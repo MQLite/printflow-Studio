@@ -1,6 +1,7 @@
 using System.IO;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
@@ -218,6 +219,57 @@ public sealed class SessionServiceTests
 
         blocked.IsFailure.ShouldBeTrue();
         blocked.Failure.Code.ShouldBe(FailureCode.AdapterUnavailable);
+    }
+
+    [Fact]
+    public async Task PrepareCustomerDesign_reaches_PhotoshopOutput_and_records_a_PrintOutput()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        string source = harness.WriteSourcePng();
+
+        SessionId id = (await service.ImportAsync(
+            WorkflowType.PrepareCustomerDesign, source, "customer-design", "tester", CancellationToken.None)).Value.Id;
+
+        await Must(service.ExecuteAsync(id, new WorkflowCommand.ConfirmOriginal(), "tester", CancellationToken.None));
+        await RunAndApprove(service, id, StepKind.Enhancement);
+        await RunAndApprove(service, id, StepKind.BackgroundRemoval);
+        await RunAndApprove(service, id, StepKind.Trim);
+
+        PrintDimensions dimensions = PrintDimensions.FromMillimetres(200, 150, SizePreset.Custom);
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.SetPrintDimensions(dimensions), "tester", CancellationToken.None));
+        await Must(service.ExecuteAsync(
+            id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_1px, "ordinary design"),
+            "tester",
+            CancellationToken.None));
+
+        OperationResult<SessionView> started = await service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.PhotoshopOutput), "tester", CancellationToken.None);
+        started.IsSuccess.ShouldBeTrue(started.IsFailure ? started.Failure.ToString() : "");
+
+        SessionStep photoshopStep = started.Value.Steps.Single(s => s.Step == StepKind.PhotoshopOutput);
+        photoshopStep.State.ShouldBe(StepState.ReviewRequired);
+
+        OperationResult<SessionView> approved = await service.ExecuteAsync(
+            id, new WorkflowCommand.Approve(StepKind.PhotoshopOutput, photoshopStep.CurrentRevisionSha256!.Value),
+            "tester", CancellationToken.None);
+        approved.IsSuccess.ShouldBeTrue(approved.IsFailure ? approved.Failure.ToString() : "");
+
+        OperationResult<SessionView> completed =
+            await service.ExecuteAsync(id, new WorkflowCommand.Complete(), "tester", CancellationToken.None);
+        completed.IsSuccess.ShouldBeTrue(completed.IsFailure ? completed.Failure.ToString() : "");
+
+        SessionAggregate aggregate = (await harness.Repository.LoadAsync(id, CancellationToken.None)).Value!;
+        PrintOutput output = aggregate.Outputs.Single();
+        output.Branch.ShouldBe(WhiteUnderbaseBranch.W1_1px);
+        output.Dimensions.WidthMm.ShouldBe(200);
+        output.ReviewState.ShouldBe(Domain.Revisions.ReviewState.Approved);
+
+        string outputAbsolute = harness.FileWorkspace.ResolveAbsolute(output.File);
+        File.Exists(outputAbsolute).ShouldBeTrue();
+        output.File.FileName.ShouldBe("customer-design_200mm_CMYK_W.tif");
     }
 
     private static async Task<SessionView> RunAndApprove(ISessionService service, SessionId id, StepKind step)

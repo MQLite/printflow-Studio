@@ -640,6 +640,25 @@ public sealed class SessionService : ISessionService
                         review.ReviewId, aggregate.Session.Id, review.Step, review.SubjectKind, review.SubjectId,
                         review.ReviewedHash, context.Operator, context.NowUtc, review.IsApproved,
                         review.QuickReason, review.Notes));
+
+                    // A PrintOutput's cached ReviewState is a query convenience only — the
+                    // ReviewDecision row above remains the authority — but it must still track
+                    // the decision, or every reload would show every production TIFF as
+                    // perpetually unreviewed regardless of what was actually approved.
+                    if (review.SubjectKind == ReviewSubjectKind.PrintOutput)
+                    {
+                        PrintOutput? output = aggregate.Outputs
+                            .Concat(outputUpdates)
+                            .LastOrDefault(o => o.Id.Value == review.SubjectId);
+                        if (output is not null)
+                        {
+                            outputUpdates.Add(output with
+                            {
+                                ReviewState = review.IsApproved ? ReviewState.Approved : ReviewState.Rejected,
+                            });
+                        }
+                    }
+
                     break;
 
                 case WorkflowEffect.InvalidateDescendants invalidate:
