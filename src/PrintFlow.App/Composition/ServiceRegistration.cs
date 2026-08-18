@@ -1,5 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.Domain.Ids;
+using PrintFlow.Infrastructure.Preset;
 using PrintFlow.App.ViewModels;
+using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.App.Composition;
 
@@ -20,6 +24,13 @@ public static class ServiceRegistration
         ServiceCollection services = new();
 
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IIdGenerator>(SystemIdGenerator.Instance);
+        services.AddSingleton<IWorkflowEngine>(WorkflowEngine.Instance);
+
+        // Nothing has been hash-verified at this point, so the provider trusts nothing and
+        // production adapters stay refused. Real preset loading is Task 11100.0.
+        services.AddSingleton<IWorkstationPresetProvider>(new ConfiguredPresetProvider());
+
         services.AddTransient<ShellViewModel>();
 
         return services.BuildServiceProvider();
