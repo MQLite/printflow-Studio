@@ -1,0 +1,90 @@
+###############################################################################
+# PrintFlow Studio — privacy-first ignore rules
+#
+# Posture: DENY BY DEFAULT for anything that could carry customer artwork,
+# production evidence, or workstation identity. Re-inclusions below are narrow
+# and cover only synthetic, source-controlled assets.
+#
+# Authority: Epic 11100 plan §19.3; MVP design §19 (Privacy and Updates).
+#
+# NOTE ON ANCHORING: local runtime and evidence directory rules are anchored to
+# the repository root with a leading slash. An unanchored rule matches at ANY
+# depth, and because Git is case-insensitive on this workstation
+# (core.ignorecase=true) rules like "Sessions/" and "preset/" silently excluded
+# src/PrintFlow.Domain/Sessions/ and src/PrintFlow.Infrastructure/Preset/.
+# The real evidence lives outside this repository under D:\PrintFlowStudio, so
+# anchoring costs no protection — and the extension rules below still deny
+# customer and production binaries at every depth.
+###############################################################################
+
+# --- .NET build output (any depth) ------------------------------------------
+bin/
+obj/
+artifacts/
+.vs/
+*.user
+*.suo
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+# --- Local app configuration ------------------------------------------------
+appsettings.local.json
+*.local.json
+
+# --- SQLite -----------------------------------------------------------------
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# --- Production / customer image and design files (any depth) ---------------
+*.atn
+*.psd
+*.psb
+*.tif
+*.tiff
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# --- Signed baseline evidence, by name (any depth) --------------------------
+# Belt and braces for the Epic 11000 artifacts, which are plain .json and would
+# otherwise not be caught by an extension rule.
+printflow-workstation-*.json
+workstation-preset-*.json
+workstation.json
+displays.json
+
+# --- Local production evidence (repository root only) -----------------------
+/signoff/
+/preset/
+/evidence/
+/screenshots/
+/Baseline/
+
+# --- Local logs / runtime (repository root only) ----------------------------
+/logs/
+/Logs/
+/Quarantine/
+/Sessions/
+/Working/
+/Approved/
+/Rejected/
+
+# --- OS / editor noise ------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp
+
+###############################################################################
+# Narrow re-inclusions — SYNTHETIC, source-controlled assets only.
+# Never add a re-inclusion for anything derived from customer work or from
+# D:\PrintFlowStudio\Baseline.
+###############################################################################
+!src/PrintFlow.App/Assets/
+!src/PrintFlow.App/Assets/*.png
+!tests/PrintFlow.Tests/Fixtures/synthetic/
+!tests/PrintFlow.Tests/Fixtures/synthetic/*.png

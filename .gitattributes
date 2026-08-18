@@ -1,0 +1,22 @@
+# Normalise text files in the repository; check out with platform-native endings.
+* text=auto
+
+*.cs        text diff=csharp
+*.xaml      text
+*.csproj    text
+*.sln       text eol=crlf
+*.props     text
+*.targets   text
+*.json      text
+*.md        text
+*.resx      text
+*.sql       text
+*.ps1       text eol=crlf
+*.gitignore text
+
+# Binary
+*.png binary
+*.jpg binary
+*.tif binary
+*.psd binary
+*.atn binary
