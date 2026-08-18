@@ -85,8 +85,7 @@ public sealed class SessionService : ISessionService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceAbsolutePath);
 
-        OutputName name = OutputName.Sanitise(
-            outputName ?? System.IO.Path.GetFileNameWithoutExtension(sourceAbsolutePath));
+        OutputName name = OutputName.Sanitise(outputName ?? StemOf(sourceAbsolutePath));
 
         SessionId id = SessionId.From(_idGenerator.NewId());
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
@@ -147,7 +146,7 @@ public sealed class SessionService : ISessionService
 
         InputSnapshot snapshotRecord = new(
             SnapshotId.From(_idGenerator.NewId()), id, revisionId, sourceAbsolutePath,
-            System.IO.Path.GetFileName(sourceAbsolutePath), context.NowUtc);
+            FileNameOf(sourceAbsolutePath), context.NowUtc);
 
         ProcessingSession sessionAfterImport = MergeSession(session, finished.State, finished.Effects, context.NowUtc);
         ProcessingAttempt succeededAttempt = runningAttempt.Succeed(revisionId, context.NowUtc);
@@ -733,6 +732,28 @@ public sealed class SessionService : ISessionService
         string path = file.RelativePath;
         int slash = path.LastIndexOf('/');
         return WorkspaceDirRef.Create(slash < 0 ? path : path[..slash]);
+    }
+
+    /// <summary>
+    /// The file name component of an absolute path, without touching the file system.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately manual rather than the BCL path helper type: the Workflow project carries no
+    /// file-system dependency at all (plan §5), and this is pure string splitting on an
+    /// already-known path, not a disk access.
+    /// </remarks>
+    private static string FileNameOf(string absolutePath)
+    {
+        int lastSeparator = absolutePath.LastIndexOfAny(['\\', '/']);
+        return lastSeparator < 0 ? absolutePath : absolutePath[(lastSeparator + 1)..];
+    }
+
+    /// <summary>The file name with its extension removed, for defaulting an unset output name.</summary>
+    private static string StemOf(string absolutePath)
+    {
+        string fileName = FileNameOf(absolutePath);
+        int dot = fileName.LastIndexOf('.');
+        return dot > 0 ? fileName[..dot] : fileName;
     }
 
     private string AdapterIdFor(AdapterKind kind) => kind switch

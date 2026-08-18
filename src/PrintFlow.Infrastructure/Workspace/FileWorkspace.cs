@@ -389,13 +389,22 @@ public sealed class FileWorkspace : IWorkspace
     }
 
     /// <summary>
-    /// <c>S_&lt;UTC compact&gt;_&lt;first 8 hex chars of the session id&gt;</c> (plan §12.1).
+    /// <c>S_&lt;UTC compact&gt;_&lt;last 8 hex chars of the session id&gt;</c> (plan §12.1).
     /// Carries no customer text; renaming the operator's output name never moves this directory.
     /// </summary>
+    /// <remarks>
+    /// Deliberately the <b>last</b> 8 hex characters, not the first: <see cref="SessionId"/> is
+    /// a UUIDv7, whose leading bits are a millisecond timestamp rather than randomness. Two
+    /// sessions created close together — well within the UTC-compact timestamp's one-second
+    /// resolution — would share those leading characters and collide on the same directory
+    /// name. The trailing bits of a UUIDv7 are the random tail, which is what a "short id"
+    /// needs to actually be short <em>and</em> distinguishing.
+    /// </remarks>
     internal static string BuildSessionDirectoryName(SessionId id, DateTimeOffset createdUtc)
     {
         string utcCompact = createdUtc.UtcDateTime.ToString("yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture);
-        string shortId = id.Value.ToString("N", CultureInfo.InvariantCulture)[..8];
+        string hex = id.Value.ToString("N", CultureInfo.InvariantCulture);
+        string shortId = hex[^8..];
         return $"S_{utcCompact}_{shortId}";
     }
 }

@@ -26,7 +26,7 @@ public sealed class WorkspaceTests
         OperationResult<WorkspaceDirRef> created = fileWorkspace.CreateSession(id, createdUtc);
 
         created.IsSuccess.ShouldBeTrue();
-        string expectedShortId = id.Value.ToString("N")[..8];
+        string expectedShortId = id.Value.ToString("N")[^8..];
         created.Value.RelativePath.ShouldBe($"Sessions/S_20260819T103000Z_{expectedShortId}");
         Directory.Exists(Path.Combine(workspace.Root, created.Value.RelativePath)).ShouldBeTrue();
         foreach (string area in new[] { "Source", "Working", "Approved", "Rejected", "Logs" })
