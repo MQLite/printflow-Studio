@@ -37,6 +37,7 @@ public sealed class SessionService : ISessionService
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
     private readonly IWorkstationPresetProvider _presetProvider;
+    private readonly IEnvironmentGate _environmentGate;
     private readonly RevisionIntegrityGuard _integrityGuard;
     private readonly IIdGenerator _idGenerator;
     private readonly TimeProvider _timeProvider;
@@ -51,6 +52,7 @@ public sealed class SessionService : ISessionService
         IMeituProcessor meitu,
         IPhotoshopOutputProcessor photoshop,
         IWorkstationPresetProvider presetProvider,
+        IEnvironmentGate environmentGate,
         IIdGenerator idGenerator,
         TimeProvider timeProvider)
     {
@@ -61,6 +63,7 @@ public sealed class SessionService : ISessionService
         ArgumentNullException.ThrowIfNull(meitu);
         ArgumentNullException.ThrowIfNull(photoshop);
         ArgumentNullException.ThrowIfNull(presetProvider);
+        ArgumentNullException.ThrowIfNull(environmentGate);
         ArgumentNullException.ThrowIfNull(idGenerator);
         ArgumentNullException.ThrowIfNull(timeProvider);
 
@@ -71,6 +74,7 @@ public sealed class SessionService : ISessionService
         _meitu = meitu;
         _photoshop = photoshop;
         _presetProvider = presetProvider;
+        _environmentGate = environmentGate;
         _idGenerator = idGenerator;
         _timeProvider = timeProvider;
         _integrityGuard = new RevisionIntegrityGuard(workspace, fileInspector);
@@ -291,6 +295,15 @@ public sealed class SessionService : ISessionService
         {
             return OperationResult.Fail<SessionView>(
                 FailureCode.PreconditionNotMet, $"Step {runAdapter.Step} is not part of this workflow.");
+        }
+
+        if (definition.IsAdapterBacked)
+        {
+            OperationResult<Unit> gate = _environmentGate.Verify(AdapterModeFor(runAdapter.Adapter));
+            if (gate.IsFailure)
+            {
+                return OperationResult.Fail<SessionView>(gate.Failure);
+            }
         }
 
         AutomationLockChange? acquire = null;
@@ -708,10 +721,17 @@ public sealed class SessionService : ISessionService
         List<RevisionInvalidation> revisionInvalidations =
             [.. descendants.Select(id => new RevisionInvalidation(id, reason, nowUtc))];
 
+        // A PrintOutput is caught by either of two distinct paths: its declared source
+        // (SourceRevisionId) was invalidated, or — when nothing sits between the shared source
+        // and PhotoshopOutput (e.g. GENERATE_PRINT_TIFF, which has no Enhancement/Trim step) —
+        // its own twin Revision was, which the walk finds under the shared GUID (plan §16 item
+        // 4) rather than under SourceRevisionId, since a PrintOutput's SourceRevisionId is the
+        // upstream design it was produced from, never itself.
         List<PrintOutput> outputInvalidations =
         [
             .. aggregate.Outputs
-                .Where(o => o.IsValid && descendants.Contains(o.SourceRevisionId))
+                .Where(o => o.IsValid &&
+                    (descendants.Contains(o.SourceRevisionId) || descendants.Contains(RevisionId.From(o.Id.Value))))
                 .Select(o => o.Invalidate(reason)),
         ];
 
@@ -782,6 +802,19 @@ public sealed class SessionService : ISessionService
         AdapterKind.Photoshop => _photoshop.AdapterId,
         AdapterKind.Internal => "internal-trim-placeholder-v1",
         _ => "unknown",
+    };
+
+    /// <summary>
+    /// The declared execution mode of the adapter that would actually run this step, for
+    /// <see cref="IEnvironmentGate"/>. Only ever called for <see cref="AdapterKind.Meitu"/> or
+    /// <see cref="AdapterKind.Photoshop"/> (plan §8: the gate applies to adapter-backed steps).
+    /// </summary>
+    private AdapterExecutionMode AdapterModeFor(AdapterKind kind) => kind switch
+    {
+        AdapterKind.Meitu => _meitu.Mode,
+        AdapterKind.Photoshop => _photoshop.Mode,
+        _ => throw new InvalidOperationException(
+            $"Adapter kind '{kind}' is not adapter-backed; it has no execution mode to gate."),
     };
 
     private static OperationFailure MapRejection(CommandRejection rejection) =>

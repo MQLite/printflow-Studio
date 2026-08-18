@@ -2,6 +2,7 @@ using Microsoft.Extensions.Time.Testing;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
+using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
 using PrintFlow.Infrastructure.Sqlite;
@@ -36,6 +37,17 @@ internal sealed class SessionServiceHarness : IDisposable
 
     public ISessionRepository Repository { get; }
 
+    public IEnvironmentGate EnvironmentGate { get; } = new FoundationEnvironmentGate();
+
+    /// <summary>
+    /// The scriptable fake adapters used by <see cref="CreateService"/>, exposed as their
+    /// concrete type so a test can call <c>SetScenario</c> (Epic 11100 Part 3A §3) before
+    /// issuing a command.
+    /// </summary>
+    public FakeMeituProcessor FakeMeitu { get; }
+
+    public FakePhotoshopOutputProcessor FakePhotoshop { get; }
+
     public SessionServiceHarness()
     {
         Workspace = new TempWorkspace();
@@ -47,6 +59,8 @@ internal sealed class SessionServiceHarness : IDisposable
         Preset = new WorkstationPresetProvider(presetPath, PresetFixture.PresetId, PresetFixture.PresetVersion, hash);
 
         Repository = new SqliteSessionRepository(Database.Factory);
+        FakeMeitu = new FakeMeituProcessor(FileWorkspace);
+        FakePhotoshop = new FakePhotoshopOutputProcessor(FileWorkspace);
     }
 
     /// <summary>
@@ -65,9 +79,27 @@ internal sealed class SessionServiceHarness : IDisposable
         Repository,
         FileWorkspace,
         FileInspector,
-        new FakeMeituProcessor(),
-        new FakePhotoshopOutputProcessor(FileWorkspace),
+        FakeMeitu,
+        FakePhotoshop,
         Preset,
+        EnvironmentGate,
+        SystemIdGenerator.Instance,
+        Clock);
+
+    /// <summary>
+    /// Builds a service with a caller-supplied Meitu adapter in place of the scriptable fake —
+    /// for tests that need to prove something about a non-fake <see cref="AdapterExecutionMode"/>
+    /// (Epic 11100 Part 3A §8: <see cref="IEnvironmentGate"/> blocking a production adapter).
+    /// </summary>
+    public ISessionService CreateServiceWithMeitu(IMeituProcessor meitu) => new SessionService(
+        WorkflowEngine.Instance,
+        Repository,
+        FileWorkspace,
+        FileInspector,
+        meitu,
+        FakePhotoshop,
+        Preset,
+        EnvironmentGate,
         SystemIdGenerator.Instance,
         Clock);
 

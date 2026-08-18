@@ -5,6 +5,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
 using PrintFlow.Infrastructure.Sqlite;
@@ -63,6 +64,7 @@ public static class ServiceRegistration
         services.AddSingleton<IFileInspector, WicFileInspector>();
         services.AddSingleton<IWorkspace>(new FileWorkspace(workspaceRoot));
         services.AddSingleton<IRecycleBin, RecycleBin>();
+        services.AddSingleton<IEnvironmentGate, FoundationEnvironmentGate>();
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
 
         RegisterAdapters(services, configuration.Adapters.Mode);

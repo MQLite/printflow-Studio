@@ -52,6 +52,9 @@ public interface IMeituProcessor
     /// <summary>Identifies the implementation; written to every attempt so a fake result is never mistaken for a production one.</summary>
     string AdapterId { get; }
 
+    /// <summary>Whether this is a deterministic local double or real automation; consulted by <see cref="IEnvironmentGate"/>.</summary>
+    AdapterExecutionMode Mode { get; }
+
     Task<OperationResult<AdapterOutput>> ProcessAsync(MeituRequest request, CancellationToken cancellationToken);
 }
 
@@ -65,6 +68,9 @@ public interface IMeituProcessor
 public interface IPhotoshopOutputProcessor
 {
     string AdapterId { get; }
+
+    /// <summary>Whether this is a deterministic local double or real automation; consulted by <see cref="IEnvironmentGate"/>.</summary>
+    AdapterExecutionMode Mode { get; }
 
     Task<OperationResult<AdapterOutput>> GenerateAsync(PhotoshopRequest request, CancellationToken cancellationToken);
 }
