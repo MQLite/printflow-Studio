@@ -46,6 +46,14 @@ public sealed class ConfiguredPresetProvider : IWorkstationPresetProvider
                 "No workstation preset has been loaded or hash-verified. Preset loading is Task 11100.0; environment verification is Epic 11500.")
             : OperationResult.Ok(_verified);
 
+    /// <inheritdoc />
+    public OperationResult<NamingPatternSet> GetNamingPatterns() =>
+        _verified is null
+            ? OperationResult.Fail<NamingPatternSet>(
+                FailureCode.EnvironmentNotVerified,
+                "No workstation preset has been loaded or hash-verified; naming patterns are unavailable.")
+            : OperationResult.Ok(NamingPatternSet.DesignDefault);
+
     /// <summary>Builds a reference from configuration values, without touching the manifest.</summary>
     public static OperationResult<ProductionPresetRef> Describe(
         string presetId, string presetVersion, string expectedSha256)

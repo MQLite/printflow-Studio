@@ -11,12 +11,28 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>PrintFlow.Infrastructure</RootNamespace>
-    <UseWPF>false</UseWPF>
+    <!--
+      UseWPF is set for two reasons, both non-negotiable for this project's job and neither a
+      UI dependency: System.Windows.Media.Imaging (WIC) for file inspection (plan §14.2), and
+      Microsoft.VisualBasic.FileIO for Recycle Bin support (plan §12.2). An architecture test
+      asserts this project declares no Window, UserControl, Page or Application type.
+    -->
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
     <ProjectReference Include="..\PrintFlow.Workflow\PrintFlow.Workflow.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Forward-only embedded migrations (Epic 11100 plan §4.5, §18). -->
+    <EmbeddedResource Include="Sqlite\Migrations\*.sql" />
   </ItemGroup>
 
 </Project>

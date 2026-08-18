@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 
 namespace PrintFlow.Domain.Sessions;
 
@@ -24,7 +25,9 @@ public sealed record ProcessingSession(
     DateTimeOffset? HandedOffAtUtc,
     string? HandOffReason,
     DateTimeOffset? AbandonedAtUtc,
-    string? AbandonReason)
+    string? AbandonReason,
+    PrintDimensions? Dimensions,
+    WhiteUnderbaseBranch? WhiteUnderbaseBranch)
 {
     /// <summary>Creates a new active session positioned at its first step.</summary>
     public static ProcessingSession Start(
@@ -45,7 +48,9 @@ public sealed record ProcessingSession(
             HandedOffAtUtc: null,
             HandOffReason: null,
             AbandonedAtUtc: null,
-            AbandonReason: null);
+            AbandonReason: null,
+            Dimensions: null,
+            WhiteUnderbaseBranch: null);
 
     /// <summary>True while ordinary workflow progression is legal.</summary>
     public bool IsActive => State == SessionState.Active;

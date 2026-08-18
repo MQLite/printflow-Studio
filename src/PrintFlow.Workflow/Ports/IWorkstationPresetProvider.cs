@@ -28,4 +28,14 @@ public interface IWorkstationPresetProvider
     /// Returns the verified preset reference, or a failure explaining why it cannot be trusted.
     /// </summary>
     OperationResult<ProductionPresetRef> GetVerifiedPreset();
+
+    /// <summary>
+    /// Returns the output-naming patterns carried by the verified preset
+    /// (<c>storageAndNamingContract</c>), or a failure when the preset itself is not verified.
+    /// </summary>
+    /// <remarks>
+    /// Naming code must never hard-code <c>_HD</c>, <c>_CUTOUT</c>, or the collision suffix —
+    /// they come from here (Epic 11100 Task 11107; plan §13.2).
+    /// </remarks>
+    OperationResult<NamingPatternSet> GetNamingPatterns();
 }

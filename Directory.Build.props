@@ -32,4 +32,20 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!--
+      GHSA-2m69-gcr7-jv3q: Microsoft.Data.Sqlite 10.0.0 transitively pulls
+      SQLitePCLRaw.lib.e_sqlite3 2.1.11, flagged high severity for an underlying SQLite
+      aggregate-terms bug fixed upstream in SQLite 3.50.2. NuGet's advisory record lists no
+      patched SQLitePCLRaw version, and every SQLitePCLRaw release compatible with net10.0
+      restores to the same flagged transitive version, so pinning around it is not possible.
+      Risk assessment: PrintFlow's database is single-operator, local-only, and never executes
+      SQL built from untrusted or network input (all statements are the fixed, hand-written
+      SQL behind the repository — Epic 11100 plan §4.4) — the aggregate-query pattern this
+      advisory concerns does not occur here. Suppressed with that assessment on record; revisit
+      when a patched SQLitePCLRaw version compatible with net10.0 is published.
+    -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+
 </Project>

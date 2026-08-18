@@ -72,6 +72,93 @@ public readonly record struct OutputName
             : throw new ArgumentException(result.Error, nameof(candidate));
     }
 
+    /// <summary>Reserved Windows device names; matched case-insensitively against the whole stem.</summary>
+    private static readonly HashSet<string> ReservedDeviceNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CON", "PRN", "AUX", "NUL",
+        "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    };
+
+    /// <summary>
+    /// Sanitises an arbitrary candidate (typically the imported file's stem) into a valid
+    /// <see cref="OutputName"/>, never failing (Epic 11100 plan §13.1; task §19).
+    /// </summary>
+    /// <remarks>
+    /// Unlike <see cref="Create"/>, which rejects invalid operator input outright, this always
+    /// produces a usable name: it strips what Windows forbids, collapses whitespace, protects
+    /// reserved device names, and falls back to <c>Untitled</c> when nothing is left. Non-ASCII
+    /// characters, including Chinese, are preserved — sanitisation removes what NTFS forbids,
+    /// not what looks unfamiliar.
+    /// </remarks>
+    public static OutputName Sanitise(string? candidate)
+    {
+        string working = candidate ?? string.Empty;
+
+        // Strip control characters and characters Windows forbids.
+        System.Text.StringBuilder builder = new(working.Length);
+        foreach (char c in working)
+        {
+            if (char.IsControl(c) || Array.IndexOf(ForbiddenCharacters, c) >= 0)
+            {
+                continue;
+            }
+
+            builder.Append(c);
+        }
+
+        working = builder.ToString();
+
+        // Collapse runs of whitespace to a single space.
+        working = CollapseWhitespace(working);
+
+        working = working.Trim().TrimEnd('.', ' ');
+
+        if (working.Length > MaxLength)
+        {
+            working = working[..MaxLength].TrimEnd('.', ' ');
+        }
+
+        if (working.Length == 0)
+        {
+            working = "Untitled";
+        }
+
+        if (ReservedDeviceNames.Contains(working))
+        {
+            working = "_" + working;
+        }
+
+        // The prefix or truncation above cannot reintroduce a forbidden character or exceed
+        // the length budget, so this always succeeds.
+        return Parse(working);
+    }
+
+    private static string CollapseWhitespace(string value)
+    {
+        System.Text.StringBuilder builder = new(value.Length);
+        bool previousWasSpace = false;
+        foreach (char c in value)
+        {
+            bool isSpace = char.IsWhiteSpace(c);
+            if (isSpace)
+            {
+                if (!previousWasSpace)
+                {
+                    builder.Append(' ');
+                }
+
+                previousWasSpace = true;
+                continue;
+            }
+
+            builder.Append(c);
+            previousWasSpace = false;
+        }
+
+        return builder.ToString();
+    }
+
     public override string ToString() => Value ?? string.Empty;
 
     /// <summary>Validation outcome for <see cref="OutputName"/>.</summary>
