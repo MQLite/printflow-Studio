@@ -188,20 +188,42 @@ Photoshop colour settings and Windows display settings were not touched.
 
 ### 4.1 Known consequence of the per-user install — operator action recommended
 
-`dotnet build`, `dotnet test` and `dotnet run` all work. However, launching the built
-`PrintFlow.App.exe` **by double-clicking from Explorer** shows the Windows *"download .NET"*
-prompt, because the executable's launcher looks for a machine-wide .NET 10 Desktop Runtime
-and finds only .NET 8 there. With `DOTNET_ROOT` present in the launching process the
-application starts correctly — verified: the window opens with the title **PrintFlow Studio**.
+The per-user install has two consequences, both environment/tooling items rather than defects
+in the solution. Neither affects the code, and both disappear once the runtime and SDK are
+installed machine-wide.
 
-Either of the following clears it; the second is the recommended end state:
+**1. A plain `dotnet` command does not find the .NET 10 SDK.** Windows composes a process
+`PATH` as machine entries **then** user entries, and `C:\Program Files\dotnet` is on the
+machine `PATH`. A user-scope entry can therefore never precede it. In a fresh terminal,
+`dotnet` resolves to the machine-wide .NET 8 muxer, which cannot satisfy the `global.json`
+pin to SDK 10.0.400 and fails with *"A compatible .NET SDK was not found."*
 
-| Option | Needs admin | Effect |
-| --- | --- | --- |
-| Sign out and back in (or restart Explorer) | No | Explorer inherits the `DOTNET_ROOT` user variable already set |
-| `winget install Microsoft.DotNet.DesktopRuntime.10` from an elevated prompt | Yes | Machine-wide runtime; no environment variable needed by anything |
+Until the SDK is installed machine-wide, invoke the .NET 10 muxer by full path:
 
-This is an environment/tooling item, not a defect in the solution.
+```powershell
+$env:DOTNET_ROOT = "$env:LOCALAPPDATA\Microsoft\dotnet"
+& "$env:DOTNET_ROOT\dotnet.exe" build   PrintFlowStudio.sln
+& "$env:DOTNET_ROOT\dotnet.exe" test    PrintFlowStudio.sln
+& "$env:DOTNET_ROOT\dotnet.exe" run --project src\PrintFlow.App
+```
+
+Verified: `run` starts the application and the window opens titled **PrintFlow Studio**.
+
+**2. Double-clicking `PrintFlow.App.exe` shows the Windows "download .NET" prompt,** because
+the executable's launcher looks for a machine-wide .NET 10 Desktop Runtime and finds only
+.NET 8. Unlike case 1 this one *is* fixed by the `DOTNET_ROOT` user variable, which the
+launcher honours — but only in processes started after it was set, so Explorer needs a sign-out
+and back in to inherit it.
+
+| Option | Needs admin | Fixes case 1 | Fixes case 2 |
+| --- | --- | --- | --- |
+| Use the full muxer path, as above | No | Yes | n/a — run from a shell instead |
+| Sign out and back in | No | **No** — machine `PATH` still wins | Yes |
+| `winget install Microsoft.DotNet.SDK.10` from an elevated prompt | Yes | Yes | Yes |
+
+The last row is the recommended end state: it installs both the SDK and the Desktop Runtime
+machine-wide, after which plain `dotnet` commands and double-click launching both work with
+no environment variable at all.
 
 ---
 
