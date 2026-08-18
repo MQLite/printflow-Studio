@@ -371,7 +371,7 @@ dotnet build                    succeeded, 0 warnings, 0 errors
 dotnet test                     Passed! Failed: 0, Passed: 5409, Skipped: 0, Total: 5409
 ```
 
-5,076 tests carried over from Part 1, unchanged and still green; **76 new or changed tests**
+5,333 tests carried over from Part 1, unchanged and still green; **76 new or changed tests**
 added this slice.
 
 | Area | Coverage |
