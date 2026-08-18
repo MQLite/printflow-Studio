@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="App_Title" xml:space="preserve">
+    <value>PrintFlow Studio</value>
+  </data>
+  <data name="Shell_Heading" xml:space="preserve">
+    <value>PrintFlow Studio</value>
+  </data>
+  <data name="Shell_Subheading" xml:space="preserve">
+    <value>Core desktop and workflow foundation</value>
+  </data>
+  <data name="Shell_WorkflowsHeading" xml:space="preserve">
+    <value>Available workflows</value>
+  </data>
+  <data name="Shell_StepsHeading" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Shell_FoundationNotice" xml:space="preserve">
+    <value>This build proves project composition only. Image import, review, trimming, TIFF production and automation are not implemented.</value>
+  </data>
+  <data name="Workflow_PrepareAsset" xml:space="preserve">
+    <value>Prepare Design Asset</value>
+  </data>
+  <data name="Workflow_PrepareCustomerDesign" xml:space="preserve">
+    <value>Prepare Customer Design</value>
+  </data>
+  <data name="Workflow_GeneratePrintTiff" xml:space="preserve">
+    <value>Generate Print TIFF</value>
+  </data>
+  <data name="Step_Import" xml:space="preserve"><value>Import</value></data>
+  <data name="Step_OriginalConfirmation" xml:space="preserve"><value>Original Confirmation</value></data>
+  <data name="Step_Enhancement" xml:space="preserve"><value>Enhancement</value></data>
+  <data name="Step_BackgroundRemoval" xml:space="preserve"><value>Background Removal</value></data>
+  <data name="Step_Trim" xml:space="preserve"><value>Trim</value></data>
+  <data name="Step_ApprovedPngExport" xml:space="preserve"><value>Approved PNG Export</value></data>
+  <data name="Step_PrintDimensions" xml:space="preserve"><value>Print Dimensions</value></data>
+  <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop Output</value></data>
+  <data name="Flag_Skippable" xml:space="preserve"><value>skippable</value></data>
+  <data name="Flag_RequiresReview" xml:space="preserve"><value>review required</value></data>
+</root>

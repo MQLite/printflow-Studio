@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Fixed workflow definitions, the pure workflow engine, commands, effects and
+    the infrastructure ports.
+
+    HARD RULES (Epic 11100 plan §4.2, §5):
+      * References PrintFlow.Domain and nothing else.
+      * Must never reference PrintFlow.Infrastructure, SQLite, WPF, Meitu,
+        Photoshop or any Windows automation library.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PrintFlow.Workflow</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      System commands have internal constructors so no WPF view model can synthesise
+      "the adapter succeeded". The test project still has to drive those transitions.
+    -->
+    <InternalsVisibleTo Include="PrintFlow.Tests" />
+  </ItemGroup>
+
+</Project>

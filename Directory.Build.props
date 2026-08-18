@@ -1,0 +1,35 @@
+<Project>
+
+  <!--
+    Common build configuration for every PrintFlow Studio project.
+    Authority: Epic 11100 plan §4.1 (.NET 10 LTS), §4.2 (solution structure).
+  -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>9999</WarningLevel>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+    <!-- Reproducible output -->
+    <Deterministic>true</Deterministic>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- Central package management + restore reproducibility -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+
+    <!-- Product identity -->
+    <Company>PrintFlow Studio</Company>
+    <Product>PrintFlow Studio</Product>
+    <Version>0.1.0</Version>
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <!-- No package is produced from this repository; it ships as an offline installer. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

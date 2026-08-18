@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Pure domain types.
+
+    HARD RULES (Epic 11100 plan §4.2, enforced by architecture tests):
+      * No Windows UI dependency.
+      * No file-system access, no SQL, no automation.
+      * NO PackageReference and no ProjectReference of any kind.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>PrintFlow.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>

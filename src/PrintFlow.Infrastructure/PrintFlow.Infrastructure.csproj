@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Outward adapters: persistence, file workspace, file inspection, preset
+    loading and fake adapters.
+
+    In the Part 1 slice this project is deliberately near-empty. No real
+    Meitu, Photoshop or Maintop logic exists anywhere in the solution.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>PrintFlow.Infrastructure</RootNamespace>
+    <UseWPF>false</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
+    <ProjectReference Include="..\PrintFlow.Workflow\PrintFlow.Workflow.csproj" />
+  </ItemGroup>
+
+</Project>

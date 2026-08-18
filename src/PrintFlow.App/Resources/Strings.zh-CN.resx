@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="App_Title" xml:space="preserve">
+    <value>PrintFlow Studio</value>
+  </data>
+  <data name="Shell_Heading" xml:space="preserve">
+    <value>PrintFlow Studio</value>
+  </data>
+  <data name="Shell_Subheading" xml:space="preserve">
+    <value>核心桌面与流程基础</value>
+  </data>
+  <data name="Shell_WorkflowsHeading" xml:space="preserve">
+    <value>可用流程</value>
+  </data>
+  <data name="Shell_StepsHeading" xml:space="preserve">
+    <value>步骤</value>
+  </data>
+  <data name="Shell_FoundationNotice" xml:space="preserve">
+    <value>此版本仅用于验证项目组合。图片导入、审核、裁边、TIFF 生产与自动化尚未实现。</value>
+  </data>
+  <data name="Workflow_PrepareAsset" xml:space="preserve">
+    <value>准备设计素材</value>
+  </data>
+  <data name="Workflow_PrepareCustomerDesign" xml:space="preserve">
+    <value>处理客户设计</value>
+  </data>
+  <data name="Workflow_GeneratePrintTiff" xml:space="preserve">
+    <value>生成打印 TIFF</value>
+  </data>
+  <data name="Step_Import" xml:space="preserve"><value>导入</value></data>
+  <data name="Step_OriginalConfirmation" xml:space="preserve"><value>原图确认</value></data>
+  <data name="Step_Enhancement" xml:space="preserve"><value>高清化</value></data>
+  <data name="Step_BackgroundRemoval" xml:space="preserve"><value>去背景</value></data>
+  <data name="Step_Trim" xml:space="preserve"><value>裁边</value></data>
+  <data name="Step_ApprovedPngExport" xml:space="preserve"><value>导出已审核 PNG</value></data>
+  <data name="Step_PrintDimensions" xml:space="preserve"><value>打印尺寸</value></data>
+  <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop 输出</value></data>
+  <data name="Flag_Skippable" xml:space="preserve"><value>可跳过</value></data>
+  <data name="Flag_RequiresReview" xml:space="preserve"><value>需审核</value></data>
+</root>

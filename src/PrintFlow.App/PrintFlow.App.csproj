@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    WPF shell and composition root.
+
+    PrintFlow.Infrastructure may only be touched from PrintFlow.App.Composition
+    (the standard composition-root exemption, checked by an architecture test).
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>PrintFlow.App</RootNamespace>
+    <AssemblyName>PrintFlow.App</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PrintFlow.Domain\PrintFlow.Domain.csproj" />
+    <ProjectReference Include="..\PrintFlow.Workflow\PrintFlow.Workflow.csproj" />
+    <ProjectReference Include="..\PrintFlow.Infrastructure\PrintFlow.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Operator-visible strings live in .resx from the first commit, so the Chinese-first
+      localisation in a later slice is a translation job rather than a string-extraction
+      refactor across every view (Epic 11100 plan §16.3).
+
+      The accessor in Resources\Strings.cs is written by hand rather than generated: the WPF
+      markup-compile pass builds a temporary project that does not carry generated designer
+      output, so a hand-written accessor is the one that reliably compiles in both passes.
+    -->
+    <EmbeddedResource Update="Resources\Strings.resx" />
+    <EmbeddedResource Update="Resources\Strings.zh-CN.resx" />
+  </ItemGroup>
+
+</Project>
