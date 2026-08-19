@@ -54,21 +54,6 @@
   <data name="App_Title" xml:space="preserve">
     <value>PrintFlow Studio</value>
   </data>
-  <data name="Shell_Heading" xml:space="preserve">
-    <value>PrintFlow Studio</value>
-  </data>
-  <data name="Shell_Subheading" xml:space="preserve">
-    <value>Core desktop and workflow foundation</value>
-  </data>
-  <data name="Shell_WorkflowsHeading" xml:space="preserve">
-    <value>Available workflows</value>
-  </data>
-  <data name="Shell_StepsHeading" xml:space="preserve">
-    <value>Steps</value>
-  </data>
-  <data name="Shell_FoundationNotice" xml:space="preserve">
-    <value>This build proves project composition only. Image import, review, trimming, TIFF production and automation are not implemented.</value>
-  </data>
   <data name="Workflow_PrepareAsset" xml:space="preserve">
     <value>Prepare Design Asset</value>
   </data>
@@ -103,4 +88,100 @@
   <data name="Startup_RecoverySummary" xml:space="preserve">
     <value>Startup recovery: {0} interrupted attempt(s), {1} stale lock(s) released, {2} file(s) quarantined.</value>
   </data>
+  <data name="Preset_Verified" xml:space="preserve">
+    <value>Preset verified</value>
+  </data>
+  <data name="Preset_NotVerified" xml:space="preserve">
+    <value>Preset not verified</value>
+  </data>
+  <data name="Nav_BackToHome" xml:space="preserve">
+    <value>Back to Home</value>
+  </data>
+  <data name="Home_ImportHeading" xml:space="preserve">
+    <value>Start new processing</value>
+  </data>
+  <data name="Home_ImportHint" xml:space="preserve">
+    <value>Choose one file, or drag one file onto this window. One file per session — there is no batch import.</value>
+  </data>
+  <data name="Home_ChooseFile" xml:space="preserve">
+    <value>Choose file…</value>
+  </data>
+  <data name="Home_ImportFilter" xml:space="preserve">
+    <value>Images|*.png;*.jpg;*.jpeg;*.tif;*.tiff;*.psd|All files|*.*</value>
+  </data>
+  <data name="Home_RecentHeading" xml:space="preserve">
+    <value>Recent processing</value>
+  </data>
+  <data name="Home_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Home_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="Home_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Home_Abandon" xml:space="preserve">
+    <value>Abandon</value>
+  </data>
+  <data name="Home_NoRecentSessions" xml:space="preserve">
+    <value>No processing in the last 30 days.</value>
+  </data>
+  <data name="Home_DropNothing" xml:space="preserve">
+    <value>Nothing usable was dropped. Drop one image file.</value>
+  </data>
+  <data name="Home_DropSingleFileOnly" xml:space="preserve">
+    <value>{0} files were dropped. PrintFlow Studio processes one file per session, so nothing was started — drop a single file.</value>
+  </data>
+  <data name="Home_ImportFailed" xml:space="preserve">
+    <value>That file could not be imported ({0}). No session was created.</value>
+  </data>
+  <data name="Home_ResumeFailed" xml:space="preserve">
+    <value>That session could not be opened ({0}).</value>
+  </data>
+  <data name="Home_AbandonFailed" xml:space="preserve">
+    <value>That session could not be abandoned ({0}).</value>
+  </data>
+  <data name="Home_AbandonDone" xml:space="preserve">
+    <value>“{0}” was abandoned. Its imported file, approved outputs and history are kept.</value>
+  </data>
+  <data name="Home_RecentUnavailable" xml:space="preserve">
+    <value>Recent processing could not be read ({0}).</value>
+  </data>
+  <data name="WorkflowSelection_Heading" xml:space="preserve">
+    <value>Choose a workflow</value>
+  </data>
+  <data name="WorkflowSelection_Hint" xml:space="preserve">
+    <value>The workflow can still be changed until this session produces its first processed result.</value>
+  </data>
+  <data name="WorkflowSelection_Select" xml:space="preserve">
+    <value>Choose</value>
+  </data>
+  <data name="WorkflowSelection_Locked" xml:space="preserve">
+    <value>The workflow is locked because this session has already produced a result. To use a different workflow, end this session and import the file again.</value>
+  </data>
+  <data name="WorkflowSelection_Refused" xml:space="preserve">
+    <value>That workflow could not be selected ({0}).</value>
+  </data>
+  <data name="Session_StepsHeading" xml:space="preserve">
+    <value>Steps</value>
+  </data>
+  <data name="Session_PlaceholderNotice" xml:space="preserve">
+    <value>Processing controls are not part of this build. This screen shows the session exactly as it is stored.</value>
+  </data>
+  <data name="Session_AllStepsFinished" xml:space="preserve">
+    <value>All steps finished</value>
+  </data>
+  <data name="SessionState_Active" xml:space="preserve"><value>Active</value></data>
+  <data name="SessionState_HandedOff" xml:space="preserve"><value>Handed off</value></data>
+  <data name="SessionState_Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="SessionState_Abandoned" xml:space="preserve"><value>Abandoned</value></data>
+  <data name="StepState_Waiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="StepState_Processing" xml:space="preserve"><value>Processing</value></data>
+  <data name="StepState_ReviewRequired" xml:space="preserve"><value>Review required</value></data>
+  <data name="StepState_Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="StepState_RetryRequired" xml:space="preserve"><value>Retry required</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="StepState_Interrupted" xml:space="preserve"><value>Interrupted</value></data>
 </root>

@@ -16,6 +16,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// driven end to end through <see cref="SessionService"/> against a real temporary workspace,
 /// real SQLite, real fake output files, and real hashes (Epic 11100 Part 3A §9).
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class AddAnotherSizeTests
 {
     [Fact]

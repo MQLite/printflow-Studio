@@ -15,6 +15,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// <see cref="SessionService"/> pipeline (Epic 11100 Part 3A §3–§4): every scripted outcome
 /// still goes through the real workspace and file inspector, never fabricating a Revision.
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class FakeAdapterScenarioTests
 {
     [Fact]

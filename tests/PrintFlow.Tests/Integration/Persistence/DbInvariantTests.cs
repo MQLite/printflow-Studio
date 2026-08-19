@@ -8,6 +8,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// illegal statement directly — not through the repository, which never issues one
 /// (task §29–§31, §48).
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class DbInvariantTests
 {
     private const string SessionId = "11111111-1111-1111-1111-111111111111";

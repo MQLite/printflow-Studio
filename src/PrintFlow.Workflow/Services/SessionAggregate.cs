@@ -65,13 +65,38 @@ public sealed record SessionAggregate(
     }
 }
 
-/// <summary>A flattened row for the "Recent Processing" list (MVP design §10, §13.2).</summary>
+/// <summary>
+/// A flattened row for the "Recent Processing" list (MVP design §10, §13.2).
+/// </summary>
+/// <remarks>
+/// Deliberately the smallest thing an operator needs in order to recognise a session and
+/// decide what to do with it. No workspace path, no original source path, no revision and no
+/// storage detail: Home lists work, not a database (Epic 11100 Part 3C2 §8).
+/// <para>
+/// <see cref="CanAbandon"/> and <see cref="CanContinueProcessing"/> are reported here rather
+/// than re-derived by a view model, and both delegate to <see cref="SessionStateRules"/> — the
+/// same predicates <see cref="Engine.WorkflowEngine"/> guards its own commands with. They
+/// decide which entry action Home offers; the command path still decides whether it is
+/// accepted.
+/// </para>
+/// </remarks>
 public sealed record SessionListItem(
     SessionId Id,
     WorkflowType WorkflowType,
     OutputName OutputName,
+    StepKind CurrentStep,
     SessionState State,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc)
+{
+    /// <summary>Whether Home may offer Abandon for this session.</summary>
+    public bool CanAbandon => SessionStateRules.AllowsAbandon(State);
+
+    /// <summary>
+    /// Whether resuming this session means "carry on processing" rather than "look at a
+    /// finished record".
+    /// </summary>
+    public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
+}
 
 /// <summary>The global automation lock's current holder, if any (MVP design invariant 7).</summary>
 public sealed record AutomationLockState(

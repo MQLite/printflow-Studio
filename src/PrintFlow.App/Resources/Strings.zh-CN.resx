@@ -54,21 +54,6 @@
   <data name="App_Title" xml:space="preserve">
     <value>PrintFlow Studio</value>
   </data>
-  <data name="Shell_Heading" xml:space="preserve">
-    <value>PrintFlow Studio</value>
-  </data>
-  <data name="Shell_Subheading" xml:space="preserve">
-    <value>核心桌面与流程基础</value>
-  </data>
-  <data name="Shell_WorkflowsHeading" xml:space="preserve">
-    <value>可用流程</value>
-  </data>
-  <data name="Shell_StepsHeading" xml:space="preserve">
-    <value>步骤</value>
-  </data>
-  <data name="Shell_FoundationNotice" xml:space="preserve">
-    <value>此版本仅用于验证项目组合。图片导入、审核、裁边、TIFF 生产与自动化尚未实现。</value>
-  </data>
   <data name="Workflow_PrepareAsset" xml:space="preserve">
     <value>准备设计素材</value>
   </data>
@@ -103,4 +88,100 @@
   <data name="Startup_RecoverySummary" xml:space="preserve">
     <value>启动恢复：中断的处理 {0} 个，释放过期锁 {1} 个，隔离文件 {2} 个。</value>
   </data>
+  <data name="Preset_Verified" xml:space="preserve">
+    <value>预设已校验</value>
+  </data>
+  <data name="Preset_NotVerified" xml:space="preserve">
+    <value>预设未校验</value>
+  </data>
+  <data name="Nav_BackToHome" xml:space="preserve">
+    <value>返回主页</value>
+  </data>
+  <data name="Home_ImportHeading" xml:space="preserve">
+    <value>开始新的处理</value>
+  </data>
+  <data name="Home_ImportHint" xml:space="preserve">
+    <value>选择一个文件，或将一个文件拖入本窗口。每个处理只接受一个文件，不支持批量导入。</value>
+  </data>
+  <data name="Home_ChooseFile" xml:space="preserve">
+    <value>选择文件…</value>
+  </data>
+  <data name="Home_ImportFilter" xml:space="preserve">
+    <value>图片|*.png;*.jpg;*.jpeg;*.tif;*.tiff;*.psd|所有文件|*.*</value>
+  </data>
+  <data name="Home_RecentHeading" xml:space="preserve">
+    <value>最近处理</value>
+  </data>
+  <data name="Home_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="Home_Resume" xml:space="preserve">
+    <value>继续</value>
+  </data>
+  <data name="Home_Details" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="Home_Abandon" xml:space="preserve">
+    <value>放弃</value>
+  </data>
+  <data name="Home_NoRecentSessions" xml:space="preserve">
+    <value>最近 30 天内没有处理记录。</value>
+  </data>
+  <data name="Home_DropNothing" xml:space="preserve">
+    <value>拖入的内容无法使用。请拖入一个图片文件。</value>
+  </data>
+  <data name="Home_DropSingleFileOnly" xml:space="preserve">
+    <value>一次拖入了 {0} 个文件。PrintFlow Studio 每个处理只接受一个文件，因此没有开始任何处理，请只拖入一个文件。</value>
+  </data>
+  <data name="Home_ImportFailed" xml:space="preserve">
+    <value>该文件无法导入（{0}）。未创建任何处理。</value>
+  </data>
+  <data name="Home_ResumeFailed" xml:space="preserve">
+    <value>无法打开该处理（{0}）。</value>
+  </data>
+  <data name="Home_AbandonFailed" xml:space="preserve">
+    <value>无法放弃该处理（{0}）。</value>
+  </data>
+  <data name="Home_AbandonDone" xml:space="preserve">
+    <value>“{0}”已放弃。导入的文件、已审核的输出和历史记录均予保留。</value>
+  </data>
+  <data name="Home_RecentUnavailable" xml:space="preserve">
+    <value>无法读取最近处理（{0}）。</value>
+  </data>
+  <data name="WorkflowSelection_Heading" xml:space="preserve">
+    <value>选择流程</value>
+  </data>
+  <data name="WorkflowSelection_Hint" xml:space="preserve">
+    <value>在本次处理产生第一个处理结果之前，仍可更改流程。</value>
+  </data>
+  <data name="WorkflowSelection_Select" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="WorkflowSelection_Locked" xml:space="preserve">
+    <value>本次处理已产生结果，流程已锁定。如需更换流程，请结束本次处理并重新导入文件。</value>
+  </data>
+  <data name="WorkflowSelection_Refused" xml:space="preserve">
+    <value>无法选择该流程（{0}）。</value>
+  </data>
+  <data name="Session_StepsHeading" xml:space="preserve">
+    <value>步骤</value>
+  </data>
+  <data name="Session_PlaceholderNotice" xml:space="preserve">
+    <value>本版本尚未提供处理操作。此页面仅按已保存的内容显示本次处理。</value>
+  </data>
+  <data name="Session_AllStepsFinished" xml:space="preserve">
+    <value>所有步骤已完成</value>
+  </data>
+  <data name="SessionState_Active" xml:space="preserve"><value>进行中</value></data>
+  <data name="SessionState_HandedOff" xml:space="preserve"><value>已转交</value></data>
+  <data name="SessionState_Completed" xml:space="preserve"><value>已完成</value></data>
+  <data name="SessionState_Abandoned" xml:space="preserve"><value>已放弃</value></data>
+  <data name="StepState_Waiting" xml:space="preserve"><value>等待中</value></data>
+  <data name="StepState_Processing" xml:space="preserve"><value>处理中</value></data>
+  <data name="StepState_ReviewRequired" xml:space="preserve"><value>待审核</value></data>
+  <data name="StepState_Approved" xml:space="preserve"><value>已通过</value></data>
+  <data name="StepState_RetryRequired" xml:space="preserve"><value>需重试</value></data>
+  <data name="StepState_Skipped" xml:space="preserve"><value>已跳过</value></data>
+  <data name="StepState_Failed" xml:space="preserve"><value>失败</value></data>
+  <data name="StepState_Interrupted" xml:space="preserve"><value>已中断</value></data>
 </root>

@@ -18,6 +18,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// hash-bound approval integrity, downstream invalidation, transactional commit, and the
 /// automation lock (task §37, §47–§49).
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class SessionServiceTests
 {
     [Fact]

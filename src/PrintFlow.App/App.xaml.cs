@@ -1,6 +1,7 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
+using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
@@ -70,6 +71,11 @@ public partial class App : Application
             DataContext = _services!.GetRequiredService<ShellViewModel>(),
         };
         MainWindow.Show();
+
+        // Home is reachable only from here — after the guard was claimed, migrations applied and
+        // recovery completed. There is no other caller that can put a screen on the window
+        // (Part 3C2 §2).
+        await _services!.GetRequiredService<INavigationService>().GoHomeAsync(CancellationToken.None);
     }
 
     protected override void OnExit(ExitEventArgs e)

@@ -30,6 +30,12 @@ namespace PrintFlow.Workflow.Services;
 /// </remarks>
 public sealed class SessionService : ISessionService
 {
+    /// <summary>How many sessions "Recent Processing" shows at most (MVP design §10).</summary>
+    public const int RecentSessionLimit = 100;
+
+    /// <summary>How far back "Recent Processing" reaches (MVP design §10).</summary>
+    public static readonly TimeSpan RecentSessionWindow = TimeSpan.FromDays(30);
+
     private readonly IWorkflowEngine _engine;
     private readonly ISessionRepository _repository;
     private readonly IWorkspace _workspace;
@@ -237,6 +243,11 @@ public sealed class SessionService : ISessionService
         WorkflowSnapshot snapshot = loaded.Value.ToSnapshot();
         return OperationResult.Ok(SessionView.From(snapshot, _engine.AvailableCommands(snapshot)));
     }
+
+    /// <inheritdoc />
+    public Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken) =>
+        _repository.ListRecentAsync(
+            RecentSessionLimit, _timeProvider.GetUtcNow() - RecentSessionWindow, cancellationToken);
 
     // -------------------------------------------------------------------------------------
     // Revision integrity (Jira 11105)

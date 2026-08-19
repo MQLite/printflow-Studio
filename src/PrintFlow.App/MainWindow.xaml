@@ -3,71 +3,31 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:PrintFlow.App.Views"
         xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
-        Title="{Binding Heading}"
-        Height="620" Width="900"
+        Title="{Binding Title}"
+        Height="700" Width="1000"
         WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Window.Resources>
+        <!--
+            The whole navigation mechanism: a view model becomes its screen here, so no view
+            model ever references a View type and no screen constructs another (Part 3C2 §16).
+        -->
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+            <views:HomeView />
+        </DataTemplate>
 
-        <TextBlock Grid.Row="0"
-                   Text="{Binding Heading}"
-                   FontSize="26"
-                   FontWeight="SemiBold" />
+        <DataTemplate DataType="{x:Type vm:WorkflowSelectionViewModel}">
+            <views:WorkflowSelectionView />
+        </DataTemplate>
 
-        <TextBlock Grid.Row="1"
-                   Text="{Binding Subheading}"
-                   Margin="0,4,0,20"
-                   Opacity="0.7"
-                   FontSize="14" />
+        <DataTemplate DataType="{x:Type vm:SessionViewModel}">
+            <views:SessionScreenView />
+        </DataTemplate>
+    </Window.Resources>
 
-        <HeaderedContentControl Grid.Row="2" Header="{Binding WorkflowsHeading}">
-            <ItemsControl ItemsSource="{Binding Workflows}" Margin="0,8,0,0">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="#33000000"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                Padding="14"
-                                Margin="0,0,0,12">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Title}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,6" />
-                                <ItemsControl ItemsSource="{Binding Steps}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding}" Margin="8,1,0,1" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </HeaderedContentControl>
-
-        <TextBlock Grid.Row="3"
-                   Text="{Binding StartupSummary}"
-                   TextWrapping="Wrap"
-                   Margin="0,16,0,0"
-                   Opacity="0.85" />
-
-        <TextBlock Grid.Row="4"
-                   Text="{Binding FoundationNotice}"
-                   TextWrapping="Wrap"
-                   Margin="0,8,0,0"
-                   Opacity="0.7" />
-    </Grid>
+    <ContentControl Content="{Binding Current}" />
 </Window>

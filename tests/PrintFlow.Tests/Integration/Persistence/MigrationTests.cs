@@ -7,6 +7,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// <summary>
 /// Jira 11108: forward-only, <c>PRAGMA user_version</c>-gated migrations (task §27, §48).
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class MigrationTests
 {
     [Fact]

@@ -13,6 +13,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// <summary>
 /// Epic 11100 Part 3A §7–§8: the <see cref="FoundationEnvironmentGate"/> foundation seam.
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class EnvironmentGateTests
 {
     [Fact]

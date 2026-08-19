@@ -88,6 +88,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
             SessionId.From(Guid.Parse(row.Id)),
             Mappers.ToWorkflowType(row.WorkflowType),
             Domain.Files.OutputName.Parse(row.OutputName),
+            Mappers.ToStepKind(row.CurrentStep),
             Mappers.ToSessionState(row.State),
             Mappers.ToDateTimeOffset(row.UpdatedAtUtc))).ToList();
 

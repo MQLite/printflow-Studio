@@ -24,6 +24,7 @@ namespace PrintFlow.Tests.Integration.Startup;
 /// it. Only the single-instance guard and (where the assertion is about call counts) the
 /// recovery service are scripted.
 /// </remarks>
+[Collection(SqliteCollection.Name)]
 public sealed class ApplicationStartupTests
 {
     // -------------------------------------------------------------------------------------
@@ -47,9 +48,9 @@ public sealed class ApplicationStartupTests
         guard.AcquireCallCount.ShouldBe(1);
         guard.IsHeld.ShouldBeTrue();
 
-        // The shell the App would show resolves from the graph startup returned.
+        // The screens the App would show resolve from the graph startup returned.
         result.Services.ShouldNotBeNull();
-        result.Services!.GetRequiredService<ShellViewModel>().Workflows.Count.ShouldBe(3);
+        result.Services!.GetRequiredService<WorkflowSelectionViewModel>().Workflows.Count.ShouldBe(3);
     }
 
     [Fact]
@@ -251,7 +252,7 @@ public sealed class ApplicationStartupTests
 
         // The same status is what the shell reads — the report is not discarded silently.
         result.Services!.GetRequiredService<StartupStatusAccessor>().Status.ShouldBeSameAs(status);
-        result.Services!.GetRequiredService<ShellViewModel>().StartupSummary.ShouldContain("1");
+        result.Services!.GetRequiredService<HomeViewModel>().StartupSummary.ShouldContain("1");
     }
 
     [Fact]

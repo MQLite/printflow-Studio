@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Navigation;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
@@ -79,7 +80,16 @@ public static class ServiceRegistration
         services.AddSingleton<IStartupRecoveryService, StartupRecoveryService>();
 
         services.AddSingleton<StartupStatusAccessor>();
-        services.AddTransient<ShellViewModel>();
+
+        // Navigation is a singleton because "which screen is current" is one fact per window;
+        // the screens themselves are transient so each visit starts from a clean view model
+        // and cannot carry the previous session's state forward.
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
+        services.AddSingleton<ShellViewModel>();
+        services.AddTransient<HomeViewModel>();
+        services.AddTransient<WorkflowSelectionViewModel>();
+        services.AddTransient<SessionViewModel>();
 
         overrides?.Invoke(services);
 

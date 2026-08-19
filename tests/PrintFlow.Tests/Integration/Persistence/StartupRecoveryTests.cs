@@ -25,6 +25,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// application is killed mid-attempt, with none of the flakiness of racing a real process.
 /// Recovery then runs on a service instance that shares nothing with it but the disk.
 /// </remarks>
+[Collection(SqliteCollection.Name)]
 public sealed class StartupRecoveryTests
 {
     // -------------------------------------------------------------------------------------

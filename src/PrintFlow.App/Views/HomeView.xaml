@@ -1,0 +1,123 @@
+<UserControl x:Class="PrintFlow.App.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
+             AllowDrop="True"
+             DragOver="OnDragOver"
+             Drop="OnDrop">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Title}"
+                   FontSize="26"
+                   FontWeight="SemiBold" />
+
+        <!-- Startup recovery and preset status: one line each, no diagnostics UI (§12, §13). -->
+        <StackPanel Grid.Row="1" Margin="0,6,0,16">
+            <TextBlock Text="{Binding StartupSummary}" TextWrapping="Wrap" Opacity="0.85" />
+            <TextBlock Text="{Binding PresetStatus}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0" />
+        </StackPanel>
+
+        <!-- The one way in. Dropping is handled on the whole screen, so the operator can
+             drop anywhere rather than hunt for a target. -->
+        <Border Grid.Row="2"
+                BorderBrush="#33000000"
+                BorderThickness="1"
+                CornerRadius="6"
+                Padding="16">
+            <StackPanel>
+                <TextBlock Text="{Binding ImportHeading}" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
+                <Button Content="{Binding ChooseFileLabel}"
+                        Command="{Binding ChooseFileCommand}"
+                        Padding="14,6"
+                        HorizontalAlignment="Left" />
+            </StackPanel>
+        </Border>
+
+        <TextBlock Grid.Row="3"
+                   Text="{Binding Notice}"
+                   TextWrapping="Wrap"
+                   Margin="0,12,0,0"
+                   FontWeight="SemiBold" />
+
+        <DockPanel Grid.Row="4" Margin="0,18,0,0">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
+                <TextBlock Text="{Binding RecentHeading}" FontSize="16" FontWeight="SemiBold" />
+                <Button DockPanel.Dock="Right"
+                        Content="{Binding RefreshLabel}"
+                        Command="{Binding RefreshCommand}"
+                        Padding="10,4" />
+            </DockPanel>
+
+            <TextBlock DockPanel.Dock="Top"
+                       Text="{Binding EmptyRecentText}"
+                       Opacity="0.7"
+                       Margin="0,4,0,0"
+                       Visibility="{Binding HasNoRecentSessions, Converter={StaticResource BoolToVisibility}}" />
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding RecentSessions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#22000000" BorderThickness="0,0,0,1" Padding="6,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0" Opacity="0.75">
+                                            <TextBlock Text="{Binding Workflow}" />
+                                            <TextBlock Text="  ·  " />
+                                            <TextBlock Text="{Binding CurrentStep}" />
+                                            <TextBlock Text="  ·  " />
+                                            <TextBlock Text="{Binding State}" />
+                                            <TextBlock Text="  ·  " />
+                                            <TextBlock Text="{Binding UpdatedAt}" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="{Binding OpenActionLabel}"
+                                                Command="{Binding DataContext.ResumeCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="12,4"
+                                                Margin="0,0,8,0" />
+                                        <!-- Offered only where the workflow layer says Abandon is legal (§10). -->
+                                        <Button Content="{Binding DataContext.AbandonLabel,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                Command="{Binding DataContext.AbandonCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="12,4"
+                                                Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</UserControl>

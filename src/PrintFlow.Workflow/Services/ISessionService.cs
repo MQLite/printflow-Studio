@@ -38,4 +38,14 @@ public interface ISessionService
 
     /// <summary>Loads a session's current view without changing anything.</summary>
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lists the sessions the Home screen offers as entry points, newest first.
+    /// </summary>
+    /// <remarks>
+    /// The window and the cap are the service's policy, not the caller's: a view model that
+    /// chose them could quietly disagree with another one, and "how much recent work Home
+    /// shows" is a product rule rather than a presentation detail (Epic 11100 Part 3C2 §8).
+    /// </remarks>
+    Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken);
 }

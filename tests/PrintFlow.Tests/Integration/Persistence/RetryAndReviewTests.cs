@@ -16,6 +16,7 @@ namespace PrintFlow.Tests.Integration.Persistence;
 /// Retry-after-failure and reject-then-retry, driven end to end through
 /// <see cref="SessionService"/> against real files and a real database (Epic 11100 Part 3A §5–§6).
 /// </summary>
+[Collection(SqliteCollection.Name)]
 public sealed class RetryAndReviewTests
 {
     [Fact]

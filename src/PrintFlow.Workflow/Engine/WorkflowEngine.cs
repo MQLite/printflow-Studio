@@ -103,7 +103,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition SelectWorkflow(
         WorkflowSnapshot state, WorkflowCommand.SelectWorkflow command, CommandContext context)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return NotActive(state, nameof(WorkflowCommand.SelectWorkflow));
         }
@@ -147,7 +147,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition SetOutputName(
         WorkflowSnapshot state, WorkflowCommand.SetOutputName command)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return NotActive(state, nameof(WorkflowCommand.SetOutputName));
         }
@@ -173,7 +173,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition SelectWhiteUnderbaseBranch(
         WorkflowSnapshot state, WorkflowCommand.SelectWhiteUnderbaseBranch command)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return NotActive(state, nameof(WorkflowCommand.SelectWhiteUnderbaseBranch));
         }
@@ -207,7 +207,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition ReturnToStep(
         WorkflowSnapshot state, WorkflowCommand.ReturnToStep command, CommandContext context)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return NotActive(state, nameof(WorkflowCommand.ReturnToStep));
         }
@@ -266,7 +266,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// </summary>
     private static WorkflowTransition Complete(WorkflowSnapshot state, CommandContext context)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return NotActive(state, nameof(WorkflowCommand.Complete));
         }
@@ -353,7 +353,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition AbandonSession(
         WorkflowSnapshot state, WorkflowCommand.AbandonSession command, CommandContext context)
     {
-        if (state.SessionState is not (SessionState.Active or SessionState.HandedOff))
+        if (!SessionStateRules.AllowsAbandon(state.SessionState))
         {
             return WorkflowTransition.Rejected(
                 RejectionCode.PreconditionNotMet,
@@ -844,7 +844,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// </summary>
     private static StepResolution Resolve(WorkflowSnapshot state, StepKind kind, CommandKind command)
     {
-        if (state.SessionState != SessionState.Active)
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
         {
             return StepResolution.Refused(
                 RejectionCode.SessionNotActive,
@@ -928,6 +928,15 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// Payload-carrying commands whose legality depends on the payload itself are omitted
     /// from the probe: the engine cannot report whether a dimension the operator has not
     /// typed yet would be accepted. The UI enables those through their own screens.
+    /// <para>
+    /// <see cref="CommandKind.SelectWorkflow"/> is the exception, and is probed with the
+    /// session's <i>current</i> workflow. Its two guards — the session is Active, and no
+    /// derived Revision exists — are both checked before the payload is looked at, so the
+    /// probe answers "may the workflow still be chosen?" without inventing a choice the
+    /// operator has not made. That question is exactly what the Workflow Selection screen
+    /// asks, and answering it here keeps the workflow lock defined in one place
+    /// (MVP design §6.1, invariant 12).
+    /// </para>
     /// </remarks>
     private static WorkflowCommand? BuildProbe(WorkflowSnapshot state, CommandKind kind)
     {
@@ -936,6 +945,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
 
         return kind switch
         {
+            CommandKind.SelectWorkflow => new WorkflowCommand.SelectWorkflow(state.WorkflowType),
             CommandKind.ConfirmOriginal => new WorkflowCommand.ConfirmOriginal(),
             CommandKind.StartStep => new WorkflowCommand.StartStep(step),
             CommandKind.Retry => new WorkflowCommand.Retry(step),
