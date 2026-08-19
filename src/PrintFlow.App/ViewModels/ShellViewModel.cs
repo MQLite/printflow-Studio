@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PrintFlow.App.Resources;
+using PrintFlow.App.Startup;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Definitions;
 
@@ -80,8 +81,13 @@ public sealed class WorkflowSummary
 /// </remarks>
 public sealed partial class ShellViewModel : ObservableObject
 {
-    public ShellViewModel()
+    private readonly StartupStatusAccessor _startupStatus;
+
+    public ShellViewModel(StartupStatusAccessor startupStatus)
     {
+        ArgumentNullException.ThrowIfNull(startupStatus);
+
+        _startupStatus = startupStatus;
         Workflows = new ReadOnlyCollection<WorkflowSummary>(
             WorkflowCatalog.All.Select(definition => new WorkflowSummary(definition)).ToList());
     }
@@ -96,4 +102,36 @@ public sealed partial class ShellViewModel : ObservableObject
 
     /// <summary>The three fixed workflows, straight from the catalogue.</summary>
     public IReadOnlyList<WorkflowSummary> Workflows { get; }
+
+    /// <summary>
+    /// One line describing what startup recovery did, so a restart after a crash says so
+    /// visibly rather than only in a report object (Epic 11100 Part 3C1 §6).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately a summary and nothing more — the diagnostics surface that lists individual
+    /// recovery entries is a later slice.
+    /// </remarks>
+    public string StartupSummary
+    {
+        get
+        {
+            StartupStatus? status = _startupStatus.Status;
+            if (status is null || !status.RecoveryExecuted)
+            {
+                return Strings.Startup_RecoveryNotRun;
+            }
+
+            if (status.RecoveryReport is { IsNoOp: true })
+            {
+                return Strings.Startup_RecoveryClean;
+            }
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Startup_RecoverySummary,
+                status.RecoveredAttemptCount,
+                status.ReleasedStaleLockCount,
+                status.QuarantinedFileCount);
+        }
+    }
 }

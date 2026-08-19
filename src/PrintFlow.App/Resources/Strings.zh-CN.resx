@@ -88,4 +88,19 @@
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop 输出</value></data>
   <data name="Flag_Skippable" xml:space="preserve"><value>可跳过</value></data>
   <data name="Flag_RequiresReview" xml:space="preserve"><value>需审核</value></data>
+  <data name="Startup_AlreadyRunning" xml:space="preserve">
+    <value>PrintFlow Studio 已在运行。</value>
+  </data>
+  <data name="Startup_Failed" xml:space="preserve">
+    <value>PrintFlow Studio 无法启动，已安全停止。</value>
+  </data>
+  <data name="Startup_RecoveryNotRun" xml:space="preserve">
+    <value>未执行启动恢复。</value>
+  </data>
+  <data name="Startup_RecoveryClean" xml:space="preserve">
+    <value>启动恢复未发现需要恢复的内容。</value>
+  </data>
+  <data name="Startup_RecoverySummary" xml:space="preserve">
+    <value>启动恢复：中断的处理 {0} 个，释放过期锁 {1} 个，隔离文件 {2} 个。</value>
+  </data>
 </root>

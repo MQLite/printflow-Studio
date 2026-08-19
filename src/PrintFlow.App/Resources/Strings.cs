@@ -57,6 +57,17 @@ internal static class Strings
 
     internal static string Flag_RequiresReview => Get(nameof(Flag_RequiresReview));
 
+    internal static string Startup_AlreadyRunning => Get(nameof(Startup_AlreadyRunning));
+
+    internal static string Startup_Failed => Get(nameof(Startup_Failed));
+
+    internal static string Startup_RecoveryNotRun => Get(nameof(Startup_RecoveryNotRun));
+
+    internal static string Startup_RecoveryClean => Get(nameof(Startup_RecoveryClean));
+
+    /// <summary>Composite format: interrupted attempts, released locks, quarantined files.</summary>
+    internal static string Startup_RecoverySummary => Get(nameof(Startup_RecoverySummary));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

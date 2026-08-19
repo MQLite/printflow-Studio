@@ -1,5 +1,5 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -22,36 +22,37 @@ namespace PrintFlow.App.Composition;
 /// <c>PrintFlow.Infrastructure</c>.
 /// </summary>
 /// <remarks>
-/// Startup sequence, fail-closed at every stage (Epic 11100 plan §18):
-/// configuration → workspace root → database + migrations → preset verification (recorded,
-/// never blocking) → adapters (fails closed on <c>Adapters.Mode = Production</c>, which has no
-/// implementation yet) → the service graph. An architecture test asserts that no type outside
-/// this namespace references an Infrastructure type.
+/// Registration only. Configuration loading, directory creation, database migration, preset
+/// verification and crash recovery are the ordered startup <i>sequence</i> and belong to
+/// <see cref="ApplicationStartup"/> (Epic 11100 Part 3C1 §4) — keeping them out of here is what
+/// makes "recovery runs exactly once, from the primary instance" checkable rather than hoped for.
+/// An architecture test asserts that no type outside this namespace references an Infrastructure
+/// type.
 /// </remarks>
 public static class ServiceRegistration
 {
-    /// <summary>Registers everything the shell needs to start.</summary>
-    public static ServiceProvider BuildServiceProvider()
+    /// <summary>
+    /// Registers everything the shell needs, against an already-migrated database.
+    /// </summary>
+    /// <param name="configuration">The loaded <c>appsettings.json</c>.</param>
+    /// <param name="workspaceRootAbsolute">The resolved, already-created workspace root.</param>
+    /// <param name="connectionFactory">A factory for the already-migrated database.</param>
+    /// <param name="overrides">
+    /// Applied last, so a test can substitute one registration without rebuilding the graph by
+    /// hand. Nothing in the application passes it.
+    /// </param>
+    public static ServiceProvider BuildServiceProvider(
+        PrintFlowConfiguration configuration,
+        string workspaceRootAbsolute,
+        SqliteConnectionFactory connectionFactory,
+        Action<IServiceCollection>? overrides = null)
     {
-        string baseDirectory = AppContext.BaseDirectory;
-        string configPath = System.IO.Path.Combine(baseDirectory, "appsettings.json");
-        PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(configPath);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(workspaceRootAbsolute);
+        ArgumentNullException.ThrowIfNull(connectionFactory);
 
-        string workspaceRoot = System.IO.Path.GetFullPath(configuration.Workspace.Root);
-        string databasePath = System.IO.Path.Combine(workspaceRoot, configuration.Database.RelativePath);
-
-        SqliteConnectionFactory connectionFactory = new(databasePath);
-        using (SqliteConnection migrationConnection = connectionFactory.Open())
-        {
-            var migrated = MigrationRunner.Migrate(migrationConnection);
-            if (migrated.IsFailure)
-            {
-                throw new InvalidOperationException(
-                    $"Database migration failed: {migrated.Failure}. PrintFlow will not start against an unmigrated or newer-than-known database.");
-            }
-        }
-
-        string presetManifestPath = System.IO.Path.Combine(workspaceRoot, configuration.Preset.Path);
+        string presetManifestPath =
+            System.IO.Path.Combine(workspaceRootAbsolute, configuration.Preset.Path);
         Sha256 expectedPresetHash = Sha256.Parse(configuration.Preset.ExpectedSha256);
         WorkstationPresetProvider presetProvider = new(
             presetManifestPath, configuration.Preset.Id, configuration.Preset.Version, expectedPresetHash);
@@ -63,7 +64,7 @@ public static class ServiceRegistration
         services.AddSingleton<IWorkflowEngine>(WorkflowEngine.Instance);
         services.AddSingleton<IWorkstationPresetProvider>(presetProvider);
         services.AddSingleton<IFileInspector, WicFileInspector>();
-        services.AddSingleton<IWorkspace>(new FileWorkspace(workspaceRoot));
+        services.AddSingleton<IWorkspace>(new FileWorkspace(workspaceRootAbsolute));
         services.AddSingleton<IRecycleBin, RecycleBin>();
         services.AddSingleton<IEnvironmentGate, FoundationEnvironmentGate>();
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
@@ -72,15 +73,15 @@ public static class ServiceRegistration
 
         services.AddSingleton<ISessionService, SessionService>();
 
-        // Crash recovery is composed here but deliberately not invoked yet. It must run once,
-        // after migrations and before this process claims the automation lock, and it is only
-        // safe behind the single-instance guard — a second instance running it would recover
-        // attempts the first is still driving. Both belong to the Part 3C startup sequence
-        // (Epic 11100 plan §18); Part 3B provides the primitive and this seam.
+        // Composed here, invoked only by ApplicationStartup — once, behind the single-instance
+        // guard and after migrations. Nothing else in the graph may call RecoverAsync.
         services.AddSingleton<IProcessLiveness, SystemProcessLiveness>();
         services.AddSingleton<IStartupRecoveryService, StartupRecoveryService>();
 
+        services.AddSingleton<StartupStatusAccessor>();
         services.AddTransient<ShellViewModel>();
+
+        overrides?.Invoke(services);
 
         return services.BuildServiceProvider();
     }

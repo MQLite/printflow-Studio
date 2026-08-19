@@ -88,4 +88,19 @@
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop Output</value></data>
   <data name="Flag_Skippable" xml:space="preserve"><value>skippable</value></data>
   <data name="Flag_RequiresReview" xml:space="preserve"><value>review required</value></data>
+  <data name="Startup_AlreadyRunning" xml:space="preserve">
+    <value>PrintFlow Studio is already running.</value>
+  </data>
+  <data name="Startup_Failed" xml:space="preserve">
+    <value>PrintFlow Studio could not start and has stopped safely.</value>
+  </data>
+  <data name="Startup_RecoveryNotRun" xml:space="preserve">
+    <value>Startup recovery did not run.</value>
+  </data>
+  <data name="Startup_RecoveryClean" xml:space="preserve">
+    <value>Startup recovery found nothing to recover.</value>
+  </data>
+  <data name="Startup_RecoverySummary" xml:space="preserve">
+    <value>Startup recovery: {0} interrupted attempt(s), {1} stale lock(s) released, {2} file(s) quarantined.</value>
+  </data>
 </root>
