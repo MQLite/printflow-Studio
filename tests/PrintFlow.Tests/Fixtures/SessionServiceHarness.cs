@@ -87,6 +87,25 @@ internal sealed class SessionServiceHarness : IDisposable
         Clock);
 
     /// <summary>
+    /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and
+    /// database, with a scripted liveness answer (Epic 11100 Part 3B).
+    /// </summary>
+    /// <remarks>
+    /// Built separately from <see cref="CreateService"/> on purpose: recovery is what the
+    /// <b>next</b> process does after a crash, so a test that shares nothing with the service
+    /// that crashed is the honest arrangement — only the database and the files on disk carry
+    /// state across.
+    /// </remarks>
+    public IStartupRecoveryService CreateRecoveryService(FakeProcessLiveness liveness) =>
+        new StartupRecoveryService(
+            WorkflowEngine.Instance,
+            Repository,
+            FileWorkspace,
+            liveness,
+            SystemIdGenerator.Instance,
+            Clock);
+
+    /// <summary>
     /// Builds a service with a caller-supplied Meitu adapter in place of the scriptable fake —
     /// for tests that need to prove something about a non-fake <see cref="AdapterExecutionMode"/>
     /// (Epic 11100 Part 3A §8: <see cref="IEnvironmentGate"/> blocking a production adapter).

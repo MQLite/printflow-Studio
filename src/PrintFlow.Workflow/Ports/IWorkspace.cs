@@ -73,6 +73,29 @@ public interface IWorkspace
     OperationResult<Unit> CleanupWorking(WorkspaceDirRef session);
 
     /// <summary>
+    /// Lists every file currently present under this session's <c>Working\</c> area, each
+    /// attributed to the attempt folder it sits in.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately scoped to <c>Working\</c> and nothing else: startup recovery is the only
+    /// caller, and confining what it can even see to the one disposable area makes "recovery
+    /// never touches <c>Source</c>, <c>Approved</c>, <c>Baseline</c> or <c>TestData</c>"
+    /// (Epic 11100 Part 3B §8) a property of the seam rather than a rule recovery has to
+    /// remember. A missing <c>Working\</c> directory is an empty list, not a failure.
+    /// </remarks>
+    OperationResult<IReadOnlyList<WorkingFileEntry>> ListWorkingFiles(WorkspaceDirRef session);
+
+    /// <summary>
+    /// Moves one orphaned working file into <c>Quarantine\</c>. Never deletes.
+    /// </summary>
+    /// <remarks>
+    /// The reference must belong to <see cref="WorkspaceArea.Working"/>; anything else is
+    /// refused rather than moved. That refusal is the second half of the containment above —
+    /// even a caller holding an <c>Approved</c> reference cannot route it through here.
+    /// </remarks>
+    OperationResult<Unit> QuarantineWorkingFile(WorkspaceFileRef file, string reason);
+
+    /// <summary>
     /// Records that a file exists on disk with no corresponding metadata (a commit that failed
     /// after the file write completed). Never deletes; only marks for later inspection.
     /// </summary>

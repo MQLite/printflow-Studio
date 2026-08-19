@@ -304,6 +304,73 @@ public sealed class FileWorkspace : IWorkspace
     }
 
     /// <inheritdoc />
+    public OperationResult<IReadOnlyList<WorkingFileEntry>> ListWorkingFiles(WorkspaceDirRef session)
+    {
+        string workingRelative = $"{session.RelativePath}/{AreaFolder(WorkspaceArea.Working)}";
+
+        OperationResult<string> workingAbsolute = PathGuard.ResolveWithinRoot(_rootAbsolute, workingRelative);
+        if (workingAbsolute.IsFailure)
+        {
+            return OperationResult.Fail<IReadOnlyList<WorkingFileEntry>>(workingAbsolute.Failure);
+        }
+
+        if (!Directory.Exists(workingAbsolute.Value))
+        {
+            return OperationResult.Ok<IReadOnlyList<WorkingFileEntry>>([]);
+        }
+
+        List<WorkingFileEntry> entries = [];
+        try
+        {
+            foreach (string absolute in Directory.EnumerateFiles(
+                workingAbsolute.Value, "*", SearchOption.AllDirectories))
+            {
+                string relativeToWorking = System.IO.Path
+                    .GetRelativePath(workingAbsolute.Value, absolute)
+                    .Replace('\\', '/');
+
+                // The first segment is the per-attempt folder CreateWorkingCopyAsync creates.
+                // A file sitting directly in Working\ has none, and is reported rather than
+                // attributed to anything.
+                int separator = relativeToWorking.IndexOf('/');
+                string attemptFolder = separator < 0 ? string.Empty : relativeToWorking[..separator];
+
+                entries.Add(new WorkingFileEntry(
+                    WorkspaceFileRef.Create($"{workingRelative}/{relativeToWorking}", WorkspaceArea.Working),
+                    attemptFolder));
+            }
+        }
+        catch (IOException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<WorkingFileEntry>>(
+                FailureCode.WorkspaceError, $"Could not list working files: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<WorkingFileEntry>>(
+                FailureCode.WorkspaceError, $"Could not list working files: {ex.Message}");
+        }
+
+        return OperationResult.Ok<IReadOnlyList<WorkingFileEntry>>(entries);
+    }
+
+    /// <inheritdoc />
+    public OperationResult<Unit> QuarantineWorkingFile(WorkspaceFileRef file, string reason)
+    {
+        if (file.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.WorkspaceError,
+                $"Only Working files may be quarantined through this route; '{file}' is {file.Area}.");
+        }
+
+        OperationResult<string> absolute = PathGuard.ResolveWithinRoot(_rootAbsolute, file.RelativePath);
+        return absolute.IsFailure
+            ? OperationResult.Fail<Unit>(absolute.Failure)
+            : Quarantine(absolute.Value, reason);
+    }
+
+    /// <inheritdoc />
     public OperationResult<Unit> Quarantine(string absolutePath, string reason)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(absolutePath);

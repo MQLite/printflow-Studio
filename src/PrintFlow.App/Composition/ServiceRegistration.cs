@@ -5,6 +5,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Diagnostics;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
@@ -70,6 +71,14 @@ public static class ServiceRegistration
         RegisterAdapters(services, configuration.Adapters.Mode);
 
         services.AddSingleton<ISessionService, SessionService>();
+
+        // Crash recovery is composed here but deliberately not invoked yet. It must run once,
+        // after migrations and before this process claims the automation lock, and it is only
+        // safe behind the single-instance guard — a second instance running it would recover
+        // attempts the first is still driving. Both belong to the Part 3C startup sequence
+        // (Epic 11100 plan §18); Part 3B provides the primitive and this seam.
+        services.AddSingleton<IProcessLiveness, SystemProcessLiveness>();
+        services.AddSingleton<IStartupRecoveryService, StartupRecoveryService>();
 
         services.AddTransient<ShellViewModel>();
 

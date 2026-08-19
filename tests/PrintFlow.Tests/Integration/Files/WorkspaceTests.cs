@@ -211,6 +211,53 @@ public sealed class WorkspaceTests
     }
 
     [Fact]
+    public async Task Working_files_are_listed_with_the_attempt_folder_they_belong_to()
+    {
+        using TempWorkspace workspace = new();
+        FileWorkspace fileWorkspace = new(workspace.Root);
+        SessionId id = SessionId.From(Guid.CreateVersion7());
+        WorkspaceDirRef session = fileWorkspace.CreateSession(id, DateTimeOffset.UtcNow).Value;
+
+        WorkspaceFileRef source = (await fileWorkspace.ImportSourceAsync(
+            session, workspace.CreateSourceFile("in.png", SyntheticImages.Png()), CancellationToken.None)).Value;
+        AttemptId attemptId = AttemptId.From(Guid.CreateVersion7());
+        await fileWorkspace.CreateWorkingCopyAsync(session, attemptId, source, CancellationToken.None);
+        fileWorkspace.ReserveOutput(session, WorkspaceArea.Approved, "final.png", NamingPatternSet.DesignDefault);
+
+        // A file dropped straight into Working\ belongs to no attempt at all.
+        string sessionRoot = fileWorkspace.ResolveAbsoluteDirectory(session);
+        File.WriteAllBytes(Path.Combine(sessionRoot, "Working", "stray.png"), SyntheticImages.Png());
+
+        IReadOnlyList<WorkingFileEntry> listed = fileWorkspace.ListWorkingFiles(session).Value;
+
+        // Source and Approved are outside what this call can even see.
+        listed.Count.ShouldBe(2);
+        listed.Single(e => e.File.FileName == "in.png").AttemptFolderName
+            .ShouldBe(attemptId.Value.ToString("D"));
+        listed.Single(e => e.File.FileName == "stray.png").AttemptFolderName.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public async Task Quarantining_a_non_Working_reference_is_refused_rather_than_moved()
+    {
+        using TempWorkspace workspace = new();
+        FileWorkspace fileWorkspace = new(workspace.Root);
+        SessionId id = SessionId.From(Guid.CreateVersion7());
+        WorkspaceDirRef session = fileWorkspace.CreateSession(id, DateTimeOffset.UtcNow).Value;
+
+        WorkspaceFileRef source = (await fileWorkspace.ImportSourceAsync(
+            session, workspace.CreateSourceFile("in.png", SyntheticImages.Png()), CancellationToken.None)).Value;
+
+        OperationResult<PrintFlow.Domain.Results.Unit> refused =
+            fileWorkspace.QuarantineWorkingFile(source, "startup recovery");
+
+        refused.IsFailure.ShouldBeTrue();
+        refused.Failure.Code.ShouldBe(FailureCode.WorkspaceError);
+        File.Exists(fileWorkspace.ResolveAbsolute(source)).ShouldBeTrue();
+        Directory.Exists(Path.Combine(workspace.Root, "Quarantine")).ShouldBeFalse();
+    }
+
+    [Fact]
     public void RecycleBin_has_no_hard_delete_fallback_on_failure()
     {
         RecycleBin recycleBin = new();
