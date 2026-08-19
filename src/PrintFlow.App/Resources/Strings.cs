@@ -146,6 +146,110 @@ internal static class Strings
 
     internal static string Session_AllStepsFinished => Get(nameof(Session_AllStepsFinished));
 
+    // --- Part 3C3A: processing and review controls ---------------------------------------
+
+    internal static string Session_ConfirmOriginal => Get(nameof(Session_ConfirmOriginal));
+
+    internal static string Session_RunStep => Get(nameof(Session_RunStep));
+
+    internal static string Session_Approve => Get(nameof(Session_Approve));
+
+    internal static string Session_Reject => Get(nameof(Session_Reject));
+
+    internal static string Session_Retry => Get(nameof(Session_Retry));
+
+    internal static string Session_Skip => Get(nameof(Session_Skip));
+
+    internal static string Session_HandOff => Get(nameof(Session_HandOff));
+
+    /// <summary>The unmissable warning that results are synthetic (Part 3C3A §8).</summary>
+    internal static string Session_FakeModeNotice => Get(nameof(Session_FakeModeNotice));
+
+    internal static string Session_HandedOffNotice => Get(nameof(Session_HandedOffNotice));
+
+    internal static string Session_ReviewHeading => Get(nameof(Session_ReviewHeading));
+
+    internal static string Session_RejectReasonLabel => Get(nameof(Session_RejectReasonLabel));
+
+    internal static string Session_RejectNotesLabel => Get(nameof(Session_RejectNotesLabel));
+
+    internal static string Session_ArtefactHeading => Get(nameof(Session_ArtefactHeading));
+
+    internal static string Session_ArtefactNone => Get(nameof(Session_ArtefactNone));
+
+    /// <summary>Says the artefact shown is the step's input rather than its result.</summary>
+    internal static string Session_ArtefactIsInput => Get(nameof(Session_ArtefactIsInput));
+
+    internal static string Session_LabelFileName => Get(nameof(Session_LabelFileName));
+
+    internal static string Session_LabelFormat => Get(nameof(Session_LabelFormat));
+
+    internal static string Session_LabelPixels => Get(nameof(Session_LabelPixels));
+
+    internal static string Session_LabelDpi => Get(nameof(Session_LabelDpi));
+
+    internal static string Session_LabelHash => Get(nameof(Session_LabelHash));
+
+    internal static string Session_LabelRevision => Get(nameof(Session_LabelRevision));
+
+    /// <summary>Shown where a structural fact was legitimately not determined.</summary>
+    internal static string Session_ValueUnknown => Get(nameof(Session_ValueUnknown));
+
+    /// <summary>Composite format: the stable failure code.</summary>
+    internal static string Session_ActionFailed => Get(nameof(Session_ActionFailed));
+
+    internal static string Failure_OutputMissing => Get(nameof(Failure_OutputMissing));
+
+    internal static string Failure_OutputUnreadable => Get(nameof(Failure_OutputUnreadable));
+
+    internal static string Failure_OutputValidationFailed => Get(nameof(Failure_OutputValidationFailed));
+
+    internal static string Failure_Timeout => Get(nameof(Failure_Timeout));
+
+    internal static string Failure_Cancelled => Get(nameof(Failure_Cancelled));
+
+    internal static string Failure_RevisionIntegrityMismatch => Get(nameof(Failure_RevisionIntegrityMismatch));
+
+    internal static string Failure_EnvironmentNotVerified => Get(nameof(Failure_EnvironmentNotVerified));
+
+    internal static string Failure_AdapterUnavailable => Get(nameof(Failure_AdapterUnavailable));
+
+    internal static string Failure_PresetHashMismatch => Get(nameof(Failure_PresetHashMismatch));
+
+    internal static string Failure_UnknownDialog => Get(nameof(Failure_UnknownDialog));
+
+    internal static string Failure_WorkspaceError => Get(nameof(Failure_WorkspaceError));
+
+    internal static string Failure_PersistenceError => Get(nameof(Failure_PersistenceError));
+
+    internal static string Failure_PreconditionNotMet => Get(nameof(Failure_PreconditionNotMet));
+
+    internal static string Rejection_InsufficientResult => Get(nameof(Rejection_InsufficientResult));
+
+    internal static string Rejection_EdgeError => Get(nameof(Rejection_EdgeError));
+
+    internal static string Rejection_MissingContent => Get(nameof(Rejection_MissingContent));
+
+    internal static string Rejection_ColourIssue => Get(nameof(Rejection_ColourIssue));
+
+    internal static string Rejection_DimensionIssue => Get(nameof(Rejection_DimensionIssue));
+
+    internal static string Rejection_WhiteInkIssue => Get(nameof(Rejection_WhiteInkIssue));
+
+    internal static string Rejection_Other => Get(nameof(Rejection_Other));
+
+    internal static string Format_Png => Get(nameof(Format_Png));
+
+    internal static string Format_Jpeg => Get(nameof(Format_Jpeg));
+
+    internal static string Format_Tiff => Get(nameof(Format_Tiff));
+
+    internal static string Format_Psd => Get(nameof(Format_Psd));
+
+    internal static string Format_Pdf => Get(nameof(Format_Pdf));
+
+    internal static string Format_Unknown => Get(nameof(Format_Unknown));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

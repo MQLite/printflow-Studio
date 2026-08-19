@@ -937,6 +937,21 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// asks, and answering it here keeps the workflow lock defined in one place
     /// (MVP design §6.1, invariant 12).
     /// </para>
+    /// <para>
+    /// <see cref="CommandKind.Approve"/> and <see cref="CommandKind.Reject"/> are probed with
+    /// the step's <b>own current hash</b>, never a synthesised one. Their legality includes
+    /// "the reviewed hash still matches the result on offer", so probing with anything else
+    /// would answer a different question than the operator's click will ask. When the step has
+    /// no result there is nothing to review and no probe is built (Epic 11100 Part 3C3A §5).
+    /// </para>
+    /// <para>
+    /// <see cref="CommandKind.HandOff"/> and <see cref="CommandKind.AbandonSession"/> carry a
+    /// free-text reason the operator has not written yet, so they are probed with
+    /// <see cref="ProbeReason"/>. That deliberately separates the two questions §5 draws apart:
+    /// the probe answers <i>may this command category be attempted here</i>, and the real
+    /// command still has to satisfy the non-empty-reason guard when it is issued. Validation is
+    /// not weakened — an empty reason is refused exactly as before.
+    /// </para>
     /// </remarks>
     private static WorkflowCommand? BuildProbe(WorkflowSnapshot state, CommandKind kind)
     {
@@ -950,10 +965,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.StartStep => new WorkflowCommand.StartStep(step),
             CommandKind.Retry => new WorkflowCommand.Retry(step),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
-            CommandKind.HandOff => new WorkflowCommand.HandOff(step, "probe"),
+            CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
-            CommandKind.AbandonSession => new WorkflowCommand.AbandonSession("probe"),
+            CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),
             CommandKind.Approve when current?.CurrentRevisionSha256 is Sha256 hash =>
                 new WorkflowCommand.Approve(step, hash),
             CommandKind.Reject when current?.CurrentRevisionSha256 is Sha256 hash =>
@@ -961,4 +976,14 @@ public sealed class WorkflowEngine : IWorkflowEngine
             _ => null,
         };
     }
+
+    /// <summary>
+    /// The stand-in reason used when probing a command that requires one.
+    /// </summary>
+    /// <remarks>
+    /// Never persisted: a probe produces no effects because nothing is applied. It exists only
+    /// so the reason guard is satisfied while the guards that actually vary — session state and
+    /// step state — decide the answer.
+    /// </remarks>
+    private const string ProbeReason = "probe";
 }

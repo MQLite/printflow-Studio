@@ -167,7 +167,7 @@
     <value>步骤</value>
   </data>
   <data name="Session_PlaceholderNotice" xml:space="preserve">
-    <value>本版本尚未提供处理操作。此页面仅按已保存的内容显示本次处理。</value>
+    <value>本版本尚未提供打印尺寸、白墨与完成处理等操作。此页面所显示的内容均取自已保存的处理记录。</value>
   </data>
   <data name="Session_AllStepsFinished" xml:space="preserve">
     <value>所有步骤已完成</value>
@@ -184,4 +184,85 @@
   <data name="StepState_Skipped" xml:space="preserve"><value>已跳过</value></data>
   <data name="StepState_Failed" xml:space="preserve"><value>失败</value></data>
   <data name="StepState_Interrupted" xml:space="preserve"><value>已中断</value></data>
+  <data name="Session_ConfirmOriginal" xml:space="preserve"><value>确认原图</value></data>
+  <data name="Session_RunStep" xml:space="preserve"><value>执行步骤</value></data>
+  <data name="Session_Approve" xml:space="preserve"><value>通过</value></data>
+  <data name="Session_Reject" xml:space="preserve"><value>驳回</value></data>
+  <data name="Session_Retry" xml:space="preserve"><value>重试</value></data>
+  <data name="Session_Skip" xml:space="preserve"><value>跳过</value></data>
+  <data name="Session_HandOff" xml:space="preserve"><value>转为人工处理</value></data>
+  <data name="Session_FakeModeNotice" xml:space="preserve">
+    <value>模拟处理模式 —— 生成的是测试文件，不是正式产出。</value>
+  </data>
+  <data name="Session_HandedOffNotice" xml:space="preserve">
+    <value>自动处理已结束，请手动继续。</value>
+  </data>
+  <data name="Session_ReviewHeading" xml:space="preserve"><value>待审核</value></data>
+  <data name="Session_RejectReasonLabel" xml:space="preserve"><value>驳回原因</value></data>
+  <data name="Session_RejectNotesLabel" xml:space="preserve"><value>备注（可选）</value></data>
+  <data name="Session_ArtefactHeading" xml:space="preserve"><value>当前文件</value></data>
+  <data name="Session_ArtefactNone" xml:space="preserve"><value>尚未验证任何文件。</value></data>
+  <data name="Session_ArtefactIsInput" xml:space="preserve"><value>本步骤的输入文件</value></data>
+  <data name="Session_LabelFileName" xml:space="preserve"><value>文件</value></data>
+  <data name="Session_LabelFormat" xml:space="preserve"><value>格式</value></data>
+  <data name="Session_LabelPixels" xml:space="preserve"><value>像素</value></data>
+  <data name="Session_LabelDpi" xml:space="preserve"><value>分辨率</value></data>
+  <data name="Session_LabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_LabelRevision" xml:space="preserve"><value>版本</value></data>
+  <data name="Session_ValueUnknown" xml:space="preserve"><value>未确定</value></data>
+  <data name="Session_ActionFailed" xml:space="preserve">
+    <value>该操作未能完成。{0}（{1}）</value>
+  </data>
+  <data name="Failure_OutputMissing" xml:space="preserve">
+    <value>未生成预期的结果文件。</value>
+  </data>
+  <data name="Failure_OutputUnreadable" xml:space="preserve">
+    <value>结果文件存在，但无法完整读取。</value>
+  </data>
+  <data name="Failure_OutputValidationFailed" xml:space="preserve">
+    <value>结果文件未通过校验。</value>
+  </data>
+  <data name="Failure_Timeout" xml:space="preserve">
+    <value>操作未在规定时间内完成。</value>
+  </data>
+  <data name="Failure_Cancelled" xml:space="preserve">
+    <value>操作已取消。</value>
+  </data>
+  <data name="Failure_RevisionIntegrityMismatch" xml:space="preserve">
+    <value>文件在显示后发生了变化，该决定未生效。请重新执行该步骤。</value>
+  </data>
+  <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
+    <value>本工作站尚未通过自动处理环境校验。</value>
+  </data>
+  <data name="Failure_AdapterUnavailable" xml:space="preserve">
+    <value>所需的应用程序不可用或正被占用。</value>
+  </data>
+  <data name="Failure_PresetHashMismatch" xml:space="preserve">
+    <value>工作站预设与预期签名不一致。</value>
+  </data>
+  <data name="Failure_UnknownDialog" xml:space="preserve">
+    <value>出现了无法识别的窗口，自动处理已停止。</value>
+  </data>
+  <data name="Failure_WorkspaceError" xml:space="preserve">
+    <value>工作区文件操作失败。</value>
+  </data>
+  <data name="Failure_PersistenceError" xml:space="preserve">
+    <value>读取或保存处理记录失败。</value>
+  </data>
+  <data name="Failure_PreconditionNotMet" xml:space="preserve">
+    <value>当前状态下无法执行该操作。</value>
+  </data>
+  <data name="Rejection_InsufficientResult" xml:space="preserve"><value>效果不达标</value></data>
+  <data name="Rejection_EdgeError" xml:space="preserve"><value>边缘错误</value></data>
+  <data name="Rejection_MissingContent" xml:space="preserve"><value>内容缺失</value></data>
+  <data name="Rejection_ColourIssue" xml:space="preserve"><value>颜色问题</value></data>
+  <data name="Rejection_DimensionIssue" xml:space="preserve"><value>尺寸问题</value></data>
+  <data name="Rejection_WhiteInkIssue" xml:space="preserve"><value>白墨问题</value></data>
+  <data name="Rejection_Other" xml:space="preserve"><value>其他</value></data>
+  <data name="Format_Png" xml:space="preserve"><value>PNG</value></data>
+  <data name="Format_Jpeg" xml:space="preserve"><value>JPEG</value></data>
+  <data name="Format_Tiff" xml:space="preserve"><value>TIFF</value></data>
+  <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
+  <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
+  <data name="Format_Unknown" xml:space="preserve"><value>未知</value></data>
 </root>

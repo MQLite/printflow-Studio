@@ -1,3 +1,6 @@
+using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
 
 namespace PrintFlow.App.Resources;
@@ -45,6 +48,64 @@ internal static class DisplayNames
         Domain.Sessions.SessionState.Completed => Strings.SessionState_Completed,
         Domain.Sessions.SessionState.Abandoned => Strings.SessionState_Abandoned,
         _ => state.ToString(),
+    };
+
+    internal static string ImageFormat(ImageFormat format) => format switch
+    {
+        Domain.Files.ImageFormat.Png => Strings.Format_Png,
+        Domain.Files.ImageFormat.Jpeg => Strings.Format_Jpeg,
+        Domain.Files.ImageFormat.Tiff => Strings.Format_Tiff,
+        Domain.Files.ImageFormat.Psd => Strings.Format_Psd,
+        Domain.Files.ImageFormat.Pdf => Strings.Format_Pdf,
+        Domain.Files.ImageFormat.Unknown => Strings.Format_Unknown,
+        _ => format.ToString(),
+    };
+
+    /// <summary>
+    /// The operator label for a quick rejection reason (MVP design §7.3).
+    /// </summary>
+    /// <remarks>
+    /// The enum value is what gets persisted into <c>ReviewDecision.QuickReason</c> and read
+    /// back as audit history; only this label is translated, so a decision recorded on a
+    /// Chinese workstation still reads the same to anyone else.
+    /// </remarks>
+    internal static string RejectionReason(RejectionReason reason) => reason switch
+    {
+        Domain.Reviews.RejectionReason.InsufficientResult => Strings.Rejection_InsufficientResult,
+        Domain.Reviews.RejectionReason.EdgeError => Strings.Rejection_EdgeError,
+        Domain.Reviews.RejectionReason.MissingContent => Strings.Rejection_MissingContent,
+        Domain.Reviews.RejectionReason.ColourIssue => Strings.Rejection_ColourIssue,
+        Domain.Reviews.RejectionReason.DimensionIssue => Strings.Rejection_DimensionIssue,
+        Domain.Reviews.RejectionReason.WhiteInkIssue => Strings.Rejection_WhiteInkIssue,
+        Domain.Reviews.RejectionReason.Other => Strings.Rejection_Other,
+        _ => reason.ToString(),
+    };
+
+    /// <summary>
+    /// What a failure means to the operator, in one sentence (Part 3C3A §15).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately maps the <see cref="FailureCode"/> rather than
+    /// <c>OperationFailure.TechnicalDetail</c>: the detail is English log text that can name a
+    /// path, and is never shown. The code itself is still displayed alongside this sentence,
+    /// because it is the stable identifier a support call can quote (MVP design §13.4).
+    /// </remarks>
+    internal static string Failure(FailureCode code) => code switch
+    {
+        FailureCode.OutputMissing => Strings.Failure_OutputMissing,
+        FailureCode.OutputUnreadable => Strings.Failure_OutputUnreadable,
+        FailureCode.OutputValidationFailed => Strings.Failure_OutputValidationFailed,
+        FailureCode.Timeout => Strings.Failure_Timeout,
+        FailureCode.Cancelled => Strings.Failure_Cancelled,
+        FailureCode.RevisionIntegrityMismatch => Strings.Failure_RevisionIntegrityMismatch,
+        FailureCode.EnvironmentNotVerified => Strings.Failure_EnvironmentNotVerified,
+        FailureCode.AdapterUnavailable => Strings.Failure_AdapterUnavailable,
+        FailureCode.PresetHashMismatch => Strings.Failure_PresetHashMismatch,
+        FailureCode.UnknownDialog => Strings.Failure_UnknownDialog,
+        FailureCode.WorkspaceError => Strings.Failure_WorkspaceError,
+        FailureCode.PersistenceError => Strings.Failure_PersistenceError,
+        FailureCode.PreconditionNotMet => Strings.Failure_PreconditionNotMet,
+        _ => code.ToString(),
     };
 
     internal static string StepState(StepState state) => state switch

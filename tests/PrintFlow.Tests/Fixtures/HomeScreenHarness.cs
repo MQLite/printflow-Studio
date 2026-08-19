@@ -150,5 +150,18 @@ internal sealed class HomeScreenHarness : IDisposable
     public WorkflowSelectionViewModel WorkflowSelection(RecordingNavigation navigation) =>
         new(Sessions, navigation);
 
+    /// <summary>A session screen over the same service (Epic 11100 Part 3C3A §19).</summary>
+    public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, navigation);
+
+    /// <summary>
+    /// The absolute path of a file inside the workspace, for a test that needs to corrupt one.
+    /// </summary>
+    /// <remarks>
+    /// Only a test resolves a workspace-relative reference this way. Production code goes
+    /// through <c>IWorkspace.ResolveAbsolute</c>, and the view models never see a path at all.
+    /// </remarks>
+    public string ResolveInWorkspace(string relativePath) =>
+        System.IO.Path.Combine(_harness.Workspace.Root, relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+
     public void Dispose() => _harness.Dispose();
 }

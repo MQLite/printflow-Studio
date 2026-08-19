@@ -34,9 +34,31 @@ public sealed class BannedApiEnforcementTests
         AssertNoFileIo("PrintFlow.Workflow");
     }
 
-    private static void AssertNoFileIo(string projectName)
+    /// <summary>
+    /// View models drive the UI through <c>ISessionService</c>, never through the file system
+    /// (Epic 11100 Part 3C3A §18).
+    /// </summary>
+    /// <remarks>
+    /// Scoped to <c>ViewModels\</c> rather than the whole shell project on purpose: file dialogs
+    /// (<c>Navigation\</c>) and the composition root legitimately name paths, and forbidding it
+    /// there would be a rule the code could not follow. What must stay true is that the layer
+    /// holding the operator's actions never opens, reads, copies or inspects a file — the
+    /// closest a view model comes is handing a path a dialog gave it straight to
+    /// <c>ImportAsync</c> (plan §17.4).
+    /// </remarks>
+    [Fact]
+    public void Shell_view_models_contain_no_System_IO_usage()
+    {
+        AssertNoFileIo("PrintFlow.App", subdirectory: "ViewModels");
+    }
+
+    private static void AssertNoFileIo(string projectName, string? subdirectory = null)
     {
         string projectDirectory = FindProjectDirectory(projectName);
+        if (subdirectory is not null)
+        {
+            projectDirectory = Path.Combine(projectDirectory, subdirectory);
+        }
 
         List<string> offenders = [];
         foreach (string file in Directory.EnumerateFiles(projectDirectory, "*.cs", SearchOption.AllDirectories))
@@ -57,8 +79,9 @@ public sealed class BannedApiEnforcementTests
             }
         }
 
+        string scope = subdirectory is null ? projectName : $@"{projectName}\{subdirectory}";
         offenders.ShouldBeEmpty(
-            $"{projectName} must have no System.IO usage — file I/O belongs only in " +
+            $"{scope} must have no System.IO usage — file I/O belongs only in " +
             "PrintFlow.Infrastructure or PrintFlow.App.Composition.");
     }
 

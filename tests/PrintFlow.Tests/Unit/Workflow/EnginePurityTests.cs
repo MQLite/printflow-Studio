@@ -1,3 +1,4 @@
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
@@ -102,6 +103,77 @@ public sealed class EnginePurityTests
         available.ShouldContain(CommandKind.Skip);
         available.ShouldNotContain(CommandKind.Approve);
         available.ShouldNotContain(CommandKind.Complete);
+    }
+
+    /// <summary>
+    /// The review commands are probed with the step's real hash, so availability and the
+    /// operator's actual click ask the same question (Epic 11100 Part 3C3A §5).
+    /// </summary>
+    /// <remarks>
+    /// The failure this guards against is a probe that synthesises a hash: Approve would then
+    /// be reported available while the real, correctly-hashed command was refused — or worse,
+    /// reported available on a step with no result at all.
+    /// </remarks>
+    [Fact]
+    public void Approve_and_Reject_availability_tracks_the_step_actually_having_a_result()
+    {
+        WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.PrepareAsset);
+        scenario.CompleteImport();
+        scenario.Must(new WorkflowCommand.ConfirmOriginal());
+        scenario.Must(new WorkflowCommand.StartStep(StepKind.Enhancement));
+
+        // Processing: an attempt is running, so there is nothing to review yet.
+        WorkflowEngine.Instance.AvailableCommands(scenario.State)
+            .ShouldNotContain(CommandKind.Approve);
+
+        RevisionId produced = scenario.NextRevision();
+        Sha256 hash = WorkflowScenario.HashOf(produced);
+        scenario.Must(SystemCommands.Succeeded(
+            scenario.NextAttempt(), StepKind.Enhancement, produced, hash));
+
+        IReadOnlyList<CommandKind> available = WorkflowEngine.Instance.AvailableCommands(scenario.State);
+        available.ShouldContain(CommandKind.Approve);
+        available.ShouldContain(CommandKind.Reject);
+
+        // The command the UI would actually send — carrying the displayed hash — is accepted,
+        // and a differently-hashed one is still refused. Probing did not weaken the guard.
+        WorkflowSnapshot atReview = scenario.State;
+        WorkflowEngine.Instance
+            .Apply(atReview, new WorkflowCommand.Approve(StepKind.Enhancement, hash), FixedContext)
+            .IsAccepted.ShouldBeTrue();
+
+        WorkflowEngine.Instance
+            .Apply(
+                atReview,
+                new WorkflowCommand.Approve(StepKind.Enhancement, WorkflowScenario.HashOf(scenario.NextRevision())),
+                FixedContext)
+            .IsRejected.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// HandOff availability answers "may this be attempted here", while the reason guard still
+    /// applies to the real command (Epic 11100 Part 3C3A §5).
+    /// </summary>
+    [Fact]
+    public void HandOff_is_offered_at_review_but_an_empty_reason_is_still_refused()
+    {
+        WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.PrepareAsset);
+        scenario.CompleteImport();
+        scenario.Must(new WorkflowCommand.ConfirmOriginal());
+        scenario.Must(new WorkflowCommand.StartStep(StepKind.Enhancement));
+
+        RevisionId produced = scenario.NextRevision();
+        scenario.Must(SystemCommands.Succeeded(
+            scenario.NextAttempt(), StepKind.Enhancement, produced, WorkflowScenario.HashOf(produced)));
+
+        WorkflowEngine.Instance.AvailableCommands(scenario.State).ShouldContain(CommandKind.HandOff);
+
+        WorkflowEngine.Instance
+            .Apply(scenario.State, new WorkflowCommand.HandOff(StepKind.Enhancement, "   "), FixedContext)
+            .Rejection!.Code.ShouldBe(RejectionCode.InvalidPayload);
+
+        scenario.Apply(new WorkflowCommand.HandOff(StepKind.Enhancement, "operator will finish by hand"))
+            .IsAccepted.ShouldBeTrue();
     }
 
     [Fact]

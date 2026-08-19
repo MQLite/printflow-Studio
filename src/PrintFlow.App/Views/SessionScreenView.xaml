@@ -7,8 +7,23 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <Style x:Key="MetadataLabel" TargetType="TextBlock">
+            <Setter Property="Opacity" Value="0.6" />
+            <Setter Property="Margin" Value="0,0,8,2" />
+        </Style>
+
+        <Style x:Key="MetadataValue" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,2" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -16,6 +31,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Session identity (§3). -->
         <TextBlock Grid.Row="0" Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0" Opacity="0.85">
@@ -26,55 +42,229 @@
             <TextBlock Text="{Binding CurrentStep}" />
         </StackPanel>
 
-        <TextBlock Grid.Row="2"
-                   Text="{Binding PlaceholderNotice}"
-                   TextWrapping="Wrap"
-                   Margin="0,14,0,10"
-                   Opacity="0.7" />
+        <!--
+            The fake-adapter warning (§8). Deliberately loud: an operator must never mistake a
+            generated test file for production output.
+        -->
+        <Border Grid.Row="2"
+                Background="#FFF4CE"
+                BorderBrush="#E0B000"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="10,6"
+                Margin="0,12,0,0"
+                Visibility="{Binding IsFakeProcessing, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding FakeModeNotice}"
+                       TextWrapping="Wrap"
+                       Foreground="#5A4500"
+                       FontWeight="SemiBold" />
+        </Border>
 
-        <DockPanel Grid.Row="3">
-            <TextBlock DockPanel.Dock="Top"
-                       Text="{Binding StepsHeading}"
-                       FontSize="16"
+        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+            <!-- Automation has ended for this session; nothing here restarts it (§14). -->
+            <TextBlock Text="{Binding HandedOffNotice}"
+                       TextWrapping="Wrap"
                        FontWeight="SemiBold"
-                       Margin="0,0,0,8" />
+                       Margin="0,0,0,6"
+                       Visibility="{Binding IsHandedOff, Converter={StaticResource BoolToVisibility}}" />
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Steps}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30" />
-                                    <ColumnDefinition Width="240" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+            <!-- The error surface: a localised sentence and a stable code, never a trace (§15). -->
+            <TextBlock Text="{Binding Notice}"
+                       TextWrapping="Wrap"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,6" />
 
-                                <TextBlock Grid.Column="0" Text="{Binding Ordinal}" Opacity="0.6" />
-                                <TextBlock Grid.Column="1" Text="{Binding Name}" />
-                                <TextBlock Grid.Column="2" Text="{Binding State}" Opacity="0.8" />
+            <TextBlock Text="{Binding PlaceholderNotice}"
+                       TextWrapping="Wrap"
+                       Opacity="0.7" />
+        </StackPanel>
 
-                                <Grid.Style>
-                                    <Style TargetType="Grid">
+        <Grid Grid.Row="4" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="360" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Step list (§3). -->
+            <DockPanel Grid.Column="0" Margin="0,0,20,0">
+                <TextBlock DockPanel.Dock="Top"
+                           Text="{Binding StepsHeading}"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,8" />
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Steps}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30" />
+                                        <ColumnDefinition Width="240" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{Binding Ordinal}" Opacity="0.6" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding State}" Opacity="0.8" />
+
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
+                    <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ArtefactHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                            <TextBlock Text="{Binding ArtefactNoneText}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       Margin="0,6,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+                                            <DataTrigger Binding="{Binding HasArtefact}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </Grid.Style>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </DockPanel>
+                                </TextBlock.Style>
+                            </TextBlock>
 
-        <Button Grid.Row="4"
-                Content="{Binding BackLabel}"
-                Command="{Binding BackToHomeCommand}"
-                Padding="14,6"
-                Margin="0,12,0,0"
-                HorizontalAlignment="Left" />
+                            <TextBlock Text="{Binding ArtefactIsInputText}"
+                                       Opacity="0.7"
+                                       FontStyle="Italic"
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding ArtefactIsInput, Converter={StaticResource BoolToVisibility}}" />
+
+                            <Grid Margin="0,8,0,0"
+                                  Visibility="{Binding HasArtefact, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding FileNameLabel}" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactFileName}" />
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding FormatLabel}" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactFormat}" />
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding PixelsLabel}" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactPixels}" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding DpiLabel}" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactDpi}" />
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding HashLabel}" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource MetadataValue}" FontFamily="Consolas" Text="{Binding ArtefactHash}" />
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding RevisionLabel}" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource MetadataValue}" FontFamily="Consolas" Text="{Binding ArtefactRevision}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        Review panel (§9). Metadata and a decision, nothing else: preview,
+                        comparison, zoom and crop are Epic 11200.
+                    -->
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding IsReviewRequired, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReviewHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                            <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
+                            <ComboBox ItemsSource="{Binding RejectionReasons}"
+                                      SelectedItem="{Binding SelectedRejectionReason}"
+                                      DisplayMemberPath="Label" />
+
+                            <TextBlock Text="{Binding RejectNotesLabel}" Opacity="0.6" Margin="0,10,0,4" />
+                            <TextBox Text="{Binding RejectionNotes, UpdateSourceTrigger=PropertyChanged}"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     MinHeight="52"
+                                     VerticalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!--
+            Actions (§4). Every button's visibility comes from AvailableCommands, which is the
+            engine's own answer — the screen states no workflow rule of its own.
+        -->
+        <DockPanel Grid.Row="5" Margin="0,14,0,0" LastChildFill="False">
+            <WrapPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <WrapPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Padding" Value="14,6" />
+                        <Setter Property="Margin" Value="0,0,8,0" />
+                    </Style>
+                </WrapPanel.Resources>
+
+                <Button Content="{Binding ConfirmOriginalLabel}"
+                        Command="{Binding ConfirmOriginalCommand}"
+                        Visibility="{Binding CanConfirmOriginal, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding RunStepLabel}"
+                        Command="{Binding RunStepCommand}"
+                        Visibility="{Binding CanRunStep, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding ApproveLabel}"
+                        Command="{Binding ApproveCommand}"
+                        Visibility="{Binding CanApprove, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding RejectLabel}"
+                        Command="{Binding RejectCommand}"
+                        Visibility="{Binding CanReject, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding RetryLabel}"
+                        Command="{Binding RetryCommand}"
+                        Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding SkipLabel}"
+                        Command="{Binding SkipCommand}"
+                        Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
+
+                <Button Content="{Binding HandOffLabel}"
+                        Command="{Binding HandOffCommand}"
+                        Visibility="{Binding CanHandOff, Converter={StaticResource BoolToVisibility}}" />
+            </WrapPanel>
+
+            <Button DockPanel.Dock="Right"
+                    Content="{Binding BackLabel}"
+                    Command="{Binding BackToHomeCommand}"
+                    Padding="14,6" />
+        </DockPanel>
     </Grid>
 </UserControl>

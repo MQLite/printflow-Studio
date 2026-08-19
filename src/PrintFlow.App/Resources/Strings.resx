@@ -167,7 +167,7 @@
     <value>Steps</value>
   </data>
   <data name="Session_PlaceholderNotice" xml:space="preserve">
-    <value>Processing controls are not part of this build. This screen shows the session exactly as it is stored.</value>
+    <value>Print dimensions, white underbase and session completion are not part of this build. Everything shown here is the session exactly as it is stored.</value>
   </data>
   <data name="Session_AllStepsFinished" xml:space="preserve">
     <value>All steps finished</value>
@@ -184,4 +184,85 @@
   <data name="StepState_Skipped" xml:space="preserve"><value>Skipped</value></data>
   <data name="StepState_Failed" xml:space="preserve"><value>Failed</value></data>
   <data name="StepState_Interrupted" xml:space="preserve"><value>Interrupted</value></data>
+  <data name="Session_ConfirmOriginal" xml:space="preserve"><value>Confirm original</value></data>
+  <data name="Session_RunStep" xml:space="preserve"><value>Run step</value></data>
+  <data name="Session_Approve" xml:space="preserve"><value>Approve</value></data>
+  <data name="Session_Reject" xml:space="preserve"><value>Reject</value></data>
+  <data name="Session_Retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="Session_Skip" xml:space="preserve"><value>Skip</value></data>
+  <data name="Session_HandOff" xml:space="preserve"><value>Hand off manually</value></data>
+  <data name="Session_FakeModeNotice" xml:space="preserve">
+    <value>FAKE PROCESSING MODE — results are generated test files, not production output.</value>
+  </data>
+  <data name="Session_HandedOffNotice" xml:space="preserve">
+    <value>Automated processing has ended. Continue manually.</value>
+  </data>
+  <data name="Session_ReviewHeading" xml:space="preserve"><value>Review required</value></data>
+  <data name="Session_RejectReasonLabel" xml:space="preserve"><value>Reason</value></data>
+  <data name="Session_RejectNotesLabel" xml:space="preserve"><value>Notes (optional)</value></data>
+  <data name="Session_ArtefactHeading" xml:space="preserve"><value>Current file</value></data>
+  <data name="Session_ArtefactNone" xml:space="preserve"><value>No file has been validated yet.</value></data>
+  <data name="Session_ArtefactIsInput" xml:space="preserve"><value>Input for this step</value></data>
+  <data name="Session_LabelFileName" xml:space="preserve"><value>File</value></data>
+  <data name="Session_LabelFormat" xml:space="preserve"><value>Format</value></data>
+  <data name="Session_LabelPixels" xml:space="preserve"><value>Pixels</value></data>
+  <data name="Session_LabelDpi" xml:space="preserve"><value>DPI</value></data>
+  <data name="Session_LabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_LabelRevision" xml:space="preserve"><value>Revision</value></data>
+  <data name="Session_ValueUnknown" xml:space="preserve"><value>Not determined</value></data>
+  <data name="Session_ActionFailed" xml:space="preserve">
+    <value>That action did not complete. {0} ({1})</value>
+  </data>
+  <data name="Failure_OutputMissing" xml:space="preserve">
+    <value>The expected result file was not produced.</value>
+  </data>
+  <data name="Failure_OutputUnreadable" xml:space="preserve">
+    <value>The result file exists but could not be read completely.</value>
+  </data>
+  <data name="Failure_OutputValidationFailed" xml:space="preserve">
+    <value>The result file did not pass validation.</value>
+  </data>
+  <data name="Failure_Timeout" xml:space="preserve">
+    <value>The operation did not finish in time.</value>
+  </data>
+  <data name="Failure_Cancelled" xml:space="preserve">
+    <value>The operation was cancelled.</value>
+  </data>
+  <data name="Failure_RevisionIntegrityMismatch" xml:space="preserve">
+    <value>The file changed after it was shown, so the decision was not applied. Run the step again.</value>
+  </data>
+  <data name="Failure_EnvironmentNotVerified" xml:space="preserve">
+    <value>This workstation has not been verified for automated processing.</value>
+  </data>
+  <data name="Failure_AdapterUnavailable" xml:space="preserve">
+    <value>The required application is unavailable or already in use.</value>
+  </data>
+  <data name="Failure_PresetHashMismatch" xml:space="preserve">
+    <value>The workstation preset did not match its expected signature.</value>
+  </data>
+  <data name="Failure_UnknownDialog" xml:space="preserve">
+    <value>An unrecognised window appeared, so automation stopped.</value>
+  </data>
+  <data name="Failure_WorkspaceError" xml:space="preserve">
+    <value>A file operation in the workspace failed.</value>
+  </data>
+  <data name="Failure_PersistenceError" xml:space="preserve">
+    <value>Saving or reading the session record failed.</value>
+  </data>
+  <data name="Failure_PreconditionNotMet" xml:space="preserve">
+    <value>This action is not possible in the session's current state.</value>
+  </data>
+  <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
+  <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
+  <data name="Rejection_MissingContent" xml:space="preserve"><value>Missing content</value></data>
+  <data name="Rejection_ColourIssue" xml:space="preserve"><value>Colour issue</value></data>
+  <data name="Rejection_DimensionIssue" xml:space="preserve"><value>Dimension issue</value></data>
+  <data name="Rejection_WhiteInkIssue" xml:space="preserve"><value>White-ink issue</value></data>
+  <data name="Rejection_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Format_Png" xml:space="preserve"><value>PNG</value></data>
+  <data name="Format_Jpeg" xml:space="preserve"><value>JPEG</value></data>
+  <data name="Format_Tiff" xml:space="preserve"><value>TIFF</value></data>
+  <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
+  <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
+  <data name="Format_Unknown" xml:space="preserve"><value>Unknown</value></data>
 </root>

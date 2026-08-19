@@ -172,7 +172,7 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(committedClosing.Failure);
         }
 
-        return OperationResult.Ok(SessionView.From(finished.State, _engine.AvailableCommands(finished.State)));
+        return ViewOf(finished.State, [rootRevision]);
     }
 
     /// <inheritdoc />
@@ -220,7 +220,7 @@ public sealed class SessionService : ISessionService
                 return OperationResult.Fail<SessionView>(committed.Failure);
             }
 
-            return OperationResult.Ok(SessionView.From(transition.State, _engine.AvailableCommands(transition.State)));
+            return ViewOf(transition.State, aggregate.Revisions);
         }
 
         return await RunAdapterBackedStepAsync(aggregate, transition, context, runAdapter, cancellationToken);
@@ -241,13 +241,41 @@ public sealed class SessionService : ISessionService
         }
 
         WorkflowSnapshot snapshot = loaded.Value.ToSnapshot();
-        return OperationResult.Ok(SessionView.From(snapshot, _engine.AvailableCommands(snapshot)));
+        return ViewOf(snapshot, loaded.Value.Revisions);
     }
 
     /// <inheritdoc />
     public Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken) =>
         _repository.ListRecentAsync(
             RecentSessionLimit, _timeProvider.GetUtcNow() - RecentSessionWindow, cancellationToken);
+
+    /// <summary>
+    /// Builds the read model the UI sees, from the state the engine just produced plus the
+    /// Revisions that state can refer to.
+    /// </summary>
+    /// <remarks>
+    /// The single place a <see cref="SessionView"/> is constructed, so "what the screen knows"
+    /// cannot drift between the import path, the command path and the reload path. The
+    /// Revision list is passed in rather than re-read: after a command the caller already
+    /// holds the authoritative set, including one just created, and a second read would be a
+    /// chance for the two to disagree.
+    /// </remarks>
+    private OperationResult<SessionView> ViewOf(WorkflowSnapshot state, IReadOnlyList<Revision> revisions) =>
+        OperationResult.Ok(SessionView.From(
+            state, _engine.AvailableCommands(state), revisions, ProcessingMode));
+
+    /// <summary>
+    /// How this installation actually processes work (Part 3C3A §8).
+    /// </summary>
+    /// <remarks>
+    /// Reported as Fake if <i>either</i> adapter is a double. A session that would run one real
+    /// application and one deterministic stand-in still produces output an operator must not
+    /// mistake for production, so the weaker claim is the honest one.
+    /// </remarks>
+    private AdapterExecutionMode ProcessingMode =>
+        _meitu.Mode == AdapterExecutionMode.Fake || _photoshop.Mode == AdapterExecutionMode.Fake
+            ? AdapterExecutionMode.Fake
+            : AdapterExecutionMode.Production;
 
     // -------------------------------------------------------------------------------------
     // Revision integrity (Jira 11105)
@@ -412,7 +440,7 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(committedFinish.Failure);
         }
 
-        return OperationResult.Ok(SessionView.From(finished.State, _engine.AvailableCommands(finished.State)));
+        return ViewOf(finished.State, [.. afterStart.Revisions, newRevision]);
     }
 
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(

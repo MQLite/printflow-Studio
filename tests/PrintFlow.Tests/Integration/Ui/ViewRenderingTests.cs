@@ -60,11 +60,40 @@ public sealed class ViewRenderingTests
         harness.FilePicker.Path = harness.WriteSourceFile("session.png");
         await harness.Home.ChooseFileCommand.ExecuteAsync(null);
 
-        SessionViewModel session = new(new RecordingNavigation());
+        SessionViewModel session = harness.Session(new RecordingNavigation());
         SessionView opened = harness.Navigation.WorkflowSelectionFor!;
         session.Open(opened);
         session.Steps.Count.ShouldBe(opened.Steps.Count);
         opened.WorkflowType.ShouldBe(WorkflowType.PrepareAsset);
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// The review state renders too, with the artefact panel and the decision controls
+    /// populated (Epic 11100 Part 3C3A §20).
+    /// </summary>
+    /// <remarks>
+    /// The screen above shows a freshly imported session, where the review panel and most of
+    /// the metadata grid are collapsed — so it would not have exercised their bindings at all.
+    /// This one drives the session to <c>ReviewRequired</c> through the view model's own
+    /// commands first, which is the state the operator spends the most time looking at.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_review_state_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("review.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+
+        session.Notice.ShouldBeNull();
+        session.IsReviewRequired.ShouldBeTrue();
+        session.HasArtefact.ShouldBeTrue();
 
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
@@ -92,9 +121,11 @@ public sealed class ViewRenderingTests
     [Fact]
     public void A_deliberately_wrong_binding_path_is_reported()
     {
+        using HomeScreenHarness harness = new();
+
         List<string> errors = Render(() => new UserControl
         {
-            DataContext = new SessionViewModel(new RecordingNavigation()),
+            DataContext = harness.Session(new RecordingNavigation()),
             Content = new TextBlock().WithBinding(
                 TextBlock.TextProperty, new System.Windows.Data.Binding("NoSuchProperty")),
         });
