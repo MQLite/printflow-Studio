@@ -197,7 +197,10 @@ internal sealed class HomeScreenHarness : IDisposable
         new(Sessions, navigation);
 
     /// <summary>A session screen over the same service (Epic 11100 Part 3C3A §19).</summary>
-    public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, navigation);
+    public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, Previews, navigation);
+
+    /// <summary>The read-only image seam the session screen previews through (Part C1 §3).</summary>
+    public IArtefactPreviewService Previews => _harness.Previews;
 
     /// <summary>
     /// The absolute path of a file inside the workspace, for a test that needs to corrupt one.

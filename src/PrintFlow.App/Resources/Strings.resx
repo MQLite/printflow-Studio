@@ -315,4 +315,24 @@
   <data name="ReviewState_NotReviewed" xml:space="preserve"><value>Not reviewed</value></data>
   <data name="ReviewState_Approved" xml:space="preserve"><value>Approved</value></data>
   <data name="ReviewState_Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="Session_PreviewHeading" xml:space="preserve"><value>Image review</value></data>
+  <data name="Session_PreviewCurrent" xml:space="preserve"><value>Preview</value></data>
+  <data name="Session_PreviewBefore" xml:space="preserve"><value>Before</value></data>
+  <data name="Session_PreviewAfter" xml:space="preserve"><value>After</value></data>
+  <data name="Session_PreviewPixels" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="Session_PreviewReduced" xml:space="preserve">
+    <value>Reduced for display; the file itself is unchanged.</value>
+  </data>
+  <data name="Session_PreviewUnavailable" xml:space="preserve"><value>Preview unavailable</value></data>
+  <data name="Session_PreviewLoadFailed" xml:space="preserve">
+    <value>This file cannot be displayed here. The file itself is unaffected and the review below still applies to it.</value>
+  </data>
+  <data name="Session_ZoomIn" xml:space="preserve"><value>Zoom in</value></data>
+  <data name="Session_ZoomOut" xml:space="preserve"><value>Zoom out</value></data>
+  <data name="Session_ZoomReset" xml:space="preserve"><value>Reset zoom</value></data>
+  <data name="Session_ZoomFit" xml:space="preserve"><value>Fit</value></data>
+  <data name="Session_ZoomPercent" xml:space="preserve"><value>{0}%</value></data>
+  <data name="Session_ManualCropRequiredNotice" xml:space="preserve">
+    <value>Automatic trim cannot determine the crop area. Manual crop will be available in the next workflow step.</value>
+  </data>
 </root>

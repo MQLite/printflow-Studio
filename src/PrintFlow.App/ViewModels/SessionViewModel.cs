@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
@@ -182,7 +183,22 @@ public sealed class PrintOutputRow
 /// </remarks>
 public sealed partial class SessionViewModel : ObservableObject
 {
+    /// <summary>The smallest and largest zoom the review surface offers (Part C1 §12).</summary>
+    /// <remarks>
+    /// 10% makes a production-sized design fit at a glance; 800% is well past the point where a
+    /// deterministic trim's edge can be judged. Neither bound alters a Revision — zoom is a
+    /// property of looking, not of the file.
+    /// </remarks>
+    public const double MinimumZoom = 0.10;
+
+    /// <inheritdoc cref="MinimumZoom" />
+    public const double MaximumZoom = 8.00;
+
+    /// <summary>What one press of Zoom In or Zoom Out multiplies or divides the scale by.</summary>
+    private const double ZoomStep = 1.25;
+
     private readonly ISessionService _sessions;
+    private readonly IArtefactPreviewService _previews;
     private readonly INavigationService _navigation;
 
     /// <summary>
@@ -238,14 +254,40 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private SizePreset _pendingPreset = SizePreset.Custom;
 
+    /// <summary>
+    /// Whether the whole image is fitted to its viewport (Part C1 §15).
+    /// </summary>
+    /// <remarks>
+    /// Starts true and returns to true on reset, because the first thing a reviewer needs is
+    /// the complete result — opening at pixel-level zoom would show a corner of a design and
+    /// call it a review.
+    /// </remarks>
+    [ObservableProperty]
+    private bool _isFitToViewport = true;
+
+    /// <summary>
+    /// The zoom multiplier applied when not fitted; 1.0 is one image pixel per screen pixel.
+    /// </summary>
+    /// <remarks>
+    /// Shared by both halves of a comparison on purpose (§14): a before and an after examined
+    /// at different magnifications are not a comparison. Scroll position is deliberately
+    /// <i>not</i> shared — each pane keeps its own, which is what lets an operator look at the
+    /// top-left of one and the bottom-right of the other.
+    /// </remarks>
+    [ObservableProperty]
+    private double _zoomScale = 1.0;
+
     private SessionView? _session;
 
-    public SessionViewModel(ISessionService sessions, INavigationService navigation)
+    public SessionViewModel(
+        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation)
     {
         ArgumentNullException.ThrowIfNull(sessions);
+        ArgumentNullException.ThrowIfNull(previews);
         ArgumentNullException.ThrowIfNull(navigation);
 
         _sessions = sessions;
+        _previews = previews;
         _navigation = navigation;
 
         RejectionReasons = new ReadOnlyCollection<RejectionReasonChoice>(
@@ -271,6 +313,19 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>The production outputs this session already holds, oldest first (§15).</summary>
     public ObservableCollection<PrintOutputRow> Outputs { get; } = [];
+
+    /// <summary>
+    /// What the operator is looking at: nothing, one image, or Before then After
+    /// (Epic 11200 Part C1 §7, §11).
+    /// </summary>
+    /// <remarks>
+    /// Order is the label's partner, not a substitute for it: the upstream pane is always first
+    /// and always headed "Before", so a side-by-side layout reads left-to-right the way the
+    /// work happened. A step with no result of its own contributes one pane, and a
+    /// <c>ManualCropRequired</c> outcome contributes exactly the upstream one — there is no
+    /// path here that manufactures an "after" for a result that was never produced (§17).
+    /// </remarks>
+    public ObservableCollection<ArtefactPreviewPane> PreviewPanes { get; } = [];
 
     /// <summary>Every quick rejection reason, in enum order.</summary>
     public IReadOnlyList<RejectionReasonChoice> RejectionReasons { get; }
@@ -357,6 +412,63 @@ public sealed partial class SessionViewModel : ObservableObject
     public string BranchLabel => Strings.Session_LabelBranch;
 
     public string ReviewStateLabel => Strings.Session_LabelReview;
+
+    // --- Image preview (Epic 11200 Part C1) ----------------------------------------------
+
+    public string PreviewHeading => Strings.Session_PreviewHeading;
+
+    /// <summary>The heading given to the upstream half of a comparison (§11).</summary>
+    public string BeforeLabel => Strings.Session_PreviewBefore;
+
+    /// <summary>The heading given to the step-result half of a comparison (§11).</summary>
+    public string AfterLabel => Strings.Session_PreviewAfter;
+
+    /// <summary>The heading given to a lone preview, where there is nothing to compare.</summary>
+    public string SinglePreviewLabel => Strings.Session_PreviewCurrent;
+
+    /// <summary>The zoom read-out while the whole image is fitted (§15).</summary>
+    public string FitLabel => Strings.Session_ZoomFit;
+
+    public string ZoomInLabel => Strings.Session_ZoomIn;
+
+    public string ZoomOutLabel => Strings.Session_ZoomOut;
+
+    public string ResetZoomLabel => Strings.Session_ZoomReset;
+
+    /// <summary>Whether there is anything at all to show in the preview area.</summary>
+    public bool HasPreview => PreviewPanes.Count > 0;
+
+    /// <summary>The current magnification, or the word "Fit" while the whole image is shown.</summary>
+    public string ZoomLabel => IsFitToViewport
+        ? FitLabel
+        : string.Format(CultureInfo.CurrentCulture, Strings.Session_ZoomPercent, Math.Round(ZoomScale * 100));
+
+    /// <summary>True while a further step in is within <see cref="MaximumZoom"/>.</summary>
+    public bool CanZoomIn => EffectiveZoom * ZoomStep <= MaximumZoom + ZoomTolerance;
+
+    /// <summary>True while a further step out is within <see cref="MinimumZoom"/>.</summary>
+    public bool CanZoomOut => EffectiveZoom / ZoomStep >= MinimumZoom - ZoomTolerance;
+
+    /// <summary>
+    /// The stable-English sentence saying a trim needs a human (Part C1 §17).
+    /// </summary>
+    /// <remarks>
+    /// Shown beside the ordinary failure notice rather than instead of it. The failure line
+    /// carries the code a support call quotes; this one says what the operator does next, and
+    /// says plainly that the tool is not here yet rather than implying a button they cannot
+    /// find.
+    /// </remarks>
+    public string ManualCropNotice => Strings.Session_ManualCropRequiredNotice;
+
+    /// <summary>
+    /// Whether the current step ended in <see cref="FailureCode.ManualCropRequired"/>.
+    /// </summary>
+    /// <remarks>
+    /// Read from <see cref="SessionView.CurrentStepFailure"/>, which is derived from the
+    /// persisted attempt row, so the notice survives navigating away and resuming — a state
+    /// this screen remembered in a field would not (§17, §19).
+    /// </remarks>
+    public bool IsManualCropRequired => _session?.CurrentStepFailure == FailureCode.ManualCropRequired;
 
     /// <summary>
     /// The unmissable warning that this installation produces synthetic results
@@ -548,6 +660,11 @@ public sealed partial class SessionViewModel : ObservableObject
     public bool IsReviewRequired => CanApprove || CanReject;
 
     /// <summary>Shows <paramref name="session"/> exactly as the service returned it.</summary>
+    /// <remarks>
+    /// Synchronous, because navigation is. The images the screen shows are not: loading them
+    /// starts here and completes on <see cref="PreviewsLoaded"/>, so a caller that needs the
+    /// pictures to be there — a test, or a later screen — can await that rather than guess.
+    /// </remarks>
     public void Open(SessionView session)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -555,6 +672,16 @@ public sealed partial class SessionViewModel : ObservableObject
         Show(session);
         Notice = null;
     }
+
+    /// <summary>
+    /// The in-flight preview load, or a completed task when there is nothing to load.
+    /// </summary>
+    /// <remarks>
+    /// It never faults: <see cref="LoadPreviewsAsync"/> turns every preview failure into a pane
+    /// that says so, because a picture that would not decode is not a reason for anything else
+    /// on this screen to stop working (§21).
+    /// </remarks>
+    public Task PreviewsLoaded { get; private set; } = Task.CompletedTask;
 
     // --- Commands ------------------------------------------------------------------------
 
@@ -726,9 +853,40 @@ public sealed partial class SessionViewModel : ObservableObject
     }
 
     /// <summary>Returns to Home. Changes nothing about the session (Part 3C3A §16).</summary>
+    /// <remarks>
+    /// The panes are dropped on the way out (Part C1 §19). Navigation already discards this
+    /// transient view model, so this is belt and braces rather than the mechanism — but it is
+    /// the difference between "the images are collectable once the screen is collected" and
+    /// "the images are collectable now", and the images are the only large objects here.
+    /// </remarks>
     [RelayCommand]
-    private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
+    private async Task BackToHomeAsync(CancellationToken cancellationToken)
+    {
+        ClearPreviews();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    // --- Zoom (Part C1 §12, §13, §15) ----------------------------------------------------
+    //
+    // State only. Nothing here reads a file, resamples an image or writes anything: the
+    // magnification is applied by the view's own transform, and the Revision is untouched
+    // whatever the operator does with these three buttons.
+
+    /// <summary>Magnifies one step, leaving fit-to-viewport if that is where it started.</summary>
+    [RelayCommand]
+    private void ZoomIn() => ApplyZoom(EffectiveZoom * ZoomStep);
+
+    /// <summary>Reduces one step, leaving fit-to-viewport if that is where it started.</summary>
+    [RelayCommand]
+    private void ZoomOut() => ApplyZoom(EffectiveZoom / ZoomStep);
+
+    /// <summary>Returns to the opening state: the whole image fitted to its viewport (§15).</summary>
+    [RelayCommand]
+    private void ResetZoom()
+    {
+        IsFitToViewport = true;
+        ZoomScale = 1.0;
+    }
 
     // --- Plumbing ------------------------------------------------------------------------
 
@@ -740,6 +898,126 @@ public sealed partial class SessionViewModel : ObservableObject
         _session?.CurrentArtefact is { IsCurrentStepResult: true } artefact ? artefact.Sha256 : null;
 
     private bool Allows(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
+
+    /// <summary>Floating-point slack, so eight steps of ×1.25 still count as reaching 800%.</summary>
+    private const double ZoomTolerance = 1e-9;
+
+    /// <summary>
+    /// The magnification a zoom step starts from.
+    /// </summary>
+    /// <remarks>
+    /// Fit is treated as 100% for this purpose rather than as the viewport's actual scale,
+    /// which this layer does not know and should not: the first press of Zoom In must land on
+    /// a stated, reproducible number, not on "whatever 1.25× of however the window happened to
+    /// be sized comes to".
+    /// </remarks>
+    private double EffectiveZoom => IsFitToViewport ? 1.0 : ZoomScale;
+
+    /// <summary>Applies a requested magnification, clamped to the stated bounds (§12).</summary>
+    private void ApplyZoom(double requested)
+    {
+        double clamped = Math.Clamp(requested, MinimumZoom, MaximumZoom);
+        IsFitToViewport = false;
+        ZoomScale = clamped;
+    }
+
+    partial void OnIsFitToViewportChanged(bool value) => NotifyZoomChanged();
+
+    partial void OnZoomScaleChanged(double value) => NotifyZoomChanged();
+
+    private void NotifyZoomChanged()
+    {
+        OnPropertyChanged(nameof(ZoomLabel));
+        OnPropertyChanged(nameof(CanZoomIn));
+        OnPropertyChanged(nameof(CanZoomOut));
+    }
+
+    /// <summary>
+    /// Fills <see cref="PreviewPanes"/> from the preview seam (§7, §9, §22).
+    /// </summary>
+    /// <remarks>
+    /// Two identities in, at most two panes out. The screen never decides <i>which</i> Revision
+    /// is upstream — <see cref="SessionView.UpstreamArtefact"/> is resolved from the real
+    /// derivation edge in the workflow layer, and this method only asks for it by id (§9).
+    /// <para>
+    /// A failure from either request produces a pane that says the preview is unavailable and
+    /// changes nothing else: no <see cref="Notice"/>, no reload, no command. That separation is
+    /// the point of §21 — a decoder that cannot draw a container has said nothing about whether
+    /// the bytes on disk are the ones the operator is about to approve.
+    /// </para>
+    /// </remarks>
+    private async Task LoadPreviewsAsync(SessionView session, int generation, CancellationToken cancellationToken)
+    {
+        if (session.CurrentArtefact is not { } current)
+        {
+            return;
+        }
+
+        List<ArtefactPreviewPane> loaded = [];
+
+        if (session.UpstreamArtefact is { } upstream)
+        {
+            loaded.Add(await BuildPaneAsync(
+                session.Id, BeforeLabel, upstream, cancellationToken).ConfigureAwait(true));
+        }
+
+        loaded.Add(await BuildPaneAsync(
+            session.Id,
+            session.HasBeforeAfterComparison ? AfterLabel : SinglePreviewLabel,
+            current,
+            cancellationToken).ConfigureAwait(true));
+
+        // Decoding is slow enough that a second command can land while the first load is still
+        // in flight. Publishing only for the generation that is still current is what stops the
+        // older load's images from reappearing beside the newer state's metadata — the exact
+        // staleness a review surface must never show.
+        if (generation != _previewGeneration)
+        {
+            return;
+        }
+
+        foreach (ArtefactPreviewPane pane in loaded)
+        {
+            PreviewPanes.Add(pane);
+        }
+
+        OnPropertyChanged(nameof(HasPreview));
+    }
+
+    private async Task<ArtefactPreviewPane> BuildPaneAsync(
+        SessionId sessionId, string heading, ArtefactView artefact, CancellationToken cancellationToken)
+    {
+        OperationResult<ImagePreview> preview = await _previews
+            .GetPreviewAsync(sessionId, artefact.RevisionId, cancellationToken)
+            .ConfigureAwait(true);
+
+        return preview.IsSuccess
+            ? ArtefactPreviewPane.From(heading, artefact.FileName, preview.Value)
+            : ArtefactPreviewPane.Unreadable(heading, artefact.FileName, preview.Failure);
+    }
+
+    /// <summary>
+    /// Which preview load is the current one.
+    /// </summary>
+    /// <remarks>
+    /// Incremented by every <see cref="ClearPreviews"/>, which is every state change. A load
+    /// that started before the last one publishes nothing.
+    /// </remarks>
+    private int _previewGeneration;
+
+    /// <summary>Drops every displayed image, so the bytes become collectable at once (§19).</summary>
+    private void ClearPreviews()
+    {
+        _previewGeneration++;
+
+        if (PreviewPanes.Count == 0)
+        {
+            return;
+        }
+
+        PreviewPanes.Clear();
+        OnPropertyChanged(nameof(HasPreview));
+    }
 
     private static string? Trimmed(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -866,10 +1144,12 @@ public sealed partial class SessionViewModel : ObservableObject
                 // attempt is persisted before the failure returns. Re-reading is what keeps the
                 // screen showing the database rather than the last thing that worked.
                 await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                await PreviewsLoaded.ConfigureAwait(true);
                 return;
             }
 
             Show(result.Value);
+            await PreviewsLoaded.ConfigureAwait(true);
         }
         finally
         {
@@ -894,9 +1174,20 @@ public sealed partial class SessionViewModel : ObservableObject
     }
 
     /// <summary>Rebuilds every displayed value from <paramref name="session"/>.</summary>
+    /// <remarks>
+    /// The previews are rebuilt wholesale like everything else, and for the same reason: an
+    /// image left over from the previous state would be the one thing on the screen still
+    /// describing a Revision that has been superseded — which, on a review surface, is the
+    /// worst possible thing to leave stale.
+    /// </remarks>
     private void Show(SessionView session)
     {
         _session = session;
+
+        // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
+        ResetZoom();
+        ClearPreviews();
+        PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);
 
         Steps.Clear();
         foreach (SessionStep step in session.Steps)
@@ -927,6 +1218,8 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasOutputs));
 
         OnPropertyChanged(nameof(HasArtefact));
+        OnPropertyChanged(nameof(HasPreview));
+        OnPropertyChanged(nameof(IsManualCropRequired));
         OnPropertyChanged(nameof(ArtefactIsInput));
         OnPropertyChanged(nameof(ArtefactFileName));
         OnPropertyChanged(nameof(ArtefactFormat));

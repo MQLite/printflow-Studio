@@ -315,4 +315,24 @@
   <data name="ReviewState_NotReviewed" xml:space="preserve"><value>尚未审核</value></data>
   <data name="ReviewState_Approved" xml:space="preserve"><value>已通过</value></data>
   <data name="ReviewState_Rejected" xml:space="preserve"><value>已退回</value></data>
+  <data name="Session_PreviewHeading" xml:space="preserve"><value>图像审核</value></data>
+  <data name="Session_PreviewCurrent" xml:space="preserve"><value>预览</value></data>
+  <data name="Session_PreviewBefore" xml:space="preserve"><value>处理前</value></data>
+  <data name="Session_PreviewAfter" xml:space="preserve"><value>处理后</value></data>
+  <data name="Session_PreviewPixels" xml:space="preserve"><value>{0} × {1} 像素</value></data>
+  <data name="Session_PreviewReduced" xml:space="preserve">
+    <value>已缩小显示，文件本身未作任何改动。</value>
+  </data>
+  <data name="Session_PreviewUnavailable" xml:space="preserve"><value>无法预览</value></data>
+  <data name="Session_PreviewLoadFailed" xml:space="preserve">
+    <value>此文件无法在此显示。文件本身不受影响，下方的审核仍然针对该文件。</value>
+  </data>
+  <data name="Session_ZoomIn" xml:space="preserve"><value>放大</value></data>
+  <data name="Session_ZoomOut" xml:space="preserve"><value>缩小</value></data>
+  <data name="Session_ZoomReset" xml:space="preserve"><value>重置缩放</value></data>
+  <data name="Session_ZoomFit" xml:space="preserve"><value>适应窗口</value></data>
+  <data name="Session_ZoomPercent" xml:space="preserve"><value>{0}%</value></data>
+  <data name="Session_ManualCropRequiredNotice" xml:space="preserve">
+    <value>自动裁切无法确定裁切范围。手动裁切将在后续工作流步骤中提供。</value>
+  </data>
 </root>

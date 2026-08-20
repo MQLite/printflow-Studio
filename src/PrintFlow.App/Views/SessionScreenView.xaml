@@ -4,11 +4,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+             xmlns:local="clr-namespace:PrintFlow.App.Views"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:PreviewPayloadConverter x:Key="PreviewPayload" />
 
         <Style x:Key="MetadataLabel" TargetType="TextBlock">
             <Setter Property="Opacity" Value="0.6" />
@@ -19,6 +22,130 @@
             <Setter Property="Margin" Value="0,0,0,2" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
+
+        <!--
+            The transparency checkerboard (§8). Display only: it is a brush painted behind the
+            image, so the bytes are never flattened, never composited and never written. Two
+            8×8 squares tiled at 16×16, in the conventional light grey pair.
+        -->
+        <DrawingBrush x:Key="TransparencyCheckerboard"
+                      TileMode="Tile"
+                      Viewport="0,0,16,16"
+                      ViewportUnits="Absolute"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#FFFFFF">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,16,16" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#D8D8D8">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup>
+                                <RectangleGeometry Rect="0,0,8,8" />
+                                <RectangleGeometry Rect="8,8,8,8" />
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!--
+            One preview pane (§7, §11). Used for the single-image state and for both halves of
+            a Before/After comparison, so the two can never drift apart in appearance and the
+            heading is the only thing that differs.
+        -->
+        <DataTemplate DataType="{x:Type vm:ArtefactPreviewPane}">
+            <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Margin="0,0,10,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="10,8,10,8">
+                        <TextBlock Text="{Binding Heading}" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding FileName}"
+                                   Opacity="0.75"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Detail}"
+                                   Opacity="0.6"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}" />
+                    </StackPanel>
+
+                    <!--
+                        A preview that could not be produced is a sentence, never a blank box and
+                        never a reason for anything else on this screen to stop (§21).
+                    -->
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="{Binding Unavailable}"
+                               TextWrapping="Wrap"
+                               Opacity="0.75"
+                               FontStyle="Italic"
+                               Margin="10,0,10,10"
+                               Visibility="{Binding IsUnavailable, Converter={StaticResource BoolToVisibility}}" />
+
+                    <ScrollViewer Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}">
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <!--
+                                    Panning is scrolling (§13): once the image is larger than the
+                                    viewport the ordinary scrollbars appear. While it is fitted
+                                    there is nothing off-screen, so they are disabled and the
+                                    Image's Uniform stretch has the whole viewport to fit into
+                                    (§15).
+                                -->
+                                <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
+                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                 Value="True">
+                                        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+                                        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
+
+                        <Grid Background="{StaticResource TransparencyCheckerboard}">
+                            <Image Source="{Binding Payload, Converter={StaticResource PreviewPayload}}"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                                <Image.LayoutTransform>
+                                    <!--
+                                        The magnification, shared by both panes (§14). Applied to
+                                        the displayed element only — no Revision is resampled,
+                                        rewritten or re-hashed by zooming (§12).
+                                    -->
+                                    <ScaleTransform
+                                        ScaleX="{Binding DataContext.ZoomScale,
+                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        ScaleY="{Binding DataContext.ZoomScale,
+                                                 RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                </Image.LayoutTransform>
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <!--
+                                            The preview payload is a 96-dpi PNG, so None means one
+                                            image pixel per device-independent pixel and "100%"
+                                            reads as 100% whatever dpi the artefact records.
+                                        -->
+                                        <Setter Property="Stretch" Value="None" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
+                                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         Value="True">
+                                                <Setter Property="Stretch" Value="Uniform" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Grid>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -86,6 +213,17 @@
                        FontWeight="SemiBold"
                        Margin="0,0,0,6" />
 
+            <!--
+                A trim that cannot honestly decide (Epic 11200 Part C1 §17). Shown in addition
+                to the failure line above, never instead of it, and offering no crop control:
+                the tool arrives in the next slice, and there is no fabricated "after" beside
+                this message because no Revision was produced.
+            -->
+            <TextBlock Text="{Binding ManualCropNotice}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,6"
+                       Visibility="{Binding IsManualCropRequired, Converter={StaticResource BoolToVisibility}}" />
+
             <TextBlock Text="{Binding PlaceholderNotice}"
                        TextWrapping="Wrap"
                        Opacity="0.7" />
@@ -99,6 +237,7 @@
 
             <Grid Grid.Column="0" Margin="0,0,20,0">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -111,7 +250,7 @@
                            FontWeight="SemiBold"
                            Margin="0,0,0,8" />
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
                     <ItemsControl ItemsSource="{Binding Steps}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -143,11 +282,64 @@
             </DockPanel>
 
             <!--
+                Image review (Epic 11200 Part C1 §7–§16). One pane when there is a single
+                artefact, two — Before then After — when the Revision on screen was derived
+                from one that still exists. The pairing is decided in the workflow layer from
+                Revision.SourceRevisionId; this file only lays out what it was given (§9).
+            -->
+            <DockPanel Grid.Row="1" Margin="0,14,0,0"
+                       Visibility="{Binding HasPreview, Converter={StaticResource BoolToVisibility}}">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding PreviewHeading}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <!-- Zoom (§12) and, through the panes' scrollbars, pan (§13). -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <TextBlock Text="{Binding ZoomLabel}"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.75"
+                                   MinWidth="52"
+                                   TextAlignment="Right"
+                                   Margin="0,0,10,0" />
+                        <Button Content="{Binding ZoomOutLabel}"
+                                Command="{Binding ZoomOutCommand}"
+                                IsEnabled="{Binding CanZoomOut}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ZoomInLabel}"
+                                Command="{Binding ZoomInCommand}"
+                                IsEnabled="{Binding CanZoomIn}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ResetZoomLabel}"
+                                Command="{Binding ResetZoomCommand}"
+                                Padding="10,4" />
+                    </StackPanel>
+                </DockPanel>
+
+                <ItemsControl ItemsSource="{Binding PreviewPanes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!--
+                                One row, and as many equal columns as there are panes: a single
+                                preview fills the width, and a comparison splits it evenly
+                                side by side (§11).
+                            -->
+                            <primitives:UniformGrid Rows="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </DockPanel>
+
+            <!--
                 Outputs already produced (§15). Present so an operator adding size B can see
                 size A is still there, still approved and still valid. Concise metadata only,
                 with no path and no way in — this is not a history browser.
             -->
-            <Border Grid.Row="1"
+            <Border Grid.Row="2"
                     BorderBrush="#22000000"
                     BorderThickness="1"
                     CornerRadius="6"

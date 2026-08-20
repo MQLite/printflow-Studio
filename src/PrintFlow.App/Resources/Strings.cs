@@ -326,6 +326,46 @@ internal static class Strings
 
     internal static string Format_Unknown => Get(nameof(Format_Unknown));
 
+    // --- Epic 11200 Part C1: image preview, comparison and zoom ---------------------------
+
+    internal static string Session_PreviewHeading => Get(nameof(Session_PreviewHeading));
+
+    /// <summary>Heading of the single pane when there is nothing to compare against.</summary>
+    internal static string Session_PreviewCurrent => Get(nameof(Session_PreviewCurrent));
+
+    /// <summary>Heading of the upstream half of a comparison.</summary>
+    internal static string Session_PreviewBefore => Get(nameof(Session_PreviewBefore));
+
+    /// <summary>Heading of the step-result half of a comparison.</summary>
+    internal static string Session_PreviewAfter => Get(nameof(Session_PreviewAfter));
+
+    /// <summary>Composite format: pixel width, pixel height.</summary>
+    internal static string Session_PreviewPixels => Get(nameof(Session_PreviewPixels));
+
+    /// <summary>Says the preview is a reduced stand-in rather than every pixel.</summary>
+    internal static string Session_PreviewReduced => Get(nameof(Session_PreviewReduced));
+
+    /// <summary>Shown when no preview could be produced. Never a workflow failure.</summary>
+    internal static string Session_PreviewUnavailable => Get(nameof(Session_PreviewUnavailable));
+
+    /// <summary>Shown when the file exists but this workstation's decoder cannot display it.</summary>
+    internal static string Session_PreviewLoadFailed => Get(nameof(Session_PreviewLoadFailed));
+
+    internal static string Session_ZoomIn => Get(nameof(Session_ZoomIn));
+
+    internal static string Session_ZoomOut => Get(nameof(Session_ZoomOut));
+
+    internal static string Session_ZoomReset => Get(nameof(Session_ZoomReset));
+
+    /// <summary>The zoom read-out while the whole image is fitted to the viewport.</summary>
+    internal static string Session_ZoomFit => Get(nameof(Session_ZoomFit));
+
+    /// <summary>Composite format: the zoom percentage.</summary>
+    internal static string Session_ZoomPercent => Get(nameof(Session_ZoomPercent));
+
+    /// <summary>Says a trim needs a human and where the tool will be (Part C1 §17).</summary>
+    internal static string Session_ManualCropRequiredNotice => Get(nameof(Session_ManualCropRequiredNotice));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

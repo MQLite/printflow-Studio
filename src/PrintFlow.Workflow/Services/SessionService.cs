@@ -191,7 +191,7 @@ public sealed class SessionService : ISessionService
         }
 
         // A freshly imported session has produced nothing yet, so it holds no PrintOutput.
-        return ViewOf(finished.State, [rootRevision], []);
+        return ViewOf(finished.State, [rootRevision], [], [succeededAttempt]);
     }
 
     /// <inheritdoc />
@@ -239,7 +239,8 @@ public sealed class SessionService : ISessionService
                 return OperationResult.Fail<SessionView>(committed.Failure);
             }
 
-            return ViewOf(transition.State, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation));
+            return ViewOf(
+                transition.State, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts);
         }
 
         return await RunAdapterBackedStepAsync(aggregate, transition, context, runAdapter, cancellationToken);
@@ -260,7 +261,7 @@ public sealed class SessionService : ISessionService
         }
 
         WorkflowSnapshot snapshot = loaded.Value.ToSnapshot();
-        return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs);
+        return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs, loaded.Value.Attempts);
     }
 
     /// <inheritdoc />
@@ -275,14 +276,24 @@ public sealed class SessionService : ISessionService
     /// <remarks>
     /// The single place a <see cref="SessionView"/> is constructed, so "what the screen knows"
     /// cannot drift between the import path, the command path and the reload path. The
-    /// Revision and PrintOutput lists are passed in rather than re-read: after a command the
-    /// caller already holds the authoritative set, including a row just written, and a second
-    /// read would be a chance for the two to disagree.
+    /// Revision, PrintOutput and attempt lists are passed in rather than re-read: after a
+    /// command the caller already holds the authoritative set, including a row just written,
+    /// and a second read would be a chance for the two to disagree.
+    /// <para>
+    /// The attempts are there for one thing — the current step's failure code, which the review
+    /// surface needs in order to explain a <c>ManualCropRequired</c> outcome (Epic 11200 Part
+    /// C1 §17). A path that ends in a failed attempt returns a failure rather than a view, so
+    /// the code always arrives through the reload above; the lists passed on the success paths
+    /// simply describe a step that did not fail.
+    /// </para>
     /// </remarks>
     private OperationResult<SessionView> ViewOf(
-        WorkflowSnapshot state, IReadOnlyList<Revision> revisions, IReadOnlyList<PrintOutput> outputs) =>
+        WorkflowSnapshot state,
+        IReadOnlyList<Revision> revisions,
+        IReadOnlyList<PrintOutput> outputs,
+        IReadOnlyList<ProcessingAttempt> attempts) =>
         OperationResult.Ok(SessionView.From(
-            state, _engine.AvailableCommands(state), revisions, outputs, ProcessingMode));
+            state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode));
 
     /// <summary>
     /// The output rows as they stand after <paramref name="mutation"/> is committed.
@@ -490,7 +501,8 @@ public sealed class SessionService : ISessionService
         return ViewOf(
             finished.State,
             [.. afterStart.Revisions, newRevision],
-            OutputsAfter(afterStart.Outputs, finishing));
+            OutputsAfter(afterStart.Outputs, finishing),
+            [.. afterStart.Attempts, succeededAttempt]);
     }
 
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(

@@ -1,9 +1,13 @@
 using System.Globalization;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using PrintFlow.App.Composition;
 using PrintFlow.App.Navigation;
 using PrintFlow.App.ViewModels;
+using PrintFlow.App.Views;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
@@ -361,6 +365,218 @@ public sealed class SessionSmokeTests
     /// A started application: the real startup sequence, the real container, the real
     /// navigation service, and a scripted file dialog.
     /// </summary>
+    // -------------------------------------------------------------------------------------
+    // Smoke E–G — image review (Epic 11200 Part C1 §27)
+    // -------------------------------------------------------------------------------------
+    //
+    // §27 asks for an interactive pass over the three review screens. Interactive WPF is not
+    // available here — there is no desktop to click on — so these do the honest alternative
+    // §27 itself names: the real composed graph, driven through the real view models, rendered
+    // for real at 1000×700, and then *inspected*. Each check below is one line of that manual
+    // checklist turned into something a build can answer:
+    //
+    //   checkerboard visible      -> the pane's checkerboard brush is in the arranged tree
+    //   Before/After labels       -> both headings are present, in that order
+    //   trim shows a smaller canvas -> the two rendered bitmaps' pixel sizes are 12x10 and 5x5
+    //   zoom works                -> the transform actually applied changes with the buttons
+    //   no clipping at 1000x700   -> the screen's DesiredSize fits the viewport it was given
+    //   zh-CN fits                -> the same, with the Chinese resources loaded
+    //
+    // What is genuinely not covered, and is stated rather than implied: nobody has looked at
+    // the result. Colour, spacing and legibility remain a human judgement.
+
+    [Fact]
+    public async Task Smoke_E_enhancement_review_shows_before_and_after_over_a_checkerboard()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session = await app.ImportAndChooseAsync("smoke-e.png", WorkflowType.PrepareAsset);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsReviewRequired.ShouldBeTrue();
+        AssertComparisonRenders(session);
+    }
+
+    [Fact]
+    public async Task Smoke_F_background_removal_review_shows_before_and_after()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session = await app.ImportAndChooseAsync("smoke-f.png", WorkflowType.PrepareAsset);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.IsReviewRequired.ShouldBeTrue();
+        AssertComparisonRenders(session);
+    }
+
+    /// <summary>
+    /// The flow the slice exists for: a transparent image, a deterministic trim, and a review
+    /// in which the cropped canvas is visibly smaller (§16, §27).
+    /// </summary>
+    [Fact]
+    public async Task Smoke_G_trim_review_shows_the_cropped_canvas_beside_the_uncropped_one()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        // 12×10 with a 5×5 opaque block; everything else fully transparent.
+        SessionViewModel session = await app.ImportAndChooseAsync(
+            "smoke-g.png",
+            WorkflowType.PrepareAsset,
+            SyntheticImages.PngWithAlpha(12, 10, (x, y) => x is >= 3 and <= 7 && y is >= 2 and <= 6 ? (byte)255 : (byte)0));
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.IsReviewRequired.ShouldBeTrue();
+
+        ReviewScreenFacts rendered = AssertComparisonRenders(session);
+
+        // The canvas really did get smaller, measured on the bitmaps that were drawn.
+        rendered.BitmapSizes.ShouldBe([(12, 10), (5, 5)]);
+
+        // And they really are transparent, which is what the checkerboard is behind.
+        rendered.BitmapsCarryAlpha.ShouldAllBe(carries => carries);
+    }
+
+    /// <summary>
+    /// The same review screen with the Chinese resources loaded (§20, §27).
+    /// </summary>
+    /// <remarks>
+    /// "The zh-CN strings fit reasonably" is not something a build can judge, and this does not
+    /// claim to. What it does claim is the part that would actually break a layout: with the
+    /// longer Chinese sentences in place the screen still asks for no more room than the window
+    /// it is given, and every binding still resolves.
+    /// </remarks>
+    [Fact]
+    public async Task Smoke_H_the_review_screen_fits_the_window_with_the_Chinese_resources()
+    {
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo chinese = CultureInfo.GetCultureInfo("zh-CN");
+            CultureInfo.CurrentUICulture = chinese;
+            CultureInfo.CurrentCulture = chinese;
+
+            using SmokeApplication app = await SmokeApplication.StartAsync();
+
+            SessionViewModel session = await app.ImportAndChooseAsync("smoke-h.png", WorkflowType.PrepareAsset);
+            await session.ConfirmOriginalCommand.ExecuteAsync(null);
+            await session.RunStepCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
+
+            // The Chinese satellite really is what the screen is showing.
+            session.BeforeLabel.ShouldBe("处理前");
+            session.AfterLabel.ShouldBe("处理后");
+            session.ManualCropNotice.ShouldNotBe("Session_ManualCropRequiredNotice");
+
+            AssertComparisonRenders(session);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    /// <summary>
+    /// What one rendered review screen turned out to contain (Part C1 §27).
+    /// </summary>
+    /// <remarks>
+    /// Plain values only. They are pulled out on the render thread — every WPF element belongs
+    /// to the STA thread that built it — and asserted here, where a failure message is readable.
+    /// </remarks>
+    private sealed record ReviewScreenFacts(
+        IReadOnlyList<string> Texts,
+        int CheckerboardPanels,
+        IReadOnlyList<(int Width, int Height)> BitmapSizes,
+        IReadOnlyList<bool> BitmapsCarryAlpha,
+        IReadOnlyList<double> AppliedScales);
+
+    /// <summary>
+    /// Renders the review screen at 1000×700 and checks the §27 list.
+    /// </summary>
+    /// <remarks>
+    /// The zoom check is deliberately made on the <see cref="ScaleTransform"/> that was really
+    /// applied to a rendered <see cref="Image"/>, not on the view model's own number: the view
+    /// model's number is already asserted in <c>ImagePreviewControlTests</c>, and the open
+    /// question here is whether the two <c>RelativeSource</c> bindings that carry it to the
+    /// image actually connect.
+    /// </remarks>
+    private static ReviewScreenFacts AssertComparisonRenders(SessionViewModel session)
+    {
+        session.PreviewPanes.Count.ShouldBe(2);
+        session.PreviewPanes[0].Heading.ShouldBe(session.BeforeLabel);
+        session.PreviewPanes[1].Heading.ShouldBe(session.AfterLabel);
+
+        RenderResult<ReviewScreenFacts> fitted = RenderReview(session);
+
+        // Both labels reached the screen, in the order they were built.
+        List<string> texts = [.. fitted.Facts.Texts];
+        texts.ShouldContain(session.BeforeLabel);
+        texts.ShouldContain(session.AfterLabel);
+        texts.IndexOf(session.BeforeLabel).ShouldBeLessThan(texts.IndexOf(session.AfterLabel));
+
+        // The checkerboard is behind both images, and both images were drawn.
+        fitted.Facts.CheckerboardPanels.ShouldBe(2);
+        fitted.Facts.BitmapSizes.Count.ShouldBe(2);
+
+        // Nothing asks for more room than the window gives it.
+        fitted.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+        fitted.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
+
+        // Zoom reaches the image through the bindings, not only the view model.
+        fitted.Facts.AppliedScales.ShouldAllBe(scale => scale == 1.0);
+
+        session.ZoomInCommand.Execute(null);
+        session.ZoomInCommand.Execute(null);
+
+        RenderReview(session).Facts.AppliedScales.ShouldAllBe(scale => scale > 1.0);
+
+        session.ResetZoomCommand.Execute(null);
+        return fitted.Facts;
+    }
+
+    private static RenderResult<ReviewScreenFacts> RenderReview(SessionViewModel session) =>
+        WpfRendering.RenderExpectingNoBindingErrors(
+            () => new SessionScreenView { DataContext = session },
+            WpfRendering.ReviewViewport,
+            Inspect);
+
+    private static ReviewScreenFacts Inspect(RenderedTree tree)
+    {
+        Brush checkerboard = (Brush)tree.Root.FindResource("TransparencyCheckerboard");
+
+        BitmapSource[] bitmaps = [.. tree.OfType<Image>()
+            .Select(image => image.Source)
+            .OfType<BitmapSource>()];
+
+        return new ReviewScreenFacts(
+            [.. tree.OfType<TextBlock>().Select(block => block.Text)],
+            tree.OfType<Grid>().Count(grid => ReferenceEquals(grid.Background, checkerboard)),
+            [.. bitmaps.Select(bitmap => (bitmap.PixelWidth, bitmap.PixelHeight))],
+            [.. bitmaps.Select(bitmap => bitmap.Format == PixelFormats.Bgra32)],
+            [.. tree.OfType<Image>()
+                .Where(image => image.Source is not null)
+                .Select(image => image.LayoutTransform)
+                .OfType<ScaleTransform>()
+                .Select(transform => transform.ScaleX)]);
+    }
+
     private sealed class SmokeApplication : IDisposable
     {
         private readonly TempApplication _layout;
@@ -412,13 +628,14 @@ public sealed class SessionSmokeTests
         /// Walks Home to Workflow Selection to the session screen, exactly as an operator
         /// would, and returns the live session view model the navigation service resolved.
         /// </summary>
-        public async Task<SessionViewModel> ImportAndChooseAsync(string fileName, WorkflowType workflow)
+        public async Task<SessionViewModel> ImportAndChooseAsync(
+            string fileName, WorkflowType workflow, byte[]? content = null)
         {
             INavigationService navigation = Services.GetRequiredService<INavigationService>();
             await navigation.GoHomeAsync(CancellationToken.None);
 
             HomeViewModel home = (HomeViewModel)navigation.Current!;
-            _picker.Path = WriteSyntheticFile(fileName);
+            _picker.Path = WriteSyntheticFile(fileName, content);
             await home.ChooseFileCommand.ExecuteAsync(null);
             home.Notice.ShouldBeNull();
 
@@ -453,13 +670,13 @@ public sealed class SessionSmokeTests
         /// Written under the OS temp directory and never committed: no customer or production
         /// file is involved in any smoke pass (§21, task §50).
         /// </remarks>
-        private static string WriteSyntheticFile(string fileName)
+        private static string WriteSyntheticFile(string fileName, byte[]? content = null)
         {
             string directory = Path.Combine(Path.GetTempPath(), "PrintFlowTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
 
             string path = Path.Combine(directory, fileName);
-            File.WriteAllBytes(path, SyntheticImages.Png(8, 6, alpha: true));
+            File.WriteAllBytes(path, content ?? SyntheticImages.Png(8, 6, alpha: true));
             return path;
         }
     }

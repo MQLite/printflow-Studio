@@ -94,6 +94,26 @@ internal static class SyntheticImages
         return plane;
     }
 
+    /// <summary>
+    /// Decodes an in-memory image the way a UI would, reporting its pixel dimensions.
+    /// </summary>
+    /// <remarks>
+    /// Used to prove a preview payload is a genuinely displayable image rather than a plausible
+    /// byte array: the assertion "the operator can see this" is only worth making if something
+    /// actually decoded it (Epic 11200 Part C1 §24).
+    /// </remarks>
+    public static (int Width, int Height) DecodeDimensions(ReadOnlyMemory<byte> payload)
+    {
+        using MemoryStream stream = new(payload.ToArray(), writable: false);
+        BitmapDecoder decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.PreservePixelFormat | BitmapCreateOptions.IgnoreColorProfile,
+            BitmapCacheOption.OnLoad);
+
+        BitmapSource frame = decoder.Frames[0];
+        return (frame.PixelWidth, frame.PixelHeight);
+    }
+
     /// <summary>The pixel format WIC reports for a file, preserving the stored format.</summary>
     public static PixelFormat FormatOf(string absolutePath)
     {

@@ -167,4 +167,58 @@ public sealed class DbInvariantTests
         command.CommandText = "SELECT COUNT(*) FROM AutomationLock WHERE Id = 1;";
         Convert.ToInt64(command.ExecuteScalar()).ShouldBe(1L);
     }
+
+    /// <summary>
+    /// The metadata store holds no image bytes (Epic 11200 Part C1 §5, §29).
+    /// </summary>
+    /// <remarks>
+    /// PrintFlow's design is that files live in the workspace and the database describes them.
+    /// A preview cache would be the obvious place for that to erode — a thumbnail column is a
+    /// small, tempting change that turns the metadata store into a second copy of the
+    /// operator's artwork, with its own way of going stale. There is no BLOB column anywhere,
+    /// so the temptation has to be acted on deliberately and this test has to be deleted first.
+    /// </remarks>
+    [Fact]
+    public void No_table_declares_a_binary_column()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        List<string> tables = [];
+        using (SqliteCommand list = connection.CreateCommand())
+        {
+            list.CommandText =
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%';";
+            using SqliteDataReader reader = list.ExecuteReader();
+            while (reader.Read())
+            {
+                tables.Add(reader.GetString(0));
+            }
+        }
+
+        tables.ShouldNotBeEmpty();
+
+        List<string> binaryColumns = [];
+        foreach (string table in tables)
+        {
+            using SqliteCommand columns = connection.CreateCommand();
+            columns.CommandText = $"PRAGMA table_info(\"{table}\");";
+            using SqliteDataReader reader = columns.ExecuteReader();
+            while (reader.Read())
+            {
+                string column = reader.GetString(1);
+                string declaredType = reader.GetString(2);
+
+                // SQLite's own affinity rule: any declared type containing "BLOB" — and any
+                // empty declaration, which is BLOB affinity too.
+                if (declaredType.Length == 0 ||
+                    declaredType.Contains("BLOB", StringComparison.OrdinalIgnoreCase))
+                {
+                    binaryColumns.Add($"{table}.{column} ({declaredType})");
+                }
+            }
+        }
+
+        binaryColumns.ShouldBeEmpty("no image, thumbnail or preview bytes may be persisted in SQLite.");
+    }
 }

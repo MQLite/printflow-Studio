@@ -155,6 +155,159 @@ public sealed class ViewRenderingTests
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
 
+    // -------------------------------------------------------------------------------------
+    // Epic 11200 Part C1 §25: the four preview states, rendered for real
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The single-preview state: one pane over the checkerboard, and the zoom controls (§25.1).
+    /// </summary>
+    /// <remarks>
+    /// The pane template, the payload converter, the checkerboard brush and the two zoom
+    /// <c>RelativeSource</c> bindings — the transform's and the scrollbar trigger's — are all
+    /// resolved for the first time here. Those <c>RelativeSource</c> paths are exactly the kind
+    /// that compile fine and silently bind to nothing, which is what this whole file exists to
+    /// catch.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_a_single_preview_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("preview-single.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.PreviewsLoaded;
+
+        session.PreviewPanes.Count.ShouldBe(1);
+        session.PreviewPanes[0].HasImage.ShouldBeTrue();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>The before/after state, at both the fitted and the magnified extreme (§25.2).</summary>
+    /// <remarks>
+    /// Rendered twice on purpose: fitted and zoomed take different branches of the pane
+    /// template's two triggers — <c>Stretch</c> and the scrollbar visibilities — so rendering
+    /// only one of them would leave half the template unexercised.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_before_after_comparison_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("preview-pair.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.PreviewPanes.Count.ShouldBe(2);
+        session.IsFitToViewport.ShouldBeTrue();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        session.ZoomInCommand.Execute(null);
+        session.ZoomInCommand.Execute(null);
+        session.IsFitToViewport.ShouldBeFalse();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// The transparent-cut-out state: a real trimmed PNG over the checkerboard (§25.3).
+    /// </summary>
+    /// <remarks>
+    /// The one render that shows what the slice is for — an uncropped 12×10 upstream beside the
+    /// 5×5 result, both with live alpha. The checkerboard resource is a static brush and cannot
+    /// produce a binding error of its own, so what this really proves is that the pair renders
+    /// with genuinely transparent content in it.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_a_transparent_trim_result_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.PreviewPanes.Count.ShouldBe(2);
+        session.PreviewPanes.ShouldAllBe(pane => pane.HasImage);
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>The manual-crop state: the notice, and no fabricated "after" (§25.4).</summary>
+    [Fact]
+    public async Task The_session_screen_renders_the_manual_crop_state_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: true);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsManualCropRequired.ShouldBeTrue();
+        session.PreviewPanes.Count.ShouldBe(1);
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>A preview that could not be produced renders its notice, not a blank box (§21).</summary>
+    [Fact]
+    public async Task The_session_screen_renders_an_unavailable_preview_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("preview-gone.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionView opened = harness.Navigation.WorkflowSelectionFor!;
+
+        // The imported source snapshot is marked read-only by the workspace, so removing it
+        // takes the attribute off first. Only a test does this; nothing in the application has
+        // a route to delete a Source file at all.
+        string sourceCopy = harness.ResolveInWorkspace(
+            (await harness.Inner.Repository.LoadAsync(opened.Id, CancellationToken.None))
+                .Value!.Revisions[0].File.RelativePath);
+        System.IO.File.SetAttributes(sourceCopy, System.IO.FileAttributes.Normal);
+        System.IO.File.Delete(sourceCopy);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(opened);
+        await session.PreviewsLoaded;
+
+        session.PreviewPanes.Count.ShouldBe(1);
+        session.PreviewPanes[0].IsUnavailable.ShouldBeTrue();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>Imports a PREPARE_ASSET session and drives it as far as Trim.</summary>
+    private static async Task<SessionViewModel> PrepareAssetAtTrimAsync(
+        HomeScreenHarness harness, bool transparentSource)
+    {
+        harness.FilePicker.Path = transparentSource
+            ? harness.Inner.WriteFullyTransparentSourcePng("trim-render-empty.png")
+            : harness.Inner.WriteBorderedSourcePng("trim-render-bordered.png");
+
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+
+        session.Notice.ShouldBeNull();
+        return session;
+    }
+
     /// <summary>Imports, chooses GENERATE_PRINT_TIFF and confirms, leaving PrintDimensions current.</summary>
     private static async Task<SessionViewModel> TiffSessionAtDimensionsAsync(
         HomeScreenHarness harness, string fileName)
@@ -201,7 +354,7 @@ public sealed class ViewRenderingTests
     {
         using HomeScreenHarness harness = new();
 
-        List<string> errors = Render(() => new UserControl
+        IReadOnlyList<string> errors = Render(() => new UserControl
         {
             DataContext = harness.Session(new RecordingNavigation()),
             Content = new TextBlock().WithBinding(
@@ -213,82 +366,15 @@ public sealed class ViewRenderingTests
 
     // -------------------------------------------------------------------------------------
 
+    private static readonly Size Viewport = new(1200, 900);
+
     private static void RenderOnStaThread(Func<UserControl> create) =>
-        Render(create).ShouldBeEmpty();
+        WpfRendering.RenderExpectingNoBindingErrors(create, Viewport);
 
-    /// <summary>Measures and arranges the control on an STA thread, collecting binding traces.</summary>
-    private static List<string> Render(Func<UserControl> create)
-    {
-        List<string> errors = [];
+    private static IReadOnlyList<string> Render(Func<UserControl> create) =>
+        WpfRendering.Render(create, Viewport);
 
-        OnStaThread(() =>
-        {
-            BindingErrorListener listener = new();
-            SourceLevels previous = PresentationTraceSources.DataBindingSource.Switch.Level;
-            PresentationTraceSources.Refresh();
-            PresentationTraceSources.DataBindingSource.Listeners.Add(listener);
-            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error | SourceLevels.Warning;
-
-            try
-            {
-                UserControl view = create();
-                view.Measure(new Size(1200, 900));
-                view.Arrange(new Rect(0, 0, 1200, 900));
-                view.UpdateLayout();
-            }
-            finally
-            {
-                PresentationTraceSources.DataBindingSource.Listeners.Remove(listener);
-                PresentationTraceSources.DataBindingSource.Switch.Level = previous;
-                errors.AddRange(listener.Errors);
-            }
-        });
-
-        return errors;
-    }
-
-    private static void OnStaThread(Action action)
-    {
-        Exception? failure = null;
-        Thread thread = new(() =>
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                failure = ex;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-
-        if (failure is not null)
-        {
-            throw new InvalidOperationException("The view failed to render.", failure);
-        }
-    }
-
-    /// <summary>Collects whatever WPF's data-binding trace source reports.</summary>
-    private sealed class BindingErrorListener : TraceListener
-    {
-        public List<string> Errors { get; } = [];
-
-        public override void Write(string? message)
-        {
-        }
-
-        public override void WriteLine(string? message)
-        {
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                Errors.Add(message);
-            }
-        }
-    }
+    private static void OnStaThread(Action action) => WpfRendering.OnStaThread(action);
 }
 
 /// <summary>Small helper so a binding can be attached inline in a test expression.</summary>

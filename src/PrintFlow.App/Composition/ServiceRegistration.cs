@@ -80,6 +80,12 @@ public static class ServiceRegistration
 
         services.AddSingleton<ISessionService, SessionService>();
 
+        // The read-only image seam (Epic 11200 Part C1 §3). Registered beside the session
+        // service rather than inside it: previews change nothing, and a screen that could only
+        // reach them through the command service would blur that.
+        services.AddSingleton<IImagePreviewDecoder, WicImagePreviewDecoder>();
+        services.AddSingleton<IArtefactPreviewService, ArtefactPreviewService>();
+
         // Composed here, invoked only by ApplicationStartup — once, behind the single-instance
         // guard and after migrations. Nothing else in the graph may call RecoverAsync.
         services.AddSingleton<IProcessLiveness, SystemProcessLiveness>();

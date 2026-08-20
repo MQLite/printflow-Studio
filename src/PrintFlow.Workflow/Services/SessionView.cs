@@ -1,6 +1,8 @@
+using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Engine;
@@ -31,17 +33,28 @@ namespace PrintFlow.Workflow.Services;
 /// Whether this is the current step's own result (true) or the upstream input it will work
 /// from (false).
 /// </param>
+/// <param name="SourceRevisionId">
+/// The Revision this one was derived from, straight off <see cref="Revision.SourceRevisionId"/>
+/// (Epic 11200 Part C1 §9).
+/// </param>
+/// <remarks>
+/// <see cref="SourceRevisionId"/> is the real derivation edge and not an inference from step
+/// order: it is what <see cref="SessionView.UpstreamArtefact"/> is resolved through, so a
+/// before/after comparison is a fact about the lineage rather than a guess about which step
+/// probably ran first.
+/// </remarks>
 public sealed record ArtefactView(
     RevisionId RevisionId,
     string FileName,
     FileFacts Facts,
-    bool IsCurrentStepResult)
+    bool IsCurrentStepResult,
+    RevisionId? SourceRevisionId)
 {
     /// <summary>The hash an approval or rejection of this artefact must be bound to.</summary>
     public Sha256 Sha256 => Facts.Sha256;
 
     internal static ArtefactView From(Revision revision, bool isCurrentStepResult) => new(
-        revision.Id, revision.File.FileName, revision.Facts, isCurrentStepResult);
+        revision.Id, revision.File.FileName, revision.Facts, isCurrentStepResult, revision.SourceRevisionId);
 }
 
 /// <summary>
@@ -114,6 +127,14 @@ public sealed record PrintOutputView(
 /// workflow definition lives, rather than by a view model comparing step kinds — a screen that
 /// worked that out for itself would be a second copy of the catalogue (Part 3C3B §10).
 /// </param>
+/// <param name="UpstreamArtefact">
+/// The Revision <see cref="CurrentArtefact"/> was derived from, when it is a step result with a
+/// source that still exists (Epic 11200 Part C1 §9).
+/// </param>
+/// <param name="CurrentStepFailure">
+/// The failure code of the current step's most recent attempt, when that step is
+/// <see cref="StepState.Failed"/> (Part C1 §17).
+/// </param>
 public sealed record SessionView(
     SessionId Id,
     WorkflowType WorkflowType,
@@ -127,7 +148,9 @@ public sealed record SessionView(
     ArtefactView? CurrentArtefact,
     AdapterExecutionMode ProcessingMode,
     IReadOnlyList<PrintOutputView> Outputs,
-    bool ProducesPrintOutput)
+    bool ProducesPrintOutput,
+    ArtefactView? UpstreamArtefact,
+    FailureCode? CurrentStepFailure)
 {
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
@@ -135,17 +158,33 @@ public sealed record SessionView(
     /// <summary>True when the results this session produces are synthetic (Part 3C3A §8).</summary>
     public bool IsFakeProcessing => ProcessingMode == AdapterExecutionMode.Fake;
 
+    /// <summary>
+    /// Whether the screen has a genuine before/after pair to show (Part C1 §9, §11).
+    /// </summary>
+    /// <remarks>
+    /// True only when the artefact on screen is this step's own result <b>and</b> the Revision
+    /// it was derived from is still resolvable. A step that produced nothing — a failed Trim,
+    /// most importantly — has no "after", so there is nothing here to fabricate one from
+    /// (§17).
+    /// </remarks>
+    public bool HasBeforeAfterComparison =>
+        CurrentArtefact is { IsCurrentStepResult: true } && UpstreamArtefact is not null;
+
     public static SessionView From(
         WorkflowSnapshot snapshot,
         IReadOnlyList<CommandKind> availableCommands,
         IReadOnlyList<Revision> revisions,
         IReadOnlyList<PrintOutput> outputs,
+        IReadOnlyList<ProcessingAttempt> attempts,
         AdapterExecutionMode processingMode)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(availableCommands);
         ArgumentNullException.ThrowIfNull(revisions);
         ArgumentNullException.ThrowIfNull(outputs);
+        ArgumentNullException.ThrowIfNull(attempts);
+
+        ArtefactView? current = ResolveArtefact(snapshot, revisions);
 
         return new SessionView(
             snapshot.SessionId,
@@ -157,10 +196,61 @@ public sealed record SessionView(
             snapshot.Dimensions,
             snapshot.WhiteUnderbaseBranch,
             availableCommands,
-            ResolveArtefact(snapshot, revisions),
+            current,
             processingMode,
             [.. outputs.OrderBy(o => o.CreatedAtUtc).Select(PrintOutputView.From)],
-            snapshot.Definition.Contains(StepKind.PhotoshopOutput));
+            snapshot.Definition.Contains(StepKind.PhotoshopOutput),
+            ResolveUpstream(current, revisions),
+            ResolveCurrentStepFailure(snapshot, attempts));
+    }
+
+    /// <summary>
+    /// Resolves the "before" half of a comparison from the derivation edge itself.
+    /// </summary>
+    /// <remarks>
+    /// Only for an artefact that is the current step's own result: when the screen is already
+    /// showing the step's <i>input</i>, that input is the only thing there is to look at, and
+    /// pairing it with its own grandparent would answer a question nobody asked.
+    /// </remarks>
+    private static ArtefactView? ResolveUpstream(ArtefactView? current, IReadOnlyList<Revision> revisions) =>
+        current is { IsCurrentStepResult: true, SourceRevisionId: RevisionId sourceId } &&
+        Find(revisions, sourceId) is Revision source
+            ? ArtefactView.From(source, isCurrentStepResult: false)
+            : null;
+
+    /// <summary>
+    /// The code the current step's newest ended attempt failed with, while the step is Failed.
+    /// </summary>
+    /// <remarks>
+    /// Guarded on <see cref="StepState.Failed"/> rather than reported for any failed attempt in
+    /// the history: a step that failed once and then succeeded is not a failed step, and a
+    /// screen showing a stale code beside a good result would be worse than showing none. The
+    /// one consumer today is the manual-crop notice, which must survive a reload and therefore
+    /// cannot live in view-model memory (§17).
+    /// </remarks>
+    private static FailureCode? ResolveCurrentStepFailure(
+        WorkflowSnapshot snapshot, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (snapshot.CurrentStep is not { State: StepState.Failed } step)
+        {
+            return null;
+        }
+
+        ProcessingAttempt? newest = null;
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.Step != step.Step || attempt.EndedAtUtc is null)
+            {
+                continue;
+            }
+
+            if (newest is null || attempt.EndedAtUtc > newest.EndedAtUtc)
+            {
+                newest = attempt;
+            }
+        }
+
+        return newest?.Failure?.Code;
     }
 
     /// <summary>

@@ -57,6 +57,15 @@ internal sealed class SessionServiceHarness : IDisposable
     /// </summary>
     public ITrimProcessor Trim { get; }
 
+    /// <summary>
+    /// The real WIC preview decoder, for the same reason Trim is real: a doubled decoder would
+    /// prove nothing about whether an operator can actually see the file (Epic 11200 Part C1 §22).
+    /// </summary>
+    public IImagePreviewDecoder PreviewDecoder { get; }
+
+    /// <summary>The read-only image seam over the same workspace and database.</summary>
+    public IArtefactPreviewService Previews { get; }
+
     public SessionServiceHarness()
     {
         Workspace = new TempWorkspace();
@@ -71,6 +80,8 @@ internal sealed class SessionServiceHarness : IDisposable
         FakeMeitu = new FakeMeituProcessor(FileWorkspace);
         FakePhotoshop = new FakePhotoshopOutputProcessor(FileWorkspace);
         Trim = new DeterministicAlphaTrimProcessor(FileWorkspace);
+        PreviewDecoder = new WicImagePreviewDecoder(FileWorkspace);
+        Previews = new ArtefactPreviewService(Repository, PreviewDecoder);
     }
 
     /// <summary>
