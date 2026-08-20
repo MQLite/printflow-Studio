@@ -265,4 +265,51 @@
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
   <data name="Format_Unknown" xml:space="preserve"><value>未知</value></data>
+  <data name="Session_DimensionsHeading" xml:space="preserve">
+    <value>打印尺寸</value>
+  </data>
+  <data name="Session_DimensionsHint" xml:space="preserve">
+    <value>请输入成品打印的实际物理尺寸，单位为毫米。</value>
+  </data>
+  <data name="Session_LabelWidthMm" xml:space="preserve"><value>宽度（毫米）</value></data>
+  <data name="Session_LabelHeightMm" xml:space="preserve"><value>高度（毫米）</value></data>
+  <data name="Session_DimensionsConfirm" xml:space="preserve"><value>确认尺寸</value></data>
+  <data name="Session_DimensionsInvalid" xml:space="preserve">
+    <value>宽度和高度都必须是大于零的毫米数值。</value>
+  </data>
+  <data name="Session_DimensionsSummary" xml:space="preserve">
+    <value>{0} × {1} 毫米（{2} × {3} 像素，{4} dpi）</value>
+  </data>
+  <data name="Session_DimensionsNotSet" xml:space="preserve"><value>尚未设置</value></data>
+  <data name="Session_PresetsLabel" xml:space="preserve"><value>预设尺寸</value></data>
+  <data name="Session_PresetHint" xml:space="preserve">
+    <value>预设只是填入其标称尺寸，确认之前仍可自行修改毫米数值。</value>
+  </data>
+  <data name="Preset_A3Landscape" xml:space="preserve"><value>A3 横向</value></data>
+  <data name="Preset_A3Portrait" xml:space="preserve"><value>A3 纵向</value></data>
+  <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>
+  <data name="Preset_A5" xml:space="preserve"><value>A5</value></data>
+  <data name="Preset_Custom" xml:space="preserve"><value>自定义</value></data>
+  <data name="Session_W1Heading" xml:space="preserve"><value>白墨打底（W1）</value></data>
+  <data name="Session_W1Hint" xml:space="preserve">
+    <value>请对完整的成品设计进行判断并自行选择收缩量。系统没有默认值，也绝不会通过分析图像替你决定。</value>
+  </data>
+  <data name="Session_W1Confirm" xml:space="preserve"><value>确认 W1 分支</value></data>
+  <data name="Session_W1NotChosen" xml:space="preserve"><value>尚未选择</value></data>
+  <data name="W1_0px" xml:space="preserve"><value>0 像素 — 精细细节</value></data>
+  <data name="W1_1px" xml:space="preserve"><value>1 像素 — 普通图案</value></data>
+  <data name="W1_2px" xml:space="preserve"><value>2 像素 — 实色／整块矩形图案</value></data>
+  <data name="Session_FakeTiffNotice" xml:space="preserve">
+    <value>此处生成的 TIFF 属于合成的基础输出，不可用于生产。未进行 CMYK 转换、未生成 W1 专色通道、未执行 Photoshop 动作，也未做任何 Maintop 相关准备。请勿据此打印。</value>
+  </data>
+  <data name="Session_Complete" xml:space="preserve"><value>完成</value></data>
+  <data name="Session_AddAnotherSize" xml:space="preserve"><value>增加另一个尺寸</value></data>
+  <data name="Session_OutputsHeading" xml:space="preserve"><value>已生成的输出</value></data>
+  <data name="Session_LabelBranch" xml:space="preserve"><value>W1</value></data>
+  <data name="Session_LabelReview" xml:space="preserve"><value>审核</value></data>
+  <data name="Session_OutputValid" xml:space="preserve"><value>有效</value></data>
+  <data name="Session_OutputInvalid" xml:space="preserve"><value>已失效</value></data>
+  <data name="ReviewState_NotReviewed" xml:space="preserve"><value>尚未审核</value></data>
+  <data name="ReviewState_Approved" xml:space="preserve"><value>已通过</value></data>
+  <data name="ReviewState_Rejected" xml:space="preserve"><value>已退回</value></data>
 </root>

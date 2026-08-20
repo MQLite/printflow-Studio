@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
@@ -925,9 +926,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// Builds a representative command for legality probing.
     /// </summary>
     /// <remarks>
-    /// Payload-carrying commands whose legality depends on the payload itself are omitted
-    /// from the probe: the engine cannot report whether a dimension the operator has not
-    /// typed yet would be accepted. The UI enables those through their own screens.
+    /// Payload-carrying commands are probed with a stand-in payload chosen so that the
+    /// <i>payload</i> guard cannot be what decides the answer. The probe therefore reports the
+    /// category question — <i>may this command be attempted here at all</i> — while the real
+    /// command still has to satisfy every payload guard when it is issued. No guard is
+    /// relaxed to make probing possible (Epic 11100 Part 3C3B §8).
     /// <para>
     /// <see cref="CommandKind.SelectWorkflow"/> is the exception, and is probed with the
     /// session's <i>current</i> workflow. Its two guards — the session is Active, and no
@@ -952,6 +955,24 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// command still has to satisfy the non-empty-reason guard when it is issued. Validation is
     /// not weakened — an empty reason is refused exactly as before.
     /// </para>
+    /// <para>
+    /// <see cref="CommandKind.SetPrintDimensions"/> is probed with <see cref="ProbeDimensions"/>
+    /// and <see cref="CommandKind.SelectWhiteUnderbaseBranch"/> with
+    /// <see cref="ProbeBranch"/> plus <see cref="ProbeReason"/>. Both stand-ins are valid by
+    /// construction, precisely so the payload check cannot be what answers the probe: what
+    /// varies, and therefore what the answer reports, is whether the session is active, whether
+    /// PrintDimensions is the current step, and whether this workflow produces a TIFF at all.
+    /// The operator's own size and branch still go through every guard when the real command is
+    /// issued — a non-positive dimension is refused as before, and
+    /// <see cref="ProbeBranch"/> is <b>never</b> a default: nothing is applied by a probe, so no
+    /// session acquires a branch it did not explicitly choose (MVP design §12; Part 3C3B §8).
+    /// </para>
+    /// <para>
+    /// <see cref="CommandKind.SetOutputName"/> and <see cref="CommandKind.ReturnToStep"/> stay
+    /// unprobed. Neither has a screen in this slice, and <c>ReturnToStep</c> in particular has
+    /// no payload-independent answer — "may I return" depends on <i>which</i> step, so a single
+    /// stand-in target would report something no button is asking (Part 3C3B §8).
+    /// </para>
     /// </remarks>
     private static WorkflowCommand? BuildProbe(WorkflowSnapshot state, CommandKind kind)
     {
@@ -966,6 +987,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.Retry => new WorkflowCommand.Retry(step),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
+            CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
+            CommandKind.SelectWhiteUnderbaseBranch =>
+                new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
             CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),
@@ -986,4 +1010,26 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// step state — decide the answer.
     /// </remarks>
     private const string ProbeReason = "probe";
+
+    /// <summary>
+    /// The stand-in size used when probing <see cref="CommandKind.SetPrintDimensions"/>.
+    /// </summary>
+    /// <remarks>
+    /// A valid size on purpose, so the positivity guard is satisfied and the probe reports the
+    /// step question instead. Never persisted and never shown: a probe applies nothing, so no
+    /// session is silently given A4.
+    /// </remarks>
+    private static readonly PrintDimensions ProbeDimensions = PrintDimensions.FromPreset(SizePreset.A4);
+
+    /// <summary>
+    /// The stand-in branch used when probing
+    /// <see cref="CommandKind.SelectWhiteUnderbaseBranch"/>.
+    /// </summary>
+    /// <remarks>
+    /// Emphatically not a default. The enum has no member that means "unchosen", so a probe has
+    /// to name one; which one is irrelevant, because the probed transition is discarded and only
+    /// its accepted/rejected verdict is read. The operator's choice remains the only branch that
+    /// ever reaches a session (MVP design §12).
+    /// </remarks>
+    private const WhiteUnderbaseBranch ProbeBranch = WhiteUnderbaseBranch.W1_1px;
 }

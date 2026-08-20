@@ -172,7 +172,8 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(committedClosing.Failure);
         }
 
-        return ViewOf(finished.State, [rootRevision]);
+        // A freshly imported session has produced nothing yet, so it holds no PrintOutput.
+        return ViewOf(finished.State, [rootRevision], []);
     }
 
     /// <inheritdoc />
@@ -220,7 +221,7 @@ public sealed class SessionService : ISessionService
                 return OperationResult.Fail<SessionView>(committed.Failure);
             }
 
-            return ViewOf(transition.State, aggregate.Revisions);
+            return ViewOf(transition.State, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation));
         }
 
         return await RunAdapterBackedStepAsync(aggregate, transition, context, runAdapter, cancellationToken);
@@ -241,7 +242,7 @@ public sealed class SessionService : ISessionService
         }
 
         WorkflowSnapshot snapshot = loaded.Value.ToSnapshot();
-        return ViewOf(snapshot, loaded.Value.Revisions);
+        return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs);
     }
 
     /// <inheritdoc />
@@ -256,13 +257,41 @@ public sealed class SessionService : ISessionService
     /// <remarks>
     /// The single place a <see cref="SessionView"/> is constructed, so "what the screen knows"
     /// cannot drift between the import path, the command path and the reload path. The
-    /// Revision list is passed in rather than re-read: after a command the caller already
-    /// holds the authoritative set, including one just created, and a second read would be a
-    /// chance for the two to disagree.
+    /// Revision and PrintOutput lists are passed in rather than re-read: after a command the
+    /// caller already holds the authoritative set, including a row just written, and a second
+    /// read would be a chance for the two to disagree.
     /// </remarks>
-    private OperationResult<SessionView> ViewOf(WorkflowSnapshot state, IReadOnlyList<Revision> revisions) =>
+    private OperationResult<SessionView> ViewOf(
+        WorkflowSnapshot state, IReadOnlyList<Revision> revisions, IReadOnlyList<PrintOutput> outputs) =>
         OperationResult.Ok(SessionView.From(
-            state, _engine.AvailableCommands(state), revisions, ProcessingMode));
+            state, _engine.AvailableCommands(state), revisions, outputs, ProcessingMode));
+
+    /// <summary>
+    /// The output rows as they stand after <paramref name="mutation"/> is committed.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionMutation.UpsertOutputs"/> is a delta — a newly produced TIFF, a review
+    /// state that just changed, an invalidation — so the view has to be built from the existing
+    /// rows with that delta applied, keyed by id and last-write-wins, exactly as the repository
+    /// will write it. Returning <paramref name="existing"/> unchanged would show a freshly
+    /// approved output as still unreviewed until the next reload (Part 3C3B §15).
+    /// </remarks>
+    private static IReadOnlyList<PrintOutput> OutputsAfter(
+        IReadOnlyList<PrintOutput> existing, SessionMutation mutation)
+    {
+        if (mutation.UpsertOutputs.Count == 0)
+        {
+            return existing;
+        }
+
+        Dictionary<PrintOutputId, PrintOutput> merged = [];
+        foreach (PrintOutput output in existing.Concat(mutation.UpsertOutputs))
+        {
+            merged[output.Id] = output;
+        }
+
+        return [.. merged.Values];
+    }
 
     /// <summary>
     /// How this installation actually processes work (Part 3C3A §8).
@@ -440,7 +469,10 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(committedFinish.Failure);
         }
 
-        return ViewOf(finished.State, [.. afterStart.Revisions, newRevision]);
+        return ViewOf(
+            finished.State,
+            [.. afterStart.Revisions, newRevision],
+            OutputsAfter(afterStart.Outputs, finishing));
     }
 
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(
@@ -729,7 +761,31 @@ public sealed class SessionService : ISessionService
 
         return new SessionMutation(
             updatedSession, newSnapshot.Steps, newRevisions ?? [], revisionInvalidations,
-            upsertAttempts ?? [], reviews, outputUpdates, newInputSnapshot, lockChange);
+            upsertAttempts ?? [], reviews, outputUpdates, newInputSnapshot, lockChange)
+        {
+            RemoveSteps = StepsNoLongerInWorkflow(aggregate, newSnapshot),
+        };
+    }
+
+    /// <summary>
+    /// The step rows a re-shaped session has left behind (Part 3C3B, defect fix).
+    /// </summary>
+    /// <remarks>
+    /// Choosing a different workflow replaces the step list, and upserting the new one does not
+    /// remove the old one's rows. Since <c>ISessionRepository.LoadAsync</c> reads every step row
+    /// the session has, those leftovers came back as part of the reconstructed snapshot — so a
+    /// session switched to GENERATE_PRINT_TIFF reloaded still waiting on Enhancement, a step
+    /// that workflow does not contain.
+    /// <para>
+    /// Computed by comparing the two step lists rather than from the workflow definitions, so
+    /// there is nothing here to keep in step with the catalogue.
+    /// </para>
+    /// </remarks>
+    private static IReadOnlyList<StepKind> StepsNoLongerInWorkflow(
+        SessionAggregate aggregate, WorkflowSnapshot newSnapshot)
+    {
+        HashSet<StepKind> kept = [.. newSnapshot.Steps.Select(step => step.Step)];
+        return [.. aggregate.Steps.Select(step => step.Step).Where(kind => !kept.Contains(kind))];
     }
 
     /// <summary>

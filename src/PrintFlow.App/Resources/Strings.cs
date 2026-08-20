@@ -198,6 +198,80 @@ internal static class Strings
     /// <summary>Composite format: the stable failure code.</summary>
     internal static string Session_ActionFailed => Get(nameof(Session_ActionFailed));
 
+    // --- Part 3C3B: dimensions, W1 and production output ---------------------------------
+
+    internal static string Session_DimensionsHeading => Get(nameof(Session_DimensionsHeading));
+
+    internal static string Session_DimensionsHint => Get(nameof(Session_DimensionsHint));
+
+    internal static string Session_LabelWidthMm => Get(nameof(Session_LabelWidthMm));
+
+    internal static string Session_LabelHeightMm => Get(nameof(Session_LabelHeightMm));
+
+    internal static string Session_DimensionsConfirm => Get(nameof(Session_DimensionsConfirm));
+
+    /// <summary>Shown when the typed millimetres are not a size the domain will accept.</summary>
+    internal static string Session_DimensionsInvalid => Get(nameof(Session_DimensionsInvalid));
+
+    /// <summary>Composite format: width mm, height mm, pixel width, pixel height, DPI.</summary>
+    internal static string Session_DimensionsSummary => Get(nameof(Session_DimensionsSummary));
+
+    internal static string Session_DimensionsNotSet => Get(nameof(Session_DimensionsNotSet));
+
+    internal static string Session_PresetsLabel => Get(nameof(Session_PresetsLabel));
+
+    internal static string Session_PresetHint => Get(nameof(Session_PresetHint));
+
+    internal static string Preset_A3Landscape => Get(nameof(Preset_A3Landscape));
+
+    internal static string Preset_A3Portrait => Get(nameof(Preset_A3Portrait));
+
+    internal static string Preset_A4 => Get(nameof(Preset_A4));
+
+    internal static string Preset_A5 => Get(nameof(Preset_A5));
+
+    internal static string Preset_Custom => Get(nameof(Preset_Custom));
+
+    internal static string Session_W1Heading => Get(nameof(Session_W1Heading));
+
+    /// <summary>Operator guidance for the W1 branches. Guidance only — never a suggestion the app acts on.</summary>
+    internal static string Session_W1Hint => Get(nameof(Session_W1Hint));
+
+    internal static string Session_W1Confirm => Get(nameof(Session_W1Confirm));
+
+    internal static string Session_W1NotChosen => Get(nameof(Session_W1NotChosen));
+
+    internal static string W1_0px => Get(nameof(W1_0px));
+
+    internal static string W1_1px => Get(nameof(W1_1px));
+
+    internal static string W1_2px => Get(nameof(W1_2px));
+
+    /// <summary>
+    /// The extra warning shown for a synthetic production TIFF (Part 3C3B §10).
+    /// </summary>
+    internal static string Session_FakeTiffNotice => Get(nameof(Session_FakeTiffNotice));
+
+    internal static string Session_Complete => Get(nameof(Session_Complete));
+
+    internal static string Session_AddAnotherSize => Get(nameof(Session_AddAnotherSize));
+
+    internal static string Session_OutputsHeading => Get(nameof(Session_OutputsHeading));
+
+    internal static string Session_LabelBranch => Get(nameof(Session_LabelBranch));
+
+    internal static string Session_LabelReview => Get(nameof(Session_LabelReview));
+
+    internal static string Session_OutputValid => Get(nameof(Session_OutputValid));
+
+    internal static string Session_OutputInvalid => Get(nameof(Session_OutputInvalid));
+
+    internal static string ReviewState_NotReviewed => Get(nameof(ReviewState_NotReviewed));
+
+    internal static string ReviewState_Approved => Get(nameof(ReviewState_Approved));
+
+    internal static string ReviewState_Rejected => Get(nameof(ReviewState_Rejected));
+
     internal static string Failure_OutputMissing => Get(nameof(Failure_OutputMissing));
 
     internal static string Failure_OutputUnreadable => Get(nameof(Failure_OutputUnreadable));

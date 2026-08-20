@@ -1,5 +1,7 @@
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
 
@@ -106,6 +108,49 @@ internal static class DisplayNames
         FailureCode.PersistenceError => Strings.Failure_PersistenceError,
         FailureCode.PreconditionNotMet => Strings.Failure_PreconditionNotMet,
         _ => code.ToString(),
+    };
+
+    /// <summary>
+    /// The operator label for a white-underbase branch, carrying its guidance (Part 3C3B §7).
+    /// </summary>
+    /// <remarks>
+    /// The guidance — 0 px fine detail, 1 px ordinary, 2 px solid — is written into the label
+    /// because it is what the operator classifies against. It stays advice: nothing here ranks
+    /// the branches, marks one recommended, or looks at the image. The enum value is what gets
+    /// persisted (MVP design §12, §13.4).
+    /// </remarks>
+    internal static string WhiteUnderbaseBranch(WhiteUnderbaseBranch branch) => branch switch
+    {
+        Domain.Outputs.WhiteUnderbaseBranch.W1_0px => Strings.W1_0px,
+        Domain.Outputs.WhiteUnderbaseBranch.W1_1px => Strings.W1_1px,
+        Domain.Outputs.WhiteUnderbaseBranch.W1_2px => Strings.W1_2px,
+        _ => branch.ToString(),
+    };
+
+    /// <summary>
+    /// The operator label for a size preset.
+    /// </summary>
+    /// <remarks>
+    /// A label only. The millimetres behind each preset come from
+    /// <c>PrintDimensions.NominalMillimetres</c>, so this file never states a size.
+    /// </remarks>
+    internal static string SizePreset(SizePreset preset) => preset switch
+    {
+        Domain.Outputs.SizePreset.A3Landscape => Strings.Preset_A3Landscape,
+        Domain.Outputs.SizePreset.A3Portrait => Strings.Preset_A3Portrait,
+        Domain.Outputs.SizePreset.A4 => Strings.Preset_A4,
+        Domain.Outputs.SizePreset.A5 => Strings.Preset_A5,
+        Domain.Outputs.SizePreset.Custom => Strings.Preset_Custom,
+        _ => preset.ToString(),
+    };
+
+    /// <summary>The operator label for an output's cached review projection.</summary>
+    internal static string ReviewState(ReviewState state) => state switch
+    {
+        Domain.Revisions.ReviewState.NotReviewed => Strings.ReviewState_NotReviewed,
+        Domain.Revisions.ReviewState.Approved => Strings.ReviewState_Approved,
+        Domain.Revisions.ReviewState.Rejected => Strings.ReviewState_Rejected,
+        _ => state.ToString(),
     };
 
     internal static string StepState(StepState state) => state switch

@@ -43,6 +43,26 @@ public sealed record SessionMutation(
     InputSnapshot? NewSnapshot,
     AutomationLockChange? LockChange)
 {
+    /// <summary>
+    /// Step rows to delete, for a session that has been re-shaped onto a different workflow
+    /// (Epic 11100 Part 3C3B, defect fix).
+    /// </summary>
+    /// <remarks>
+    /// Stated explicitly rather than inferred as "whatever is not in
+    /// <see cref="UpsertSteps"/>". Some commits legitimately carry no steps at all — startup
+    /// recovery releasing a stale automation lock is one — and under an inferred rule such a
+    /// commit would silently delete every step the session has. An empty list here means
+    /// "remove nothing", which is the only safe default.
+    /// <para>
+    /// Only <c>SelectWorkflow</c> produces a non-empty one. Choosing a different workflow
+    /// replaces the step list; without this the previous workflow's rows survived, and because
+    /// <c>LoadAsync</c> reads every step row for the session, a reload rebuilt a snapshot
+    /// containing steps the chosen workflow does not have — leaving the session apparently
+    /// waiting on a step that is not part of it.
+    /// </para>
+    /// </remarks>
+    public IReadOnlyList<StepKind> RemoveSteps { get; init; } = [];
+
     public static SessionMutation Empty(ProcessingSession session) => new(
         session, [], [], [], [], [], [], null, null);
 }

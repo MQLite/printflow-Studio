@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
@@ -60,8 +61,104 @@ public sealed class RejectionReasonChoice
 }
 
 /// <summary>
+/// One white-underbase branch offered to the operator (Epic 11100 Part 3C3B §6, §7).
+/// </summary>
+/// <remarks>
+/// There are exactly three, they are presented in enum order, and none of them is marked,
+/// sorted or styled as preferable. <see cref="Label"/> carries the classification guidance so
+/// the operator has something to classify against; the choice itself stays theirs
+/// (MVP design §12).
+/// </remarks>
+public sealed class WhiteUnderbaseChoice
+{
+    internal WhiteUnderbaseChoice(WhiteUnderbaseBranch branch)
+    {
+        Branch = branch;
+        Label = DisplayNames.WhiteUnderbaseBranch(branch);
+    }
+
+    /// <summary>The persisted value. Never displayed.</summary>
+    public WhiteUnderbaseBranch Branch { get; }
+
+    /// <summary>The localised label, including the operator guidance for this branch.</summary>
+    public string Label { get; }
+}
+
+/// <summary>
+/// One size shortcut, offered beside the millimetre boxes (Epic 11100 Part 3C3B §5).
+/// </summary>
+/// <remarks>
+/// A shortcut and nothing more: pressing it types the preset's nominal millimetres into the
+/// boxes, which the operator can still change before confirming. It confirms nothing, resizes
+/// nothing, and is not a size editor.
+/// </remarks>
+public sealed class SizePresetChoice
+{
+    internal SizePresetChoice(SizePreset preset, double widthMm, double heightMm)
+    {
+        Preset = preset;
+        WidthMm = widthMm;
+        HeightMm = heightMm;
+        Label = DisplayNames.SizePreset(preset);
+    }
+
+    public SizePreset Preset { get; }
+
+    public double WidthMm { get; }
+
+    public double HeightMm { get; }
+
+    public string Label { get; }
+}
+
+/// <summary>
+/// One production output the session already holds, flattened for the list
+/// (Epic 11100 Part 3C3B §15).
+/// </summary>
+/// <remarks>
+/// Exists so the operator can see Output A is still there while Output B is being made. Every
+/// value is a label built from the <see cref="PrintOutputView"/> the service returned; nothing
+/// here reads a file, and no path is shown.
+/// </remarks>
+public sealed class PrintOutputRow
+{
+    internal PrintOutputRow(PrintOutputView output)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+
+        FileName = output.FileName;
+        Size = string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_DimensionsSummary,
+            output.Dimensions.WidthMm,
+            output.Dimensions.HeightMm,
+            output.Dimensions.PixelWidth,
+            output.Dimensions.PixelHeight,
+            output.Dimensions.Dpi);
+        Branch = DisplayNames.WhiteUnderbaseBranch(output.Branch);
+        Review = DisplayNames.ReviewState(output.ReviewState);
+        IsValid = output.IsValid;
+        Validity = output.IsValid ? Strings.Session_OutputValid : Strings.Session_OutputInvalid;
+    }
+
+    /// <summary>The workspace file name. Never a path.</summary>
+    public string FileName { get; }
+
+    public string Size { get; }
+
+    public string Branch { get; }
+
+    public string Review { get; }
+
+    public string Validity { get; }
+
+    /// <summary>Drives the emphasis on an invalidated row; the text says so as well.</summary>
+    public bool IsValid { get; }
+}
+
+/// <summary>
 /// The session processing screen: what the session is, what file it is holding, and the
-/// actions the workflow currently permits (Epic 11100 Part 3C3A §3–§16).
+/// actions the workflow currently permits (Epic 11100 Part 3C3A §3–§16, Part 3C3B §3–§15).
 /// </summary>
 /// <remarks>
 /// Every action goes through <see cref="ISessionService.ExecuteAsync"/> and nothing else. This
@@ -75,9 +172,12 @@ public sealed class RejectionReasonChoice
 /// happened" state to drift out of step with the database.
 /// </para>
 /// <para>
-/// Print dimensions, the white-underbase branch, Complete and AddAnotherSize are deliberately
-/// absent: they are Part 3C3B, and an inert button that looks like it works is worse than a
-/// screen that plainly has none yet.
+/// The production decisions this screen carries — the print size and the W1 branch — are
+/// operator input, and both are held here only as unconfirmed text or an unconfirmed selection
+/// until a command persists them. Nothing derives a size from the image, nothing infers a
+/// branch, and nothing pre-selects one. The pixel figures shown come from
+/// <see cref="PrintDimensions"/> itself rather than from arithmetic repeated here
+/// (Part 3C3B §4, §7).
 /// </para>
 /// </remarks>
 public sealed partial class SessionViewModel : ObservableObject
@@ -110,6 +210,34 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private string? _rejectionNotes;
 
+    /// <summary>Unconfirmed operator input. Means nothing until a command accepts it.</summary>
+    [ObservableProperty]
+    private string? _widthMmText;
+
+    /// <summary>Unconfirmed operator input. Means nothing until a command accepts it.</summary>
+    [ObservableProperty]
+    private string? _heightMmText;
+
+    /// <summary>
+    /// The branch the operator has picked but not yet confirmed.
+    /// </summary>
+    /// <remarks>
+    /// Starts null and is never assigned a starting value anywhere in this file. That null is
+    /// the point: a pre-selected branch would be a default by another name, and the design
+    /// forbids one (MVP design §12, Part 3C3B §6).
+    /// </remarks>
+    [ObservableProperty]
+    private WhiteUnderbaseChoice? _selectedWhiteUnderbaseChoice;
+
+    /// <summary>
+    /// Which preset, if any, the pending millimetres came from.
+    /// </summary>
+    /// <remarks>
+    /// Reverts to <see cref="SizePreset.Custom"/> the moment either box is edited, so a size
+    /// the operator typed is never recorded as having come from a preset.
+    /// </remarks>
+    private SizePreset _pendingPreset = SizePreset.Custom;
+
     private SessionView? _session;
 
     public SessionViewModel(ISessionService sessions, INavigationService navigation)
@@ -123,13 +251,35 @@ public sealed partial class SessionViewModel : ObservableObject
         RejectionReasons = new ReadOnlyCollection<RejectionReasonChoice>(
             Enum.GetValues<RejectionReason>().Select(reason => new RejectionReasonChoice(reason)).ToList());
         _selectedRejectionReason = RejectionReasons[0];
+
+        WhiteUnderbaseChoices = new ReadOnlyCollection<WhiteUnderbaseChoice>(
+            Enum.GetValues<WhiteUnderbaseBranch>().Select(branch => new WhiteUnderbaseChoice(branch)).ToList());
+
+        // Only the presets that have a nominal size; Custom is what typing produces.
+        SizePresets = new ReadOnlyCollection<SizePresetChoice>(
+        [
+            .. Enum.GetValues<SizePreset>()
+                .Select(preset => (Preset: preset, Nominal: PrintDimensions.NominalMillimetres(preset)))
+                .Where(candidate => candidate.Nominal is not null)
+                .Select(candidate => new SizePresetChoice(
+                    candidate.Preset, candidate.Nominal!.Value.WidthMm, candidate.Nominal.Value.HeightMm)),
+        ]);
     }
 
     /// <summary>The open session's steps, in workflow order.</summary>
     public ObservableCollection<SessionStepRow> Steps { get; } = [];
 
+    /// <summary>The production outputs this session already holds, oldest first (§15).</summary>
+    public ObservableCollection<PrintOutputRow> Outputs { get; } = [];
+
     /// <summary>Every quick rejection reason, in enum order.</summary>
     public IReadOnlyList<RejectionReasonChoice> RejectionReasons { get; }
+
+    /// <summary>Every white-underbase branch, in enum order and with none preferred (§6).</summary>
+    public IReadOnlyList<WhiteUnderbaseChoice> WhiteUnderbaseChoices { get; }
+
+    /// <summary>The named size shortcuts (§5).</summary>
+    public IReadOnlyList<SizePresetChoice> SizePresets { get; }
 
     // --- Labels --------------------------------------------------------------------------
 
@@ -177,6 +327,37 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string RevisionLabel => Strings.Session_LabelRevision;
 
+    public string DimensionsHeading => Strings.Session_DimensionsHeading;
+
+    public string DimensionsHint => Strings.Session_DimensionsHint;
+
+    public string WidthMmLabel => Strings.Session_LabelWidthMm;
+
+    public string HeightMmLabel => Strings.Session_LabelHeightMm;
+
+    public string ConfirmDimensionsLabel => Strings.Session_DimensionsConfirm;
+
+    public string PresetsLabel => Strings.Session_PresetsLabel;
+
+    public string PresetHint => Strings.Session_PresetHint;
+
+    public string WhiteUnderbaseHeading => Strings.Session_W1Heading;
+
+    /// <summary>Classification guidance. Advice to the operator, never a decision (§7).</summary>
+    public string WhiteUnderbaseHint => Strings.Session_W1Hint;
+
+    public string ConfirmWhiteUnderbaseLabel => Strings.Session_W1Confirm;
+
+    public string CompleteLabel => Strings.Session_Complete;
+
+    public string AddAnotherSizeLabel => Strings.Session_AddAnotherSize;
+
+    public string OutputsHeading => Strings.Session_OutputsHeading;
+
+    public string BranchLabel => Strings.Session_LabelBranch;
+
+    public string ReviewStateLabel => Strings.Session_LabelReview;
+
     /// <summary>
     /// The unmissable warning that this installation produces synthetic results
     /// (Part 3C3A §8).
@@ -189,6 +370,30 @@ public sealed partial class SessionViewModel : ObservableObject
     public string FakeModeNotice => Strings.Session_FakeModeNotice;
 
     public bool IsFakeProcessing => _session?.IsFakeProcessing == true;
+
+    /// <summary>
+    /// The stronger warning shown when a synthetic <b>production TIFF</b> is involved
+    /// (Part 3C3B §10).
+    /// </summary>
+    /// <remarks>
+    /// A generated PNG that is not really enhanced is obviously not finished work. A file
+    /// called <c>..._CMYK_W.tif</c> looks exactly like something that could be sent to the
+    /// printer, so it gets its own sentence saying what it is not: no CMYK conversion, no W1
+    /// spot channel, no Photoshop Action, nothing prepared for Maintop. The warning claims
+    /// none of those were done — it never claims any of them were.
+    /// </remarks>
+    public string FakeTiffNotice => Strings.Session_FakeTiffNotice;
+
+    /// <summary>
+    /// Whether the synthetic-TIFF warning applies.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.ProducesPrintOutput"/> is the workflow layer's answer to "does
+    /// this workflow end in a TIFF", so the screen does not compare step kinds to work it out.
+    /// It stays visible after completion, when the finished — still synthetic — output is what
+    /// the operator is looking at.
+    /// </remarks>
+    public bool IsFakeTiffOutput => IsFakeProcessing && _session?.ProducesPrintOutput == true;
 
     // --- Session identity ----------------------------------------------------------------
 
@@ -273,6 +478,64 @@ public sealed partial class SessionViewModel : ObservableObject
     public bool CanSkip => Allows(CommandKind.Skip);
 
     public bool CanHandOff => Allows(CommandKind.HandOff);
+
+    /// <summary>
+    /// Whether the dimensions panel is shown (§3).
+    /// </summary>
+    /// <remarks>
+    /// "Is the session on the PrintDimensions step" is not restated here: the engine reports
+    /// <c>SetPrintDimensions</c> as available exactly when it would accept one, which is the
+    /// same question and one fewer place to get it wrong. It is what reopens the panel after
+    /// AddAnotherSize as well, with no second rule about reopening.
+    /// </remarks>
+    public bool CanSetDimensions => Allows(CommandKind.SetPrintDimensions);
+
+    /// <summary>
+    /// Whether the W1 selector is shown (§6).
+    /// </summary>
+    /// <remarks>
+    /// Available for the whole active life of a TIFF-producing session, because that is when
+    /// the engine will accept the decision — including before the operator has reached the
+    /// Photoshop step, and again for each new size. Photoshop output still refuses to start
+    /// until a branch has actually been recorded; showing the selector is not the same as
+    /// having chosen.
+    /// </remarks>
+    public bool CanSelectWhiteUnderbase => Allows(CommandKind.SelectWhiteUnderbaseBranch);
+
+    public bool CanComplete => Allows(CommandKind.Complete);
+
+    public bool CanAddAnotherSize => Allows(CommandKind.AddAnotherSize);
+
+    /// <summary>Whether the confirm button under the W1 selector does anything yet.</summary>
+    /// <remarks>
+    /// Only about this screen's own input being complete — whether a branch has been picked at
+    /// all. Legality remains <see cref="CanSelectWhiteUnderbase"/>'s answer.
+    /// </remarks>
+    public bool CanConfirmWhiteUnderbase => CanSelectWhiteUnderbase && SelectedWhiteUnderbaseChoice is not null;
+
+    /// <summary>The confirmed print size, or a plain "not set".</summary>
+    public string ConfirmedDimensions =>
+        _session?.Dimensions is { } dimensions ? Describe(dimensions) : Strings.Session_DimensionsNotSet;
+
+    /// <summary>The confirmed W1 branch, or a plain "not chosen".</summary>
+    public string ConfirmedWhiteUnderbase => _session?.WhiteUnderbaseBranch is { } branch
+        ? DisplayNames.WhiteUnderbaseBranch(branch)
+        : Strings.Session_W1NotChosen;
+
+    /// <summary>
+    /// What the typed millimetres would become, or empty while they are not a usable size.
+    /// </summary>
+    /// <remarks>
+    /// The pixels come from <see cref="PrintDimensions"/>, which derives them at the fixed
+    /// production DPI. This screen does not divide by 25.4 anywhere — the preview and the
+    /// value that gets persisted are computed by the same code, so they cannot disagree
+    /// (§4).
+    /// </remarks>
+    public string PendingDimensions => TryReadTypedDimensions(out PrintDimensions typed)
+        ? Describe(typed)
+        : string.Empty;
+
+    public bool HasOutputs => Outputs.Count > 0;
 
     /// <summary>
     /// Whether the review panel is shown.
@@ -374,6 +637,94 @@ public sealed partial class SessionViewModel : ObservableObject
     private Task HandOffAsync(CancellationToken cancellationToken) =>
         RunAsync(step => new WorkflowCommand.HandOff(step, HandedOffFromSessionReason), cancellationToken);
 
+    /// <summary>
+    /// Types a preset's nominal size into the boxes (Part 3C3B §5).
+    /// </summary>
+    /// <remarks>
+    /// Confirms nothing. It is a shortcut past typing four digits, after which the operator
+    /// still reads the millimetres, still may change them, and still presses Confirm — which
+    /// is what "the operator must still be able to enter the resulting physical dimensions
+    /// explicitly" asks for. It never resizes an image and never enlarges anything.
+    /// </remarks>
+    [RelayCommand]
+    private void ApplyPreset(SizePresetChoice? preset)
+    {
+        if (preset is null)
+        {
+            return;
+        }
+
+        // Assigning the text marks the pending size as Custom through the change handlers
+        // below, so the preset is recorded afterwards rather than before.
+        WidthMmText = preset.WidthMm.ToString(CultureInfo.CurrentCulture);
+        HeightMmText = preset.HeightMm.ToString(CultureInfo.CurrentCulture);
+        _pendingPreset = preset.Preset;
+    }
+
+    /// <summary>
+    /// Confirms the typed print dimensions through the ordinary command path (§3).
+    /// </summary>
+    /// <remarks>
+    /// The only thing this does with the text is turn it into a number. Whether that number is
+    /// a usable size is <see cref="PrintDimensions.TryFromMillimetres"/>'s answer, and whether
+    /// the session may accept it now is the engine's — neither rule is restated here, and no
+    /// size is silently adjusted to make it acceptable (§4).
+    /// </remarks>
+    [RelayCommand]
+    private Task SetDimensionsAsync(CancellationToken cancellationToken)
+    {
+        if (!TryReadTypedDimensions(out PrintDimensions dimensions))
+        {
+            Notice = Strings.Session_DimensionsInvalid;
+            return Task.CompletedTask;
+        }
+
+        return RunAsync(new WorkflowCommand.SetPrintDimensions(dimensions), cancellationToken);
+    }
+
+    /// <summary>
+    /// Records the operator's explicit white-underbase decision (§6).
+    /// </summary>
+    /// <remarks>
+    /// Does nothing at all until a branch has been picked. There is no fallback to a branch
+    /// when none is selected, because a fallback is a default (MVP design §12).
+    /// </remarks>
+    [RelayCommand]
+    private Task SelectWhiteUnderbaseAsync(CancellationToken cancellationToken) =>
+        SelectedWhiteUnderbaseChoice is { } choice
+            ? RunAsync(
+                new WorkflowCommand.SelectWhiteUnderbaseBranch(choice.Branch, JustificationFor(choice.Branch)),
+                cancellationToken)
+            : Task.CompletedTask;
+
+    /// <summary>
+    /// Finishes the session (§12).
+    /// </summary>
+    /// <remarks>
+    /// Offered only while <c>AvailableCommands</c> contains Complete, which the engine reports
+    /// when every step is finished and the terminal artefact is Approved. There is no path here
+    /// that marks a step done, skips a required one, or completes around one.
+    /// </remarks>
+    [RelayCommand]
+    private Task CompleteAsync(CancellationToken cancellationToken) =>
+        RunAsync(new WorkflowCommand.Complete(), cancellationToken);
+
+    /// <summary>
+    /// Reopens a completed production session at PrintDimensions to make another size (§14).
+    /// </summary>
+    /// <remarks>
+    /// The outputs already produced are left exactly as they are — the new size is a sibling
+    /// derived from the same approved Revision, which is the engine's rule and not something
+    /// this screen arranges. The pending size and branch are cleared so the next output's two
+    /// decisions are made afresh rather than inherited from the last one.
+    /// </remarks>
+    [RelayCommand]
+    private Task AddAnotherSizeAsync(CancellationToken cancellationToken)
+    {
+        ClearPendingDecisions();
+        return RunAsync(new WorkflowCommand.AddAnotherSize(), cancellationToken);
+    }
+
     /// <summary>Returns to Home. Changes nothing about the session (Part 3C3A §16).</summary>
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
@@ -394,22 +745,106 @@ public sealed partial class SessionViewModel : ObservableObject
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     /// <summary>
+    /// The stable English justification recorded with a W1 decision.
+    /// </summary>
+    /// <remarks>
+    /// Not a resource, for the same reason <see cref="WorkflowCommand.Skip.DefaultReason"/> is
+    /// not: it is persisted as audit history, and a record whose wording changed with the
+    /// workstation's language would be a poor audit trail (MVP design §13.4). It records the
+    /// classification the operator claimed, which is exactly what makes the decision reviewable
+    /// later.
+    /// </remarks>
+    private static string JustificationFor(WhiteUnderbaseBranch branch) => branch switch
+    {
+        WhiteUnderbaseBranch.W1_0px =>
+            "Operator classified the finished design as fine detail and selected 0 px contraction.",
+        WhiteUnderbaseBranch.W1_1px =>
+            "Operator classified the finished design as ordinary artwork and selected 1 px contraction.",
+        WhiteUnderbaseBranch.W1_2px =>
+            "Operator classified the finished design as solid or full rectangular artwork and selected 2 px contraction.",
+        _ => "Operator selected the white-underbase branch explicitly on the session screen.",
+    };
+
+    /// <summary>
+    /// Turns the typed millimetres into a <see cref="PrintDimensions"/>, if they are usable.
+    /// </summary>
+    /// <remarks>
+    /// Two steps, and only the first belongs to this screen: parsing text into a number is a
+    /// presentation concern, and whether that number is an acceptable size is the domain's
+    /// answer through <see cref="PrintDimensions.TryFromMillimetres"/>. Nothing is rounded up,
+    /// clamped or substituted on the way through.
+    /// </remarks>
+    private bool TryReadTypedDimensions(out PrintDimensions dimensions)
+    {
+        dimensions = default;
+
+        return TryReadMillimetres(WidthMmText, out double widthMm)
+            && TryReadMillimetres(HeightMmText, out double heightMm)
+            && PrintDimensions.TryFromMillimetres(widthMm, heightMm, _pendingPreset, out dimensions);
+    }
+
+    private static bool TryReadMillimetres(string? text, out double millimetres) =>
+        double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out millimetres);
+
+    private static string Describe(PrintDimensions dimensions) => string.Format(
+        CultureInfo.CurrentCulture,
+        Strings.Session_DimensionsSummary,
+        dimensions.WidthMm,
+        dimensions.HeightMm,
+        dimensions.PixelWidth,
+        dimensions.PixelHeight,
+        dimensions.Dpi);
+
+    /// <summary>Forgets the unconfirmed size and branch, so the next output decides both afresh.</summary>
+    private void ClearPendingDecisions()
+    {
+        WidthMmText = null;
+        HeightMmText = null;
+        _pendingPreset = SizePreset.Custom;
+        SelectedWhiteUnderbaseChoice = null;
+    }
+
+    /// <summary>Editing either box means the size is the operator's, not a preset's.</summary>
+    partial void OnWidthMmTextChanged(string? value)
+    {
+        _pendingPreset = SizePreset.Custom;
+        OnPropertyChanged(nameof(PendingDimensions));
+    }
+
+    /// <inheritdoc cref="OnWidthMmTextChanged" />
+    partial void OnHeightMmTextChanged(string? value)
+    {
+        _pendingPreset = SizePreset.Custom;
+        OnPropertyChanged(nameof(PendingDimensions));
+    }
+
+    partial void OnSelectedWhiteUnderbaseChoiceChanged(WhiteUnderbaseChoice? value) =>
+        OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
+
+    /// <summary>
     /// Builds the command for the current step, executes it, and shows whatever came back.
+    /// </summary>
+    /// <remarks>
+    /// For the step-scoped actions only. Session-scoped ones — Complete and AddAnotherSize —
+    /// are legal precisely when there is no current step left, so they go straight to the
+    /// overload below rather than through a step that would be null.
+    /// </remarks>
+    private Task RunAsync(Func<StepKind, WorkflowCommand?> build, CancellationToken cancellationToken) =>
+        _session?.CurrentStep is { } step
+            ? RunAsync(build(step.Step), cancellationToken)
+            : Task.CompletedTask;
+
+    /// <summary>
+    /// Executes one command and shows whatever came back.
     /// </summary>
     /// <remarks>
     /// One path for every button, so no action can quietly skip the refresh: the screen is
     /// always rebuilt from the <see cref="SessionView"/> the service returned, and a failure is
     /// reported rather than swallowed or worked around.
     /// </remarks>
-    private async Task RunAsync(Func<StepKind, WorkflowCommand?> build, CancellationToken cancellationToken)
+    private async Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy || _session.CurrentStep is not { } step)
-        {
-            return;
-        }
-
-        WorkflowCommand? command = build(step.Step);
-        if (command is null)
+        if (_session is null || IsBusy || command is null)
         {
             return;
         }
@@ -469,6 +904,15 @@ public sealed partial class SessionViewModel : ObservableObject
             Steps.Add(new SessionStepRow(step, isCurrent: step == session.CurrentStep));
         }
 
+        // Rebuilt wholesale from what the service returned, like everything else here: an
+        // output whose review state or validity changed must not survive as the row this
+        // screen happened to build earlier (§15).
+        Outputs.Clear();
+        foreach (PrintOutputView output in session.Outputs)
+        {
+            Outputs.Add(new PrintOutputRow(output));
+        }
+
         OnPropertyChanged(nameof(SessionName));
         OnPropertyChanged(nameof(Workflow));
         OnPropertyChanged(nameof(State));
@@ -476,6 +920,11 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(IsReadOnly));
         OnPropertyChanged(nameof(IsHandedOff));
         OnPropertyChanged(nameof(IsFakeProcessing));
+        OnPropertyChanged(nameof(IsFakeTiffOutput));
+
+        OnPropertyChanged(nameof(ConfirmedDimensions));
+        OnPropertyChanged(nameof(ConfirmedWhiteUnderbase));
+        OnPropertyChanged(nameof(HasOutputs));
 
         OnPropertyChanged(nameof(HasArtefact));
         OnPropertyChanged(nameof(ArtefactIsInput));
@@ -493,6 +942,11 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanHandOff));
+        OnPropertyChanged(nameof(CanSetDimensions));
+        OnPropertyChanged(nameof(CanSelectWhiteUnderbase));
+        OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
+        OnPropertyChanged(nameof(CanComplete));
+        OnPropertyChanged(nameof(CanAddAnotherSize));
         OnPropertyChanged(nameof(IsReviewRequired));
     }
 

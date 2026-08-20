@@ -45,6 +45,43 @@ public sealed record ArtefactView(
 }
 
 /// <summary>
+/// One production output this session has already produced, flattened for display
+/// (Epic 11100 Part 3C3B §15).
+/// </summary>
+/// <remarks>
+/// Deliberately the smallest thing that lets an operator see Output A still exists while
+/// Output B is being made: what size it is, which W1 branch it was made with, whether it was
+/// reviewed, whether it is still valid, and what the file is called. No path, no hash, no
+/// preset signature, no attempt history — this is a "what have I got" line, not a history
+/// browser.
+/// <para>
+/// <see cref="ReviewState"/> is the cached projection rather than the authority (the
+/// <c>ReviewDecision</c> row is), which is exactly what a list wants: it is a label, and no
+/// decision is ever taken from it.
+/// </para>
+/// </remarks>
+/// <param name="IsValid">
+/// False once an upstream change invalidated this output. Shown rather than hidden: an
+/// operator needs to know a size they produced no longer reflects the design.
+/// </param>
+public sealed record PrintOutputView(
+    PrintOutputId Id,
+    PrintDimensions Dimensions,
+    WhiteUnderbaseBranch Branch,
+    ReviewState ReviewState,
+    bool IsValid,
+    string FileName)
+{
+    internal static PrintOutputView From(PrintOutput output) => new(
+        output.Id,
+        output.Dimensions,
+        output.Branch,
+        output.ReviewState,
+        output.IsValid,
+        output.File.FileName);
+}
+
+/// <summary>
 /// A flattened, UI-safe read model for one session (Epic 11100 plan §9.2).
 /// </summary>
 /// <remarks>
@@ -68,6 +105,15 @@ public sealed record ArtefactView(
 /// screen can warn that output is synthetic without ever referencing an adapter
 /// (Part 3C3A §8).
 /// </param>
+/// <param name="Outputs">
+/// Every production output this session holds, oldest first, so an operator making Output B
+/// can still see Output A (Part 3C3B §15). Empty for a workflow that produces no TIFF.
+/// </param>
+/// <param name="ProducesPrintOutput">
+/// Whether this session's workflow ends in a production TIFF. Answered here, where the
+/// workflow definition lives, rather than by a view model comparing step kinds — a screen that
+/// worked that out for itself would be a second copy of the catalogue (Part 3C3B §10).
+/// </param>
 public sealed record SessionView(
     SessionId Id,
     WorkflowType WorkflowType,
@@ -79,7 +125,9 @@ public sealed record SessionView(
     WhiteUnderbaseBranch? WhiteUnderbaseBranch,
     IReadOnlyList<CommandKind> AvailableCommands,
     ArtefactView? CurrentArtefact,
-    AdapterExecutionMode ProcessingMode)
+    AdapterExecutionMode ProcessingMode,
+    IReadOnlyList<PrintOutputView> Outputs,
+    bool ProducesPrintOutput)
 {
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
@@ -91,11 +139,13 @@ public sealed record SessionView(
         WorkflowSnapshot snapshot,
         IReadOnlyList<CommandKind> availableCommands,
         IReadOnlyList<Revision> revisions,
+        IReadOnlyList<PrintOutput> outputs,
         AdapterExecutionMode processingMode)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(availableCommands);
         ArgumentNullException.ThrowIfNull(revisions);
+        ArgumentNullException.ThrowIfNull(outputs);
 
         return new SessionView(
             snapshot.SessionId,
@@ -108,7 +158,9 @@ public sealed record SessionView(
             snapshot.WhiteUnderbaseBranch,
             availableCommands,
             ResolveArtefact(snapshot, revisions),
-            processingMode);
+            processingMode,
+            [.. outputs.OrderBy(o => o.CreatedAtUtc).Select(PrintOutputView.From)],
+            snapshot.Definition.Contains(StepKind.PhotoshopOutput));
     }
 
     /// <summary>

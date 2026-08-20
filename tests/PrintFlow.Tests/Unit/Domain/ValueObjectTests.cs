@@ -148,6 +148,72 @@ public sealed class ValueObjectTests
             PrintDimensions.FromMillimetres(width, height, SizePreset.Custom));
     }
 
+    /// <summary>
+    /// The non-throwing factory refuses exactly what the throwing one does
+    /// (Epic 11100 Part 3C3B §4).
+    /// </summary>
+    /// <remarks>
+    /// The operator-input path uses <c>TryFromMillimetres</c>, so if the two ever disagreed the
+    /// UI would accept a size the domain considers unusable. Asserting them against each other
+    /// — rather than restating the rule a third time — is what keeps that from happening.
+    /// </remarks>
+    [Theory]
+    [InlineData(0, 100)]
+    [InlineData(100, 0)]
+    [InlineData(-5, 100)]
+    [InlineData(100, -5)]
+    [InlineData(double.NaN, 100)]
+    [InlineData(100, double.PositiveInfinity)]
+    public void PrintDimensions_try_factory_refuses_what_the_throwing_factory_refuses(double width, double height)
+    {
+        PrintDimensions.TryFromMillimetres(width, height, SizePreset.Custom, out PrintDimensions refused)
+            .ShouldBeFalse();
+        refused.ShouldBe(default);
+
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            PrintDimensions.FromMillimetres(width, height, SizePreset.Custom));
+    }
+
+    [Fact]
+    public void PrintDimensions_try_factory_produces_the_same_value_as_the_throwing_one()
+    {
+        PrintDimensions.TryFromMillimetres(210, 297, SizePreset.A4, out PrintDimensions accepted)
+            .ShouldBeTrue();
+
+        accepted.ShouldBe(PrintDimensions.FromMillimetres(210, 297, SizePreset.A4));
+    }
+
+    /// <summary>
+    /// Every named preset has a nominal size and produces dimensions tagged with itself
+    /// (Part 3C3B §5).
+    /// </summary>
+    [Theory]
+    [InlineData(SizePreset.A3Landscape, 420, 297)]
+    [InlineData(SizePreset.A3Portrait, 297, 420)]
+    [InlineData(SizePreset.A4, 210, 297)]
+    [InlineData(SizePreset.A5, 148, 210)]
+    public void PrintDimensions_from_preset_uses_the_presets_nominal_millimetres(
+        SizePreset preset, double widthMm, double heightMm)
+    {
+        PrintDimensions.NominalMillimetres(preset).ShouldBe((widthMm, heightMm));
+
+        PrintDimensions dimensions = PrintDimensions.FromPreset(preset);
+        dimensions.WidthMm.ShouldBe(widthMm);
+        dimensions.HeightMm.ShouldBe(heightMm);
+        dimensions.Preset.ShouldBe(preset);
+
+        // Pixels still come from the one conversion, never from a table of pixel sizes.
+        dimensions.ShouldBe(PrintDimensions.FromMillimetres(widthMm, heightMm, preset));
+    }
+
+    /// <summary>Custom is what typing produces, so it has no nominal size to offer.</summary>
+    [Fact]
+    public void PrintDimensions_custom_has_no_nominal_size()
+    {
+        PrintDimensions.NominalMillimetres(SizePreset.Custom).ShouldBeNull();
+        Should.Throw<ArgumentOutOfRangeException>(() => PrintDimensions.FromPreset(SizePreset.Custom));
+    }
+
     // -----------------------------------------------------------------------------
     // Identifiers and results
     // -----------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
@@ -174,6 +175,87 @@ public sealed class EnginePurityTests
 
         scenario.Apply(new WorkflowCommand.HandOff(StepKind.Enhancement, "operator will finish by hand"))
             .IsAccepted.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// <c>SetPrintDimensions</c> availability tracks the step, and probing has not made the
+    /// payload guard any weaker (Epic 11100 Part 3C3B §8).
+    /// </summary>
+    /// <remarks>
+    /// Two things must hold at once, and one without the other would be a defect: the screen
+    /// gets a truthful answer to "may a size be confirmed now", and a size the domain would
+    /// refuse is still refused. The probe's own stand-in size is never applied — the assertion
+    /// that the session still has no dimensions after probing is what proves it.
+    /// </remarks>
+    [Fact]
+    public void SetPrintDimensions_is_offered_only_on_its_step_and_still_validates_its_payload()
+    {
+        WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.GeneratePrintTiff);
+        scenario.CompleteImport();
+
+        // OriginalConfirmation is current: the dimensions step has not been reached.
+        WorkflowEngine.Instance.AvailableCommands(scenario.State)
+            .ShouldNotContain(CommandKind.SetPrintDimensions);
+
+        scenario.Must(new WorkflowCommand.ConfirmOriginal());
+
+        WorkflowEngine.Instance.AvailableCommands(scenario.State)
+            .ShouldContain(CommandKind.SetPrintDimensions);
+
+        // Probing answered the category question without recording a size of its own.
+        scenario.State.Dimensions.ShouldBeNull();
+
+        // And the real command's payload guard is untouched: the engine refuses a size the
+        // domain would never have produced in the first place.
+        WorkflowEngine.Instance
+            .Apply(
+                scenario.State,
+                new WorkflowCommand.SetPrintDimensions(default),
+                FixedContext)
+            .Rejection!.Code.ShouldBe(RejectionCode.InvalidPayload);
+
+        scenario.Apply(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait))
+            .IsAccepted.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// <c>SelectWhiteUnderbaseBranch</c> availability follows the workflow, and probing it
+    /// gives no session a branch (Part 3C3B §6, §8).
+    /// </summary>
+    /// <remarks>
+    /// The second assertion is the important one. The probe has to name some branch to ask its
+    /// question, and if that ever leaked into the state it would be a default — the exact thing
+    /// MVP design §12 forbids. So: available, repeatedly probed, and still unchosen.
+    /// </remarks>
+    [Fact]
+    public void SelectWhiteUnderbaseBranch_probing_never_leaves_a_branch_behind()
+    {
+        WorkflowScenario tiff = WorkflowScenario.For(WorkflowType.GeneratePrintTiff);
+        tiff.CompleteImport();
+
+        WorkflowEngine.Instance.AvailableCommands(tiff.State)
+            .ShouldContain(CommandKind.SelectWhiteUnderbaseBranch);
+        WorkflowEngine.Instance.AvailableCommands(tiff.State);
+        WorkflowEngine.Instance.AvailableCommands(tiff.State);
+
+        tiff.State.WhiteUnderbaseBranch.ShouldBeNull();
+
+        // Still refused without a justification, so probing did not relax that guard either.
+        WorkflowEngine.Instance
+            .Apply(
+                tiff.State,
+                new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_2px, "  "),
+                FixedContext)
+            .Rejection!.Code.ShouldBe(RejectionCode.InvalidPayload);
+
+        // A workflow that produces no TIFF is never offered the decision at all.
+        WorkflowScenario asset = WorkflowScenario.For(WorkflowType.PrepareAsset);
+        asset.CompleteImport();
+
+        WorkflowEngine.Instance.AvailableCommands(asset.State)
+            .ShouldNotContain(CommandKind.SelectWhiteUnderbaseBranch);
+        WorkflowEngine.Instance.AvailableCommands(asset.State)
+            .ShouldNotContain(CommandKind.SetPrintDimensions);
     }
 
     [Fact]

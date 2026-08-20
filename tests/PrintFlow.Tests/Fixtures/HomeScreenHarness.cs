@@ -103,6 +103,40 @@ internal sealed class RecordingSessionRepository : ISessionRepository
 }
 
 /// <summary>
+/// Wraps a real Meitu adapter and counts the calls (Epic 11100 Part 3C3B §17).
+/// </summary>
+/// <remarks>
+/// "GENERATE_PRINT_TIFF makes no Meitu attempt" can be argued from the persisted attempt rows,
+/// but only indirectly — that argument depends on the service always writing an attempt before
+/// calling an adapter, which is the very kind of assumption a test should not lean on. Counting
+/// the calls at the port says it outright. It delegates rather than stubs, so the session under
+/// test still runs the ordinary fake pipeline.
+/// </remarks>
+internal sealed class CountingMeituProcessor : IMeituProcessor
+{
+    private readonly IMeituProcessor _inner;
+
+    public CountingMeituProcessor(IMeituProcessor inner)
+    {
+        ArgumentNullException.ThrowIfNull(inner);
+        _inner = inner;
+    }
+
+    public int CallCount { get; private set; }
+
+    public string AdapterId => _inner.AdapterId;
+
+    public AdapterExecutionMode Mode => _inner.Mode;
+
+    public Task<OperationResult<AdapterOutput>> ProcessAsync(
+        MeituRequest request, CancellationToken cancellationToken)
+    {
+        CallCount++;
+        return _inner.ProcessAsync(request, cancellationToken);
+    }
+}
+
+/// <summary>
 /// A Home screen wired to the real session service, real workspace and real SQLite database.
 /// </summary>
 /// <remarks>
@@ -117,9 +151,21 @@ internal sealed class HomeScreenHarness : IDisposable
 
     public HomeScreenHarness()
     {
-        Sessions = _harness.CreateService();
+        Meitu = new CountingMeituProcessor(_harness.FakeMeitu);
+        Sessions = _harness.CreateServiceWithMeitu(Meitu);
         Home = new HomeViewModel(Sessions, Navigation, FilePicker, StartupStatus);
     }
+
+    /// <summary>
+    /// The Meitu port the screens actually drive, counting its calls.
+    /// </summary>
+    /// <remarks>
+    /// It delegates straight to <see cref="SessionServiceHarness.FakeMeitu"/>, so scripting a
+    /// scenario on that instance still works and nothing about the pipeline changes. The count
+    /// exists so "this workflow never reaches Meitu" can be asserted at the seam rather than
+    /// inferred from the absence of a database row (Part 3C3B §17).
+    /// </remarks>
+    public CountingMeituProcessor Meitu { get; }
 
     public SessionServiceHarness Inner => _harness;
 

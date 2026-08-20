@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
@@ -5,6 +6,8 @@ using PrintFlow.App.Navigation;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
@@ -14,12 +17,14 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.Tests.Integration.Ui;
 
 /// <summary>
-/// The Part 3C3A smoke passes (§21), driven through the <b>real composed application graph</b>.
+/// The smoke passes for Part 3C3A (§21) and Part 3C3B (§22), driven through the <b>real
+/// composed application graph</b>.
 /// </summary>
 /// <remarks>
-/// These are the four operator journeys the slice is signed off against — success,
-/// reject/retry, skip, hand-off — walked end to end from Home through Workflow Selection to the
-/// session screen, on synthetic files only.
+/// These are the operator journeys the slices are signed off against, walked end to end from
+/// Home through Workflow Selection to the session screen, on synthetic files only: Smoke A–D
+/// are the PREPARE_ASSET paths — success, reject/retry, skip, hand-off — and the three
+/// <c>Production_smoke</c> passes below are the TIFF paths added in Part 3C3B.
 /// <para>
 /// What makes them a smoke pass rather than another unit of the suite above is what is
 /// <i>not</i> substituted: the whole graph comes from <see cref="ApplicationStartup"/> — the
@@ -193,6 +198,164 @@ public sealed class SessionSmokeTests
     }
 
     // -------------------------------------------------------------------------------------
+    // Part 3C3B Smoke A — Generate Print TIFF, end to end (§22)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// GENERATE_PRINT_TIFF from import to Completed, on synthetic files only
+    /// (Epic 11100 Part 3C3B §22, Smoke A).
+    /// </summary>
+    /// <remarks>
+    /// The journey a production operator actually walks, through the real composed graph:
+    /// confirm the original, enter a size, classify the design for W1, generate, review the
+    /// TIFF, complete. Every step goes through the screen's own controls, so this is a smoke
+    /// pass over the wiring rather than a second copy of the service tests.
+    /// </remarks>
+    [Fact]
+    public async Task Production_smoke_A_generate_print_tiff_from_import_to_completed()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session =
+            await app.ImportAndChooseAsync("smoke-tiff-a.png", WorkflowType.GeneratePrintTiff);
+        SessionId id = app.OpenSessionId;
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        (await app.LoadAsync(id)).ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.PrintDimensions);
+
+        session.CanSetDimensions.ShouldBeTrue();
+        session.SelectedWhiteUnderbaseChoice.ShouldBeNull();     // no default, ever
+
+        await ConfirmSizeAndBranchAsync(session, widthMm: 200, WhiteUnderbaseBranch.W1_1px);
+
+        session.CanRunStep.ShouldBeTrue();
+        await session.RunStepCommand.ExecuteAsync(null);
+
+        session.IsReviewRequired.ShouldBeTrue();
+        session.IsFakeTiffOutput.ShouldBeTrue();                 // the synthetic-TIFF warning
+        session.CanComplete.ShouldBeFalse();
+
+        await session.ApproveCommand.ExecuteAsync(null);
+        session.CanComplete.ShouldBeTrue();
+
+        await session.CompleteCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        SessionAggregate persisted = await app.LoadAsync(id);
+        persisted.Session.State.ShouldBe(SessionState.Completed);
+
+        PrintOutput output = persisted.Outputs.ShouldHaveSingleItem();
+        output.ReviewState.ShouldBe(ReviewState.Approved);
+        output.Dimensions.WidthMm.ShouldBe(200);
+        output.Branch.ShouldBe(WhiteUnderbaseBranch.W1_1px);
+        File.Exists(app.Workspace.ResolveAbsolute(output.File)).ShouldBeTrue();
+
+        session.Outputs.ShouldHaveSingleItem();
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Part 3C3B Smoke B — another size from a completed session (§22)
+    // -------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Production_smoke_B_adding_another_size_leaves_the_first_output_in_place()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session =
+            await app.ImportAndChooseAsync("smoke-tiff-b.png", WorkflowType.GeneratePrintTiff);
+        SessionId id = app.OpenSessionId;
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await ConfirmSizeAndBranchAsync(session, widthMm: 200, WhiteUnderbaseBranch.W1_1px);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.CompleteCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        session.CanAddAnotherSize.ShouldBeTrue();
+        await session.AddAnotherSizeCommand.ExecuteAsync(null);
+
+        // Reopened with both decisions cleared: the second output makes its own.
+        session.CanSetDimensions.ShouldBeTrue();
+        session.SelectedWhiteUnderbaseChoice.ShouldBeNull();
+        (await app.LoadAsync(id)).Session.WhiteUnderbaseBranch.ShouldBeNull();
+
+        await ConfirmSizeAndBranchAsync(session, widthMm: 150, WhiteUnderbaseBranch.W1_2px);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        SessionAggregate persisted = await app.LoadAsync(id);
+        persisted.Outputs.Count.ShouldBe(2);
+        persisted.Outputs.ShouldAllBe(o => o.IsValid && o.ReviewState == ReviewState.Approved);
+
+        // Both files are still on disk, and both are on screen.
+        foreach (PrintOutput output in persisted.Outputs)
+        {
+            File.Exists(app.Workspace.ResolveAbsolute(output.File)).ShouldBeTrue();
+        }
+
+        session.Outputs.Count.ShouldBe(2);
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Part 3C3B Smoke C — the customer-design production tail (§22)
+    // -------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Production_smoke_C_customer_design_reaches_a_completed_tiff_from_an_approved_trim()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session =
+            await app.ImportAndChooseAsync("smoke-tiff-c.png", WorkflowType.PrepareCustomerDesign);
+        SessionId id = app.OpenSessionId;
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // Enhancement
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // BackgroundRemoval
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // Trim
+        await session.ApproveCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        SessionAggregate atDimensions = await app.LoadAsync(id);
+        atDimensions.ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.PrintDimensions);
+        atDimensions.Steps.Single(s => s.Step == StepKind.Trim).State.ShouldBe(StepState.Approved);
+
+        await ConfirmSizeAndBranchAsync(session, widthMm: 240, WhiteUnderbaseBranch.W1_0px);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.CompleteCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        SessionAggregate persisted = await app.LoadAsync(id);
+        persisted.Session.State.ShouldBe(SessionState.Completed);
+
+        PrintOutput output = persisted.Outputs.ShouldHaveSingleItem();
+        output.ReviewState.ShouldBe(ReviewState.Approved);
+        output.Branch.ShouldBe(WhiteUnderbaseBranch.W1_0px);
+        output.Dimensions.WidthMm.ShouldBe(240);
+    }
+
+    /// <summary>Enters a size and classifies the design, through the screen's own controls.</summary>
+    private static async Task ConfirmSizeAndBranchAsync(
+        SessionViewModel session, double widthMm, WhiteUnderbaseBranch branch)
+    {
+        session.WidthMmText = widthMm.ToString(CultureInfo.CurrentCulture);
+        session.HeightMmText = 150d.ToString(CultureInfo.CurrentCulture);
+        await session.SetDimensionsCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        session.SelectedWhiteUnderbaseChoice =
+            session.WhiteUnderbaseChoices.Single(choice => choice.Branch == branch);
+        await session.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+    }
+
+    // -------------------------------------------------------------------------------------
 
     /// <summary>
     /// A started application: the real startup sequence, the real container, the real
@@ -217,6 +380,12 @@ public sealed class SessionSmokeTests
         public ServiceProvider Services => _startup.Services!;
 
         public ISessionRepository Repository => Services.GetRequiredService<ISessionRepository>();
+
+        /// <summary>
+        /// The application's own workspace, for the one thing a smoke pass must check on
+        /// disk: that the file a produced output names is really there.
+        /// </summary>
+        public IWorkspace Workspace => Services.GetRequiredService<IWorkspace>();
 
         /// <summary>The session the navigation service currently has a screen open for.</summary>
         public SessionId OpenSessionId { get; private set; }

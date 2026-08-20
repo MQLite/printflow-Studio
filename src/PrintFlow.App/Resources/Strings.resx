@@ -265,4 +265,51 @@
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
   <data name="Format_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Session_DimensionsHeading" xml:space="preserve">
+    <value>Print dimensions</value>
+  </data>
+  <data name="Session_DimensionsHint" xml:space="preserve">
+    <value>Enter the finished physical size of the print, in millimetres.</value>
+  </data>
+  <data name="Session_LabelWidthMm" xml:space="preserve"><value>Width (mm)</value></data>
+  <data name="Session_LabelHeightMm" xml:space="preserve"><value>Height (mm)</value></data>
+  <data name="Session_DimensionsConfirm" xml:space="preserve"><value>Confirm dimensions</value></data>
+  <data name="Session_DimensionsInvalid" xml:space="preserve">
+    <value>Enter a width and a height as positive numbers of millimetres.</value>
+  </data>
+  <data name="Session_DimensionsSummary" xml:space="preserve">
+    <value>{0} × {1} mm ({2} × {3} px at {4} dpi)</value>
+  </data>
+  <data name="Session_DimensionsNotSet" xml:space="preserve"><value>Not set</value></data>
+  <data name="Session_PresetsLabel" xml:space="preserve"><value>Presets</value></data>
+  <data name="Session_PresetHint" xml:space="preserve">
+    <value>A preset fills in its nominal size. You can still change the millimetres before confirming.</value>
+  </data>
+  <data name="Preset_A3Landscape" xml:space="preserve"><value>A3 landscape</value></data>
+  <data name="Preset_A3Portrait" xml:space="preserve"><value>A3 portrait</value></data>
+  <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>
+  <data name="Preset_A5" xml:space="preserve"><value>A5</value></data>
+  <data name="Preset_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="Session_W1Heading" xml:space="preserve"><value>White underbase (W1)</value></data>
+  <data name="Session_W1Hint" xml:space="preserve">
+    <value>Classify the complete finished design and choose the contraction yourself. There is no default, and PrintFlow never inspects the image to decide for you.</value>
+  </data>
+  <data name="Session_W1Confirm" xml:space="preserve"><value>Confirm W1 branch</value></data>
+  <data name="Session_W1NotChosen" xml:space="preserve"><value>Not chosen</value></data>
+  <data name="W1_0px" xml:space="preserve"><value>0 px — fine details</value></data>
+  <data name="W1_1px" xml:space="preserve"><value>1 px — ordinary artwork</value></data>
+  <data name="W1_2px" xml:space="preserve"><value>2 px — solid / full rectangular artwork</value></data>
+  <data name="Session_FakeTiffNotice" xml:space="preserve">
+    <value>The TIFF produced here is synthetic foundation output and is NOT production-ready. No CMYK conversion, no W1 spot channel, no Photoshop Action and nothing prepared for Maintop has been performed. Do not print from it.</value>
+  </data>
+  <data name="Session_Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="Session_AddAnotherSize" xml:space="preserve"><value>Add another size</value></data>
+  <data name="Session_OutputsHeading" xml:space="preserve"><value>Outputs produced</value></data>
+  <data name="Session_LabelBranch" xml:space="preserve"><value>W1</value></data>
+  <data name="Session_LabelReview" xml:space="preserve"><value>Review</value></data>
+  <data name="Session_OutputValid" xml:space="preserve"><value>Valid</value></data>
+  <data name="Session_OutputInvalid" xml:space="preserve"><value>No longer valid</value></data>
+  <data name="ReviewState_NotReviewed" xml:space="preserve"><value>Not reviewed</value></data>
+  <data name="ReviewState_Approved" xml:space="preserve"><value>Approved</value></data>
+  <data name="ReviewState_Rejected" xml:space="preserve"><value>Rejected</value></data>
 </root>

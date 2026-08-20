@@ -112,6 +112,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 await UpsertStepAsync(connection, transaction, mutation.Session.Id, step);
             }
 
+            // Steps the session no longer has, after a workflow re-shape. Inside the same
+            // transaction as the upserts above, so the step list is never briefly a mixture
+            // of the old workflow's rows and the new one's.
+            foreach (StepKind step in mutation.RemoveSteps)
+            {
+                await DeleteStepAsync(connection, transaction, mutation.Session.Id, step);
+            }
+
             if (mutation.NewSnapshot is { } snapshot)
             {
                 await InsertSnapshotAsync(connection, transaction, snapshot);
@@ -250,6 +258,26 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 EnteredStateAtUtc = excluded.EnteredStateAtUtc;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
+    }
+
+    /// <summary>
+    /// Removes one step row from a session that has been re-shaped onto another workflow.
+    /// </summary>
+    /// <remarks>
+    /// The only delete in this repository. Metadata is otherwise append-or-update, and this is
+    /// not an exception to that in spirit: a step that is not part of the chosen workflow is
+    /// not history, it is a row that should never have outlived the choice. Nothing derived
+    /// from it is touched — Revisions, attempts and reviews all remain, so the audit trail of
+    /// what was actually done survives the change of workflow.
+    /// </remarks>
+    private static Task DeleteStepAsync(
+        SqliteConnection connection, SqliteTransaction transaction, SessionId sessionId, StepKind step)
+    {
+        const string sql = "DELETE FROM SessionStep WHERE SessionId = @SessionId AND StepKind = @StepKind;";
+        return connection.ExecuteAsync(
+            sql,
+            new { SessionId = sessionId.ToString(), StepKind = Mappers.ToText(step) },
+            transaction);
     }
 
     private static Task InsertSnapshotAsync(

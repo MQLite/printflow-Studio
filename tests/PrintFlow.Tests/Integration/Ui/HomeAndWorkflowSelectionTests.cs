@@ -10,6 +10,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Services;
 
@@ -217,6 +218,50 @@ public sealed class HomeAndWorkflowSelectionTests
         // The import survives the re-shape: choosing a workflow must not discard the file.
         stored.Value.Steps.Single(s => s.Step == StepKind.Import).State.ShouldBe(StepState.Approved);
         stored.Value.Revisions.Count.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// A re-shaped session holds exactly the chosen workflow's steps, with none of the previous
+    /// workflow's left behind (Epic 11100 Part 3C3B, defect fix).
+    /// </summary>
+    /// <remarks>
+    /// The defect this covers: metadata was upsert-only, so switching from the import default to
+    /// another workflow left the old workflow's step rows in the database. Because
+    /// <c>LoadAsync</c> reads every step row a session has, the reconstructed snapshot contained
+    /// steps the chosen workflow does not define, and its <c>CurrentStep</c> resolved to one of
+    /// them — a session switched to GENERATE_PRINT_TIFF reloaded still waiting on Enhancement.
+    /// <para>
+    /// The assertion is against the reloaded snapshot rather than the view the command returned,
+    /// because the in-memory answer was always right; only what came back from SQLite was not.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(WorkflowType.PrepareAsset)]
+    [InlineData(WorkflowType.PrepareCustomerDesign)]
+    [InlineData(WorkflowType.GeneratePrintTiff)]
+    public async Task A_reshaped_session_keeps_only_the_chosen_workflows_steps(WorkflowType chosen)
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("reshape.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        RecordingNavigation navigation = new();
+        WorkflowSelectionViewModel selection = harness.WorkflowSelection(navigation);
+        selection.Open(harness.Navigation.WorkflowSelectionFor!);
+        await selection.SelectCommand.ExecuteAsync(selection.Workflows.Single(w => w.Type == chosen));
+        selection.Notice.ShouldBeNull();
+
+        SessionId id = navigation.SessionFor.ShouldNotBeNull().Id;
+        SessionAggregate stored = (await harness.Inner.Repository.LoadAsync(id, CancellationToken.None)).Value!;
+
+        IReadOnlyList<StepKind> expected =
+            [.. WorkflowCatalog.For(chosen).Steps.Select(definition => definition.Kind)];
+
+        stored.Steps.Select(step => step.Step).OrderBy(kind => kind).ShouldBe(
+            expected.OrderBy(kind => kind));
+
+        // And the snapshot rebuilt from those rows points at a step the workflow actually has.
+        stored.ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
     }
 
     [Fact]

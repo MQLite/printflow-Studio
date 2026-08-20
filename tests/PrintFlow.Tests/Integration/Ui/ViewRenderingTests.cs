@@ -98,6 +98,84 @@ public sealed class ViewRenderingTests
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
 
+    /// <summary>
+    /// The production panels render: the dimensions boxes with their preset buttons, and the
+    /// W1 selector (Epic 11100 Part 3C3B §21).
+    /// </summary>
+    /// <remarks>
+    /// Both are collapsed on every screen the tests above reach, so none of their bindings —
+    /// including the preset buttons' <c>RelativeSource</c> command binding, which is the one
+    /// most likely to be written wrongly — would have been resolved anywhere else.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_dimensions_and_w1_panels_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await TiffSessionAtDimensionsAsync(harness, "dimensions-render.png");
+
+        session.CanSetDimensions.ShouldBeTrue();
+        session.CanSelectWhiteUnderbase.ShouldBeTrue();
+        session.SizePresets.ShouldNotBeEmpty();
+
+        // Typed input and a selection, so the preview and the confirmed lines have content too.
+        session.WidthMmText = "200";
+        session.HeightMmText = "150";
+        session.SelectedWhiteUnderbaseChoice = session.WhiteUnderbaseChoices[0];
+        session.PendingDimensions.ShouldNotBeNullOrWhiteSpace();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// A completed production session renders, with its output list and the reopen action
+    /// (Part 3C3B §21).
+    /// </summary>
+    [Fact]
+    public async Task The_session_screen_renders_the_completed_state_and_output_list_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await TiffSessionAtDimensionsAsync(harness, "outputs-render.png");
+
+        session.WidthMmText = "200";
+        session.HeightMmText = "150";
+        await session.SetDimensionsCommand.ExecuteAsync(null);
+
+        session.SelectedWhiteUnderbaseChoice = session.WhiteUnderbaseChoices[1];
+        await session.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.CompleteCommand.ExecuteAsync(null);
+
+        session.Notice.ShouldBeNull();
+        session.HasOutputs.ShouldBeTrue();
+        session.CanAddAnotherSize.ShouldBeTrue();
+        session.IsFakeTiffOutput.ShouldBeTrue();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>Imports, chooses GENERATE_PRINT_TIFF and confirms, leaving PrintDimensions current.</summary>
+    private static async Task<SessionViewModel> TiffSessionAtDimensionsAsync(
+        HomeScreenHarness harness, string fileName)
+    {
+        harness.FilePicker.Path = harness.WriteSourceFile(fileName);
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        RecordingNavigation navigation = new();
+        WorkflowSelectionViewModel selection = harness.WorkflowSelection(navigation);
+        selection.Open(harness.Navigation.WorkflowSelectionFor!);
+        await selection.SelectCommand.ExecuteAsync(
+            selection.Workflows.Single(choice => choice.Type == WorkflowType.GeneratePrintTiff));
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(navigation.SessionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        return session;
+    }
+
     [Fact]
     public void The_shell_window_and_its_screen_templates_parse()
     {
