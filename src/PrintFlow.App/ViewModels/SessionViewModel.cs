@@ -10,6 +10,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Services;
@@ -277,6 +278,40 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private double _zoomScale = 1.0;
 
+    // --- Manual crop (Epic 11200 Part C2) -------------------------------------------------
+    //
+    // Three pieces of state and nothing more. Entering crop mode changes nothing about the
+    // session, drawing a rectangle changes nothing about the session, and only Apply issues a
+    // command — which is what makes Cancel structurally incapable of leaving a trace (§22).
+
+    /// <summary>
+    /// Whether the operator is drawing a crop rectangle rather than reviewing (§5).
+    /// </summary>
+    /// <remarks>
+    /// Screen state, deliberately not persisted: nothing about having opened the crop tool is a
+    /// fact about the session, and a mode that survived a reload would be a mode the database
+    /// had an opinion about. Eligibility to enter it <i>is</i> persisted, and comes from
+    /// <see cref="CanManualCrop"/>.
+    /// </remarks>
+    [ObservableProperty]
+    private bool _isCropping;
+
+    /// <summary>
+    /// The rectangle the operator has drawn, in <b>source image pixels</b> (§6).
+    /// </summary>
+    /// <remarks>
+    /// Source pixels rather than viewport ones, so the selection means the same thing after the
+    /// operator zooms, scrolls or resizes the window — and so the value handed to the command is
+    /// the value that was validated. The conversion happens once, in
+    /// <see cref="TrySetCropSelection"/>, through the pure <see cref="CropSurfaceLayout"/>.
+    /// </remarks>
+    [ObservableProperty]
+    private TrimBounds? _cropSelection;
+
+    /// <summary>Set when a drag produced nothing usable, cleared by the next usable one (§23).</summary>
+    [ObservableProperty]
+    private bool _isCropSelectionInvalid;
+
     private SessionView? _session;
 
     public SessionViewModel(
@@ -469,6 +504,66 @@ public sealed partial class SessionViewModel : ObservableObject
     /// this screen remembered in a field would not (§17, §19).
     /// </remarks>
     public bool IsManualCropRequired => _session?.CurrentStepFailure == FailureCode.ManualCropRequired;
+
+    // --- Manual crop surface (Epic 11200 Part C2 §5, §22, §23, §34) -----------------------
+
+    public string ManualCropHeading => Strings.Session_ManualCropHeading;
+
+    /// <summary>What the operator does on the image, shown while crop mode is open.</summary>
+    public string ManualCropInstructions => Strings.Session_ManualCropInstructions;
+
+    public string BeginManualCropLabel => Strings.Session_ManualCropBegin;
+
+    public string ApplyManualCropLabel => Strings.Session_ManualCropApply;
+
+    public string CancelManualCropLabel => Strings.Session_ManualCropCancel;
+
+    /// <summary>Shown when a drag selected nothing that overlaps the artwork (§23).</summary>
+    public string ManualCropInvalidNotice => Strings.Session_ManualCropInvalid;
+
+    /// <summary>
+    /// Whether an operator-selected crop is a legal next action (§3).
+    /// </summary>
+    /// <remarks>
+    /// Read straight off <see cref="SessionView.CanManualCrop"/>, which the workflow layer
+    /// derives from the session state, the step state and the attempt history through
+    /// <c>ManualCropEligibility</c> — the same predicate the service enforces when the command
+    /// arrives. This screen restates none of that: an eligibility rule that lived in two places
+    /// would eventually give two answers, and the one that decides whether a button appears is
+    /// the one that would be wrong (§3, §13).
+    /// </remarks>
+    public bool CanManualCrop => _session?.CanManualCrop == true;
+
+    /// <summary>True while a drawn rectangle is ready to be submitted (§23).</summary>
+    public bool CanApplyManualCrop => IsCropping && CropSelection is not null && !IsBusy;
+
+    /// <summary>
+    /// The image the crop rectangle is drawn on, or null when crop mode is closed (§24).
+    /// </summary>
+    /// <remarks>
+    /// The last pane, which is always the one describing <c>SessionView.CurrentArtefact</c>. In
+    /// every state a crop is legal in, the Trim step holds no result of its own, so that
+    /// artefact is the upstream Revision the step would consume — the very Revision
+    /// <c>SubmitManualCrop</c> resolves through <c>UpstreamRevisionOf(Trim)</c>. The operator
+    /// therefore draws on the file that is actually going to be cropped, without this screen
+    /// choosing a Revision or asking for a second decode: it reuses the pane the C1 preview
+    /// seam already produced (§24).
+    /// </remarks>
+    public ArtefactPreviewPane? CropPane =>
+        IsCropping && PreviewPanes.Count > 0 && PreviewPanes[^1] is { HasImage: true } pane ? pane : null;
+
+    /// <summary>The selection in source pixels, or a line saying nothing is selected yet.</summary>
+    /// <remarks>
+    /// Stated in the artefact's own pixels, never in screen units: it is the number the crop is
+    /// actually recorded in, so showing anything else would describe a different rectangle from
+    /// the one about to be cropped.
+    /// </remarks>
+    public string CropSelectionSummary => CropSelection is { } crop
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_ManualCropSelection,
+            crop.Left, crop.Top, crop.Width, crop.Height)
+        : Strings.Session_ManualCropNoSelection;
 
     /// <summary>
     /// The unmissable warning that this installation produces synthetic results
@@ -764,6 +859,94 @@ public sealed partial class SessionViewModel : ObservableObject
     private Task HandOffAsync(CancellationToken cancellationToken) =>
         RunAsync(step => new WorkflowCommand.HandOff(step, HandedOffFromSessionReason), cancellationToken);
 
+    // --- Manual crop commands (Part C2 §5, §12, §22) --------------------------------------
+
+    /// <summary>
+    /// Opens the crop surface. Changes nothing about the session (§22).
+    /// </summary>
+    /// <remarks>
+    /// No command, no attempt, no file: entering crop mode is the operator picking up a tool,
+    /// not starting work. The offer itself still comes from the workflow layer — pressing this
+    /// when <see cref="CanManualCrop"/> is false does nothing, and the service would refuse the
+    /// resulting command anyway (§13).
+    /// </remarks>
+    [RelayCommand]
+    private void BeginManualCrop()
+    {
+        if (!CanManualCrop || IsBusy)
+        {
+            return;
+        }
+
+        ClearCropState();
+        IsCropping = true;
+    }
+
+    /// <summary>
+    /// Closes the crop surface, discarding the rectangle (§22).
+    /// </summary>
+    /// <remarks>
+    /// The whole of §22 made structural rather than promised: this method cannot leave a trace
+    /// because it has nothing to leave one with. It touches no file, issues no command and
+    /// reaches no service, so "no file, no Attempt, no Revision, no workflow mutation" is a
+    /// property of what the code can do, not of what it happens to do today.
+    /// </remarks>
+    [RelayCommand]
+    private void CancelManualCrop() => ClearCropState();
+
+    /// <summary>
+    /// Submits the drawn rectangle through the ordinary command path (§12).
+    /// </summary>
+    /// <remarks>
+    /// This screen calls <see cref="ISessionService.ExecuteAsync"/> and never
+    /// <c>IManualCropProcessor</c>. The working copy, the attempt row, the pixel work, the
+    /// <c>FileInspector</c> pass, the SHA-256 and the two metadata transactions all happen
+    /// behind that call, exactly as they do for Run Step — which is what makes a manual crop
+    /// as auditable as an automatic one rather than a side door around the machinery (§9, §15).
+    /// </remarks>
+    [RelayCommand]
+    private async Task ApplyManualCropAsync(CancellationToken cancellationToken)
+    {
+        if (CropSelection is not { } crop)
+        {
+            IsCropSelectionInvalid = true;
+            return;
+        }
+
+        await RunAsync(
+            step => new WorkflowCommand.SubmitManualCrop(step, crop), cancellationToken).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Records a drag as a source-pixel rectangle, or refuses it (§7, §23).
+    /// </summary>
+    /// <remarks>
+    /// The view supplies the geometry it can measure and the two points the mouse reported; the
+    /// mapping and every validity question belong to <see cref="CropSurfaceLayout"/>, which is
+    /// pure and tested on its own. The refusal is the same one the domain would give — a
+    /// rectangle with no pixel in it — so an invalid selection is stopped here <i>and</i> would
+    /// be stopped again by the engine and the processor if it somehow got through (§23).
+    /// </remarks>
+    /// <returns>True when the drag produced a usable rectangle.</returns>
+    public bool TrySetCropSelection(CropSurfaceLayout layout, double x1, double y1, double x2, double y2)
+    {
+        if (!IsCropping)
+        {
+            return false;
+        }
+
+        if (!layout.TryToSourceBounds(x1, y1, x2, y2, out TrimBounds bounds))
+        {
+            CropSelection = null;
+            IsCropSelectionInvalid = true;
+            return false;
+        }
+
+        CropSelection = bounds;
+        IsCropSelectionInvalid = false;
+        return true;
+    }
+
     /// <summary>
     /// Types a preset's nominal size into the boxes (Part 3C3B §5).
     /// </summary>
@@ -1019,6 +1202,28 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasPreview));
     }
 
+    /// <summary>Leaves crop mode with nothing selected. Touches no file and issues no command.</summary>
+    private void ClearCropState()
+    {
+        IsCropping = false;
+        CropSelection = null;
+        IsCropSelectionInvalid = false;
+    }
+
+    partial void OnIsCroppingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanApplyManualCrop));
+        OnPropertyChanged(nameof(CropPane));
+    }
+
+    partial void OnCropSelectionChanged(TrimBounds? value)
+    {
+        OnPropertyChanged(nameof(CanApplyManualCrop));
+        OnPropertyChanged(nameof(CropSelectionSummary));
+    }
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanApplyManualCrop));
+
     private static string? Trimmed(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
@@ -1186,6 +1391,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
         ResetZoom();
+
+        // The crop surface belongs to the state that needed one. A rectangle drawn against the
+        // file the operator was looking at a moment ago must not survive into a state showing a
+        // different one — that is the same staleness the preview generation token exists to
+        // prevent, applied to the selection (Part C2 §22, §25).
+        ClearCropState();
+
         ClearPreviews();
         PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);
 
@@ -1220,6 +1432,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasArtefact));
         OnPropertyChanged(nameof(HasPreview));
         OnPropertyChanged(nameof(IsManualCropRequired));
+        OnPropertyChanged(nameof(CanManualCrop));
         OnPropertyChanged(nameof(ArtefactIsInput));
         OnPropertyChanged(nameof(ArtefactFileName));
         OnPropertyChanged(nameof(ArtefactFormat));

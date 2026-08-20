@@ -48,6 +48,7 @@ public sealed class HomeAndWorkflowSelectionTests
             harness.FakeMeitu,
             harness.FakePhotoshop,
             harness.Trim,
+            harness.ManualCrop,
             harness.Preset,
             harness.EnvironmentGate,
             SystemIdGenerator.Instance,

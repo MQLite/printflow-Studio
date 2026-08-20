@@ -363,8 +363,34 @@ internal static class Strings
     /// <summary>Composite format: the zoom percentage.</summary>
     internal static string Session_ZoomPercent => Get(nameof(Session_ZoomPercent));
 
-    /// <summary>Says a trim needs a human and where the tool will be (Part C1 §17).</summary>
+    /// <summary>Says a trim needs a human and what to do next (Part C1 §17; Part C2 §34).</summary>
     internal static string Session_ManualCropRequiredNotice => Get(nameof(Session_ManualCropRequiredNotice));
+
+    // --- Epic 11200 Part C2: manual crop --------------------------------------------------
+
+    /// <summary>Heading of the crop surface.</summary>
+    internal static string Session_ManualCropHeading => Get(nameof(Session_ManualCropHeading));
+
+    /// <summary>The button that opens the crop surface.</summary>
+    internal static string Session_ManualCropBegin => Get(nameof(Session_ManualCropBegin));
+
+    /// <summary>Tells the operator to drag on the image to draw the crop area.</summary>
+    internal static string Session_ManualCropInstructions => Get(nameof(Session_ManualCropInstructions));
+
+    /// <summary>The button that submits the drawn rectangle.</summary>
+    internal static string Session_ManualCropApply => Get(nameof(Session_ManualCropApply));
+
+    /// <summary>The button that leaves crop mode without changing anything.</summary>
+    internal static string Session_ManualCropCancel => Get(nameof(Session_ManualCropCancel));
+
+    /// <summary>Shown when a drag selected nothing that overlaps the artwork.</summary>
+    internal static string Session_ManualCropInvalid => Get(nameof(Session_ManualCropInvalid));
+
+    /// <summary>Composite format: left, top, width, height — all in source image pixels.</summary>
+    internal static string Session_ManualCropSelection => Get(nameof(Session_ManualCropSelection));
+
+    /// <summary>Shown in place of the selection summary before anything has been drawn.</summary>
+    internal static string Session_ManualCropNoSelection => Get(nameof(Session_ManualCropNoSelection));
 
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.

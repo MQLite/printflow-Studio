@@ -72,6 +72,12 @@ public static class ServiceRegistration
         // nothing about it is gated on the workstation environment (Epic 11200 Part B §17).
         services.AddSingleton<ITrimProcessor, DeterministicAlphaTrimProcessor>();
 
+        // The manual-crop counterpart, registered on exactly the same terms and for the same
+        // reasons: in-process pixel work, no external application, no environment gate. It is
+        // the fallback the operator reaches only after the automatic trim has refused
+        // (Epic 11200 Part C2 §9).
+        services.AddSingleton<IManualCropProcessor, WicManualCropProcessor>();
+
         services.AddSingleton<IRecycleBin, RecycleBin>();
         services.AddSingleton<IEnvironmentGate, FoundationEnvironmentGate>();
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));

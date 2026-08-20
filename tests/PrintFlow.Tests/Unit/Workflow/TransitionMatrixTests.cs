@@ -183,6 +183,8 @@ public sealed class TransitionMatrixTests
             CommandKind.Approve => new WorkflowCommand.Approve(step, hash),
             CommandKind.Reject => new WorkflowCommand.Reject(step, hash, RejectionReason.Other),
             CommandKind.Retry => new WorkflowCommand.Retry(step),
+            CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(
+                step, global::PrintFlow.Domain.Trimming.TrimBounds.Canvas(4, 4)),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, "matrix probe"),
             CommandKind.SetPrintDimensions =>

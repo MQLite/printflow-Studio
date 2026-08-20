@@ -27,7 +27,11 @@ public sealed class ArtefactPreviewPane
         ReadOnlyMemory<byte> payload,
         bool hasImage,
         string detail,
-        string? unavailable)
+        string? unavailable,
+        int payloadPixelWidth,
+        int payloadPixelHeight,
+        int sourcePixelWidth,
+        int sourcePixelHeight)
     {
         Heading = heading;
         FileName = fileName;
@@ -35,6 +39,10 @@ public sealed class ArtefactPreviewPane
         HasImage = hasImage;
         Detail = detail;
         Unavailable = unavailable;
+        PayloadPixelWidth = payloadPixelWidth;
+        PayloadPixelHeight = payloadPixelHeight;
+        SourcePixelWidth = sourcePixelWidth;
+        SourcePixelHeight = sourcePixelHeight;
     }
 
     /// <summary>"Before", "After", or the single-image heading. The operator's only orientation.</summary>
@@ -57,6 +65,26 @@ public sealed class ArtefactPreviewPane
     /// <summary>True exactly when <see cref="Unavailable"/> should be shown.</summary>
     public bool IsUnavailable => !HasImage;
 
+    /// <summary>Width of <see cref="Payload"/> in its own pixels; zero when there is no image.</summary>
+    /// <remarks>
+    /// The payload's dimensions and the artefact's are both carried because a manual crop needs
+    /// the ratio between them: what the operator drags over is the payload, and what a crop is
+    /// recorded in is the source, and for a reduced preview those differ (Part C1 §6;
+    /// Part C2 §7). <see cref="Detail"/> states the source figures for the operator to read;
+    /// these four are for <see cref="CropSurfaceLayout"/> to calculate with.
+    /// </remarks>
+    public int PayloadPixelWidth { get; }
+
+    /// <inheritdoc cref="PayloadPixelWidth" />
+    public int PayloadPixelHeight { get; }
+
+    /// <summary>Width of the artefact itself in pixels; zero when there is no image.</summary>
+    /// <inheritdoc cref="PayloadPixelWidth" />
+    public int SourcePixelWidth { get; }
+
+    /// <inheritdoc cref="SourcePixelWidth" />
+    public int SourcePixelHeight { get; }
+
     internal static ArtefactPreviewPane From(string heading, string fileName, ImagePreview preview)
     {
         ArgumentNullException.ThrowIfNull(preview);
@@ -73,7 +101,9 @@ public sealed class ArtefactPreviewPane
             ? $"{pixels} · {Strings.Session_PreviewReduced}"
             : pixels;
 
-        return new ArtefactPreviewPane(heading, fileName, preview.Payload, hasImage: true, detail, unavailable: null);
+        return new ArtefactPreviewPane(
+            heading, fileName, preview.Payload, hasImage: true, detail, unavailable: null,
+            preview.PixelWidth, preview.PixelHeight, preview.SourcePixelWidth, preview.SourcePixelHeight);
     }
 
     /// <summary>
@@ -95,6 +125,7 @@ public sealed class ArtefactPreviewPane
             : Strings.Session_PreviewUnavailable;
 
         return new ArtefactPreviewPane(
-            heading, fileName, ReadOnlyMemory<byte>.Empty, hasImage: false, string.Empty, message);
+            heading, fileName, ReadOnlyMemory<byte>.Empty, hasImage: false, string.Empty, message,
+            payloadPixelWidth: 0, payloadPixelHeight: 0, sourcePixelWidth: 0, sourcePixelHeight: 0);
     }
 }

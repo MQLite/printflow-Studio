@@ -61,6 +61,85 @@ internal static class SyntheticImages
         return stream.ToArray();
     }
 
+    /// <summary>
+    /// An opaque PNG with no alpha channel, whose colour is decided per pixel.
+    /// </summary>
+    /// <remarks>
+    /// The counterpart to <see cref="PngWithAlpha"/> and the file that matters most to manual
+    /// crop: automatic trimming refuses it because <c>Bgr24</c> carries no alpha to measure, so
+    /// it is exactly the case the operator has to solve by hand (Epic 11200 Part C2 §27). The
+    /// colour varies per pixel so a crop that took the wrong rectangle produces visibly wrong
+    /// bytes rather than a plausible block of one shade.
+    /// </remarks>
+    public static byte[] OpaqueRgbPng(
+        int width, int height, Func<int, int, (byte R, byte G, byte B)> colourAt, double dpi = 300)
+    {
+        ArgumentNullException.ThrowIfNull(colourAt);
+
+        WriteableBitmap bitmap = new(width, height, dpi, dpi, PixelFormats.Bgr24, null);
+        int stride = width * 3;
+        byte[] pixels = new byte[stride * height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                (byte r, byte g, byte b) = colourAt(x, y);
+                int i = (y * stride) + (x * 3);
+                pixels[i] = b;
+                pixels[i + 1] = g;
+                pixels[i + 2] = r;
+            }
+        }
+
+        bitmap.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+
+        PngBitmapEncoder encoder = new();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using MemoryStream stream = new();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
+    /// <summary>Every pixel of an image as BGRA bytes, row-major, as WIC decodes it.</summary>
+    /// <remarks>
+    /// Converts to BGRA for comparison only — the assertion is about which pixels survived a
+    /// crop, and a common format is what makes an opaque source and a transparent one
+    /// comparable with the same helper. It says nothing about the stored format, which
+    /// <see cref="FormatOf"/> answers.
+    /// </remarks>
+    public static byte[] ReadBgra(string absolutePath, out int width, out int height)
+    {
+        BitmapSource frame = DecodeFrame(absolutePath);
+        width = frame.PixelWidth;
+        height = frame.PixelHeight;
+
+        BitmapSource bgra = frame.Format == PixelFormats.Bgra32
+            ? frame
+            : new FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+
+        byte[] pixels = new byte[width * height * 4];
+        bgra.CopyPixels(pixels, width * 4, 0);
+        return pixels;
+    }
+
+    /// <summary>The horizontal and vertical resolution WIC reports for a file.</summary>
+    public static (double X, double Y) ReadDpi(string absolutePath)
+    {
+        BitmapSource frame = DecodeFrame(absolutePath);
+        return (frame.DpiX, frame.DpiY);
+    }
+
+    private static BitmapSource DecodeFrame(string absolutePath)
+    {
+        using FileStream stream = new(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        BitmapDecoder decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.PreservePixelFormat | BitmapCreateOptions.IgnoreColorProfile,
+            BitmapCacheOption.OnLoad);
+
+        return decoder.Frames[0];
+    }
+
     /// <summary>The alpha byte of every pixel of a PNG, row-major, as WIC decodes it.</summary>
     /// <remarks>
     /// Reads back through WIC rather than trusting what was written, so an integration test can

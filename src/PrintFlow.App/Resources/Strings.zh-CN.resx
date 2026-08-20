@@ -333,6 +333,18 @@
   <data name="Session_ZoomFit" xml:space="preserve"><value>适应窗口</value></data>
   <data name="Session_ZoomPercent" xml:space="preserve"><value>{0}%</value></data>
   <data name="Session_ManualCropRequiredNotice" xml:space="preserve">
-    <value>自动裁切无法确定裁切范围。手动裁切将在后续工作流步骤中提供。</value>
+    <value>自动裁切无法确定裁切范围。请使用"手动裁切"自行框选。</value>
   </data>
+  <data name="Session_ManualCropHeading" xml:space="preserve"><value>手动裁切</value></data>
+  <data name="Session_ManualCropBegin" xml:space="preserve"><value>手动裁切</value></data>
+  <data name="Session_ManualCropInstructions" xml:space="preserve">
+    <value>框选裁切区域：在图像上拖动以选择要保留的范围。再次拖动可重新框选。放大后可使用滚动条移动图像。</value>
+  </data>
+  <data name="Session_ManualCropApply" xml:space="preserve"><value>应用裁切</value></data>
+  <data name="Session_ManualCropCancel" xml:space="preserve"><value>取消裁切</value></data>
+  <data name="Session_ManualCropInvalid" xml:space="preserve">
+    <value>裁切区域无效。所选范围必须至少覆盖图像的一个像素。</value>
+  </data>
+  <data name="Session_ManualCropSelection" xml:space="preserve"><value>已选择：{0}, {1} · {2} × {3} 像素</value></data>
+  <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>尚未选择裁切区域。</value></data>
 </root>

@@ -23,8 +23,9 @@ namespace PrintFlow.Workflow.Services;
 /// <remarks>
 /// <see cref="WorkflowEngine"/> itself stays untouched and pure — this type is the only place
 /// that sequences file work before metadata commits (plan §10.5) and the only place that
-/// decides how a <see cref="WorkflowEffect.RunAdapter"/> is actually carried out. A step that
-/// invokes an adapter produces <b>two</b> metadata transactions, not one: the first records the
+/// decides how a <see cref="WorkflowEffect.RunAdapter"/> or a
+/// <see cref="WorkflowEffect.RunManualCrop"/> is actually carried out. A step that
+/// produces a file makes <b>two</b> metadata transactions, not one: the first records the
 /// attempt as <c>Running</c> before any file work begins (so a crash mid-attempt is
 /// detectable — plan §38), and the second records the outcome once the file work and its
 /// validation are complete.
@@ -50,6 +51,17 @@ public sealed class SessionService : ISessionService
     /// </remarks>
     private const string TrimOutputFileName = "trimmed.png";
 
+    /// <summary>
+    /// What a manual crop writes beside its working copy, inside the attempt's own directory.
+    /// </summary>
+    /// <remarks>
+    /// A different name from <see cref="TrimOutputFileName"/> so the two are distinguishable on
+    /// disk, and fixed for the same reason that one is. Uniqueness across attempts comes from
+    /// the attempt directory rather than from the name, which is what lets a rejected crop and
+    /// the crop that replaces it both survive without either overwriting the other (Part C2 §20).
+    /// </remarks>
+    private const string ManualCropOutputFileName = "manual-crop.png";
+
     private readonly IWorkflowEngine _engine;
     private readonly ISessionRepository _repository;
     private readonly IWorkspace _workspace;
@@ -57,6 +69,7 @@ public sealed class SessionService : ISessionService
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
     private readonly ITrimProcessor _trim;
+    private readonly IManualCropProcessor _manualCrop;
     private readonly IWorkstationPresetProvider _presetProvider;
     private readonly IEnvironmentGate _environmentGate;
     private readonly RevisionIntegrityGuard _integrityGuard;
@@ -73,6 +86,7 @@ public sealed class SessionService : ISessionService
         IMeituProcessor meitu,
         IPhotoshopOutputProcessor photoshop,
         ITrimProcessor trim,
+        IManualCropProcessor manualCrop,
         IWorkstationPresetProvider presetProvider,
         IEnvironmentGate environmentGate,
         IIdGenerator idGenerator,
@@ -85,6 +99,7 @@ public sealed class SessionService : ISessionService
         ArgumentNullException.ThrowIfNull(meitu);
         ArgumentNullException.ThrowIfNull(photoshop);
         ArgumentNullException.ThrowIfNull(trim);
+        ArgumentNullException.ThrowIfNull(manualCrop);
         ArgumentNullException.ThrowIfNull(presetProvider);
         ArgumentNullException.ThrowIfNull(environmentGate);
         ArgumentNullException.ThrowIfNull(idGenerator);
@@ -97,6 +112,7 @@ public sealed class SessionService : ISessionService
         _meitu = meitu;
         _photoshop = photoshop;
         _trim = trim;
+        _manualCrop = manualCrop;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _idGenerator = idGenerator;
@@ -215,6 +231,19 @@ public sealed class SessionService : ISessionService
         WorkflowSnapshot snapshot = aggregate.ToSnapshot();
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
+        // The half of manual-crop eligibility the pure engine cannot see, checked before the
+        // command reaches it. Button visibility is not a guard: a crop asked for against an
+        // unrelated Trim failure, or against a rejected deterministic trim, is refused here even
+        // if something managed to construct the command (Part C2 §13).
+        if (command is WorkflowCommand.SubmitManualCrop &&
+            !ManualCropEligibility.IsEligible(snapshot, aggregate.Attempts))
+        {
+            return OperationResult.Fail<SessionView>(
+                FailureCode.PreconditionNotMet,
+                "A manual crop is legal only after a Trim attempt reported ManualCropRequired, or " +
+                "after an earlier manual crop was rejected.");
+        }
+
         OperationResult<Unit> integrity = await EnsureIntegrityAsync(aggregate, snapshot, command, context, cancellationToken);
         if (integrity.IsFailure)
         {
@@ -227,8 +256,8 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(transition.Rejection!));
         }
 
-        WorkflowEffect.RunAdapter? runAdapter = transition.Effects.OfType<WorkflowEffect.RunAdapter>().FirstOrDefault();
-        if (runAdapter is null)
+        ProducingWork? work = ProducingWorkOf(transition.Effects);
+        if (work is null)
         {
             ProcessingSession updatedSession = MergeSession(aggregate.Session, transition.State, transition.Effects, context.NowUtc);
             SessionMutation mutation = BuildMetadataMutation(aggregate, updatedSession, transition.State, transition.Effects, context);
@@ -243,7 +272,55 @@ public sealed class SessionService : ISessionService
                 transition.State, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts);
         }
 
-        return await RunAdapterBackedStepAsync(aggregate, transition, context, runAdapter, cancellationToken);
+        return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
+    }
+
+    /// <summary>
+    /// The producing work one accepted command asked for, whichever effect described it.
+    /// </summary>
+    /// <remarks>
+    /// A manual crop and an adapter call differ in what performs the work and in one extra piece
+    /// of data — the operator's rectangle — and in nothing else that the attempt/Revision/review
+    /// machinery cares about. Normalising both onto one shape is what lets that machinery exist
+    /// once: a second near-copy of <see cref="RunProducingStepAsync"/> would be a second place
+    /// for "record the attempt before the file work" and "hash before committing" to drift.
+    /// </remarks>
+    /// <param name="ProcessorId">Which code performs the work, written to the attempt row.</param>
+    /// <param name="ManualCrop">
+    /// The operator's rectangle in source pixels, or null for adapter-backed and internal
+    /// automatic work. Its presence is what routes the work to <see cref="IManualCropProcessor"/>.
+    /// </param>
+    private sealed record ProducingWork(
+        AttemptId AttemptId,
+        StepKind Step,
+        AdapterKind Adapter,
+        OperationKind Operation,
+        RevisionId? InputRevision,
+        string ProcessorId,
+        TrimBounds? ManualCrop);
+
+    /// <summary>Reads the one producing effect out of a transition, or null when there is none.</summary>
+    private ProducingWork? ProducingWorkOf(IReadOnlyList<WorkflowEffect> effects)
+    {
+        foreach (WorkflowEffect effect in effects)
+        {
+            switch (effect)
+            {
+                case WorkflowEffect.RunAdapter run:
+                    return new ProducingWork(
+                        run.AttemptId, run.Step, run.Adapter, run.Operation, run.InputRevision,
+                        AdapterIdFor(run.Adapter), ManualCrop: null);
+
+                case WorkflowEffect.RunManualCrop crop:
+                    // The processor's own identity, asked for rather than hard-coded, so the
+                    // attempt row can never claim an implementation that did not run.
+                    return new ProducingWork(
+                        crop.AttemptId, crop.Step, AdapterKind.Internal, OperationKind.ManualImport,
+                        crop.InputRevision, _manualCrop.ProcessorId, crop.Crop);
+            }
+        }
+
+        return null;
     }
 
     /// <inheritdoc />
@@ -380,23 +457,33 @@ public sealed class SessionService : ISessionService
         id is null ? null : aggregate.Revisions.FirstOrDefault(r => r.Id == id.Value);
 
     // -------------------------------------------------------------------------------------
-    // Adapter-backed steps: two metadata transactions around the file work
+    // Producing steps: two metadata transactions around the file work
     // -------------------------------------------------------------------------------------
 
-    private async Task<OperationResult<SessionView>> RunAdapterBackedStepAsync(
+    /// <summary>
+    /// Runs one attempt that produces a file, from the opening transaction to the closing one.
+    /// </summary>
+    /// <remarks>
+    /// One path for an adapter call, a deterministic trim, a promotion and a manual crop alike.
+    /// The environment gate and the automation lock are taken only for genuinely adapter-backed
+    /// steps, so a manual crop — which drives no external application — neither waits for the
+    /// lock nor requires a verified workstation, exactly as the deterministic trim does not
+    /// (Part B §17; Part C2 §9).
+    /// </remarks>
+    private async Task<OperationResult<SessionView>> RunProducingStepAsync(
         SessionAggregate aggregate, WorkflowTransition started, CommandContext context,
-        WorkflowEffect.RunAdapter runAdapter, CancellationToken cancellationToken)
+        ProducingWork work, CancellationToken cancellationToken)
     {
-        StepDefinition? definition = started.State.Definition.Find(runAdapter.Step);
+        StepDefinition? definition = started.State.Definition.Find(work.Step);
         if (definition is null)
         {
             return OperationResult.Fail<SessionView>(
-                FailureCode.PreconditionNotMet, $"Step {runAdapter.Step} is not part of this workflow.");
+                FailureCode.PreconditionNotMet, $"Step {work.Step} is not part of this workflow.");
         }
 
         if (definition.IsAdapterBacked)
         {
-            OperationResult<Unit> gate = _environmentGate.Verify(AdapterModeFor(runAdapter.Adapter));
+            OperationResult<Unit> gate = _environmentGate.Verify(AdapterModeFor(work.Adapter));
             if (gate.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(gate.Failure);
@@ -428,8 +515,8 @@ public sealed class SessionService : ISessionService
             .FirstOrDefault()?.RetrySequence ?? 0;
 
         ProcessingAttempt runningAttempt = ProcessingAttempt.Start(
-            context.NewAttemptId, aggregate.Session.Id, runAdapter.Step, runAdapter.InputRevision,
-            runAdapter.Operation, AdapterIdFor(runAdapter.Adapter), context.NowUtc, retrySequence: retrySequence);
+            context.NewAttemptId, aggregate.Session.Id, work.Step, work.InputRevision,
+            work.Operation, work.ProcessorId, context.NowUtc, retrySequence: retrySequence);
 
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
 
@@ -450,22 +537,25 @@ public sealed class SessionService : ISessionService
             Attempts = [.. aggregate.Attempts, runningAttempt],
         };
 
-        OperationResult<(WorkspaceFileRef Output, FileFacts Facts)> work =
-            await PerformStepWorkAsync(afterStart, started.State, definition, runAdapter, context, cancellationToken);
+        OperationResult<(WorkspaceFileRef Output, FileFacts Facts)> produced =
+            await PerformStepWorkAsync(afterStart, started.State, definition, work, context, cancellationToken);
 
-        if (work.IsFailure)
+        if (produced.IsFailure)
         {
             return await FailAttemptAsync(
-                afterStart, started.State, context, runAdapter.Step, runningAttempt, work.Failure, cancellationToken);
+                afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, cancellationToken);
         }
 
+        // The Revision hangs off the Revision this attempt actually consumed. For a manual crop
+        // that is the file the operator drew on, which is what makes ManualImport lineage
+        // truthful rather than positional (Part C2 §16).
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision newRevision = Revision.Create(
-            revisionId, aggregate.Session.Id, runAdapter.InputRevision, runAdapter.Operation,
-            work.Value.Output, work.Value.Facts, context.NowUtc);
+            revisionId, aggregate.Session.Id, work.InputRevision, work.Operation,
+            produced.Value.Output, produced.Value.Facts, context.NowUtc);
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
-            context.NewAttemptId, runAdapter.Step, revisionId, work.Value.Facts.Sha256);
+            context.NewAttemptId, work.Step, revisionId, produced.Value.Facts.Sha256);
         WorkflowTransition finished = _engine.Apply(started.State, succeeded, context);
         if (finished.IsRejected)
         {
@@ -476,10 +566,10 @@ public sealed class SessionService : ISessionService
         ProcessingSession sessionAfterFinish = MergeSession(sessionAfterStart, finished.State, finished.Effects, context.NowUtc);
 
         List<PrintOutput> newOutputs = [];
-        if (runAdapter.Step == StepKind.PhotoshopOutput)
+        if (work.Step == StepKind.PhotoshopOutput)
         {
             OperationResult<PrintOutput> output = BuildPrintOutput(
-                aggregate.Session.Id, revisionId, started.State, work.Value, context);
+                aggregate.Session.Id, revisionId, started.State, produced.Value, context);
             if (output.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(output.Failure);
@@ -507,14 +597,14 @@ public sealed class SessionService : ISessionService
 
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
-        WorkflowEffect.RunAdapter runAdapter, CommandContext context, CancellationToken cancellationToken)
+        ProducingWork work, CommandContext context, CancellationToken cancellationToken)
     {
         WorkspaceDirRef session = aggregate.Session.Workspace;
-        WorkspaceFileRef? input = runAdapter.InputRevision is RevisionId inputId
+        WorkspaceFileRef? input = work.InputRevision is RevisionId inputId
             ? aggregate.Revisions.FirstOrDefault(r => r.Id == inputId)?.File
             : null;
 
-        if (runAdapter.Adapter == AdapterKind.None)
+        if (work.Adapter == AdapterKind.None)
         {
             // ApprovedPngExport: promote the approved upstream bytes unchanged. The existing
             // hash-bound approval already covers the promoted file by construction (plan §7.3).
@@ -550,7 +640,7 @@ public sealed class SessionService : ISessionService
         if (input is not { } upstreamRef)
         {
             return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
-                FailureCode.PreconditionNotMet, $"Step {runAdapter.Step} has no upstream Revision to work from.");
+                FailureCode.PreconditionNotMet, $"Step {work.Step} has no upstream Revision to work from.");
         }
 
         OperationResult<WorkspaceFileRef> workingCopy =
@@ -560,11 +650,11 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(workingCopy.Failure);
         }
 
-        switch (runAdapter.Adapter)
+        switch (work.Adapter)
         {
             case AdapterKind.Meitu:
             {
-                MeituOperation operation = runAdapter.Operation == OperationKind.Enhance
+                MeituOperation operation = work.Operation == OperationKind.Enhance
                     ? MeituOperation.Enhance
                     : MeituOperation.RemoveBackground;
 
@@ -640,6 +730,23 @@ public sealed class SessionService : ISessionService
                         $"Step {definition.Kind} is internal but has no deterministic processor.");
                 }
 
+                // A rectangle on the work means a human chose it, so the alpha scan is skipped
+                // entirely: the automatic path already refused this file, and re-running it
+                // would refuse again for the same reason (Part C2 §10, §21).
+                if (work.ManualCrop is { } crop)
+                {
+                    OperationResult<ManualCropResult> cropped = await _manualCrop.CropAsync(
+                        new ManualCropRequest(
+                            workingCopy.Value,
+                            SiblingOf(workingCopy.Value, ManualCropOutputFileName),
+                            crop),
+                        cancellationToken);
+
+                    return cropped.IsFailure
+                        ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(cropped.Failure)
+                        : await InspectAsync(cropped.Value.ProducedFile, cancellationToken);
+                }
+
                 OperationResult<TrimResult> trimmed = await _trim.TrimAsync(
                     new TrimRequest(
                         workingCopy.Value,
@@ -672,7 +779,7 @@ public sealed class SessionService : ISessionService
 
             default:
                 return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
-                    FailureCode.PreconditionNotMet, $"Unsupported adapter kind '{runAdapter.Adapter}'.");
+                    FailureCode.PreconditionNotMet, $"Unsupported adapter kind '{work.Adapter}'.");
         }
     }
 

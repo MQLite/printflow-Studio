@@ -256,6 +256,102 @@ public sealed class ViewRenderingTests
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
 
+    // -------------------------------------------------------------------------------------
+    // Epic 11200 Part C2 §33: the crop surface, and the review it leads to
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The crop surface renders, over a real image, fitted and magnified (§33).
+    /// </summary>
+    /// <remarks>
+    /// Every binding this slice added is resolved for the first time here: the crop pane's own
+    /// <c>DataContext</c> hop, the payload converter and checkerboard reused inside it, the two
+    /// <c>RelativeSource</c> zoom bindings on a second image, the instructions, the selection
+    /// summary and the Apply/Cancel buttons. Rendered twice for the same reason the review pair
+    /// is — fitted and magnified take different branches of the template's triggers.
+    /// <para>
+    /// The overlay <c>Canvas</c> and its outline are named elements the code-behind wires up in
+    /// the constructor, so a rendering pass is also the only automated check that those names
+    /// still resolve.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_crop_surface_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await OpaqueAssetAtTrimAsync(harness);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.CanManualCrop.ShouldBeTrue();
+        session.BeginManualCropCommand.Execute(null);
+        session.IsCropping.ShouldBeTrue();
+        session.CropPane.ShouldNotBeNull();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        // With a selection drawn, so the summary line and the enabled Apply button render too.
+        session.TrySetCropSelection(
+            new CropSurfaceLayout(12, 10, 12, 10, 12, 10, session.IsFitToViewport, session.ZoomScale),
+            2, 2, 10, 8).ShouldBeTrue();
+        session.CanApplyManualCrop.ShouldBeTrue();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        session.ZoomInCommand.Execute(null);
+        session.IsFitToViewport.ShouldBeFalse();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>A refused selection renders its notice rather than a blank line (§23, §33).</summary>
+    [Fact]
+    public async Task The_session_screen_renders_a_refused_crop_selection_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await OpaqueAssetAtTrimAsync(harness);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+        session.BeginManualCropCommand.Execute(null);
+
+        session.TrySetCropSelection(
+            new CropSurfaceLayout(12, 10, 12, 10, 12, 10, session.IsFitToViewport, session.ZoomScale),
+            5, 5, 5, 5).ShouldBeFalse();
+        session.IsCropSelectionInvalid.ShouldBeTrue();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>The Before/After review of a manual crop renders (§33).</summary>
+    /// <remarks>
+    /// The state the operator lands in after pressing Apply. It goes through the same review
+    /// template as an automatic trim's result — which is the point of §18 — so what this really
+    /// checks is that the crop surface has stood down and the ordinary panes are back.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_manual_crop_result_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await OpaqueAssetAtTrimAsync(harness);
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+        session.BeginManualCropCommand.Execute(null);
+        session.TrySetCropSelection(
+            new CropSurfaceLayout(12, 10, 12, 10, 12, 10, session.IsFitToViewport, session.ZoomScale),
+            3, 2, 9, 7).ShouldBeTrue();
+
+        await session.ApplyManualCropCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.IsCropping.ShouldBeFalse();
+        session.IsReviewRequired.ShouldBeTrue();
+        session.PreviewPanes.Count.ShouldBe(2);
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
     /// <summary>A preview that could not be produced renders its notice, not a blank box (§21).</summary>
     [Fact]
     public async Task The_session_screen_renders_an_unavailable_preview_with_no_binding_errors()
@@ -283,6 +379,31 @@ public sealed class ViewRenderingTests
         session.PreviewPanes[0].IsUnavailable.ShouldBeTrue();
 
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// Imports a no-alpha PREPARE_ASSET session and drives it as far as Trim (Part C2 §33).
+    /// </summary>
+    /// <remarks>
+    /// Both Meitu steps are skipped rather than run, so the file Trim receives is the operator's
+    /// own opaque original. Running the fake enhancement first would leave Trim looking at
+    /// whatever that adapter wrote, and whether <i>that</i> has an alpha channel is the fake's
+    /// business — which would make the manual-crop state this helper exists to reach depend on a
+    /// double's implementation detail.
+    /// </remarks>
+    private static async Task<SessionViewModel> OpaqueAssetAtTrimAsync(HomeScreenHarness harness)
+    {
+        harness.FilePicker.Path = harness.Inner.WriteOpaqueSourcePng("crop-render.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+
+        session.Notice.ShouldBeNull();
+        return session;
     }
 
     /// <summary>Imports a PREPARE_ASSET session and drives it as far as Trim.</summary>

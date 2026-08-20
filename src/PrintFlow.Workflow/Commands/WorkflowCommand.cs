@@ -4,6 +4,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Workflow.Commands;
 
@@ -54,6 +55,25 @@ public abstract record WorkflowCommand
 
     /// <summary>Return a rejected, failed or interrupted step to a state where a new attempt is legal.</summary>
     public sealed record Retry(StepKind Step) : WorkflowCommand;
+
+    /// <summary>
+    /// Crop <paramref name="Crop"/> out of the step's upstream Revision, because automatic
+    /// trimming could not decide the rectangle (Epic 11200 Part C2 §12).
+    /// </summary>
+    /// <remarks>
+    /// An operator command like any other, and emphatically <b>not</b> a
+    /// <see cref="HandOff"/>: the work stays inside PrintFlow, the session stays
+    /// <c>Active</c>, and the result goes through the same attempt, hash and review machinery
+    /// every other produced file does. What it is not is a general image editor — the only
+    /// thing the operator supplies is a rectangle (Part C2 §4, §10).
+    /// <para>
+    /// <paramref name="Crop"/> is in the <b>source image's own pixel coordinates</b>. A
+    /// viewport rectangle would mean the same drag produced a different crop depending on the
+    /// window size, so the display-to-source mapping happens on the review surface and only
+    /// its answer reaches a command (Part C2 §6, §7).
+    /// </para>
+    /// </remarks>
+    public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop) : WorkflowCommand;
 
     /// <summary>Skip a skippable step. Creates no Revision.</summary>
     public sealed record Skip(StepKind Step, string? Reason = null) : WorkflowCommand

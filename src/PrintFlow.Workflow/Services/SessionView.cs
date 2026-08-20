@@ -135,6 +135,16 @@ public sealed record PrintOutputView(
 /// The failure code of the current step's most recent attempt, when that step is
 /// <see cref="StepState.Failed"/> (Part C1 §17).
 /// </param>
+/// <param name="CanManualCrop">
+/// Whether an operator-selected crop is a legal next action, answered by
+/// <see cref="ManualCropEligibility"/> (Epic 11200 Part C2 §3).
+/// </param>
+/// <remarks>
+/// <see cref="CanManualCrop"/> is reported rather than left to the screen because it depends on
+/// attempt history the UI does not have and must not reconstruct. It is the same predicate
+/// <see cref="SessionService"/> enforces, so an offered control and an accepted command cannot
+/// disagree.
+/// </remarks>
 public sealed record SessionView(
     SessionId Id,
     WorkflowType WorkflowType,
@@ -150,7 +160,8 @@ public sealed record SessionView(
     IReadOnlyList<PrintOutputView> Outputs,
     bool ProducesPrintOutput,
     ArtefactView? UpstreamArtefact,
-    FailureCode? CurrentStepFailure)
+    FailureCode? CurrentStepFailure,
+    bool CanManualCrop)
 {
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
@@ -201,7 +212,9 @@ public sealed record SessionView(
             [.. outputs.OrderBy(o => o.CreatedAtUtc).Select(PrintOutputView.From)],
             snapshot.Definition.Contains(StepKind.PhotoshopOutput),
             ResolveUpstream(current, revisions),
-            ResolveCurrentStepFailure(snapshot, attempts));
+            ManualCropEligibility.CurrentStepFailure(snapshot, attempts),
+            ManualCropEligibility.IsEligible(snapshot, attempts)
+                && availableCommands.Contains(CommandKind.SubmitManualCrop));
     }
 
     /// <summary>
@@ -217,41 +230,6 @@ public sealed record SessionView(
         Find(revisions, sourceId) is Revision source
             ? ArtefactView.From(source, isCurrentStepResult: false)
             : null;
-
-    /// <summary>
-    /// The code the current step's newest ended attempt failed with, while the step is Failed.
-    /// </summary>
-    /// <remarks>
-    /// Guarded on <see cref="StepState.Failed"/> rather than reported for any failed attempt in
-    /// the history: a step that failed once and then succeeded is not a failed step, and a
-    /// screen showing a stale code beside a good result would be worse than showing none. The
-    /// one consumer today is the manual-crop notice, which must survive a reload and therefore
-    /// cannot live in view-model memory (§17).
-    /// </remarks>
-    private static FailureCode? ResolveCurrentStepFailure(
-        WorkflowSnapshot snapshot, IReadOnlyList<ProcessingAttempt> attempts)
-    {
-        if (snapshot.CurrentStep is not { State: StepState.Failed } step)
-        {
-            return null;
-        }
-
-        ProcessingAttempt? newest = null;
-        foreach (ProcessingAttempt attempt in attempts)
-        {
-            if (attempt.Step != step.Step || attempt.EndedAtUtc is null)
-            {
-                continue;
-            }
-
-            if (newest is null || attempt.EndedAtUtc > newest.EndedAtUtc)
-            {
-                newest = attempt;
-            }
-        }
-
-        return newest?.Failure?.Code;
-    }
 
     /// <summary>
     /// Picks the Revision the screen should describe.

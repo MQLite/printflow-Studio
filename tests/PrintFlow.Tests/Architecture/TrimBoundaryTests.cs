@@ -1,10 +1,14 @@
 using System.Reflection;
+using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Trimming;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Architecture;
 
@@ -134,6 +138,113 @@ public sealed class TrimBoundaryTests
     }
 
     // -----------------------------------------------------------------------------
+    // Manual crop: the same boundaries, asserted separately (Epic 11200 Part C2 §36)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// The manual-crop port is declared in the workflow layer and implemented only in
+    /// Infrastructure (§36).
+    /// </summary>
+    /// <remarks>
+    /// The WIC call has exactly one home. A view model, or the workflow layer itself, growing an
+    /// implementation would mean pixel work had escaped the layer that is allowed to know what
+    /// a decoder is.
+    /// </remarks>
+    [Fact]
+    public void The_workflow_layer_declares_the_manual_crop_port_and_implements_it_only_in_infrastructure()
+    {
+        typeof(IManualCropProcessor).Assembly.ShouldBe(WorkflowLayer);
+
+        CropImplementations(Domain).ShouldBeEmpty();
+        CropImplementations(WorkflowLayer).ShouldBeEmpty();
+        CropImplementations(Shell).ShouldBeEmpty();
+
+        CropImplementations(Infrastructure).ShouldBe(
+            ["PrintFlow.Infrastructure.Imaging.WicManualCropProcessor"]);
+    }
+
+    /// <summary>
+    /// The manual-crop seam names no path (§36).
+    /// </summary>
+    /// <remarks>
+    /// The same statement <c>PreviewBoundaryTests</c> makes about previews, for the seam that
+    /// <i>writes</i>. A crop taking a path would be an arbitrary-file-write API by another name,
+    /// and no amount of validation elsewhere would make it safe.
+    /// </remarks>
+    [Fact]
+    public void The_manual_crop_seam_accepts_no_string_parameter()
+    {
+        IEnumerable<string> offenders = typeof(IManualCropProcessor).GetMethods()
+            .SelectMany(method => method.GetParameters()
+                .Where(parameter => parameter.ParameterType == typeof(string))
+                .Select(parameter => $"{method.Name}({parameter.Name})"));
+
+        offenders.ShouldBeEmpty();
+
+        // Both files it names are workspace references, resolved by the workspace and nothing else.
+        typeof(ManualCropRequest).GetProperties()
+            .Where(p => p.Name is "Input" or "ExpectedOutput")
+            .Select(p => p.PropertyType)
+            .ShouldAllBe(type => type == typeof(WorkspaceFileRef));
+    }
+
+    /// <summary>
+    /// The manual crop can reach no external application either (§36).
+    /// </summary>
+    /// <remarks>
+    /// Structural, for the same reason the trim version is: "manual crop is not Photoshop" is a
+    /// claim about what the code can do, and an absent type reference is the only form of that
+    /// claim which cannot be talked around later.
+    /// </remarks>
+    [Fact]
+    public void The_manual_crop_processor_can_reach_no_external_application_adapter()
+    {
+        Type processor = Infrastructure.GetType("PrintFlow.Infrastructure.Imaging.WicManualCropProcessor")!;
+        Type[] forbidden =
+        [
+            typeof(IMeituProcessor),
+            typeof(IPhotoshopOutputProcessor),
+            typeof(IEnvironmentGate),
+            typeof(MeituRequest),
+            typeof(PhotoshopRequest),
+            typeof(AdapterOutput),
+        ];
+
+        SignatureTypes(processor).Intersect(forbidden).ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// Manual-crop eligibility is decided in the workflow layer and nowhere else (§3, §36).
+    /// </summary>
+    /// <remarks>
+    /// The rule is a single public method, and both callers that matter are inside the workflow
+    /// layer: the read model that reports whether to offer the control, and the service that
+    /// refuses the command. The shell may read the answer but has no way to compute one — it
+    /// cannot see attempt history at all, because <c>SessionView</c> does not carry any.
+    /// </remarks>
+    [Fact]
+    public void Manual_crop_eligibility_is_decided_in_the_workflow_layer()
+    {
+        Type rule = WorkflowLayer.GetType("PrintFlow.Workflow.Services.ManualCropEligibility")!;
+        rule.IsAbstract.ShouldBeTrue("the rule is a static class, so nothing can hold an instance of it");
+        rule.IsSealed.ShouldBeTrue();
+
+        // The shell is given the verdict, not the inputs: no view model names the rule, and the
+        // read model it reads carries no attempts to re-derive it from.
+        Shell.GetTypes()
+            .Where(t => SignatureTypes(t).Contains(rule))
+            .Select(t => t.FullName!)
+            .ShouldBeEmpty();
+
+        typeof(SessionView).GetProperties()
+            .Select(p => p.PropertyType)
+            .ShouldNotContain(typeof(IReadOnlyList<ProcessingAttempt>));
+
+        typeof(SessionView).GetProperty(nameof(SessionView.CanManualCrop))!
+            .PropertyType.ShouldBe(typeof(bool));
+    }
+
+    // -----------------------------------------------------------------------------
     // The step definition itself
     // -----------------------------------------------------------------------------
 
@@ -171,17 +282,35 @@ public sealed class TrimBoundaryTests
     // -----------------------------------------------------------------------------
 
     /// <summary>
-    /// The UI drives Trim through <c>ISessionService</c>, exactly as it drives every other step.
+    /// The UI drives Trim and manual crop through <c>ISessionService</c>, exactly as it drives
+    /// every other step.
     /// </summary>
     /// <remarks>
-    /// Part B adds no review surface. A view model holding an <see cref="ITrimProcessor"/>
-    /// would mean the screen had acquired its own route to pixel work, bypassing the attempt,
-    /// hash and review machinery entirely.
+    /// A view model holding an <see cref="ITrimProcessor"/> or an
+    /// <see cref="IManualCropProcessor"/> would mean the screen had acquired its own route to
+    /// pixel work, bypassing the attempt, hash and review machinery entirely. The request and
+    /// result types are listed too, because holding one is the same thing one step removed.
+    /// <para>
+    /// <b>What changed in Part C2, and why.</b> <see cref="TrimBounds"/> used to be on this list.
+    /// It no longer is: a manual crop <i>is</i> an operator-supplied rectangle, so the screen
+    /// that offers the tool has to be able to name one, and
+    /// <c>WorkflowCommand.SubmitManualCrop</c> carries it. Reusing the existing half-open
+    /// rectangle rather than inventing a parallel UI type is deliberate (Part C2 §6) — a second
+    /// rectangle type would need a conversion at the seam, and a conversion is where an
+    /// off-by-one clips a column of artwork. Nothing is weakened by the removal: a rectangle is
+    /// pure geometry with no route to a file, and the test below states the property that
+    /// actually matters, which is that the only thing the shell can do with one is put it in a
+    /// command.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void No_view_model_holds_a_trim_processor_or_trim_geometry()
+    public void No_view_model_holds_a_trim_or_manual_crop_processor()
     {
-        Type[] forbidden = [typeof(ITrimProcessor), typeof(TrimRequest), typeof(TrimResult), typeof(TrimBounds)];
+        Type[] forbidden =
+        [
+            typeof(ITrimProcessor), typeof(TrimRequest), typeof(TrimResult),
+            typeof(IManualCropProcessor), typeof(ManualCropRequest), typeof(ManualCropResult),
+        ];
 
         List<string> offenders = [];
         foreach (Type type in Shell.GetTypes()
@@ -195,6 +324,53 @@ public sealed class TrimBoundaryTests
 
         offenders.ShouldBeEmpty();
     }
+
+    /// <summary>
+    /// A crop rectangle leaves the shell only inside a <c>WorkflowCommand</c> (Part C2 §12).
+    /// </summary>
+    /// <remarks>
+    /// The replacement for the blanket ban above, and a sharper statement than it was. It does
+    /// not ask whether the shell mentions a rectangle — it must, to let an operator draw one —
+    /// but whether the shell has any way to <i>use</i> one except by handing it to
+    /// <c>ISessionService.ExecuteAsync</c>. Two halves:
+    /// <list type="bullet">
+    ///   <item>exactly one command carries a <see cref="TrimBounds"/>, so there is one command
+    ///         shape a rectangle can travel in;</item>
+    ///   <item>no type declared in the shell names the manual-crop port or its request/result
+    ///         records, so there is no second route past the command at all.</item>
+    /// </list>
+    /// The port records themselves do carry a rectangle, and must: they are the seam
+    /// <see cref="IManualCropProcessor"/> is defined in terms of. What matters is that the
+    /// only code able to construct one is on the far side of the service, together with the
+    /// eligibility guard, the attempt row, the inspection, the hash and the review.
+    /// </remarks>
+    [Fact]
+    public void A_crop_rectangle_reaches_the_workflow_layer_only_as_a_command()
+    {
+        IEnumerable<string> commandsCarryingBounds = WorkflowLayer.GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(WorkflowCommand)))
+            .Where(t => t.GetConstructors()
+                .SelectMany(c => c.GetParameters())
+                .Any(p => p.ParameterType == typeof(TrimBounds)))
+            .Select(t => t.FullName!);
+
+        commandsCarryingBounds.ShouldBe([typeof(WorkflowCommand.SubmitManualCrop).FullName!]);
+
+        Type[] cropSeam = [typeof(IManualCropProcessor), typeof(ManualCropRequest), typeof(ManualCropResult)];
+
+        IEnumerable<string> shellTypesNamingTheSeam = Shell.GetTypes()
+            .Where(t => SignatureTypes(t).Intersect(cropSeam).Any())
+            .Select(t => t.FullName!);
+
+        shellTypesNamingTheSeam.ShouldBeEmpty(
+            "the shell submits a rectangle through ISessionService and never performs the crop itself.");
+    }
+
+    private static string[] CropImplementations(Assembly assembly) =>
+        [.. assembly.GetTypes()
+            .Where(t => t is { IsInterface: false, IsAbstract: false } && typeof(IManualCropProcessor).IsAssignableFrom(t))
+            .Select(t => t.FullName!)
+            .Order(StringComparer.Ordinal)];
 
     private static string[] Implementations(Assembly assembly) =>
         [.. assembly.GetTypes()

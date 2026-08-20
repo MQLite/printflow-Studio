@@ -4,6 +4,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Effects;
@@ -48,6 +49,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.Approve c => Approve(state, c, context),
             WorkflowCommand.Reject c => Reject(state, c, context),
             WorkflowCommand.Retry c => Retry(state, c, context),
+            WorkflowCommand.SubmitManualCrop c => SubmitManualCrop(state, c, context),
             WorkflowCommand.Skip c => Skip(state, c, context),
             WorkflowCommand.HandOff c => HandOff(state, c, context),
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
@@ -634,6 +636,82 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(newState);
     }
 
+    /// <summary>
+    /// Starts an attempt that crops the step's upstream Revision to the operator's rectangle
+    /// (Epic 11200 Part C2 §12, §13).
+    /// </summary>
+    /// <remarks>
+    /// <b>This is half of the eligibility rule, and deliberately the half a pure reducer can
+    /// answer.</b> A <see cref="WorkflowSnapshot"/> holds no attempt history, so the engine can
+    /// see that Trim is the current step and that it is Failed or RetryRequired, but not
+    /// <i>why</i>. The other half — that the failure really was
+    /// <c>ManualCropRequired</c>, or that the rejected result really was a manual crop — is
+    /// checked by <see cref="Services.ManualCropEligibility"/> in the application layer, which
+    /// does hold the attempts. Both must pass before a crop runs; neither is a UI concern
+    /// (Part C2 §3).
+    /// <para>
+    /// Structured exactly like <see cref="StartStep"/>, including the fresh working copy, so a
+    /// manual crop is an ordinary producing attempt in every respect that matters to the audit
+    /// trail. It is not a <see cref="HandOff"/> and does not change the session state
+    /// (Part C2 §4).
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition SubmitManualCrop(
+        WorkflowSnapshot state, WorkflowCommand.SubmitManualCrop command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, command.Step, CommandKind.SubmitManualCrop);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        // Trim is the only step an operator-drawn rectangle means anything for. Enhancement and
+        // BackgroundRemoval fail for reasons a crop cannot fix, and PhotoshopOutput produces a
+        // production TIFF from confirmed dimensions rather than from a drag.
+        if (command.Step != StepKind.Trim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.CommandNotApplicable,
+                $"Step {command.Step} has no manual crop; only Trim can be cropped by hand.");
+        }
+
+        if (command.Crop.IsEmpty)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, "A manual crop rectangle contains at least one pixel.");
+        }
+
+        RevisionId? input = state.UpstreamRevisionOf(command.Step);
+        if (input is not RevisionId source)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"Step {command.Step} has no upstream Revision to crop.");
+        }
+
+        SessionStep step = resolved.Step!;
+
+        List<WorkflowEffect> effects =
+        [
+            // Every attempt, automatic or manual, works on a fresh copy (MVP design invariant 8).
+            new WorkflowEffect.CreateWorkingCopy(command.Step, source, WorkspaceArea.Working),
+
+            new WorkflowEffect.RecordAttemptStarted(
+                context.NewAttemptId, command.Step, OperationKind.ManualImport, source, step.AttemptCount),
+
+            new WorkflowEffect.RunManualCrop(context.NewAttemptId, command.Step, source, command.Crop),
+        ];
+
+        SessionStep started = step with
+        {
+            State = StepState.Processing,
+            AttemptCount = step.AttemptCount + 1,
+            EnteredStateAtUtc = context.NowUtc,
+        };
+
+        return WorkflowTransition.Accepted(state.WithStep(started), effects);
+    }
+
     private static WorkflowTransition Skip(
         WorkflowSnapshot state, WorkflowCommand.Skip command, CommandContext context)
     {
@@ -985,6 +1063,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.ConfirmOriginal => new WorkflowCommand.ConfirmOriginal(),
             CommandKind.StartStep => new WorkflowCommand.StartStep(step),
             CommandKind.Retry => new WorkflowCommand.Retry(step),
+            CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(step, ProbeCrop),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
             CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
@@ -1032,4 +1111,21 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// ever reaches a session (MVP design §12).
     /// </remarks>
     private const WhiteUnderbaseBranch ProbeBranch = WhiteUnderbaseBranch.W1_1px;
+
+    /// <summary>
+    /// The stand-in rectangle used when probing <see cref="CommandKind.SubmitManualCrop"/>.
+    /// </summary>
+    /// <remarks>
+    /// A single pixel: valid by construction, so the non-empty guard is satisfied and the probe
+    /// reports the question a screen is actually asking — <i>may a manual crop be started for
+    /// this step at all</i>. The operator's own rectangle still goes through every guard, in
+    /// the engine and again in the processor, when the real command is issued. It is never
+    /// persisted and never cropped to: a probe applies nothing.
+    /// <para>
+    /// A positive probe is necessary but not sufficient for the crop control to appear. The
+    /// screen reads <c>SessionView.CanManualCrop</c>, which also requires the attempt history
+    /// to show a genuine <c>ManualCropRequired</c> condition (Part C2 §3).
+    /// </para>
+    /// </remarks>
+    private static readonly TrimBounds ProbeCrop = TrimBounds.Canvas(1, 1);
 }

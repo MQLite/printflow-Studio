@@ -23,6 +23,7 @@ public enum CommandKind
     Retry,
     Skip,
     HandOff,
+    SubmitManualCrop,
     SetPrintDimensions,
     SelectWhiteUnderbaseBranch,
     ReturnToStep,
@@ -105,12 +106,16 @@ public static class TransitionTable
         // A finished step is reopened only by returning to it, which is session-scoped.
         [StepState.Approved] = [],
 
+        // SubmitManualCrop belongs here as well as under Failed: rejecting a manual crop
+        // leaves the step RetryRequired, and the corrective path after that is another manual
+        // crop rather than the deterministic trim that already refused (Part C2 §21).
         [StepState.RetryRequired] =
         [
             CommandKind.StartStep,
             CommandKind.Retry,
             CommandKind.Skip,
             CommandKind.HandOff,
+            CommandKind.SubmitManualCrop,
         ],
 
         [StepState.Skipped] = [],
@@ -121,6 +126,7 @@ public static class TransitionTable
             CommandKind.Retry,
             CommandKind.Skip,
             CommandKind.HandOff,
+            CommandKind.SubmitManualCrop,
         ],
 
         [StepState.Interrupted] =
@@ -176,6 +182,10 @@ public static class TransitionTable
 
         CommandKind.Skip => StepState.Skipped,
         CommandKind.SetPrintDimensions => StepState.Approved,
+
+        // A submitted crop starts an attempt, exactly as StartStep does. Its result is a
+        // Revision that still has to be reviewed; nothing here approves anything (Part C2 §17).
+        CommandKind.SubmitManualCrop => StepState.Processing,
 
         // A produced result that needs no review is approved by construction: for
         // ApprovedPngExport the bytes are unchanged, so the upstream hash-bound approval

@@ -215,14 +215,29 @@
 
             <!--
                 A trim that cannot honestly decide (Epic 11200 Part C1 §17). Shown in addition
-                to the failure line above, never instead of it, and offering no crop control:
-                the tool arrives in the next slice, and there is no fabricated "after" beside
-                this message because no Revision was produced.
+                to the failure line above, never instead of it. There is still no fabricated
+                "after" beside this message, because no Revision was produced — what Part C2
+                adds is the way forward: the button below.
             -->
             <TextBlock Text="{Binding ManualCropNotice}"
                        TextWrapping="Wrap"
                        Margin="0,0,0,6"
                        Visibility="{Binding IsManualCropRequired, Converter={StaticResource BoolToVisibility}}" />
+
+            <!--
+                Manual Crop (Part C2 §3). Its visibility is CanManualCrop, which the workflow
+                layer answers from the session state, the step state and the attempt history —
+                this file states no condition of its own, which is what "do not infer eligibility
+                in XAML" asks for. It is deliberately not bound to IsManualCropRequired: that
+                notice covers only the first of the two openings, and the second — offering
+                another crop after one was rejected — has no failure code to show (§21).
+            -->
+            <Button Content="{Binding BeginManualCropLabel}"
+                    Command="{Binding BeginManualCropCommand}"
+                    HorizontalAlignment="Left"
+                    Padding="14,6"
+                    Margin="0,0,0,8"
+                    Visibility="{Binding CanManualCrop, Converter={StaticResource BoolToVisibility}}" />
 
             <TextBlock Text="{Binding PlaceholderNotice}"
                        TextWrapping="Wrap"
@@ -287,8 +302,28 @@
                 from one that still exists. The pairing is decided in the workflow layer from
                 Revision.SourceRevisionId; this file only lays out what it was given (§9).
             -->
-            <DockPanel Grid.Row="1" Margin="0,14,0,0"
-                       Visibility="{Binding HasPreview, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel Grid.Row="1" Margin="0,14,0,0">
+                <DockPanel.Style>
+                    <Style TargetType="DockPanel">
+                        <!--
+                            The review panes and the crop surface share this row, and exactly one
+                            of them is up at a time: while a rectangle is being drawn, the drawing
+                            is the task, and leaving the read-only panes beside it would invite a
+                            drag on the wrong image.
+                        -->
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasPreview}" Value="True" />
+                                    <Condition Binding="{Binding IsCropping}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DockPanel.Style>
+
                 <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding PreviewHeading}"
@@ -332,6 +367,159 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
+            </DockPanel>
+
+            <!--
+                The manual crop surface (Epic 11200 Part C2 §5, §7, §8).
+
+                Same row as the review panes, and shown instead of them. The image is the pane
+                the C1 preview seam already produced, drawn exactly as a review pane is — same
+                checkerboard, same Uniform/None stretch pair, same zoom transform — so the
+                rectangle the operator draws sits over the artwork they were just looking at.
+
+                §8, the interaction, stated: dragging draws a crop rectangle and nothing else.
+                There is no drag-to-pan to disable, because panning has always been the
+                scrollbars (Part C1 §13); a magnified image is navigated with them, and the
+                selection stays on the same artwork because it is stored in source pixels and
+                re-projected. There is no spacebar modifier and no transform handle — drawing a
+                new rectangle replaces the old one, which is the whole of the MVP interaction.
+
+                CropOverlay sits inside the scrolled content rather than over the ScrollViewer,
+                which is what keeps the scrollbars usable and what removes scroll offset from
+                the coordinate mapping entirely: a mouse position on this canvas is already a
+                position in the scrolled content (see CropSurfaceLayout).
+            -->
+            <DockPanel Grid.Row="1" Margin="0,14,0,0"
+                       Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding ManualCropHeading}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <TextBlock Text="{Binding ZoomLabel}"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.75"
+                                   MinWidth="52"
+                                   TextAlignment="Right"
+                                   Margin="0,0,10,0" />
+                        <Button Content="{Binding ZoomOutLabel}"
+                                Command="{Binding ZoomOutCommand}"
+                                IsEnabled="{Binding CanZoomOut}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ZoomInLabel}"
+                                Command="{Binding ZoomInCommand}"
+                                IsEnabled="{Binding CanZoomIn}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ResetZoomLabel}"
+                                Command="{Binding ResetZoomCommand}"
+                                Padding="10,4" />
+                    </StackPanel>
+                </DockPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <TextBlock Text="{Binding ManualCropInstructions}"
+                               TextWrapping="Wrap"
+                               Opacity="0.75"
+                               Margin="0,0,0,4" />
+
+                    <TextBlock Text="{Binding CropSelectionSummary}"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,4" />
+
+                    <!-- A refused selection says so and stops there; nothing else changes (§23). -->
+                    <TextBlock Text="{Binding ManualCropInvalidNotice}"
+                               TextWrapping="Wrap"
+                               FontStyle="Italic"
+                               Margin="0,0,0,6"
+                               Visibility="{Binding IsCropSelectionInvalid,
+                                            Converter={StaticResource BoolToVisibility}}" />
+
+                    <StackPanel Orientation="Horizontal">
+                        <!--
+                            Apply is the only control on this surface that reaches the service.
+                            Cancel calls a command that touches nothing at all (§22).
+                        -->
+                        <Button Content="{Binding ApplyManualCropLabel}"
+                                Command="{Binding ApplyManualCropCommand}"
+                                IsEnabled="{Binding CanApplyManualCrop}"
+                                Padding="14,6"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding CancelManualCropLabel}"
+                                Command="{Binding CancelManualCropCommand}"
+                                Padding="14,6" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
+                        DataContext="{Binding CropPane}">
+                    <ScrollViewer>
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
+                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                 Value="True">
+                                        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+                                        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
+
+                        <Grid Background="{StaticResource TransparencyCheckerboard}">
+                            <Image Source="{Binding Payload, Converter={StaticResource PreviewPayload}}"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                                <Image.LayoutTransform>
+                                    <ScaleTransform
+                                        ScaleX="{Binding DataContext.ZoomScale,
+                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        ScaleY="{Binding DataContext.ZoomScale,
+                                                 RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                </Image.LayoutTransform>
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Stretch" Value="None" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
+                                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         Value="True">
+                                                <Setter Property="Stretch" Value="Uniform" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+
+                            <!--
+                                Transparent so it is hit-testable across the whole surface,
+                                including the letterboxed margins — a drag that begins beside the
+                                image and ends on it is still a drag the operator made, and the
+                                geometry clamps it to the part that overlaps (§23).
+                            -->
+                            <Canvas x:Name="CropOverlay"
+                                    Background="Transparent"
+                                    ClipToBounds="True"
+                                    Cursor="Cross">
+                                <Rectangle x:Name="CropSelectionOutline"
+                                           Visibility="Collapsed"
+                                           Stroke="#FF1E88E5"
+                                           StrokeThickness="1.5"
+                                           StrokeDashArray="4 3"
+                                           Fill="#221E88E5"
+                                           IsHitTestVisible="False" />
+                            </Canvas>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
             </DockPanel>
 
             <!--

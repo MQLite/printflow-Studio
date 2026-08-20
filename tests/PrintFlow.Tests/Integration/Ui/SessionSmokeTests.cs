@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,6 +14,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
@@ -493,6 +495,191 @@ public sealed class SessionSmokeTests
         }
     }
 
+    // -------------------------------------------------------------------------------------
+    // Smoke I — Epic 11200 Part C2 §35: the manual-crop journey, through the real graph
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A no-alpha photo through the whole manual-crop journey: refuse, draw, apply, review,
+    /// approve, export, complete (Part C2 §35).
+    /// </summary>
+    /// <remarks>
+    /// <b>No human looked at this.</b> §35 asks for a visual pass on an interactive desktop, and
+    /// this build has none, so what stands in for it is stated plainly rather than implied: the
+    /// real composed graph from <see cref="ApplicationStartup"/> — including the real
+    /// <c>WicManualCropProcessor</c> resolved from the container — walked from Home to
+    /// completion, with each state measured and arranged for real and failing on any binding
+    /// error. Nobody has confirmed by eye that the rectangle sits over the artwork.
+    /// <para>
+    /// What <i>is</i> checked automatically, and is the closest available answer to "does the
+    /// selection align with the image", is the geometry: the crop surface is arranged at a real
+    /// size and the drag is mapped through the same <see cref="CropSurfaceLayout"/> the view
+    /// uses, at both fit and 200%, and must land on the same source rectangle both times.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Smoke_I_a_no_alpha_photo_is_cropped_by_hand_and_completes()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        // 12×10, opaque, no alpha channel at all — the case automatic trimming must refuse.
+        SessionViewModel session = await app.ImportAndChooseAsync(
+            "smoke-i.png",
+            WorkflowType.PrepareAsset,
+            SyntheticImages.OpaqueRgbPng(12, 10, (x, y) => ((byte)(x * 20), (byte)(y * 25), (byte)0x60)));
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+
+        // The automatic trim refuses, and the screen offers the crop rather than a dead end.
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsManualCropRequired.ShouldBeTrue();
+        session.CanManualCrop.ShouldBeTrue();
+
+        TrimBounds expected = TrimBounds.FromEdges(3, 2, 9, 7);
+
+        // The crop surface is arranged for real on a second screen over the same session — the
+        // one that is rendered is never driven afterwards, because a rendered ItemsControl binds
+        // its collection to the render thread's dispatcher for good. Its measured geometry is
+        // what the drag is mapped through: at fit and again at 200%, which must agree.
+        CropSurfaceLayout fitted;
+        using (SessionScreen probe = await app.OpenSecondScreenAsync())
+        {
+            probe.Model.BeginManualCropCommand.Execute(null);
+            probe.Model.CropPane.ShouldNotBeNull();
+
+            fitted = ArrangeCropSurface(probe.Model);
+            fitted.IsUsable.ShouldBeTrue();
+            DragOnto(probe.Model, fitted, expected).ShouldBe(expected);
+
+            probe.Model.ZoomInCommand.Execute(null);
+            probe.Model.ZoomInCommand.Execute(null);
+            probe.Model.ZoomInCommand.Execute(null);
+            probe.Model.IsFitToViewport.ShouldBeFalse();
+
+            CropSurfaceLayout magnified = ArrangeCropSurface(probe.Model);
+            magnified.DisplayScale.ShouldBe(probe.Model.ZoomScale, 1e-9);
+            DragOnto(probe.Model, magnified, expected).ShouldBe(expected);
+        }
+
+        // The operator draws the same rectangle on the live screen and applies it.
+        session.BeginManualCropCommand.Execute(null);
+        DragOnto(session, fitted, expected).ShouldBe(expected);
+
+        await session.ApplyManualCropCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.IsCropping.ShouldBeFalse();
+        session.IsReviewRequired.ShouldBeTrue();
+
+        // And the review that follows renders as an ordinary Before/After pair.
+        using (SessionScreen review = await app.OpenSecondScreenAsync())
+        {
+            ReviewScreenFacts rendered = AssertComparisonRenders(review.Model);
+            rendered.BitmapSizes.ShouldBe([(12, 10), (6, 5)]);
+        }
+
+        // Approve, export, complete — nothing about the rest of the workflow is special.
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.CompleteCommand.ExecuteAsync(null);
+
+        session.Notice.ShouldBeNull();
+        session.IsReadOnly.ShouldBeTrue();
+
+        SessionAggregate aggregate = await app.LoadAsync(app.OpenSessionId);
+        aggregate.Session.State.ShouldBe(SessionState.Completed);
+
+        Revision manual = aggregate.Revisions.Single(r => r.Operation == OperationKind.ManualImport);
+        manual.Facts.PixelWidth.ShouldBe(expected.Width);
+        manual.Facts.PixelHeight.ShouldBe(expected.Height);
+
+        // The refusal and the crop are both in the history, produced by the two named processors.
+        aggregate.Attempts.ShouldContain(a =>
+            a.AdapterId == "internal-alpha-trim-v1" && a.Status == AttemptStatus.Failed);
+        aggregate.Attempts.ShouldContain(a =>
+            a.AdapterId == "internal-manual-crop-v1" && a.OutputRevisionId == manual.Id);
+
+        // The approved PNG on disk is the cropped canvas.
+        Revision exported = aggregate.Revisions.Single(r => r.Operation == OperationKind.PromoteApproved);
+        File.Exists(app.Workspace.ResolveAbsolute(exported.File)).ShouldBeTrue();
+        exported.Facts.Sha256.ShouldBe(manual.Facts.Sha256);
+    }
+
+    /// <summary>
+    /// A throwaway session screen, opened on the session's current state purely to be rendered.
+    /// </summary>
+    /// <remarks>
+    /// <c>using</c>-scoped so the "render it, then stop using it" rule is visible in the test
+    /// rather than remembered. It exists because rendering costs the view model something
+    /// permanent: an <c>ItemsControl</c> bound to <c>PreviewPanes</c> creates a
+    /// <c>CollectionView</c> owned by the render thread's dispatcher, and that thread is gone by
+    /// the time the next command would touch the collection. Only tests hit this — the
+    /// application renders on the thread it drives from.
+    /// </remarks>
+    private sealed class SessionScreen : IDisposable
+    {
+        public SessionScreen(SessionViewModel model) => Model = model;
+
+        public SessionViewModel Model { get; }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Arranges the session screen and reads the crop surface's real measured geometry.
+    /// </summary>
+    /// <remarks>
+    /// The numbers come from the arranged tree — the overlay canvas the view's own pointer
+    /// handlers measure against — rather than from figures a test chose. That is what makes the
+    /// mapping assertions above statements about the screen rather than about arithmetic already
+    /// covered by <c>CropSurfaceLayoutTests</c>.
+    /// </remarks>
+    private static CropSurfaceLayout ArrangeCropSurface(SessionViewModel session)
+    {
+        ArtefactPreviewPane pane = session.CropPane!;
+
+        RenderResult<(double Width, double Height)> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+            () => new SessionScreenView { DataContext = session },
+            WpfRendering.ReviewViewport,
+            tree =>
+            {
+                Canvas overlay = tree.OfType<Canvas>().Single(c => c.Name == "CropOverlay");
+                return (overlay.ActualWidth, overlay.ActualHeight);
+            });
+
+        return new CropSurfaceLayout(
+            rendered.Facts.Width, rendered.Facts.Height,
+            pane.PayloadPixelWidth, pane.PayloadPixelHeight,
+            pane.SourcePixelWidth, pane.SourcePixelHeight,
+            session.IsFitToViewport, session.ZoomScale);
+    }
+
+    /// <summary>
+    /// Drags over the artwork <paramref name="target"/> covers and returns what was selected.
+    /// </summary>
+    /// <remarks>
+    /// The drag is expressed by projecting the intended source rectangle onto the measured
+    /// surface, which is what makes the two zoom levels comparable: the same artwork is dragged
+    /// over in both, and the answer must be the same rectangle even though the screen
+    /// coordinates are not.
+    /// </remarks>
+    private static TrimBounds DragOnto(
+        SessionViewModel session, CropSurfaceLayout layout, TrimBounds target)
+    {
+        layout.TryToSurfaceRect(target, out double x, out double y, out double width, out double height)
+            .ShouldBeTrue();
+
+        session.TrySetCropSelection(layout, x, y, x + width, y + height).ShouldBeTrue();
+        return session.CropSelection!.Value;
+    }
+
     /// <summary>
     /// What one rendered review screen turned out to contain (Part C1 §27).
     /// </summary>
@@ -567,7 +754,12 @@ public sealed class SessionSmokeTests
 
         return new ReviewScreenFacts(
             [.. tree.OfType<TextBlock>().Select(block => block.Text)],
-            tree.OfType<Grid>().Count(grid => ReferenceEquals(grid.Background, checkerboard)),
+
+            // On screen, not merely present in the tree. Since Epic 11200 Part C2 the session
+            // screen also carries a crop surface over the same checkerboard; it is collapsed
+            // during a review, so counting it would answer a different question from the one
+            // §27 asks, which is how many checkerboards the operator is looking at.
+            tree.OfType<Grid>().Count(grid => ReferenceEquals(grid.Background, checkerboard) && IsShown(grid)),
             [.. bitmaps.Select(bitmap => (bitmap.PixelWidth, bitmap.PixelHeight))],
             [.. bitmaps.Select(bitmap => bitmap.Format == PixelFormats.Bgra32)],
             [.. tree.OfType<Image>()
@@ -576,6 +768,33 @@ public sealed class SessionSmokeTests
                 .OfType<ScaleTransform>()
                 .Select(transform => transform.ScaleX)]);
     }
+
+    /// <summary>
+    /// Whether an element and every ancestor above it is <see cref="Visibility.Visible"/>.
+    /// </summary>
+    /// <remarks>
+    /// <c>UIElement.IsVisible</c> would be the obvious answer, but it is false for everything
+    /// here: it also requires a presentation source, and this harness measures and arranges
+    /// without ever showing a window. Walking the parents asks the part that is actually about
+    /// the screen's content, and walks both trees for the same reason
+    /// <c>WpfRendering.Collect</c> does — a templated element's parent may exist in only one.
+    /// </remarks>
+    private static bool IsShown(DependencyObject element)
+    {
+        for (DependencyObject? node = element; node is not null; node = ParentOf(node))
+        {
+            if (node is UIElement { Visibility: not Visibility.Visible })
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static DependencyObject? ParentOf(DependencyObject node) =>
+        (node is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(node) : null)
+        ?? LogicalTreeHelper.GetParent(node);
 
     private sealed class SmokeApplication : IDisposable
     {
@@ -655,6 +874,27 @@ public sealed class SessionSmokeTests
 
         public async Task<SessionAggregate> LoadAsync(SessionId id) =>
             (await Repository.LoadAsync(id, CancellationToken.None)).Value!;
+
+        /// <summary>
+        /// A second session screen over the same composed services, showing the open session's
+        /// current persisted state.
+        /// </summary>
+        /// <remarks>
+        /// Resolved from the container rather than constructed, so it is the same view model the
+        /// navigation service would hand an operator resuming this session — including the same
+        /// <c>IArtefactPreviewService</c> and the same real crop processor behind it.
+        /// </remarks>
+        public async Task<SessionScreen> OpenSecondScreenAsync()
+        {
+            ISessionService sessions = Services.GetRequiredService<ISessionService>();
+            SessionView current = (await sessions.LoadAsync(OpenSessionId, CancellationToken.None)).Value;
+
+            SessionViewModel model = Services.GetRequiredService<SessionViewModel>();
+            model.Open(current);
+            await model.PreviewsLoaded;
+
+            return new SessionScreen(model);
+        }
 
         public void Dispose()
         {

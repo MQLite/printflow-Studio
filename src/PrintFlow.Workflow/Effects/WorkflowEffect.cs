@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Definitions;
 
 namespace PrintFlow.Workflow.Effects;
@@ -44,6 +45,21 @@ public abstract record WorkflowEffect
         AdapterKind Adapter,
         OperationKind Operation,
         RevisionId? InputRevision) : WorkflowEffect;
+
+    /// <summary>
+    /// Crop a Revision to a rectangle the operator drew (Epic 11200 Part C2 §12).
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="RunAdapter"/> because it carries the one thing an adapter call
+    /// never does: geometry a human chose. Modelling it as data on the effect keeps the crop
+    /// rectangle on the same audited path as every other input to a producing attempt, rather
+    /// than being smuggled to the processor around the reducer.
+    /// </remarks>
+    public sealed record RunManualCrop(
+        AttemptId AttemptId,
+        StepKind Step,
+        RevisionId InputRevision,
+        TrimBounds Crop) : WorkflowEffect;
 
     /// <summary>Record the start of an attempt before any work begins, so a crash is detectable.</summary>
     public sealed record RecordAttemptStarted(

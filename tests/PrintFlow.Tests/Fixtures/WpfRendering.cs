@@ -95,6 +95,19 @@ internal static class WpfRendering
                 List<DependencyObject> elements = [];
                 Collect(view, elements);
                 facts = inspect(new RenderedTree(view, elements));
+
+                // Detach the view from the view model before the STA thread ends.
+                //
+                // A rendered Button subscribes to its bound ICommand's CanExecuteChanged, and
+                // the view model outlives this thread — so a command completing later would
+                // raise that event and the Button, owned by a thread that no longer exists,
+                // would throw a cross-thread InvalidOperationException on a thread-pool thread
+                // and take the test host down with it. Clearing the DataContext re-evaluates
+                // every binding against null, which unsubscribes the buttons. Only a test needs
+                // this: in the application the view and its view model share one UI thread for
+                // as long as both exist.
+                view.DataContext = null;
+                view.UpdateLayout();
             }
             finally
             {

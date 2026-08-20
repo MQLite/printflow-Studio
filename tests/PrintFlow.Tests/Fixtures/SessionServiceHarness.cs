@@ -58,6 +58,12 @@ internal sealed class SessionServiceHarness : IDisposable
     public ITrimProcessor Trim { get; }
 
     /// <summary>
+    /// The real WIC manual-crop processor, never a double: Epic 11200 Part C2 §27 requires the
+    /// integration flow to produce an actual cropped file whose pixels can be read back.
+    /// </summary>
+    public IManualCropProcessor ManualCrop { get; }
+
+    /// <summary>
     /// The real WIC preview decoder, for the same reason Trim is real: a doubled decoder would
     /// prove nothing about whether an operator can actually see the file (Epic 11200 Part C1 §22).
     /// </summary>
@@ -80,6 +86,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FakeMeitu = new FakeMeituProcessor(FileWorkspace);
         FakePhotoshop = new FakePhotoshopOutputProcessor(FileWorkspace);
         Trim = new DeterministicAlphaTrimProcessor(FileWorkspace);
+        ManualCrop = new WicManualCropProcessor(FileWorkspace);
         PreviewDecoder = new WicImagePreviewDecoder(FileWorkspace);
         Previews = new ArtefactPreviewService(Repository, PreviewDecoder);
     }
@@ -103,6 +110,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FakeMeitu,
         FakePhotoshop,
         Trim,
+        ManualCrop,
         Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
@@ -140,6 +148,7 @@ internal sealed class SessionServiceHarness : IDisposable
         meitu,
         FakePhotoshop,
         Trim,
+        ManualCrop,
         Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
@@ -163,6 +172,20 @@ internal sealed class SessionServiceHarness : IDisposable
     /// <summary>A PNG with an alpha channel in which nothing is visible — the manual-crop case.</summary>
     public string WriteFullyTransparentSourcePng(string fileName = "empty.png") =>
         Workspace.CreateSourceFile(fileName, SyntheticImages.PngWithAlpha(8, 8, (_, _) => 0));
+
+    /// <summary>
+    /// A 12×10 opaque PNG with no alpha channel at all — the primary manual-crop scenario.
+    /// </summary>
+    /// <remarks>
+    /// The honest version of "the operator brought a photo". <c>Bgr24</c> carries no alpha, so
+    /// the deterministic trim reports <c>ManualCropRequired</c> rather than guessing a
+    /// background from colour, and the only way forward is a human-drawn rectangle
+    /// (Epic 11200 Part C2 §28). The colour is a per-pixel gradient so a crop that took the
+    /// wrong rectangle is detectable pixel by pixel.
+    /// </remarks>
+    public string WriteOpaqueSourcePng(string fileName = "opaque.png") =>
+        Workspace.CreateSourceFile(fileName, SyntheticImages.OpaqueRgbPng(
+            12, 10, (x, y) => ((byte)(x * 20), (byte)(y * 25), (byte)((x + y) * 10))));
 
     public void Dispose()
     {
