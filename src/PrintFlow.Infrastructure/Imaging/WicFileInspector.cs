@@ -147,8 +147,8 @@ public sealed class WicFileInspector : IFileInspector
                 frame.PixelHeight,
                 frame.DpiX > 0 ? frame.DpiX : null,
                 frame.DpiY > 0 ? frame.DpiY : null,
-                InferColourMode(pixelFormat),
-                InferHasAlpha(pixelFormat));
+                WicPixelFormats.ColourModeOf(pixelFormat),
+                WicPixelFormats.HasAlpha(pixelFormat));
         }
         catch (NotSupportedException)
         {
@@ -159,56 +159,5 @@ public sealed class WicFileInspector : IFileInspector
         {
             return WicMetadata.Unavailable;
         }
-    }
-
-    private static ColourMode InferColourMode(PixelFormat format)
-    {
-        if (format == PixelFormats.Cmyk32)
-        {
-            return ColourMode.Cmyk;
-        }
-
-        if (format == PixelFormats.Gray2 || format == PixelFormats.Gray4 ||
-            format == PixelFormats.Gray8 || format == PixelFormats.Gray16 ||
-            format == PixelFormats.Gray32Float)
-        {
-            return ColourMode.Grayscale;
-        }
-
-        if (format == PixelFormats.Bgr24 || format == PixelFormats.Rgb24 ||
-            format == PixelFormats.Bgr32 || format == PixelFormats.Bgra32 ||
-            format == PixelFormats.Pbgra32 || format == PixelFormats.Bgr101010 ||
-            format == PixelFormats.Rgba64 || format == PixelFormats.Prgba64 ||
-            format == PixelFormats.Rgb48 || format == PixelFormats.Rgba128Float ||
-            format == PixelFormats.Prgba128Float || format == PixelFormats.Rgb128Float)
-        {
-            return ColourMode.Rgb;
-        }
-
-        // Indexed formats carry a palette that may itself be any of the above; claiming RGB
-        // here would be a guess PrintFlow does not make.
-        return ColourMode.Unknown;
-    }
-
-    private static bool? InferHasAlpha(PixelFormat format)
-    {
-        if (format == PixelFormats.Bgra32 || format == PixelFormats.Pbgra32 ||
-            format == PixelFormats.Rgba64 || format == PixelFormats.Prgba64 ||
-            format == PixelFormats.Rgba128Float || format == PixelFormats.Prgba128Float)
-        {
-            return true;
-        }
-
-        if (format == PixelFormats.Bgr24 || format == PixelFormats.Rgb24 ||
-            format == PixelFormats.Bgr32 || format == PixelFormats.Gray2 ||
-            format == PixelFormats.Gray4 || format == PixelFormats.Gray8 ||
-            format == PixelFormats.Gray16 || format == PixelFormats.Gray32Float ||
-            format == PixelFormats.Cmyk32 || format == PixelFormats.Bgr101010 ||
-            format == PixelFormats.Rgb48 || format == PixelFormats.Rgb128Float)
-        {
-            return false;
-        }
-
-        return null;
     }
 }

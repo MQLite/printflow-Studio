@@ -15,7 +15,7 @@ public enum AdapterKind
     /// <summary>Photoshop screen automation (Epic 11400). Only fake adapters exist today.</summary>
     Photoshop,
 
-    /// <summary>Deterministic in-process image work (Epic 11200 implements trimming).</summary>
+    /// <summary>Deterministic in-process image work: today, alpha-bound trimming.</summary>
     Internal,
 }
 

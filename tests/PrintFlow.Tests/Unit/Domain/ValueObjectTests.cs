@@ -271,6 +271,7 @@ public sealed class ValueObjectTests
             "AdapterUnavailable", "EnvironmentNotVerified", "PresetHashMismatch", "UnknownDialog",
             "Timeout", "Cancelled", "OutputMissing", "OutputUnreadable", "OutputValidationFailed",
             "RevisionIntegrityMismatch", "WorkspaceError", "PersistenceError", "PreconditionNotMet",
+            "ManualCropRequired",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

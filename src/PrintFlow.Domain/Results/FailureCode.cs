@@ -49,4 +49,15 @@ public enum FailureCode
 
     /// <summary>A required precondition of the requested operation was not satisfied.</summary>
     PreconditionNotMet,
+
+    /// <summary>
+    /// Deterministic trimming established no usable alpha content, so no automatic crop is
+    /// honest and the operator must crop manually (Epic 11200 Part B §10).
+    /// </summary>
+    /// <remarks>
+    /// Never retryable: the same bytes deterministically produce the same answer, so offering
+    /// Retry would invite the operator to keep pressing a button that cannot succeed. The
+    /// recovery action is a human crop, whose re-entry surface is Epic 11200 Part C.
+    /// </remarks>
+    ManualCropRequired,
 }

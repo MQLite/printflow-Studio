@@ -298,6 +298,8 @@ internal static class Strings
 
     internal static string Failure_PreconditionNotMet => Get(nameof(Failure_PreconditionNotMet));
 
+    internal static string Failure_ManualCropRequired => Get(nameof(Failure_ManualCropRequired));
+
     internal static string Rejection_InsufficientResult => Get(nameof(Rejection_InsufficientResult));
 
     internal static string Rejection_EdgeError => Get(nameof(Rejection_EdgeError));

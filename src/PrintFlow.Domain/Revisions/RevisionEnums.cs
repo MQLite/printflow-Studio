@@ -12,7 +12,7 @@ public enum OperationKind
     /// <summary>Meitu background removal.</summary>
     RemoveBackground,
 
-    /// <summary>Deterministic canvas trimming (algorithm: Epic 11200).</summary>
+    /// <summary>Deterministic canvas trimming to the alpha content.</summary>
     Trim,
 
     /// <summary>Promotion of an already-approved file into the Approved area; bytes unchanged.</summary>

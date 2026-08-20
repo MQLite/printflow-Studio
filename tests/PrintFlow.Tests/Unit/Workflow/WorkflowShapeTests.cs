@@ -180,8 +180,8 @@ public sealed class WorkflowShapeTests
     [Fact]
     public void Trim_is_defined_but_carries_no_external_adapter()
     {
-        // Epic 11100 defines the Trim step; the alpha-bound algorithm and the crop/review UI
-        // are Epic 11200. Nothing here routes trimming through Meitu or Photoshop.
+        // Trimming is PrintFlow's own deterministic pixel work (Epic 11200 Part B), so nothing
+        // here routes it through Meitu or Photoshop. The crop/review UI is Part C.
         foreach (WorkflowDefinition definition in WorkflowCatalog.All)
         {
             StepDefinition? trim = definition.Find(StepKind.Trim);

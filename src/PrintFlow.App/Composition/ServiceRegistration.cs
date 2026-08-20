@@ -66,6 +66,12 @@ public static class ServiceRegistration
         services.AddSingleton<IWorkstationPresetProvider>(presetProvider);
         services.AddSingleton<IFileInspector, WicFileInspector>();
         services.AddSingleton<IWorkspace>(new FileWorkspace(workspaceRootAbsolute));
+
+        // Registered unconditionally, outside RegisterAdapters: deterministic trimming drives
+        // no external application, so it has no Fake/Production duality to choose between and
+        // nothing about it is gated on the workstation environment (Epic 11200 Part B §17).
+        services.AddSingleton<ITrimProcessor, DeterministicAlphaTrimProcessor>();
+
         services.AddSingleton<IRecycleBin, RecycleBin>();
         services.AddSingleton<IEnvironmentGate, FoundationEnvironmentGate>();
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));

@@ -6,6 +6,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Effects;
@@ -36,12 +37,26 @@ public sealed class SessionService : ISessionService
     /// <summary>How far back "Recent Processing" reaches (MVP design §10).</summary>
     public static readonly TimeSpan RecentSessionWindow = TimeSpan.FromDays(30);
 
+    /// <summary>
+    /// What a deterministic trim writes beside its working copy, inside the attempt's own
+    /// directory.
+    /// </summary>
+    /// <remarks>
+    /// A fixed name rather than a preset-driven one: this is an intermediate artefact of one
+    /// attempt, not a deliverable. Operator-facing naming applies when the approved result is
+    /// promoted into <c>Approved\</c>, and coupling Trim to the naming patterns would make a
+    /// pixel operation depend on the signed preset for no gain. The extension is <c>.png</c>
+    /// because a trimmed cut-out must keep its transparency (Part B §14).
+    /// </remarks>
+    private const string TrimOutputFileName = "trimmed.png";
+
     private readonly IWorkflowEngine _engine;
     private readonly ISessionRepository _repository;
     private readonly IWorkspace _workspace;
     private readonly IFileInspector _fileInspector;
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
+    private readonly ITrimProcessor _trim;
     private readonly IWorkstationPresetProvider _presetProvider;
     private readonly IEnvironmentGate _environmentGate;
     private readonly RevisionIntegrityGuard _integrityGuard;
@@ -57,6 +72,7 @@ public sealed class SessionService : ISessionService
         IFileInspector fileInspector,
         IMeituProcessor meitu,
         IPhotoshopOutputProcessor photoshop,
+        ITrimProcessor trim,
         IWorkstationPresetProvider presetProvider,
         IEnvironmentGate environmentGate,
         IIdGenerator idGenerator,
@@ -68,6 +84,7 @@ public sealed class SessionService : ISessionService
         ArgumentNullException.ThrowIfNull(fileInspector);
         ArgumentNullException.ThrowIfNull(meitu);
         ArgumentNullException.ThrowIfNull(photoshop);
+        ArgumentNullException.ThrowIfNull(trim);
         ArgumentNullException.ThrowIfNull(presetProvider);
         ArgumentNullException.ThrowIfNull(environmentGate);
         ArgumentNullException.ThrowIfNull(idGenerator);
@@ -79,6 +96,7 @@ public sealed class SessionService : ISessionService
         _fileInspector = fileInspector;
         _meitu = meitu;
         _photoshop = photoshop;
+        _trim = trim;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _idGenerator = idGenerator;
@@ -599,12 +617,46 @@ public sealed class SessionService : ISessionService
             }
 
             case AdapterKind.Internal:
-                // Trim placeholder: Epic 11100 defines the step shape only (StepKind.Trim,
-                // its state, its position in each workflow). The real alpha-bound crop
-                // algorithm, manual adjustment and trim review belong to Epic 11200. Passing
-                // the working copy through unchanged still genuinely exercises the attempt ->
-                // validation -> revision -> review pipeline; it claims no cropping behaviour.
-                return await InspectAsync(workingCopy.Value, cancellationToken);
+            {
+                // Checked rather than assumed: AdapterKind.Internal means "deterministic
+                // in-process pixel work", and Trim is only the first such step. A future
+                // internal step routed here by accident would silently be trimmed.
+                if (definition.Kind != StepKind.Trim)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                        FailureCode.PreconditionNotMet,
+                        $"Step {definition.Kind} is internal but has no deterministic processor.");
+                }
+
+                OperationResult<TrimResult> trimmed = await _trim.TrimAsync(
+                    new TrimRequest(
+                        workingCopy.Value,
+                        SiblingOf(workingCopy.Value, TrimOutputFileName),
+                        TrimMargin.Tight),
+                    cancellationToken);
+                if (trimmed.IsFailure)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(trimmed.Failure);
+                }
+
+                TrimResult result = trimmed.Value;
+                if (result.Outcome == TrimOutcome.ManualCropRequired)
+                {
+                    // Deliberately a failed attempt and not a Revision. Nothing was produced,
+                    // so fabricating one — from the untrimmed working copy, or as a
+                    // ManualImport of a file no human has edited yet — would record a trim
+                    // that never happened. The step ends in Failed with a stable code the
+                    // manual-crop surface (Epic 11200 Part C) can route on, and the attempt
+                    // row keeps the reason (Part B §10).
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                        OperationFailure.Create(
+                            FailureCode.ManualCropRequired,
+                            result.ManualCropReason ?? "No usable alpha content was found.",
+                            isRetryable: false));
+                }
+
+                return await InspectAsync(result.ProducedFile!.Value, cancellationToken);
+            }
 
             default:
                 return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
@@ -868,6 +920,21 @@ public sealed class SessionService : ISessionService
         return WorkspaceDirRef.Create(slash < 0 ? path : path[..slash]);
     }
 
+    /// <summary>A reference to <paramref name="fileName"/> beside <paramref name="file"/>.</summary>
+    /// <remarks>
+    /// The same pure string work as <see cref="ParentDirOf"/> and for the same reason: the
+    /// Workflow project has no file-system dependency, and naming a sibling inside an attempt's
+    /// own working directory is not a path resolution — only <see cref="IWorkspace"/> turns a
+    /// reference into a real path.
+    /// </remarks>
+    private static WorkspaceFileRef SiblingOf(WorkspaceFileRef file, string fileName)
+    {
+        string path = file.RelativePath;
+        int slash = path.LastIndexOf('/');
+        string directory = slash < 0 ? string.Empty : path[..(slash + 1)];
+        return WorkspaceFileRef.Create(directory + fileName, file.Area);
+    }
+
     /// <summary>
     /// The file name component of an absolute path, without touching the file system.
     /// </summary>
@@ -895,7 +962,7 @@ public sealed class SessionService : ISessionService
         AdapterKind.None => "internal-promote-v1",
         AdapterKind.Meitu => _meitu.AdapterId,
         AdapterKind.Photoshop => _photoshop.AdapterId,
-        AdapterKind.Internal => "internal-trim-placeholder-v1",
+        AdapterKind.Internal => _trim.ProcessorId,
         _ => "unknown",
     };
 

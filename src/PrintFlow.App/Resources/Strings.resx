@@ -252,6 +252,9 @@
   <data name="Failure_PreconditionNotMet" xml:space="preserve">
     <value>This action is not possible in the session's current state.</value>
   </data>
+  <data name="Failure_ManualCropRequired" xml:space="preserve">
+    <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
+  </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
   <data name="Rejection_MissingContent" xml:space="preserve"><value>Missing content</value></data>

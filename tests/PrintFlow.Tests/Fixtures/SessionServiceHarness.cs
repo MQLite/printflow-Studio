@@ -15,11 +15,14 @@ namespace PrintFlow.Tests.Fixtures;
 
 /// <summary>
 /// Wires the real object graph — real workspace, real file inspector, real SQLite repository,
-/// deterministic fake adapters — against a throwaway temp workspace and database.
+/// real deterministic trim, deterministic fake adapters — against a throwaway temp workspace
+/// and database.
 /// </summary>
 /// <remarks>
 /// Used by the SessionService integration tests to prove the pieces work together: nothing
 /// here is a mock of PrintFlow's own code, only Meitu/Photoshop are faked (Epic 11100 plan §35).
+/// Trim is emphatically not faked — it is PrintFlow's own pixel work, so a double would prove
+/// nothing about it (Epic 11200 Part B §23).
 /// </remarks>
 internal sealed class SessionServiceHarness : IDisposable
 {
@@ -48,6 +51,12 @@ internal sealed class SessionServiceHarness : IDisposable
 
     public FakePhotoshopOutputProcessor FakePhotoshop { get; }
 
+    /// <summary>
+    /// The real deterministic trim processor, never a double: Epic 11200 Part B §23 requires
+    /// the integration flow to produce an actual cropped file, not a scripted one.
+    /// </summary>
+    public ITrimProcessor Trim { get; }
+
     public SessionServiceHarness()
     {
         Workspace = new TempWorkspace();
@@ -61,6 +70,7 @@ internal sealed class SessionServiceHarness : IDisposable
         Repository = new SqliteSessionRepository(Database.Factory);
         FakeMeitu = new FakeMeituProcessor(FileWorkspace);
         FakePhotoshop = new FakePhotoshopOutputProcessor(FileWorkspace);
+        Trim = new DeterministicAlphaTrimProcessor(FileWorkspace);
     }
 
     /// <summary>
@@ -81,6 +91,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FileInspector,
         FakeMeitu,
         FakePhotoshop,
+        Trim,
         Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
@@ -117,6 +128,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FileInspector,
         meitu,
         FakePhotoshop,
+        Trim,
         Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
@@ -124,6 +136,22 @@ internal sealed class SessionServiceHarness : IDisposable
 
     public string WriteSourcePng(string fileName = "source.png") =>
         Workspace.CreateSourceFile(fileName, SyntheticImages.Png(6, 5, alpha: true));
+
+    /// <summary>
+    /// A 12×10 PNG whose only alpha content is the 5×5 block from (3,2) to (7,6) inclusive.
+    /// </summary>
+    /// <remarks>
+    /// The deliberately asymmetric border is what makes a trim assertion meaningful: a crop
+    /// that transposed its axes, or that measured from the wrong corner, would produce a
+    /// differently shaped result rather than an accidentally correct square.
+    /// </remarks>
+    public string WriteBorderedSourcePng(string fileName = "bordered.png") =>
+        Workspace.CreateSourceFile(fileName, SyntheticImages.PngWithAlpha(
+            12, 10, (x, y) => x is >= 3 and <= 7 && y is >= 2 and <= 6 ? (byte)255 : (byte)0));
+
+    /// <summary>A PNG with an alpha channel in which nothing is visible — the manual-crop case.</summary>
+    public string WriteFullyTransparentSourcePng(string fileName = "empty.png") =>
+        Workspace.CreateSourceFile(fileName, SyntheticImages.PngWithAlpha(8, 8, (_, _) => 0));
 
     public void Dispose()
     {

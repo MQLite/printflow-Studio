@@ -39,8 +39,8 @@ public static class WorkflowCatalog
                 IsSkippable: true, RequiresReview: true, ProducesRevision: true,
                 OperationKind.RemoveBackground, AdapterKind.Meitu),
 
-            // Defined here so the workflow shape is complete and testable. The alpha-bound
-            // algorithm, manual crop and trim review are Epic 11200.
+            // The alpha-bound crop is real (Epic 11200 Part B); the manual crop surface and
+            // the image-review UI are Epic 11200 Part C.
             new StepDefinition(
                 StepKind.Trim, 4,
                 IsSkippable: false, RequiresReview: true, ProducesRevision: true,

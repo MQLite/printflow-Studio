@@ -30,8 +30,8 @@ public enum StepKind
     BackgroundRemoval,
 
     /// <summary>
-    /// Deterministic canvas trimming. Defined here so the workflow shape is complete; the
-    /// alpha-bound algorithm, manual crop and trim review belong to Epic 11200.
+    /// Deterministic canvas trimming to the alpha content (Epic 11200 Part B). The manual
+    /// crop surface and the image-review UI are Epic 11200 Part C.
     /// </summary>
     Trim,
 

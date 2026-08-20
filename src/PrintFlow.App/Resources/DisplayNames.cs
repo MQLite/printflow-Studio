@@ -107,6 +107,7 @@ internal static class DisplayNames
         FailureCode.WorkspaceError => Strings.Failure_WorkspaceError,
         FailureCode.PersistenceError => Strings.Failure_PersistenceError,
         FailureCode.PreconditionNotMet => Strings.Failure_PreconditionNotMet,
+        FailureCode.ManualCropRequired => Strings.Failure_ManualCropRequired,
         _ => code.ToString(),
     };
 
