@@ -167,7 +167,7 @@
     <value>步骤</value>
   </data>
   <data name="Session_PlaceholderNotice" xml:space="preserve">
-    <value>本版本尚未提供图像预览、并排对比、返回上一步骤以及处理历史浏览等功能。此页面所显示的内容均取自已保存的处理记录。</value>
+    <value>本版本尚未提供处理历史浏览功能。此页面所显示的内容均取自已保存的处理记录。</value>
   </data>
   <data name="Session_AllStepsFinished" xml:space="preserve">
     <value>所有步骤已完成</value>

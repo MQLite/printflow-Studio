@@ -167,7 +167,7 @@
     <value>Steps</value>
   </data>
   <data name="Session_PlaceholderNotice" xml:space="preserve">
-    <value>Image preview, side-by-side comparison, going back to an earlier step and the processing-history browser are not part of this build. Everything shown here is the session exactly as it is stored.</value>
+    <value>A browsable processing history is not part of this build. Everything shown here is the session exactly as it is stored.</value>
   </data>
   <data name="Session_AllStepsFinished" xml:space="preserve">
     <value>All steps finished</value>
