@@ -6,6 +6,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Infrastructure.Sqlite;
 
@@ -191,6 +192,53 @@ internal static class Mappers
         _ => throw new InvalidOperationException($"Unknown ReviewSubjectKind '{text}' in database."),
     };
 
+    public static string ToText(TrimMode value) => value switch
+    {
+        TrimMode.TightCrop => "TIGHT_CROP",
+        TrimMode.UniformMargin => "UNIFORM_MARGIN",
+        TrimMode.EdgeSpecificMargin => "EDGE_SPECIFIC_MARGIN",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static TrimMode ToTrimMode(string text) => text switch
+    {
+        "TIGHT_CROP" => TrimMode.TightCrop,
+        "UNIFORM_MARGIN" => TrimMode.UniformMargin,
+        "EDGE_SPECIFIC_MARGIN" => TrimMode.EdgeSpecificMargin,
+        _ => throw new InvalidOperationException($"Unknown TrimMode '{text}' in database."),
+    };
+
+    /// <summary>
+    /// Rebuilds a <see cref="TrimMargin"/> from its five columns, or null when none was stored.
+    /// </summary>
+    /// <remarks>
+    /// Goes back through the domain factories rather than reconstructing the value directly, so
+    /// a row that somehow held a negative margin is refused here rather than becoming a
+    /// <see cref="TrimMargin"/> the factories would never have produced. Reading is the last
+    /// place that invariant can still be enforced, and the database CHECK is the first
+    /// (Epic 11200 Part C3 §11, §14).
+    /// <para>
+    /// <see cref="TrimMode.EdgeSpecificMargin"/> keeps its four numbers even when they happen to
+    /// be equal, because the mode is what the operator asked for and not a restatement of the
+    /// numbers (Part B).
+    /// </para>
+    /// </remarks>
+    public static TrimMargin? ToTrimMargin(
+        string? mode, int? top, int? right, int? bottom, int? left)
+    {
+        if (mode is null)
+        {
+            return null;
+        }
+
+        return ToTrimMode(mode) switch
+        {
+            TrimMode.TightCrop => TrimMargin.Tight,
+            TrimMode.UniformMargin => TrimMargin.Uniform(top ?? 0),
+            _ => TrimMargin.PerEdge(top ?? 0, right ?? 0, bottom ?? 0, left ?? 0),
+        };
+    }
+
     public static string ToText(WhiteUnderbaseBranch value) => value switch
     {
         WhiteUnderbaseBranch.W1_0px => "W1_0PX",
@@ -267,6 +315,14 @@ internal static class Mappers
         DimensionsPixelHeight = session.Dimensions?.PixelHeight,
         DimensionsPreset = session.Dimensions is { } d ? ToText(d.Preset) : null,
         WhiteUnderbaseBranch = session.WhiteUnderbaseBranch is { } b ? ToText(b) : null,
+
+        // Always written, unlike the attempt's copy: a session always has a pending trim
+        // decision, and Tight is a decision rather than an absence (Epic 11200 Part C3 §10).
+        TrimMode = ToText(session.TrimMargin.Mode),
+        TrimMarginTop = session.TrimMargin.Top,
+        TrimMarginRight = session.TrimMargin.Right,
+        TrimMarginBottom = session.TrimMargin.Bottom,
+        TrimMarginLeft = session.TrimMargin.Left,
     };
 
     public static ProcessingSession ToDomain(SessionRow row)
@@ -291,7 +347,15 @@ internal static class Mappers
             ToDateTimeOffsetOrNull(row.AbandonedAtUtc),
             row.AbandonReason,
             dimensions,
-            row.WhiteUnderbaseBranch is string wub ? ToWhiteUnderbaseBranch(wub) : null);
+            row.WhiteUnderbaseBranch is string wub ? ToWhiteUnderbaseBranch(wub) : null)
+        {
+            // A row written before migration 0002 has no trim columns at all, and reads back as
+            // Tight — which is exactly what it ran with, because Tight was the only behaviour
+            // before this slice (Epic 11200 Part C3 §10).
+            TrimMargin = ToTrimMargin(
+                row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
+                row.TrimMarginBottom, row.TrimMarginLeft) ?? TrimMargin.Tight,
+        };
     }
 
     public static StepRow ToRow(SessionId sessionId, SessionStep step) => new()
@@ -435,6 +499,14 @@ internal static class Mappers
             : null,
         RetryOfAttemptId = attempt.RetryOfAttemptId?.ToString(),
         RetrySequence = attempt.RetrySequence,
+
+        // Null for anything that is not a deterministic trim, which is the honest reading:
+        // "this attempt had no trim margin", never "it used the default" (Part C3 §14, §17).
+        TrimMode = attempt.TrimParameters is { } margin ? ToText(margin.Mode) : null,
+        TrimMarginTop = attempt.TrimParameters?.Top,
+        TrimMarginRight = attempt.TrimParameters?.Right,
+        TrimMarginBottom = attempt.TrimParameters?.Bottom,
+        TrimMarginLeft = attempt.TrimParameters?.Left,
     };
 
     public static ProcessingAttempt ToDomain(AttemptRow row)
@@ -460,7 +532,12 @@ internal static class Mappers
             row.OutputRevisionId is string orid ? RevisionId.From(Guid.Parse(orid)) : null,
             failure,
             row.RetryOfAttemptId is string roa ? AttemptId.From(Guid.Parse(roa)) : null,
-            row.RetrySequence);
+            row.RetrySequence)
+        {
+            TrimParameters = ToTrimMargin(
+                row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
+                row.TrimMarginBottom, row.TrimMarginLeft),
+        };
     }
 
     public static ReviewRow ToRow(ReviewDecision review) => new()

@@ -610,6 +610,166 @@ public sealed class SessionSmokeTests
         exported.Facts.Sha256.ShouldBe(manual.Facts.Sha256);
     }
 
+    // -------------------------------------------------------------------------------------
+    // Smoke J — Epic 11200 Part C3 §26: trim with a margin, review, return, re-trim
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The C3 journey through the real graph: margin, review, return upstream, run again at a
+    /// different margin (§26).
+    /// </summary>
+    /// <remarks>
+    /// <b>No human looked at this.</b> §26 asks for a visual pass on an interactive desktop and
+    /// this build has none, so what stands in for it is stated plainly rather than implied: the
+    /// real composed graph from <see cref="ApplicationStartup"/> — real workspace, real
+    /// database, real deterministic trim — driven from Home through to a second trim, with each
+    /// review state measured and arranged for real and failing on any binding error. Nobody has
+    /// confirmed by eye that the margin looks right around the artwork.
+    /// <para>
+    /// What <i>is</i> answered automatically is the part a person would be checking for: the two
+    /// runs really produce different canvases, in the sizes the margins predict, measured on the
+    /// bitmaps that were drawn — and both attempts remain attributable to their own settings
+    /// after the return.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Smoke_J_a_trim_with_a_margin_is_reviewed_returned_to_and_run_again()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        // 12×10 with a 5×5 opaque block at [3,2 → 8,7); everything else fully transparent.
+        SessionViewModel session = await app.ImportAndChooseAsync(
+            "smoke-j.png",
+            WorkflowType.PrepareAsset,
+            SyntheticImages.PngWithAlpha(12, 10, (x, y) => x is >= 3 and <= 7 && y is >= 2 and <= 6 ? (byte)255 : (byte)0));
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        // Run A: a uniform 2 px margin, chosen on the screen and applied through the service.
+        session.CanSetTrimParameters.ShouldBeTrue();
+        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+        session.UniformMarginText = "2";
+        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsReviewRequired.ShouldBeTrue();
+        session.HasTrimParameters.ShouldBeTrue();
+
+        using (SessionScreen review = await app.OpenSecondScreenAsync())
+        {
+            ReviewScreenFacts rendered = AssertComparisonRenders(review.Model);
+
+            // 5×5 of content plus 2 px on every edge, all of which fit inside the 12×10 canvas.
+            rendered.BitmapSizes.ShouldBe([(12, 10), (9, 9)]);
+        }
+
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+        session.Notice.ShouldBeNull();
+
+        // Return upstream to Trim, through the confirmation the operator would read.
+        session.CanReturnToStep.ShouldBeTrue();
+        session.SelectedReturnTarget = session.ReturnTargets.Single(t => t.Step == StepKind.Trim);
+        session.BeginReturnCommand.Execute(null);
+        session.IsConfirmingReturn.ShouldBeTrue();
+
+        await session.ConfirmReturnCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        session.CurrentStep.ShouldBe(session.Steps.Single(s => s.IsCurrent).Name);
+
+        // Run B: a different margin entirely, on the reopened step.
+        session.CanSetTrimParameters.ShouldBeTrue();
+        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.EdgeSpecificMargin);
+        session.TopMarginText = "1";
+        session.RightMarginText = "3";
+        session.BottomMarginText = "2";
+        session.LeftMarginText = "3";
+        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsReviewRequired.ShouldBeTrue();
+
+        using (SessionScreen review = await app.OpenSecondScreenAsync())
+        {
+            ReviewScreenFacts rendered = AssertComparisonRenders(review.Model);
+
+            // Width = 5 + 3 + 3 = 11; Height = 5 + 1 + 2 = 8. Visibly a different canvas from A.
+            rendered.BitmapSizes.ShouldBe([(12, 10), (11, 8)]);
+        }
+
+        // Both runs survive, each attributable to its own settings (§15, §21).
+        SessionAggregate aggregate = await app.LoadAsync(app.OpenSessionId);
+        List<ProcessingAttempt> trims = [.. aggregate.Attempts.Where(a => a.Step == StepKind.Trim)];
+        trims.Count.ShouldBe(2);
+        trims.Select(a => a.TrimParameters).ShouldBe(
+            [TrimMargin.Uniform(2), TrimMargin.PerEdge(top: 1, right: 3, bottom: 2, left: 3)],
+            ignoreOrder: true);
+
+        // Nothing was deleted by the return: both trimmed files are still on disk.
+        foreach (Revision revision in aggregate.Revisions.Where(r => r.Operation == OperationKind.Trim))
+        {
+            File.Exists(app.Workspace.ResolveAbsolute(revision.File)).ShouldBeTrue();
+        }
+    }
+
+    /// <summary>
+    /// The other half of §26: a ManualCropRequired outcome offers no margin controls.
+    /// </summary>
+    /// <remarks>
+    /// Through the real graph rather than the view-model suite, because the question is what an
+    /// operator is <i>shown</i>: the crop tool appears and the margin panel is gone, so nothing
+    /// on the screen suggests that adding pixels could rescue an image with no alpha to measure
+    /// from. Rendered for real, so the two panels' visibility is exercised rather than asserted
+    /// only as booleans.
+    /// </remarks>
+    [Fact]
+    public async Task Smoke_K_a_manual_crop_outcome_offers_no_margin_controls()
+    {
+        using SmokeApplication app = await SmokeApplication.StartAsync();
+
+        SessionViewModel session = await app.ImportAndChooseAsync(
+            "smoke-k.png",
+            WorkflowType.PrepareAsset,
+            SyntheticImages.OpaqueRgbPng(12, 10, (x, y) => ((byte)(x * 20), (byte)(y * 25), (byte)0x60)));
+
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.SkipCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        // Before the run, the automatic trim is what is about to happen, so the margin controls
+        // are the right thing to offer.
+        session.CanSetTrimParameters.ShouldBeTrue();
+        session.CanManualCrop.ShouldBeFalse();
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        // Afterwards the two surfaces have swapped.
+        session.IsManualCropRequired.ShouldBeTrue();
+        session.CanManualCrop.ShouldBeTrue();
+        session.CanSetTrimParameters.ShouldBeFalse();
+
+        using SessionScreen screen = await app.OpenSecondScreenAsync();
+        screen.Model.CanSetTrimParameters.ShouldBeFalse();
+        screen.Model.CanManualCrop.ShouldBeTrue();
+
+        WpfRendering.RenderExpectingNoBindingErrors(
+            () => new SessionScreenView { DataContext = screen.Model }, WpfRendering.ReviewViewport);
+    }
+
     /// <summary>
     /// A throwaway session screen, opened on the session's current state purely to be rendered.
     /// </summary>

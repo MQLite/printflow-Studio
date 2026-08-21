@@ -1,9 +1,11 @@
+using System.Globalization;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.App.Resources;
 
@@ -143,6 +145,46 @@ internal static class DisplayNames
         Domain.Outputs.SizePreset.A5 => Strings.Preset_A5,
         Domain.Outputs.SizePreset.Custom => Strings.Preset_Custom,
         _ => preset.ToString(),
+    };
+
+    /// <summary>
+    /// The operator label for a trim mode, carrying what it means (Epic 11200 Part C3 §9).
+    /// </summary>
+    /// <remarks>
+    /// Each label says what the mode does, because the three are otherwise distinguishable only
+    /// by the boxes that appear underneath them. The enum value is what gets persisted, on both
+    /// the session and the producing attempt (MVP design §13.4).
+    /// </remarks>
+    internal static string TrimMode(TrimMode mode) => mode switch
+    {
+        Domain.Trimming.TrimMode.TightCrop => Strings.Session_TrimModeTight,
+        Domain.Trimming.TrimMode.UniformMargin => Strings.Session_TrimModeUniform,
+        Domain.Trimming.TrimMode.EdgeSpecificMargin => Strings.Session_TrimModeEdgeSpecific,
+        _ => mode.ToString(),
+    };
+
+    /// <summary>
+    /// One concise line describing how a trim was parameterised (Epic 11200 Part C3 §18).
+    /// </summary>
+    /// <remarks>
+    /// Shaped by the mode rather than by the numbers, so a uniform 0&#160;px reads as
+    /// "Uniform 0 px" and not as "Tight": the two produce the same rectangle but the operator
+    /// asked for different things, and a review line that collapsed them would misreport what
+    /// was chosen (Part B, <c>TrimMode</c>).
+    /// <para>
+    /// Deliberately a sentence and not a screen. §18 asks for concise parameter information
+    /// beside the result, and a general processing-history browser is explicitly out of scope
+    /// (§28).
+    /// </para>
+    /// </remarks>
+    internal static string TrimMargin(TrimMargin margin) => margin.Mode switch
+    {
+        Domain.Trimming.TrimMode.UniformMargin => string.Format(
+            CultureInfo.CurrentCulture, Strings.Session_TrimSummaryUniform, margin.Top),
+        Domain.Trimming.TrimMode.EdgeSpecificMargin => string.Format(
+            CultureInfo.CurrentCulture, Strings.Session_TrimSummaryEdges,
+            margin.Top, margin.Right, margin.Bottom, margin.Left),
+        _ => Strings.Session_TrimSummaryTight,
     };
 
     /// <summary>The operator label for an output's cached review projection.</summary>

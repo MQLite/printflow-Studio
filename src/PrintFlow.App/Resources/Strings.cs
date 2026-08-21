@@ -392,6 +392,69 @@ internal static class Strings
     /// <summary>Shown in place of the selection summary before anything has been drawn.</summary>
     internal static string Session_ManualCropNoSelection => Get(nameof(Session_ManualCropNoSelection));
 
+    // --- Return to an earlier step (Epic 11200 Part C3 §3, §5) ---------------------------
+
+    internal static string Session_ReturnHeading => Get(nameof(Session_ReturnHeading));
+
+    internal static string Session_ReturnHint => Get(nameof(Session_ReturnHint));
+
+    internal static string Session_ReturnTargetLabel => Get(nameof(Session_ReturnTargetLabel));
+
+    internal static string Session_ReturnBegin => Get(nameof(Session_ReturnBegin));
+
+    /// <summary>
+    /// What the operator is asked to confirm before anything is invalidated (§5).
+    /// </summary>
+    /// <remarks>
+    /// It says results become invalid and that history is kept, and it deliberately does not
+    /// say anything about files — because nothing is deleted. <c>ReturnToStep</c> invalidates
+    /// Revisions and PrintOutputs; the bytes stay on disk and every review decision stays
+    /// queryable. A warning about deletion would be a warning about something that does not
+    /// happen (§5, §6).
+    /// </remarks>
+    internal static string Session_ReturnConfirmQuestion => Get(nameof(Session_ReturnConfirmQuestion));
+
+    internal static string Session_ReturnConfirm => Get(nameof(Session_ReturnConfirm));
+
+    internal static string Session_ReturnCancel => Get(nameof(Session_ReturnCancel));
+
+    // --- Deterministic trim margin (Epic 11200 Part C3 §9–§12, §18) ----------------------
+
+    internal static string Session_TrimHeading => Get(nameof(Session_TrimHeading));
+
+    internal static string Session_TrimHint => Get(nameof(Session_TrimHint));
+
+    internal static string Session_TrimModeTight => Get(nameof(Session_TrimModeTight));
+
+    internal static string Session_TrimModeUniform => Get(nameof(Session_TrimModeUniform));
+
+    internal static string Session_TrimModeEdgeSpecific => Get(nameof(Session_TrimModeEdgeSpecific));
+
+    internal static string Session_TrimMarginLabel => Get(nameof(Session_TrimMarginLabel));
+
+    internal static string Session_TrimTopLabel => Get(nameof(Session_TrimTopLabel));
+
+    internal static string Session_TrimRightLabel => Get(nameof(Session_TrimRightLabel));
+
+    internal static string Session_TrimBottomLabel => Get(nameof(Session_TrimBottomLabel));
+
+    internal static string Session_TrimLeftLabel => Get(nameof(Session_TrimLeftLabel));
+
+    internal static string Session_TrimApply => Get(nameof(Session_TrimApply));
+
+    /// <summary>Shown when the typed pixels are not a whole non-negative number (§11).</summary>
+    internal static string Session_TrimMarginInvalid => Get(nameof(Session_TrimMarginInvalid));
+
+    internal static string Session_TrimCurrentLabel => Get(nameof(Session_TrimCurrentLabel));
+
+    internal static string Session_TrimSummaryTight => Get(nameof(Session_TrimSummaryTight));
+
+    /// <summary>Composite format: the single margin in pixels.</summary>
+    internal static string Session_TrimSummaryUniform => Get(nameof(Session_TrimSummaryUniform));
+
+    /// <summary>Composite format: top, right, bottom, left — all in pixels.</summary>
+    internal static string Session_TrimSummaryEdges => Get(nameof(Session_TrimSummaryEdges));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

@@ -87,6 +87,62 @@ public sealed class WhiteUnderbaseChoice
 }
 
 /// <summary>
+/// One earlier step the operator may return to, flattened for the selector
+/// (Epic 11200 Part C3 §3, §4).
+/// </summary>
+/// <remarks>
+/// A label over a <see cref="ReturnTargetView"/> the workflow layer produced, and nothing more.
+/// The list this belongs to contains exactly the steps <c>ReturnToStep</c> would accept, so
+/// there is no "is this legal" question left for the screen to answer — and deliberately no
+/// way for it to construct one of these for a step the engine did not offer (§4).
+/// </remarks>
+public sealed class ReturnTargetRow
+{
+    internal ReturnTargetRow(ReturnTargetView target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        Step = target.Step;
+        DisplayName = DisplayNames.Step(target.Step);
+        Ordinal = target.Ordinal + 1;
+    }
+
+    /// <summary>The persisted step this row returns to. Never displayed raw.</summary>
+    public StepKind Step { get; }
+
+    /// <summary>The localised step name — the only part an operator reads.</summary>
+    public string DisplayName { get; }
+
+    /// <summary>Its one-based position, so the list reads like the step list above it.</summary>
+    public int Ordinal { get; }
+}
+
+/// <summary>
+/// One trim mode offered beside the margin boxes (Epic 11200 Part C3 §9).
+/// </summary>
+/// <remarks>
+/// Exactly three, in enum order. Unlike <see cref="WhiteUnderbaseChoice"/>, one of them
+/// <i>is</i> pre-selected — Tight — and that difference is the point of §10: a trim margin is
+/// an operational parameter of a deterministic algorithm whose zero is meaningful, whereas a W1
+/// branch is a classification of the artwork that only a human can make. Neither reading is
+/// transferable to the other.
+/// </remarks>
+public sealed class TrimModeChoice
+{
+    internal TrimModeChoice(TrimMode mode)
+    {
+        Mode = mode;
+        Label = DisplayNames.TrimMode(mode);
+    }
+
+    /// <summary>The persisted value. Never displayed.</summary>
+    public TrimMode Mode { get; }
+
+    /// <summary>The localised label, carrying what the mode does.</summary>
+    public string Label { get; }
+}
+
+/// <summary>
 /// One size shortcut, offered beside the millimetre boxes (Epic 11100 Part 3C3B §5).
 /// </summary>
 /// <remarks>
@@ -312,6 +368,59 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private bool _isCropSelectionInvalid;
 
+    // --- Return to an earlier step (Epic 11200 Part C3 §3, §5) ---------------------------
+    //
+    // Two pieces of state. Picking a destination changes nothing, and opening the confirmation
+    // changes nothing — only Confirm issues a command, which is what makes Cancel structurally
+    // incapable of leaving a trace, exactly as it is for the crop surface.
+
+    /// <summary>The destination the operator has picked but not yet confirmed.</summary>
+    /// <remarks>
+    /// Starts null, and every state change clears it. A destination carried over from the
+    /// previous state would be a step that may no longer be a legal target at all.
+    /// </remarks>
+    [ObservableProperty]
+    private ReturnTargetRow? _selectedReturnTarget;
+
+    /// <summary>
+    /// Whether the confirmation is on screen, waiting to be confirmed or cancelled (§5).
+    /// </summary>
+    /// <remarks>
+    /// Screen state, never persisted. Having looked at a warning is not a fact about the
+    /// session.
+    /// </remarks>
+    [ObservableProperty]
+    private bool _isConfirmingReturn;
+
+    // --- Trim margin (Epic 11200 Part C3 §9–§12) ------------------------------------------
+    //
+    // Unconfirmed operator input, exactly like the millimetre boxes: these mean nothing until
+    // SetTrimParameters accepts them, and nothing here computes a rectangle or touches a file.
+
+    /// <summary>The mode the operator has picked. Starts at Tight, which is a default on purpose (§10).</summary>
+    [ObservableProperty]
+    private TrimModeChoice _selectedTrimMode;
+
+    /// <summary>Unconfirmed operator input for <see cref="TrimMode.UniformMargin"/>.</summary>
+    [ObservableProperty]
+    private string? _uniformMarginText;
+
+    /// <summary>Unconfirmed operator input for <see cref="TrimMode.EdgeSpecificMargin"/>.</summary>
+    [ObservableProperty]
+    private string? _topMarginText;
+
+    /// <inheritdoc cref="_topMarginText" />
+    [ObservableProperty]
+    private string? _rightMarginText;
+
+    /// <inheritdoc cref="_topMarginText" />
+    [ObservableProperty]
+    private string? _bottomMarginText;
+
+    /// <inheritdoc cref="_topMarginText" />
+    [ObservableProperty]
+    private string? _leftMarginText;
+
     private SessionView? _session;
 
     public SessionViewModel(
@@ -331,6 +440,12 @@ public sealed partial class SessionViewModel : ObservableObject
 
         WhiteUnderbaseChoices = new ReadOnlyCollection<WhiteUnderbaseChoice>(
             Enum.GetValues<WhiteUnderbaseBranch>().Select(branch => new WhiteUnderbaseChoice(branch)).ToList());
+
+        // Tight first, and pre-selected. See TrimModeChoice for why this is a default where the
+        // W1 selector must not have one (§10).
+        TrimModes = new ReadOnlyCollection<TrimModeChoice>(
+            Enum.GetValues<TrimMode>().Select(mode => new TrimModeChoice(mode)).ToList());
+        _selectedTrimMode = TrimModes[0];
 
         // Only the presets that have a nominal size; Custom is what typing produces.
         SizePresets = new ReadOnlyCollection<SizePresetChoice>(
@@ -367,6 +482,19 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>Every white-underbase branch, in enum order and with none preferred (§6).</summary>
     public IReadOnlyList<WhiteUnderbaseChoice> WhiteUnderbaseChoices { get; }
+
+    /// <summary>The three trim modes, in enum order (Part C3 §9).</summary>
+    public IReadOnlyList<TrimModeChoice> TrimModes { get; }
+
+    /// <summary>
+    /// The earlier steps the operator may return to, in workflow order (Part C3 §3, §4).
+    /// </summary>
+    /// <remarks>
+    /// Rebuilt wholesale from <see cref="SessionView.ReturnTargets"/> on every state change,
+    /// because which steps are behind you changes as the session moves. Nothing here filters,
+    /// adds to, or reorders what the workflow layer offered.
+    /// </remarks>
+    public ObservableCollection<ReturnTargetRow> ReturnTargets { get; } = [];
 
     /// <summary>The named size shortcuts (§5).</summary>
     public IReadOnlyList<SizePresetChoice> SizePresets { get; }
@@ -564,6 +692,111 @@ public sealed partial class SessionViewModel : ObservableObject
             Strings.Session_ManualCropSelection,
             crop.Left, crop.Top, crop.Width, crop.Height)
         : Strings.Session_ManualCropNoSelection;
+
+    // --- Return to an earlier step (Epic 11200 Part C3 §3, §5) ---------------------------
+
+    public string ReturnHeading => Strings.Session_ReturnHeading;
+
+    public string ReturnHint => Strings.Session_ReturnHint;
+
+    public string ReturnTargetLabel => Strings.Session_ReturnTargetLabel;
+
+    public string BeginReturnLabel => Strings.Session_ReturnBegin;
+
+    /// <summary>
+    /// What the operator confirms before anything is invalidated (§5).
+    /// </summary>
+    /// <remarks>
+    /// It says later results become invalid and that audit history is kept, and says nothing
+    /// about files — because <c>ReturnToStep</c> deletes none. A warning about deletion would
+    /// warn about something that does not happen (§5, §6).
+    /// </remarks>
+    public string ReturnConfirmQuestion => Strings.Session_ReturnConfirmQuestion;
+
+    public string ConfirmReturnLabel => Strings.Session_ReturnConfirm;
+
+    public string CancelReturnLabel => Strings.Session_ReturnCancel;
+
+    /// <summary>
+    /// Whether the return control is shown at all (§3, §24).
+    /// </summary>
+    /// <remarks>
+    /// True exactly when the workflow layer offered at least one destination. There is no
+    /// condition of this screen's own: <see cref="SessionView.ReturnTargets"/> already contains
+    /// only steps the real <c>ReturnToStep</c> accepts, so an offered control and an accepted
+    /// command cannot disagree (§4, §8).
+    /// </remarks>
+    public bool CanReturnToStep => _session?.CanReturnToStep == true;
+
+    /// <summary>True once a destination has been picked, so the confirmation can be opened.</summary>
+    public bool CanBeginReturn => CanReturnToStep && SelectedReturnTarget is not null && !IsBusy;
+
+    // --- Trim margin (Epic 11200 Part C3 §9–§12, §18) ------------------------------------
+
+    public string TrimHeading => Strings.Session_TrimHeading;
+
+    public string TrimHint => Strings.Session_TrimHint;
+
+    public string TrimMarginLabel => Strings.Session_TrimMarginLabel;
+
+    public string TrimTopLabel => Strings.Session_TrimTopLabel;
+
+    public string TrimRightLabel => Strings.Session_TrimRightLabel;
+
+    public string TrimBottomLabel => Strings.Session_TrimBottomLabel;
+
+    public string TrimLeftLabel => Strings.Session_TrimLeftLabel;
+
+    public string ApplyTrimMarginLabel => Strings.Session_TrimApply;
+
+    public string TrimCurrentLabel => Strings.Session_TrimCurrentLabel;
+
+    /// <summary>
+    /// Whether the margin controls are shown (§9, §17).
+    /// </summary>
+    /// <remarks>
+    /// Read straight off <see cref="SessionView.CanSetTrimParameters"/>, which combines the
+    /// engine's answer — Trim is current and between attempts — with the attempt history that
+    /// says whether this file is on the manual-crop path. That second half is why the screen
+    /// cannot work this out: a file the automatic trim has already refused gets no margin
+    /// controls, because adding margin to a crop that was never decided is not a thing the
+    /// control could do (§17).
+    /// </remarks>
+    public bool CanSetTrimParameters => _session?.CanSetTrimParameters == true;
+
+    /// <summary>Whether the single uniform box is the relevant input (§11).</summary>
+    public bool IsUniformMargin => SelectedTrimMode.Mode == TrimMode.UniformMargin;
+
+    /// <summary>Whether the four per-edge boxes are the relevant input (§12).</summary>
+    public bool IsEdgeSpecificMargin => SelectedTrimMode.Mode == TrimMode.EdgeSpecificMargin;
+
+    /// <summary>
+    /// The margin the next Trim run will use, as one line (§18).
+    /// </summary>
+    /// <remarks>
+    /// Read from <see cref="SessionView.TrimMargin"/> — the persisted decision — rather than
+    /// from the boxes above it, so it says what would actually happen rather than what has been
+    /// typed but not applied.
+    /// </remarks>
+    public string PendingTrimSummary =>
+        _session is { } session ? DisplayNames.TrimMargin(session.TrimMargin) : string.Empty;
+
+    /// <summary>
+    /// How the deterministic trim on screen was parameterised (§18).
+    /// </summary>
+    /// <remarks>
+    /// From the attempt that produced this exact Revision, resolved in the workflow layer. It
+    /// is the answer to "how was this Trim Revision produced?" shown where the operator is
+    /// being asked to approve it — and it is empty for anything that is not a deterministic
+    /// trim, rather than falling back to the session's current setting, which would label a
+    /// manual crop with a margin nothing applied.
+    /// </remarks>
+    public string TrimParametersSummary => _session?.CurrentTrimParameters is { } margin
+        ? DisplayNames.TrimMargin(margin)
+        : string.Empty;
+
+    /// <inheritdoc cref="TrimParametersSummary" />
+    public bool HasTrimParameters => _session?.HasTrimParameters == true;
 
     /// <summary>
     /// The unmissable warning that this installation produces synthetic results
@@ -947,6 +1180,88 @@ public sealed partial class SessionViewModel : ObservableObject
         return true;
     }
 
+    // --- Return to an earlier step (Part C3 §3, §5, §6) -----------------------------------
+
+    /// <summary>
+    /// Opens the confirmation. Changes nothing about the session (§5).
+    /// </summary>
+    /// <remarks>
+    /// No command, no attempt, no invalidation: this is the operator being told what returning
+    /// will do, before anything does it. The offer itself still comes from the workflow layer —
+    /// pressing this with nothing selected, or with no legal target, does nothing.
+    /// </remarks>
+    [RelayCommand]
+    private void BeginReturn()
+    {
+        if (!CanBeginReturn)
+        {
+            return;
+        }
+
+        IsConfirmingReturn = true;
+    }
+
+    /// <summary>
+    /// Closes the confirmation, discarding it (§24).
+    /// </summary>
+    /// <remarks>
+    /// The same structural guarantee <see cref="CancelManualCrop"/> has: this method cannot
+    /// leave a trace because it has nothing to leave one with. It touches no file, issues no
+    /// command and reaches no service.
+    /// </remarks>
+    [RelayCommand]
+    private void CancelReturn() => IsConfirmingReturn = false;
+
+    /// <summary>
+    /// Returns to the chosen step through the ordinary command path (§3, §6).
+    /// </summary>
+    /// <remarks>
+    /// This screen calls <see cref="ISessionService.ExecuteAsync"/> and nothing else. The
+    /// descendant Revision walk, the dependent PrintOutput invalidation, the step resets and the
+    /// retention of every review decision and every file all happen behind that call, under the
+    /// rules Part 3A already established — none of which is restated, reimplemented or adjusted
+    /// here (§6, §7).
+    /// </remarks>
+    [RelayCommand]
+    private async Task ConfirmReturnAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedReturnTarget is not { } target)
+        {
+            return;
+        }
+
+        await RunAsync(
+            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
+    }
+
+    // --- Trim margin (Part C3 §9–§13) -----------------------------------------------------
+
+    /// <summary>
+    /// Records the chosen trim margin through the ordinary command path (§13).
+    /// </summary>
+    /// <remarks>
+    /// The only thing this does with the text is turn it into a number. Whether that number is
+    /// a usable margin is <see cref="TrimMargin"/>'s answer through its own factories, which
+    /// refuse a negative value outright — nothing here clamps, rounds or reinterprets one, and
+    /// a negative margin is emphatically not read as "crop further in" (§11).
+    /// <para>
+    /// The margin then reaches <c>ITrimProcessor</c> only by being persisted and read back when
+    /// Run Step starts the attempt. This view model has no reference to the processor and no way
+    /// to acquire one (§13).
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private Task ApplyTrimMarginAsync(CancellationToken cancellationToken)
+    {
+        if (!TryReadTypedMargin(out TrimMargin margin))
+        {
+            Notice = Strings.Session_TrimMarginInvalid;
+            return Task.CompletedTask;
+        }
+
+        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken);
+    }
+
     /// <summary>
     /// Types a preset's nominal size into the boxes (Part 3C3B §5).
     /// </summary>
@@ -1222,7 +1537,32 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CropSelectionSummary));
     }
 
-    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanApplyManualCrop));
+    partial void OnIsBusyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanApplyManualCrop));
+        OnPropertyChanged(nameof(CanBeginReturn));
+    }
+
+    /// <summary>Leaves the return confirmation closed with nothing chosen. Issues no command.</summary>
+    private void ClearReturnState()
+    {
+        IsConfirmingReturn = false;
+        SelectedReturnTarget = null;
+    }
+
+    partial void OnSelectedReturnTargetChanged(ReturnTargetRow? value)
+    {
+        // Changing the destination puts the confirmation away: what was confirmed a moment ago
+        // was a warning about a different step.
+        IsConfirmingReturn = false;
+        OnPropertyChanged(nameof(CanBeginReturn));
+    }
+
+    partial void OnSelectedTrimModeChanged(TrimModeChoice value)
+    {
+        OnPropertyChanged(nameof(IsUniformMargin));
+        OnPropertyChanged(nameof(IsEdgeSpecificMargin));
+    }
 
     private static string? Trimmed(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -1268,6 +1608,64 @@ public sealed partial class SessionViewModel : ObservableObject
 
     private static bool TryReadMillimetres(string? text, out double millimetres) =>
         double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out millimetres);
+
+    /// <summary>
+    /// Turns the chosen mode and its boxes into a <see cref="TrimMargin"/>, if they are usable.
+    /// </summary>
+    /// <remarks>
+    /// Two steps, and only the first belongs to this screen: parsing text into whole numbers is
+    /// a presentation concern, and whether those numbers are an acceptable margin is the
+    /// domain's answer through <see cref="TrimMargin.Uniform"/> and
+    /// <see cref="TrimMargin.PerEdge"/>. Nothing is clamped or substituted on the way through —
+    /// a blank box, a decimal, a minus sign or a number too large for an <c>int</c> all fail
+    /// here and produce the invalid-margin notice rather than a quietly corrected value (§11).
+    /// <para>
+    /// Tight is the one mode with no input: it means zero on all four edges by construction, so
+    /// there is nothing to type and nothing to get wrong.
+    /// </para>
+    /// </remarks>
+    private bool TryReadTypedMargin(out TrimMargin margin)
+    {
+        margin = TrimMargin.Tight;
+
+        switch (SelectedTrimMode.Mode)
+        {
+            case TrimMode.TightCrop:
+                return true;
+
+            case TrimMode.UniformMargin:
+                if (!TryReadPixels(UniformMarginText, out int uniform))
+                {
+                    return false;
+                }
+
+                margin = TrimMargin.Uniform(uniform);
+                return true;
+
+            default:
+                if (!TryReadPixels(TopMarginText, out int top) ||
+                    !TryReadPixels(RightMarginText, out int right) ||
+                    !TryReadPixels(BottomMarginText, out int bottom) ||
+                    !TryReadPixels(LeftMarginText, out int left))
+                {
+                    return false;
+                }
+
+                margin = TrimMargin.PerEdge(top, right, bottom, left);
+                return true;
+        }
+    }
+
+    /// <summary>
+    /// Parses a whole non-negative pixel count.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="NumberStyles.None"/> rather than <c>Integer</c>: it accepts digits and nothing
+    /// else, so a leading minus sign is refused by the parse instead of reaching the domain
+    /// factory as an exception. The factory would refuse it too — the point is that both do.
+    /// </remarks>
+    private static bool TryReadPixels(string? text, out int pixels) =>
+        int.TryParse(text, NumberStyles.None, CultureInfo.CurrentCulture, out pixels) && pixels >= 0;
 
     private static string Describe(PrintDimensions dimensions) => string.Format(
         CultureInfo.CurrentCulture,
@@ -1398,8 +1796,25 @@ public sealed partial class SessionViewModel : ObservableObject
         // prevent, applied to the selection (Part C2 §22, §25).
         ClearCropState();
 
+        // Same reasoning as the crop rectangle: a destination chosen against the previous state
+        // may not be a legal target in this one, and a confirmation left standing would be a
+        // warning about a step the operator is no longer looking at (§24).
+        ClearReturnState();
+
         ClearPreviews();
         PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);
+
+        // The margin boxes are re-seeded from the persisted decision rather than left holding
+        // what was typed, so what the operator sees is what the next run would actually use.
+        // Applying a margin and then looking at the boxes must not show a different number from
+        // the summary beside them (§13, §18).
+        ShowTrimMargin(session.TrimMargin);
+
+        ReturnTargets.Clear();
+        foreach (ReturnTargetView target in session.ReturnTargets)
+        {
+            ReturnTargets.Add(new ReturnTargetRow(target));
+        }
 
         Steps.Clear();
         foreach (SessionStep step in session.Steps)
@@ -1454,6 +1869,30 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanComplete));
         OnPropertyChanged(nameof(CanAddAnotherSize));
         OnPropertyChanged(nameof(IsReviewRequired));
+
+        OnPropertyChanged(nameof(CanReturnToStep));
+        OnPropertyChanged(nameof(CanBeginReturn));
+        OnPropertyChanged(nameof(CanSetTrimParameters));
+        OnPropertyChanged(nameof(PendingTrimSummary));
+        OnPropertyChanged(nameof(TrimParametersSummary));
+        OnPropertyChanged(nameof(HasTrimParameters));
+    }
+
+    /// <summary>Re-seeds the mode selector and the margin boxes from a persisted margin.</summary>
+    /// <remarks>
+    /// Every box gets a value, whichever mode is showing, so switching mode never reveals a
+    /// stale number left over from an earlier setting. Tight leaves the boxes at zero, which is
+    /// what Tight is.
+    /// </remarks>
+    private void ShowTrimMargin(TrimMargin margin)
+    {
+        SelectedTrimMode = TrimModes.First(choice => choice.Mode == margin.Mode);
+
+        UniformMarginText = margin.Top.ToString(CultureInfo.CurrentCulture);
+        TopMarginText = margin.Top.ToString(CultureInfo.CurrentCulture);
+        RightMarginText = margin.Right.ToString(CultureInfo.CurrentCulture);
+        BottomMarginText = margin.Bottom.ToString(CultureInfo.CurrentCulture);
+        LeftMarginText = margin.Left.ToString(CultureInfo.CurrentCulture);
     }
 
     /// <summary>

@@ -654,6 +654,100 @@
                     </Border>
 
                     <!--
+                        Trim margin (Epic 11200 Part C3 §9–§12). Visible exactly while
+                        CanSetTrimParameters is true, which the workflow layer answers from the
+                        engine's legality plus the attempt history — so this panel disappears on
+                        a ManualCropRequired outcome without this file stating that rule, and
+                        cannot mislead an operator into thinking margin could fix missing alpha
+                        (§17).
+                    -->
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding CanSetTrimParameters, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding TrimHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding TrimHint}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       Margin="0,6,0,0" />
+
+                            <!--
+                                Tight is pre-selected, unlike the W1 selector below. That is the
+                                §10 distinction made visible: a trim margin is an operational
+                                parameter whose zero is meaningful, and no non-zero safety margin
+                                is ever added on the operator's behalf.
+                            -->
+                            <ListBox ItemsSource="{Binding TrimModes}"
+                                     SelectedItem="{Binding SelectedTrimMode}"
+                                     DisplayMemberPath="Label"
+                                     BorderThickness="0"
+                                     Margin="0,8,0,0" />
+
+                            <!-- Uniform: one non-negative pixel count (§11). -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding IsUniformMargin, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding TrimMarginLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding UniformMarginText, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalAlignment="Left"
+                                         MinWidth="80" />
+                            </StackPanel>
+
+                            <!-- Edge-specific: four non-negative pixel counts, kept compact (§12). -->
+                            <Grid Margin="0,8,0,0"
+                                  Visibility="{Binding IsEdgeSpecificMargin, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding TrimTopLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="1" Grid.Column="0"
+                                         Text="{Binding TopMarginText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="0" Grid.Column="2"
+                                           Text="{Binding TrimRightLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="1" Grid.Column="2"
+                                         Text="{Binding RightMarginText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="0" Grid.Column="4"
+                                           Text="{Binding TrimBottomLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="1" Grid.Column="4"
+                                         Text="{Binding BottomMarginText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <TextBlock Grid.Row="0" Grid.Column="6"
+                                           Text="{Binding TrimLeftLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="1" Grid.Column="6"
+                                         Text="{Binding LeftMarginText, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+
+                            <Button Content="{Binding ApplyTrimMarginLabel}"
+                                    Command="{Binding ApplyTrimMarginCommand}"
+                                    HorizontalAlignment="Left"
+                                    Padding="14,6"
+                                    Margin="0,10,0,0" />
+
+                            <!-- The persisted decision, so it says what Run Step would do (§18). -->
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
+                                <TextBlock Text="{Binding TrimCurrentLabel}" Opacity="0.75" Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding PendingTrimSummary}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!--
                         Print dimensions (§3–§5). Visible exactly while the engine would accept
                         the command, so it appears on the PrintDimensions step and reappears
                         after Add Another Size without this file knowing either rule.
@@ -786,6 +880,19 @@
                         <StackPanel>
                             <TextBlock Text="{Binding ReviewHeading}" FontSize="15" FontWeight="SemiBold" />
 
+                            <!--
+                                How the result being reviewed was produced (Part C3 §18). Comes
+                                from the attempt that produced this exact Revision, so it stays
+                                correct after a reject-and-re-run at a different margin; empty,
+                                and therefore collapsed, for anything that is not a
+                                deterministic trim.
+                            -->
+                            <TextBlock Text="{Binding TrimParametersSummary}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+
                             <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <ComboBox ItemsSource="{Binding RejectionReasons}"
                                       SelectedItem="{Binding SelectedRejectionReason}"
@@ -797,6 +904,72 @@
                                      AcceptsReturn="True"
                                      MinHeight="52"
                                      VerticalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        Return to an earlier step (Epic 11200 Part C3 §3–§5). Visible exactly
+                        while the workflow layer offered at least one destination, and the list
+                        contains exactly the steps the real ReturnToStep would accept — this
+                        file states no legality rule of its own, which is what §4's "do not
+                        duplicate ReturnToStep legality in WPF" asks for.
+                    -->
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding CanReturnToStep, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReturnHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ReturnHint}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       Margin="0,6,0,0" />
+
+                            <TextBlock Text="{Binding ReturnTargetLabel}" Opacity="0.6" Margin="0,10,0,4" />
+                            <ComboBox ItemsSource="{Binding ReturnTargets}"
+                                      SelectedItem="{Binding SelectedReturnTarget}"
+                                      DisplayMemberPath="DisplayName" />
+
+                            <Button Content="{Binding BeginReturnLabel}"
+                                    Command="{Binding BeginReturnCommand}"
+                                    IsEnabled="{Binding CanBeginReturn}"
+                                    HorizontalAlignment="Left"
+                                    Padding="14,6"
+                                    Margin="0,10,0,0" />
+
+                            <!--
+                                The confirmation (§5). It stands between the selector and the
+                                command: nothing is invalidated until Confirm is pressed, and
+                                Cancel reaches no service at all. It says results become invalid
+                                and history is kept — and says nothing about files, because
+                                ReturnToStep deletes none (§6).
+                            -->
+                            <Border Background="#FFF4CE"
+                                    BorderBrush="#E0B000"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="10,8"
+                                    Margin="0,10,0,0"
+                                    Visibility="{Binding IsConfirmingReturn, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ReturnConfirmQuestion}"
+                                               TextWrapping="Wrap"
+                                               Foreground="#5A4500" />
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                        <Button Content="{Binding ConfirmReturnLabel}"
+                                                Command="{Binding ConfirmReturnCommand}"
+                                                Padding="14,6"
+                                                Margin="0,0,8,0" />
+
+                                        <Button Content="{Binding CancelReturnLabel}"
+                                                Command="{Binding CancelReturnCommand}"
+                                                Padding="14,6" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
                 </StackPanel>

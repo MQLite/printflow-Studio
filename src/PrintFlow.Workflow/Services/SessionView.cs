@@ -5,10 +5,32 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Workflow.Services;
+
+/// <summary>
+/// One earlier step the operator may legally return to (Epic 11200 Part C3 §4).
+/// </summary>
+/// <remarks>
+/// Carries the stable <see cref="StepKind"/> and its position, and no display text. The label
+/// an operator reads is built in the shell by <c>DisplayNames.Step</c>, exactly as every other
+/// step name on the screen is: enum values are stable English and are what gets persisted,
+/// while what is shown is translated (MVP design §13.4). A localised string reaching down into
+/// the workflow layer would be the one thing that could not be translated for a zh-CN
+/// workstation.
+/// <para>
+/// The legality is not here either. Every instance of this type comes from
+/// <see cref="IWorkflowEngine.AvailableReturnTargets"/>, which produced it by applying the real
+/// <c>ReturnToStep</c> command — so the existence of a row <i>is</i> the legality, and there is
+/// nothing for a view model to re-derive (§4, §8).
+/// </para>
+/// </remarks>
+/// <param name="Step">The step to return to. Never displayed raw.</param>
+/// <param name="Ordinal">Its position in the workflow, so the list reads in workflow order.</param>
+public sealed record ReturnTargetView(StepKind Step, int Ordinal);
 
 /// <summary>
 /// The file the session screen is currently about, flattened for display
@@ -139,11 +161,34 @@ public sealed record PrintOutputView(
 /// Whether an operator-selected crop is a legal next action, answered by
 /// <see cref="ManualCropEligibility"/> (Epic 11200 Part C2 §3).
 /// </param>
+/// <param name="ReturnTargets">
+/// The earlier steps <c>ReturnToStep</c> would accept right now, in workflow order
+/// (Epic 11200 Part C3 §4, §8). Empty when returning is not legal.
+/// </param>
+/// <param name="TrimMargin">
+/// The margin the next deterministic Trim attempt will run with — the session's current
+/// decision, which starts at <see cref="Domain.Trimming.TrimMargin.Tight"/> (Part C3 §10).
+/// </param>
+/// <param name="CanSetTrimParameters">
+/// Whether the margin controls should be offered: the automatic trim is about to run, and this
+/// file is not one the automatic trim has already refused (Part C3 §9, §17).
+/// </param>
+/// <param name="CurrentTrimParameters">
+/// The margin the attempt that produced <see cref="CurrentArtefact"/> actually ran with, or
+/// null when that artefact was not produced by a deterministic trim (Part C3 §18).
+/// </param>
 /// <remarks>
 /// <see cref="CanManualCrop"/> is reported rather than left to the screen because it depends on
 /// attempt history the UI does not have and must not reconstruct. It is the same predicate
 /// <see cref="SessionService"/> enforces, so an offered control and an accepted command cannot
 /// disagree.
+/// <para>
+/// <see cref="CanSetTrimParameters"/> and <see cref="CurrentTrimParameters"/> are here for the
+/// same reason. The first needs attempt history to know the file is not on the manual path; the
+/// second needs the attempt row that produced the result on screen. Neither is derivable from
+/// anything the shell can see, and a screen that guessed would be guessing about what an
+/// operator is being asked to approve.
+/// </para>
 /// </remarks>
 public sealed record SessionView(
     SessionId Id,
@@ -161,8 +206,21 @@ public sealed record SessionView(
     bool ProducesPrintOutput,
     ArtefactView? UpstreamArtefact,
     FailureCode? CurrentStepFailure,
-    bool CanManualCrop)
+    bool CanManualCrop,
+    IReadOnlyList<ReturnTargetView> ReturnTargets,
+    TrimMargin TrimMargin,
+    bool CanSetTrimParameters,
+    TrimMargin? CurrentTrimParameters)
 {
+    /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
+    public bool CanReturnToStep => ReturnTargets.Count > 0;
+
+    /// <summary>
+    /// Whether the artefact on screen carries deterministic trim parameters worth stating
+    /// (§18).
+    /// </summary>
+    public bool HasTrimParameters => CurrentTrimParameters is not null;
+
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
 
@@ -187,15 +245,24 @@ public sealed record SessionView(
         IReadOnlyList<Revision> revisions,
         IReadOnlyList<PrintOutput> outputs,
         IReadOnlyList<ProcessingAttempt> attempts,
-        AdapterExecutionMode processingMode)
+        AdapterExecutionMode processingMode,
+        IReadOnlyList<StepKind> returnTargets)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(availableCommands);
         ArgumentNullException.ThrowIfNull(revisions);
         ArgumentNullException.ThrowIfNull(outputs);
         ArgumentNullException.ThrowIfNull(attempts);
+        ArgumentNullException.ThrowIfNull(returnTargets);
 
         ArtefactView? current = ResolveArtefact(snapshot, revisions);
+
+        // The two halves of "may an operator crop by hand", computed once and read twice: the
+        // manual-crop offer needs it, and the margin controls need its negation — a file the
+        // automatic trim has refused is on the manual path, where adding margin to a crop that
+        // was never decided would be a control that cannot do what it appears to (§17).
+        bool canManualCrop = ManualCropEligibility.IsEligible(snapshot, attempts)
+            && availableCommands.Contains(CommandKind.SubmitManualCrop);
 
         return new SessionView(
             snapshot.SessionId,
@@ -213,8 +280,45 @@ public sealed record SessionView(
             snapshot.Definition.Contains(StepKind.PhotoshopOutput),
             ResolveUpstream(current, revisions),
             ManualCropEligibility.CurrentStepFailure(snapshot, attempts),
-            ManualCropEligibility.IsEligible(snapshot, attempts)
-                && availableCommands.Contains(CommandKind.SubmitManualCrop));
+            canManualCrop,
+            [.. returnTargets.Select(step => new ReturnTargetView(
+                step, snapshot.Definition.IndexOf(step)))],
+            snapshot.TrimMargin,
+            availableCommands.Contains(CommandKind.SetTrimParameters) && !canManualCrop,
+            ResolveTrimParameters(current, attempts));
+    }
+
+    /// <summary>
+    /// The margin the attempt that produced <paramref name="current"/> actually ran with (§18).
+    /// </summary>
+    /// <remarks>
+    /// Found through <see cref="ProcessingAttempt.OutputRevisionId"/> — the attempt that says it
+    /// produced this exact Revision — rather than by taking the newest Trim attempt. After a
+    /// reject-and-re-run the history holds two, and "the parameters of whatever ran last" would
+    /// label the result on screen with settings that produced a different file (§21).
+    /// <para>
+    /// Only for the step's own result. While the screen is showing the file a step is about to
+    /// <i>consume</i>, that file's own trim parameters — if it even had any — describe how it
+    /// was made further upstream, which is not what the line beside a review is claiming.
+    /// </para>
+    /// </remarks>
+    private static TrimMargin? ResolveTrimParameters(
+        ArtefactView? current, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (current is not { IsCurrentStepResult: true } result)
+        {
+            return null;
+        }
+
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.OutputRevisionId == result.RevisionId)
+            {
+                return attempt.TrimParameters;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

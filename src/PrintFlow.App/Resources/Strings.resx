@@ -347,4 +347,39 @@
   </data>
   <data name="Session_ManualCropSelection" xml:space="preserve"><value>Selected: {0}, {1} · {2} × {3} px</value></data>
   <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>No crop area selected yet.</value></data>
+
+  <!-- Return to an earlier step (Epic 11200 Part C3 §3, §5). -->
+  <data name="Session_ReturnHeading" xml:space="preserve"><value>Return to an earlier step</value></data>
+  <data name="Session_ReturnHint" xml:space="preserve">
+    <value>Choose an earlier step to go back to. Only steps you can legally return to are listed.</value>
+  </data>
+  <data name="Session_ReturnTargetLabel" xml:space="preserve"><value>Return to</value></data>
+  <data name="Session_ReturnBegin" xml:space="preserve"><value>Return to Step</value></data>
+  <data name="Session_ReturnConfirmQuestion" xml:space="preserve">
+    <value>Returning to this step will invalidate later derived results. Existing audit history will be retained.</value>
+  </data>
+  <data name="Session_ReturnConfirm" xml:space="preserve"><value>Confirm Return</value></data>
+  <data name="Session_ReturnCancel" xml:space="preserve"><value>Cancel</value></data>
+
+  <!-- Deterministic trim margin (Epic 11200 Part C3 §9–§12, §18). -->
+  <data name="Session_TrimHeading" xml:space="preserve"><value>Trim margin</value></data>
+  <data name="Session_TrimHint" xml:space="preserve">
+    <value>How much canvas the automatic trim keeps around the artwork. Margins only add space; they never crop further in.</value>
+  </data>
+  <data name="Session_TrimModeTight" xml:space="preserve"><value>Tight crop — no margin</value></data>
+  <data name="Session_TrimModeUniform" xml:space="preserve"><value>Uniform margin — the same on all four edges</value></data>
+  <data name="Session_TrimModeEdgeSpecific" xml:space="preserve"><value>Edge-specific margin — one per edge</value></data>
+  <data name="Session_TrimMarginLabel" xml:space="preserve"><value>Margin (px)</value></data>
+  <data name="Session_TrimTopLabel" xml:space="preserve"><value>Top</value></data>
+  <data name="Session_TrimRightLabel" xml:space="preserve"><value>Right</value></data>
+  <data name="Session_TrimBottomLabel" xml:space="preserve"><value>Bottom</value></data>
+  <data name="Session_TrimLeftLabel" xml:space="preserve"><value>Left</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>Apply Margin</value></data>
+  <data name="Session_TrimMarginInvalid" xml:space="preserve">
+    <value>Invalid margin. Enter a whole number of pixels that is zero or greater.</value>
+  </data>
+  <data name="Session_TrimCurrentLabel" xml:space="preserve"><value>Next run</value></data>
+  <data name="Session_TrimSummaryTight" xml:space="preserve"><value>Trim: Tight</value></data>
+  <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>Trim: Uniform {0} px</value></data>
+  <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>Trim: T {0} / R {1} / B {2} / L {3} px</value></data>
 </root>

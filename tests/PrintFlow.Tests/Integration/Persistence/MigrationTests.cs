@@ -18,7 +18,10 @@ public sealed class MigrationTests
         using SqliteConnection connection = database.Factory.Open();
         using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "PRAGMA user_version;";
-        Convert.ToInt64(command.ExecuteScalar()).ShouldBe(1L);
+
+        // Against the newest script this build carries rather than a literal, so adding a
+        // migration cannot leave this passing while meaning something weaker.
+        Convert.ToInt64(command.ExecuteScalar()).ShouldBe(MigrationRunner.NewestKnownVersion);
 
         using SqliteCommand tables = connection.CreateCommand();
         tables.CommandText = "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'Revision';";
@@ -35,9 +38,11 @@ public sealed class MigrationTests
 
         second.IsSuccess.ShouldBeTrue();
 
+        // One audit row per script, and re-running adds none: the second Migrate call above
+        // found every version already applied and did nothing.
         using SqliteCommand count = connection.CreateCommand();
         count.CommandText = "SELECT COUNT(*) FROM SchemaMigration;";
-        Convert.ToInt64(count.ExecuteScalar()).ShouldBe(1L);
+        Convert.ToInt64(count.ExecuteScalar()).ShouldBe(MigrationRunner.NewestKnownVersion);
     }
 
     [Fact]

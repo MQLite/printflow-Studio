@@ -61,7 +61,13 @@ public sealed record SessionAggregate(
             latestApproved,
             Session.Dimensions,
             Session.WhiteUnderbaseBranch,
-            approvedOutputCount);
+            approvedOutputCount)
+        {
+            // Carried across like the print size and the W1 branch, and for the same reason:
+            // it is a decision the operator made that no Revision records, so a reload that
+            // dropped it would silently re-trim at zero margin (Epic 11200 Part C3 §13).
+            TrimMargin = Session.TrimMargin,
+        };
     }
 }
 

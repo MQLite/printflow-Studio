@@ -347,4 +347,39 @@
   </data>
   <data name="Session_ManualCropSelection" xml:space="preserve"><value>已选择：{0}, {1} · {2} × {3} 像素</value></data>
   <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>尚未选择裁切区域。</value></data>
+
+  <!-- Return to an earlier step (Epic 11200 Part C3 §3, §5). -->
+  <data name="Session_ReturnHeading" xml:space="preserve"><value>返回上一步骤</value></data>
+  <data name="Session_ReturnHint" xml:space="preserve">
+    <value>选择要返回的较早步骤。此处仅列出当前允许返回的步骤。</value>
+  </data>
+  <data name="Session_ReturnTargetLabel" xml:space="preserve"><value>返回至</value></data>
+  <data name="Session_ReturnBegin" xml:space="preserve"><value>返回步骤</value></data>
+  <data name="Session_ReturnConfirmQuestion" xml:space="preserve">
+    <value>返回该步骤会使其后生成的结果失效。已有的审核记录将予以保留。</value>
+  </data>
+  <data name="Session_ReturnConfirm" xml:space="preserve"><value>确认返回</value></data>
+  <data name="Session_ReturnCancel" xml:space="preserve"><value>取消</value></data>
+
+  <!-- Deterministic trim margin (Epic 11200 Part C3 §9–§12, §18). -->
+  <data name="Session_TrimHeading" xml:space="preserve"><value>裁切边距</value></data>
+  <data name="Session_TrimHint" xml:space="preserve">
+    <value>自动裁切在图案周围保留的画布大小。边距只会向外扩展，绝不会向内多裁。</value>
+  </data>
+  <data name="Session_TrimModeTight" xml:space="preserve"><value>紧贴裁切 — 无边距</value></data>
+  <data name="Session_TrimModeUniform" xml:space="preserve"><value>统一边距 — 四边相同</value></data>
+  <data name="Session_TrimModeEdgeSpecific" xml:space="preserve"><value>分边边距 — 每边单独设置</value></data>
+  <data name="Session_TrimMarginLabel" xml:space="preserve"><value>边距（像素）</value></data>
+  <data name="Session_TrimTopLabel" xml:space="preserve"><value>上</value></data>
+  <data name="Session_TrimRightLabel" xml:space="preserve"><value>右</value></data>
+  <data name="Session_TrimBottomLabel" xml:space="preserve"><value>下</value></data>
+  <data name="Session_TrimLeftLabel" xml:space="preserve"><value>左</value></data>
+  <data name="Session_TrimApply" xml:space="preserve"><value>应用边距</value></data>
+  <data name="Session_TrimMarginInvalid" xml:space="preserve">
+    <value>边距无效。请输入大于或等于零的整数像素值。</value>
+  </data>
+  <data name="Session_TrimCurrentLabel" xml:space="preserve"><value>下次运行</value></data>
+  <data name="Session_TrimSummaryTight" xml:space="preserve"><value>裁切：紧贴</value></data>
+  <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>裁切：统一 {0} 像素</value></data>
+  <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>裁切：上 {0} / 右 {1} / 下 {2} / 左 {3} 像素</value></data>
 </root>

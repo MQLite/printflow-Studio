@@ -191,6 +191,8 @@ public sealed class TransitionMatrixTests
                 new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait),
             CommandKind.SelectWhiteUnderbaseBranch => new WorkflowCommand.SelectWhiteUnderbaseBranch(
                 global::PrintFlow.Domain.Outputs.WhiteUnderbaseBranch.W1_1px, "matrix probe"),
+            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(
+                global::PrintFlow.Domain.Trimming.TrimMargin.Uniform(2)),
             CommandKind.ReturnToStep => new WorkflowCommand.ReturnToStep(step),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),

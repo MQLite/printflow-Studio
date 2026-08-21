@@ -106,6 +106,19 @@ public abstract record WorkflowEffect
     /// <summary>Persist the confirmed print dimensions.</summary>
     public sealed record PersistPrintDimensions(PrintDimensions Dimensions) : WorkflowEffect;
 
+    /// <summary>
+    /// Persist the trim margin the next deterministic Trim attempt will run with
+    /// (Epic 11200 Part C3 §13, §14).
+    /// </summary>
+    /// <remarks>
+    /// The session-level half of the parameter record: it is what "Run Trim" reads, so the
+    /// value that runs is one that survived a restart rather than one a screen was holding.
+    /// The audit half is separate and lives on <c>ProcessingAttempt.TrimParameters</c>, written
+    /// when the attempt starts — that is the row that must never be rewritten when the operator
+    /// changes their mind and re-runs (§15).
+    /// </remarks>
+    public sealed record PersistTrimParameters(TrimMargin Margin) : WorkflowEffect;
+
     /// <summary>Persist the explicit white-underbase decision and its justification.</summary>
     public sealed record PersistWhiteUnderbaseBranch(
         WhiteUnderbaseBranch Branch,

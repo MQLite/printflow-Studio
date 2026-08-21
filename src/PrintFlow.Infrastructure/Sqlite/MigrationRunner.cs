@@ -22,12 +22,23 @@ public static class MigrationRunner
 {
     private const string ResourcePrefix = "PrintFlow.Infrastructure.Sqlite.Migrations.";
 
+    /// <summary>
+    /// The newest schema version this build carries a script for.
+    /// </summary>
+    /// <remarks>
+    /// Exposed so a caller — startup diagnostics, and the tests that assert the database really
+    /// was migrated before anything read it — can state "the schema is current" rather than a
+    /// literal that has to be edited every time a migration is added. A stale literal in a test
+    /// is a test that stops meaning what it says.
+    /// </remarks>
+    public static long NewestKnownVersion { get; } = HighestVersionOf(LoadEmbeddedMigrations());
+
     public static OperationResult<Unit> Migrate(SqliteConnection connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         IReadOnlyList<Migration> migrations = LoadEmbeddedMigrations();
-        long highestKnown = migrations.Count == 0 ? 0 : migrations[^1].Version;
+        long highestKnown = HighestVersionOf(migrations);
 
         long currentVersion = ReadUserVersion(connection);
         if (currentVersion > highestKnown)
@@ -97,6 +108,9 @@ public static class MigrationRunner
         object? result = command.ExecuteScalar();
         return result is long value ? value : Convert.ToInt64(result, CultureInfo.InvariantCulture);
     }
+
+    private static long HighestVersionOf(IReadOnlyList<Migration> migrations) =>
+        migrations.Count == 0 ? 0 : migrations[^1].Version;
 
     private readonly record struct Migration(int Version, string Name, string Sql, string Sha256);
 

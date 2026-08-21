@@ -54,6 +54,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.HandOff c => HandOff(state, c, context),
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
             WorkflowCommand.SelectWhiteUnderbaseBranch c => SelectWhiteUnderbaseBranch(state, c),
+            WorkflowCommand.SetTrimParameters c => SetTrimParameters(state, c),
             WorkflowCommand.ReturnToStep c => ReturnToStep(state, c, context),
             WorkflowCommand.Complete => Complete(state, context),
             WorkflowCommand.AddAnotherSize => AddAnotherSize(state, context),
@@ -93,6 +94,32 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         return available;
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<StepKind> AvailableReturnTargets(WorkflowSnapshot state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        // The same placeholder context AvailableCommands uses, and safe for the same reason:
+        // nothing is applied, so the reset timestamps a probe would compute are discarded with
+        // the transition that produced them.
+        CommandContext probe = new(
+            DateTimeOffset.UnixEpoch, CommandContext.UnknownOperator, default, default);
+
+        List<StepKind> targets = [];
+        foreach (StepDefinition step in state.Definition.Steps)
+        {
+            // The real command, not a summary of what it would say. Whatever ReturnToStep's
+            // preconditions are today or become later, this list is exactly the set that
+            // satisfies them.
+            if (Apply(state, new WorkflowCommand.ReturnToStep(step.Kind), probe).IsAccepted)
+            {
+                targets.Add(step.Kind);
+            }
+        }
+
+        return targets;
     }
 
     // ---------------------------------------------------------------------------------
@@ -199,6 +226,68 @@ public sealed class WorkflowEngine : IWorkflowEngine
             state with { WhiteUnderbaseBranch = command.Branch },
             new WorkflowEffect.PersistWhiteUnderbaseBranch(command.Branch, command.Justification.Trim()));
     }
+
+    /// <summary>
+    /// Records the margin the next deterministic Trim attempt will run with
+    /// (Epic 11200 Part C3 §9, §13).
+    /// </summary>
+    /// <remarks>
+    /// Legal only while Trim is the current step and is <i>between</i> attempts, which is the
+    /// state-machine half of "only when the automatic trim is about to run" (§9). Recording a
+    /// margin while an attempt is Processing would change what a running trim claimed to use,
+    /// and recording one against a result already awaiting review would leave the attempt row
+    /// describing one margin and the session another — the exact drift §15 exists to prevent.
+    /// <para>
+    /// The historical half — a step that failed with <c>ManualCropRequired</c> is on the manual
+    /// path, where no margin can help — is <c>ManualCropEligibility</c>'s, because it is a
+    /// question about attempt history that a snapshot deliberately cannot answer. Both run:
+    /// this decides whether the command is legal, and <c>SessionView</c> decides whether the
+    /// control is offered (§17).
+    /// </para>
+    /// <para>
+    /// Accepting one starts nothing. No attempt, no file, no Revision — it records a decision,
+    /// and <c>StartStep</c> reads it later.
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition SetTrimParameters(
+        WorkflowSnapshot state, WorkflowCommand.SetTrimParameters command)
+    {
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
+        {
+            return NotActive(state, nameof(WorkflowCommand.SetTrimParameters));
+        }
+
+        if (!state.Definition.Contains(StepKind.Trim))
+        {
+            return NotInWorkflow(state, StepKind.Trim);
+        }
+
+        if (state.CurrentStep is not { Step: StepKind.Trim } trim)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "A trim margin can only be set while Trim is the current step; it describes the run that is about to happen.");
+        }
+
+        if (!AcceptsTrimParameters(trim.State))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"Trim is {trim.State}; a margin is set between attempts, not during one or after a result has been produced.");
+        }
+
+        return WorkflowTransition.Accepted(
+            state with { TrimMargin = command.Margin },
+            new WorkflowEffect.PersistTrimParameters(command.Margin));
+    }
+
+    /// <summary>The Trim step states in which a new deterministic attempt is the next action.</summary>
+    /// <remarks>
+    /// Written out rather than expressed as "not Processing and not ReviewRequired", so a step
+    /// state added later is excluded until someone decides it belongs.
+    /// </remarks>
+    private static bool AcceptsTrimParameters(StepState state) => state is
+        StepState.Waiting or StepState.RetryRequired or StepState.Failed or StepState.Interrupted;
 
     /// <summary>
     /// Returns to an earlier step and invalidates everything derived from it.
@@ -1046,10 +1135,21 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// session acquires a branch it did not explicitly choose (MVP design §12; Part 3C3B §8).
     /// </para>
     /// <para>
+    /// <see cref="CommandKind.SetTrimParameters"/> is probed with the session's <b>current</b>
+    /// margin, the same way <see cref="CommandKind.SelectWorkflow"/> is probed with its current
+    /// workflow. Its payload is valid by construction — <c>TrimMargin</c>'s factories refuse a
+    /// negative pixel count — so the guards that vary are the ones that answer: is the session
+    /// active, is Trim this workflow's current step, and is it between attempts. Probing with an
+    /// invented margin would be worse than pointless here: it would answer a question about a
+    /// number the operator never typed (Epic 11200 Part C3 §9, §13).
+    /// </para>
+    /// <para>
     /// <see cref="CommandKind.SetOutputName"/> and <see cref="CommandKind.ReturnToStep"/> stay
-    /// unprobed. Neither has a screen in this slice, and <c>ReturnToStep</c> in particular has
+    /// unprobed. <c>SetOutputName</c> has no screen in this slice, and <c>ReturnToStep</c> has
     /// no payload-independent answer — "may I return" depends on <i>which</i> step, so a single
-    /// stand-in target would report something no button is asking (Part 3C3B §8).
+    /// stand-in target would report something no button is asking (Part 3C3B §8). The screen
+    /// that offers destinations asks <see cref="AvailableReturnTargets"/> instead, which
+    /// answers with the real targets rather than a yes/no (Part C3 §8).
     /// </para>
     /// </remarks>
     private static WorkflowCommand? BuildProbe(WorkflowSnapshot state, CommandKind kind)
@@ -1069,6 +1169,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
+            CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
             CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),

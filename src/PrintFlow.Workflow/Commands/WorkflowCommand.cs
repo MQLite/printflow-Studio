@@ -100,6 +100,30 @@ public abstract record WorkflowCommand
         WhiteUnderbaseBranch Branch,
         string Justification) : WorkflowCommand;
 
+    /// <summary>
+    /// Record the trim margin the next deterministic Trim attempt will run with
+    /// (Epic 11200 Part C3 §13).
+    /// </summary>
+    /// <remarks>
+    /// Exists so the operator's margin reaches <see cref="Ports.ITrimProcessor"/> the same way
+    /// every other operator decision reaches the work that consumes it: as a command the engine
+    /// checks and the application layer persists. A view model handed a margin straight to the
+    /// processor would be pixel work with no attempt row, no legality check and nothing to
+    /// audit afterwards — the same side door <see cref="SubmitManualCrop"/> exists to avoid.
+    /// <para>
+    /// It is a <b>decision</b> and not an attempt: accepting one starts nothing, produces no
+    /// file, and creates no Revision. <see cref="StartStep"/> for Trim then reads the recorded
+    /// value, so what runs is always what was last recorded rather than whatever a screen
+    /// happened to be holding.
+    /// </para>
+    /// <para>
+    /// <paramref name="Margin"/> is already validated by construction —
+    /// <see cref="TrimMargin"/>'s factories refuse a negative pixel count outright — so this
+    /// command cannot carry a margin the domain would reject (§11).
+    /// </para>
+    /// </remarks>
+    public sealed record SetTrimParameters(TrimMargin Margin) : WorkflowCommand;
+
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
     public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;
 

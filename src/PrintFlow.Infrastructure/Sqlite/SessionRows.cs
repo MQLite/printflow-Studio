@@ -25,6 +25,11 @@ internal sealed class SessionRow
     public int? DimensionsPixelHeight { get; set; }
     public string? DimensionsPreset { get; set; }
     public string? WhiteUnderbaseBranch { get; set; }
+    public string? TrimMode { get; set; }
+    public int? TrimMarginTop { get; set; }
+    public int? TrimMarginRight { get; set; }
+    public int? TrimMarginBottom { get; set; }
+    public int? TrimMarginLeft { get; set; }
 }
 
 internal sealed class StepRow
@@ -89,6 +94,14 @@ internal sealed class AttemptRow
     public string? FailureDetailJson { get; set; }
     public string? RetryOfAttemptId { get; set; }
     public int RetrySequence { get; set; }
+
+    // How this attempt's deterministic trim was parameterised (Epic 11200 Part C3 §14).
+    // Null for anything that is not a deterministic trim, including a manual crop.
+    public string? TrimMode { get; set; }
+    public int? TrimMarginTop { get; set; }
+    public int? TrimMarginRight { get; set; }
+    public int? TrimMarginBottom { get; set; }
+    public int? TrimMarginLeft { get; set; }
 }
 
 internal sealed class ReviewRow

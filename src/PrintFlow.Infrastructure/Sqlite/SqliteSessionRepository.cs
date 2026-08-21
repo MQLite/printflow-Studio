@@ -209,12 +209,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (Id, WorkflowType, OutputName, CurrentStep, State, WorkspacePath, CreatedAtUtc, UpdatedAtUtc,
                  CompletedAtUtc, HandedOffAtUtc, HandOffReason, AbandonedAtUtc, AbandonReason,
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
-                 DimensionsPreset, WhiteUnderbaseBranch)
+                 DimensionsPreset, WhiteUnderbaseBranch,
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft)
             VALUES
                 (@Id, @WorkflowType, @OutputName, @CurrentStep, @State, @WorkspacePath, @CreatedAtUtc, @UpdatedAtUtc,
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
-                 @DimensionsPreset, @WhiteUnderbaseBranch)
+                 @DimensionsPreset, @WhiteUnderbaseBranch,
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft)
             ON CONFLICT(Id) DO UPDATE SET
                 WorkflowType = excluded.WorkflowType,
                 OutputName = excluded.OutputName,
@@ -231,7 +233,16 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 DimensionsPixelWidth = excluded.DimensionsPixelWidth,
                 DimensionsPixelHeight = excluded.DimensionsPixelHeight,
                 DimensionsPreset = excluded.DimensionsPreset,
-                WhiteUnderbaseBranch = excluded.WhiteUnderbaseBranch;
+                WhiteUnderbaseBranch = excluded.WhiteUnderbaseBranch,
+
+                -- The session's *pending* trim decision, so it does update: it is what the next
+                -- run will use, and the operator is allowed to change their mind. The attempt's
+                -- copy is the one that must never be rewritten (Epic 11200 Part C3 §14, §15).
+                TrimMode = excluded.TrimMode,
+                TrimMarginTop = excluded.TrimMarginTop,
+                TrimMarginRight = excluded.TrimMarginRight,
+                TrimMarginBottom = excluded.TrimMarginBottom,
+                TrimMarginLeft = excluded.TrimMarginLeft;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }
@@ -327,6 +338,16 @@ public sealed class SqliteSessionRepository : ISessionRepository
         }, transaction);
     }
 
+    /// <summary>
+    /// Inserts an attempt, or updates the fields that legitimately change when it ends.
+    /// </summary>
+    /// <remarks>
+    /// The trim-parameter columns are deliberately absent from the <c>DO UPDATE</c> clause.
+    /// They are written once, with the attempt's opening transaction, and describe what this
+    /// attempt was asked to do — so leaving them out is what makes "a retry with a different
+    /// margin never rewrites the first attempt's settings" a property of the SQL rather than a
+    /// promise about the caller (Epic 11200 Part C3 §15).
+    /// </remarks>
     private static Task UpsertAttemptAsync(SqliteConnection connection, SqliteTransaction transaction, ProcessingAttempt attempt)
     {
         AttemptRow row = Mappers.ToRow(attempt);
@@ -334,10 +355,12 @@ public sealed class SqliteSessionRepository : ISessionRepository
             """
             INSERT INTO ProcessingAttempt
                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc, EndedAtUtc,
-                 ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence)
+                 ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft)
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
-                 @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence)
+                 @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft)
             ON CONFLICT(Id) DO UPDATE SET
                 EndedAtUtc = excluded.EndedAtUtc,
                 ResultStatus = excluded.ResultStatus,

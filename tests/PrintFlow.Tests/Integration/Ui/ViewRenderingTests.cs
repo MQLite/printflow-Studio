@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using PrintFlow.App;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Services;
 
@@ -483,6 +485,147 @@ public sealed class ViewRenderingTests
         });
 
         errors.ShouldNotBeEmpty();
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Epic 11200 Part C3 §25: the return selector and the trim margin controls
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The return selector renders, with and without the confirmation showing (§25).
+    /// </summary>
+    /// <remarks>
+    /// Twice, because the confirmation is a collapsed branch until it is opened: its warning
+    /// text and its two buttons would otherwise never have a binding resolved. The
+    /// <c>ComboBox</c>'s <c>DisplayMemberPath</c> is the one most likely to be written wrongly
+    /// and the one that would be silent if it were.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_return_selector_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+        session.CanReturnToStep.ShouldBeTrue();
+        session.ReturnTargets.ShouldNotBeEmpty();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        session.SelectedReturnTarget = session.ReturnTargets[0];
+        session.BeginReturnCommand.Execute(null);
+        session.IsConfirmingReturn.ShouldBeTrue();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// All three trim margin states render (§25).
+    /// </summary>
+    /// <remarks>
+    /// Tight, uniform and edge-specific are three mutually exclusive branches of the same
+    /// panel, so a single render would leave two of them — including the four-box grid, which
+    /// is the fiddliest markup this slice adds — completely unexercised.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_every_trim_margin_state_with_no_binding_errors()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+        session.CanSetTrimParameters.ShouldBeTrue();
+        session.SelectedTrimMode.Mode.ShouldBe(TrimMode.TightCrop);
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+        session.UniformMarginText = "8";
+        session.IsUniformMargin.ShouldBeTrue();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+
+        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.EdgeSpecificMargin);
+        session.TopMarginText = "4";
+        session.RightMarginText = "8";
+        session.BottomMarginText = "4";
+        session.LeftMarginText = "8";
+        session.IsEdgeSpecificMargin.ShouldBeTrue();
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// The trim review renders with its parameter summary (§18, §25).
+    /// </summary>
+    /// <remarks>
+    /// The one line this slice adds to the review panel, which is collapsed on every other
+    /// render in this file because no other state has a deterministic trim on screen.
+    /// </remarks>
+    [Fact]
+    public async Task The_session_screen_renders_the_trim_review_with_its_parameter_summary()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.EdgeSpecificMargin);
+        session.TopMarginText = "1";
+        session.RightMarginText = "2";
+        session.BottomMarginText = "1";
+        session.LeftMarginText = "2";
+        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+        session.Notice.ShouldBeNull();
+
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.IsReviewRequired.ShouldBeTrue();
+        session.HasTrimParameters.ShouldBeTrue();
+        session.TrimParametersSummary.ShouldNotBeNullOrWhiteSpace();
+
+        RenderOnStaThread(() => new SessionScreenView { DataContext = session });
+    }
+
+    /// <summary>
+    /// The same two panels with the Chinese resources loaded (§25).
+    /// </summary>
+    /// <remarks>
+    /// What a build can honestly judge about zh-CN parity: every binding still resolves with the
+    /// satellite loaded, the strings really are the translated ones rather than raw resource
+    /// keys, and the screen still asks for no more room than the window it is given. Whether the
+    /// Chinese wording <i>reads</i> well remains a human judgement, and nobody has made it
+    /// (§26).
+    /// </remarks>
+    [Fact]
+    public async Task The_return_and_trim_controls_fit_the_window_with_the_Chinese_resources()
+    {
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo chinese = CultureInfo.GetCultureInfo("zh-CN");
+            CultureInfo.CurrentUICulture = chinese;
+            CultureInfo.CurrentCulture = chinese;
+
+            using HomeScreenHarness harness = new();
+            SessionViewModel session = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+            // The satellite really is what the screen is showing: a missing translation would
+            // fall back to the resource key, which these would then equal.
+            session.TrimHeading.ShouldNotBe("Session_TrimHeading");
+            session.ReturnHeading.ShouldNotBe("Session_ReturnHeading");
+            session.ReturnConfirmQuestion.ShouldNotBe("Session_ReturnConfirmQuestion");
+            session.TrimModes.ShouldAllBe(mode => !mode.Label.StartsWith("Session_", StringComparison.Ordinal));
+
+            session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.EdgeSpecificMargin);
+            session.SelectedReturnTarget = session.ReturnTargets[0];
+            session.BeginReturnCommand.Execute(null);
+
+            RenderResult<int> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+                () => new SessionScreenView { DataContext = session }, WpfRendering.ReviewViewport, _ => 0);
+
+            rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+            rendered.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     // -------------------------------------------------------------------------------------

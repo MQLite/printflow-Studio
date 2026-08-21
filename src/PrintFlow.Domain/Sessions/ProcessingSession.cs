@@ -1,6 +1,7 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Domain.Sessions;
 
@@ -29,6 +30,25 @@ public sealed record ProcessingSession(
     PrintDimensions? Dimensions,
     WhiteUnderbaseBranch? WhiteUnderbaseBranch)
 {
+    /// <summary>
+    /// The margin the next deterministic Trim attempt will run with
+    /// (Epic 11200 Part C3 §13).
+    /// </summary>
+    /// <remarks>
+    /// The <i>pending</i> decision, and only that: it says what "Run Trim" would do next, never
+    /// what an earlier trim did. The record of what a trim actually did belongs to
+    /// <c>ProcessingAttempt.TrimParameters</c>, because this value changes whenever the operator
+    /// changes their mind and an audit record must not (§14, §15).
+    /// <para>
+    /// It lives on the session rather than only in a view model so that "Run Trim uses the
+    /// persisted decision" survives a restart, the way the print size and the W1 branch do
+    /// (Epic 11100 plan §17.3). Its starting value is <see cref="TrimMargin.Tight"/> — zero
+    /// margin, the behaviour every trim has had since Part B — and nothing ever adds a non-zero
+    /// safety margin the operator did not ask for (§10).
+    /// </para>
+    /// </remarks>
+    public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
+
     /// <summary>Creates a new active session positioned at its first step.</summary>
     public static ProcessingSession Start(
         SessionId id,

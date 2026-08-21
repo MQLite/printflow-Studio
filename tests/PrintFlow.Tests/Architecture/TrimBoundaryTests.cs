@@ -366,6 +366,114 @@ public sealed class TrimBoundaryTests
             "the shell submits a rectangle through ISessionService and never performs the crop itself.");
     }
 
+    // -----------------------------------------------------------------------------
+    // Trim parameters and return targets (Epic 11200 Part C3 §27)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// A trim margin reaches the workflow layer only inside a <c>WorkflowCommand</c> (§13, §27).
+    /// </summary>
+    /// <remarks>
+    /// The same statement <c>A_crop_rectangle_reaches_the_workflow_layer_only_as_a_command</c>
+    /// makes about a rectangle, for the other value an operator now supplies. The shell must be
+    /// able to name a <see cref="TrimMargin"/> — the operator types one — so a blanket ban would
+    /// be the wrong shape. What matters is that there is exactly one command a margin can travel
+    /// in, and no second route past it: the shell names no trim seam type at all, which
+    /// <c>No_view_model_holds_a_trim_or_manual_crop_processor</c> above already asserts.
+    /// </remarks>
+    [Fact]
+    public void A_trim_margin_reaches_the_workflow_layer_only_as_a_command()
+    {
+        IEnumerable<string> commandsCarryingMargin = WorkflowLayer.GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(WorkflowCommand)))
+            .Where(t => t.GetConstructors()
+                .SelectMany(c => c.GetParameters())
+                .Any(p => p.ParameterType == typeof(TrimMargin)))
+            .Select(t => t.FullName!);
+
+        commandsCarryingMargin.ShouldBe([typeof(WorkflowCommand.SetTrimParameters).FullName!]);
+    }
+
+    /// <summary>
+    /// An attempt's recorded trim parameters cannot be reassigned (§14, §15, §27).
+    /// </summary>
+    /// <remarks>
+    /// The audit property made structural. <c>TrimParameters</c> is <c>init</c>-only, so the
+    /// only way to change what an attempt says it ran with is to build a different attempt —
+    /// which is what a retry does, under a new identity. An ordinary setter would make
+    /// "the first attempt's settings are never overwritten" a matter of nobody having written
+    /// the assignment yet.
+    /// </remarks>
+    [Fact]
+    public void An_attempts_recorded_trim_parameters_are_init_only()
+    {
+        PropertyInfo property = typeof(ProcessingAttempt)
+            .GetProperty(nameof(ProcessingAttempt.TrimParameters))!;
+
+        property.PropertyType.ShouldBe(typeof(TrimMargin?));
+
+        MethodInfo setter = property.SetMethod!;
+        setter.ReturnParameter.GetRequiredCustomModifiers()
+            .ShouldContain(typeof(System.Runtime.CompilerServices.IsExternalInit),
+                "TrimParameters must be init-only, so a recorded attempt cannot be re-parameterised.");
+    }
+
+    /// <summary>
+    /// Return destinations come from the workflow layer and cannot be invented by the shell
+    /// (§4, §27).
+    /// </summary>
+    /// <remarks>
+    /// Two halves. The engine owns the question — <c>AvailableReturnTargets</c> is on the
+    /// interface, so the shell asks rather than derives — and the row the selector binds to can
+    /// only be built from a <see cref="ReturnTargetView"/> the workflow layer produced. A row
+    /// constructible from a bare <c>StepKind</c> would be a destination the screen made up, and
+    /// the whole point of §4 is that it cannot.
+    /// </remarks>
+    [Fact]
+    public void Return_targets_come_from_the_workflow_layer_and_cannot_be_invented_by_the_shell()
+    {
+        typeof(IWorkflowEngine)
+            .GetMethod(nameof(IWorkflowEngine.AvailableReturnTargets))
+            .ShouldNotBeNull("the engine, not a view model, decides where returning is legal.");
+
+        typeof(SessionView).GetProperty(nameof(SessionView.ReturnTargets))!
+            .PropertyType.ShouldBe(typeof(IReadOnlyList<ReturnTargetView>));
+
+        Type row = Shell.GetType("PrintFlow.App.ViewModels.ReturnTargetRow")!;
+        ConstructorInfo[] constructors = row.GetConstructors(
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        constructors.Length.ShouldBe(1);
+        constructors[0].GetParameters().Select(p => p.ParameterType)
+            .ShouldBe([typeof(ReturnTargetView)]);
+        constructors[0].IsPublic.ShouldBeFalse(
+            "nothing outside the shell may construct a return destination.");
+    }
+
+    /// <summary>
+    /// The read model carries no attempt history for the shell to re-derive parameters from
+    /// (§27).
+    /// </summary>
+    /// <remarks>
+    /// The same guarantee <c>Manual_crop_eligibility_is_decided_in_the_workflow_layer</c> makes
+    /// about eligibility, extended to the two answers this slice added. Both are computed where
+    /// the attempt rows live and handed over as values, so a screen cannot arrive at a second
+    /// opinion about which margin produced the file it is displaying.
+    /// </remarks>
+    [Fact]
+    public void The_read_model_reports_trim_parameters_rather_than_the_history_behind_them()
+    {
+        typeof(SessionView).GetProperty(nameof(SessionView.CurrentTrimParameters))!
+            .PropertyType.ShouldBe(typeof(TrimMargin?));
+
+        typeof(SessionView).GetProperty(nameof(SessionView.CanSetTrimParameters))!
+            .PropertyType.ShouldBe(typeof(bool));
+
+        typeof(SessionView).GetProperties()
+            .Select(p => p.PropertyType)
+            .ShouldNotContain(typeof(IReadOnlyList<ProcessingAttempt>));
+    }
+
     private static string[] CropImplementations(Assembly assembly) =>
         [.. assembly.GetTypes()
             .Where(t => t is { IsInterface: false, IsAbstract: false } && typeof(IManualCropProcessor).IsAssignableFrom(t))

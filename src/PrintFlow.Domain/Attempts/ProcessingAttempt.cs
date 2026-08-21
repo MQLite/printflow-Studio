@@ -2,6 +2,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Domain.Attempts;
 
@@ -68,6 +69,35 @@ public sealed record ProcessingAttempt(
             Failure: null,
             retryOfAttemptId,
             retrySequence);
+
+    /// <summary>
+    /// The trim margin this attempt ran with, when it ran the deterministic trim
+    /// (Epic 11200 Part C3 §14).
+    /// </summary>
+    /// <remarks>
+    /// The answer to "how was this Trim Revision produced?", recorded on the attempt rather
+    /// than only on the session. A session-level setting answers "what would the <i>next</i>
+    /// run use", which is a different question and one that changes: an operator who rejects a
+    /// uniform 4&#160;px trim and re-runs at 1/2/3/4 would, under a session-only record, have
+    /// retrospectively rewritten what the first attempt did. An attempt row is written once and
+    /// never rewritten, so both settings stay readable side by side (§15).
+    /// <para>
+    /// Null for everything that is not a deterministic trim — an adapter call, a promotion, and
+    /// specifically a manual crop, whose rectangle the operator drew and to which an automatic
+    /// margin means nothing (§17). Null therefore reads as "this attempt had no trim margin",
+    /// never as "it used the default".
+    /// </para>
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter, so every existing call site
+    /// keeps saying what it meant: an attempt carries trim parameters only when something
+    /// deliberately attaches them.
+    /// </para>
+    /// </remarks>
+    public TrimMargin? TrimParameters { get; init; }
+
+    /// <summary>Records the trim margin this attempt is about to run with.</summary>
+    public ProcessingAttempt WithTrimParameters(TrimMargin margin) =>
+        this with { TrimParameters = margin };
 
     public ProcessingAttempt Succeed(RevisionId outputRevisionId, DateTimeOffset endedAtUtc) =>
         this with

@@ -2,6 +2,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Definitions;
 
 namespace PrintFlow.Workflow.Engine;
@@ -45,6 +46,32 @@ public sealed record WorkflowSnapshot(
     public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType);
 
     /// <summary>
+    /// The margin the next deterministic Trim attempt will run with
+    /// (Epic 11200 Part C3 §10, §13).
+    /// </summary>
+    /// <remarks>
+    /// <b>This one does have a default, and that is deliberate.</b> It starts at
+    /// <see cref="TrimMargin.Tight"/> — crop exactly to the alpha content, zero margin on all
+    /// four edges — which is the behaviour every trim has had since Part B, so a session that
+    /// never opens the margin controls behaves exactly as it did before. Contrast
+    /// <see cref="WhiteUnderbaseBranch"/>, which is null until an operator chooses: W1 is a
+    /// classification of the artwork that only a human can make, and a pre-selected branch
+    /// would be that judgement made by the software (MVP design §12). A trim margin is an
+    /// operational parameter of a deterministic algorithm, and "no margin" is the honest
+    /// zero rather than a guess.
+    /// <para>
+    /// What is emphatically <i>not</i> defaulted is a non-zero safety margin: nothing anywhere
+    /// adds pixels the operator did not ask for (§10).
+    /// </para>
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter so <c>default</c> is
+    /// <see cref="TrimMargin.Tight"/> at every construction site without one of them having to
+    /// say so.
+    /// </para>
+    /// </remarks>
+    public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
+
+    /// <summary>
     /// Value equality, including the step list element by element.
     /// </summary>
     /// <remarks>
@@ -75,6 +102,7 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(Dimensions, other.Dimensions)
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
+            && TrimMargin.Equals(other.TrimMargin)
             && Steps.SequenceEqual(other.Steps);
     }
 
@@ -90,6 +118,7 @@ public sealed record WorkflowSnapshot(
         hash.Add(Dimensions);
         hash.Add(WhiteUnderbaseBranch);
         hash.Add(ApprovedPrintOutputCount);
+        hash.Add(TrimMargin);
 
         foreach (SessionStep step in Steps)
         {

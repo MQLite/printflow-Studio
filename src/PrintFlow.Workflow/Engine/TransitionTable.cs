@@ -26,6 +26,7 @@ public enum CommandKind
     SubmitManualCrop,
     SetPrintDimensions,
     SelectWhiteUnderbaseBranch,
+    SetTrimParameters,
     ReturnToStep,
     Complete,
     AddAnotherSize,
@@ -69,6 +70,13 @@ public static class TransitionTable
         CommandKind.SelectWorkflow,
         CommandKind.SetOutputName,
         CommandKind.SelectWhiteUnderbaseBranch,
+
+        // A trim margin is a decision about the run, not a step-state transition: it changes
+        // no step's state and starts nothing. The engine still checks that Trim is the current
+        // step and is between attempts before accepting one — that guard just is not a row in
+        // this table, because the table answers "what does the *target step's* state permit",
+        // and this command names no step (Epic 11200 Part C3 §13).
+        CommandKind.SetTrimParameters,
         CommandKind.ReturnToStep,
         CommandKind.Complete,
         CommandKind.AddAnotherSize,

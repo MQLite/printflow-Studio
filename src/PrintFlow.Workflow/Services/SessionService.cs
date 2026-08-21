@@ -370,7 +370,8 @@ public sealed class SessionService : ISessionService
         IReadOnlyList<PrintOutput> outputs,
         IReadOnlyList<ProcessingAttempt> attempts) =>
         OperationResult.Ok(SessionView.From(
-            state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode));
+            state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode,
+            _engine.AvailableReturnTargets(state)));
 
     /// <summary>
     /// The output rows as they stand after <paramref name="mutation"/> is committed.
@@ -517,6 +518,17 @@ public sealed class SessionService : ISessionService
         ProcessingAttempt runningAttempt = ProcessingAttempt.Start(
             context.NewAttemptId, aggregate.Session.Id, work.Step, work.InputRevision,
             work.Operation, work.ProcessorId, context.NowUtc, retrySequence: retrySequence);
+
+        // The parameter record, written with the opening transaction — before any pixel work —
+        // so the row says what this attempt was asked to do rather than what it turned out to
+        // do. A later attempt with a different margin gets its own row; this one is never
+        // rewritten, which is what makes the two settings comparable afterwards (Part C3 §14,
+        // §15). Only the deterministic trim has parameters: a manual crop is a rectangle a
+        // human drew, and a margin means nothing to it (§17).
+        if (work is { Step: StepKind.Trim, ManualCrop: null })
+        {
+            runningAttempt = runningAttempt.WithTrimParameters(started.State.TrimMargin);
+        }
 
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
 
@@ -747,11 +759,16 @@ public sealed class SessionService : ISessionService
                         : await InspectAsync(cropped.Value.ProducedFile, cancellationToken);
                 }
 
+                // The operator's recorded decision, not a constant. It arrives here from
+                // WorkflowSnapshot.TrimMargin, which SetTrimParameters is the only way to
+                // change — so nothing between the screen and the processor can substitute a
+                // margin, and the same value is what the attempt row recorded before this ran
+                // (Epic 11200 Part C3 §13, §14).
                 OperationResult<TrimResult> trimmed = await _trim.TrimAsync(
                     new TrimRequest(
                         workingCopy.Value,
                         SiblingOf(workingCopy.Value, TrimOutputFileName),
-                        TrimMargin.Tight),
+                        state.TrimMargin),
                     cancellationToken);
                 if (trimmed.IsFailure)
                 {
@@ -1016,6 +1033,7 @@ public sealed class SessionService : ISessionService
             UpdatedAtUtc = nowUtc,
             Dimensions = newSnapshot.Dimensions,
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
+            TrimMargin = newSnapshot.TrimMargin,
         };
 
         foreach (WorkflowEffect effect in effects)

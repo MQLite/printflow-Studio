@@ -182,7 +182,7 @@ public sealed class ApplicationStartupTests
 
         result.Status.CanShowShell.ShouldBeTrue();
         recovery.CallCount.ShouldBe(1);
-        userVersionWhenRecoveryRan.ShouldBe(1L);
+        userVersionWhenRecoveryRan.ShouldBe(MigrationRunner.NewestKnownVersion);
         recoveryReadableTableCount.ShouldBe(3L);
     }
 
