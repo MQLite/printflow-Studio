@@ -300,6 +300,20 @@ internal static class Strings
 
     internal static string Failure_ManualCropRequired => Get(nameof(Failure_ManualCropRequired));
 
+    internal static string Failure_MeituNotInstalled => Get(nameof(Failure_MeituNotInstalled));
+
+    internal static string Failure_MeituLaunchFailed => Get(nameof(Failure_MeituLaunchFailed));
+
+    internal static string Failure_MeituWindowNotFound => Get(nameof(Failure_MeituWindowNotFound));
+
+    internal static string Failure_MeituTargetLost => Get(nameof(Failure_MeituTargetLost));
+
+    internal static string Failure_MeituUnknownState => Get(nameof(Failure_MeituUnknownState));
+
+    internal static string Failure_MeituBlockingDialog => Get(nameof(Failure_MeituBlockingDialog));
+
+    internal static string Failure_MeituOpenInputFailed => Get(nameof(Failure_MeituOpenInputFailed));
+
     internal static string Rejection_InsufficientResult => Get(nameof(Rejection_InsufficientResult));
 
     internal static string Rejection_EdgeError => Get(nameof(Rejection_EdgeError));

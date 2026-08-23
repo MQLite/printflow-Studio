@@ -124,12 +124,21 @@ public static class ServiceRegistration
                 break;
 
             case "Production":
-                // No production adapter exists yet (Epic 11300/11400). Failing closed here,
-                // rather than falling back to the fake silently, is the point: a workstation
-                // configured for Production must never quietly run against fakes.
+                // Epic 11300 Part A added a production Meitu adapter, but it implements the
+                // safety foundation only — it cannot enhance or remove a background, and no
+                // production Photoshop adapter exists at all (Epic 11400). Wiring a half-built
+                // production graph here would put an adapter that always fails in front of an
+                // operator, so the composition root still refuses.
+                //
+                // Failing closed rather than falling back to the fake remains the point: a
+                // workstation configured for Production must never quietly run against fakes.
+                // The Part A foundation is exercised through
+                // MeituAutomationComposition.CreateFoundation, which is reachable from the
+                // controlled smoke and from tests but not from any session (Part A §6, §22).
                 throw new NotSupportedException(
-                    "Adapters:Mode is 'Production', but no production Meitu/Photoshop adapter exists yet " +
-                    "(Epic 11300/11400). Refusing to start rather than silently substituting a fake.");
+                    "Adapters:Mode is 'Production', but production automation is incomplete: the Meitu " +
+                    "adapter implements only the Epic 11300 Part A foundation and no production Photoshop " +
+                    "adapter exists (Epic 11400). Refusing to start rather than silently substituting a fake.");
 
             default:
                 throw new NotSupportedException(

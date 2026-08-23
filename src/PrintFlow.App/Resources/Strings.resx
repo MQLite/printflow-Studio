@@ -255,6 +255,27 @@
   <data name="Failure_ManualCropRequired" xml:space="preserve">
     <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
   </data>
+  <data name="Failure_MeituNotInstalled" xml:space="preserve">
+    <value>The approved Meitu program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+  </data>
+  <data name="Failure_MeituLaunchFailed" xml:space="preserve">
+    <value>Meitu was started but did not become ready in time. Please open Meitu yourself and try again.</value>
+  </data>
+  <data name="Failure_MeituWindowNotFound" xml:space="preserve">
+    <value>Meitu is running but its window could not be found, so nothing was sent to it.</value>
+  </data>
+  <data name="Failure_MeituTargetLost" xml:space="preserve">
+    <value>Meitu was no longer the active window, so nothing was clicked or typed. Please leave Meitu in front and try again.</value>
+  </data>
+  <data name="Failure_MeituUnknownState" xml:space="preserve">
+    <value>Meitu is on a screen this program does not recognise. Nothing was changed. Please return Meitu to its start page or finish what is open, then try again.</value>
+  </data>
+  <data name="Failure_MeituBlockingDialog" xml:space="preserve">
+    <value>A message window is open in Meitu. This program will not close it for you — please deal with it, then try again.</value>
+  </data>
+  <data name="Failure_MeituOpenInputFailed" xml:space="preserve">
+    <value>The prepared file could not be handed to Meitu, so nothing was opened.</value>
+  </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
   <data name="Rejection_MissingContent" xml:space="preserve"><value>Missing content</value></data>

@@ -18,6 +18,13 @@
       asserts this project declares no Window, UserControl, Page or Application type.
     -->
     <UseWPF>true</UseWPF>
+    <!--
+      Required by the LibraryImport source generator, which emits pinning code for the array
+      and bool marshalling in Automation\NativeMethods.cs (Epic 11300 Part A §8). No unsafe
+      code is written by hand anywhere in this repository; an architecture test asserts that
+      the `unsafe` keyword appears in no source file.
+    -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

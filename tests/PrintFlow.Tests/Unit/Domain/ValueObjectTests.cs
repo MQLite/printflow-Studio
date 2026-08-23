@@ -272,6 +272,10 @@ public sealed class ValueObjectTests
             "Timeout", "Cancelled", "OutputMissing", "OutputUnreadable", "OutputValidationFailed",
             "RevisionIntegrityMismatch", "WorkspaceError", "PersistenceError", "PreconditionNotMet",
             "ManualCropRequired",
+
+            // Epic 11300 Part A §21 — the minimum stable set for Meitu automation.
+            "MeituNotInstalled", "MeituLaunchFailed", "MeituWindowNotFound", "MeituTargetLost",
+            "MeituUnknownState", "MeituBlockingDialog", "MeituOpenInputFailed",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

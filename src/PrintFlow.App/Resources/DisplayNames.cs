@@ -110,6 +110,13 @@ internal static class DisplayNames
         FailureCode.PersistenceError => Strings.Failure_PersistenceError,
         FailureCode.PreconditionNotMet => Strings.Failure_PreconditionNotMet,
         FailureCode.ManualCropRequired => Strings.Failure_ManualCropRequired,
+        FailureCode.MeituNotInstalled => Strings.Failure_MeituNotInstalled,
+        FailureCode.MeituLaunchFailed => Strings.Failure_MeituLaunchFailed,
+        FailureCode.MeituWindowNotFound => Strings.Failure_MeituWindowNotFound,
+        FailureCode.MeituTargetLost => Strings.Failure_MeituTargetLost,
+        FailureCode.MeituUnknownState => Strings.Failure_MeituUnknownState,
+        FailureCode.MeituBlockingDialog => Strings.Failure_MeituBlockingDialog,
+        FailureCode.MeituOpenInputFailed => Strings.Failure_MeituOpenInputFailed,
         _ => code.ToString(),
     };
 

@@ -255,6 +255,27 @@
   <data name="Failure_ManualCropRequired" xml:space="preserve">
     <value>该图片没有可用于裁切的透明区域，需要手动裁切。</value>
   </data>
+  <data name="Failure_MeituNotInstalled" xml:space="preserve">
+    <value>未在本机找到已批准的美图程序，或版本与批准的版本不一致。请检查工作站配置。</value>
+  </data>
+  <data name="Failure_MeituLaunchFailed" xml:space="preserve">
+    <value>美图已启动但未在规定时间内就绪。请手动打开美图后重试。</value>
+  </data>
+  <data name="Failure_MeituWindowNotFound" xml:space="preserve">
+    <value>美图正在运行，但未找到它的窗口，因此没有向它发送任何操作。</value>
+  </data>
+  <data name="Failure_MeituTargetLost" xml:space="preserve">
+    <value>美图已不是当前活动窗口，因此没有执行任何点击或输入。请让美图保持在最前，然后重试。</value>
+  </data>
+  <data name="Failure_MeituUnknownState" xml:space="preserve">
+    <value>美图当前显示的界面本程序无法识别，未做任何更改。请将美图恢复到起始页，或先完成已打开的编辑，然后重试。</value>
+  </data>
+  <data name="Failure_MeituBlockingDialog" xml:space="preserve">
+    <value>美图中有弹出窗口。本程序不会替您关闭它，请先处理该窗口，然后重试。</value>
+  </data>
+  <data name="Failure_MeituOpenInputFailed" xml:space="preserve">
+    <value>未能将准备好的文件交给美图，因此没有打开任何文件。</value>
+  </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>效果不达标</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>边缘错误</value></data>
   <data name="Rejection_MissingContent" xml:space="preserve"><value>内容缺失</value></data>
