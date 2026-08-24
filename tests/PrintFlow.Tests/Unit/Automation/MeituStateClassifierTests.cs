@@ -148,12 +148,104 @@ public sealed class MeituStateClassifierTests
     [Fact]
     public void The_editor_is_recognised_only_by_the_file_name_PrintFlow_itself_chose()
     {
-        Classify(Observe(title: "美图秀秀-图片编辑", texts: ["working_a1.png"], expectedFile: "working_a1.png"))
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EditorMarkers, "working_a1.png"],
+                expectedFile: "working_a1.png"))
             .State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
 
         // A different document being open proves nothing about PrintFlow's file, so it stops.
-        Classify(Observe(title: "美图秀秀-图片编辑", texts: ["某位客户的图.png"], expectedFile: "working_a1.png"))
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EditorMarkers, "某位客户的图.png"],
+                expectedFile: "working_a1.png"))
             .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    /// <summary>
+    /// The expected file name alone does not make a screen the editor.
+    /// </summary>
+    /// <remarks>
+    /// The Part A rule accepted any screen whose title was acceptable and on which the expected
+    /// name appeared anywhere. That is weaker than it reads: a file name shows up in places that
+    /// say nothing about what is loaded — a recent-files list being the obvious one — so the
+    /// name has to be corroborated by the editor's own signed markers before it counts as
+    /// confirmation (§13, §14).
+    /// </remarks>
+    [Fact]
+    public void The_expected_file_name_without_the_signed_editor_markers_is_not_accepted()
+    {
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: ["working_a1.png"],
+                expectedFile: "working_a1.png"))
+            .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    /// <summary>
+    /// The editor's markers without the expected name are not accepted either.
+    /// </summary>
+    /// <remarks>
+    /// The counterpart of the test above, and the one that rules out "some document is open" as
+    /// sufficient (§14). Both halves of the signature have to hold, because either on its own is
+    /// satisfied by a screen PrintFlow's file is not on.
+    /// </remarks>
+    [Fact]
+    public void The_signed_editor_markers_without_the_expected_file_name_are_not_accepted()
+    {
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EditorMarkers],
+                expectedFile: "working_a1.png"))
+            .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    /// <summary>
+    /// A feature-suffixed title is never enough on its own, in either direction.
+    /// </summary>
+    /// <remarks>
+    /// Part A's defect was a prefix rule that let the editor pass for the start page. The
+    /// editor signature is matched by <i>exact</i> title equality for the same reason, so a
+    /// title that merely starts with the signed one — Meitu appends feature suffixes freely —
+    /// cannot carry an editor recognition either (§22).
+    /// </remarks>
+    [Fact]
+    public void A_title_that_merely_extends_the_signed_editor_title_is_not_the_editor()
+    {
+        Classify(Observe(
+                title: MeituFakes.EditorTitle + "-批处理",
+                texts: [.. MeituFakes.EditorMarkers, "working_a1.png"],
+                expectedFile: "working_a1.png"))
+            .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    /// <summary>
+    /// Expecting a file and not seeing it never resolves to a safe state.
+    /// </summary>
+    /// <remarks>
+    /// The trap this pins is specific. <see cref="MeituStartingState.KnownEditorEmpty"/> is a
+    /// <i>safe</i> starting state, so an empty-editor signature loose enough to match the editor
+    /// generally would turn "PrintFlow expected A.png and the editor is showing B.png" into a
+    /// green light. The classifier therefore only considers the empty editor when nothing has
+    /// been handed over at all (§14, §15).
+    /// </remarks>
+    [Fact]
+    public void An_editor_showing_another_document_is_never_KnownEditorEmpty()
+    {
+        MeituBaseline permissive = MeituFakes.Baseline() with
+        {
+            EditorEmpty = MeituFakes.EditorWithDocument(),
+        };
+
+        MeituStateSnapshot snapshot = MeituStateClassifier.Classify(
+            permissive,
+            Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EditorMarkers, "某位客户的图.png"],
+                expectedFile: "working_a1.png"));
+
+        snapshot.State.ShouldBe(MeituStartingState.Unknown);
+        snapshot.IsSafeStartingState.ShouldBeFalse();
     }
 
     /// <summary>

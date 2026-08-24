@@ -166,10 +166,237 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<UiElementRef>(window.Failure);
         }
 
-        OperationResult<UiElementQuery> query = QueryFor(element);
-        return query.IsFailure
-            ? OperationResult.Fail<UiElementRef>(query.Failure)
-            : _elements.Find(window.Value.Handle, query.Value);
+        return element switch
+        {
+            KnownMeituElement.WelcomeOpenEntry => FindStartPageCard(target, window.Value.Handle),
+            KnownMeituElement.EditorOpenControl => FindEditorOpenControl(target, window.Value.Handle),
+            _ => FindDialogControl(target, window.Value.Handle, element),
+        };
+    }
+
+    /// <summary>Locates the empty editor's own open control from its signed signature.</summary>
+    private OperationResult<UiElementRef> FindEditorOpenControl(MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(baseline.Failure);
+        }
+
+        if (baseline.Value.EditorEmpty?.OpenControl is not { } signature)
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain records no open control for the Meitu editor, so PrintFlow has " +
+                "no signed way to raise its picker. Nothing was invoked.");
+        }
+
+        return FindSignedControl(target, window, signature);
+    }
+
+    /// <summary>
+    /// Finds the one element matching a signed control signature beneath a verified window.
+    /// </summary>
+    /// <remarks>
+    /// The search is by name and the decision is by the whole signature. Narrowing the query
+    /// first keeps the tree walk cheap; deciding on the full signature afterwards is what stops
+    /// a same-named control elsewhere on the screen from being accepted.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindSignedControl(
+        MeituTarget target, WindowHandle window, MeituControlSignature signature)
+    {
+        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
+            window,
+            new UiElementQuery(
+                UiControlKind.Any, Name: signature.Name.Length > 0 ? signature.Name : null));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(found.Failure);
+        }
+
+        List<UiElementRef> elements = [];
+        List<UiElementIdentity> identities = [];
+
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> identity = _elements.Describe(candidate);
+            if (identity.IsFailure)
+            {
+                continue;
+            }
+
+            elements.Add(candidate);
+            identities.Add(identity.Value);
+        }
+
+        OperationResult<int> chosen = MeituCardTargetRule.SelectSignedControl(
+            signature, target.Process.ProcessId, identities);
+
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(elements[chosen.Value]);
+    }
+
+    /// <summary>
+    /// Resolves the start-page entry to the card that owns the signed marker, never to the
+    /// marker itself (Epic 11300 Part B1 §3, §4, §5).
+    /// </summary>
+    /// <remarks>
+    /// The direction of travel is the whole fix. Part A searched the window for an element
+    /// <i>named</i> 图片编辑 and invoked what it found, which was the card's title label — a
+    /// <c>Text</c> element that advertises <c>InvokePattern</c>, reports success, and does
+    /// nothing. Here the named element is only ever an anchor: PrintFlow walks up from it and
+    /// invokes the ancestor, and only if that ancestor matches the shape signed evidence
+    /// records.
+    ///
+    /// Every candidate is walked and described before any decision is taken, so "there are two
+    /// of these" is a fact the rule can see rather than a first match it silently accepts.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindStartPageCard(MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(baseline.Failure);
+        }
+
+        if (baseline.Value.StartPageCard is not { } shape)
+        {
+            // No signed card shape means no reviewed way to tell a card from its label, and the
+            // Part A defect is precisely what happens when that distinction is assumed (§10).
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no start-page card structure, so PrintFlow has no " +
+                "signed way to tell a card from the label that titles it and will not invoke either.");
+        }
+
+        string markerName = _options.WelcomeOpenEntryName;
+
+        // Retained from Part A: the configured entry must be one the signed clean-start evidence
+        // actually records, so the option cannot become a back door for naming any control.
+        if (!baseline.Value.WelcomeMarkers.Contains(markerName, StringComparer.Ordinal))
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                $"'{markerName}' is not one of the {baseline.Value.WelcomeMarkers.Length} markers the signed " +
+                "clean-start evidence records, so PrintFlow will not look for it.");
+        }
+
+        OperationResult<IReadOnlyList<UiElementRef>> markers =
+            _elements.FindAll(window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        if (markers.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(markers.Failure);
+        }
+
+        List<UiElementRef> owners = [];
+        List<MeituCardCandidate> candidates = [];
+
+        foreach (UiElementRef marker in markers.Value)
+        {
+            OperationResult<UiElementIdentity> markerIdentity = _elements.Describe(marker);
+            if (markerIdentity.IsFailure)
+            {
+                // A marker that cannot be read is not a marker that can be trusted to anchor a
+                // walk; drop it as a candidate rather than let a partial read decide anything.
+                continue;
+            }
+
+            OperationResult<UiElementRef> parent = _elements.GetParent(marker);
+            OperationResult<UiElementIdentity> ownerIdentity = parent.IsSuccess
+                ? _elements.Describe(parent.Value)
+                : OperationResult.Fail<UiElementIdentity>(parent.Failure);
+
+            owners.Add(parent.IsSuccess ? parent.Value : marker);
+            candidates.Add(new MeituCardCandidate(
+                markerIdentity.Value, ownerIdentity.IsSuccess ? ownerIdentity.Value : null));
+        }
+
+        OperationResult<int> chosen = MeituCardTargetRule.SelectOwningCard(
+            shape, markerName, target.Process.ProcessId, candidates);
+
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(owners[chosen.Value]);
+    }
+
+    /// <summary>Locates a picker control by the automation id the signed evidence records.</summary>
+    /// <remarks>
+    /// The control type is verified after the lookup rather than folded into the query, because
+    /// the evidence records it as the type a person saw in an inspector and the closed
+    /// <see cref="UiControlKind"/> set does not name every one of them. Checking it afterwards
+    /// is also the stronger order: the id has to be right <i>and</i> what it found has to be the
+    /// kind of thing the evidence says it is.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindDialogControl(
+        MeituTarget target, WindowHandle dialog, KnownMeituElement element)
+    {
+        OperationResult<MeituFileDialogSignature> signature = FileDialogSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(signature.Failure);
+        }
+
+        (string automationId, string controlType) = element == KnownMeituElement.FileDialogFileName
+            ? (signature.Value.FileNameAutomationId, signature.Value.FileNameControlType)
+            : (signature.Value.ConfirmAutomationId, signature.Value.ConfirmControlType);
+
+        // Every match, not the first. An automation id is not unique inside a Windows common
+        // dialog: the file-name field is an Edit nested inside a ComboBox, and both report id
+        // 1148. Taking the first descendant would hand back the ComboBox, so the control type
+        // recorded in the evidence is what selects between them — and the selection has to be
+        // unique before anything is written.
+        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
+            dialog, new UiElementQuery(UiControlKind.Any, AutomationId: automationId));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(found.Failure);
+        }
+
+        List<UiElementRef> matches = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> identity = _elements.Describe(candidate);
+            if (identity.IsFailure ||
+                !string.Equals(identity.Value.ControlTypeName, controlType, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (identity.Value.ProcessId != target.Process.ProcessId)
+            {
+                return OperationResult.Fail<UiElementRef>(
+                    FailureCode.MeituTargetLost,
+                    $"The picker control '{automationId}' belongs to process {identity.Value.ProcessId}, not " +
+                    $"the verified Meitu process {target.Process.ProcessId}. Nothing was written or invoked.");
+            }
+
+            matches.Add(candidate);
+        }
+
+        return matches.Count == 1
+            ? OperationResult.Ok(matches[0])
+            : OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituOpenInputFailed,
+                $"The picker has {matches.Count} control(s) with automation id '{automationId}' of type " +
+                $"{controlType}, and the signed evidence describes exactly one. Nothing was written or invoked.");
+    }
+
+    /// <summary>The signed picker signature, or a refusal when the chain vouches for none.</summary>
+    private OperationResult<MeituFileDialogSignature> FileDialogSignature()
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituFileDialogSignature>(baseline.Failure);
+        }
+
+        return baseline.Value.FileDialog is { } signature
+            ? OperationResult.Ok(signature)
+            : OperationResult.Fail<MeituFileDialogSignature>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no file-picker signature, so PrintFlow has no signed " +
+                "description of the window it would type a path into. Nothing was written.");
     }
 
     /// <inheritdoc />
@@ -220,34 +447,149 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     /// <inheritdoc />
-    public async Task<OperationResult<Unit>> OpenWorkingCopyAsync(
+    public async Task<OperationResult<MeituTarget>> OpenWorkingCopyAsync(
         MeituTarget target, string workingCopyAbsolutePath, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentException.ThrowIfNullOrWhiteSpace(workingCopyAbsolutePath);
 
+        OperationResult<MeituTarget> editor = await ReachEmptyEditorAsync(target, cancellationToken)
+            .ConfigureAwait(false);
+        if (editor.IsFailure)
+        {
+            return editor;
+        }
+
+        OperationResult<Unit> requested = await InvokeKnownElementAsync(
+            editor.Value, KnownMeituElement.EditorOpenControl, cancellationToken).ConfigureAwait(false);
+        if (requested.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(requested.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> dialog = await WaitForFileDialogAsync(editor.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (dialog.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(dialog.Failure);
+        }
+
+        OperationResult<Unit> filled = FillAndConfirmDialog(
+            editor.Value, dialog.Value, workingCopyAbsolutePath);
+
+        return filled.IsFailure
+            ? OperationResult.Fail<MeituTarget>(filled.Failure)
+            : OperationResult.Ok(editor.Value);
+    }
+
+    /// <summary>
+    /// Gets from wherever Meitu is to its empty editor, and returns that window as a verified
+    /// target (Epic 11300 Part B1 §7, §11).
+    /// </summary>
+    /// <remarks>
+    /// Meitu 7.8.7.5 does not raise a file dialog from the start page, which is what Part A
+    /// expected. Invoking the 图片编辑 card opens a <i>second top-level window</i> — the editor —
+    /// in its empty state, and the picker comes from a control on that window. The sequence
+    /// therefore has a step Part A had no reason to model, and the window PrintFlow ends up
+    /// interacting with is not the one it started from.
+    ///
+    /// Which window is the editor is decided by classifying candidates, not by matching a title
+    /// here. That keeps one definition of "this is the empty editor" — the signed evidence the
+    /// classifier reads — rather than a second one living in the open path that could drift from
+    /// it.
+    /// </remarks>
+    private async Task<OperationResult<MeituTarget>> ReachEmptyEditorAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
         OperationResult<MeituTarget> verified = await VerifyTargetAsync(target, cancellationToken)
             .ConfigureAwait(false);
         if (verified.IsFailure)
         {
-            return OperationResult.Fail<Unit>(verified.Failure);
+            return verified;
         }
 
-        OperationResult<Unit> requested = await RequestOpenDialogAsync(verified.Value, cancellationToken)
-            .ConfigureAwait(false);
-        if (requested.IsFailure)
+        OperationResult<MeituStateSnapshot> state = await InspectStateAsync(
+            verified.Value, expectedWorkingCopyFileName: null, cancellationToken).ConfigureAwait(false);
+        if (state.IsFailure)
         {
-            return requested;
+            return OperationResult.Fail<MeituTarget>(state.Failure);
         }
 
-        OperationResult<ExternalWindowRef> dialog = await WaitForFileDialogAsync(verified.Value, cancellationToken)
-            .ConfigureAwait(false);
-        if (dialog.IsFailure)
+        // Already there: an operator who left Meitu on the empty editor does not need the start
+        // page driven, and driving it anyway would open a second editor window.
+        if (state.Value.State == MeituStartingState.KnownEditorEmpty)
         {
-            return OperationResult.Fail<Unit>(dialog.Failure);
+            return verified;
         }
 
-        return FillAndConfirmDialog(verified.Value, dialog.Value, workingCopyAbsolutePath);
+        if (state.Value.State != MeituStartingState.KnownWelcome)
+        {
+            return OperationResult.Fail<MeituTarget>(
+                FailureCode.MeituUnknownState,
+                $"Meitu is on '{state.Value.State}', which is neither the signed start page nor the signed " +
+                "empty editor, so PrintFlow has no evidence-backed way to reach the picker from here. " +
+                "Nothing was invoked.");
+        }
+
+        OperationResult<Unit> card = await RequestOpenDialogAsync(verified.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (card.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(card.Failure);
+        }
+
+        return await WaitForEmptyEditorWindowAsync(verified.Value, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Waits for a window of the verified process that classifies as the signed empty editor.
+    /// </summary>
+    private async Task<OperationResult<MeituTarget>> WaitForEmptyEditorWindowAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+                _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure)
+            {
+                return OperationResult.Fail<MeituTarget>(windows.Failure);
+            }
+
+            foreach (ExternalWindowRef window in windows.Value)
+            {
+                if (window.OwningProcessId != target.Process.ProcessId)
+                {
+                    continue;
+                }
+
+                MeituTarget candidate = target with { Window = window };
+                OperationResult<MeituStateSnapshot> state = await InspectStateAsync(
+                    candidate, expectedWorkingCopyFileName: null, cancellationToken).ConfigureAwait(false);
+
+                if (state.IsSuccess && state.Value.State == MeituStartingState.KnownEditorEmpty)
+                {
+                    // Activated rather than assumed to be in front: it is a new window, and the
+                    // input that follows requires the foreground, which is checked again there.
+                    return await ActivateAsync(candidate, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituTarget>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"No window of Meitu process {target.Process.ProcessId} reached the signed empty-editor " +
+                    $"state within {_options.DialogTimeout.TotalSeconds:0} s; nothing further was invoked " +
+                    "and nothing was typed.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />
@@ -330,38 +672,22 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         return refreshed;
     }
 
-    /// <summary>Asks Meitu to show its Open dialog, preferring a named element to a keystroke.</summary>
-    private async Task<OperationResult<Unit>> RequestOpenDialogAsync(
-        MeituTarget target, CancellationToken cancellationToken)
-    {
-        // Priority 1 (§4): a Windows UI Automation element. It needs no coordinate and no
-        // keystroke, so it cannot land anywhere but the control it names.
-        OperationResult<UiElementRef> entry = FindKnownElement(target, KnownMeituElement.WelcomeOpenEntry);
-        if (entry.IsSuccess)
-        {
-            OperationResult<Unit> invoked = await InvokeKnownElementAsync(
-                target, KnownMeituElement.WelcomeOpenEntry, cancellationToken).ConfigureAwait(false);
-
-            if (invoked.IsSuccess)
-            {
-                return invoked;
-            }
-
-            // A lost target means something changed underneath PrintFlow; that is a stop, not a
-            // reason to try harder. Any other invoke failure means the control exposed no
-            // automation pattern, so nothing happened at all — and falling through to the
-            // shortcut cannot double-act.
-            if (invoked.Failure.Code == FailureCode.MeituTargetLost)
-            {
-                return invoked;
-            }
-        }
-
-        // Priority 2 (§4): a stable shortcut, and only after the target window has been
-        // verified — which SendVerifiedShortcutAsync does, twice.
-        return await SendVerifiedShortcutAsync(target, KnownShortcut.OpenFile, cancellationToken)
-            .ConfigureAwait(false);
-    }
+    /// <summary>Asks Meitu to show its picker by invoking the structurally resolved card.</summary>
+    /// <remarks>
+    /// One route, and no fallback. Part A tried the named element first and dropped through to a
+    /// verified <c>Ctrl+O</c> when the lookup failed, which was reasonable while "the lookup
+    /// failed" meant only "no element of that name is here". Part B1 changed what that failure
+    /// means: it is now the structural rule refusing — no card matched the signed shape, or two
+    /// did, or one belonged to the wrong process — and §5 requires those to end with no input at
+    /// all. A keystroke sent immediately after a refusal would be exactly the "try something
+    /// else" behaviour the refusal exists to prevent, so the fallback is gone.
+    ///
+    /// <see cref="SendVerifiedShortcutAsync"/> remains on the seam, guarded as before; nothing
+    /// in the open path calls it.
+    /// </remarks>
+    private Task<OperationResult<Unit>> RequestOpenDialogAsync(
+        MeituTarget target, CancellationToken cancellationToken) =>
+        InvokeKnownElementAsync(target, KnownMeituElement.WelcomeOpenEntry, cancellationToken);
 
     /// <summary>
     /// Waits for a file dialog that belongs to the verified Meitu process and carries the
@@ -370,6 +696,12 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     private async Task<OperationResult<ExternalWindowRef>> WaitForFileDialogAsync(
         MeituTarget target, CancellationToken cancellationToken)
     {
+        OperationResult<MeituFileDialogSignature> signature = FileDialogSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(signature.Failure);
+        }
+
         DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
 
         while (true)
@@ -385,11 +717,12 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
             foreach (ExternalWindowRef candidate in windows.Value)
             {
-                // Both conditions, always: the dialog must be a Windows common dialog *and*
-                // owned by the exact Meitu process. A dialog that merely looks right, in some
-                // other process, is not touched (§17).
+                // Both conditions, always: the picker must carry the signed window class *and*
+                // be owned by the exact Meitu process. A window that merely looks right, in some
+                // other process, is not touched (§17, §21).
                 if (candidate.OwningProcessId == target.Process.ProcessId &&
-                    string.Equals(candidate.ClassName, _options.FileDialogClassName, StringComparison.Ordinal))
+                    string.Equals(
+                        candidate.ClassName, signature.Value.WindowClassName, StringComparison.Ordinal))
                 {
                     return OperationResult.Ok(candidate);
                 }
@@ -399,21 +732,75 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             {
                 return OperationResult.Fail<ExternalWindowRef>(
                     FailureCode.MeituOpenInputFailed,
-                    $"No file dialog owned by Meitu process {target.Process.ProcessId} appeared within " +
-                    $"{_options.DialogTimeout.TotalSeconds:0} s; nothing was typed.");
+                    $"No '{signature.Value.WindowClassName}' picker owned by Meitu process " +
+                    $"{target.Process.ProcessId} appeared within {_options.DialogTimeout.TotalSeconds:0} s; " +
+                    "nothing was typed.");
             }
 
             await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
         }
     }
 
+    /// <summary>
+    /// Re-establishes that the picker is still Meitu's and still in front, before input.
+    /// </summary>
+    /// <remarks>
+    /// The same "verify, then act" ordering as <see cref="VerifyTargetAsync"/>, but the thing
+    /// being verified is different and has to be. While the picker is up it — not the editor —
+    /// holds the foreground, so requiring the editor window to be foreground would refuse every
+    /// legitimate open. What is required instead is that the picker still exists, still belongs
+    /// to the verified Meitu process, and that the foreground still belongs to that same
+    /// process.
+    ///
+    /// The process-level foreground check is not about where the input would land: a value
+    /// written through a pattern to a named element inside an identified window cannot be
+    /// redirected by focus the way a keystroke can. It is about not acting on a machine the
+    /// operator has moved on from. If Explorer comes to the front mid-sequence, PrintFlow stops
+    /// rather than press Open in a dialog nobody is looking at (§12, §21, §25).
+    /// </remarks>
+    private OperationResult<ExternalWindowRef> VerifyDialog(MeituTarget target, WindowHandle dialog)
+    {
+        OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
+        if (refreshed.IsFailure)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                $"The picker {dialog} is no longer available; nothing further was written or invoked.");
+        }
+
+        if (refreshed.Value.OwningProcessId != target.Process.ProcessId)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                $"The picker {dialog} belongs to process {refreshed.Value.OwningProcessId}, not the verified " +
+                $"Meitu process {target.Process.ProcessId}; nothing was written or invoked.");
+        }
+
+        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+        if (foreground.IsFailure)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+        }
+
+        return foreground.Value.ProcessId == target.Process.ProcessId
+            ? refreshed
+            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
+                dialog, foreground.Value,
+                "The foreground left the verified Meitu process while its picker was being filled."));
+    }
+
     /// <summary>Writes the path into the verified dialog's field and confirms it.</summary>
     private OperationResult<Unit> FillAndConfirmDialog(
         MeituTarget target, ExternalWindowRef dialog, string workingCopyAbsolutePath)
     {
-        OperationResult<UiElementRef> field = _elements.Find(
-            dialog.Handle,
-            new UiElementQuery(UiControlKind.Edit, AutomationId: _options.FileDialogFileNameAutomationId));
+        OperationResult<ExternalWindowRef> beforeWrite = VerifyDialog(target, dialog.Handle);
+        if (beforeWrite.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(beforeWrite.Failure);
+        }
+
+        OperationResult<UiElementRef> field = FindDialogControl(
+            target, dialog.Handle, KnownMeituElement.FileDialogFileName);
         if (field.IsFailure)
         {
             return OperationResult.Fail<Unit>(field.Failure);
@@ -428,64 +815,39 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return written;
         }
 
-        // Re-read the dialog before confirming: if it has closed or been replaced since the
-        // field was written, the Open button found under the old handle is not this dialog's.
-        OperationResult<ExternalWindowRef> stillOpen = _locator.Refresh(dialog.Handle);
-        if (stillOpen.IsFailure || stillOpen.Value.OwningProcessId != target.Process.ProcessId)
+        // Read the field back before pressing anything. A value pattern that reports success
+        // without the text landing is not hypothetical in shell dialogs, and Open acts on
+        // whatever the dialog currently has selected — which, if the write was lost, is a file
+        // the operator last touched rather than the one PrintFlow prepared (§12, §13).
+        OperationResult<string> readBack = _elements.GetValue(field.Value);
+        if (readBack.IsFailure)
         {
-            return OperationResult.Fail<Unit>(
-                FailureCode.MeituTargetLost,
-                "The file dialog stopped belonging to the verified Meitu process before it was confirmed.");
+            return OperationResult.Fail<Unit>(readBack.Failure);
         }
 
-        OperationResult<UiElementRef> confirm = _elements.Find(
-            dialog.Handle,
-            new UiElementQuery(UiControlKind.Button, AutomationId: _options.FileDialogOpenButtonAutomationId));
+        if (!string.Equals(readBack.Value, workingCopyAbsolutePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.MeituOpenInputFailed,
+                $"The picker's file-name field reads '{readBack.Value}' after PrintFlow wrote " +
+                $"'{workingCopyAbsolutePath}'. Open was not invoked, so no file was opened.");
+        }
+
+        // Verified again before the irreversible half. Writing a value changes a field that
+        // nothing acts on; invoking Open is what makes Meitu load a file, so the check closest
+        // to it matters most — and a tree walk plus a value write takes long enough for the
+        // dialog to be closed or the operator to move away.
+        OperationResult<ExternalWindowRef> beforeOpen = VerifyDialog(target, dialog.Handle);
+        if (beforeOpen.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(beforeOpen.Failure);
+        }
+
+        OperationResult<UiElementRef> confirm = FindDialogControl(
+            target, dialog.Handle, KnownMeituElement.FileDialogOpenButton);
         return confirm.IsFailure
             ? OperationResult.Fail<Unit>(confirm.Failure)
             : _elements.Invoke(confirm.Value);
-    }
-
-    /// <summary>Resolves a named element to the query that finds it.</summary>
-    private OperationResult<UiElementQuery> QueryFor(KnownMeituElement element)
-    {
-        switch (element)
-        {
-            case KnownMeituElement.WelcomeOpenEntry:
-            {
-                OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
-                if (baseline.IsFailure)
-                {
-                    return OperationResult.Fail<UiElementQuery>(baseline.Failure);
-                }
-
-                // The configured entry name must be one the signed clean-start evidence actually
-                // records. Without this check the option would be a back door for naming any
-                // control at all — which is what §2 rules out.
-                if (!baseline.Value.WelcomeMarkers.Contains(_options.WelcomeOpenEntryName, StringComparer.Ordinal))
-                {
-                    return OperationResult.Fail<UiElementQuery>(
-                        FailureCode.MeituUnknownState,
-                        $"'{_options.WelcomeOpenEntryName}' is not one of the {baseline.Value.WelcomeMarkers.Length} " +
-                        "markers the signed clean-start evidence records, so PrintFlow will not look for it.");
-                }
-
-                return OperationResult.Ok(
-                    new UiElementQuery(UiControlKind.Any, Name: _options.WelcomeOpenEntryName));
-            }
-
-            case KnownMeituElement.FileDialogFileName:
-                return OperationResult.Ok(new UiElementQuery(
-                    UiControlKind.Edit, AutomationId: _options.FileDialogFileNameAutomationId));
-
-            case KnownMeituElement.FileDialogOpenButton:
-                return OperationResult.Ok(new UiElementQuery(
-                    UiControlKind.Button, AutomationId: _options.FileDialogOpenButtonAutomationId));
-
-            default:
-                return OperationResult.Fail<UiElementQuery>(
-                    FailureCode.PreconditionNotMet, $"No query is defined for element '{element}'.");
-        }
     }
 
     private static OperationFailure TargetLost(

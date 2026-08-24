@@ -17,6 +17,9 @@ public enum KnownMeituElement
     /// <summary>The clean start page's photo-editor entry, selected from the signed markers.</summary>
     WelcomeOpenEntry,
 
+    /// <summary>The empty editor's own open control, which is what actually raises the picker.</summary>
+    EditorOpenControl,
+
     /// <summary>The file-name field of the Windows common file dialog Meitu opened.</summary>
     FileDialogFileName,
 
@@ -75,16 +78,22 @@ public interface IMeituUiDriver
         MeituTarget target, KnownShortcut shortcut, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Hands <paramref name="workingCopyAbsolutePath"/> to Meitu through a positively identified
-    /// Open control and file dialog.
+    /// Hands <paramref name="workingCopyAbsolutePath"/> to Meitu through positively identified
+    /// controls, and returns the window the file was opened into.
     /// </summary>
     /// <remarks>
-    /// The path is never typed into whatever dialog happens to hold focus. The dialog must be
-    /// owned by the verified Meitu process and carry the Windows common-dialog class before its
+    /// The path is never typed into whatever dialog happens to hold focus. The picker must be
+    /// owned by the verified Meitu process and carry the signed window class before its
     /// file-name field is written, and the field is set through the value pattern rather than
     /// keystrokes (§17).
+    ///
+    /// The returned target is not always the one passed in, and callers must confirm against
+    /// the one they get back. Meitu's editor is a <i>separate top-level window</i> from its
+    /// start page (Part B1 §7), so a sequence that begins on the start page ends on a window
+    /// that did not exist when it started — and confirming against the original would be
+    /// looking at the wrong screen.
     /// </remarks>
-    Task<OperationResult<Unit>> OpenWorkingCopyAsync(
+    Task<OperationResult<MeituTarget>> OpenWorkingCopyAsync(
         MeituTarget target, string workingCopyAbsolutePath, CancellationToken cancellationToken);
 
     /// <summary>Captures the target window as local failure evidence.</summary>

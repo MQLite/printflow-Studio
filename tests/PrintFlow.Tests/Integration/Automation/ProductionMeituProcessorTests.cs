@@ -377,12 +377,20 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
         ExternalWindowRef dialog = MeituFakes.Window(
             handle: 0x2000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
-        h.Locator.Register(process, window, dialog);
+        // Only the start page exists to begin with; the editor and the picker appear as they are
+        // asked for, below.
+        h.Locator.Register(process, window);
         ShowWelcomePage(h.Elements, window);
 
-        h.Elements.MakeFindable(new UiElementQuery(UiControlKind.Any, Name: "图片编辑"));
-        h.Elements.MakeFindable(new UiElementQuery(UiControlKind.Edit, AutomationId: "1148"));
-        h.Elements.MakeFindable(new UiElementQuery(UiControlKind.Button, AutomationId: "1"));
+        // The editor is a second top-level window that only exists once the start-page card has
+        // been invoked, exactly as on the workstation (Part B1 §7).
+        ExternalWindowRef editor = MeituFakes.Window(
+            handle: 0x5000, owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+
+        h.Elements.AddStartPageCard(window.Handle, "图片编辑", processId: process.ProcessId);
+        h.Elements.AddEditorOpenControl(editor.Handle, process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit", processId: process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button", processId: process.ProcessId);
 
         WorkspaceFileRef working = WorkspaceFileRef.Create(
             "Sessions/S_1/Working/A_1/working.png", WorkspaceArea.Working);
@@ -390,12 +398,26 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
         File.WriteAllBytes(absolute, [0x89, 0x50, 0x4E, 0x47]);
 
-        // The fake window reports one fixed set of names, so it carries both the welcome markers
-        // (which EnsureReadyAsync needs) and the handed-over file name (which confirmation
-        // needs). The classifier checks the expected file name before the welcome markers, so
-        // this also pins that ordering: an open document outranks a start page that is still
-        // partly visible.
-        h.Elements.SetTexts(window.Handle, [.. MeituFakes.WelcomeMarkers, "working.png"]);
+        // Each invoke moves Meitu one step, and the order is the point: the start page is what
+        // EnsureReadyAsync sees, the empty editor is where the picker comes from, and the editor
+        // showing the handed-over name is what confirmation sees. A fake that showed the file
+        // name from the outset would let a confirmation step that never ran pass.
+        h.Elements.OnInvoke = invoked =>
+        {
+            if (invoked.EndsWith(".CardButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor);
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+            }
+            else if (invoked.EndsWith(".openButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor, dialog);
+            }
+            else if (invoked == "1")
+            {
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers, "working.png"]);
+            }
+        };
 
         OperationResult<MeituOpenedWorkingCopy> opened =
             await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
@@ -424,5 +446,138 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.OutputMissing);
         h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Confirmation (§13, §14)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// An open that cannot be confirmed by identity is never reported as a success.
+    /// </summary>
+    /// <remarks>
+    /// This pins the Part B1 finding as behaviour. Meitu 7.8.7.5 exposes the open document's name
+    /// nowhere a UI Automation client can read it — 141 elements at depth 30, zero occurrences of
+    /// the handed-over file name — so the verified chain carries no editor-with-working-copy
+    /// signature and the state stays unreachable.
+    ///
+    /// The file is still handed over, and the picker still closes. What must not happen is the
+    /// adapter concluding from that that the right file is loaded. The assertion to read here is
+    /// the failure: PrintFlow gets all the way to a loaded editor and still declines to claim it
+    /// is looking at PrintFlow's file, because it cannot tell.
+    /// </remarks>
+    [Fact]
+    public async Task An_open_that_cannot_be_confirmed_by_identity_is_refused_not_claimed()
+    {
+        Harness h = Build(MeituFakes.BaselineWithout(editorWithWorkingCopy: true) with
+        {
+            ExecutablePath = _executablePath,
+            ExecutableSha256 = _executableSha256,
+        });
+        ExternalProcessRef process = Process();
+        ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef editor = MeituFakes.Window(
+            handle: 0x5000, owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+
+        h.Locator.Register(process, window);
+        ShowWelcomePage(h.Elements, window);
+        h.Elements.AddStartPageCard(window.Handle, "图片编辑", processId: process.ProcessId);
+        h.Elements.AddEditorOpenControl(editor.Handle, process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit", processId: process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button", processId: process.ProcessId);
+
+        h.Elements.OnInvoke = invoked =>
+        {
+            if (invoked.EndsWith(".CardButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor);
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+            }
+            else if (invoked.EndsWith(".openButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor, dialog);
+            }
+            else if (invoked == "1")
+            {
+                // Meitu really does load the file — it just never says which file it is.
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+            }
+        };
+
+        WorkspaceFileRef working = WorkspaceFileRef.Create(
+            "Sessions/S_1/Working/A_1/working.png", WorkspaceArea.Working);
+        string absolute = h.Workspace.ResolveAbsolute(working);
+        Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
+        File.WriteAllBytes(absolute, [0x89, 0x50, 0x4E, 0x47]);
+
+        OperationResult<MeituOpenedWorkingCopy> opened =
+            await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        opened.Failure.Context["missingEvidence"].ShouldBe("editor-with-working-copy");
+
+        // The path was still delivered — the refusal is about what may be concluded, not about
+        // whether the work was attempted.
+        h.Elements.ValueWrites.ShouldHaveSingleItem();
+    }
+
+    /// <summary>
+    /// A confirmation that times out is a failure, not a success carrying <c>Unknown</c>.
+    /// </summary>
+    /// <remarks>
+    /// Regression test for a defect this slice found in the Part A confirmation path: the poll
+    /// returned its last observation as a success when the deadline passed, so an open that never
+    /// produced the expected screen was reported as having succeeded with a state of
+    /// <c>Unknown</c>. That is the "opened successfully means processing succeeded" conflation
+    /// stated in code.
+    /// </remarks>
+    [Fact]
+    public async Task A_confirmation_that_never_arrives_is_a_failure()
+    {
+        Harness h = Build();
+        ExternalProcessRef process = Process();
+        ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef editor = MeituFakes.Window(
+            handle: 0x5000, owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+
+        h.Locator.Register(process, window);
+        ShowWelcomePage(h.Elements, window);
+        h.Elements.AddStartPageCard(window.Handle, "图片编辑", processId: process.ProcessId);
+        h.Elements.AddEditorOpenControl(editor.Handle, process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit", processId: process.ProcessId);
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button", processId: process.ProcessId);
+
+        h.Elements.OnInvoke = invoked =>
+        {
+            if (invoked.EndsWith(".CardButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor);
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+            }
+            else if (invoked.EndsWith(".openButton", StringComparison.Ordinal))
+            {
+                h.Locator.Replace(process, window, editor, dialog);
+            }
+
+            // Nothing ever shows the expected file: the editor stays as it was.
+        };
+
+        WorkspaceFileRef working = WorkspaceFileRef.Create(
+            "Sessions/S_1/Working/A_1/working.png", WorkspaceArea.Working);
+        string absolute = h.Workspace.ResolveAbsolute(working);
+        Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
+        File.WriteAllBytes(absolute, [0x89, 0x50, 0x4E, 0x47]);
+
+        OperationResult<MeituOpenedWorkingCopy> opened =
+            await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        opened.Failure.TechnicalDetail.ShouldContain("nothing is claimed about it");
     }
 }

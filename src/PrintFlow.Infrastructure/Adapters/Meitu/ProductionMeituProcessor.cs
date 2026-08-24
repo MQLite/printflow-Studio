@@ -145,6 +145,12 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 "outputs are never opened by an external application.");
         }
 
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituOpenedWorkingCopy>(baseline.Failure);
+        }
+
         OperationResult<MeituReadiness> ready = await EnsureReadyAsync(cancellationToken).ConfigureAwait(false);
         if (ready.IsFailure)
         {
@@ -166,7 +172,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return Capture<MeituOpenedWorkingCopy>(ready.Value.Target, activated.Failure, "activate-failed");
         }
 
-        OperationResult<Unit> opened = await _driver
+        OperationResult<MeituTarget> opened = await _driver
             .OpenWorkingCopyAsync(activated.Value, absolutePath, cancellationToken)
             .ConfigureAwait(false);
         if (opened.IsFailure)
@@ -174,10 +180,39 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return Capture<MeituOpenedWorkingCopy>(activated.Value, opened.Failure, "open-failed");
         }
 
-        // A dialog that closed is not proof the file loaded. Confirmation is a positive
-        // observation of the expected name in Meitu's own UI (MVP design §11.5).
-        OperationResult<MeituStateSnapshot> confirmed = await PollForStateAsync(
-            activated.Value,
+        // Confirmation is against the window the driver ended on, not the one it started from.
+        // Meitu's editor is a separate top-level window (Part B1 §7), so polling the start page
+        // would look at a screen the file was never going to appear on and time out for a reason
+        // that has nothing to do with whether the open worked.
+        //
+        // A dialog that closed is not proof the file loaded either. Confirmation is a positive
+        // observation of the expected name on the signed editor screen (MVP design §11.5, §13).
+        // Whether confirmation is even possible is decided before waiting for it. If the
+        // verified chain carries no signature for "the editor is showing the document PrintFlow
+        // handed over", polling for that state is polling for something unreachable, and
+        // 30 seconds of it would report a timeout as though the open had been slow rather than
+        // as what it is: PrintFlow has no signed way to tell which document is loaded (§10, §14).
+        if (baseline.Value.EditorWithWorkingCopy is null)
+        {
+            return Capture<MeituOpenedWorkingCopy>(
+                opened.Value,
+                OperationFailure.Create(
+                    FailureCode.MeituUnknownState,
+                    $"'{workingCopy.FileName}' was handed to Meitu, but the verified evidence chain carries no " +
+                    "signature that identifies which document the editor is showing, so PrintFlow cannot " +
+                    "confirm the right file is open and will not claim that it is.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["expectedFile"] = workingCopy.FileName,
+                        ["windowTitle"] = opened.Value.Window.Title,
+                        ["missingEvidence"] = "editor-with-working-copy",
+                    }),
+                "open-unconfirmable");
+        }
+
+        OperationResult<MeituStateSnapshot> confirmed = await ConfirmStateAsync(
+            opened.Value,
             workingCopy.FileName,
             _options.OpenConfirmationTimeout,
             state => state.State == MeituStartingState.KnownEditorWithExpectedWorkingCopy,
@@ -185,10 +220,10 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
 
         if (confirmed.IsFailure)
         {
-            return Capture<MeituOpenedWorkingCopy>(activated.Value, confirmed.Failure, "open-unconfirmed");
+            return Capture<MeituOpenedWorkingCopy>(opened.Value, confirmed.Failure, "open-unconfirmed");
         }
 
-        return OperationResult.Ok(new MeituOpenedWorkingCopy(activated.Value, confirmed.Value));
+        return OperationResult.Ok(new MeituOpenedWorkingCopy(opened.Value, confirmed.Value));
     }
 
     /// <summary>Reuses an already-running instance, inspecting it exactly once (§15).</summary>
@@ -297,7 +332,60 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         }
     }
 
-    /// <summary>Polls the classified state until <paramref name="isDecided"/> or the timeout.</summary>
+    /// <summary>
+    /// Polls until <paramref name="isDecided"/> holds, and <b>fails</b> if it never does.
+    /// </summary>
+    /// <remarks>
+    /// The difference from <see cref="PollForStateAsync"/> is the whole point of this method
+    /// existing. That one hands back the last state it saw when the timeout expires, which is
+    /// right for the launch path — it evaluates safety itself afterwards and wants the state to
+    /// report. Used for confirmation it is a hole: an open that never produced the expected
+    /// screen came back as a success carrying <c>Unknown</c>, which is precisely the
+    /// "opened successfully means processing succeeded" conflation §13 forbids.
+    ///
+    /// Two methods with names that say which is which, rather than one with a flag, because the
+    /// flag is the thing that gets forgotten.
+    /// </remarks>
+    private async Task<OperationResult<MeituStateSnapshot>> ConfirmStateAsync(
+        MeituTarget target,
+        string? expectedWorkingCopyFileName,
+        TimeSpan timeout,
+        Func<MeituStateSnapshot, bool> isDecided,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<MeituStateSnapshot> polled = await PollForStateAsync(
+            target, expectedWorkingCopyFileName, timeout, isDecided, cancellationToken).ConfigureAwait(false);
+
+        if (polled.IsFailure)
+        {
+            return polled;
+        }
+
+        return isDecided(polled.Value)
+            ? polled
+            : OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Meitu did not reach the expected state within {timeout.TotalSeconds:0} s; it is on " +
+                $"'{polled.Value.State}'. The file was handed over but PrintFlow has not seen it loaded, so " +
+                "nothing is claimed about it.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["lastState"] = polled.Value.State.ToString(),
+                    ["windowTitle"] = polled.Value.Observation.WindowTitle,
+                    ["expectedFile"] = expectedWorkingCopyFileName ?? "(none)",
+                }));
+    }
+
+    /// <summary>
+    /// Polls the classified state until <paramref name="isDecided"/> or the timeout, returning
+    /// the last state seen either way.
+    /// </summary>
+    /// <remarks>
+    /// A timeout here is a success carrying an undecided state, so every caller must inspect
+    /// what it got back. Callers that need "decided or nothing" should use
+    /// <see cref="ConfirmStateAsync"/> instead.
+    /// </remarks>
     private async Task<OperationResult<MeituStateSnapshot>> PollForStateAsync(
         MeituTarget target,
         string? expectedWorkingCopyFileName,

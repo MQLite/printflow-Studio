@@ -55,10 +55,15 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.Unknown, matched, observation);
         }
 
-        // 3. The working copy PrintFlow handed over, identified by the name PrintFlow chose.
-        //    A name it did not choose proves nothing and is not accepted here.
+        // 3. The working copy PrintFlow handed over, identified by the name PrintFlow chose and
+        //    only on the screen the signed editor evidence describes. Three things must hold
+        //    together: the editor's exact title, enough of its positive markers, and the
+        //    expected name where the evidence says a document name appears. "Some document is
+        //    open" is never sufficient, and a name PrintFlow did not choose proves nothing (§14).
         if (observation.ExpectedWorkingCopyFileName is { Length: > 0 } expected &&
-            ShowsFile(observation, expected))
+            baseline.EditorWithWorkingCopy is { } editor &&
+            MatchesEditor(editor, observation) &&
+            ShowsFile(observation, expected, editor.FileNameLocation))
         {
             return new MeituStateSnapshot(
                 MeituStartingState.KnownEditorWithExpectedWorkingCopy, matched, observation);
@@ -76,9 +81,60 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.KnownWelcome, matched, observation);
         }
 
-        // 5. Anything else — including an editor that merely looks empty, and a processing
-        //    overlay whose signature Part A has no signed evidence for.
+        // 5. The editor with no document loaded — considered only when nothing has been handed
+        //    over. The restriction is what stops the dangerous reading of §14: if PrintFlow
+        //    expected A.png and the editor is showing B.png, step 3 has already declined, and
+        //    without this guard an empty-editor signature loose enough to match would turn that
+        //    into a *safe* starting state. Expecting a file and not seeing it is never safe.
+        if (observation.ExpectedWorkingCopyFileName is not { Length: > 0 } &&
+            baseline.EditorEmpty is { } empty &&
+            MatchesEditor(empty, observation))
+        {
+            return new MeituStateSnapshot(MeituStartingState.KnownEditorEmpty, matched, observation);
+        }
+
+        // 6. Anything else — including a screen whose signature the verified chain does not
+        //    carry, and a processing overlay Part B1 has no signed evidence for.
         return new MeituStateSnapshot(MeituStartingState.Unknown, matched, observation);
+    }
+
+    /// <summary>
+    /// Whether an observation matches a signed editor signature: exact title, enough positive
+    /// markers.
+    /// </summary>
+    /// <remarks>
+    /// Exact title equality rather than the prefix rule of step 2. The distinction is the
+    /// Part A defect in reverse: Meitu titles its editor with the start page's title plus a
+    /// feature suffix, so a prefix test cannot separate the two screens in either direction.
+    ///
+    /// The markers are required, not merely counted, and they are <i>positive</i> ones. A
+    /// signature phrased as "the expected file name is absent" would be matched just as well by
+    /// a text read that returned nothing at all, which is the failure mode §15 rules out.
+    /// </remarks>
+    private static bool MatchesEditor(MeituEditorSignature signature, MeituObservation observation)
+    {
+        if (!string.Equals(observation.WindowTitle, signature.WindowTitle, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (signature.RequiredMarkers.IsDefaultOrEmpty || signature.MinimumRequiredMarkers <= 0)
+        {
+            // A signature with no positive markers would accept the screen on its title alone,
+            // and a title is the one thing on a window that any application can claim.
+            return false;
+        }
+
+        int seen = 0;
+        foreach (string marker in signature.RequiredMarkers)
+        {
+            if (Shows(observation, marker))
+            {
+                seen++;
+            }
+        }
+
+        return seen >= signature.MinimumRequiredMarkers;
     }
 
     private static ImmutableArray<string> MatchedMarkers(MeituBaseline baseline, MeituObservation observation)
@@ -125,16 +181,59 @@ public static class MeituStateClassifier
         return false;
     }
 
-    private static bool ShowsFile(MeituObservation observation, string fileName)
+    /// <summary>
+    /// Whether the expected document name appears where the signed evidence says it appears.
+    /// </summary>
+    /// <remarks>
+    /// The location is part of the signature rather than "anywhere in the UI" because file
+    /// names turn up in places that prove nothing about what is loaded — a recent-files list on
+    /// the start page being the obvious one. Restricting the search to the observed location
+    /// keeps the confirmation a statement about the open document (§13).
+    /// </remarks>
+    private static bool ShowsFile(
+        MeituObservation observation, string fileName, MeituFileNameLocation location)
     {
-        if (observation.WindowTitle.Contains(fileName, StringComparison.OrdinalIgnoreCase))
+        bool inTitle = location is MeituFileNameLocation.WindowTitle
+                or MeituFileNameLocation.TitleOrVisibleText &&
+            observation.WindowTitle.Contains(fileName, StringComparison.OrdinalIgnoreCase);
+
+        if (inTitle)
         {
             return true;
+        }
+
+        if (location is not (MeituFileNameLocation.VisibleText or MeituFileNameLocation.TitleOrVisibleText))
+        {
+            return false;
         }
 
         foreach (string text in observation.VisibleTexts)
         {
             if (text.Contains(fileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether a marker appears in the window title or any automation name read.</summary>
+    private static bool Shows(MeituObservation observation, string marker)
+    {
+        if (observation.WindowTitle.Contains(marker, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (observation.VisibleTexts.IsDefaultOrEmpty)
+        {
+            return false;
+        }
+
+        foreach (string text in observation.VisibleTexts)
+        {
+            if (text.Contains(marker, StringComparison.Ordinal))
             {
                 return true;
             }

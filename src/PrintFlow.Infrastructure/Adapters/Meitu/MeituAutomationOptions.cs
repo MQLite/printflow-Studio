@@ -35,24 +35,14 @@ public sealed record MeituAutomationOptions
     /// <summary>How long to allow for a requested foreground change to take effect.</summary>
     public TimeSpan ActivationTimeout { get; init; } = TimeSpan.FromSeconds(5);
 
-    /// <summary>The signed clean-start marker that opens the photo editor.</summary>
-    public string WelcomeOpenEntryName { get; init; } = "图片编辑";
-
-    /// <summary>
-    /// The window class of the Windows common file dialog.
-    /// </summary>
+    /// <summary>The signed clean-start marker that titles the photo-editor card.</summary>
     /// <remarks>
-    /// This is a Windows contract, not a Meitu one — which is why it can be named here without
-    /// inventing a Meitu assumption. It is checked <i>in addition to</i> the dialog belonging to
-    /// the verified Meitu process, never instead of it (§17).
+    /// A marker, not a target. Part B1 uses this name only to <i>anchor</i> a structural walk:
+    /// the element it matches is a title label, and what PrintFlow invokes is the card that owns
+    /// it, resolved against the shape the signed evidence records (§3). The driver still refuses
+    /// any name the signed clean-start evidence does not list.
     /// </remarks>
-    public string FileDialogClassName { get; init; } = "#32770";
-
-    /// <summary>The common-dialog automation id of the file-name edit.</summary>
-    public string FileDialogFileNameAutomationId { get; init; } = "1148";
-
-    /// <summary>The common-dialog automation id of the Open button.</summary>
-    public string FileDialogOpenButtonAutomationId { get; init; } = "1";
+    public string WelcomeOpenEntryName { get; init; } = "图片编辑";
 
     /// <summary>How many automation names one state observation reads.</summary>
     public int SnapshotItemLimit { get; init; } = 400;

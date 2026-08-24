@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Windows.Automation;
 using PrintFlow.Domain.Results;
 
@@ -78,6 +79,132 @@ public sealed class UiaElementProvider : IUiElementProvider
     }
 
     /// <inheritdoc />
+    public OperationResult<IReadOnlyList<UiElementRef>> FindAll(WindowHandle root, UiElementQuery query)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        OperationResult<AutomationElement> rootElement = RootOf(root);
+        if (rootElement.IsFailure)
+        {
+            return OperationResult.Fail<IReadOnlyList<UiElementRef>>(rootElement.Failure);
+        }
+
+        try
+        {
+            AutomationElementCollection found =
+                rootElement.Value.FindAll(TreeScope.Descendants, BuildCondition(query));
+
+            List<UiElementRef> matches = new(found.Count);
+            foreach (AutomationElement element in found)
+            {
+                matches.Add(new UiElementRef(element, NameOf(element), root));
+            }
+
+            return OperationResult.Ok<IReadOnlyList<UiElementRef>>(matches);
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<UiElementRef>>(
+                FailureCode.MeituTargetLost,
+                $"Window {root} disappeared while searching for {query}: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<UiElementRef>>(
+                FailureCode.MeituOpenInputFailed, $"Searching for {query} failed: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    public OperationResult<UiElementIdentity> Describe(UiElementRef element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+
+        if (element.Native is not AutomationElement native)
+        {
+            return OperationResult.Fail<UiElementIdentity>(
+                FailureCode.MeituOpenInputFailed,
+                $"'{element.Name}' was not located by this provider and cannot be described.");
+        }
+
+        try
+        {
+            AutomationElement.AutomationElementInformation current = native.Current;
+            System.Windows.Rect rect = current.BoundingRectangle;
+
+            return OperationResult.Ok(new UiElementIdentity(
+                ControlTypeName: ShortControlTypeName(current.ControlType),
+                AutomationId: current.AutomationId ?? string.Empty,
+                Name: current.Name ?? string.Empty,
+                ClassName: current.ClassName ?? string.Empty,
+                ProcessId: current.ProcessId,
+                SupportedPatterns: PatternsOf(native),
+                Bounds: rect.IsEmpty
+                    ? default
+                    : new UiBounds(rect.X, rect.Y, rect.Width, rect.Height),
+                IsEnabled: current.IsEnabled,
+                IsOffscreen: current.IsOffscreen));
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<UiElementIdentity>(
+                FailureCode.MeituTargetLost, $"'{element.Name}' disappeared before it could be read: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<UiElementIdentity>(
+                FailureCode.MeituOpenInputFailed, $"Reading '{element.Name}' failed: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    public OperationResult<UiElementRef> GetParent(UiElementRef element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+
+        if (element.Native is not AutomationElement native)
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituOpenInputFailed,
+                $"'{element.Name}' was not located by this provider, so its parent cannot be walked to.");
+        }
+
+        try
+        {
+            // The control view rather than the raw view: the raw tree contains framework
+            // scaffolding that no signed evidence describes, and a rule that walked through it
+            // would be counting levels nobody has validated.
+            AutomationElement? parent = TreeWalker.ControlViewWalker.GetParent(native);
+
+            // Fully qualified: this file's own namespace is `…Infrastructure.Automation`, which
+            // shadows the UI Automation `Automation` class the comparison needs.
+            if (parent is null ||
+                System.Windows.Automation.Automation.Compare(parent, AutomationElement.RootElement))
+            {
+                // The desktop is not an ancestor this slice may return: every element a rule may
+                // consider has to live inside the window the locator already attributed to the
+                // verified process.
+                return OperationResult.Fail<UiElementRef>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"'{element.Name}' has no parent inside window {element.RootWindow}.");
+            }
+
+            return OperationResult.Ok(new UiElementRef(parent, NameOf(parent), element.RootWindow));
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituTargetLost,
+                $"'{element.Name}' disappeared while its parent was being walked to: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituOpenInputFailed, $"Walking to the parent of '{element.Name}' failed: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
     public OperationResult<Unit> Invoke(UiElementRef element)
     {
         ArgumentNullException.ThrowIfNull(element);
@@ -119,6 +246,40 @@ public sealed class UiaElementProvider : IUiElementProvider
         {
             return OperationResult.Fail<Unit>(
                 FailureCode.MeituOpenInputFailed, $"Invoking '{element.Name}' failed: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    public OperationResult<string> GetValue(UiElementRef element)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+
+        if (element.Native is not AutomationElement native)
+        {
+            return OperationResult.Fail<string>(
+                FailureCode.MeituOpenInputFailed,
+                $"'{element.Name}' was not located by this provider and cannot be read.");
+        }
+
+        try
+        {
+            if (!native.TryGetCurrentPattern(ValuePattern.Pattern, out object pattern))
+            {
+                return OperationResult.Fail<string>(
+                    FailureCode.MeituOpenInputFailed, $"'{element.Name}' exposes no value pattern.");
+            }
+
+            return OperationResult.Ok(((ValuePattern)pattern).Current.Value ?? string.Empty);
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<string>(
+                FailureCode.MeituTargetLost, $"'{element.Name}' disappeared before it could be read: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<string>(
+                FailureCode.MeituOpenInputFailed, $"Reading '{element.Name}' failed: {ex.Message}");
         }
     }
 
@@ -294,5 +455,77 @@ public sealed class UiaElementProvider : IUiElementProvider
         {
             return string.Empty;
         }
+    }
+
+    /// <summary>
+    /// Reduces <c>ControlType.CheckBox</c> to <c>CheckBox</c>.
+    /// </summary>
+    /// <remarks>
+    /// Signed evidence records the short form because that is what a person reading a UI
+    /// inspector sees. Normalising here, once, keeps the evidence files free of a .NET-specific
+    /// prefix that would have to be repeated in every one of them.
+    /// </remarks>
+    private static string ShortControlTypeName(ControlType controlType)
+    {
+        string programmatic = controlType.ProgrammaticName ?? string.Empty;
+        int separator = programmatic.LastIndexOf('.');
+        return separator >= 0 && separator < programmatic.Length - 1
+            ? programmatic[(separator + 1)..]
+            : programmatic;
+    }
+
+    /// <summary>
+    /// Maps the element's supported patterns onto the closed <see cref="UiPatternKind"/> set.
+    /// </summary>
+    /// <remarks>
+    /// Patterns this slice has no vocabulary for are dropped rather than surfaced as strings.
+    /// The consequence is deliberate: a rule can only ever require a pattern that
+    /// <see cref="UiPatternKind"/> names, so signed evidence cannot demand something the
+    /// adapter has no reviewed way to use.
+    /// </remarks>
+    private static ImmutableArray<UiPatternKind> PatternsOf(AutomationElement element)
+    {
+        ImmutableArray<UiPatternKind>.Builder patterns = ImmutableArray.CreateBuilder<UiPatternKind>();
+
+        foreach (AutomationPattern supported in element.GetSupportedPatterns())
+        {
+            UiPatternKind? kind = KindOf(supported);
+            if (kind is { } value && !patterns.Contains(value))
+            {
+                patterns.Add(value);
+            }
+        }
+
+        return patterns.ToImmutable();
+    }
+
+    private static UiPatternKind? KindOf(AutomationPattern pattern)
+    {
+        if (pattern == InvokePattern.Pattern)
+        {
+            return UiPatternKind.Invoke;
+        }
+
+        if (pattern == ValuePattern.Pattern)
+        {
+            return UiPatternKind.Value;
+        }
+
+        if (pattern == TogglePattern.Pattern)
+        {
+            return UiPatternKind.Toggle;
+        }
+
+        if (pattern == SelectionItemPattern.Pattern)
+        {
+            return UiPatternKind.SelectionItem;
+        }
+
+        if (pattern == ExpandCollapsePattern.Pattern)
+        {
+            return UiPatternKind.ExpandCollapse;
+        }
+
+        return pattern == WindowPattern.Pattern ? UiPatternKind.Window : null;
     }
 }

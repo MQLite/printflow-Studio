@@ -117,6 +117,21 @@ public sealed class MeituWorkstationSmoke
             Log($"matched markers      : {string.Join(", ", ready.Value.State.MatchedMarkers)}");
             Log($"launched by PrintFlow: {ready.Value.WasLaunched}");
 
+            Log(string.Empty);
+            Log("## Phase 1b — resolve the start-page card structurally (read-only, no input)");
+
+            if (ready.Value.State.State == MeituStartingState.KnownWelcome)
+            {
+                DescribeCardTarget(ready.Value, baseline.Value, Log);
+            }
+            else
+            {
+                // The card only exists on the start page. Running the resolution against another
+                // screen and printing its refusal would read like a defect rather than the
+                // rule declining to find a control that is not there.
+                Log($"skipped              : Meitu is on {ready.Value.State.State}, not the start page.");
+            }
+
             if (Environment.GetEnvironmentVariable(EnableOpenVariable) != "1")
             {
                 Log(string.Empty);
@@ -145,6 +160,7 @@ public sealed class MeituWorkstationSmoke
 
             Log($"state                : {opened.Value.State.State}");
             Log($"window title         : '{opened.Value.Target.Window.Title}'");
+            Log($"expected file        : {workingCopy.FileName}");
             Log(string.Empty);
             Log("STOP. No Enhancement, no Background Removal, no export, no Revision (§27).");
         }
@@ -153,6 +169,76 @@ public sealed class MeituWorkstationSmoke
             WriteTranscript(transcript.ToString());
             CleanUp(root, evidenceDirectory);
         }
+    }
+
+    /// <summary>
+    /// Reports which control the structural rule resolves the signed marker to, without
+    /// invoking it.
+    /// </summary>
+    /// <remarks>
+    /// This is the fact Part A could not state and Part B1 exists to establish, so the smoke
+    /// prints it before anything is invoked rather than inferring it afterwards from whether the
+    /// open worked. It builds its own read-only driver over the same real seams the foundation
+    /// uses; <c>FindKnownElement</c> produces no input.
+    /// </remarks>
+    private static void DescribeCardTarget(
+        MeituReadiness ready, MeituBaseline baseline, Action<string> log)
+    {
+        if (baseline.StartPageCard is not { } shape)
+        {
+            log("card shape           : NOT SIGNED — the verified chain vouches for no card structure.");
+            return;
+        }
+
+        log($"signed card shape    : {shape.LabelControlType}/{shape.LabelClassName}" +
+            $"'{shape.LabelAutomationIdSuffix}' → {shape.CardControlType}/{shape.CardClassName}" +
+            $"'{shape.CardAutomationIdSuffix}' requiring {shape.RequiredCardPattern}");
+
+        Win32ExternalAppWindowLocator locator = new();
+        UiaElementProvider elements = new();
+        GuardedMeituUiDriver driver = new(
+            locator, elements, new Win32ScopedInputSink(locator), new NullEvidenceSink(),
+            new FixedBaselineProvider(baseline), new MeituAutomationOptions(), TimeProvider.System);
+
+        OperationResult<UiElementRef> card = driver.FindKnownElement(
+            ready.Target, KnownMeituElement.WelcomeOpenEntry);
+
+        if (card.IsFailure)
+        {
+            log($"resolved card        : REFUSED — {card.Failure.Code}");
+            log($"detail               : {card.Failure.TechnicalDetail}");
+            foreach (KeyValuePair<string, string> entry in card.Failure.Context)
+            {
+                log($"  {entry.Key,-20}: {entry.Value}");
+            }
+
+            return;
+        }
+
+        OperationResult<UiElementIdentity> identity = elements.Describe(card.Value);
+        log(identity.IsSuccess
+            ? $"resolved card        : {identity.Value}"
+            : $"resolved card        : located, but unreadable — {identity.Failure.Code}");
+
+        if (identity.IsSuccess)
+        {
+            log($"  patterns           : {string.Join(", ", identity.Value.SupportedPatterns)}");
+            log($"  bounds / enabled   : {identity.Value.Bounds} / {identity.Value.IsEnabled}");
+        }
+    }
+
+    /// <summary>A baseline provider over an already-verified baseline, for the smoke's own driver.</summary>
+    private sealed class FixedBaselineProvider(MeituBaseline baseline) : IMeituBaselineProvider
+    {
+        public OperationResult<MeituBaseline> GetVerifiedBaseline() => OperationResult.Ok(baseline);
+    }
+
+    /// <summary>An evidence sink for the read-only diagnostic, which captures nothing.</summary>
+    private sealed class NullEvidenceSink : IAutomationEvidenceSink
+    {
+        public OperationResult<EvidenceRef> CaptureWindow(ExternalWindowRef window, string reason) =>
+            OperationResult.Fail<EvidenceRef>(
+                FailureCode.WorkspaceError, "The read-only diagnostic captures no evidence.");
     }
 
     /// <summary>
@@ -184,29 +270,25 @@ public sealed class MeituWorkstationSmoke
             }
         }
 
-        OperationResult<UiElementRef> entry = elements.Find(
-            ready.Target.Window.Handle,
-            new UiElementQuery(UiControlKind.Any, Name: baseline.WelcomeMarkers.Contains("图片编辑") ? "图片编辑" : null));
-
-        if (entry.IsFailure)
+        // What the main window is showing now. After the card has been invoked this is the
+        // question §7 asks — did Meitu raise a picker, change to an editor, or do neither? — and
+        // it is answered by looking rather than by assuming which of them happened.
+        OperationResult<ExternalWindowRef> main = locator.Refresh(ready.Target.Window.Handle);
+        if (main.IsSuccess)
         {
-            log($"start-page entry     : NOT FOUND — {entry.Failure.Code}");
-            return;
+            log($"main window now      : '{main.Value.Title}' class='{main.Value.ClassName}' " +
+                $"enabled={main.Value.IsEnabled} bounds={main.Value.Bounds}");
         }
 
-        log($"start-page entry     : found ('{entry.Value.Name}')");
-
-        // Whether UI Automation can activate this control at all is the single fact that decides
-        // what Part B has to build: an invokable element means the preferred route works and the
-        // problem is elsewhere, while a bare Text element means Meitu's start page is not
-        // automatable through UIA and needs the next option down §4's priority list.
-        if (entry.Value.Native is System.Windows.Automation.AutomationElement native)
+        OperationResult<IReadOnlyList<string>> texts =
+            elements.ReadTextSnapshot(ready.Target.Window.Handle, 400);
+        if (texts.IsSuccess)
         {
-            log($"  control type       : {native.Current.ControlType.ProgrammaticName}");
-            log($"  automation id      : '{native.Current.AutomationId}'");
-            log($"  enabled / offscreen: {native.Current.IsEnabled} / {native.Current.IsOffscreen}");
-            log($"  supported patterns : {string.Join(", ",
-                native.GetSupportedPatterns().Select(p => p.ProgrammaticName))}");
+            string[] distinct = [.. texts.Value.Distinct(StringComparer.Ordinal).Take(60)];
+            log($"visible names ({texts.Value.Count,3})  : {string.Join(" | ", distinct)}");
+            log($"signed welcome markers still visible: " +
+                $"{baseline.WelcomeMarkers.Count(m => texts.Value.Any(t => t.Contains(m, StringComparison.Ordinal)))}" +
+                $" of {baseline.WelcomeMarkers.Length}");
         }
     }
 
