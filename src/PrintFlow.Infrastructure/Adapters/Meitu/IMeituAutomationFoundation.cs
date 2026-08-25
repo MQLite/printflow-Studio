@@ -115,6 +115,16 @@ public interface IMeituAutomationFoundation
         MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Runs only the C1 Background Removal UI action/completion slice. The required mode
+    /// decision is explicit, and success still produces no export, AdapterOutput or Revision.
+    /// </summary>
+    Task<OperationResult<MeituBackgroundRemovalOutcome>> RemoveBackgroundAsync(
+        MeituOpenedWorkingCopy opened,
+        WorkspaceFileRef workingCopy,
+        MeituBackgroundRemovalModeDecision modeDecision,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Writes the enhanced result to a PrintFlow-controlled path and validates what landed there
     /// (Epic 11300 Part B2B §7, §14, §16, §17, §19).
     /// </summary>

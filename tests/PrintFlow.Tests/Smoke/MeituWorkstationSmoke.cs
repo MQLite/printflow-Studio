@@ -55,6 +55,13 @@ public sealed class MeituWorkstationSmoke
     private const string EnableVariable = "PRINTFLOW_MEITU_SMOKE";
     private const string EnableOpenVariable = "PRINTFLOW_MEITU_SMOKE_OPEN";
     private const string EnableEnhanceVariable = "PRINTFLOW_MEITU_SMOKE_ENHANCE";
+    private const string EnableBackgroundDiscoveryVariable = "PRINTFLOW_MEITU_SMOKE_BACKGROUND_DISCOVERY";
+    private const string EnableBackgroundActionVariable = "PRINTFLOW_MEITU_SMOKE_BACKGROUND_ACTION";
+    private const string EnableBackgroundRouteVariable = "PRINTFLOW_MEITU_SMOKE_BACKGROUND";
+    private const string SyntheticSourceVariable = "PRINTFLOW_MEITU_SMOKE_SYNTHETIC_SOURCE";
+    private const string RetainedWorkingFileVariable = "PRINTFLOW_MEITU_SMOKE_RETAINED_FILE";
+    private const string PresetManifestVariable = "PRINTFLOW_MEITU_SMOKE_PRESET_MANIFEST";
+    private const string PresetSha256Variable = "PRINTFLOW_MEITU_SMOKE_PRESET_SHA256";
     private const string EnableExportVariable = "PRINTFLOW_MEITU_SMOKE_EXPORT";
     private const string EnableCloseVariable = "PRINTFLOW_MEITU_SMOKE_CLOSE";
 
@@ -84,8 +91,7 @@ public sealed class MeituWorkstationSmoke
             Log($"controlled workspace : {root}");
 
             PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
-            string manifest = Path.Combine(configuration.Workspace.Root, configuration.Preset.Path);
-            Sha256 expected = Sha256.Parse(configuration.Preset.ExpectedSha256);
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
             Log($"preset manifest      : {manifest}");
 
             // The baseline first, on its own, so a failure here is reported as "the signed chain
@@ -199,6 +205,58 @@ public sealed class MeituWorkstationSmoke
             Log($"window title         : '{opened.Value.Target.Window.Title}'");
             Log($"expected file        : {workingCopy.FileName}");
             Log($"observed identity    : {opened.Value.State.Observation.ObservedDocumentIdentity}");
+
+            if (Environment.GetEnvironmentVariable(EnableBackgroundDiscoveryVariable) == "1")
+            {
+                Log(string.Empty);
+                Log("## Phase C1 discovery — Background Removal candidates (read-only, no input)");
+                DescribeBackgroundRemovalCandidates(opened.Value.Target, Log);
+            }
+
+            if (Environment.GetEnvironmentVariable(EnableBackgroundActionVariable) == "1")
+            {
+                Log(string.Empty);
+                Log("## Phase C1 supervised discovery action — provisional structural target");
+                await ExerciseBackgroundRemovalDiscoveryAsync(
+                    opened.Value.Target, baseline.Value, workingCopy.FileName, Log);
+            }
+
+            if (Environment.GetEnvironmentVariable(EnableBackgroundRouteVariable) == "1")
+            {
+                Log(string.Empty);
+                Log("## Phase C1 — guarded Background Removal (no export)");
+                Log("mode authority       : reviewed synthetic content → 自动选择");
+                OperationResult<MeituBackgroundRemovalOutcome> removed =
+                    await foundation.RemoveBackgroundAsync(
+                        opened.Value,
+                        workingCopy,
+                        MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+                        CancellationToken.None);
+                if (removed.IsFailure)
+                {
+                    Log($"RESULT               : BACKGROUND REMOVAL STOPPED — {removed.Failure.Code}");
+                    Log($"detail               : {removed.Failure.TechnicalDetail}");
+                    foreach (KeyValuePair<string, string> entry in removed.Failure.Context)
+                    {
+                        Log($"  {entry.Key,-20}: {entry.Value}");
+                    }
+
+                    Log("No export, AdapterOutput or Revision was produced.");
+                    return;
+                }
+
+                Log($"identity before      : {removed.Value.IdentityBeforeAction.State} " +
+                    $"({removed.Value.ObservedDocumentIdentity})");
+                Log($"automatic mode       : {removed.Value.ObservedAutomaticModeName}");
+                Log($"busy observed        : {removed.Value.Busy.State}");
+                Log($"completion observed  : " +
+                    $"{MeituBackgroundRemovalRule.Classify(baseline.Value.BackgroundRemoval!, removed.Value.Completion.Observation)} " +
+                    "(positive signed controls; Busy absent)");
+                Log($"identity after       : {removed.Value.IdentityAfterCompletion.State}");
+                Log("STOP                 : no export, AdapterOutput or Revision");
+                return;
+            }
+
             if (Environment.GetEnvironmentVariable(EnableEnhanceVariable) != "1")
             {
                 Log(string.Empty);
@@ -332,6 +390,148 @@ public sealed class MeituWorkstationSmoke
         {
             WriteTranscript(transcript.ToString());
             CleanUp(root, evidenceDirectory, mayStillBeLoaded);
+        }
+    }
+
+    /// <summary>
+    /// Continues C1 discovery against a retained synthetic document when an earlier read-only
+    /// open intentionally left Meitu in an editor state that the clean-start smoke will not
+    /// reinterpret. Exact Save-surface identity is still the first input-producing step.
+    /// </summary>
+    [Fact]
+    public async Task Discover_background_removal_on_a_retained_synthetic_document()
+    {
+        string? expectedWorkingCopyFileName =
+            Environment.GetEnvironmentVariable(RetainedWorkingFileVariable);
+        bool exerciseAction = Environment.GetEnvironmentVariable(EnableBackgroundActionVariable) == "1";
+        bool inspectCompletion =
+            Environment.GetEnvironmentVariable(EnableBackgroundDiscoveryVariable) == "1";
+        if ((!exerciseAction && !inspectCompletion) ||
+            string.IsNullOrWhiteSpace(expectedWorkingCopyFileName))
+        {
+            return;
+        }
+
+        StringBuilder transcript = new();
+        void Log(string line)
+        {
+            transcript.AppendLine(line);
+            Console.WriteLine(line);
+        }
+
+        try
+        {
+            PrintFlowConfiguration configuration =
+                PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            PresetMeituBaselineProvider baselines = new(
+                manifest, expected);
+            OperationResult<MeituBaseline> baseline = baselines.GetVerifiedBaseline();
+            if (baseline.IsFailure)
+            {
+                Log($"baseline             : REFUSED — {baseline.Failure.Code}");
+                return;
+            }
+
+            Win32ExternalAppWindowLocator locator = new();
+            OperationResult<IReadOnlyList<ExternalProcessRef>> processes =
+                locator.FindProcessesByExecutable(baseline.Value.ExecutablePath);
+            if (processes.IsFailure || processes.Value.Count != 1)
+            {
+                Log($"process              : REFUSED — {(processes.IsFailure ? processes.Failure.Code.ToString() : $"{processes.Value.Count} candidates")}");
+                return;
+            }
+
+            ExternalProcessRef process = processes.Value[0];
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows = locator.FindTopLevelWindows(process);
+            if (windows.IsFailure)
+            {
+                Log($"window               : REFUSED — {windows.Failure.Code}");
+                return;
+            }
+
+            ExternalWindowRef[] candidates =
+            [
+                .. windows.Value.Where(window =>
+                    window.IsVisible && window.IsEnabled &&
+                    !string.Equals(window.Title, baseline.Value.WelcomeWindowTitle, StringComparison.Ordinal) &&
+                    baseline.Value.AcceptedWindowTitles.Contains(window.Title, StringComparer.Ordinal))
+            ];
+            if (candidates.Length != 1)
+            {
+                Log($"window               : REFUSED — {candidates.Length} accepted candidates");
+                return;
+            }
+
+            Log($"retained expected file: {expectedWorkingCopyFileName}");
+            Log($"process / window     : {process.ProcessId} / {candidates[0].Handle}");
+            MeituTarget target = new(process, candidates[0]);
+            if (exerciseAction)
+            {
+                await ExerciseBackgroundRemovalDiscoveryAsync(
+                    target, baseline.Value, expectedWorkingCopyFileName, Log);
+            }
+            else
+            {
+                UiaElementProvider elements = new();
+                GuardedMeituUiDriver driver = new(
+                    locator, elements, new Win32ScopedInputSink(locator), new NullEvidenceSink(),
+                    new FixedBaselineProvider(baseline.Value), new MeituAutomationOptions(), TimeProvider.System);
+
+                OperationResult<MeituStateSnapshot> identity =
+                    await driver.ConfirmWorkingCopyIdentityAsync(
+                        target, expectedWorkingCopyFileName, CancellationToken.None);
+                if (identity.IsFailure)
+                {
+                    Log($"post-completion identity: REFUSED — {identity.Failure.Code}");
+                    Log($"detail               : {identity.Failure.TechnicalDetail}");
+                    DescribeBackgroundRemovalCandidates(target, Log);
+
+                    OperationResult<PrintFlow.Domain.Results.Unit> returned =
+                        await InvokeProvisionalPageButtonAsync(
+                            target, "调整", driver, locator, elements);
+                    if (returned.IsFailure)
+                    {
+                        Log($"editor return       : REFUSED — {returned.Failure.Code}");
+                        return;
+                    }
+
+                    Log("editor return       : 调整 invoked once through exact PageButton structure");
+                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+                    identity = await driver.ConfirmWorkingCopyIdentityAsync(
+                        target, expectedWorkingCopyFileName, CancellationToken.None);
+                    if (identity.IsFailure)
+                    {
+                        Log($"identity after return: REFUSED — {identity.Failure.Code}");
+                        return;
+                    }
+                }
+
+                Log($"post-completion identity: {identity.Value.State} " +
+                    $"({identity.Value.Observation.ObservedDocumentIdentity})");
+                DescribeBackgroundRemovalCandidates(target, Log);
+
+                if (Environment.GetEnvironmentVariable(EnableCloseVariable) == "1")
+                {
+                    OperationResult<MeituTarget> closed = await driver.CloseDocumentAsync(
+                        target, CancellationToken.None);
+                    if (closed.IsFailure)
+                    {
+                        Log($"close                : STOPPED — {closed.Failure.Code}");
+                        Log($"detail               : {closed.Failure.TechnicalDetail}");
+                        Log("Any modified-document prompt is intentionally left for the operator.");
+                        return;
+                    }
+
+                    Log("close                : signed empty-editor state confirmed");
+                }
+
+                Log("STOP                 : no export, AdapterOutput or Revision");
+            }
+        }
+        finally
+        {
+            WriteTranscript(transcript.ToString());
         }
     }
 
@@ -530,14 +730,345 @@ public sealed class MeituWorkstationSmoke
     {
         string token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
         WorkspaceFileRef reference = WorkspaceFileRef.Create(
-            $"Sessions/S_SMOKE/Working/A_1/PF_IDENTITY_FINAL_{token}.png", WorkspaceArea.Working);
+            $"Sessions/S_SMOKE/Working/A_1/PF_BACKGROUND_C1_{token}.png", WorkspaceArea.Working);
 
         IWorkspace workspace = new FileWorkspace(root);
         string absolute = workspace.ResolveAbsolute(reference);
         Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
-        File.WriteAllBytes(absolute, SyntheticImages.Png(320, 240, dpi: 300, alpha: true));
+
+        string? syntheticSource = Environment.GetEnvironmentVariable(SyntheticSourceVariable);
+        if (string.IsNullOrWhiteSpace(syntheticSource))
+        {
+            File.WriteAllBytes(absolute, SyntheticImages.Png(320, 240, dpi: 300, alpha: true));
+        }
+        else
+        {
+            byte[] pixels = SyntheticImages.ReadBgra(syntheticSource, out int width, out int height);
+            File.WriteAllBytes(absolute, SyntheticImages.OpaqueRgbPng(
+                width,
+                height,
+                (x, y) =>
+                {
+                    int offset = ((y * width) + x) * 4;
+                    return (pixels[offset + 2], pixels[offset + 1], pixels[offset]);
+                }));
+        }
 
         return (absolute, reference, workspace);
+    }
+
+    /// <summary>
+    /// Records every live control associated with the candidate Background Removal terms and
+    /// its first six control-view ancestors. This is discovery evidence only and invokes
+    /// nothing; the production action must use a separately signed fixed-depth rule.
+    /// </summary>
+    private static void DescribeBackgroundRemovalCandidates(MeituTarget target, Action<string> log)
+    {
+        string[] terms =
+        [
+            "智能抠图", "抠图", "AI换背景", "自动选择", "局部抠图", "手动修补",
+            "反选", "移除背景", "调整", "智能识别中", "返回结果中", "图片合成中", "取消"
+        ];
+        UiaElementProvider elements = new();
+        OperationResult<IReadOnlyList<UiElementRef>> found = elements.FindAll(
+            target.Window.Handle, new UiElementQuery(UiControlKind.Any));
+
+        if (found.IsFailure)
+        {
+            log($"candidate walk       : REFUSED — {found.Failure.Code}");
+            log($"detail               : {found.Failure.TechnicalDetail}");
+            return;
+        }
+
+        List<UiElementRef> candidates = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> identity = elements.Describe(candidate);
+            if (identity.IsSuccess && terms.Any(term =>
+                    identity.Value.Name.Contains(term, StringComparison.Ordinal)))
+            {
+                candidates.Add(candidate);
+            }
+        }
+
+        log($"candidate markers      : {candidates.Count}");
+        for (int candidateIndex = 0; candidateIndex < candidates.Count; candidateIndex++)
+        {
+            UiElementRef current = candidates[candidateIndex];
+            for (int depth = 0; depth <= 6; depth++)
+            {
+                OperationResult<UiElementIdentity> identity = elements.Describe(current);
+                if (identity.IsFailure)
+                {
+                    log($"  [{candidateIndex}] depth {depth}: UNREADABLE — {identity.Failure.Code}");
+                    break;
+                }
+
+                UiElementIdentity value = identity.Value;
+                string displayedValue = "(unsupported)";
+                if (value.Supports(UiPatternKind.Value))
+                {
+                    OperationResult<string> currentValue = elements.GetValue(current);
+                    displayedValue = currentValue.IsSuccess
+                        ? $"'{currentValue.Value}'"
+                        : $"(unreadable: {currentValue.Failure.Code})";
+                }
+                log($"  [{candidateIndex}] depth {depth}: {value}; patterns=" +
+                    $"{(value.SupportedPatterns.IsDefaultOrEmpty ? "(none)" : string.Join(", ", value.SupportedPatterns))}; " +
+                    $"enabled={value.IsEnabled}; offscreen={value.IsOffscreen}; bounds={value.Bounds}; " +
+                    $"value={displayedValue}");
+
+                OperationResult<UiElementRef> parent = elements.GetParent(current);
+                if (parent.IsFailure)
+                {
+                    break;
+                }
+
+                current = parent.Value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Enters the live 抠图 feature once through a provisional exact structural control and then
+    /// polls UIA read-only. This diagnostic exists to discover semantics and evidence before a
+    /// final immutable preset is signed; it is never reachable unless its explicit smoke switch
+    /// is set.
+    /// </summary>
+    private static async Task ExerciseBackgroundRemovalDiscoveryAsync(
+        MeituTarget target,
+        MeituBaseline baseline,
+        string expectedWorkingCopyFileName,
+        Action<string> log)
+    {
+        Win32ExternalAppWindowLocator locator = new();
+        UiaElementProvider elements = new();
+        GuardedMeituUiDriver driver = new(
+            locator, elements, new Win32ScopedInputSink(locator), new NullEvidenceSink(),
+            new FixedBaselineProvider(baseline), new MeituAutomationOptions(), TimeProvider.System);
+
+        OperationResult<MeituStateSnapshot> identity = await driver.ConfirmWorkingCopyIdentityAsync(
+            target, expectedWorkingCopyFileName, CancellationToken.None);
+        if (identity.IsFailure)
+        {
+            log($"final identity        : REFUSED — {identity.Failure.Code}");
+            log($"detail               : {identity.Failure.TechnicalDetail}");
+            return;
+        }
+
+        string observedIdentity = identity.Value.Observation.ObservedDocumentIdentity ?? "(missing)";
+        log($"final identity        : {identity.Value.State} ({observedIdentity})");
+
+        OperationResult<MeituTarget> activated = await driver.ActivateAsync(target, CancellationToken.None);
+        if (activated.IsFailure)
+        {
+            log($"editor reacquisition : REFUSED — {activated.Failure.Code}");
+            return;
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+            locator.FindOwnedDialogs(activated.Value.Process, activated.Value.Window);
+        if (dialogs.IsFailure || dialogs.Value.Count != 0)
+        {
+            log($"blocking modal       : {(dialogs.IsFailure ? dialogs.Failure.Code.ToString() : string.Join(" | ", dialogs.Value.Select(d => d.Title)))}");
+            log("input sent           : false");
+            return;
+        }
+
+        MeituControlSignature provisional = new(
+            Name: "抠图",
+            AutomationIdContains: string.Empty,
+            ControlTypeName: "CheckBox",
+            ClassName: "PageButton",
+            RequiredPattern: UiPatternKind.Invoke);
+
+        OperationResult<IReadOnlyList<UiElementRef>> found = elements.FindAll(
+            activated.Value.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: provisional.Name));
+        if (found.IsFailure)
+        {
+            log($"provisional target   : REFUSED — {found.Failure.Code}");
+            return;
+        }
+
+        List<UiElementRef> refs = [];
+        List<UiElementIdentity> identities = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> described = elements.Describe(candidate);
+            if (described.IsSuccess)
+            {
+                refs.Add(candidate);
+                identities.Add(described.Value);
+            }
+        }
+
+        OperationResult<int> selected = MeituCardTargetRule.SelectSignedControl(
+            provisional, activated.Value.Process.ProcessId, identities);
+        if (selected.IsFailure)
+        {
+            log($"provisional target   : REFUSED — {selected.Failure.Code}");
+            log($"detail               : {selected.Failure.TechnicalDetail}");
+            return;
+        }
+
+        UiElementIdentity targetIdentity = identities[selected.Value];
+        log($"provisional target   : {targetIdentity}");
+        log($"patterns / state     : {string.Join(", ", targetIdentity.SupportedPatterns)}; " +
+            $"enabled={targetIdentity.IsEnabled}; offscreen={targetIdentity.IsOffscreen}");
+
+        OperationResult<ExternalWindowRef> refreshed = locator.Refresh(activated.Value.Window.Handle);
+        OperationResult<ForegroundIdentity> foreground = locator.ReadForeground();
+        if (refreshed.IsFailure || foreground.IsFailure ||
+            foreground.Value.Handle != activated.Value.Window.Handle ||
+            foreground.Value.ProcessId != activated.Value.Process.ProcessId)
+        {
+            log("foreground guard     : REFUSED");
+            log("input sent           : false");
+            return;
+        }
+
+        OperationResult<IReadOnlyList<string>> before =
+            elements.ReadTextSnapshot(activated.Value.Window.Handle, 500);
+        HashSet<string> beforeNames = before.IsSuccess
+            ? [.. before.Value]
+            : [];
+
+        OperationResult<PrintFlow.Domain.Results.Unit> invoked = elements.Invoke(refs[selected.Value]);
+        if (invoked.IsFailure)
+        {
+            log($"single invocation    : REFUSED — {invoked.Failure.Code}");
+            return;
+        }
+
+        log("single invocation    : sent once");
+        DateTimeOffset started = DateTimeOffset.UtcNow;
+        string? lastReading = null;
+        string[] relevantTerms =
+        [
+            "抠图", "背景", "人物", "人像", "商品", "物品", "通用", "自动", "手动",
+            "智能", "选择", "处理中", "正在", "完成", "调整", "边缘", "涂抹", "擦除",
+            "透明", "替换", "更换", "重置", "撤销", "保存"
+        ];
+
+        for (int sample = 0; sample < 200; sample++)
+        {
+            OperationResult<IReadOnlyList<string>> snapshot =
+                elements.ReadTextSnapshot(activated.Value.Window.Handle, 500);
+            OperationResult<IReadOnlyList<UiElementRef>> progress = elements.FindAll(
+                activated.Value.Window.Handle, new UiElementQuery(UiControlKind.ProgressBar));
+
+            if (snapshot.IsFailure)
+            {
+                log($"poll                 : REFUSED — {snapshot.Failure.Code}");
+                break;
+            }
+
+            string[] relevant =
+            [
+                .. snapshot.Value
+                    .Where(name => relevantTerms.Any(term => name.Contains(term, StringComparison.Ordinal)) ||
+                        !beforeNames.Contains(name))
+                    .Distinct(StringComparer.Ordinal)
+            ];
+            string reading = $"texts=[{string.Join(" | ", relevant)}]; progressBars=" +
+                $"{(progress.IsSuccess ? progress.Value.Count : -1)}";
+            if (!string.Equals(reading, lastReading, StringComparison.Ordinal))
+            {
+                double elapsed = (DateTimeOffset.UtcNow - started).TotalSeconds;
+                log($"  t+{elapsed,5:0.00}s           : {reading}");
+                lastReading = reading;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+        }
+
+        log("observation stopped  : read-only polling ended; no second input, export or Revision");
+        DescribeBackgroundRemovalCandidates(activated.Value, log);
+    }
+
+    private static async Task<OperationResult<PrintFlow.Domain.Results.Unit>>
+        InvokeProvisionalPageButtonAsync(
+            MeituTarget target,
+            string exactName,
+            GuardedMeituUiDriver driver,
+            Win32ExternalAppWindowLocator locator,
+            UiaElementProvider elements)
+    {
+        OperationResult<MeituTarget> activated = await driver.ActivateAsync(target, CancellationToken.None);
+        if (activated.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(activated.Failure);
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+            locator.FindOwnedDialogs(activated.Value.Process, activated.Value.Window);
+        if (dialogs.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(dialogs.Failure);
+        }
+
+        if (dialogs.Value.Count != 0)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
+                OperationFailure.Create(
+                    FailureCode.MeituBlockingDialog,
+                    "A Meitu-owned modal blocks the provisional page-button action. Nothing was invoked.",
+                    isRetryable: true));
+        }
+
+        MeituControlSignature provisional = new(
+            exactName, string.Empty, "CheckBox", "PageButton", UiPatternKind.Invoke);
+        OperationResult<IReadOnlyList<UiElementRef>> found = elements.FindAll(
+            activated.Value.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: exactName));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(found.Failure);
+        }
+
+        List<UiElementRef> refs = [];
+        List<UiElementIdentity> identities = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> described = elements.Describe(candidate);
+            if (described.IsSuccess)
+            {
+                refs.Add(candidate);
+                identities.Add(described.Value);
+            }
+        }
+
+        OperationResult<int> selected = MeituCardTargetRule.SelectSignedControl(
+            provisional, activated.Value.Process.ProcessId, identities);
+        if (selected.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(selected.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> refreshed = locator.Refresh(activated.Value.Window.Handle);
+        if (refreshed.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(refreshed.Failure);
+        }
+
+        OperationResult<ForegroundIdentity> foreground = locator.ReadForeground();
+        if (foreground.IsFailure)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(foreground.Failure);
+        }
+
+        if (foreground.Value.Handle != activated.Value.Window.Handle ||
+            foreground.Value.ProcessId != activated.Value.Process.ProcessId)
+        {
+            return OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
+                OperationFailure.Create(
+                    FailureCode.MeituTargetLost,
+                    "The verified Meitu editor lost foreground before the provisional page-button action. " +
+                    "Nothing was invoked.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        return elements.Invoke(refs[selected.Value]);
     }
 
     /// <summary>
@@ -582,8 +1113,7 @@ public sealed class MeituWorkstationSmoke
 
             PrintFlowConfiguration configuration =
                 PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
-            string manifest = Path.Combine(configuration.Workspace.Root, configuration.Preset.Path);
-            Sha256 expected = Sha256.Parse(configuration.Preset.ExpectedSha256);
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
 
             (string workingCopyPath, WorkspaceFileRef workingCopy, IWorkspace workspace) =
                 PrepareSyntheticWorkingCopy(root);
@@ -654,6 +1184,15 @@ public sealed class MeituWorkstationSmoke
         string path = file.RelativePath;
         int slash = path.LastIndexOf('/');
         return WorkspaceDirRef.Create(slash < 0 ? path : path[..slash]);
+    }
+
+    private static (string Manifest, Sha256 Expected) PresetForSmoke(PrintFlowConfiguration configuration)
+    {
+        string manifest = Environment.GetEnvironmentVariable(PresetManifestVariable) ??
+            Path.Combine(configuration.Workspace.Root, configuration.Preset.Path);
+        string digest = Environment.GetEnvironmentVariable(PresetSha256Variable) ??
+            configuration.Preset.ExpectedSha256;
+        return (manifest, Sha256.Parse(digest));
     }
 
     private static WorkspaceFileRef SiblingOf(WorkspaceFileRef file, string fileName)

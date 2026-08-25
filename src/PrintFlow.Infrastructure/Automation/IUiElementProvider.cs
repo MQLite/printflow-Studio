@@ -193,6 +193,18 @@ public interface IUiElementProvider
     OperationResult<Unit> SetValue(UiElementRef element, string value);
 
     /// <summary>
+    /// Reads only automation names that exactly match one of the supplied signed markers.
+    /// </summary>
+    /// <remarks>
+    /// This is the time-sensitive counterpart to <see cref="ReadTextSnapshot"/>. It lets a
+    /// guarded route observe a short-lived positive processing marker without paying for a
+    /// managed walk of the whole Qt tree. The query is still rooted beneath the already-owned
+    /// window, invokes nothing, and accepts no caller-selected action or control.
+    /// </remarks>
+    OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
+        WindowHandle root, IReadOnlyCollection<string> exactNames);
+
+    /// <summary>
     /// Reads up to <paramref name="maxItems"/> visible automation names beneath
     /// <paramref name="root"/>, for state recognition and failure evidence.
     /// </summary>

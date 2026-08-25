@@ -437,4 +437,49 @@ public sealed class MeituStateClassifierTests
         MeituStateClassifier.Classify(MeituFakes.Baseline(), finished).State
             .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
     }
+
+    [Fact]
+    public void Background_Removal_Busy_outranks_the_loaded_editor()
+    {
+        MeituObservation busy = Observe(
+            title: MeituFakes.EditorTitle,
+            texts: [.. MeituFakes.EditorMarkers, .. MeituFakes.BackgroundBusyTexts()],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), busy).State
+            .ShouldBe(MeituStartingState.Busy);
+    }
+
+    [Fact]
+    public void Background_Removal_completion_is_not_generic_Busy()
+    {
+        MeituObservation complete = Observe(
+            title: MeituFakes.EditorTitle,
+            texts:
+            [
+                .. MeituFakes.EditorMarkers,
+                "自动选择", "局部抠图", "手动修补", "反选", "移除背景",
+            ],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), complete).State
+            .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+    }
+
+    [Fact]
+    public void Enhancement_Busy_does_not_match_Background_Removal_Busy()
+    {
+        MeituObservation enhancementBusy = Observe(
+            title: MeituFakes.EditorTitle,
+            texts: [.. MeituFakes.EditorMarkers, .. MeituFakes.BusyMarkers],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituBaseline backgroundOnly = MeituFakes.BaselineWithout(enhancement: true);
+
+        MeituStateClassifier.Classify(backgroundOnly, enhancementBusy).State
+            .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+    }
 }

@@ -42,6 +42,12 @@ public sealed record MeituAutomationOptions
     /// <summary>How long a running Enhancement has to reach its signed completion state.</summary>
     public TimeSpan EnhancementCompletionTimeout { get; init; } = TimeSpan.FromMinutes(5);
 
+    /// <summary>How long 抠图 has to expose its operation-specific Busy signature.</summary>
+    public TimeSpan BackgroundRemovalBusyTimeout { get; init; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>How long a running 抠图 operation has to reach positive result controls.</summary>
+    public TimeSpan BackgroundRemovalCompletionTimeout { get; init; } = TimeSpan.FromMinutes(5);
+
     /// <summary>
     /// How long to watch, read-only, for an Enhancement Meitu starts by itself after a document
     /// is opened (Epic 11300 Part B2B §20).

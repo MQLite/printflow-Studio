@@ -634,6 +634,37 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     }
 
     /// <inheritdoc />
+    public async Task<OperationResult<MeituBackgroundRemovalOutcome>> RemoveBackgroundAsync(
+        MeituOpenedWorkingCopy opened,
+        WorkspaceFileRef workingCopy,
+        MeituBackgroundRemovalModeDecision modeDecision,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(opened);
+
+        if (workingCopy.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(
+                FailureCode.PreconditionNotMet,
+                $"Meitu may only remove the background from a Working copy; " +
+                $"'{workingCopy.RelativePath}' is in {workingCopy.Area}. No input was produced.");
+        }
+
+        OperationResult<MeituBackgroundRemovalOutcome> run = await _driver
+            .RunBackgroundRemovalAsync(
+                opened.Target,
+                workingCopy.FileName,
+                modeDecision,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return run.IsFailure
+            ? Capture<MeituBackgroundRemovalOutcome>(
+                opened.Target, run.Failure, "background-removal-c1-failed")
+            : run;
+    }
+
+    /// <inheritdoc />
     public Task<OperationResult<bool>> DismissExportResultSurfaceAsync(
         MeituTarget target, CancellationToken cancellationToken) =>
         _driver.DismissExportResultSurfaceAsync(target, cancellationToken);

@@ -266,6 +266,55 @@ public sealed class AutomationBoundaryTests
         members.ShouldNotContain(name => name.Contains("Export", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void The_Background_Removal_outcome_carries_no_output_success_or_revision_surface()
+    {
+        string[] members = [.. typeof(MeituBackgroundRemovalOutcome)
+            .GetProperties()
+            .Select(property => property.Name)];
+
+        members.ShouldNotContain(name => name.Contains("Output", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Path", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Revision", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Succeed", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Export", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Cutout", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void The_Background_Removal_route_exposes_no_path_coordinate_shortcut_or_free_form_action()
+    {
+        MethodInfo method = typeof(IMeituUiDriver).GetMethod(
+            nameof(IMeituUiDriver.RunBackgroundRemovalAsync))!;
+
+        method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
+            ["target", "expectedWorkingCopyFileName", "modeDecision", "cancellationToken"]);
+        method.GetParameters().ShouldNotContain(parameter =>
+            parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("action", StringComparison.OrdinalIgnoreCase) ||
+            parameter.ParameterType == typeof(KnownShortcut));
+
+        string source = DriverSource();
+        int start = source.IndexOf(
+            "public async Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync",
+            StringComparison.Ordinal);
+        int end = source.IndexOf(
+            "private async Task<OperationResult<MeituStateSnapshot>> AwaitBackgroundRemovalPhaseAsync",
+            start,
+            StringComparison.Ordinal);
+
+        start.ShouldBeGreaterThan(-1);
+        end.ShouldBeGreaterThan(start);
+        string route = source[start..end];
+        route.ShouldNotContain(nameof(IMeituUiDriver.SendVerifiedShortcutAsync));
+        route.ShouldNotContain("SetValue", Case.Sensitive);
+        route.ShouldNotContain("SendKeys", Case.Insensitive);
+        route.ShouldNotContain("mouse", Case.Insensitive);
+        route.ShouldNotContain("coordinate", Case.Insensitive);
+        route.ShouldNotContain("Export", Case.Sensitive);
+    }
+
     /// <summary>
     /// The Enhancement route writes nothing: no Save, no Save As, no value written anywhere.
     /// </summary>

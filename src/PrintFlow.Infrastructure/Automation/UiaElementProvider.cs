@@ -116,6 +116,49 @@ public sealed class UiaElementProvider : IUiElementProvider
     }
 
     /// <inheritdoc />
+    public OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
+        WindowHandle root, IReadOnlyCollection<string> exactNames)
+    {
+        ArgumentNullException.ThrowIfNull(exactNames);
+        string[] names = [.. exactNames.Where(name => !string.IsNullOrEmpty(name)).Distinct(StringComparer.Ordinal)];
+        if (names.Length == 0)
+        {
+            return OperationResult.Ok<IReadOnlyList<string>>([]);
+        }
+
+        OperationResult<AutomationElement> rootElement = RootOf(root);
+        if (rootElement.IsFailure)
+        {
+            return OperationResult.Fail<IReadOnlyList<string>>(rootElement.Failure);
+        }
+
+        try
+        {
+            Condition condition = names.Length == 1
+                ? new PropertyCondition(AutomationElement.NameProperty, names[0])
+                : new OrCondition(names
+                    .Select(name => (Condition)new PropertyCondition(AutomationElement.NameProperty, name))
+                    .ToArray());
+            AutomationElementCollection found =
+                rootElement.Value.FindAll(TreeScope.Descendants, condition);
+            return OperationResult.Ok<IReadOnlyList<string>>(
+                [.. found.Cast<AutomationElement>().Select(NameOf)]);
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<string>>(
+                FailureCode.MeituTargetLost,
+                $"Window {root} disappeared while reading signed markers: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<string>>(
+                FailureCode.MeituOpenInputFailed,
+                $"Reading signed markers beneath window {root} failed: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
     public OperationResult<UiElementIdentity> Describe(UiElementRef element)
     {
         ArgumentNullException.ThrowIfNull(element);

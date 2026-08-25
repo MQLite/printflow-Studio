@@ -601,9 +601,55 @@ public sealed class PresetMeituBaselineProviderTests : IDisposable
         }
         """;
 
+    private const string BackgroundRemovalEvidence = """
+        {
+          "backgroundRemoval": {
+            "actionMarkerName": "抠图",
+            "actionControl": {
+              "markerControlType": "CheckBox",
+              "markerClassName": "PageButton",
+              "markerAutomationIdSuffix": "",
+              "ownerControlType": "CheckBox",
+              "ownerClassName": "PageButton",
+              "ownerAutomationIdSuffix": "",
+              "markerRelativeAutomationIdSuffix": "",
+              "ownerAncestorDepth": 0,
+              "requiredOwnerPattern": "Invoke"
+            },
+            "returnMarkerName": "调整",
+            "returnControl": {
+              "markerControlType": "CheckBox",
+              "markerClassName": "PageButton",
+              "markerAutomationIdSuffix": "",
+              "ownerControlType": "CheckBox",
+              "ownerClassName": "PageButton",
+              "ownerAutomationIdSuffix": "",
+              "markerRelativeAutomationIdSuffix": "",
+              "ownerAncestorDepth": 0,
+              "requiredOwnerPattern": "Invoke"
+            },
+            "observedAutomaticModeName": "自动选择",
+            "modePolicy": "OPERATOR_OR_REVIEWED_CONTENT_DECISION",
+            "autoStartsOnEntry": true,
+            "busy": {
+              "requiredMarkers": ["智能识别中...", "返回结果中...", "图片合成中...", "取消"],
+              "minimumRequiredMarkers": 2
+            },
+            "completion": {
+              "requiredMarkers": ["自动选择", "局部抠图", "手动修补", "反选", "移除背景"],
+              "minimumRequiredMarkers": 5,
+              "requiresBusyAbsent": true
+            }
+          }
+        }
+        """;
+
     /// <summary>Returns the enhancement evidence with one JSON fragment replaced.</summary>
     private static string EnhancementWith(string find, string replace) =>
         EnhancementEvidence.Replace(find, replace, StringComparison.Ordinal);
+
+    private static string BackgroundRemovalWith(string find, string replace) =>
+        BackgroundRemovalEvidence.Replace(find, replace, StringComparison.Ordinal);
 
     [Fact]
     public void A_vouched_for_close_route_is_read_from_the_signed_file()
@@ -638,12 +684,92 @@ public sealed class PresetMeituBaselineProviderTests : IDisposable
     }
 
     [Fact]
+    public void A_vouched_for_Background_Removal_route_is_read_from_the_signed_file()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-background-removal.json", BackgroundRemovalEvidence);
+
+        MeituBackgroundRemovalSignature signature = Load().Value.BackgroundRemoval.ShouldNotBeNull();
+
+        signature.ActionMarkerName.ShouldBe("抠图");
+        signature.ActionControl.OwnerAncestorDepth.ShouldBe(0);
+        signature.ActionControl.OwnerClassName.ShouldBe("PageButton");
+        signature.ReturnMarkerName.ShouldBe("调整");
+        signature.ObservedAutomaticModeName.ShouldBe("自动选择");
+        signature.ModePolicy.ShouldBe(
+            MeituBackgroundRemovalModePolicy.OperatorOrReviewedContentDecision);
+        signature.AutoStartsOnEntry.ShouldBeTrue();
+        signature.Busy.MinimumRequiredMarkers.ShouldBe(2);
+        signature.Completion.MinimumRequiredMarkers.ShouldBe(5);
+        signature.Completion.RequiresBusyAbsent.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Without_vouched_for_B2A_evidence_both_routes_are_unreachable()
     {
         MeituBaseline baseline = Load().Value;
 
         baseline.CloseDocument.ShouldBeNull();
         baseline.Enhancement.ShouldBeNull();
+        baseline.BackgroundRemoval.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Background_Removal_evidence_must_preserve_the_signed_mode_policy()
+    {
+        Vouch(
+            @"Baseline\apps\meitu\editor-background-removal.json",
+            BackgroundRemovalWith(
+                "OPERATOR_OR_REVIEWED_CONTENT_DECISION",
+                "ALWAYS_PERSON"));
+
+        OperationResult<MeituBaseline> baseline = Load();
+
+        baseline.IsFailure.ShouldBeTrue();
+        baseline.Failure.TechnicalDetail.ShouldContain("mode policy");
+    }
+
+    [Fact]
+    public void Background_Removal_evidence_must_record_that_entry_auto_starts_processing()
+    {
+        Vouch(
+            @"Baseline\apps\meitu\editor-background-removal.json",
+            BackgroundRemovalWith("\"autoStartsOnEntry\": true", "\"autoStartsOnEntry\": false"));
+
+        OperationResult<MeituBaseline> baseline = Load();
+
+        baseline.IsFailure.ShouldBeTrue();
+        baseline.Failure.TechnicalDetail.ShouldContain("auto-starts");
+    }
+
+    [Theory]
+    [InlineData("-1")]
+    [InlineData("5")]
+    public void Background_Removal_evidence_refuses_an_unreviewed_structural_depth(string depth)
+    {
+        Vouch(
+            @"Baseline\apps\meitu\editor-background-removal.json",
+            BackgroundRemovalWith(
+                "\"ownerAncestorDepth\": 0",
+                $"\"ownerAncestorDepth\": {depth}"));
+
+        OperationResult<MeituBaseline> baseline = Load();
+
+        baseline.IsFailure.ShouldBeTrue();
+        baseline.Failure.TechnicalDetail.ShouldContain("ownerAncestorDepth");
+    }
+
+    [Fact]
+    public void Editing_the_Background_Removal_evidence_after_signing_fails_closed()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-background-removal.json", BackgroundRemovalEvidence);
+        Write(
+            @"Baseline\apps\meitu\editor-background-removal.json",
+            BackgroundRemovalWith("\"minimumRequiredMarkers\": 5", "\"minimumRequiredMarkers\": 1"));
+
+        OperationResult<MeituBaseline> baseline = Load();
+
+        baseline.IsFailure.ShouldBeTrue();
+        baseline.Failure.Code.ShouldBe(FailureCode.PresetHashMismatch);
     }
 
     /// <summary>

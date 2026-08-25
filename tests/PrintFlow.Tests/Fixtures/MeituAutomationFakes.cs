@@ -153,6 +153,34 @@ internal static class MeituFakes
         Completion: new MeituCompletionSignature(
             CompletionMarkers, MinimumRequiredMarkers: 4, RequiresBusyAbsent: true));
 
+    internal const string BackgroundActionMarker = "CUTOUT-ACTION";
+    internal const string BackgroundReturnMarker = "CUTOUT-RETURN";
+    internal static readonly ImmutableArray<string> BackgroundBusyMarkers =
+        ["CUTOUT-RECOGNISING", "CUTOUT-RETURNING", "CUTOUT-COMPOSITING", "CUTOUT-ABORT"];
+    internal static readonly ImmutableArray<string> BackgroundCompletionMarkers =
+        ["CUTOUT-AUTO", "CUTOUT-LOCAL", "CUTOUT-MANUAL", "CUTOUT-INVERT", "CUTOUT-REMOVE-BG"];
+
+    internal static MeituOwnedControlShape BackgroundPageShape() => new(
+        "CheckBox", "PageButton", string.Empty,
+        "CheckBox", "PageButton", string.Empty,
+        string.Empty, 0, UiPatternKind.Invoke);
+
+    internal static MeituBackgroundRemovalSignature BackgroundRemoval() => new(
+        BackgroundActionMarker,
+        BackgroundPageShape(),
+        BackgroundReturnMarker,
+        BackgroundPageShape(),
+        "自动选择",
+        MeituBackgroundRemovalModePolicy.OperatorOrReviewedContentDecision,
+        AutoStartsOnEntry: true,
+        new MeituBusySignature(BackgroundBusyMarkers, 2),
+        new MeituCompletionSignature(BackgroundCompletionMarkers, 5, true));
+
+    internal static string[] BackgroundBusyTexts() =>
+        [.. BackgroundCompletionMarkers, "CUTOUT-RECOGNISING", "CUTOUT-ABORT"];
+
+    internal static string[] BackgroundCompletedTexts() => [.. BackgroundCompletionMarkers];
+
     /// <summary>Positive markers of Meitu's post-save confirmation surface.</summary>
     internal static readonly ImmutableArray<string> ExportResultMarkers = ["EXP-SAVED", "EXP-OPEN-FOLDER"];
 
@@ -224,7 +252,8 @@ internal static class MeituFakes
         MeituEditorSignature? editorEmpty = null,
         MeituCloseDocumentSignature? closeDocument = null,
         MeituEnhancementSignature? enhancement = null,
-        MeituExportSignature? export = null) => new(
+        MeituExportSignature? export = null,
+        MeituBackgroundRemovalSignature? backgroundRemoval = null) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -238,7 +267,8 @@ internal static class MeituFakes
         editorEmpty ?? EditorEmptySignature(),
         closeDocument ?? CloseDocument(),
         enhancement ?? Enhancement(),
-        export ?? Export());
+        export ?? Export(),
+        backgroundRemoval ?? BackgroundRemoval());
 
     /// <summary>A baseline whose optional evidence is exactly as supplied, including absent.</summary>
     /// <remarks>
@@ -253,7 +283,8 @@ internal static class MeituFakes
         bool editorEmpty = false,
         bool closeDocument = false,
         bool enhancement = false,
-        bool export = false) => new(
+        bool export = false,
+        bool backgroundRemoval = false) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -267,7 +298,8 @@ internal static class MeituFakes
         editorEmpty ? null : EditorEmptySignature(),
         closeDocument ? null : CloseDocument(),
         enhancement ? null : Enhancement(),
-        export ? null : Export());
+        export ? null : Export(),
+        backgroundRemoval ? null : BackgroundRemoval());
 
     internal static ExternalProcessRef Process(int id = 4242) =>
         new(id, ExecutablePath, new DateTimeOffset(2026, 8, 24, 9, 0, 0, TimeSpan.Zero));
@@ -593,6 +625,20 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         return owner;
     }
 
+    public FakeUiElement AddBackgroundPageAction(
+        WindowHandle window,
+        string marker,
+        int processId = 4242,
+        bool enabled = true,
+        bool offscreen = false)
+    {
+        return Add(window, new UiElementIdentity(
+            "CheckBox", string.Empty, marker, "PageButton", processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Toggle],
+            new UiBounds(372, marker == MeituFakes.BackgroundActionMarker ? 625 : 337, 56, 56),
+            enabled, offscreen));
+    }
+
     /// <summary>Adds the loaded editor's close-document control, shaped like the observed one.</summary>
     public FakeUiElement AddEditorCloseControl(WindowHandle window, int processId = 4242)
     {
@@ -780,6 +826,17 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         }
 
         return OperationResult.Ok();
+    }
+
+    public OperationResult<IReadOnlyList<string>> ReadMatchingTextSnapshot(
+        WindowHandle root, IReadOnlyCollection<string> exactNames)
+    {
+        OnReadTextSnapshot?.Invoke(root);
+        HashSet<string> signed = new(exactNames, StringComparer.Ordinal);
+        return OperationResult.Ok<IReadOnlyList<string>>(
+            Texts.TryGetValue(root.Value, out List<string>? texts)
+                ? [.. texts.Where(signed.Contains)]
+                : []);
     }
 
     public Action<WindowHandle>? OnReadTextSnapshot { get; set; }

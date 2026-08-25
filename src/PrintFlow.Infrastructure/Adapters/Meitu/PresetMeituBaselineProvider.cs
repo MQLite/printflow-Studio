@@ -144,6 +144,16 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
             return OperationResult.Fail<MeituBaseline>(export.Failure);
         }
 
+        OperationResult<MeituBackgroundRemovalSignature?> backgroundRemoval = ReadOptional(
+            root,
+            BackgroundRemovalEvidence,
+            "Meitu Background Removal evidence",
+            ReadBackgroundRemoval);
+        if (backgroundRemoval.IsFailure)
+        {
+            return OperationResult.Fail<MeituBaseline>(backgroundRemoval.Failure);
+        }
+
         return OperationResult.Ok(new MeituBaseline(
             executablePath,
             digest,
@@ -158,7 +168,8 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
             editorEmpty.Value,
             closeDocument.Value,
             enhancement.Value,
-            export.Value));
+            export.Value,
+            backgroundRemoval.Value));
     }
 
     private const string StartPageCardEvidence = @"apps\meitu\start-page-card-target.json";
@@ -168,6 +179,7 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
     private const string CloseDocumentEvidence = @"apps\meitu\editor-close-document.json";
     private const string EnhancementEvidence = @"apps\meitu\editor-enhancement.json";
     private const string ExportEvidence = @"apps\meitu\editor-export.json";
+    private const string BackgroundRemovalEvidence = @"apps\meitu\editor-background-removal.json";
 
     /// <summary>
     /// Reads one optional evidence file the preset may or may not vouch for.
@@ -490,6 +502,133 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
         return OperationResult.Ok(new MeituOwnedControlShape(
             required[0]!, required[1]!, required[2]!, required[3]!, required[4]!, required[5]!,
             required[6]!, depth, pattern));
+    }
+
+    private static OperationResult<MeituBackgroundRemovalSignature> ReadBackgroundRemoval(JsonElement root)
+    {
+        if (!root.TryGetProperty("backgroundRemoval", out JsonElement removal) ||
+            removal.ValueKind != JsonValueKind.Object)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Background Removal evidence declares no backgroundRemoval object.");
+        }
+
+        string? actionMarker = StringOrNull(removal, "actionMarkerName");
+        string? returnMarker = StringOrNull(removal, "returnMarkerName");
+        string? modeName = StringOrNull(removal, "observedAutomaticModeName");
+        if (string.IsNullOrWhiteSpace(actionMarker) || string.IsNullOrWhiteSpace(returnMarker) ||
+            string.IsNullOrWhiteSpace(modeName))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Background Removal evidence does not name its entry, return control and " +
+                "observed automatic mode.");
+        }
+
+        if (!removal.TryGetProperty("actionControl", out JsonElement action) ||
+            !removal.TryGetProperty("returnControl", out JsonElement returnControl))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Background Removal evidence does not declare both structural page controls.");
+        }
+
+        OperationResult<MeituOwnedControlShape> actionShape = ReadBackgroundControlShape(action);
+        if (actionShape.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(actionShape.Failure);
+        }
+
+        OperationResult<MeituOwnedControlShape> returnShape = ReadBackgroundControlShape(returnControl);
+        if (returnShape.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(returnShape.Failure);
+        }
+
+        if (!string.Equals(
+                StringOrNull(removal, "modePolicy"),
+                "OPERATOR_OR_REVIEWED_CONTENT_DECISION",
+                StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Background Removal evidence does not preserve the signed " +
+                "OPERATOR_OR_REVIEWED_CONTENT_DECISION mode policy.");
+        }
+
+        if (!removal.TryGetProperty("autoStartsOnEntry", out JsonElement autoStart) ||
+            autoStart.ValueKind is not (JsonValueKind.True or JsonValueKind.False) ||
+            !autoStart.GetBoolean())
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The live C1 route auto-starts on entry; evidence that does not state that fact is refused.");
+        }
+
+        OperationResult<MeituBusySignature> busy = ReadBusy(removal);
+        if (busy.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(busy.Failure);
+        }
+
+        OperationResult<MeituCompletionSignature> completion = ReadCompletion(removal);
+        return completion.IsFailure
+            ? OperationResult.Fail<MeituBackgroundRemovalSignature>(completion.Failure)
+            : OperationResult.Ok(new MeituBackgroundRemovalSignature(
+                actionMarker,
+                actionShape.Value,
+                returnMarker,
+                returnShape.Value,
+                modeName,
+                MeituBackgroundRemovalModePolicy.OperatorOrReviewedContentDecision,
+                AutoStartsOnEntry: true,
+                busy.Value,
+                completion.Value));
+    }
+
+    private static OperationResult<MeituOwnedControlShape> ReadBackgroundControlShape(JsonElement control)
+    {
+        string[] propertyNames =
+        [
+            "markerControlType", "markerClassName", "markerAutomationIdSuffix",
+            "ownerControlType", "ownerClassName", "ownerAutomationIdSuffix",
+            "markerRelativeAutomationIdSuffix"
+        ];
+        string[] values = new string[propertyNames.Length];
+        for (int index = 0; index < propertyNames.Length; index++)
+        {
+            if (!control.TryGetProperty(propertyNames[index], out JsonElement value) ||
+                value.ValueKind != JsonValueKind.String || value.GetString() is not { } text)
+            {
+                return OperationResult.Fail<MeituOwnedControlShape>(
+                    FailureCode.EnvironmentNotVerified,
+                    $"The Background Removal control is missing '{propertyNames[index]}'.");
+            }
+
+            values[index] = text;
+        }
+
+        if (!control.TryGetProperty("ownerAncestorDepth", out JsonElement depthElement) ||
+            !depthElement.TryGetInt32(out int depth) || depth < 0 || depth > 4)
+        {
+            return OperationResult.Fail<MeituOwnedControlShape>(
+                FailureCode.EnvironmentNotVerified,
+                "The Background Removal control has no fixed ownerAncestorDepth between 0 and 4.");
+        }
+
+        if (!Enum.TryParse(
+                StringOrNull(control, "requiredOwnerPattern"),
+                ignoreCase: false,
+                out UiPatternKind pattern))
+        {
+            return OperationResult.Fail<MeituOwnedControlShape>(
+                FailureCode.EnvironmentNotVerified,
+                "The Background Removal control requires an unknown UIA pattern.");
+        }
+
+        return OperationResult.Ok(new MeituOwnedControlShape(
+            values[0], values[1], values[2], values[3], values[4], values[5], values[6], depth, pattern));
     }
 
     private static OperationResult<MeituBusySignature> ReadBusy(JsonElement enhancement)

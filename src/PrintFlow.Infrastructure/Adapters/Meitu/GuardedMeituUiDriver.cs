@@ -184,6 +184,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 FindEditorCloseDocumentControl(target, window.Value.Handle),
             KnownMeituElement.EditorEnhancementAction =>
                 FindEditorEnhancementAction(target, window.Value.Handle),
+            KnownMeituElement.EditorBackgroundRemovalAction =>
+                FindEditorBackgroundRemovalAction(target, window.Value.Handle),
+            KnownMeituElement.EditorBackgroundRemovalReturn =>
+                FindEditorBackgroundRemovalReturn(target, window.Value.Handle),
 
             // The export controls exist, but not here. Every one of them lives on a surface the
             // editor raises — Meitu's owned Save panel, or the destination dialog — and resolving
@@ -430,6 +434,94 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 target, window, signature.Value.ActionMarkerName, signature.Value.ActionControl);
     }
 
+    private OperationResult<UiElementRef> FindEditorBackgroundRemovalAction(
+        MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituBackgroundRemovalSignature> signature = BackgroundRemovalSignature();
+        return signature.IsFailure
+            ? OperationResult.Fail<UiElementRef>(signature.Failure)
+            : FindBackgroundRemovalOwner(
+                target,
+                window,
+                signature.Value.ActionMarkerName,
+                signature.Value.ActionControl);
+    }
+
+    private OperationResult<UiElementRef> FindEditorBackgroundRemovalReturn(
+        MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituBackgroundRemovalSignature> signature = BackgroundRemovalSignature();
+        return signature.IsFailure
+            ? OperationResult.Fail<UiElementRef>(signature.Failure)
+            : FindBackgroundRemovalOwner(
+                target,
+                window,
+                signature.Value.ReturnMarkerName,
+                signature.Value.ReturnControl);
+    }
+
+    private OperationResult<UiElementRef> FindBackgroundRemovalOwner(
+        MeituTarget target,
+        WindowHandle window,
+        string markerName,
+        MeituOwnedControlShape shape)
+    {
+        if (shape.OwnerAncestorDepth < 0 || shape.OwnerAncestorDepth > 4)
+        {
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                $"The signed Background Removal owner depth {shape.OwnerAncestorDepth} is outside 0..4. " +
+                "Nothing was invoked.");
+        }
+
+        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
+            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        if (markers.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(markers.Failure);
+        }
+
+        List<UiElementRef> owners = [];
+        List<MeituCardCandidate> candidates = [];
+        foreach (UiElementRef marker in markers.Value)
+        {
+            OperationResult<UiElementIdentity> markerIdentity = _elements.Describe(marker);
+            if (markerIdentity.IsFailure)
+            {
+                continue;
+            }
+
+            UiElementRef current = marker;
+            UiElementIdentity? ownerIdentity = markerIdentity.Value;
+            for (int level = 0; level < shape.OwnerAncestorDepth; level++)
+            {
+                OperationResult<UiElementRef> parent = _elements.GetParent(current);
+                if (parent.IsFailure)
+                {
+                    ownerIdentity = null;
+                    break;
+                }
+
+                current = parent.Value;
+                OperationResult<UiElementIdentity> described = _elements.Describe(current);
+                ownerIdentity = described.IsSuccess ? described.Value : null;
+                if (ownerIdentity is null)
+                {
+                    break;
+                }
+            }
+
+            owners.Add(ownerIdentity is null ? marker : current);
+            candidates.Add(new MeituCardCandidate(markerIdentity.Value, ownerIdentity));
+        }
+
+        OperationResult<int> chosen = MeituBackgroundRemovalTargetRule.SelectActionOwner(
+            shape, markerName, target.Process.ProcessId, candidates);
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(owners[chosen.Value]);
+    }
+
     /// <summary>
     /// Resolves a signed text marker to the actionable control that owns it, walking exactly the
     /// number of control-view levels the evidence records (Epic 11300 Part B2A §7, §8).
@@ -525,6 +617,21 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 "The verified evidence chain carries no Enhancement signature, so PrintFlow has no signed " +
                 "description of the control it would invoke, of what Meitu looks like while it works, or " +
                 "of what finishing looks like. Nothing was invoked.");
+    }
+
+    private OperationResult<MeituBackgroundRemovalSignature> BackgroundRemovalSignature()
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalSignature>(baseline.Failure);
+        }
+
+        return baseline.Value.BackgroundRemoval is { } signature
+            ? OperationResult.Ok(signature)
+            : OperationResult.Fail<MeituBackgroundRemovalSignature>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no Background Removal signature. Nothing was invoked.");
     }
 
     /// <summary>Locates a picker control by the automation id the signed evidence records.</summary>
@@ -1625,6 +1732,415 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
         return OperationResult.Ok(new MeituEnhancementOutcome(
             settled.Value, identity, before.Value, busy.Value, complete.Value, after.Value));
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        MeituBackgroundRemovalModeDecision modeDecision,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+
+        OperationResult<MeituBackgroundRemovalSignature> signature = BackgroundRemovalSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(signature.Failure);
+        }
+
+        if (modeDecision != MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(OperationFailure.Create(
+                FailureCode.PreconditionNotMet,
+                "PRODUCT DECISION REQUIRED: Background Removal uses the signed " +
+                "OPERATOR_OR_REVIEWED_CONTENT_DECISION policy. A reviewed-content decision was not " +
+                "supplied, so no Background Removal input was produced.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["modePolicy"] = "OPERATOR_OR_REVIEWED_CONTENT_DECISION",
+                    ["modeDecision"] = modeDecision.ToString(),
+                    ["inputSent"] = "false",
+                }));
+        }
+
+        if (signature.Value.ModePolicy !=
+                MeituBackgroundRemovalModePolicy.OperatorOrReviewedContentDecision ||
+            !signature.Value.AutoStartsOnEntry ||
+            !string.Equals(signature.Value.ObservedAutomaticModeName, "自动选择", StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(
+                FailureCode.EnvironmentNotVerified,
+                "The signed Background Removal mode behaviour does not match the exercised C1 route. " +
+                "Nothing was invoked.");
+        }
+
+        OperationResult<MeituStateSnapshot> before = await ConfirmWorkingCopyIdentityAsync(
+            target, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+        if (before.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(before.Failure);
+        }
+
+        if (before.Value.Observation.ObservedDocumentIdentity is not { Length: > 0 } identity)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(
+                FailureCode.MeituUnknownState,
+                "The pre-action identity probe returned no document-derived value. Nothing was invoked.");
+        }
+
+        OperationResult<MeituTarget> editor = await ReacquireEditorAsync(
+            target, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        if (editor.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(editor.Failure);
+        }
+
+        OperationResult<MeituTarget> invoked = await InvokeBackgroundRemovalAsync(
+            editor.Value,
+            expectedWorkingCopyFileName,
+            identity,
+            signature.Value,
+            cancellationToken).ConfigureAwait(false);
+        if (invoked.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(invoked.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> busy = await AwaitBackgroundRemovalPhaseAsync(
+            invoked.Value,
+            expectedWorkingCopyFileName,
+            identity,
+            signature.Value,
+            MeituBackgroundRemovalPhase.Busy,
+            _options.BackgroundRemovalBusyTimeout,
+            cancellationToken).ConfigureAwait(false);
+        if (busy.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(busy.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> completion = await AwaitBackgroundRemovalPhaseAsync(
+            invoked.Value,
+            expectedWorkingCopyFileName,
+            identity,
+            signature.Value,
+            MeituBackgroundRemovalPhase.Complete,
+            _options.BackgroundRemovalCompletionTimeout,
+            cancellationToken).ConfigureAwait(false);
+        if (completion.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(completion.Failure);
+        }
+
+        OperationResult<MeituTarget> returned = await InvokeBackgroundRemovalReturnAsync(
+            invoked.Value, signature.Value, cancellationToken).ConfigureAwait(false);
+        if (returned.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(returned.Failure);
+        }
+
+        OperationResult<MeituTarget> reacquired = await ReacquireEditorAsync(
+            returned.Value, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        if (reacquired.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(reacquired.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> after = await ConfirmWorkingCopyIdentityAsync(
+            reacquired.Value, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+        if (after.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(after.Failure);
+        }
+
+        if (!string.Equals(
+                after.Value.Observation.ObservedDocumentIdentity,
+                identity,
+                StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                "The document identity changed between Background Removal action and completion. " +
+                "No completion claim is returned.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["identityBefore"] = identity,
+                    ["identityAfter"] = after.Value.Observation.ObservedDocumentIdentity ?? "(missing)",
+                    ["exported"] = "false",
+                    ["revisionCreated"] = "false",
+                }));
+        }
+
+        OperationResult<MeituTarget> settled = await ReacquireEditorAsync(
+            reacquired.Value, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        if (settled.IsFailure)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(settled.Failure);
+        }
+
+        return OperationResult.Ok(new MeituBackgroundRemovalOutcome(
+            settled.Value,
+            identity,
+            modeDecision,
+            signature.Value.ObservedAutomaticModeName,
+            before.Value,
+            busy.Value,
+            completion.Value,
+            after.Value));
+    }
+
+    private async Task<OperationResult<MeituTarget>> InvokeBackgroundRemovalAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        MeituBackgroundRemovalSignature signature,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<MeituTarget> verified = await VerifyTargetAsync(target, cancellationToken)
+            .ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return verified;
+        }
+
+        OperationResult<MeituStateSnapshot> state = await InspectStateCoreAsync(
+            verified.Value,
+            expectedWorkingCopyFileName,
+            observedDocumentIdentity,
+            cancellationToken).ConfigureAwait(false);
+        if (state.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(state.Failure);
+        }
+
+        if (state.Value.State != MeituStartingState.KnownEditorWithExpectedWorkingCopy)
+        {
+            return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Immediately before Background Removal the editor classified as '{state.Value.State}'. " +
+                "Nothing was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        MeituBackgroundRemovalPhase phase = MeituBackgroundRemovalRule.Classify(
+            signature, state.Value.Observation);
+        if (phase != MeituBackgroundRemovalPhase.Unobserved)
+        {
+            return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                phase == MeituBackgroundRemovalPhase.Busy
+                    ? "Background Removal is already processing; a second invocation is refused."
+                    : "A Background Removal result panel is already present; it is not proof of work on " +
+                      "this load and the page entry will not be invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["phase"] = phase.ToString(),
+                    ["inputSent"] = "false",
+                }));
+        }
+
+        OperationResult<UiElementRef> action = FindKnownElement(
+            verified.Value, KnownMeituElement.EditorBackgroundRemovalAction);
+        if (action.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(action.Failure);
+        }
+
+        OperationResult<MeituTarget> stillOurs = await VerifyTargetAsync(
+            verified.Value, cancellationToken).ConfigureAwait(false);
+        if (stillOurs.IsFailure)
+        {
+            return stillOurs;
+        }
+
+        OperationResult<Unit> sent = _elements.Invoke(action.Value);
+        return sent.IsFailure
+            ? OperationResult.Fail<MeituTarget>(sent.Failure)
+            : OperationResult.Ok(stillOurs.Value);
+    }
+
+    private async Task<OperationResult<MeituTarget>> InvokeBackgroundRemovalReturnAsync(
+        MeituTarget target,
+        MeituBackgroundRemovalSignature signature,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<MeituTarget> verified = await ReacquireForegroundAsync(
+            target, cancellationToken).ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return verified;
+        }
+
+        OperationResult<MeituStateSnapshot> snapshot = await InspectStateCoreAsync(
+            verified.Value, expectedWorkingCopyFileName: null, observedDocumentIdentity: null,
+            cancellationToken).ConfigureAwait(false);
+        if (snapshot.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(snapshot.Failure);
+        }
+
+        if (snapshot.Value.State == MeituStartingState.KnownModal ||
+            MeituBackgroundRemovalRule.Classify(signature, snapshot.Value.Observation) !=
+                MeituBackgroundRemovalPhase.Complete)
+        {
+            return OperationResult.Fail<MeituTarget>(
+                FailureCode.MeituUnknownState,
+                "The positive Background Removal completion surface is no longer present, so the signed " +
+                "return action was not invoked.");
+        }
+
+        OperationResult<UiElementRef> action = FindKnownElement(
+            verified.Value, KnownMeituElement.EditorBackgroundRemovalReturn);
+        if (action.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(action.Failure);
+        }
+
+        OperationResult<MeituTarget> stillOurs = await VerifyTargetAsync(
+            verified.Value, cancellationToken).ConfigureAwait(false);
+        if (stillOurs.IsFailure)
+        {
+            return stillOurs;
+        }
+
+        OperationResult<Unit> sent = _elements.Invoke(action.Value);
+        return sent.IsFailure
+            ? OperationResult.Fail<MeituTarget>(sent.Failure)
+            : OperationResult.Ok(stillOurs.Value);
+    }
+
+    private async Task<OperationResult<MeituStateSnapshot>> AwaitBackgroundRemovalPhaseAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        MeituBackgroundRemovalSignature signature,
+        MeituBackgroundRemovalPhase wanted,
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
+        MeituBackgroundRemovalPhase last = MeituBackgroundRemovalPhase.Unobserved;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OperationResult<MeituStateSnapshot> snapshot = ReadBackgroundRemovalPhaseSnapshot(
+                target,
+                expectedWorkingCopyFileName,
+                observedDocumentIdentity,
+                signature);
+            if (snapshot.IsFailure)
+            {
+                return snapshot;
+            }
+
+            if (snapshot.Value.State == MeituStartingState.KnownModal)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(
+                    FailureCode.MeituBlockingDialog,
+                    "A Meitu-owned modal appeared during Background Removal. It was not dismissed and no " +
+                    "further input was produced.");
+            }
+
+            last = MeituBackgroundRemovalRule.Classify(signature, snapshot.Value.Observation);
+            if (last == wanted)
+            {
+                if (wanted == MeituBackgroundRemovalPhase.Busy)
+                {
+                    return snapshot;
+                }
+
+                // Completion controls persist, unlike the short-lived progress messages. Once
+                // the fast signed-marker read sees them, take the ordinary full observation so
+                // the returned evidence still includes the editor state and modal checks.
+                OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
+                    target,
+                    expectedWorkingCopyFileName,
+                    observedDocumentIdentity,
+                    cancellationToken).ConfigureAwait(false);
+                if (full.IsFailure)
+                {
+                    return full;
+                }
+
+                if (MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation) == wanted)
+                {
+                    return full;
+                }
+
+                last = MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation);
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                    FailureCode.MeituUnknownState,
+                    $"Meitu did not reach the signed Background Removal '{wanted}' state within " +
+                    $"{timeout.TotalSeconds:0} s; last phase was '{last}'. No export or Revision exists.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["wantedPhase"] = wanted.ToString(),
+                        ["lastPhase"] = last.ToString(),
+                        ["exported"] = "false",
+                        ["revisionCreated"] = "false",
+                    }));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private OperationResult<MeituStateSnapshot> ReadBackgroundRemovalPhaseSnapshot(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        MeituBackgroundRemovalSignature signature)
+    {
+        OperationResult<ExternalWindowRef> window = RefreshOwnedWindow(target);
+        if (window.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(window.Failure);
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+            _locator.FindOwnedDialogs(target.Process, window.Value);
+        if (dialogs.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(dialogs.Failure);
+        }
+
+        string[] markers =
+        [
+            .. signature.Busy.RequiredMarkers,
+            .. signature.Completion.RequiredMarkers,
+        ];
+        OperationResult<IReadOnlyList<string>> texts =
+            _elements.ReadMatchingTextSnapshot(window.Value.Handle, markers);
+        if (texts.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(texts.Failure);
+        }
+
+        MeituObservation observation = new(
+            window.Value.Title,
+            [.. texts.Value],
+            [.. dialogs.Value.Select(dialog => dialog.Title)],
+            window.Value.IsEnabled,
+            expectedWorkingCopyFileName,
+            observedDocumentIdentity);
+        MeituBackgroundRemovalPhase phase = MeituBackgroundRemovalRule.Classify(signature, observation);
+        MeituStartingState state = !window.Value.IsEnabled || dialogs.Value.Count > 0
+            ? MeituStartingState.KnownModal
+            : phase == MeituBackgroundRemovalPhase.Busy
+                ? MeituStartingState.Busy
+                : MeituStartingState.Unknown;
+        return OperationResult.Ok(new MeituStateSnapshot(state, [], observation));
     }
 
     /// <summary>

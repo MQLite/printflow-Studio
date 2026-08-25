@@ -35,6 +35,12 @@ public enum KnownMeituElement
     /// <summary>The loaded editor's structurally derived Enhancement control.</summary>
     EditorEnhancementAction,
 
+    /// <summary>The loaded editor's signed 抠图 page entry.</summary>
+    EditorBackgroundRemovalAction,
+
+    /// <summary>The signed 调整 page used to re-establish the ordinary editor after cutout.</summary>
+    EditorBackgroundRemovalReturn,
+
     /// <summary>The file-name field of the owned Save surface, which carries the output base name.</summary>
     ExportFileNameField,
 
@@ -193,6 +199,16 @@ public interface IMeituUiDriver
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Runs the C1 Background Removal action through Busy and positive completion, then returns
+    /// to the ordinary editor and reconfirms exact document identity. Produces no file.
+    /// </summary>
+    Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        MeituBackgroundRemovalModeDecision modeDecision,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Returns the loaded editor to its signed empty state through the signed close control.
     /// </summary>
     /// <remarks>
@@ -331,3 +347,14 @@ public sealed record MeituEnhancementOutcome(
     MeituStateSnapshot Busy,
     MeituStateSnapshot Completion,
     MeituStateSnapshot IdentityAfterEnhancement);
+
+/// <summary>What one guarded C1 Background Removal run positively observed.</summary>
+public sealed record MeituBackgroundRemovalOutcome(
+    MeituTarget Target,
+    string ObservedDocumentIdentity,
+    MeituBackgroundRemovalModeDecision ModeDecision,
+    string ObservedAutomaticModeName,
+    MeituStateSnapshot IdentityBeforeAction,
+    MeituStateSnapshot Busy,
+    MeituStateSnapshot Completion,
+    MeituStateSnapshot IdentityAfterCompletion);

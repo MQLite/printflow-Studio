@@ -82,7 +82,8 @@ public sealed record MeituBaseline(
     MeituEditorSignature? EditorEmpty = null,
     MeituCloseDocumentSignature? CloseDocument = null,
     MeituEnhancementSignature? Enhancement = null,
-    MeituExportSignature? Export = null)
+    MeituExportSignature? Export = null,
+    MeituBackgroundRemovalSignature? BackgroundRemoval = null)
 {
     /// <summary>The loaded-editor portion of the signed identity evidence.</summary>
     public MeituEditorSignature? EditorWithWorkingCopy => DocumentIdentity?.Editor;
@@ -308,6 +309,24 @@ public sealed record MeituCompletionSignature(
     ImmutableArray<string> RequiredMarkers,
     int MinimumRequiredMarkers,
     bool RequiresBusyAbsent);
+
+/// <summary>The signed C1 route that enters and leaves Meitu's live 抠图 page.</summary>
+public sealed record MeituBackgroundRemovalSignature(
+    string ActionMarkerName,
+    MeituOwnedControlShape ActionControl,
+    string ReturnMarkerName,
+    MeituOwnedControlShape ReturnControl,
+    string ObservedAutomaticModeName,
+    MeituBackgroundRemovalModePolicy ModePolicy,
+    bool AutoStartsOnEntry,
+    MeituBusySignature Busy,
+    MeituCompletionSignature Completion);
+
+/// <summary>Product authority governing the automatic cutout mode.</summary>
+public enum MeituBackgroundRemovalModePolicy
+{
+    OperatorOrReviewedContentDecision,
+}
 
 /// <summary>
 /// The signed route that gets a finished result out of Meitu and onto a path PrintFlow chose

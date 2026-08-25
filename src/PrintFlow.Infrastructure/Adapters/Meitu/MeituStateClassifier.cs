@@ -66,6 +66,13 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.Busy, matched, observation);
         }
 
+        if (baseline.BackgroundRemoval is { } backgroundRemoval &&
+            MeituBackgroundRemovalRule.Classify(backgroundRemoval, observation) ==
+                MeituBackgroundRemovalPhase.Busy)
+        {
+            return new MeituStateSnapshot(MeituStartingState.Busy, matched, observation);
+        }
+
         // 4. The working copy PrintFlow handed over, identified by the name PrintFlow chose and
         //    only on the screen the signed editor evidence describes. Three things must hold
         //    together: the editor's exact title, enough of its positive markers, and the

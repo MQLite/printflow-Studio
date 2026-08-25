@@ -700,6 +700,40 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         h.Input.Sends.ShouldBeEmpty();
     }
 
+    [Theory]
+    [InlineData(WorkspaceArea.Source)]
+    [InlineData(WorkspaceArea.Approved)]
+    [InlineData(WorkspaceArea.Rejected)]
+    public async Task Background_Removal_C1_refuses_anything_that_is_not_a_Working_copy(
+        WorkspaceArea area)
+    {
+        Harness h = Build();
+        ExternalProcessRef process = Process();
+        ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
+        h.Locator.Register(process, window);
+
+        WorkspaceFileRef reference = WorkspaceFileRef.Create($"Sessions/S_1/{area}/a.png", area);
+        MeituOpenedWorkingCopy opened = new(
+            new MeituTarget(process, window),
+            new MeituStateSnapshot(
+                MeituStartingState.KnownEditorWithExpectedWorkingCopy,
+                [],
+                new MeituObservation(MeituFakes.EditorTitle, [], [], true, "a.png", "a_副本")),
+            MeituFakes.QuietLoad());
+
+        OperationResult<MeituBackgroundRemovalOutcome> run =
+            await h.Adapter.RemoveBackgroundAsync(
+                opened,
+                reference,
+                MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+                CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     /// <summary>
     /// A confirmed open does not license an Enhancement without re-establishing identity.
     /// </summary>
