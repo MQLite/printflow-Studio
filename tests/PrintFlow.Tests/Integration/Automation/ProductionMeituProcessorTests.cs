@@ -3,6 +3,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
 using FileWorkspace = PrintFlow.Infrastructure.Workspace.FileWorkspace;
@@ -85,7 +86,8 @@ public sealed class ProductionMeituProcessorTests : IDisposable
 
         IWorkspace workspace = new FileWorkspace(_workspace.Root);
         ProductionMeituProcessor adapter = new(
-            baselines, locator, driver, workspace, FastOptions, TimeProvider.System);
+            baselines, locator, driver, workspace, new WicFileInspector(),
+            new FileSystemMeituOutputProbe(), FastOptions, TimeProvider.System);
 
         return new Harness(adapter, locator, elements, input, evidence, workspace);
     }
@@ -98,30 +100,84 @@ public sealed class ProductionMeituProcessorTests : IDisposable
     // -----------------------------------------------------------------------------
 
     /// <summary>
-    /// Opening a file is not processing, and the adapter says so.
+    /// Background removal is still refused before Meitu is touched at all
+    /// (Epic 11300 Part B2B §27).
     /// </summary>
     /// <remarks>
-    /// The single most important assertion in this file. If <c>ProcessAsync</c> could return a
-    /// success, a Revision would be created for an image nothing had enhanced — the "pretend
-    /// opened means succeeded" failure §24 exists to rule out.
+    /// Enhancement can now succeed, which makes this the assertion that keeps the slice a slice.
+    /// The refusal is unconditional and comes first, so an operation this adapter has no signed
+    /// route for cannot reach a window, a control or a file — and the failure names the adapter,
+    /// so a Revision that should never exist has an operator-readable reason for not existing.
     /// </remarks>
-    [Theory]
-    [InlineData(MeituOperation.Enhance)]
-    [InlineData(MeituOperation.RemoveBackground)]
-    public async Task The_workflow_seam_always_fails_because_no_operation_is_automated_yet(
-        MeituOperation operation)
+    [Fact]
+    public async Task The_workflow_seam_still_refuses_background_removal_outright()
     {
         Harness h = Build();
         WorkspaceDirRef sessionDir = WorkspaceDirRef.Create("Sessions/S_1");
-        WorkspaceFileRef file = WorkspaceFileRef.Create("Sessions/S_1/Working/a.png", WorkspaceArea.Working);
+        WorkspaceFileRef input = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
+        WorkspaceFileRef output = WorkspaceFileRef.Create(
+            "Sessions/S_1/Working/A_1/a_CUTOUT.png", WorkspaceArea.Working);
 
         OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
-            new MeituRequest(file, operation, sessionDir, file), CancellationToken.None);
+            new MeituRequest(input, MeituOperation.RemoveBackground, sessionDir, output),
+            CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
         result.Failure.Code.ShouldBe(FailureCode.AdapterUnavailable);
         result.Failure.IsRetryable.ShouldBeFalse();
         result.Failure.Context["adapterId"].ShouldBe("meitu-xiuxiu-production-v1");
+
+        // Refused before anything at all: no window was looked at, nothing was invoked.
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// An Enhancement whose expected output is its own input is refused before Meitu is touched
+    /// (Epic 11300 Part B2B §19).
+    /// </summary>
+    /// <remarks>
+    /// This is the exact request shape the workflow used to send, and the reason it had to
+    /// change. Exporting over the working copy would destroy the bytes the attempt validates its
+    /// result against — and it would do it silently, because the file would still exist, still
+    /// be a readable PNG, and still hash to something.
+    /// </remarks>
+    [Fact]
+    public async Task Enhancement_refuses_to_export_over_its_own_working_copy()
+    {
+        Harness h = Build();
+        WorkspaceDirRef sessionDir = WorkspaceDirRef.Create("Sessions/S_1");
+        WorkspaceFileRef file = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
+
+        OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
+            new MeituRequest(file, MeituOperation.Enhance, sessionDir, file), CancellationToken.None);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// A result may only be written into the Working area (Epic 11300 Part B2B §7).
+    /// </summary>
+    [Theory]
+    [InlineData(WorkspaceArea.Source)]
+    [InlineData(WorkspaceArea.Approved)]
+    [InlineData(WorkspaceArea.Rejected)]
+    public async Task Enhancement_refuses_to_export_outside_the_Working_area(WorkspaceArea area)
+    {
+        Harness h = Build();
+        WorkspaceDirRef sessionDir = WorkspaceDirRef.Create("Sessions/S_1");
+        WorkspaceFileRef input = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
+        WorkspaceFileRef output = WorkspaceFileRef.Create($"Sessions/S_1/{area}/a_HD.png", area);
+
+        OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
+            new MeituRequest(input, MeituOperation.Enhance, sessionDir, output), CancellationToken.None);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        h.Elements.Invocations.ShouldBeEmpty();
     }
 
     [Fact]
@@ -377,6 +433,8 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
         ExternalWindowRef dialog = MeituFakes.Window(
             handle: 0x2000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef saveDialog = MeituFakes.Window(
+            handle: 0x6000, owningProcessId: process.ProcessId, title: "Form", className: "QtSaveDialog");
         // Only the start page exists to begin with; the editor and the picker appear as they are
         // asked for, below.
         h.Locator.Register(process, window);
@@ -391,6 +449,13 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         h.Elements.AddEditorOpenControl(editor.Handle, process.ProcessId);
         h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit", processId: process.ProcessId);
         h.Elements.AddDialogControl(dialog.Handle, "1", "Button", processId: process.ProcessId);
+        h.Elements.AddIdentityDialogControl(
+            saveDialog.Handle, "MainWindow.wName.fileNameEdit", "", "Edit", "QLineEdit",
+            UiPatternKind.Value, process.ProcessId);
+        h.Elements.AddIdentityDialogControl(
+            saveDialog.Handle, "MainWindow.titleFrame.closeButton", "\uE0E6", "Button", "IconFontButton",
+            UiPatternKind.Invoke, process.ProcessId);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "working_副本");
 
         WorkspaceFileRef working = WorkspaceFileRef.Create(
             "Sessions/S_1/Working/A_1/working.png", WorkspaceArea.Working);
@@ -415,7 +480,18 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             }
             else if (invoked == "1")
             {
-                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers, "working.png"]);
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+                h.Elements.AddEditorSaveControl(editor.Handle, process.ProcessId);
+            }
+            else if (invoked.EndsWith(".saveButton", StringComparison.Ordinal))
+            {
+                h.Locator.OwnedDialogs.Add(saveDialog);
+                h.Locator.PutInForeground(saveDialog);
+            }
+            else if (invoked.EndsWith(".titleFrame.closeButton", StringComparison.Ordinal))
+            {
+                h.Locator.OwnedDialogs.Remove(saveDialog);
+                h.Locator.PutInForeground(editor);
             }
         };
 
@@ -426,6 +502,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         opened.Value.State.State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
         h.Elements.ValueWrites.ShouldHaveSingleItem();
         h.Elements.ValueWrites[0].Value.ShouldBe(absolute);
+        Directory.EnumerateFiles(Path.GetDirectoryName(absolute)!).ShouldHaveSingleItem().ShouldBe(absolute);
     }
 
     [Fact]
@@ -469,7 +546,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
     [Fact]
     public async Task An_open_that_cannot_be_confirmed_by_identity_is_refused_not_claimed()
     {
-        Harness h = Build(MeituFakes.BaselineWithout(editorWithWorkingCopy: true) with
+        Harness h = Build(MeituFakes.BaselineWithout(documentIdentity: true) with
         {
             ExecutablePath = _executablePath,
             ExecutableSha256 = _executableSha256,
@@ -535,7 +612,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
     /// stated in code.
     /// </remarks>
     [Fact]
-    public async Task A_confirmation_that_never_arrives_is_a_failure()
+    public async Task A_loaded_editor_signature_that_never_arrives_is_a_failure_before_Save()
     {
         Harness h = Build();
         ExternalProcessRef process = Process();
@@ -578,6 +655,119 @@ public sealed class ProductionMeituProcessorTests : IDisposable
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
-        opened.Failure.TechnicalDetail.ShouldContain("nothing is claimed about it");
+        opened.Failure.TechnicalDetail.ShouldContain("Save was not invoked");
+        h.Elements.Invocations.ShouldNotContain("MainWindow.editorPage.saveButton");
+    }
+
+    // -----------------------------------------------------------------------------
+    // The Enhancement seam (Part B2A §16, §20)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// Enhancement refuses anything that is not a Working copy, before it touches Meitu.
+    /// </summary>
+    /// <remarks>
+    /// The same boundary as the open path, restated at the point that reaches an irreversible
+    /// action. "The caller already checked" is exactly the reasoning that lets a Source or
+    /// Approved reference through once a second way in exists.
+    /// </remarks>
+    [Theory]
+    [InlineData(WorkspaceArea.Source)]
+    [InlineData(WorkspaceArea.Approved)]
+    [InlineData(WorkspaceArea.Rejected)]
+    public async Task Enhancement_refuses_anything_that_is_not_a_Working_copy(WorkspaceArea area)
+    {
+        Harness h = Build();
+        ExternalProcessRef process = Process();
+        ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
+        h.Locator.Register(process, window);
+
+        WorkspaceFileRef reference = WorkspaceFileRef.Create($"Sessions/S_1/{area}/a.png", area);
+        MeituOpenedWorkingCopy opened = new(
+            new MeituTarget(process, window),
+            new MeituStateSnapshot(
+                MeituStartingState.KnownEditorWithExpectedWorkingCopy,
+                [],
+                new MeituObservation(MeituFakes.EditorTitle, [], [], true, "a.png", "a_副本")),
+            MeituFakes.QuietLoad());
+
+        OperationResult<MeituEnhancementOutcome> run =
+            await h.Adapter.EnhanceAsync(opened, reference, CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// A confirmed open does not license an Enhancement without re-establishing identity.
+    /// </summary>
+    /// <remarks>
+    /// The state <c>OpenWorkingCopyAsync</c> returned is a fact about the past. Here the fake
+    /// Meitu has no Save control at all, so the mandatory pre-Enhancement probe cannot run — and
+    /// the adapter must refuse rather than act on the earlier confirmation.
+    /// </remarks>
+    [Fact]
+    public async Task Enhancement_re_probes_identity_rather_than_trusting_the_confirmed_open()
+    {
+        Harness h = Build();
+        ExternalProcessRef process = Process();
+        ExternalWindowRef editor = MeituFakes.Window(
+            owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+
+        h.Locator.Register(process, editor);
+        h.Locator.PutInForeground(editor);
+        h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+        h.Elements.AddEnhancementAction(editor.Handle, processId: process.ProcessId);
+
+        WorkspaceFileRef working = WorkspaceFileRef.Create(
+            "Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
+        MeituOpenedWorkingCopy opened = new(
+            new MeituTarget(process, editor),
+            new MeituStateSnapshot(
+                MeituStartingState.KnownEditorWithExpectedWorkingCopy,
+                [],
+                new MeituObservation(MeituFakes.EditorTitle, [], [], true, "a.png", "a_副本")),
+            MeituFakes.QuietLoad());
+
+        OperationResult<MeituEnhancementOutcome> run =
+            await h.Adapter.EnhanceAsync(opened, working, CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        h.Elements.Invocations.Count(i => i == MeituFakes.ModuleAutomationId).ShouldBe(0);
+    }
+
+    /// <summary>
+    /// A failed Enhancement attaches local evidence without letting it replace the failure.
+    /// </summary>
+    [Fact]
+    public async Task A_failed_Enhancement_is_reported_with_its_own_failure_not_the_capture_result()
+    {
+        Harness h = Build();
+        h.Evidence.Fails = true;
+
+        ExternalProcessRef process = Process();
+        ExternalWindowRef editor = MeituFakes.Window(
+            owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+        h.Locator.Register(process, editor);
+
+        WorkspaceFileRef working = WorkspaceFileRef.Create(
+            "Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
+        MeituOpenedWorkingCopy opened = new(
+            new MeituTarget(process, editor),
+            new MeituStateSnapshot(
+                MeituStartingState.KnownEditorWithExpectedWorkingCopy,
+                [],
+                new MeituObservation(MeituFakes.EditorTitle, [], [], true, "a.png", "a_副本")),
+            MeituFakes.QuietLoad());
+
+        OperationResult<MeituEnhancementOutcome> run =
+            await h.Adapter.EnhanceAsync(opened, working, CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        run.Failure.Context.ShouldNotContainKey("evidencePath");
+        h.Evidence.Captures.ShouldContain(c => c.Reason == "enhancement-failed");
     }
 }

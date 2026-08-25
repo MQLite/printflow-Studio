@@ -20,12 +20,14 @@ public sealed class MeituStateClassifierTests
         IEnumerable<string>? texts = null,
         IEnumerable<string>? dialogs = null,
         bool enabled = true,
-        string? expectedFile = null) =>
+        string? expectedFile = null,
+        string? observedIdentity = null) =>
         new(title,
             [.. texts ?? []],
             [.. dialogs ?? []],
             enabled,
-            expectedFile);
+            expectedFile,
+            observedIdentity);
 
     private static MeituStateSnapshot Classify(MeituObservation observation) =>
         MeituStateClassifier.Classify(MeituFakes.Baseline(), observation);
@@ -146,19 +148,42 @@ public sealed class MeituStateClassifierTests
     // -----------------------------------------------------------------------------
 
     [Fact]
-    public void The_editor_is_recognised_only_by_the_file_name_PrintFlow_itself_chose()
+    public void The_editor_is_recognised_only_by_the_exact_derived_Save_identity()
     {
         Classify(Observe(
                 title: MeituFakes.EditorTitle,
-                texts: [.. MeituFakes.EditorMarkers, "working_a1.png"],
-                expectedFile: "working_a1.png"))
+                texts: [.. MeituFakes.EditorMarkers],
+                expectedFile: "working_a1.png",
+                observedIdentity: "working_a1_副本"))
             .State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
 
-        // A different document being open proves nothing about PrintFlow's file, so it stops.
         Classify(Observe(
                 title: MeituFakes.EditorTitle,
-                texts: [.. MeituFakes.EditorMarkers, "某位客户的图.png"],
-                expectedFile: "working_a1.png"))
+                texts: [.. MeituFakes.EditorMarkers],
+                expectedFile: "working_a1.png",
+                observedIdentity: "working_b2_副本"))
+            .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    [Fact]
+    public void A_stale_A_value_cannot_validate_current_B()
+    {
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EditorMarkers],
+                expectedFile: "PF_IDENTITY_B.png",
+                observedIdentity: "PF_IDENTITY_A_副本"))
+            .State.ShouldBe(MeituStartingState.Unknown);
+    }
+
+    [Fact]
+    public void An_empty_editor_cannot_validate_an_old_document_identity()
+    {
+        Classify(Observe(
+                title: MeituFakes.EditorTitle,
+                texts: [.. MeituFakes.EmptyEditorMarkers],
+                expectedFile: "PF_IDENTITY_B.png",
+                observedIdentity: "PF_IDENTITY_A_副本"))
             .State.ShouldBe(MeituStartingState.Unknown);
     }
 
@@ -214,8 +239,9 @@ public sealed class MeituStateClassifierTests
     {
         Classify(Observe(
                 title: MeituFakes.EditorTitle + "-批处理",
-                texts: [.. MeituFakes.EditorMarkers, "working_a1.png"],
-                expectedFile: "working_a1.png"))
+                texts: [.. MeituFakes.EditorMarkers],
+                expectedFile: "working_a1.png",
+                observedIdentity: "working_a1_副本"))
             .State.ShouldBe(MeituStartingState.Unknown);
     }
 
@@ -289,5 +315,126 @@ public sealed class MeituStateClassifierTests
     public void The_safe_starting_states_are_an_allow_list(MeituStartingState state, bool expected)
     {
         new MeituStateSnapshot(state, [], Observe()).IsSafeStartingState.ShouldBe(expected);
+    }
+
+    // -----------------------------------------------------------------------------
+    // Busy outranks every content state (Part B2A §13, §23)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// Busy beats the state that would otherwise be the safest one on the screen.
+    /// </summary>
+    /// <remarks>
+    /// This is the whole reason Busy is classified before document identity. While Meitu
+    /// computes, the editor keeps its title, its markers and its document, so an observation
+    /// taken mid-enhancement satisfies <see cref="MeituStartingState.KnownEditorWithExpectedWorkingCopy"/>
+    /// completely — and that state is on the safe-starting-state allow-list. A caller acting on
+    /// it would send input into a running operation.
+    /// </remarks>
+    [Fact]
+    public void Busy_outranks_the_expected_working_copy_it_is_running_over()
+    {
+        MeituBaseline baseline = MeituFakes.Baseline();
+        MeituObservation busy = new(
+            MeituFakes.EditorTitle,
+            [.. MeituFakes.EditorMarkers, .. MeituFakes.BusyMarkers],
+            [],
+            MainWindowEnabled: true,
+            "A.png",
+            ObservedDocumentIdentity: "A_副本");
+
+        MeituStateSnapshot snapshot = MeituStateClassifier.Classify(baseline, busy);
+
+        snapshot.State.ShouldBe(MeituStartingState.Busy);
+        snapshot.IsSafeStartingState.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Busy_outranks_the_signed_empty_editor()
+    {
+        MeituObservation busy = new(
+            MeituFakes.EditorTitle,
+            [.. MeituFakes.EmptyEditorMarkers, .. MeituFakes.BusyMarkers],
+            [],
+            MainWindowEnabled: true,
+            ExpectedWorkingCopyFileName: null);
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), busy).State
+            .ShouldBe(MeituStartingState.Busy);
+    }
+
+    [Fact]
+    public void Busy_outranks_the_signed_welcome_page()
+    {
+        MeituObservation busy = new(
+            "美图秀秀",
+            [.. MeituFakes.WelcomeMarkers, .. MeituFakes.BusyMarkers],
+            [],
+            MainWindowEnabled: true,
+            ExpectedWorkingCopyFileName: null);
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), busy).State
+            .ShouldBe(MeituStartingState.Busy);
+    }
+
+    /// <summary>A blocking dialog still outranks Busy: it is the more restrictive answer.</summary>
+    [Fact]
+    public void A_blocking_dialog_outranks_Busy()
+    {
+        MeituObservation blocked = new(
+            MeituFakes.EditorTitle,
+            [.. MeituFakes.EditorMarkers, .. MeituFakes.BusyMarkers],
+            ["Form"],
+            MainWindowEnabled: false,
+            "A.png");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), blocked).State
+            .ShouldBe(MeituStartingState.KnownModal);
+    }
+
+    /// <summary>
+    /// Without signed enhancement evidence, Busy is unreachable.
+    /// </summary>
+    /// <remarks>
+    /// The Part A and B1 position, kept intact: a chain that has never been shown a processing
+    /// overlay classifies one as <see cref="MeituStartingState.Unknown"/> and stops, rather than
+    /// guessing at what "computing" looks like.
+    /// </remarks>
+    [Fact]
+    public void Without_signed_enhancement_evidence_Busy_is_unreachable()
+    {
+        MeituObservation busy = new(
+            MeituFakes.EditorTitle,
+            [.. MeituFakes.BusyMarkers],
+            [],
+            MainWindowEnabled: true,
+            ExpectedWorkingCopyFileName: null);
+
+        MeituStateClassifier.Classify(MeituFakes.BaselineWithout(enhancement: true), busy).State
+            .ShouldBe(MeituStartingState.Unknown);
+    }
+
+    /// <summary>
+    /// The completion panel on its own is not Busy, and is not a safe state either.
+    /// </summary>
+    /// <remarks>
+    /// After an enhancement finishes, the editor is showing a document and a panel. It classifies
+    /// as the expected working copy — correctly, because that is what it is — and the enhancement
+    /// route's own guard, not the classifier, is what refuses to invoke a module that is already
+    /// selected.
+    /// </remarks>
+    [Fact]
+    public void A_finished_enhancement_is_not_Busy()
+    {
+        MeituObservation finished = new(
+            MeituFakes.EditorTitle,
+            [.. MeituFakes.CompletedTexts()],
+            [],
+            MainWindowEnabled: true,
+            "A.png",
+            ObservedDocumentIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), finished).State
+            .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
     }
 }

@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
@@ -92,7 +93,8 @@ public sealed class ProductionAdapterGateTests
             new RecordingEvidenceSink(), baselines, options, TimeProvider.System);
 
         return new ProductionMeituProcessor(
-            baselines, locator, driver, new FileWorkspace(workspace.Root), options, TimeProvider.System);
+            baselines, locator, driver, new FileWorkspace(workspace.Root), new WicFileInspector(),
+            new FileSystemMeituOutputProbe(), options, TimeProvider.System);
     }
 
     /// <summary>Counts calls that reach the adapter, so "never invoked" is a checkable fact.</summary>

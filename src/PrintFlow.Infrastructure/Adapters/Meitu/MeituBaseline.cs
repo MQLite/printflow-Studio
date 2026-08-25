@@ -34,14 +34,29 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// The signature of the picker the start-page card opens, or <c>null</c> when none has been
 /// observed and signed. Null means the open path stops rather than guessing at a dialog shape.
 /// </param>
-/// <param name="EditorWithWorkingCopy">
-/// The signature that proves the editor is showing a named document, or <c>null</c>. Null
-/// leaves <see cref="MeituStartingState.KnownEditorWithExpectedWorkingCopy"/> unreachable.
+/// <param name="DocumentIdentity">
+/// The signed Save-dialog identity probe, or <c>null</c>. Null leaves
+/// <see cref="MeituStartingState.KnownEditorWithExpectedWorkingCopy"/> unreachable.
 /// </param>
 /// <param name="EditorEmpty">
 /// The signature of the editor with no document loaded, or <c>null</c>. Null leaves
 /// <see cref="MeituStartingState.KnownEditorEmpty"/> unreachable — which is the Part A
 /// position, kept until positive markers for that screen are actually observed (§10, §15).
+/// </param>
+/// <param name="CloseDocument">
+/// The signed route that returns the loaded editor to its empty state, or <c>null</c>. Null
+/// means PrintFlow will not attempt to close a document at all — it will report that the
+/// editor is holding one and leave it to the operator.
+/// </param>
+/// <param name="Enhancement">
+/// The signed Enhancement action, Busy signature and completion signature, or <c>null</c>.
+/// Null leaves <see cref="MeituStartingState.Busy"/> unreachable and every Enhancement route
+/// refused, on the same fail-closed principle as the members above.
+/// </param>
+/// <param name="Export">
+/// The signed route that gets a finished result out of Meitu, or <c>null</c>. Null leaves every
+/// export refused, and an Enhancement PrintFlow cannot export produces no output file — which
+/// in turn leaves <c>ProcessAsync</c> unable to return success and no Revision creatable.
 /// </param>
 /// <remarks>
 /// This record is the adapter's <i>only</i> source of Meitu facts. Nothing in the adapter
@@ -63,8 +78,39 @@ public sealed record MeituBaseline(
     ImmutableArray<string> WelcomeMarkers,
     MeituCardShape? StartPageCard = null,
     MeituFileDialogSignature? FileDialog = null,
-    MeituEditorSignature? EditorWithWorkingCopy = null,
-    MeituEditorSignature? EditorEmpty = null);
+    MeituDocumentIdentitySignature? DocumentIdentity = null,
+    MeituEditorSignature? EditorEmpty = null,
+    MeituCloseDocumentSignature? CloseDocument = null,
+    MeituEnhancementSignature? Enhancement = null,
+    MeituExportSignature? Export = null)
+{
+    /// <summary>The loaded-editor portion of the signed identity evidence.</summary>
+    public MeituEditorSignature? EditorWithWorkingCopy => DocumentIdentity?.Editor;
+}
+
+/// <summary>
+/// The signed, non-writing route that identifies the document currently loaded in Meitu.
+/// </summary>
+/// <param name="Editor">Positive markers for the loaded editor before Save is invoked.</param>
+/// <param name="SaveMarkerName">The exact text marker that anchors the Save control walk.</param>
+/// <param name="SaveControl">The structural relationship from that marker to its owning control.</param>
+/// <param name="DialogTitle">The exact title of the resulting owned Save surface.</param>
+/// <param name="DialogClassName">The exact Win32 class of that surface.</param>
+/// <param name="FileNameControl">The value control that exposes the document-derived basename.</param>
+/// <param name="CancelControl">The only dialog action this probe may invoke.</param>
+/// <param name="OutputBaseNameSuffix">
+/// The exact suffix Meitu appends to the source basename. It is part of an exact derived-value
+/// comparison; it is never removed with a prefix or substring rule.
+/// </param>
+public sealed record MeituDocumentIdentitySignature(
+    MeituEditorSignature Editor,
+    string SaveMarkerName,
+    MeituCardShape SaveControl,
+    string DialogTitle,
+    string DialogClassName,
+    MeituControlSignature FileNameControl,
+    MeituControlSignature CancelControl,
+    string OutputBaseNameSuffix);
 
 /// <summary>
 /// The signature of the file picker Meitu opens, as observed and signed on this workstation
@@ -186,3 +232,170 @@ public interface IMeituBaselineProvider
     /// </remarks>
     OperationResult<MeituBaseline> GetVerifiedBaseline();
 }
+
+/// <summary>
+/// The signed route that returns the loaded editor to its empty state
+/// (Epic 11300 Part B2A §2, §28).
+/// </summary>
+/// <param name="MarkerName">The exact text marker that anchors the close-control walk.</param>
+/// <param name="Control">The structural relationship from that marker to its owning control.</param>
+/// <remarks>
+/// Present because B2A needs the editor emptied twice for reasons that have nothing to do with
+/// tidiness. Before the run, §2 forbids enhancing the document B1.1 left loaded — its backing
+/// file was deleted underneath Meitu — so the editor has to be emptied before a fresh Working
+/// copy can be opened through the signed path. After the run, §28 permits deleting the
+/// synthetic workspace only once Meitu has positively let go of it.
+///
+/// Signed rather than assumed, and structural rather than by name, for the same reason as
+/// every other control in this adapter: 关闭图片 names a <c>QLabel</c>, and the thing that
+/// actually closes the document is the <c>IconTextButton</c> that owns it.
+/// </remarks>
+public sealed record MeituCloseDocumentSignature(string MarkerName, MeituCardShape Control);
+
+/// <summary>
+/// The signed Enhancement route: which control performs it, what Meitu looks like while it is
+/// running, and what positively says it has finished (Epic 11300 Part B2A §8, §9, §13, §14).
+/// </summary>
+/// <param name="ActionMarkerName">The exact text marker that anchors the action walk.</param>
+/// <param name="ActionControl">The structural relationship from that marker to the invokable control.</param>
+/// <param name="Busy">Positive markers for Meitu computing.</param>
+/// <param name="Completion">Positive markers for Meitu having finished.</param>
+/// <remarks>
+/// The three parts are separate because they are three separate claims, each of which had to be
+/// observed live before it could be signed. Bundling them into one "enhancement works" flag
+/// would let an unproven completion rule ride into production on the strength of a proven
+/// target rule.
+/// </remarks>
+public sealed record MeituEnhancementSignature(
+    string ActionMarkerName,
+    MeituOwnedControlShape ActionControl,
+    MeituBusySignature Busy,
+    MeituCompletionSignature Completion);
+
+/// <summary>
+/// Positive markers that identify Meitu as computing (Epic 11300 Part B2A §12, §13).
+/// </summary>
+/// <param name="RequiredMarkers">Automation names observed only while processing is in flight.</param>
+/// <param name="MinimumRequiredMarkers">How many of them must be visible.</param>
+/// <remarks>
+/// Positive, and deliberately not "the editor stopped looking normal". Busy outranks every
+/// content state in <see cref="MeituStateClassifier"/>, so a Busy rule phrased as an absence
+/// would suppress document recognition on any read that happened to come back thin — turning a
+/// flaky automation read into a claim that Meitu is working.
+/// </remarks>
+public sealed record MeituBusySignature(
+    ImmutableArray<string> RequiredMarkers,
+    int MinimumRequiredMarkers);
+
+/// <summary>
+/// Positive markers that identify Enhancement as finished (Epic 11300 Part B2A §14).
+/// </summary>
+/// <param name="RequiredMarkers">Automation names Meitu shows only after the result exists.</param>
+/// <param name="MinimumRequiredMarkers">How many of them must be visible.</param>
+/// <param name="RequiresBusyAbsent">
+/// Whether the Busy signature must additionally have stopped matching. Recorded rather than
+/// assumed, because whether the two states can legitimately overlap is a property of the
+/// application, not of PrintFlow.
+/// </param>
+/// <remarks>
+/// §14 is explicit that "Busy disappeared" is not completion, and this record is the shape that
+/// makes obeying it structural rather than a matter of remembering. There is no constructor
+/// that produces a completion signature with no positive markers:
+/// <see cref="MeituEnhancementRule"/> refuses an empty marker list, so the only way to reach a
+/// completion verdict is through something Meitu positively showed.
+/// </remarks>
+public sealed record MeituCompletionSignature(
+    ImmutableArray<string> RequiredMarkers,
+    int MinimumRequiredMarkers,
+    bool RequiresBusyAbsent);
+
+/// <summary>
+/// The signed route that gets a finished result out of Meitu and onto a path PrintFlow chose
+/// (Epic 11300 Part B2B §5, §6, §8, §11, §12).
+/// </summary>
+/// <param name="SurfaceTitle">The exact title of the owned Save surface the editor's Save control raises.</param>
+/// <param name="SurfaceClassName">The exact Win32 class of that surface.</param>
+/// <param name="FileNameControl">The value control carrying the output base name, without extension.</param>
+/// <param name="FormatControl">The value control carrying the output format.</param>
+/// <param name="RequiredFormatValue">
+/// The exact value <see cref="FormatControl"/> must read before anything is invoked. Not
+/// inferred from the file name's extension: this surface has a format selector of its own, and
+/// §11 requires the format to be positively confirmed or the export to fail closed.
+/// </param>
+/// <param name="SaveAsControl">The control that opens the destination dialog.</param>
+/// <param name="Destination">The dialog in which the controlled destination is actually named.</param>
+/// <param name="Result">Meitu's own post-save confirmation surface.</param>
+/// <remarks>
+/// The member that is <b>absent</b> here is the important one. The Save surface also exposes a
+/// <c>folderEdit</c> <c>QLineEdit</c> showing the destination directory, and PrintFlow does not
+/// use it — see <see cref="MeituExportDestinationSignature"/> for the live observation that ruled
+/// it out. There is deliberately no signature member for it, so no future caller can reach for
+/// it without adding evidence and a reason first.
+/// </remarks>
+public sealed record MeituExportSignature(
+    string SurfaceTitle,
+    string SurfaceClassName,
+    MeituControlSignature FileNameControl,
+    MeituControlSignature FormatControl,
+    string RequiredFormatValue,
+    MeituControlSignature SaveAsControl,
+    MeituExportDestinationSignature Destination,
+    MeituExportResultSignature Result);
+
+/// <summary>
+/// The dialog in which the export's destination directory is named
+/// (Epic 11300 Part B2B §6, §10).
+/// </summary>
+/// <param name="WindowClassName">The dialog's Win32 class.</param>
+/// <param name="AcceptedTitles">Titles observed for it. Corroborating evidence, never the authority.</param>
+/// <param name="FileNameAutomationId">The automation id of the field the full path is written to.</param>
+/// <param name="FileNameControlType">That field's control type, which is what makes the match unique.</param>
+/// <param name="ConfirmAutomationId">The automation id of the control that writes the file.</param>
+/// <param name="ConfirmControlType">That control's control type.</param>
+/// <param name="CancelAutomationId">The automation id of the control that backs out writing nothing.</param>
+/// <param name="CancelControlType">That control's control type.</param>
+/// <remarks>
+/// This dialog exists in the route because of a live observation that a read-back check did not
+/// catch, and it is worth recording next to the thing it disproves. Invoking 保存 on the Save
+/// surface writes the file named by <c>fileNameEdit</c> in the format named by
+/// <c>formatCombo</c> — both of which a value write does control — into the directory Meitu
+/// remembers, <b>not</b> the one <c>folderEdit</c> displays. A value written to
+/// <c>folderEdit</c> is accepted, reads back exactly, and changes nothing: the export landed in
+/// the operator's Downloads folder while the field read the controlled path.
+///
+/// So the destination is named here instead, in a Windows common dialog whose file-name field
+/// takes a full path — the same shape, and the same delivery mechanism, as the open picker
+/// Part B1 already drives. §8's read-back rule is kept for every value this route writes; what
+/// this record encodes is that read-back alone was not sufficient evidence for <i>that one
+/// control</i>, and the route that does not depend on it was chosen instead.
+/// </remarks>
+public sealed record MeituExportDestinationSignature(
+    string WindowClassName,
+    ImmutableArray<string> AcceptedTitles,
+    string FileNameAutomationId,
+    string FileNameControlType,
+    string ConfirmAutomationId,
+    string ConfirmControlType,
+    string CancelAutomationId,
+    string CancelControlType);
+
+/// <summary>
+/// Meitu's post-save confirmation surface (Epic 11300 Part B2B §13, §24).
+/// </summary>
+/// <param name="RequiredMarkers">Positive markers that identify it as the save-result surface.</param>
+/// <param name="MinimumRequiredMarkers">How many of them must be visible.</param>
+/// <param name="CloseControl">The control that dismisses it, having written nothing further.</param>
+/// <remarks>
+/// Signed because §24 forbids clicking a Meitu-owned surface whose exact action has not been
+/// observed, and this one has to be dismissed before the editor can be returned to a neutral
+/// state — it disables the editor while it is up.
+///
+/// It is recorded as a <i>cleanup</i> affordance and never as evidence of where anything landed.
+/// The same surface appears for 保存 and for 另存为, and it names no path, so treating it as
+/// proof of a successful export would be exactly the "the dialog closed, so it worked" inference
+/// §13 rules out. The filesystem is the authority; this is how the screen is tidied afterwards.
+/// </remarks>
+public sealed record MeituExportResultSignature(
+    ImmutableArray<string> RequiredMarkers,
+    int MinimumRequiredMarkers,
+    MeituControlSignature CloseControl);

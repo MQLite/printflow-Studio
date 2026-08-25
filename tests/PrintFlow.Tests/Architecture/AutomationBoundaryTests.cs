@@ -47,6 +47,7 @@ public sealed class AutomationBoundaryTests
         nameof(IMeituAutomationFoundation),
         nameof(MeituTarget),
         nameof(MeituStartingState),
+        nameof(MeituDocumentIdentitySignature),
         nameof(KnownMeituElement),
         nameof(KnownShortcut),
     ];
@@ -169,6 +170,237 @@ public sealed class AutomationBoundaryTests
 
         offenders.ShouldBeEmpty($"'{bannedToken}' sends input with no verifiable target.");
     }
+
+    [Fact]
+    public void The_document_identity_probe_exposes_no_path_coordinate_or_shortcut_surface()
+    {
+        MethodInfo method = typeof(IMeituUiDriver).GetMethod(
+            nameof(IMeituUiDriver.ConfirmWorkingCopyIdentityAsync))!;
+
+        method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
+            ["target", "expectedWorkingCopyFileName", "cancellationToken"]);
+        method.GetParameters().ShouldNotContain(parameter =>
+            parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
+            parameter.ParameterType == typeof(KnownShortcut));
+
+        string source = File.ReadAllText(Path.Combine(
+            ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Meitu", "GuardedMeituUiDriver.cs"));
+        int start = source.IndexOf(
+            "public async Task<OperationResult<MeituStateSnapshot>> ConfirmWorkingCopyIdentityAsync",
+            StringComparison.Ordinal);
+        int end = source.IndexOf("private OperationResult<string> ReadIdentityValue", start, StringComparison.Ordinal);
+        string probe = source[start..end];
+
+        probe.ShouldNotContain(nameof(IMeituUiDriver.SendVerifiedShortcutAsync));
+        probe.ShouldNotContain("SendKeys", Case.Sensitive);
+        probe.ShouldNotContain("mouse", Case.Insensitive);
+        probe.ShouldNotContain("coordinate", Case.Insensitive);
+    }
+
+
+    /// <summary>
+    /// The Enhancement seam exposes no path, coordinate, keystroke or free-form control name
+    /// (Epic 11300 Part B2A §8, §11).
+    /// </summary>
+    /// <remarks>
+    /// The signature is the safety property. A caller can ask for "the Enhancement action on
+    /// this verified target, for this expected file" and nothing else — there is no overload
+    /// taking a control name, a screen point, or a shortcut, so no future caller can express one.
+    /// The source check then confirms the implementation does not reach around its own interface.
+    /// </remarks>
+    [Fact]
+    public void The_Enhancement_route_exposes_no_path_coordinate_or_shortcut_surface()
+    {
+        MethodInfo method = typeof(IMeituUiDriver).GetMethod(
+            nameof(IMeituUiDriver.RunEnhancementAsync))!;
+
+        method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
+            ["target", "expectedWorkingCopyFileName", "cancellationToken"]);
+        method.GetParameters().ShouldNotContain(parameter =>
+            parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
+            parameter.ParameterType == typeof(KnownShortcut));
+
+        string source = File.ReadAllText(Path.Combine(
+            ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Meitu", "GuardedMeituUiDriver.cs"));
+        int start = source.IndexOf(
+            "public async Task<OperationResult<MeituEnhancementOutcome>> RunEnhancementAsync",
+            StringComparison.Ordinal);
+        int end = source.IndexOf(
+            "private async Task<OperationResult<MeituTarget>> ReacquireForegroundAsync",
+            start,
+            StringComparison.Ordinal);
+
+        start.ShouldBeGreaterThan(-1);
+        end.ShouldBeGreaterThan(start);
+        string route = source[start..end];
+
+        route.ShouldNotContain(nameof(IMeituUiDriver.SendVerifiedShortcutAsync));
+        route.ShouldNotContain("SendKeys", Case.Sensitive);
+        route.ShouldNotContain("mouse", Case.Insensitive);
+        route.ShouldNotContain("coordinate", Case.Insensitive);
+    }
+
+    /// <summary>
+    /// The Enhancement outcome cannot be mistaken for an exported result
+    /// (Epic 11300 Part B2A §16, §20).
+    /// </summary>
+    /// <remarks>
+    /// Asserted on the type rather than left to review, because the temptation in B2B will be to
+    /// add an output path here rather than to a new type — and the moment this record carries
+    /// one, a caller can read a success from it as "the file exists". Until export and validation
+    /// are implemented, there must be nothing on it that could be read that way.
+    /// </remarks>
+    [Fact]
+    public void The_Enhancement_outcome_carries_no_output_success_or_revision_surface()
+    {
+        string[] members = [.. typeof(MeituEnhancementOutcome)
+            .GetProperties()
+            .Select(property => property.Name)];
+
+        members.ShouldNotContain(name => name.Contains("Output", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Path", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Revision", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Succeed", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Export", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// The Enhancement route writes nothing: no Save, no Save As, no value written anywhere.
+    /// </summary>
+    /// <remarks>
+    /// A source-level assertion because it is the one property of this slice that cannot be
+    /// recovered if it is broken. Enhancement changes the document Meitu is holding, and it must
+    /// do so without ever setting a field — a value written during it would mean PrintFlow had
+    /// typed into a surface whose state it had not established.
+    ///
+    /// The region is bounded at the export route rather than at the end of the class, because
+    /// Part B2B adds one that legitimately writes values. That is why the companion test below
+    /// exists: between them they say the whole thing, which is that the adapter writes values in
+    /// exactly two places and neither is the Enhancement.
+    /// </remarks>
+    [Fact]
+    public void The_Enhancement_and_close_routes_write_no_value_anywhere()
+    {
+        string source = DriverSource();
+
+        int start = source.IndexOf(
+            "public async Task<OperationResult<MeituEnhancementOutcome>> RunEnhancementAsync",
+            StringComparison.Ordinal);
+        int end = source.IndexOf(
+            "public async Task<OperationResult<MeituExportEvidence>> ExportResultAsync",
+            start, StringComparison.Ordinal);
+
+        start.ShouldBeGreaterThan(-1);
+        end.ShouldBeGreaterThan(start);
+
+        // Everything from the Enhancement route to the export route: the invoke, the waits, the
+        // reacquisition and the close route.
+        source[start..end].ShouldNotContain("SetValue", Case.Sensitive);
+    }
+
+    /// <summary>
+    /// The adapter writes values in exactly two places, and the export never writes the
+    /// destination folder field (Epic 11300 Part B2B §8, §10).
+    /// </summary>
+    /// <remarks>
+    /// The folder assertion is the one worth having. Meitu's Save surface exposes a
+    /// <c>folderEdit</c> that accepts a written value, reads it back exactly, and does not move
+    /// the export — the file landed in the operator's Downloads folder while the field displayed
+    /// the controlled path. Nothing in the code catches that; only having looked does. So the
+    /// prohibition is asserted on the source, where a future change that reaches for the
+    /// obvious-looking control fails a test instead of quietly exporting somewhere else.
+    /// </remarks>
+    [Fact]
+    public void The_adapter_writes_values_only_in_the_picker_and_the_export_and_never_names_a_folder_field()
+    {
+        string source = DriverSource();
+
+        // Two call sites: the picker's file-name field, and the export's shared setter. Every
+        // other value the export writes goes through that one setter.
+        int writes = 0;
+        for (int i = source.IndexOf("_elements.SetValue", StringComparison.Ordinal);
+             i >= 0;
+             i = source.IndexOf("_elements.SetValue", i + 1, StringComparison.Ordinal))
+        {
+            writes++;
+        }
+
+        writes.ShouldBe(3);
+
+        // As string literals, which is the only form in which a control id can be looked up.
+        // The names appear in this file's prose — the reason folderEdit is not used is worth
+        // stating where the route is — and prose is exactly what this assertion must not forbid.
+        source.ShouldNotContain("\"folderEdit\"", Case.Insensitive);
+        source.ShouldNotContain("\"selectFolderButton\"", Case.Insensitive);
+        source.ShouldNotContain("\"btnCoverSavePath\"", Case.Insensitive);
+        source.ShouldNotContain("\"btnDesktopSavePath\"", Case.Insensitive);
+
+        // And no signature member exists for one either, so the evidence cannot reintroduce it.
+        string[] members = [.. typeof(MeituExportSignature).GetProperties().Select(p => p.Name)];
+        members.ShouldNotContain(name => name.Contains("Folder", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Directory", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// The export evidence record cannot be mistaken for proof that a file exists
+    /// (Epic 11300 Part B2B §13).
+    /// </summary>
+    /// <remarks>
+    /// The same guard Part B2A put on <c>MeituEnhancementOutcome</c>, one layer along and for
+    /// the same reason. This record says what PrintFlow set and invoked; the filesystem says
+    /// whether it worked. A <c>Succeeded</c> or <c>ByteLength</c> member here would let a caller
+    /// read the first as the second.
+    /// </remarks>
+    [Fact]
+    public void The_export_evidence_carries_no_success_size_or_hash_surface()
+    {
+        string[] members = [.. typeof(MeituExportEvidence).GetProperties().Select(p => p.Name)];
+
+        members.ShouldNotContain(name => name.Contains("Succeed", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Exists", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Length", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Sha", StringComparison.OrdinalIgnoreCase));
+        members.ShouldNotContain(name => name.Contains("Revision", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// The export route exposes no coordinate, keystroke or free-form control name
+    /// (Epic 11300 Part B2B §12).
+    /// </summary>
+    [Fact]
+    public void The_export_route_exposes_no_coordinate_or_shortcut_surface()
+    {
+        System.Reflection.MethodInfo method = typeof(IMeituUiDriver).GetMethod(
+            nameof(IMeituUiDriver.ExportResultAsync))!;
+
+        method.GetParameters().ShouldNotContain(parameter =>
+            parameter.Name!.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("key", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("shortcut", StringComparison.OrdinalIgnoreCase) ||
+            parameter.Name.Contains("control", StringComparison.OrdinalIgnoreCase));
+
+        string source = DriverSource();
+        int start = source.IndexOf(
+            "public async Task<OperationResult<MeituExportEvidence>> ExportResultAsync",
+            StringComparison.Ordinal);
+        int end = source.IndexOf(
+            "private static OperationFailure TargetLost(", start, StringComparison.Ordinal);
+
+        start.ShouldBeGreaterThan(-1);
+        end.ShouldBeGreaterThan(start);
+
+        string route = source[start..end];
+        route.ShouldNotContain("SendShortcut", Case.Sensitive);
+        route.ShouldNotContain("SendKeys", Case.Insensitive);
+        route.ShouldNotContain("mouse_event", Case.Insensitive);
+        route.ShouldNotContain("SetCursorPos", Case.Insensitive);
+        route.ShouldNotContain("coordinate", Case.Insensitive);
+    }
+
+    private static string DriverSource() => File.ReadAllText(Path.Combine(
+        ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Meitu", "GuardedMeituUiDriver.cs"));
 
     /// <summary>P/Invoke declarations live in Infrastructure only.</summary>
     [Theory]

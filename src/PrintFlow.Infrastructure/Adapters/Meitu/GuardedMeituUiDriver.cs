@@ -58,8 +58,16 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     /// <inheritdoc />
-    public async Task<OperationResult<MeituStateSnapshot>> InspectStateAsync(
-        MeituTarget target, string? expectedWorkingCopyFileName, CancellationToken cancellationToken)
+    public Task<OperationResult<MeituStateSnapshot>> InspectStateAsync(
+        MeituTarget target, string? expectedWorkingCopyFileName, CancellationToken cancellationToken) =>
+        InspectStateCoreAsync(
+            target, expectedWorkingCopyFileName, observedDocumentIdentity: null, cancellationToken);
+
+    private async Task<OperationResult<MeituStateSnapshot>> InspectStateCoreAsync(
+        MeituTarget target,
+        string? expectedWorkingCopyFileName,
+        string? observedDocumentIdentity,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
         cancellationToken.ThrowIfCancellationRequested();
@@ -99,7 +107,8 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             [.. texts.Value],
             [.. dialogs.Value.Select(d => d.Title)],
             window.Value.IsEnabled,
-            expectedWorkingCopyFileName);
+            expectedWorkingCopyFileName,
+            observedDocumentIdentity);
 
         await Task.CompletedTask.ConfigureAwait(false);
         return OperationResult.Ok(MeituStateClassifier.Classify(baseline.Value, observation));
@@ -170,8 +179,40 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         {
             KnownMeituElement.WelcomeOpenEntry => FindStartPageCard(target, window.Value.Handle),
             KnownMeituElement.EditorOpenControl => FindEditorOpenControl(target, window.Value.Handle),
+            KnownMeituElement.EditorSaveControl => FindEditorSaveControl(target, window.Value.Handle),
+            KnownMeituElement.EditorCloseDocumentControl =>
+                FindEditorCloseDocumentControl(target, window.Value.Handle),
+            KnownMeituElement.EditorEnhancementAction =>
+                FindEditorEnhancementAction(target, window.Value.Handle),
+
+            // The export controls exist, but not here. Every one of them lives on a surface the
+            // editor raises — Meitu's owned Save panel, or the destination dialog — and resolving
+            // them against the editor window would search a screen they are not on and refuse for
+            // a reason that had nothing to do with why. The export route holds those handles and
+            // resolves them itself; this seam says so rather than returning a misleading miss.
+            KnownMeituElement.ExportFileNameField or
+            KnownMeituElement.ExportFormatField or
+            KnownMeituElement.ExportSaveAsControl or
+            KnownMeituElement.ExportDestinationFileName or
+            KnownMeituElement.ExportDestinationConfirmButton or
+            KnownMeituElement.ExportDestinationCancelButton or
+            KnownMeituElement.ExportResultCloseControl => OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                $"'{element}' belongs to a surface the editor raises, not to the editor window, so it " +
+                "cannot be resolved from the main target. The export route resolves it against the " +
+                "surface it has verified. Nothing was written or invoked."),
+
             _ => FindDialogControl(target, window.Value.Handle, element),
         };
+    }
+
+    private OperationResult<UiElementRef> FindEditorSaveControl(MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituDocumentIdentitySignature> signature = DocumentIdentitySignature();
+        return signature.IsFailure
+            ? OperationResult.Fail<UiElementRef>(signature.Failure)
+            : FindStructuredOwner(
+                target, window, signature.Value.SaveMarkerName, signature.Value.SaveControl);
     }
 
     /// <summary>Locates the empty editor's own open control from its signed signature.</summary>
@@ -320,6 +361,172 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             : OperationResult.Ok(owners[chosen.Value]);
     }
 
+    /// <summary>
+    /// Resolves a signed text marker to the one parent control whose structural relationship
+    /// matches the evidence. Used by the loaded editor's Save control after its shape was
+    /// observed independently from the start-page card.
+    /// </summary>
+    private OperationResult<UiElementRef> FindStructuredOwner(
+        MeituTarget target, WindowHandle window, string markerName, MeituCardShape shape)
+    {
+        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
+            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        if (markers.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(markers.Failure);
+        }
+
+        List<UiElementRef> owners = [];
+        List<MeituCardCandidate> candidates = [];
+        foreach (UiElementRef marker in markers.Value)
+        {
+            OperationResult<UiElementIdentity> markerIdentity = _elements.Describe(marker);
+            if (markerIdentity.IsFailure)
+            {
+                continue;
+            }
+
+            OperationResult<UiElementRef> parent = _elements.GetParent(marker);
+            OperationResult<UiElementIdentity> ownerIdentity = parent.IsSuccess
+                ? _elements.Describe(parent.Value)
+                : OperationResult.Fail<UiElementIdentity>(parent.Failure);
+
+            owners.Add(parent.IsSuccess ? parent.Value : marker);
+            candidates.Add(new MeituCardCandidate(
+                markerIdentity.Value, ownerIdentity.IsSuccess ? ownerIdentity.Value : null));
+        }
+
+        OperationResult<int> chosen = MeituCardTargetRule.SelectOwningCard(
+            shape, markerName, target.Process.ProcessId, candidates);
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(owners[chosen.Value]);
+    }
+
+    private OperationResult<UiElementRef> FindEditorCloseDocumentControl(
+        MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(baseline.Failure);
+        }
+
+        return baseline.Value.CloseDocument is { } signature
+            ? FindStructuredOwner(target, window, signature.MarkerName, signature.Control)
+            : OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain records no close-document control, so PrintFlow has no signed " +
+                "way to return the editor to its empty state. Nothing was invoked.");
+    }
+
+    private OperationResult<UiElementRef> FindEditorEnhancementAction(
+        MeituTarget target, WindowHandle window)
+    {
+        OperationResult<MeituEnhancementSignature> signature = EnhancementSignature();
+        return signature.IsFailure
+            ? OperationResult.Fail<UiElementRef>(signature.Failure)
+            : FindActionOwner(
+                target, window, signature.Value.ActionMarkerName, signature.Value.ActionControl);
+    }
+
+    /// <summary>
+    /// Resolves a signed text marker to the actionable control that owns it, walking exactly the
+    /// number of control-view levels the evidence records (Epic 11300 Part B2A §7, §8).
+    /// </summary>
+    /// <remarks>
+    /// The counterpart of <see cref="FindStructuredOwner"/> for controls whose actionable owner
+    /// is not the marker's immediate parent. The depth is read from signed evidence and the walk
+    /// stops there — it does not continue upward looking for something that matches, because
+    /// "keep going until a candidate passes" would let the rule's own shape checks decide how
+    /// far to search, and in Meitu's Qt tree the window itself passes several of them.
+    ///
+    /// A level that cannot be read ends the walk with no owner, which the rule treats as a
+    /// refusal rather than as licence to try the next level up.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindActionOwner(
+        MeituTarget target, WindowHandle window, string markerName, MeituOwnedControlShape shape)
+    {
+        if (shape.OwnerAncestorDepth <= 0)
+        {
+            // Depth zero would make the marker its own owner — the Part A defect written into
+            // evidence — so it is refused here rather than trusted to fail a later shape check.
+            return OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituUnknownState,
+                $"The signed Enhancement evidence records an owner depth of {shape.OwnerAncestorDepth}, " +
+                "which would make the text marker its own action target. Nothing was invoked.");
+        }
+
+        OperationResult<IReadOnlyList<UiElementRef>> markers = _elements.FindAll(
+            window, new UiElementQuery(UiControlKind.Any, Name: markerName));
+        if (markers.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(markers.Failure);
+        }
+
+        List<UiElementRef> owners = [];
+        List<MeituCardCandidate> candidates = [];
+
+        foreach (UiElementRef marker in markers.Value)
+        {
+            OperationResult<UiElementIdentity> markerIdentity = _elements.Describe(marker);
+            if (markerIdentity.IsFailure)
+            {
+                continue;
+            }
+
+            UiElementRef current = marker;
+            UiElementIdentity? ownerIdentity = null;
+            for (int level = 0; level < shape.OwnerAncestorDepth; level++)
+            {
+                OperationResult<UiElementRef> parent = _elements.GetParent(current);
+                if (parent.IsFailure)
+                {
+                    ownerIdentity = null;
+                    break;
+                }
+
+                current = parent.Value;
+                OperationResult<UiElementIdentity> described = _elements.Describe(current);
+                ownerIdentity = described.IsSuccess ? described.Value : null;
+                if (ownerIdentity is null)
+                {
+                    break;
+                }
+            }
+
+            // The element at the signed depth is recorded even when it was unreadable, so the
+            // rule sees "no owner" rather than an owner one level short of the evidence.
+            owners.Add(ownerIdentity is null ? marker : current);
+            candidates.Add(new MeituCardCandidate(markerIdentity.Value, ownerIdentity));
+        }
+
+        OperationResult<int> chosen = MeituEnhancementTargetRule.SelectActionOwner(
+            shape, markerName, target.Process.ProcessId, candidates);
+
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(owners[chosen.Value]);
+    }
+
+    /// <summary>The signed Enhancement route, or a refusal when the chain vouches for none.</summary>
+    private OperationResult<MeituEnhancementSignature> EnhancementSignature()
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementSignature>(baseline.Failure);
+        }
+
+        return baseline.Value.Enhancement is { } signature
+            ? OperationResult.Ok(signature)
+            : OperationResult.Fail<MeituEnhancementSignature>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no Enhancement signature, so PrintFlow has no signed " +
+                "description of the control it would invoke, of what Meitu looks like while it works, or " +
+                "of what finishing looks like. Nothing was invoked.");
+    }
+
     /// <summary>Locates a picker control by the automation id the signed evidence records.</summary>
     /// <remarks>
     /// The control type is verified after the lookup rather than folded into the query, because
@@ -397,6 +604,22 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 FailureCode.MeituUnknownState,
                 "The verified evidence chain carries no file-picker signature, so PrintFlow has no signed " +
                 "description of the window it would type a path into. Nothing was written.");
+    }
+
+    private OperationResult<MeituDocumentIdentitySignature> DocumentIdentitySignature()
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituDocumentIdentitySignature>(baseline.Failure);
+        }
+
+        return baseline.Value.DocumentIdentity is { } signature
+            ? OperationResult.Ok(signature)
+            : OperationResult.Fail<MeituDocumentIdentitySignature>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no Save-dialog document-identity signature. " +
+                "No Save control was invoked.");
     }
 
     /// <inheritdoc />
@@ -480,6 +703,361 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         return filled.IsFailure
             ? OperationResult.Fail<MeituTarget>(filled.Failure)
             : OperationResult.Ok(editor.Value);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituLoadObservation>> ObserveLoadedDocumentAsync(
+        MeituTarget target, string expectedWorkingCopyFileName, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+
+        OperationResult<MeituEnhancementSignature> signature = EnhancementSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<MeituLoadObservation>(signature.Failure);
+        }
+
+        // The first look decides how long to keep looking, and the asymmetry is the whole design.
+        // Meitu can only auto-start an enhancement when its module is already selected, and a
+        // selected module is exactly what the signed completion signature matches — so a first
+        // reading of Unobserved means there is nothing that could start by itself and the wait
+        // is over before it began. Anything else means work may be in flight or about to be, and
+        // is worth the bounded read-only watch below.
+        OperationResult<MeituStateSnapshot> first = await AwaitReadableStateAsync(
+            target, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+        if (first.IsFailure)
+        {
+            return OperationResult.Fail<MeituLoadObservation>(first.Failure);
+        }
+
+        MeituEnhancementPhase phaseAtOpen =
+            MeituEnhancementRule.Classify(signature.Value, first.Value.Observation);
+        if (phaseAtOpen == MeituEnhancementPhase.Unobserved)
+        {
+            return OperationResult.Ok(new MeituLoadObservation(
+                phaseAtOpen, AutoStartedEnhancement: false, Busy: null, Completion: null));
+        }
+
+        MeituStateSnapshot? busy = phaseAtOpen == MeituEnhancementPhase.Busy ? first.Value : null;
+        if (busy is null)
+        {
+            // The module is selected but nothing is running yet. Meitu was observed live to begin
+            // its unrequested enhancement within half a second of the document appearing, so a
+            // short bounded watch either catches it or establishes that it is not coming. What
+            // this must never do is decide from the panel alone that work happened: the panel
+            // outlives the document it belongs to, and was observed still matching on an editor
+            // holding nothing at all (§21).
+            OperationResult<MeituStateSnapshot?> watched = await WatchForAutoStartAsync(
+                target, expectedWorkingCopyFileName, signature.Value, cancellationToken)
+                .ConfigureAwait(false);
+            if (watched.IsFailure)
+            {
+                return OperationResult.Fail<MeituLoadObservation>(watched.Failure);
+            }
+
+            busy = watched.Value;
+        }
+
+        if (busy is null)
+        {
+            // Stale selected module, and no work of its own. Reported as an ordinary observation
+            // rather than a failure: it is the enhancement route's pre-invoke guard that refuses
+            // it, and it refuses with the reason that actually applies — invoking the control
+            // now would deselect the module rather than start anything.
+            return OperationResult.Ok(new MeituLoadObservation(
+                phaseAtOpen, AutoStartedEnhancement: false, Busy: null, Completion: first.Value));
+        }
+
+        // Busy was positively seen for this load. The work is Meitu's own, but it is provably
+        // this load's work, so it is waited out rather than restarted — §20 forbids invoking the
+        // module over an operation already in flight.
+        OperationResult<MeituStateSnapshot> completion = await AwaitEnhancementPhaseAsync(
+            target,
+            expectedWorkingCopyFileName,
+            observedDocumentIdentity: null,
+            signature.Value,
+            MeituEnhancementPhase.Complete,
+            _options.EnhancementCompletionTimeout,
+            cancellationToken).ConfigureAwait(false);
+
+        return completion.IsFailure
+            ? OperationResult.Fail<MeituLoadObservation>(completion.Failure)
+            : OperationResult.Ok(new MeituLoadObservation(
+                phaseAtOpen, AutoStartedEnhancement: true, busy, completion.Value));
+    }
+
+    /// <summary>
+    /// Reads the state, tolerating the short-lived owned window Meitu leaves behind after an open.
+    /// </summary>
+    /// <remarks>
+    /// The picker closing puts a transient owned pop-up in front of the editor, which classifies
+    /// as <see cref="MeituStartingState.KnownModal"/> for a fraction of a second. Reading once
+    /// and stopping on it would abandon a perfectly ordinary open, so this retries within the
+    /// dialog budget — and still stops if the modal is a real one that stays.
+    /// </remarks>
+    private async Task<OperationResult<MeituStateSnapshot>> AwaitReadableStateAsync(
+        MeituTarget target, string expectedWorkingCopyFileName, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituStateSnapshot> snapshot = await InspectStateAsync(
+                target, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+            if (snapshot.IsFailure || snapshot.Value.State != MeituStartingState.KnownModal)
+            {
+                return snapshot;
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return snapshot;
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Watches read-only for an enhancement Meitu starts by itself, and gives up quietly.
+    /// </summary>
+    /// <remarks>
+    /// A success carrying <c>null</c> is the ordinary "it did not start anything" answer, not a
+    /// failure — which is the opposite convention from <see cref="AwaitEnhancementPhaseAsync"/>,
+    /// deliberately. That method waits for something PrintFlow asked for and a timeout means the
+    /// request went nowhere; this one waits for something nobody asked for, where nothing
+    /// happening is the better of the two outcomes.
+    /// </remarks>
+    private async Task<OperationResult<MeituStateSnapshot?>> WatchForAutoStartAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        MeituEnhancementSignature signature,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.AutoEnhancementWatchTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituStateSnapshot> snapshot = await InspectStateAsync(
+                target, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+            if (snapshot.IsFailure)
+            {
+                return OperationResult.Fail<MeituStateSnapshot?>(snapshot.Failure);
+            }
+
+            if (MeituEnhancementRule.Classify(signature, snapshot.Value.Observation)
+                == MeituEnhancementPhase.Busy)
+            {
+                return OperationResult.Ok<MeituStateSnapshot?>(snapshot.Value);
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Ok<MeituStateSnapshot?>(null);
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituStateSnapshot>> ConfirmWorkingCopyIdentityAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+
+        OperationResult<MeituDocumentIdentitySignature> signature = DocumentIdentitySignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(signature.Failure);
+        }
+
+        // Positively reacquired rather than merely checked: this route is entered straight
+        // after Meitu has closed a window of its own — its picker, or a previous Save surface —
+        // and the foreground it hands back is briefly not the editor (§18).
+        OperationResult<MeituTarget> verified = await ReacquireForegroundAsync(target, cancellationToken)
+            .ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(verified.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> beforeSave = await InspectStateCoreAsync(
+            verified.Value, expectedWorkingCopyFileName, observedDocumentIdentity: null, cancellationToken)
+            .ConfigureAwait(false);
+        if (beforeSave.IsFailure)
+        {
+            return beforeSave;
+        }
+
+        if (!MeituDocumentIdentityRule.MatchesLoadedEditor(signature.Value, beforeSave.Value.Observation))
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(
+                FailureCode.MeituUnknownState,
+                "The verified editor does not match the signed loaded-document structure, so Save was not " +
+                "invoked and no document identity is claimed.");
+        }
+
+        OperationResult<Unit> requested = await InvokeKnownElementAsync(
+            verified.Value, KnownMeituElement.EditorSaveControl, cancellationToken).ConfigureAwait(false);
+        if (requested.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(requested.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> dialog = await WaitForIdentityDialogAsync(
+            verified.Value, signature.Value, cancellationToken).ConfigureAwait(false);
+        if (dialog.IsFailure)
+        {
+            // A Save action that writes immediately rather than presenting the signed surface
+            // is unsafe for identity probing. It is never retried in this call.
+            return OperationResult.Fail<MeituStateSnapshot>(dialog.Failure);
+        }
+
+        OperationResult<string> observed = ReadIdentityValue(
+            verified.Value, dialog.Value, signature.Value);
+
+        // Cancel is the only dialog action in this route. It runs even when the value control
+        // is absent or ambiguous, because the dialog itself and its cancel control are signed;
+        // Save, Save As and every editable field remain untouched.
+        OperationResult<Unit> cancelled = await CancelIdentityDialogAsync(
+            verified.Value, dialog.Value, signature.Value, cancellationToken).ConfigureAwait(false);
+        if (cancelled.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(cancelled.Failure);
+        }
+
+        if (observed.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(observed.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> confirmed = await InspectStateCoreAsync(
+            verified.Value, expectedWorkingCopyFileName, observed.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (confirmed.IsFailure)
+        {
+            return confirmed;
+        }
+
+        if (confirmed.Value.State == MeituStartingState.KnownEditorWithExpectedWorkingCopy)
+        {
+            return confirmed;
+        }
+
+        // Which of several things went wrong, named rather than assumed. The state can miss
+        // for reasons that have nothing to do with the value that was read: Meitu can be
+        // computing — it starts an enhancement by itself when a document is opened while a
+        // module is still selected — or a dialog can have appeared while the probe ran. Reporting
+        // all of those as "the name did not match" sends the operator looking for a filename
+        // problem that does not exist, which is exactly what the first B2A smoke did.
+        return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+            confirmed.Value.State == MeituStartingState.KnownModal
+                ? FailureCode.MeituBlockingDialog
+                : FailureCode.MeituUnknownState,
+            confirmed.Value.State switch
+            {
+                MeituStartingState.Busy =>
+                    "Meitu is computing, so the document it is holding cannot be confirmed as settled. " +
+                    "The Save surface was canceled and nothing further was invoked.",
+                MeituStartingState.KnownModal =>
+                    "A dialog owned by Meitu appeared while the document identity was being read. " +
+                    "PrintFlow does not dismiss it; the Save surface was canceled and no identity is claimed.",
+                _ =>
+                    $"The signed Save value did not exactly identify '{expectedWorkingCopyFileName}'. The " +
+                    "dialog was canceled and no document identity is claimed.",
+            },
+            isRetryable: confirmed.Value.State is MeituStartingState.Busy or MeituStartingState.KnownModal,
+            context: new Dictionary<string, string>
+            {
+                ["state"] = confirmed.Value.State.ToString(),
+                ["expectedFile"] = expectedWorkingCopyFileName,
+                ["observedIdentity"] = observed.Value,
+                ["inputSent"] = "cancel-only",
+            }));
+    }
+
+    private OperationResult<string> ReadIdentityValue(
+        MeituTarget target,
+        ExternalWindowRef dialog,
+        MeituDocumentIdentitySignature signature)
+    {
+        OperationResult<ExternalWindowRef> verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<string>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> field = FindSignedControl(
+            target, dialog.Handle, signature.FileNameControl);
+        if (field.IsFailure)
+        {
+            return OperationResult.Fail<string>(field.Failure);
+        }
+
+        return _elements.GetValue(field.Value);
+    }
+
+    private async Task<OperationResult<Unit>> CancelIdentityDialogAsync(
+        MeituTarget target,
+        ExternalWindowRef dialog,
+        MeituDocumentIdentitySignature signature,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<ExternalWindowRef> verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> cancel = FindSignedControl(
+            target, dialog.Handle, signature.CancelControl);
+        if (cancel.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(cancel.Failure);
+        }
+
+        // Re-check after the tree walk and immediately before the one permitted action.
+        verified = VerifyIdentityDialog(target, dialog.Handle, signature);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(verified.Failure);
+        }
+
+        OperationResult<Unit> invoked = _elements.Invoke(cancel.Value);
+        if (invoked.IsFailure)
+        {
+            return invoked;
+        }
+
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_locator.Refresh(dialog.Handle).IsFailure)
+            {
+                return OperationResult.Ok();
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituOpenInputFailed,
+                    "The signed Cancel control was invoked, but the Save surface did not close within the " +
+                    "bounded timeout. No Save or Save As control was invoked.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
@@ -741,6 +1319,91 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         }
     }
 
+    private async Task<OperationResult<ExternalWindowRef>> WaitForIdentityDialogAsync(
+        MeituTarget target,
+        MeituDocumentIdentitySignature signature,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+                _locator.FindOwnedDialogs(target.Process, target.Window);
+            if (dialogs.IsFailure)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(dialogs.Failure);
+            }
+
+            ExternalWindowRef[] matches = [.. dialogs.Value.Where(candidate =>
+                candidate.OwningProcessId == target.Process.ProcessId &&
+                string.Equals(candidate.Title, signature.DialogTitle, StringComparison.Ordinal) &&
+                string.Equals(candidate.ClassName, signature.DialogClassName, StringComparison.Ordinal))];
+
+            if (matches.Length == 1)
+            {
+                return OperationResult.Ok(matches[0]);
+            }
+
+            if (matches.Length > 1)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituUnknownState,
+                    $"{matches.Length} owned Save surfaces match the signed identity; PrintFlow will not " +
+                    "choose between them and no dialog control was used.");
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"The structurally verified Save control did not present the signed owned surface " +
+                    $"'{signature.DialogTitle}'/{signature.DialogClassName} within " +
+                    $"{_options.DialogTimeout.TotalSeconds:0} s. The action is not retried; this route cannot " +
+                    "be trusted for identity probing if it writes without prompting.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private OperationResult<ExternalWindowRef> VerifyIdentityDialog(
+        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature)
+    {
+        if (!_locator.IsAlive(target.Process))
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                $"Meitu process {target.Process.ProcessId} exited while its Save surface was open; no " +
+                "dialog control was used.");
+        }
+
+        OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
+        if (refreshed.IsFailure ||
+            refreshed.Value.OwningProcessId != target.Process.ProcessId ||
+            !string.Equals(refreshed.Value.Title, signature.DialogTitle, StringComparison.Ordinal) ||
+            !string.Equals(refreshed.Value.ClassName, signature.DialogClassName, StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                "The Save surface no longer has the signed title, class and verified Meitu owner; no dialog " +
+                "control was used.");
+        }
+
+        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+        if (foreground.IsFailure)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+        }
+
+        return foreground.Value.Handle == dialog && foreground.Value.ProcessId == target.Process.ProcessId
+            ? refreshed
+            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
+                dialog, foreground.Value,
+                "The signed Save surface is not the exact foreground window; no dialog control was used."));
+    }
+
     /// <summary>
     /// Re-establishes that the picker is still Meitu's and still in front, before input.
     /// </summary>
@@ -848,6 +1511,1235 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         return confirm.IsFailure
             ? OperationResult.Fail<Unit>(confirm.Failure)
             : _elements.Invoke(confirm.Value);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituEnhancementOutcome>> RunEnhancementAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+
+        // Before anything at all: is there a signed Enhancement route to run? Resolving this
+        // first means a chain that vouches for no evidence costs no Save invocation, rather
+        // than opening and cancelling the Save surface only to refuse afterwards.
+        OperationResult<MeituEnhancementSignature> signature = EnhancementSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(signature.Failure);
+        }
+
+        // §5. The exact pre-Enhancement identity probe: Save surface, signed value control,
+        // exact derived basename, Cancel. Nothing is saved and no file is written.
+        OperationResult<MeituStateSnapshot> before = await ConfirmWorkingCopyIdentityAsync(
+            target, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+        if (before.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(before.Failure);
+        }
+
+        if (before.Value.Observation.ObservedDocumentIdentity is not { Length: > 0 } identity)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(
+                FailureCode.MeituUnknownState,
+                "The identity probe reported success without a document-derived value. Enhancement was " +
+                "not invoked.");
+        }
+
+        // §6. The probe put an owned Save surface in front and then closed it, so the editor's
+        // foreground is a thing to re-establish rather than to assume.
+        OperationResult<MeituTarget> editor = await ReacquireEditorAsync(
+            target, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        if (editor.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(editor.Failure);
+        }
+
+        // §10, §11. The final guard and the one irreversible action.
+        OperationResult<MeituTarget> invoked = await InvokeEnhancementAsync(
+            editor.Value, expectedWorkingCopyFileName, identity, signature.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (invoked.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(invoked.Failure);
+        }
+
+        // §12, §13. Read-only from here until completion. Foreground is deliberately not
+        // required while observing: the operator may legitimately look at something else while
+        // Meitu computes, and demanding focus in order to watch would be a side effect of its
+        // own (§18).
+        OperationResult<MeituStateSnapshot> busy = await AwaitEnhancementPhaseAsync(
+            invoked.Value,
+            expectedWorkingCopyFileName,
+            identity,
+            signature.Value,
+            MeituEnhancementPhase.Busy,
+            _options.EnhancementBusyTimeout,
+            cancellationToken).ConfigureAwait(false);
+        if (busy.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(busy.Failure);
+        }
+
+        // §14. Positive completion. AwaitEnhancementPhaseAsync only ever returns on a positive
+        // match, so "Busy stopped showing" cannot end this wait on its own.
+        OperationResult<MeituStateSnapshot> complete = await AwaitEnhancementPhaseAsync(
+            invoked.Value,
+            expectedWorkingCopyFileName,
+            identity,
+            signature.Value,
+            MeituEnhancementPhase.Complete,
+            _options.EnhancementCompletionTimeout,
+            cancellationToken).ConfigureAwait(false);
+        if (complete.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(complete.Failure);
+        }
+
+        // §15. The same signed probe again. It has to be the same route rather than a cheaper
+        // re-read, because the claim being made is the same claim: this is exactly the document
+        // PrintFlow handed over, established the only way this workstation can establish it.
+        OperationResult<MeituTarget> reacquired = await ReacquireEditorAsync(
+            invoked.Value, expectedWorkingCopyFileName, identity, cancellationToken).ConfigureAwait(false);
+        if (reacquired.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(reacquired.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> after = await ConfirmWorkingCopyIdentityAsync(
+            reacquired.Value, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+        if (after.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(after.Failure);
+        }
+
+        OperationResult<MeituTarget> settled = await ReacquireEditorAsync(
+            reacquired.Value, expectedWorkingCopyFileName, identity, cancellationToken)
+            .ConfigureAwait(false);
+        if (settled.IsFailure)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(settled.Failure);
+        }
+
+        return OperationResult.Ok(new MeituEnhancementOutcome(
+            settled.Value, identity, before.Value, busy.Value, complete.Value, after.Value));
+    }
+
+    /// <summary>
+    /// Brings the target back to the foreground and verifies it got there, retrying for a
+    /// bounded time (Epic 11300 Part B2A §18).
+    /// </summary>
+    /// <remarks>
+    /// The difference between this and <see cref="VerifyTargetAsync"/> is who is expected to
+    /// have put Meitu in front. <see cref="VerifyTargetAsync"/> asks "is it in front?" and is
+    /// the guard immediately before input. This asks Windows to <i>put</i> it in front and then
+    /// asks the same question — which is what §18 means by positively reacquiring, and it is
+    /// needed because Meitu itself displaces its own editor: the picker closing after an open,
+    /// and the Save surface closing after Cancel, both hand the foreground to a short-lived
+    /// Meitu window rather than back to the editor.
+    ///
+    /// Part B1.1 saw exactly that twice, and reported it as a refusal with nothing sent. The
+    /// refusal was correct; requiring a caller to have won a race it cannot see was not. Note
+    /// what this does <b>not</b> do: it never sends input, and it never proceeds on a target it
+    /// has not just seen hold the foreground. A window that will not come forward within the
+    /// budget is still a <see cref="FailureCode.MeituTargetLost"/> with nothing sent.
+    /// </remarks>
+    private async Task<OperationResult<MeituTarget>> ReacquireForegroundAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.ActivationTimeout + _options.DialogTimeout;
+        OperationFailure? last = null;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituTarget> activated = await ActivateAsync(target, cancellationToken)
+                .ConfigureAwait(false);
+            if (activated.IsSuccess)
+            {
+                OperationResult<MeituTarget> verified = await VerifyTargetAsync(
+                    activated.Value, cancellationToken).ConfigureAwait(false);
+                if (verified.IsSuccess)
+                {
+                    return verified;
+                }
+
+                last = verified.Failure;
+            }
+            else
+            {
+                last = activated.Failure;
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituTarget>(last);
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Re-establishes the editor after something else held the foreground, and re-confirms it is
+    /// still showing the expected document (Epic 11300 Part B2A §6, §18).
+    /// </summary>
+    /// <param name="observedDocumentIdentity">
+    /// The value the signed Save surface exposed moments ago.
+    /// </param>
+    /// <remarks>
+    /// The carried identity is the one part of this worth explaining. Re-classifying with it,
+    /// rather than probing again, is not a shortcut: a fresh probe means another Save
+    /// invocation, and calling this method after every probe would then recurse. What the
+    /// carried value lets the classifier state is precise and still worth stating — the editor
+    /// is the same window of the same process, it is enabled, unblocked and in front, its signed
+    /// markers still match, and the identity read from it a moment ago was exact. §15 is what
+    /// re-establishes the identity itself, through the probe, after the work is done.
+    /// </remarks>
+    private async Task<OperationResult<MeituTarget>> ReacquireEditorAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.ActivationTimeout + _options.DialogTimeout;
+        OperationFailure? last = null;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituTarget> verified =
+                await ReacquireForegroundAsync(target, cancellationToken).ConfigureAwait(false);
+            if (verified.IsSuccess)
+            {
+                OperationResult<MeituStateSnapshot> state = await InspectStateCoreAsync(
+                    verified.Value, expectedWorkingCopyFileName, observedDocumentIdentity,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (state.IsSuccess &&
+                    state.Value.State == MeituStartingState.KnownEditorWithExpectedWorkingCopy)
+                {
+                    return OperationResult.Ok(verified.Value);
+                }
+
+                last = state.IsFailure
+                    ? state.Failure
+                    : OperationFailure.Create(
+                        FailureCode.MeituUnknownState,
+                        $"The Meitu editor is on '{state.Value.State}' rather than showing the expected " +
+                        "working copy. No Enhancement input was produced.",
+                        isRetryable: true,
+                        context: new Dictionary<string, string>
+                        {
+                            ["state"] = state.Value.State.ToString(),
+                            ["expectedFile"] = expectedWorkingCopyFileName,
+                            ["inputSent"] = "false",
+                        });
+            }
+            else
+            {
+                last = verified.Failure;
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituTarget>(last);
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// The final guard and the single Enhancement invocation (Epic 11300 Part B2A §10, §11).
+    /// </summary>
+    /// <remarks>
+    /// Every check §10 lists happens here, in this order, and the ones that can go stale during
+    /// a tree walk happen twice — once to decide whether to look for the control, once after it
+    /// has been found and immediately before it is invoked. Nothing between the last check and
+    /// the invocation reads the automation tree.
+    ///
+    /// There is exactly one <see cref="IUiElementProvider.Invoke"/> call and no retry. An
+    /// Enhancement that was invoked but whose effect was not observed is a state to report, not
+    /// a reason to invoke it a second time over work that may already be running.
+    /// </remarks>
+    private async Task<OperationResult<MeituTarget>> InvokeEnhancementAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        MeituEnhancementSignature signature,
+        CancellationToken cancellationToken)
+    {
+        // Process id and start time, window ownership, and exact foreground.
+        OperationResult<MeituTarget> verified = await VerifyTargetAsync(target, cancellationToken)
+            .ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return verified;
+        }
+
+        // No blocking modal, and the document is still the expected one.
+        OperationResult<MeituStateSnapshot> state = await InspectStateCoreAsync(
+            verified.Value, expectedWorkingCopyFileName, observedDocumentIdentity, cancellationToken)
+            .ConfigureAwait(false);
+        if (state.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(state.Failure);
+        }
+
+        if (state.Value.State != MeituStartingState.KnownEditorWithExpectedWorkingCopy)
+        {
+            return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Immediately before Enhancement the Meitu editor classified as " +
+                $"'{state.Value.State}', not as the expected working copy. Nothing was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["state"] = state.Value.State.ToString(),
+                    ["expectedFile"] = expectedWorkingCopyFileName,
+                    ["inputSent"] = "false",
+                }));
+        }
+
+        // The Enhancement control is a Qt CheckBox that Meitu treats as a toggle, and Meitu
+        // remembers which module is selected across document loads. Both were observed live:
+        // opening a new image while the Enhancement module was still selected started an
+        // enhancement with no input at all, and invoking the control while it was selected
+        // turned the module *off*.
+        // So the phase is checked before the invoke as well as after it: the one guarded
+        // invocation §11 permits must be the one that starts the work, never one that cancels a
+        // module someone else selected.
+        MeituEnhancementPhase phase = MeituEnhancementRule.Classify(
+            signature, state.Value.Observation);
+        if (phase != MeituEnhancementPhase.Unobserved)
+        {
+            return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                phase == MeituEnhancementPhase.Busy
+                    ? "Meitu is already running an Enhancement. PrintFlow will not begin a second one " +
+                      "over work in progress. Nothing was invoked."
+                    : "The Enhancement module is already selected, so invoking its control would " +
+                      "deselect it rather than start the work. Nothing was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["phase"] = phase.ToString(),
+                    ["expectedFile"] = expectedWorkingCopyFileName,
+                    ["inputSent"] = "false",
+                }));
+        }
+
+        // Element ownership, structural signature, enabled and onscreen — all of it inside the
+        // signed rule, which refuses rather than picks.
+        OperationResult<UiElementRef> action = FindKnownElement(
+            verified.Value, KnownMeituElement.EditorEnhancementAction);
+        if (action.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(action.Failure);
+        }
+
+        // Re-verified after the tree walk, which is the check closest to the irreversible half.
+        OperationResult<MeituTarget> stillOurs = await VerifyTargetAsync(verified.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (stillOurs.IsFailure)
+        {
+            return stillOurs;
+        }
+
+        OperationResult<Unit> sent = _elements.Invoke(action.Value);
+        return sent.IsFailure
+            ? OperationResult.Fail<MeituTarget>(sent.Failure)
+            : OperationResult.Ok(stillOurs.Value);
+    }
+
+    /// <summary>
+    /// Polls read-only until the signed evidence positively shows <paramref name="wanted"/>, or
+    /// the bounded budget expires (Epic 11300 Part B2A §12–§14, §17).
+    /// </summary>
+    /// <remarks>
+    /// Returns only on a positive match. That is the whole difference between this and a wait
+    /// that watches Busy go away: a timeout here is a structured failure naming the last phase
+    /// seen, never a success carrying <see cref="MeituEnhancementPhase.Unobserved"/> — the
+    /// <c>Ok(Unknown)</c> shape §24 rules out.
+    ///
+    /// Nothing in this loop produces input, and it deliberately does not require the foreground.
+    /// A run that is refused for timeout has still sent nothing beyond the single invocation
+    /// that started it, and it does not close, cancel or otherwise nudge Meitu on its way out
+    /// (§17).
+    /// </remarks>
+    private async Task<OperationResult<MeituStateSnapshot>> AwaitEnhancementPhaseAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string? observedDocumentIdentity,
+        MeituEnhancementSignature signature,
+        MeituEnhancementPhase wanted,
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
+        MeituEnhancementPhase lastPhase = MeituEnhancementPhase.Unobserved;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituStateSnapshot> snapshot = await InspectStateCoreAsync(
+                target, expectedWorkingCopyFileName, observedDocumentIdentity, cancellationToken)
+                .ConfigureAwait(false);
+            if (snapshot.IsFailure)
+            {
+                return snapshot;
+            }
+
+            // A Meitu-owned modal during processing stops the run rather than being waited
+            // through. PrintFlow does not read it, dismiss it or click it (§19).
+            if (snapshot.Value.State == MeituStartingState.KnownModal)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                    FailureCode.MeituBlockingDialog,
+                    "A dialog owned by Meitu appeared while Enhancement was being observed. PrintFlow does " +
+                    "not dismiss dialogs it cannot identify; the operator must resolve it. No further input " +
+                    "was produced and no output was exported.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["dialogTitles"] = snapshot.Value.Observation.OwnedDialogTitles.IsDefaultOrEmpty
+                            ? "(none read)"
+                            : string.Join(" | ", snapshot.Value.Observation.OwnedDialogTitles),
+                        ["phase"] = lastPhase.ToString(),
+                        ["inputSent"] = "false",
+                    }));
+            }
+
+            lastPhase = MeituEnhancementRule.Classify(signature, snapshot.Value.Observation);
+            if (lastPhase == wanted)
+            {
+                return snapshot;
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                    FailureCode.MeituUnknownState,
+                    $"Meitu did not reach the signed Enhancement '{wanted}' state within " +
+                    $"{timeout.TotalSeconds:0} s; the last positively recognised phase was '{lastPhase}'. " +
+                    "No output was exported and no Revision was created.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["wantedPhase"] = wanted.ToString(),
+                        ["lastPhase"] = lastPhase.ToString(),
+                        ["state"] = snapshot.Value.State.ToString(),
+                        ["timeoutSeconds"] =
+                            timeout.TotalSeconds.ToString("0", System.Globalization.CultureInfo.InvariantCulture),
+                        ["exported"] = "false",
+                        ["revisionCreated"] = "false",
+                    }));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituTarget>> CloseDocumentAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        OperationResult<Unit> closed = await InvokeKnownElementAsync(
+            target, KnownMeituElement.EditorCloseDocumentControl, cancellationToken).ConfigureAwait(false);
+        if (closed.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(closed.Failure);
+        }
+
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<MeituStateSnapshot> state = await InspectStateAsync(
+                target, expectedWorkingCopyFileName: null, cancellationToken).ConfigureAwait(false);
+            if (state.IsFailure)
+            {
+                return OperationResult.Fail<MeituTarget>(state.Failure);
+            }
+
+            if (state.Value.State == MeituStartingState.KnownEditorEmpty)
+            {
+                return OperationResult.Ok(target);
+            }
+
+            if (state.Value.State == MeituStartingState.KnownModal)
+            {
+                // Most likely an unsaved-changes prompt. Answering it either way is a decision
+                // about the operator's work, and this slice does not build modal automation.
+                return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                    FailureCode.MeituBlockingDialog,
+                    "Closing the document raised a dialog owned by Meitu. PrintFlow does not answer it; the " +
+                    "operator must. The synthetic workspace is retained because Meitu may still hold the file.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["dialogTitles"] = state.Value.Observation.OwnedDialogTitles.IsDefaultOrEmpty
+                            ? "(none read)"
+                            : string.Join(" | ", state.Value.Observation.OwnedDialogTitles),
+                        ["inputSent"] = "close-only",
+                    }));
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                    FailureCode.MeituUnknownState,
+                    $"The signed close control was invoked, but Meitu did not reach the signed empty editor " +
+                    $"within {_options.DialogTimeout.TotalSeconds:0} s; it is on '{state.Value.State}'. The " +
+                    "document may still be loaded, so the working file must not be deleted.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["state"] = state.Value.State.ToString(),
+                        ["inputSent"] = "close-only",
+                    }));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituExportEvidence>> ExportResultAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string observedDocumentIdentity,
+        string destinationAbsolutePath,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(observedDocumentIdentity);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationAbsolutePath);
+
+        OperationResult<MeituExportSignature> signature = ExportSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(signature.Failure);
+        }
+
+        // The destination is taken apart before Meitu is touched. A path PrintFlow would refuse
+        // to write to should cost no Save surface and no dialog, and finding that out after the
+        // editor has already been driven into a modal would leave the screen in a state the
+        // caller then has to unwind.
+        OperationResult<MeituExportDestination> destination = MeituExportRule.ResolveDestination(
+            destinationAbsolutePath, signature.Value.RequiredFormatValue);
+        if (destination.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(destination.Failure);
+        }
+
+        // §12's editor-side guard: the target is still Meitu's, still in front, still holding
+        // exactly the document this attempt handed over.
+        OperationResult<MeituTarget> editor = await ReacquireEditorAsync(
+            target, expectedWorkingCopyFileName, observedDocumentIdentity, cancellationToken)
+            .ConfigureAwait(false);
+        if (editor.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(editor.Failure);
+        }
+
+        OperationResult<Unit> raised = await InvokeKnownElementAsync(
+            editor.Value, KnownMeituElement.EditorSaveControl, cancellationToken).ConfigureAwait(false);
+        if (raised.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(raised.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> surface = await WaitForExportSurfaceAsync(
+            editor.Value, signature.Value, cancellationToken).ConfigureAwait(false);
+        if (surface.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(surface.Failure);
+        }
+
+        return await DriveExportSurfaceAsync(
+            editor.Value, surface.Value, signature.Value, destination.Value, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the signed fields, opens the destination dialog and confirms it exactly once
+    /// (Epic 11300 Part B2B §8–§12).
+    /// </summary>
+    /// <remarks>
+    /// Every value is written and then read back before the next step, and a mismatch stops the
+    /// run before anything is invoked — which is §8's rule. The route is built the way it is
+    /// because that rule turned out not to be sufficient on its own for one control, and the
+    /// discovery is worth keeping next to the code it shaped: writing the Save surface's
+    /// <c>folderEdit</c> succeeds, reads back exactly, and does not move the export. The file
+    /// landed in Meitu's remembered folder while the field displayed the controlled path.
+    ///
+    /// So the directory is never named on this surface at all. What is set here is the base name
+    /// and the format, both of which Meitu carries forward into the destination dialog, and the
+    /// destination itself is named there as a full path — in a Windows common dialog whose
+    /// file-name field is the same shape the open picker already uses.
+    /// </remarks>
+    private async Task<OperationResult<MeituExportEvidence>> DriveExportSurfaceAsync(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        MeituExportSignature signature,
+        MeituExportDestination destination,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<ExternalWindowRef> verified = VerifyExportSurface(target, surface.Handle, signature);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        // Format first, because it is the check most likely to refuse and the one §11 will not
+        // let PrintFlow infer. The value is set and then read back: on this build the selector
+        // already reads png, so the write is ordinarily a no-op, and the read-back is what turns
+        // "it was probably still png" into a fact.
+        OperationResult<string> format = await SetAndReadBackAsync(
+            target, surface.Handle, signature.FormatControl, signature.RequiredFormatValue,
+            StringComparison.OrdinalIgnoreCase, "format", cancellationToken).ConfigureAwait(false);
+        if (format.IsFailure)
+        {
+            return await CancelExportSurfaceAsync<MeituExportEvidence>(
+                target, surface, format.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        OperationResult<string> baseName = await SetAndReadBackAsync(
+            target, surface.Handle, signature.FileNameControl, destination.BaseName,
+            StringComparison.Ordinal, "output base name", cancellationToken).ConfigureAwait(false);
+        if (baseName.IsFailure)
+        {
+            return await CancelExportSurfaceAsync<MeituExportEvidence>(
+                target, surface, baseName.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Re-verified after two tree walks and two writes, immediately before the control that
+        // changes what is on screen.
+        verified = VerifyExportSurface(target, surface.Handle, signature);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> saveAs = FindSignedControl(
+            target, surface.Handle, signature.SaveAsControl);
+        if (saveAs.IsFailure)
+        {
+            return await CancelExportSurfaceAsync<MeituExportEvidence>(
+                target, surface, saveAs.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        OperationResult<Unit> opened = _elements.Invoke(saveAs.Value);
+        if (opened.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(opened.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> dialog = await WaitForDestinationDialogAsync(
+            target, signature.Destination, cancellationToken).ConfigureAwait(false);
+        if (dialog.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(dialog.Failure);
+        }
+
+        return await ConfirmDestinationAsync(
+            target, dialog.Value, signature, destination, format.Value, baseName.Value, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Names the controlled destination in the signed dialog and invokes its confirm control once
+    /// (Epic 11300 Part B2B §10, §12, §13).
+    /// </summary>
+    private async Task<OperationResult<MeituExportEvidence>> ConfirmDestinationAsync(
+        MeituTarget target,
+        ExternalWindowRef dialog,
+        MeituExportSignature signature,
+        MeituExportDestination destination,
+        string confirmedFormat,
+        string confirmedBaseName,
+        CancellationToken cancellationToken)
+    {
+        MeituExportDestinationSignature shape = signature.Destination;
+
+        OperationResult<ExternalWindowRef> verified = VerifyDestinationDialog(target, dialog.Handle, shape);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> field = FindDestinationControl(
+            target, dialog.Handle, shape.FileNameAutomationId, shape.FileNameControlType, "file-name field");
+        if (field.IsFailure)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, field.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        OperationResult<Unit> written = _elements.SetValue(field.Value, destination.AbsolutePath);
+        if (written.IsFailure)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, written.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        OperationResult<string> readBack = _elements.GetValue(field.Value);
+        if (readBack.IsFailure)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, readBack.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Case-insensitively, because Windows paths are, and the dialog is entitled to echo a
+        // path back in the casing the file system uses rather than the casing PrintFlow wrote.
+        if (!string.Equals(readBack.Value, destination.AbsolutePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape,
+                OperationFailure.Create(
+                    FailureCode.MeituOpenInputFailed,
+                    "The destination dialog's file-name field does not read back the controlled path " +
+                    "PrintFlow wrote. Nothing was confirmed, so no file was written anywhere.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["intendedPath"] = destination.AbsolutePath,
+                        ["observedValue"] = readBack.Value,
+                        ["confirmInvoked"] = "false",
+                    }),
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        verified = VerifyDestinationDialog(target, dialog.Handle, shape);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> confirm = FindDestinationControl(
+            target, dialog.Handle, shape.ConfirmAutomationId, shape.ConfirmControlType, "confirm control");
+        if (confirm.IsFailure)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, confirm.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        OperationResult<Unit> invoked = _elements.Invoke(confirm.Value);
+        if (invoked.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(invoked.Failure);
+        }
+
+        OperationResult<Unit> closed = await AwaitDialogClosedAsync(
+            dialog.Handle, shape, cancellationToken).ConfigureAwait(false);
+        if (closed.IsFailure)
+        {
+            // A dialog that stays up after its confirm control was invoked is Windows asking
+            // something PrintFlow has no signed answer for — most plausibly a confirm-overwrite
+            // prompt for a file that was not there when the destination was checked. It is backed
+            // out rather than answered, and never confirmed a second time (§12, §33).
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, closed.Failure, cancellationToken).ConfigureAwait(false);
+        }
+
+        return OperationResult.Ok(new MeituExportEvidence(
+            confirmedBaseName, confirmedFormat, verified.Value.Title, destination.AbsolutePath));
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<bool>> DismissExportResultSurfaceAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        OperationResult<MeituExportSignature> signature = ExportSignature();
+        if (signature.IsFailure)
+        {
+            return OperationResult.Fail<bool>(signature.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> refreshed = RefreshOwnedWindow(target);
+        if (refreshed.IsFailure)
+        {
+            return OperationResult.Fail<bool>(refreshed.Failure);
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+            _locator.FindOwnedDialogs(target.Process, refreshed.Value);
+        if (dialogs.IsFailure)
+        {
+            return OperationResult.Fail<bool>(dialogs.Failure);
+        }
+
+        foreach (ExternalWindowRef candidate in dialogs.Value)
+        {
+            if (candidate.OwningProcessId != target.Process.ProcessId ||
+                !string.Equals(
+                    candidate.ClassName, signature.Value.SurfaceClassName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            OperationResult<IReadOnlyList<string>> names =
+                _elements.ReadTextSnapshot(candidate.Handle, _options.SnapshotItemLimit);
+            if (names.IsFailure ||
+                !MeituExportRule.ShowsResultSurface(signature.Value.Result, names.Value))
+            {
+                // Same class, same title, different surface. The Save surface itself reaches
+                // here on a run that failed before the export; dismissing it by class alone
+                // would be clicking a control PrintFlow has not identified.
+                continue;
+            }
+
+            OperationResult<UiElementRef> close = FindSignedControl(
+                target, candidate.Handle, signature.Value.Result.CloseControl);
+            if (close.IsFailure)
+            {
+                return OperationResult.Fail<bool>(close.Failure);
+            }
+
+            OperationResult<Unit> invoked = _elements.Invoke(close.Value);
+            if (invoked.IsFailure)
+            {
+                return OperationResult.Fail<bool>(invoked.Failure);
+            }
+
+            // Waited out rather than assumed gone, and it matters more than it looks. This
+            // surface disables the editor while it is up, so a close attempted while it is still
+            // disappearing finds a blocking modal and reports the document as still loaded — for
+            // a close that then succeeds anyway. Observed live: a clean run that had exported,
+            // validated and closed correctly reported a cleanup failure it had not had.
+            return await AwaitSurfaceClosedAsync(candidate.Handle, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Nothing to dismiss. Meitu's save-confirmation surface is a preference the operator can
+        // switch off, so requiring it would make cleanup depend on a setting rather than on what
+        // is actually on screen.
+        return OperationResult.Ok(false);
+    }
+
+    /// <summary>Waits for a surface PrintFlow has just dismissed to actually go away.</summary>
+    private async Task<OperationResult<bool>> AwaitSurfaceClosedAsync(
+        WindowHandle surface, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_locator.Refresh(surface).IsFailure)
+            {
+                return OperationResult.Ok(true);
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<bool>(
+                    FailureCode.MeituUnknownState,
+                    $"Meitu's save-confirmation surface was dismissed through its signed close control " +
+                    $"but was still present {_options.DialogTimeout.TotalSeconds:0} s later. The editor " +
+                    "cannot be returned to a neutral state while it is up.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>The signed export route, or a refusal when the chain vouches for none.</summary>
+    private OperationResult<MeituExportSignature> ExportSignature()
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportSignature>(baseline.Failure);
+        }
+
+        return baseline.Value.Export is { } signature
+            ? OperationResult.Ok(signature)
+            : OperationResult.Fail<MeituExportSignature>(
+                FailureCode.MeituUnknownState,
+                "The verified evidence chain carries no export signature, so PrintFlow has no signed " +
+                "description of the surface it would name a destination on. Nothing was invoked and no " +
+                "output was produced.");
+    }
+
+    /// <summary>
+    /// Writes one signed control's value and confirms it reads back exactly (§8).
+    /// </summary>
+    private async Task<OperationResult<string>> SetAndReadBackAsync(
+        MeituTarget target,
+        WindowHandle surface,
+        MeituControlSignature control,
+        string intended,
+        StringComparison comparison,
+        string description,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        OperationResult<UiElementRef> field = FindSignedControl(target, surface, control);
+        if (field.IsFailure)
+        {
+            return OperationResult.Fail<string>(field.Failure);
+        }
+
+        OperationResult<Unit> written = _elements.SetValue(field.Value, intended);
+        if (written.IsFailure)
+        {
+            return OperationResult.Fail<string>(written.Failure);
+        }
+
+        OperationResult<string> readBack = _elements.GetValue(field.Value);
+        if (readBack.IsFailure)
+        {
+            return OperationResult.Fail<string>(readBack.Failure);
+        }
+
+        await Task.CompletedTask.ConfigureAwait(false);
+        return string.Equals(readBack.Value, intended, comparison)
+            ? OperationResult.Ok(readBack.Value)
+            : OperationResult.Fail<string>(OperationFailure.Create(
+                FailureCode.MeituOpenInputFailed,
+                $"The Save surface's {description} reads '{readBack.Value}' after PrintFlow wrote " +
+                $"'{intended}'. Neither Save nor Save As was invoked, so no file was written.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["control"] = description,
+                    ["intended"] = intended,
+                    ["observed"] = readBack.Value,
+                    ["exportInvoked"] = "false",
+                }));
+    }
+
+    /// <summary>
+    /// Waits for the owned Save surface, identified by its signed shape <b>and</b> its contents.
+    /// </summary>
+    /// <remarks>
+    /// The contents check is not redundant. Meitu's save surface and its post-save confirmation
+    /// surface share a window class and a window title on this build, so a wait that matched on
+    /// those alone would accept whichever happened to be up — including the confirmation panel
+    /// left over from a previous export. What tells them apart is that only one of them carries
+    /// the signed file-name field.
+    /// </remarks>
+    private async Task<OperationResult<ExternalWindowRef>> WaitForExportSurfaceAsync(
+        MeituTarget target, MeituExportSignature signature, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+                _locator.FindOwnedDialogs(target.Process, target.Window);
+            if (dialogs.IsFailure)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(dialogs.Failure);
+            }
+
+            ExternalWindowRef[] matches = [.. dialogs.Value.Where(candidate =>
+                candidate.OwningProcessId == target.Process.ProcessId &&
+                string.Equals(candidate.Title, signature.SurfaceTitle, StringComparison.Ordinal) &&
+                string.Equals(candidate.ClassName, signature.SurfaceClassName, StringComparison.Ordinal) &&
+                FindSignedControl(target, candidate.Handle, signature.FileNameControl).IsSuccess)];
+
+            if (matches.Length == 1)
+            {
+                return OperationResult.Ok(matches[0]);
+            }
+
+            if (matches.Length > 1)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituUnknownState,
+                    $"{matches.Length} owned Save surfaces carry the signed export shape; PrintFlow will " +
+                    "not choose between them and nothing was written or invoked.");
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"The structurally verified Save control did not present the signed export surface " +
+                    $"'{signature.SurfaceTitle}'/{signature.SurfaceClassName} carrying its file-name field " +
+                    $"within {_options.DialogTimeout.TotalSeconds:0} s. No export was attempted and no " +
+                    "output was produced.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Waits for the signed destination dialog, owned by the verified process.</summary>
+    private async Task<OperationResult<ExternalWindowRef>> WaitForDestinationDialogAsync(
+        MeituTarget target, MeituExportDestinationSignature shape, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+                _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(windows.Failure);
+            }
+
+            ExternalWindowRef[] matches = [.. windows.Value.Where(candidate =>
+                candidate.OwningProcessId == target.Process.ProcessId &&
+                string.Equals(candidate.ClassName, shape.WindowClassName, StringComparison.Ordinal) &&
+                shape.AcceptedTitles.Contains(candidate.Title, StringComparer.Ordinal))];
+
+            if (matches.Length == 1)
+            {
+                return OperationResult.Ok(matches[0]);
+            }
+
+            if (matches.Length > 1)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituUnknownState,
+                    $"{matches.Length} owned destination dialogs match the signed identity; PrintFlow will " +
+                    "not choose between them and nothing was written or invoked.");
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"The signed Save As control did not present the destination dialog " +
+                    $"{shape.WindowClassName} within {_options.DialogTimeout.TotalSeconds:0} s, so " +
+                    "PrintFlow never named a destination. No file was written to a controlled path.");
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Re-establishes that the export surface is still Meitu's and still in front.</summary>
+    private OperationResult<ExternalWindowRef> VerifyExportSurface(
+        MeituTarget target, WindowHandle surface, MeituExportSignature signature) =>
+        VerifyOwnedSurface(
+            target, surface, signature.SurfaceClassName,
+            title => string.Equals(title, signature.SurfaceTitle, StringComparison.Ordinal),
+            "Save surface");
+
+    /// <summary>Re-establishes that the destination dialog is still Meitu's and still in front.</summary>
+    private OperationResult<ExternalWindowRef> VerifyDestinationDialog(
+        MeituTarget target, WindowHandle dialog, MeituExportDestinationSignature shape) =>
+        VerifyOwnedSurface(
+            target, dialog, shape.WindowClassName,
+            title => shape.AcceptedTitles.Contains(title, StringComparer.Ordinal),
+            "destination dialog");
+
+    /// <summary>
+    /// The guard both export surfaces share: process alive, window still itself, still owned,
+    /// and the exact foreground (Epic 11300 Part B2B §12).
+    /// </summary>
+    /// <remarks>
+    /// The exact-handle foreground requirement is stronger than the process-level one the open
+    /// picker uses, and it is the right one here. A value written through a pattern cannot be
+    /// redirected by focus, but the confirm control on this dialog is the single irreversible
+    /// action of the whole slice, and requiring the dialog itself to be the foreground window
+    /// means PrintFlow never presses it against a surface something else has covered.
+    /// </remarks>
+    private OperationResult<ExternalWindowRef> VerifyOwnedSurface(
+        MeituTarget target,
+        WindowHandle surface,
+        string expectedClassName,
+        Func<string, bool> titleAccepted,
+        string description)
+    {
+        if (!_locator.IsAlive(target.Process))
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                $"Meitu process {target.Process.ProcessId} exited while its {description} was open; " +
+                "nothing further was written or invoked.");
+        }
+
+        OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(surface);
+        if (refreshed.IsFailure ||
+            refreshed.Value.OwningProcessId != target.Process.ProcessId ||
+            !string.Equals(refreshed.Value.ClassName, expectedClassName, StringComparison.Ordinal) ||
+            !titleAccepted(refreshed.Value.Title))
+        {
+            return OperationResult.Fail<ExternalWindowRef>(
+                FailureCode.MeituTargetLost,
+                $"The {description} no longer has the signed title, class and verified Meitu owner; " +
+                "nothing further was written or invoked.");
+        }
+
+        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+        if (foreground.IsFailure)
+        {
+            return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+        }
+
+        return foreground.Value.Handle == surface && foreground.Value.ProcessId == target.Process.ProcessId
+            ? refreshed
+            : OperationResult.Fail<ExternalWindowRef>(TargetLost(
+                surface, foreground.Value,
+                $"The signed {description} is not the exact foreground window; nothing further was " +
+                "written or invoked."));
+    }
+
+    /// <summary>
+    /// Locates one destination-dialog control by the automation id and control type the signed
+    /// evidence records, requiring the match to be unique.
+    /// </summary>
+    /// <remarks>
+    /// The same shape as the open picker's resolver, and it exists separately for the same
+    /// reason that one does: an automation id is not unique inside a Windows common dialog. The
+    /// save dialog's file-name field is an <c>Edit</c> nested in a <c>ComboBox</c> and both
+    /// report the same id, so the control type is what selects between them — and the selection
+    /// has to be the only one before a path is written into it.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindDestinationControl(
+        MeituTarget target,
+        WindowHandle dialog,
+        string automationId,
+        string controlTypeName,
+        string description)
+    {
+        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
+            dialog, new UiElementQuery(UiControlKind.Any, AutomationId: automationId));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(found.Failure);
+        }
+
+        List<UiElementRef> matches = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> identity = _elements.Describe(candidate);
+            if (identity.IsFailure ||
+                !string.Equals(identity.Value.ControlTypeName, controlTypeName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (identity.Value.ProcessId != target.Process.ProcessId)
+            {
+                return OperationResult.Fail<UiElementRef>(
+                    FailureCode.MeituTargetLost,
+                    $"The destination dialog's {description} belongs to process " +
+                    $"{identity.Value.ProcessId}, not the verified Meitu process " +
+                    $"{target.Process.ProcessId}. Nothing was written or invoked.");
+            }
+
+            matches.Add(candidate);
+        }
+
+        return matches.Count == 1
+            ? OperationResult.Ok(matches[0])
+            : OperationResult.Fail<UiElementRef>(
+                FailureCode.MeituOpenInputFailed,
+                $"The destination dialog has {matches.Count} control(s) with automation id " +
+                $"'{automationId}' of type {controlTypeName}, and the signed evidence describes exactly " +
+                "one. Nothing was written or invoked.");
+    }
+
+    /// <summary>Waits for a dialog PrintFlow has just confirmed to go away.</summary>
+    private async Task<OperationResult<Unit>> AwaitDialogClosedAsync(
+        WindowHandle dialog, MeituExportDestinationSignature shape, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
+            if (refreshed.IsFailure ||
+                !string.Equals(refreshed.Value.ClassName, shape.WindowClassName, StringComparison.Ordinal))
+            {
+                // Gone, or no longer the dialog PrintFlow confirmed. Either way this wait is
+                // over — and it says nothing at all about whether a file exists, which the
+                // caller establishes against the file system (§13).
+                return OperationResult.Ok();
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<Unit>(OperationFailure.Create(
+                    FailureCode.MeituOpenInputFailed,
+                    $"The destination dialog was confirmed once but was still open " +
+                    $"{_options.DialogTimeout.TotalSeconds:0} s later. Windows is asking something " +
+                    "PrintFlow has no signed answer for — most plausibly a confirm-overwrite prompt. " +
+                    "The confirm control was not invoked again.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["dialogTitle"] = refreshed.Value.Title,
+                        ["confirmInvoked"] = "once",
+                    }));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Backs out of the Save surface through its signed cancel control, writing nothing.</summary>
+    /// <remarks>
+    /// The identity probe's cancel control is reused deliberately: it is the same surface and the
+    /// same control, already signed, already the only action Part B1.1 permits on it. A second
+    /// signature for the same button would be a second thing to keep in step with the evidence.
+    /// </remarks>
+    private async Task<OperationResult<T>> CancelExportSurfaceAsync<T>(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        OperationFailure failure,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<MeituDocumentIdentitySignature> identity = DocumentIdentitySignature();
+        if (identity.IsSuccess)
+        {
+            // Best effort, and the original failure is what survives either way: a screen that
+            // could not be tidied must not become the reported problem when the reported problem
+            // is that PrintFlow refused to export (§26).
+            await CancelIdentityDialogAsync(target, surface, identity.Value, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        return OperationResult.Fail<T>(failure);
+    }
+
+    /// <summary>Backs out of the destination dialog through its signed cancel control.</summary>
+    private async Task<OperationResult<T>> CancelDestinationAsync<T>(
+        MeituTarget target,
+        ExternalWindowRef dialog,
+        MeituExportDestinationSignature shape,
+        OperationFailure failure,
+        CancellationToken cancellationToken)
+    {
+        if (_locator.Refresh(dialog.Handle).IsSuccess)
+        {
+            OperationResult<UiElementRef> cancel = FindDestinationControl(
+                target, dialog.Handle, shape.CancelAutomationId, shape.CancelControlType, "cancel control");
+            if (cancel.IsSuccess)
+            {
+                _elements.Invoke(cancel.Value);
+            }
+        }
+
+        await Task.CompletedTask.ConfigureAwait(false);
+        return OperationResult.Fail<T>(failure);
     }
 
     private static OperationFailure TargetLost(

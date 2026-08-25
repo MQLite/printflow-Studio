@@ -32,6 +32,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     private readonly IExternalAppWindowLocator _locator;
     private readonly IMeituUiDriver _driver;
     private readonly IWorkspace _workspace;
+    private readonly IFileInspector _inspector;
+    private readonly IMeituOutputProbe _outputs;
     private readonly MeituAutomationOptions _options;
     private readonly TimeProvider _clock;
 
@@ -40,6 +42,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         IExternalAppWindowLocator locator,
         IMeituUiDriver driver,
         IWorkspace workspace,
+        IFileInspector inspector,
+        IMeituOutputProbe outputs,
         MeituAutomationOptions options,
         TimeProvider clock)
     {
@@ -47,6 +51,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         ArgumentNullException.ThrowIfNull(locator);
         ArgumentNullException.ThrowIfNull(driver);
         ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentNullException.ThrowIfNull(inspector);
+        ArgumentNullException.ThrowIfNull(outputs);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
 
@@ -54,6 +60,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         _locator = locator;
         _driver = driver;
         _workspace = workspace;
+        _inspector = inspector;
+        _outputs = outputs;
         _options = options;
         _clock = clock;
     }
@@ -65,31 +73,351 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     public AdapterExecutionMode Mode => AdapterExecutionMode.Production;
 
     /// <summary>
-    /// Always fails: no Meitu operation is automated in Part A.
+    /// Runs one Meitu operation end to end, and returns success only when a validated output
+    /// file exists on the controlled path (Epic 11300 Part B2B §3, §27).
     /// </summary>
     /// <remarks>
-    /// Written as an unconditional refusal rather than left unimplemented so that wiring this
-    /// adapter into a workflow — deliberately or by accident — produces a structured, logged,
-    /// operator-readable failure instead of a <c>NotImplementedException</c> in front of
-    /// someone trying to work.
+    /// This is the first slice in which this method can succeed, and the boundary it enforces is
+    /// worth stating as a list because every item on it was, at some point, something a shorter
+    /// implementation would have been happy to call success: opening the file, clicking the
+    /// module, Busy ending, the Save surface closing. None of them appears below as a terminal
+    /// condition. What does is a file at the path this attempt named, which stopped changing,
+    /// which was read to the end, and which inspects as a PNG no smaller than the working copy —
+    /// with that working copy still byte-for-byte what PrintFlow handed over.
+    ///
+    /// <see cref="MeituOperation.RemoveBackground"/> still refuses unconditionally. The route
+    /// below is specific to Enhancement in every part: its module, its Busy and completion
+    /// signatures, and a dimension rule that would be wrong for a cut-out.
     /// </remarks>
-    public Task<OperationResult<AdapterOutput>> ProcessAsync(
+    public async Task<OperationResult<AdapterOutput>> ProcessAsync(
         MeituRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return Task.FromResult(OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
-            FailureCode.AdapterUnavailable,
-            $"The production Meitu adapter implements the Epic 11300 Part A safety foundation only; " +
-            $"'{request.Operation}' automation is Part B. No file was produced and no Revision may be created.",
-            isRetryable: false,
-            context: new Dictionary<string, string>
-            {
-                ["adapterId"] = AdapterId,
-                ["operation"] = request.Operation.ToString(),
-                ["implementedScope"] = "launch, identify, safe-state check, open working copy",
-            })));
+        if (request.Operation != MeituOperation.Enhance)
+        {
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.AdapterUnavailable,
+                $"The production Meitu adapter automates Enhancement only; '{request.Operation}' is a " +
+                "later slice. No file was produced and no Revision may be created.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["adapterId"] = AdapterId,
+                    ["operation"] = request.Operation.ToString(),
+                    ["implementedScope"] = "Enhancement: open, identify, enhance, export, validate",
+                }));
+        }
+
+        OperationResult<Unit> references = ValidateRequestReferences(request);
+        if (references.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(references.Failure);
+        }
+
+        DateTimeOffset startedAt = _clock.GetUtcNow();
+
+        // Read before anything else touches it. This is both halves of §19's evidence — the
+        // dimensions the result is measured against, and the digest that says the input survived
+        // — and neither is worth anything taken after Meitu has had the file.
+        OperationResult<FileFacts> sourceBefore = await InspectManagedFileAsync(request.Input, cancellationToken)
+            .ConfigureAwait(false);
+        if (sourceBefore.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(sourceBefore.Failure);
+        }
+
+        OperationResult<MeituOpenedWorkingCopy> opened =
+            await OpenWorkingCopyAsync(request.Input, cancellationToken).ConfigureAwait(false);
+        if (opened.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(opened.Failure);
+        }
+
+        OperationResult<MeituEnhancementOutcome> enhanced =
+            await EnhanceAsync(opened.Value, request.Input, cancellationToken).ConfigureAwait(false);
+        if (enhanced.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(enhanced.Failure);
+        }
+
+        OperationResult<MeituExportedOutput> exported = await ExportEnhancedResultAsync(
+            enhanced.Value, request.Input, sourceBefore.Value, request.ExpectedOutput, cancellationToken)
+            .ConfigureAwait(false);
+        if (exported.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(exported.Failure);
+        }
+
+        // The output exists and is valid from here on, and nothing below may take that away.
+        // §26 is explicit: a Meitu that could not be returned to a neutral state is a warning
+        // about the next attempt, not a reason to discard a file this one legitimately produced.
+        string cleanup = await ReturnToNeutralStateAsync(enhanced.Value.Target, cancellationToken)
+            .ConfigureAwait(false);
+
+        return OperationResult.Ok(new AdapterOutput(
+            exported.Value.File,
+            _clock.GetUtcNow() - startedAt,
+            $"meitu:enhance; source {Describe(sourceBefore.Value)}; output {Describe(exported.Value.Facts)}; " +
+            $"format {exported.Value.Evidence.ConfirmedFormatValue}; " +
+            $"settled after {exported.Value.ObservationsToSettle} observation(s); " +
+            $"enhancement {(opened.Value.Load.AutoStartedEnhancement ? "auto-started by Meitu and waited out" : "invoked by PrintFlow")}; " +
+            $"cleanup {cleanup}"));
     }
+
+    /// <summary>
+    /// Checks everything about the request that can be decided before Meitu is involved
+    /// (Epic 11300 Part B2B §4, §7, §19, §33).
+    /// </summary>
+    /// <remarks>
+    /// The input-is-not-the-output check is the one that would be easy to leave out and
+    /// expensive to omit. Until this slice the workflow named the working copy as its own
+    /// expected output, because the fake adapter "processes in place" — and an in-place
+    /// production export would mean Meitu writing over the file PrintFlow is in the middle of
+    /// comparing against. §19 requires the enhanced result to be a new file, and this is where
+    /// that stops depending on the caller having remembered.
+    /// </remarks>
+    private OperationResult<Unit> ValidateRequestReferences(MeituRequest request)
+    {
+        if (request.Input.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.PreconditionNotMet,
+                $"Meitu may only be given a Working copy; '{request.Input.RelativePath}' is in " +
+                $"{request.Input.Area}. No Meitu window was touched.");
+        }
+
+        if (request.ExpectedOutput.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.PreconditionNotMet,
+                $"A Meitu result may only be written into the Working area; " +
+                $"'{request.ExpectedOutput.RelativePath}' is in {request.ExpectedOutput.Area}. Approved " +
+                "and Rejected are reached by promotion after review, never by an external application.");
+        }
+
+        if (string.Equals(
+                request.ExpectedOutput.RelativePath, request.Input.RelativePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.PreconditionNotMet,
+                $"The expected output '{request.ExpectedOutput.RelativePath}' is the working copy itself. " +
+                "The enhanced result must be a new file: exporting over the input would destroy the bytes " +
+                "the attempt is validated against. Nothing was invoked.");
+        }
+
+        return OperationResult.Ok();
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<FileFacts>> InspectManagedFileAsync(
+        WorkspaceFileRef file, CancellationToken cancellationToken) =>
+        await _inspector.InspectAsync(_workspace.ResolveAbsolute(file), cancellationToken)
+            .ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituExportedOutput>> ExportEnhancedResultAsync(
+        MeituEnhancementOutcome enhancement,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(enhancement);
+        ArgumentNullException.ThrowIfNull(workingCopyFactsBefore);
+
+        // Restated rather than inherited, exactly as the enhancement route restates it. This
+        // method resolves two references to real paths and drives an application to write to one
+        // of them; "the caller already checked" is the reasoning that lets the second way in
+        // through unchecked (§16).
+        if (workingCopy.Area != WorkspaceArea.Working || output.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(
+                FailureCode.PreconditionNotMet,
+                $"An export runs between two Working references; '{workingCopy.RelativePath}' is in " +
+                $"{workingCopy.Area} and '{output.RelativePath}' is in {output.Area}. Nothing was invoked.");
+        }
+
+        if (string.Equals(output.RelativePath, workingCopy.RelativePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<MeituExportedOutput>(
+                FailureCode.PreconditionNotMet,
+                "The export destination is the working copy itself. Nothing was invoked.");
+        }
+
+        string destination = _workspace.ResolveAbsolute(output);
+
+        // §33. The attempt directory is fresh, so anything already sitting on this exact path is
+        // something PrintFlow cannot account for — and the one thing it must not do with a file
+        // it cannot account for is write over it. There is no collision-suffix rule here on
+        // purpose: uniqueness comes from the attempt directory, and quietly renaming the output
+        // would hide the fact that an attempt's own workspace was not what it expected.
+        if (File.Exists(destination))
+        {
+            return OperationResult.Fail<MeituExportedOutput>(OperationFailure.Create(
+                FailureCode.PreconditionNotMet,
+                $"'{output.RelativePath}' already exists inside this attempt's own working directory. " +
+                "PrintFlow will not overwrite a file it did not create in this attempt, and will not " +
+                "silently write somewhere else instead. Nothing was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["expectedOutput"] = output.RelativePath,
+                    ["exportInvoked"] = "false",
+                }));
+        }
+
+        OperationResult<MeituExportEvidence> exported = await _driver.ExportResultAsync(
+            enhancement.Target,
+            workingCopy.FileName,
+            enhancement.ObservedDocumentIdentity,
+            destination,
+            cancellationToken).ConfigureAwait(false);
+
+        if (exported.IsFailure)
+        {
+            return Capture<MeituExportedOutput>(enhancement.Target, exported.Failure, "export-failed");
+        }
+
+        // §13, §14. From here the screen is irrelevant: the file system is the authority on
+        // whether anything was produced, and the Save surface having closed is not evidence.
+        OperationResult<int> settled = await AwaitSettledOutputAsync(destination, cancellationToken)
+            .ConfigureAwait(false);
+        if (settled.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(settled.Failure);
+        }
+
+        OperationResult<FileFacts> outputFacts = await InspectManagedFileAsync(output, cancellationToken)
+            .ConfigureAwait(false);
+        if (outputFacts.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(outputFacts.Failure);
+        }
+
+        OperationResult<Unit> valid = MeituEnhancementOutputRule.Validate(
+            workingCopyFactsBefore, outputFacts.Value, ImageFormat.Png);
+        if (valid.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(valid.Failure);
+        }
+
+        OperationResult<FileFacts> sourceAfter = await InspectManagedFileAsync(workingCopy, cancellationToken)
+            .ConfigureAwait(false);
+        if (sourceAfter.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(sourceAfter.Failure);
+        }
+
+        OperationResult<Unit> unchanged = MeituEnhancementOutputRule.ConfirmSourceUnchanged(
+            workingCopyFactsBefore, sourceAfter.Value, workingCopy.FileName);
+
+        return unchanged.IsFailure
+            ? OperationResult.Fail<MeituExportedOutput>(unchanged.Failure)
+            : OperationResult.Ok(new MeituExportedOutput(
+                output, outputFacts.Value, exported.Value, settled.Value));
+    }
+
+    /// <summary>
+    /// Waits for the controlled output to appear and stop changing (Epic 11300 Part B2B §14, §15).
+    /// </summary>
+    /// <remarks>
+    /// Cancellation stops the wait and deliberately leaves whatever is on disk alone. Meitu may
+    /// still be writing it, and deleting a file another process holds is not a cleanup PrintFlow
+    /// can prove is safe; an unreferenced file in an attempt's own working directory is handled
+    /// by the workspace's existing quarantine policy, which does not delete either (§34).
+    /// </remarks>
+    private async Task<OperationResult<int>> AwaitSettledOutputAsync(
+        string destination, CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.OutputStabilityTimeout;
+        List<MeituOutputObservation> observations = [];
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            observations.Add(_outputs.Probe(destination));
+            if (MeituOutputStabilityRule.IsSettled(observations))
+            {
+                return OperationResult.Ok(observations.Count);
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                MeituOutputObservation last = observations[^1];
+                return OperationResult.Fail<int>(OperationFailure.Create(
+                    last.Exists ? FailureCode.OutputUnreadable : FailureCode.OutputMissing,
+                    $"The controlled output did not settle within " +
+                    $"{_options.OutputStabilityTimeout.TotalSeconds:0} s: " +
+                    $"{MeituOutputStabilityRule.DescribeUnsettled(observations)}. The export was invoked " +
+                    "once and was not repeated; no Revision may be created.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["observations"] = observations.Count.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["exists"] = last.Exists ? "true" : "false",
+                        ["byteLength"] = last.ByteLength.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["readable"] = last.CanOpenForRead ? "true" : "false",
+                    }));
+            }
+
+            await Task.Delay(_options.OutputPollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Tidies Meitu after a successful export, and reports rather than fails
+    /// (Epic 11300 Part B2B §24, §26).
+    /// </summary>
+    /// <remarks>
+    /// Returns a description instead of a result because there is no caller-visible decision to
+    /// make: the output already exists and is already validated, so the only question is what to
+    /// write down. What the caller must not be able to do is treat a tidy-up problem as a
+    /// processing problem, and a method that cannot fail cannot be misread that way.
+    ///
+    /// The order matters. Meitu's post-save surface disables the editor while it is up, so the
+    /// document cannot be closed until it is dismissed — and the close is what makes the next
+    /// attempt's open a clean one. Closing after an export was observed to reach the empty editor
+    /// directly: Meitu no longer considers the document modified, so the 温馨提示 prompt that
+    /// Part B2A recorded does not appear. If it appears anyway, the close route classifies it as
+    /// a blocking modal and stops without touching it, and that is what gets reported here.
+    /// </remarks>
+    private async Task<string> ReturnToNeutralStateAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        try
+        {
+            OperationResult<bool> dismissed = await _driver
+                .DismissExportResultSurfaceAsync(target, cancellationToken).ConfigureAwait(false);
+            if (dismissed.IsFailure)
+            {
+                return $"WARNING: Meitu's save-confirmation surface could not be dismissed " +
+                       $"({dismissed.Failure.Code}). The output is valid; the next attempt must not " +
+                       "proceed until an operator has cleared it.";
+            }
+
+            OperationResult<MeituTarget> closed = await _driver
+                .CloseDocumentAsync(target, cancellationToken).ConfigureAwait(false);
+
+            return closed.IsSuccess
+                ? "the editor was returned to its signed empty state"
+                : $"WARNING: the document is still loaded ({closed.Failure.Code}: " +
+                  $"{closed.Failure.TechnicalDetail}). The output is valid; Meitu is not in a state the " +
+                  "next attempt may blindly proceed against.";
+        }
+        catch (OperationCanceledException)
+        {
+            // §34: cancellation after the output exists must not discard it. The result is
+            // already validated; only the tidying is abandoned.
+            return "WARNING: cleanup was cancelled. The output is valid; the document may still be loaded.";
+        }
+    }
+
+    private static string Describe(FileFacts facts) =>
+        $"{facts.Format} {facts.PixelWidth}x{facts.PixelHeight} {facts.ByteLength} bytes sha256={facts.Sha256}";
 
     /// <inheritdoc />
     public async Task<OperationResult<MeituReadiness>> EnsureReadyAsync(CancellationToken cancellationToken)
@@ -192,7 +520,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         // handed over", polling for that state is polling for something unreachable, and
         // 30 seconds of it would report a timeout as though the open had been slow rather than
         // as what it is: PrintFlow has no signed way to tell which document is loaded (§10, §14).
-        if (baseline.Value.EditorWithWorkingCopy is null)
+        if (baseline.Value.DocumentIdentity is null)
         {
             return Capture<MeituOpenedWorkingCopy>(
                 opened.Value,
@@ -211,20 +539,109 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 "open-unconfirmable");
         }
 
-        OperationResult<MeituStateSnapshot> confirmed = await ConfirmStateAsync(
-            opened.Value,
-            workingCopy.FileName,
-            _options.OpenConfirmationTimeout,
-            state => state.State == MeituStartingState.KnownEditorWithExpectedWorkingCopy,
-            cancellationToken).ConfigureAwait(false);
+        // Before identity, and this order is required rather than convenient. Meitu can begin
+        // enhancing the moment the document appears, and while it is computing the editor is
+        // disabled and the Save surface the identity probe needs cannot be raised — so probing
+        // first would fail on a run that is proceeding perfectly normally. Watching first also
+        // captures the one fact that cannot be recovered later: whether the work now running
+        // started after *this* open (§20, §21, §22).
+        OperationResult<MeituLoadObservation> load = await _driver
+            .ObserveLoadedDocumentAsync(opened.Value, workingCopy.FileName, cancellationToken)
+            .ConfigureAwait(false);
+        if (load.IsFailure)
+        {
+            return Capture<MeituOpenedWorkingCopy>(opened.Value, load.Failure, "open-unsettled");
+        }
+
+        OperationResult<MeituStateSnapshot> confirmed = await _driver
+            .ConfirmWorkingCopyIdentityAsync(opened.Value, workingCopy.FileName, cancellationToken)
+            .ConfigureAwait(false);
 
         if (confirmed.IsFailure)
         {
             return Capture<MeituOpenedWorkingCopy>(opened.Value, confirmed.Failure, "open-unconfirmed");
         }
 
-        return OperationResult.Ok(new MeituOpenedWorkingCopy(opened.Value, confirmed.Value));
+        // The identity probe is what makes the observation above attributable. Busy was seen
+        // between this open and this probe, and the probe says the editor is holding exactly the
+        // file PrintFlow handed over — so an enhancement Meitu started by itself is provably an
+        // enhancement of this working copy. §20 asks for the strongest safe route available;
+        // this is it, and if it fails nothing further happens.
+        return OperationResult.Ok(new MeituOpenedWorkingCopy(opened.Value, confirmed.Value, load.Value));
     }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituEnhancementOutcome>> EnhanceAsync(
+        MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(opened);
+
+        // The same boundary as the open path, restated rather than inherited. Enhancement is
+        // the first irreversible thing this adapter does to a document, and "the caller already
+        // checked" is exactly the reasoning that lets a Source or Approved reference through
+        // once someone adds a second way in (§16).
+        if (workingCopy.Area != WorkspaceArea.Working)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(
+                FailureCode.PreconditionNotMet,
+                $"Meitu may only be asked to enhance a Working copy; '{workingCopy.RelativePath}' is in " +
+                $"{workingCopy.Area}. No Enhancement action was invoked.");
+        }
+
+        // Meitu already did it. The open watched Busy start and finish over this document and
+        // the identity probe then confirmed the document, so the work is this attempt's work —
+        // and invoking the module now would not run it again but toggle it off, discarding the
+        // result. Nothing is invoked (§20, §21).
+        if (opened.Load is { AutoStartedEnhancement: true, Busy: { } busy, Completion: { } completion })
+        {
+            OperationResult<MeituStateSnapshot> after = await _driver
+                .ConfirmWorkingCopyIdentityAsync(opened.Target, workingCopy.FileName, cancellationToken)
+                .ConfigureAwait(false);
+            if (after.IsFailure)
+            {
+                return Capture<MeituEnhancementOutcome>(
+                    opened.Target, after.Failure, "auto-enhancement-unconfirmed");
+            }
+
+            if (after.Value.Observation.ObservedDocumentIdentity is not { Length: > 0 } identity)
+            {
+                return OperationResult.Fail<MeituEnhancementOutcome>(
+                    FailureCode.MeituUnknownState,
+                    "The identity probe reported success without a document-derived value, so an " +
+                    "Enhancement Meitu started by itself cannot be attributed to this working copy. " +
+                    "Nothing was exported.");
+            }
+
+            return OperationResult.Ok(new MeituEnhancementOutcome(
+                opened.Target, identity, opened.State, busy, completion, after.Value));
+        }
+
+        // The state the open path confirmed is a fact about the past. Nothing is invoked on the
+        // strength of it: RunEnhancementAsync re-probes identity, re-acquires the editor and
+        // re-verifies the target before it produces any input (§5, §6, §10).
+        //
+        // The stale-module case reaches here too, and correctly. A completion panel left over
+        // from the previous document is not an enhancement of this one, so the run proceeds to
+        // the pre-invoke guard — which refuses, naming the reason that actually applies: the
+        // module is selected, so invoking it would deselect it rather than start work (§21).
+        OperationResult<MeituEnhancementOutcome> run = await _driver
+            .RunEnhancementAsync(opened.Target, workingCopy.FileName, cancellationToken)
+            .ConfigureAwait(false);
+
+        return run.IsFailure
+            ? Capture<MeituEnhancementOutcome>(opened.Target, run.Failure, "enhancement-failed")
+            : run;
+    }
+
+    /// <inheritdoc />
+    public Task<OperationResult<bool>> DismissExportResultSurfaceAsync(
+        MeituTarget target, CancellationToken cancellationToken) =>
+        _driver.DismissExportResultSurfaceAsync(target, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<OperationResult<MeituTarget>> CloseDocumentAsync(
+        MeituTarget target, CancellationToken cancellationToken) =>
+        _driver.CloseDocumentAsync(target, cancellationToken);
 
     /// <summary>Reuses an already-running instance, inspecting it exactly once (§15).</summary>
     private async Task<OperationResult<MeituReadiness>> AttachAsync(

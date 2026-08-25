@@ -56,16 +56,31 @@ public sealed class FakeMeituProcessor : IMeituProcessor
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // The request's input and expected-output references already point at the same
-        // working-copy file (SessionService creates one working copy per attempt); the fake
-        // "processes" it in place, which is sufficient to exercise validation genuinely without
-        // claiming any real enhancement or background-removal behaviour.
+        // The expected output is a new file beside the working copy, so the fake produces one:
+        // a byte-for-byte copy of its input at the path the workflow named. It claims no
+        // enhancement or background-removal behaviour — the bytes are identical and the adapter
+        // id says which adapter made them — but producing a real, separate file is what keeps
+        // everything downstream genuine, including the two things the production adapter now
+        // depends on: that the result is a distinct file, and that the working copy it came from
+        // is still there afterwards (Epic 11300 Part B2B §19).
         return FakeAdapterExecution.RunAsync(
             _scenario,
             request.ExpectedOutput,
             _workspace,
             _hangStarted,
-            () => OperationResult.Ok(new AdapterOutput(request.ExpectedOutput, TimeSpan.Zero, "fake")),
+            () => SucceedAsync(request, cancellationToken),
             cancellationToken);
+    }
+
+    private async Task<OperationResult<AdapterOutput>> SucceedAsync(
+        MeituRequest request, CancellationToken cancellationToken)
+    {
+        OperationResult<Unit> written = await _workspace
+            .WriteReservedAsync(request.ExpectedOutput, request.Input, cancellationToken)
+            .ConfigureAwait(false);
+
+        return written.IsFailure
+            ? OperationResult.Fail<AdapterOutput>(written.Failure)
+            : OperationResult.Ok(new AdapterOutput(request.ExpectedOutput, TimeSpan.Zero, "fake"));
     }
 }

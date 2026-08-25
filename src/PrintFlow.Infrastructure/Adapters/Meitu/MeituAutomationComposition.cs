@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
@@ -39,7 +40,42 @@ public static class MeituAutomationComposition
         IWorkspace workspace,
         string evidenceDirectory,
         TimeProvider clock,
-        MeituAutomationOptions? options = null)
+        MeituAutomationOptions? options = null) =>
+        Create(presetManifestAbsolutePath, expectedPresetSha256, workspace, evidenceDirectory, clock, options);
+
+    /// <summary>
+    /// The same object graph, reached through the workflow seam instead
+    /// (Epic 11300 Part B2B §37).
+    /// </summary>
+    /// <remarks>
+    /// Part B2B is the first slice in which <see cref="IMeituProcessor.ProcessAsync"/> can
+    /// return a success, and §37 asks for that to be proved through the production-adapter seam
+    /// without enabling Production composition broadly. This is how: the same adapter, reached
+    /// through the same interface <c>SessionService</c> would use, composed with no session, no
+    /// repository, no workflow engine and no registration.
+    ///
+    /// What that buys is exactly what it looks like. A caller here can run a real Enhancement and
+    /// get a real <c>AdapterOutput</c> back; it cannot start a session, record an attempt or
+    /// create a Revision, because none of that is reachable from this graph. <c>IEnvironmentGate</c>
+    /// stays authoritative over everything it was authoritative over before, and Epic 11500's
+    /// refusal of Production adapters in the application composition is untouched.
+    /// </remarks>
+    public static IMeituProcessor CreateProductionProcessor(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        MeituAutomationOptions? options = null) =>
+        Create(presetManifestAbsolutePath, expectedPresetSha256, workspace, evidenceDirectory, clock, options);
+
+    private static ProductionMeituProcessor Create(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        MeituAutomationOptions? options)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(presetManifestAbsolutePath);
         ArgumentNullException.ThrowIfNull(workspace);
@@ -57,6 +93,13 @@ public static class MeituAutomationComposition
         GuardedMeituUiDriver driver = new(
             locator, elements, input, evidence, baselines, resolved, clock);
 
-        return new ProductionMeituProcessor(baselines, locator, driver, workspace, resolved, clock);
+        // The same inspector the workflow uses for every other file. §16 rules out a second
+        // image-inspection implementation inside the adapter, and composing the real one here is
+        // what makes that structural rather than a note in a report.
+        WicFileInspector inspector = new();
+
+        return new ProductionMeituProcessor(
+            baselines, locator, driver, workspace, inspector, new FileSystemMeituOutputProbe(),
+            resolved, clock);
     }
 }

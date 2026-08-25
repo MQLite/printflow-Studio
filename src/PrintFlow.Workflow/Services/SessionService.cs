@@ -670,8 +670,36 @@ public sealed class SessionService : ISessionService
                     ? MeituOperation.Enhance
                     : MeituOperation.RemoveBackground;
 
+                // The expected output is a new file beside the working copy, named by the same
+                // preset-driven naming authority that names the approved deliverable, and never
+                // the working copy itself.
+                //
+                // It used to be the working copy, because the fake adapter processes in place and
+                // nothing downstream cared. A real Meitu does care: exporting over the input would
+                // destroy the very bytes the attempt validates its result against, and §19 of
+                // Epic 11300 Part B2B requires the enhanced result to be a new file. Uniqueness
+                // across attempts comes from the attempt's own directory rather than from the
+                // name, which is what lets a rejected result and the retry that replaces it both
+                // survive on disk (Epic 11200 Part C2 §20).
+                OperationResult<NamingPatternSet> meituPatterns = _presetProvider.GetNamingPatterns();
+                if (meituPatterns.IsFailure)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(meituPatterns.Failure);
+                }
+
+                string producedName = OutputFileNaming.BuildProposedFileName(
+                    work.Operation == OperationKind.Enhance
+                        ? NamingArtifactKind.Enhanced
+                        : NamingArtifactKind.Cutout,
+                    aggregate.Session.OutputName,
+                    meituPatterns.Value);
+
                 OperationResult<AdapterOutput> result = await _meitu.ProcessAsync(
-                    new MeituRequest(workingCopy.Value, operation, ParentDirOf(workingCopy.Value), workingCopy.Value),
+                    new MeituRequest(
+                        workingCopy.Value,
+                        operation,
+                        ParentDirOf(workingCopy.Value),
+                        SiblingOf(workingCopy.Value, producedName)),
                     cancellationToken);
                 if (result.IsFailure)
                 {

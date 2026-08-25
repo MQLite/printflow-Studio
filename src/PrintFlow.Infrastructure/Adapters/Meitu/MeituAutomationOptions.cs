@@ -29,6 +29,55 @@ public sealed record MeituAutomationOptions
     /// <summary>How long to wait for the working copy to become visible in Meitu after opening it.</summary>
     public TimeSpan OpenConfirmationTimeout { get; init; } = TimeSpan.FromSeconds(30);
 
+    /// <summary>How long Enhancement has to present its signed Busy state after being invoked.</summary>
+    /// <remarks>
+    /// Separate from the completion budget, and much shorter, because the two timeouts answer
+    /// different questions. This one asks "did the control PrintFlow invoked actually start
+    /// anything?" — and a control that produced no observable work within half a minute did not
+    /// do what the evidence says it does. The other asks "how long may the work take?", which is
+    /// a property of the image (Part B2A §17).
+    /// </remarks>
+    public TimeSpan EnhancementBusyTimeout { get; init; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>How long a running Enhancement has to reach its signed completion state.</summary>
+    public TimeSpan EnhancementCompletionTimeout { get; init; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// How long to watch, read-only, for an Enhancement Meitu starts by itself after a document
+    /// is opened (Epic 11300 Part B2B §20).
+    /// </summary>
+    /// <remarks>
+    /// Meitu retains its selected module across document loads, so opening a file can start work
+    /// with no PrintFlow input at all. Observed live, the unrequested run began within half a
+    /// second of the document appearing; five seconds is ten polls of margin on that, and it is
+    /// only ever spent when the module is already selected — a first reading that shows no module
+    /// panel ends the watch immediately, because nothing can auto-start without one.
+    ///
+    /// Erring long is the safe direction here, and it is worth being explicit about why: this
+    /// budget decides whether an auto-started enhancement is <i>seen</i>. Missing it does not
+    /// cause a second enhancement — the pre-invoke guard still refuses over running work — but it
+    /// turns a run that would have succeeded into a refusal.
+    /// </remarks>
+    public TimeSpan AutoEnhancementWatchTimeout { get; init; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>How long the controlled output has to appear and settle after the export is confirmed.</summary>
+    /// <remarks>
+    /// Separate from every UI timeout because it measures something else entirely: not whether a
+    /// control responded, but how long Meitu takes to finish writing an upscaled PNG. The live
+    /// 1.1 MB result was complete within a second; two minutes is the allowance for a production
+    /// image several times larger on a busy machine.
+    /// </remarks>
+    public TimeSpan OutputStabilityTimeout { get; init; } = TimeSpan.FromMinutes(2);
+
+    /// <summary>The interval between observations while waiting for the controlled output to settle.</summary>
+    /// <remarks>
+    /// Faster than <see cref="PollInterval"/> because it costs almost nothing — a file-system
+    /// stat rather than an automation tree walk — and because the stability rule counts
+    /// observations rather than seconds, so a shorter interval makes the same rule settle sooner
+    /// without weakening it.
+    /// </remarks>
+    public TimeSpan OutputPollInterval { get; init; } = TimeSpan.FromMilliseconds(250);
+
     /// <summary>The interval between observations while polling.</summary>
     public TimeSpan PollInterval { get; init; } = TimeSpan.FromMilliseconds(500);
 

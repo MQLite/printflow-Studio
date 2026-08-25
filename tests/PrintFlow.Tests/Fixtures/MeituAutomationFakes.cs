@@ -64,6 +64,19 @@ internal static class MeituFakes
     internal static MeituEditorSignature EditorWithDocument() =>
         new(EditorTitle, EditorMarkers, MinimumRequiredMarkers: 3, MeituFileNameLocation.TitleOrVisibleText);
 
+    internal static MeituDocumentIdentitySignature DocumentIdentity() => new(
+        EditorWithDocument(),
+        SaveMarkerName: "保存",
+        SaveControl: new MeituCardShape(
+            "Text", "QLabel", ".textLabel", "Button", "OptionButton", ".saveButton", UiPatternKind.Invoke),
+        DialogTitle: "Form",
+        DialogClassName: "QtSaveDialog",
+        FileNameControl: new MeituControlSignature(
+            "", ".wName.fileNameEdit", "Edit", "QLineEdit", UiPatternKind.Value),
+        CancelControl: new MeituControlSignature(
+            "\uE0E6", ".titleFrame.closeButton", "Button", "IconFontButton", UiPatternKind.Invoke),
+        OutputBaseNameSuffix: "_副本");
+
     /// <summary>Markers of the empty editor's open overlay, disjoint from the with-document set.</summary>
     internal static readonly ImmutableArray<string> EmptyEditorMarkers =
         ["打开图片", "新建画布", "手机导入图片", "最近打开"];
@@ -82,18 +95,136 @@ internal static class MeituFakes
         MeituFileNameLocation.TitleOrVisibleText,
         EditorOpenControl());
 
+
+    /// <summary>The automation id every editor tool button on the fake editor shares, as on the real one.</summary>
+    internal const string ModuleAutomationId = "MainWindow.contentsWidget.ModuleButton";
+
+    /// <summary>The fake Enhancement marker. A name, not one of the welcome markers.</summary>
+    internal const string EnhancementMarker = "ENH-ACTION";
+
+    /// <summary>
+    /// Positive Busy markers, in the shape the real evidence records: two mutually exclusive
+    /// progress texts and one abort affordance, of which any two must be visible.
+    /// </summary>
+    internal static readonly ImmutableArray<string> BusyMarkers =
+        ["ENH-RUNNING", "ENH-ELAPSED", "ENH-ABORT"];
+
+    /// <summary>
+    /// Positive completion markers: the five controls of the panel the action creates, of which
+    /// four must be visible.
+    /// </summary>
+    internal static readonly ImmutableArray<string> CompletionMarkers =
+        ["ENH-PANEL-A", "ENH-PANEL-B", "ENH-PANEL-C", "ENH-PANEL-D", "ENH-PANEL-E"];
+
+    /// <summary>Visible names that positively read as Busy.</summary>
+    internal static string[] BusyTexts() =>
+        [.. EditorMarkers, .. CompletionMarkers, "ENH-RUNNING", "ENH-ABORT"];
+
+    /// <summary>Visible names that positively read as completed.</summary>
+    internal static string[] CompletedTexts() => [.. EditorMarkers, .. CompletionMarkers];
+
+    internal static MeituCloseDocumentSignature CloseDocument() => new(
+        MarkerName: "关闭图片",
+        Control: new MeituCardShape(
+            "Text", "QLabel", ".textLabel",
+            "Button", "IconTextButton", ".closeButton", UiPatternKind.Invoke));
+
+    /// <summary>
+    /// The signed Enhancement route, with the real one's structure and none of its real values.
+    /// </summary>
+    /// <remarks>
+    /// The owner sits <i>two</i> levels above the marker and the relative id suffix spans both,
+    /// because that is what the workstation evidence records and because a fake that collapsed it
+    /// to one level would let a one-level walk pass every test and still fail on the real editor.
+    /// </remarks>
+    internal static MeituEnhancementSignature Enhancement() => new(
+        ActionMarkerName: EnhancementMarker,
+        ActionControl: new MeituOwnedControlShape(
+            MarkerControlType: "Text",
+            MarkerClassName: "QLabel",
+            MarkerAutomationIdSuffix: ".titleLabel",
+            OwnerControlType: "CheckBox",
+            OwnerClassName: "ModuleButton",
+            OwnerAutomationIdSuffix: ".ModuleButton",
+            MarkerRelativeAutomationIdSuffix: ".buttonWidget.titleLabel",
+            OwnerAncestorDepth: 2,
+            RequiredOwnerPattern: UiPatternKind.Invoke),
+        Busy: new MeituBusySignature(BusyMarkers, MinimumRequiredMarkers: 2),
+        Completion: new MeituCompletionSignature(
+            CompletionMarkers, MinimumRequiredMarkers: 4, RequiresBusyAbsent: true));
+
+    /// <summary>Positive markers of Meitu's post-save confirmation surface.</summary>
+    internal static readonly ImmutableArray<string> ExportResultMarkers = ["EXP-SAVED", "EXP-OPEN-FOLDER"];
+
+    /// <summary>The exact format value the fake export evidence requires.</summary>
+    internal const string ExportFormatValue = "png";
+
+    /// <summary>
+    /// The signed export route, with the real one's structure and none of its real values.
+    /// </summary>
+    /// <remarks>
+    /// The Save surface and the result surface deliberately share <see cref="ExportSurfaceClass"/>
+    /// and the title <c>Form</c>, because they share both on the real workstation and that
+    /// collision is the reason the driver identifies each by its contents. A fake that gave them
+    /// different classes would let a class-only match pass every test here and pick the wrong
+    /// surface on the real one.
+    /// </remarks>
+    internal static MeituExportSignature Export() => new(
+        SurfaceTitle: "Form",
+        SurfaceClassName: ExportSurfaceClass,
+        FileNameControl: new MeituControlSignature(
+            "", ".wName.fileNameEdit", "Edit", "QLineEdit", UiPatternKind.Value),
+        FormatControl: new MeituControlSignature(
+            "", ".SaveMaskWidget.wName.formatCombo", "ComboBox", "NoAnimationComboBox", UiPatternKind.Value),
+        RequiredFormatValue: ExportFormatValue,
+        SaveAsControl: new MeituControlSignature(
+            "EXP-SAVE-AS", ".SaveMaskWidget.saveAsButton", "Button", "QPushButton", UiPatternKind.Invoke),
+        Destination: new MeituExportDestinationSignature(
+            WindowClassName: "#32770",
+            AcceptedTitles: ["另存为"],
+            FileNameAutomationId: "1001",
+            FileNameControlType: "Edit",
+            ConfirmAutomationId: "1",
+            ConfirmControlType: "Button",
+            CancelAutomationId: "2",
+            CancelControlType: "Button"),
+        Result: new MeituExportResultSignature(
+            ExportResultMarkers,
+            MinimumRequiredMarkers: 2,
+            CloseControl: new MeituControlSignature(
+                ExportCloseGlyph, ".SaveResultMaskWidget.titleFrame.closeButton", "Button",
+                "IconFontButton", UiPatternKind.Invoke)));
+
+    /// <summary>The icon-font glyph both Meitu title-bar close controls carry as their name.</summary>
+    /// <remarks>
+    /// A private-use codepoint, not an empty string, and the fake carries it because the real
+    /// control does. Evidence transcribed from a UI dump recorded it as empty — the glyph renders
+    /// as nothing — and the signature then matched no element at all. A fake with a blank name
+    /// would have let that mistake pass every test here and fail on the real surface.
+    /// </remarks>
+    internal const string ExportCloseGlyph = "\uE0E6";
+
+    /// <summary>The window class both Meitu save surfaces share.</summary>
+    internal const string ExportSurfaceClass = "QtSaveDialog";
+
+    /// <summary>A load on which Meitu did nothing of its own accord — the ordinary case.</summary>
+    internal static MeituLoadObservation QuietLoad() => new(
+        MeituEnhancementPhase.Unobserved, AutoStartedEnhancement: false, Busy: null, Completion: null);
     /// <summary>
     /// A baseline with the shape of the real one, and none of its real values.
     /// </summary>
     /// <param name="card">The signed card shape, or <c>null</c> to model a chain that vouches for none.</param>
     /// <param name="fileDialog">The signed picker signature, or <c>null</c>.</param>
-    /// <param name="editorWithWorkingCopy">The signed editor-with-document signature, or <c>null</c>.</param>
+    /// <param name="documentIdentity">The signed Save-dialog document identity, or <c>null</c>.</param>
     /// <param name="editorEmpty">The signed empty-editor signature, with its open control.</param>
     internal static MeituBaseline Baseline(
         MeituCardShape? card = null,
         MeituFileDialogSignature? fileDialog = null,
-        MeituEditorSignature? editorWithWorkingCopy = null,
-        MeituEditorSignature? editorEmpty = null) => new(
+        MeituDocumentIdentitySignature? documentIdentity = null,
+        MeituEditorSignature? editorEmpty = null,
+        MeituCloseDocumentSignature? closeDocument = null,
+        MeituEnhancementSignature? enhancement = null,
+        MeituExportSignature? export = null) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -103,8 +234,11 @@ internal static class MeituFakes
         WelcomeMarkers,
         card ?? CardShape(),
         fileDialog ?? FileDialog(),
-        editorWithWorkingCopy ?? EditorWithDocument(),
-        editorEmpty ?? EditorEmptySignature());
+        documentIdentity ?? DocumentIdentity(),
+        editorEmpty ?? EditorEmptySignature(),
+        closeDocument ?? CloseDocument(),
+        enhancement ?? Enhancement(),
+        export ?? Export());
 
     /// <summary>A baseline whose optional evidence is exactly as supplied, including absent.</summary>
     /// <remarks>
@@ -115,8 +249,11 @@ internal static class MeituFakes
     internal static MeituBaseline BaselineWithout(
         bool card = false,
         bool fileDialog = false,
-        bool editorWithWorkingCopy = false,
-        bool editorEmpty = false) => new(
+        bool documentIdentity = false,
+        bool editorEmpty = false,
+        bool closeDocument = false,
+        bool enhancement = false,
+        bool export = false) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -126,8 +263,11 @@ internal static class MeituFakes
         WelcomeMarkers,
         card ? null : CardShape(),
         fileDialog ? null : FileDialog(),
-        editorWithWorkingCopy ? null : EditorWithDocument(),
-        editorEmpty ? null : EditorEmptySignature());
+        documentIdentity ? null : DocumentIdentity(),
+        editorEmpty ? null : EditorEmptySignature(),
+        closeDocument ? null : CloseDocument(),
+        enhancement ? null : Enhancement(),
+        export ? null : Export());
 
     internal static ExternalProcessRef Process(int id = 4242) =>
         new(id, ExecutablePath, new DateTimeOffset(2026, 8, 24, 9, 0, 0, TimeSpan.Zero));
@@ -232,8 +372,21 @@ internal sealed class FakeWindowLocator : IExternalAppWindowLocator
         ExternalProcessRef process, ExternalWindowRef mainWindow) =>
         OperationResult.Ok<IReadOnlyList<ExternalWindowRef>>(OwnedDialogs);
 
+    /// <summary>
+    /// Runs before each refresh, so a test can model a window that closes after a few looks.
+    /// </summary>
+    /// <remarks>
+    /// The counterpart of <see cref="RecordingUiElementProvider.OnInvoke"/> for the locator, and
+    /// needed for the same reason: "the surface went away" is something that happens <i>over</i>
+    /// a few observations, and a fake whose windows vanish instantly can only prove that a wait
+    /// terminates, never that it waits.
+    /// </remarks>
+    public Action<WindowHandle>? OnRefresh { get; set; }
+
     public OperationResult<ExternalWindowRef> Refresh(WindowHandle handle)
     {
+        OnRefresh?.Invoke(handle);
+
         foreach (List<ExternalWindowRef> windows in _windows.Values)
         {
             ExternalWindowRef? match = windows.FirstOrDefault(w => w.Handle == handle);
@@ -296,6 +449,8 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
     public List<string> Invocations { get; } = [];
 
     public List<(string Element, string Value)> ValueWrites { get; } = [];
+
+    public List<string> ValueReads { get; } = [];
 
     /// <summary>Adds one element beneath a window.</summary>
     public FakeUiElement Add(WindowHandle window, UiElementIdentity identity, FakeUiElement? parent = null)
@@ -363,6 +518,173 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
             Bounds: new UiBounds(1014, 435, 250, 44),
             IsEnabled: true,
             IsOffscreen: false));
+
+    public FakeUiElement AddEditorSaveControl(WindowHandle window, int processId = 4242)
+    {
+        const string saveId = "MainWindow.editorPage.saveButton";
+        FakeUiElement owner = Add(window, new UiElementIdentity(
+            "Button", saveId, "", "OptionButton", processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value], new UiBounds(1700, 50, 70, 36), true, false));
+        Add(window, new UiElementIdentity(
+            "Text", saveId + ".textLabel", "保存", "QLabel", processId,
+            [UiPatternKind.Invoke], new UiBounds(1710, 55, 24, 24), true, false), owner);
+        return owner;
+    }
+
+
+    /// <summary>
+    /// Adds an editor tool button shaped exactly like the observed one: a <c>ModuleButton</c>
+    /// whose <c>titleLabel</c> carries the marker text, with a layout <c>QWidget</c> in between.
+    /// </summary>
+    /// <param name="window">The window the control lives beneath.</param>
+    /// <param name="marker">The signed marker the label is named with.</param>
+    /// <param name="moduleId">The owner's automation id; every real sibling shares one.</param>
+    /// <param name="processId">The process all three elements report.</param>
+    /// <param name="enabled">Whether the owner is enabled.</param>
+    /// <param name="offscreen">Whether the owner is scrolled out of view.</param>
+    /// <remarks>
+    /// The intermediate <c>QWidget</c> is given <c>InvokePattern</c> on purpose. It is the decoy
+    /// the real editor contains, and a rule that walked up to the first invokable ancestor would
+    /// select it, report success and do nothing.
+    /// </remarks>
+    public FakeUiElement AddEnhancementAction(
+        WindowHandle window,
+        string marker = MeituFakes.EnhancementMarker,
+        string moduleId = MeituFakes.ModuleAutomationId,
+        int processId = 4242,
+        bool enabled = true,
+        bool offscreen = false)
+    {
+        FakeUiElement owner = Add(window, new UiElementIdentity(
+            ControlTypeName: "CheckBox",
+            AutomationId: moduleId,
+            Name: string.Empty,
+            ClassName: "ModuleButton",
+            ProcessId: processId,
+            SupportedPatterns: [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Toggle],
+            Bounds: new UiBounds(452, 618, 260, 56),
+            IsEnabled: enabled,
+            IsOffscreen: offscreen));
+
+        FakeUiElement layout = Add(window, new UiElementIdentity(
+            ControlTypeName: "Group",
+            AutomationId: moduleId + ".buttonWidget",
+            Name: string.Empty,
+            ClassName: "QWidget",
+            ProcessId: processId,
+            SupportedPatterns: [UiPatternKind.Invoke, UiPatternKind.Value],
+            Bounds: new UiBounds(452, 618, 260, 56),
+            IsEnabled: true,
+            IsOffscreen: false),
+            owner);
+
+        Add(window, new UiElementIdentity(
+            ControlTypeName: "Text",
+            AutomationId: moduleId + ".buttonWidget.titleLabel",
+            Name: marker,
+            ClassName: "QLabel",
+            ProcessId: processId,
+            SupportedPatterns: [UiPatternKind.Invoke],
+            Bounds: new UiBounds(494, 634, 67, 24),
+            IsEnabled: true,
+            IsOffscreen: false),
+            layout);
+
+        return owner;
+    }
+
+    /// <summary>Adds the loaded editor's close-document control, shaped like the observed one.</summary>
+    public FakeUiElement AddEditorCloseControl(WindowHandle window, int processId = 4242)
+    {
+        const string closeId = "MainWindow.editorPage.closeButton";
+        FakeUiElement owner = Add(window, new UiElementIdentity(
+            "Button", closeId, "", "IconTextButton", processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value], new UiBounds(1307, 215, 90, 36), true, false));
+        Add(window, new UiElementIdentity(
+            "Text", closeId + ".textLabel", "关闭图片", "QLabel", processId,
+            [UiPatternKind.Invoke], new UiBounds(1341, 221, 48, 24), true, false), owner);
+        return owner;
+    }
+    public FakeUiElement AddIdentityDialogControl(
+        WindowHandle dialog,
+        string automationId,
+        string name,
+        string controlType,
+        string className,
+        UiPatternKind pattern,
+        int processId = 4242) =>
+        Add(dialog, new UiElementIdentity(
+            controlType, automationId, name, className, processId,
+            [pattern], new UiBounds(100, 100, 240, 30), true, false));
+
+    /// <summary>
+    /// Adds the three controls PrintFlow uses on Meitu's Save surface, plus the cancel control
+    /// the identity probe signs (Epic 11300 Part B2B §8).
+    /// </summary>
+    /// <remarks>
+    /// The format selector starts at the signed value, as the real one does, so the ordinary
+    /// path exercises "write, then read back and find it already right" rather than a change
+    /// the real application was never observed accepting.
+    /// </remarks>
+    public void AddExportSurfaceControls(WindowHandle surface, int processId = 4242)
+    {
+        Add(surface, new UiElementIdentity(
+            "Edit", "MainWindow.MaskDialog.SaveMaskWidget.wName.fileNameEdit", string.Empty,
+            "QLineEdit", processId, [UiPatternKind.Value], new UiBounds(10, 10, 180, 28), true, false));
+
+        FakeUiElement format = Add(surface, new UiElementIdentity(
+            "ComboBox", "MainWindow.MaskDialog.SaveMaskWidget.wName.formatCombo", string.Empty,
+            "NoAnimationComboBox", processId, [UiPatternKind.Value],
+            new UiBounds(200, 10, 64, 28), true, false));
+
+        Add(surface, new UiElementIdentity(
+            "Button", "MainWindow.MaskDialog.SaveMaskWidget.saveAsButton", "EXP-SAVE-AS",
+            "QPushButton", processId, [UiPatternKind.Invoke], new UiBounds(10, 60, 84, 36), true, false));
+
+        SetReadValue(format.Identity.AutomationId, MeituFakes.ExportFormatValue);
+    }
+
+    /// <summary>
+    /// Adds Meitu's post-save confirmation surface: its markers and its own close control.
+    /// </summary>
+    /// <remarks>
+    /// Given the same window class and title as the Save surface, because the real ones share
+    /// both. Anything that tells them apart here has to be something that tells them apart there.
+    /// </remarks>
+    public void AddExportResultControls(WindowHandle surface, int processId = 4242)
+    {
+        SetTexts(surface, [.. MeituFakes.ExportResultMarkers]);
+
+        Add(surface, new UiElementIdentity(
+            "Button", "MainWindow.MaskDialog.SaveResultMaskWidget.titleFrame.closeButton",
+            MeituFakes.ExportCloseGlyph,
+            "IconFontButton", processId, [UiPatternKind.Invoke], new UiBounds(260, 4, 16, 16), true, false));
+    }
+
+    /// <summary>Adds the destination dialog's file-name, confirm and cancel controls.</summary>
+    /// <remarks>
+    /// The file-name id is deliberately carried by a <c>ComboBox</c> as well as the <c>Edit</c>,
+    /// because it is on the real dialog: the field is an Edit nested in a ComboBox and both
+    /// report id 1001. A resolver that took the first match would get the ComboBox.
+    /// </remarks>
+    public void AddDestinationDialogControls(WindowHandle dialog, int processId = 4242)
+    {
+        Add(dialog, new UiElementIdentity(
+            "ComboBox", "1001", "文件名:", "AppControlHost", processId,
+            [UiPatternKind.Value], new UiBounds(0, 0, 200, 24), true, false));
+
+        Add(dialog, new UiElementIdentity(
+            "Edit", "1001", "文件名:", "Edit", processId,
+            [UiPatternKind.Value], new UiBounds(0, 0, 200, 24), true, false));
+
+        Add(dialog, new UiElementIdentity(
+            "Button", "1", "保存(S)", "Button", processId,
+            [UiPatternKind.Invoke], new UiBounds(0, 40, 80, 24), true, false));
+
+        Add(dialog, new UiElementIdentity(
+            "Button", "2", "取消", "Button", processId,
+            [UiPatternKind.Invoke], new UiBounds(90, 40, 80, 24), true, false));
+    }
 
     /// <summary>Adds a picker control with the identity the signed dialog evidence records.</summary>
     public FakeUiElement AddDialogControl(
@@ -436,11 +758,18 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
 
     private readonly Dictionary<string, string> _values = new(StringComparer.Ordinal);
 
+    public void SetReadValue(string elementDescription, string value) =>
+        _values[elementDescription] = value;
+
     /// <summary>When set, a write is silently dropped — the lost-write case the read-back catches.</summary>
     public bool SilentlyDropValueWrites { get; set; }
 
-    public OperationResult<string> GetValue(UiElementRef element) =>
-        OperationResult.Ok(_values.TryGetValue(Describes(element), out string? value) ? value : string.Empty);
+    public OperationResult<string> GetValue(UiElementRef element)
+    {
+        string description = Describes(element);
+        ValueReads.Add(description);
+        return OperationResult.Ok(_values.TryGetValue(description, out string? value) ? value : string.Empty);
+    }
 
     public OperationResult<Unit> SetValue(UiElementRef element, string value)
     {
@@ -453,9 +782,14 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         return OperationResult.Ok();
     }
 
-    public OperationResult<IReadOnlyList<string>> ReadTextSnapshot(WindowHandle root, int maxItems) =>
-        OperationResult.Ok<IReadOnlyList<string>>(
+    public Action<WindowHandle>? OnReadTextSnapshot { get; set; }
+
+    public OperationResult<IReadOnlyList<string>> ReadTextSnapshot(WindowHandle root, int maxItems)
+    {
+        OnReadTextSnapshot?.Invoke(root);
+        return OperationResult.Ok<IReadOnlyList<string>>(
             Texts.TryGetValue(root.Value, out List<string>? texts) ? texts : []);
+    }
 
     private List<FakeUiElement> Matching(WindowHandle root, UiElementQuery query)
     {

@@ -55,21 +55,33 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.Unknown, matched, observation);
         }
 
-        // 3. The working copy PrintFlow handed over, identified by the name PrintFlow chose and
+        // 3. Meitu computing, decided before any content state. Busy outranks document and
+        //    editor recognition because the editor is still perfectly recognisable while an
+        //    operation is in flight — the toolbar, the document name and the Save control are
+        //    all still there — and a caller that read "the expected working copy is loaded"
+        //    would be entitled to send input into a running enhancement (§13).
+        if (baseline.Enhancement is { } enhancement &&
+            MeituEnhancementRule.IsBusy(enhancement, observation))
+        {
+            return new MeituStateSnapshot(MeituStartingState.Busy, matched, observation);
+        }
+
+        // 4. The working copy PrintFlow handed over, identified by the name PrintFlow chose and
         //    only on the screen the signed editor evidence describes. Three things must hold
         //    together: the editor's exact title, enough of its positive markers, and the
         //    expected name where the evidence says a document name appears. "Some document is
         //    open" is never sufficient, and a name PrintFlow did not choose proves nothing (§14).
         if (observation.ExpectedWorkingCopyFileName is { Length: > 0 } expected &&
-            baseline.EditorWithWorkingCopy is { } editor &&
-            MatchesEditor(editor, observation) &&
-            ShowsFile(observation, expected, editor.FileNameLocation))
+            baseline.DocumentIdentity is { } identity &&
+            MatchesEditor(identity.Editor, observation) &&
+            MeituDocumentIdentityRule.MatchesExpectedWorkingCopy(
+                identity, expected, observation.ObservedDocumentIdentity))
         {
             return new MeituStateSnapshot(
                 MeituStartingState.KnownEditorWithExpectedWorkingCopy, matched, observation);
         }
 
-        // 4. The signed clean start page: its exact recorded title, plus multiple markers.
+        // 5. The signed clean start page: its exact recorded title, plus multiple markers.
         //    The title must match exactly here, not by prefix as in step 2. Meitu's editor is
         //    titled "美图秀秀-图片编辑" — the start page's title with a feature suffix — and the
         //    editor still shows much of the same navigation, so a prefix match plus markers
@@ -81,7 +93,7 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.KnownWelcome, matched, observation);
         }
 
-        // 5. The editor with no document loaded — considered only when nothing has been handed
+        // 6. The editor with no document loaded — considered only when nothing has been handed
         //    over. The restriction is what stops the dangerous reading of §14: if PrintFlow
         //    expected A.png and the editor is showing B.png, step 3 has already declined, and
         //    without this guard an empty-editor signature loose enough to match would turn that
@@ -93,8 +105,8 @@ public static class MeituStateClassifier
             return new MeituStateSnapshot(MeituStartingState.KnownEditorEmpty, matched, observation);
         }
 
-        // 6. Anything else — including a screen whose signature the verified chain does not
-        //    carry, and a processing overlay Part B1 has no signed evidence for.
+        // 7. Anything else — including a screen whose signature the verified chain does not
+        //    carry, and, when no enhancement evidence is signed, a processing overlay.
         return new MeituStateSnapshot(MeituStartingState.Unknown, matched, observation);
     }
 
@@ -173,43 +185,6 @@ public static class MeituStateClassifier
             // "美图秀秀-图片编辑", and a feature suffix on an accepted base title is still the
             // accepted application. The base title itself must still match exactly.
             if (title.StartsWith(accepted, StringComparison.Ordinal))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Whether the expected document name appears where the signed evidence says it appears.
-    /// </summary>
-    /// <remarks>
-    /// The location is part of the signature rather than "anywhere in the UI" because file
-    /// names turn up in places that prove nothing about what is loaded — a recent-files list on
-    /// the start page being the obvious one. Restricting the search to the observed location
-    /// keeps the confirmation a statement about the open document (§13).
-    /// </remarks>
-    private static bool ShowsFile(
-        MeituObservation observation, string fileName, MeituFileNameLocation location)
-    {
-        bool inTitle = location is MeituFileNameLocation.WindowTitle
-                or MeituFileNameLocation.TitleOrVisibleText &&
-            observation.WindowTitle.Contains(fileName, StringComparison.OrdinalIgnoreCase);
-
-        if (inTitle)
-        {
-            return true;
-        }
-
-        if (location is not (MeituFileNameLocation.VisibleText or MeituFileNameLocation.TitleOrVisibleText))
-        {
-            return false;
-        }
-
-        foreach (string text in observation.VisibleTexts)
-        {
-            if (text.Contains(fileName, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

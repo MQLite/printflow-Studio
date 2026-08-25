@@ -630,4 +630,168 @@ public sealed class GuardedMeituUiDriverTests
         h.Elements.ValueWrites.ShouldBeEmpty();
         h.Input.Sends.ShouldBeEmpty();
     }
+
+    // -----------------------------------------------------------------------------
+    // Save-dialog document identity (Epic 11300 B1.1)
+    // -----------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Exact_Save_identity_is_accepted_and_only_Cancel_is_invoked_in_the_dialog()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, ExternalWindowRef dialog) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_A_副本");
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsSuccess.ShouldBeTrue();
+        confirmed.Value.State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+        h.Elements.Invocations.ShouldContain("MainWindow.editorPage.saveButton");
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.Invocations.ShouldNotContain("MainWindow.SaveMaskWidget.saveButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+        h.Locator.Refresh(dialog.Handle).IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Observed_B_cannot_validate_expected_A_and_the_dialog_is_still_cancelled()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, _) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_B_副本");
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        confirmed.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task A_wrong_owner_Save_dialog_is_never_read_or_cancelled()
+    {
+        Harness h = Build(meituInForeground: true);
+        MeituTarget editor = ShowLoadedEditor(h);
+        ExternalWindowRef wrongOwner = MeituFakes.Window(
+            handle: 0x6000, owningProcessId: 9999, title: "Form", className: "QtSaveDialog");
+        h.Elements.AddIdentityDialogControl(
+            wrongOwner.Handle, "MainWindow.wName.fileNameEdit", "", "Edit", "QLineEdit", UiPatternKind.Value, 9999);
+        h.Elements.OnInvoke = invoked =>
+        {
+            if (invoked.EndsWith(".saveButton", StringComparison.Ordinal))
+            {
+                h.Locator.OwnedDialogs.Add(wrongOwner);
+                h.Locator.PutInForeground(wrongOwner);
+            }
+        };
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        h.Elements.ValueReads.ShouldBeEmpty();
+        h.Elements.Invocations.ShouldNotContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Duplicate_identity_value_controls_fail_closed_then_use_only_signed_Cancel()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, ExternalWindowRef dialog) = ShowLoadedEditorAndIdentityDialog(
+            h, fileNameControlCount: 2);
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        confirmed.Failure.TechnicalDetail.ShouldContain("matched 2 elements");
+        h.Elements.ValueReads.ShouldBeEmpty();
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Locator.Refresh(dialog.Handle).IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_missing_identity_value_control_fails_closed_then_uses_only_signed_Cancel()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, _) = ShowLoadedEditorAndIdentityDialog(h, fileNameControlCount: 0);
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        h.Elements.ValueReads.ShouldBeEmpty();
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Target_lost_immediately_before_Save_records_no_input_sent()
+    {
+        Harness h = Build(meituInForeground: true);
+        MeituTarget editor = ShowLoadedEditor(h);
+        h.Elements.OnReadTextSnapshot = _ =>
+            h.Locator.Foreground = new ForegroundIdentity(new WindowHandle(0xE1E1), 777, "explorer");
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        confirmed.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        confirmed.Failure.Context["inputSent"].ShouldBe("false");
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Elements.ValueReads.ShouldBeEmpty();
+    }
+
+    private static MeituTarget ShowLoadedEditor(Harness h)
+    {
+        ExternalWindowRef editorWindow = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        h.Locator.Replace(h.Target.Process, editorWindow);
+        h.Locator.PutInForeground(editorWindow);
+        h.Elements.SetTexts(editorWindow.Handle, [.. MeituFakes.EditorMarkers]);
+        h.Elements.AddEditorSaveControl(editorWindow.Handle, h.Target.Process.ProcessId);
+        return h.Target with { Window = editorWindow };
+    }
+
+    private static (MeituTarget Editor, ExternalWindowRef Dialog) ShowLoadedEditorAndIdentityDialog(
+        Harness h, int fileNameControlCount = 1)
+    {
+        MeituTarget editor = ShowLoadedEditor(h);
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x6000,
+            owningProcessId: h.Target.Process.ProcessId,
+            title: "Form",
+            className: "QtSaveDialog");
+
+        for (int index = 0; index < fileNameControlCount; index++)
+        {
+            h.Elements.AddIdentityDialogControl(
+                dialog.Handle, "MainWindow.wName.fileNameEdit", "", "Edit", "QLineEdit",
+                UiPatternKind.Value, h.Target.Process.ProcessId);
+        }
+
+        h.Elements.AddIdentityDialogControl(
+            dialog.Handle, "MainWindow.titleFrame.closeButton", "\uE0E6", "Button", "IconFontButton",
+            UiPatternKind.Invoke, h.Target.Process.ProcessId);
+
+        h.Elements.OnInvoke = invoked =>
+        {
+            if (invoked.EndsWith(".saveButton", StringComparison.Ordinal))
+            {
+                h.Locator.OwnedDialogs.Add(dialog);
+                h.Locator.PutInForeground(dialog);
+            }
+            else if (invoked.EndsWith(".titleFrame.closeButton", StringComparison.Ordinal))
+            {
+                h.Locator.OwnedDialogs.Remove(dialog);
+                h.Locator.PutInForeground(editor.Window);
+            }
+        };
+
+        return (editor, dialog);
+    }
 }

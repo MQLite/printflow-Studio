@@ -37,10 +37,14 @@ public enum MeituStartingState
 
     /// <summary>Meitu is computing. Not a safe starting state; automation waits or stops.</summary>
     /// <remarks>
-    /// Like <see cref="KnownEditorEmpty"/>, this has no signed signature in the Part A chain:
-    /// the processing-overlay captures live in the Epic 11000 workflow evidence files, which the
-    /// preset does not vouch for. A processing overlay therefore classifies as
-    /// <see cref="Unknown"/> today, which stops — the conservative direction.
+    /// Reachable from Part B2A onward, and only through the signed enhancement evidence. A
+    /// preset that vouches for no Busy signature leaves this state unreachable, so a processing
+    /// overlay classifies as <see cref="Unknown"/> and stops — the conservative direction, and
+    /// the Part A/B1 position.
+    ///
+    /// It is classified <i>before</i> every content state. The editor stays recognisable while
+    /// Meitu computes, so a classifier that checked document identity first would report a safe,
+    /// input-eligible state during an operation that is still running (Part B2A §13).
     /// </remarks>
     Busy,
 
@@ -62,6 +66,11 @@ public enum MeituStartingState
 /// The file name of the working copy this attempt handed over, or <c>null</c> when nothing has
 /// been handed over yet.
 /// </param>
+/// <param name="ObservedDocumentIdentity">
+/// The exact document-derived value read from the signed Save surface and then canceled, or
+/// <c>null</c> for an ordinary read-only observation. A value can only be supplied by the
+/// guarded identity probe; visible editor text and recent-file entries never populate it.
+/// </param>
 /// <remarks>
 /// Separating observation from classification is what makes the recognition rules testable
 /// without a desktop: <see cref="MeituStateClassifier"/> is a pure function of this record and
@@ -73,7 +82,8 @@ public sealed record MeituObservation(
     ImmutableArray<string> VisibleTexts,
     ImmutableArray<string> OwnedDialogTitles,
     bool MainWindowEnabled,
-    string? ExpectedWorkingCopyFileName);
+    string? ExpectedWorkingCopyFileName,
+    string? ObservedDocumentIdentity = null);
 
 /// <summary>The classified state plus the evidence the classification rested on.</summary>
 /// <param name="State">What PrintFlow decided the screen is.</param>

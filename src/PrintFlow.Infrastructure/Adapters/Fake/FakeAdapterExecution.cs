@@ -22,13 +22,13 @@ internal static class FakeAdapterExecution
         WorkspaceFileRef expectedOutput,
         IWorkspace workspace,
         TaskCompletionSource? hangStarted,
-        Func<OperationResult<AdapterOutput>> succeed,
+        Func<Task<OperationResult<AdapterOutput>>> succeed,
         CancellationToken cancellationToken)
     {
         switch (scenario.Kind)
         {
             case FakeAdapterScenarioKind.Succeed:
-                return succeed();
+                return await succeed().ConfigureAwait(false);
 
             case FakeAdapterScenarioKind.FailWith:
                 return OperationResult.Fail<AdapterOutput>(
