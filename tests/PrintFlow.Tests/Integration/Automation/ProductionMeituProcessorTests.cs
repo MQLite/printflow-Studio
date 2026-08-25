@@ -196,6 +196,40 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         Build().Adapter.Mode.ShouldBe(AdapterExecutionMode.Production);
     }
 
+    [Fact]
+    public async Task Cancellation_after_the_attempt_boundary_is_a_structured_interruption()
+    {
+        Harness h = Build();
+        WorkspaceDirRef sessionDir = WorkspaceDirRef.Create("Sessions/S_cancel");
+        WorkspaceFileRef input = WorkspaceFileRef.Create(
+            "Sessions/S_cancel/Working/A_cancel/input.png", WorkspaceArea.Working);
+        WorkspaceFileRef output = WorkspaceFileRef.Create(
+            "Sessions/S_cancel/Working/A_cancel/input_HD.png", WorkspaceArea.Working);
+        string inputPath = h.Workspace.ResolveAbsolute(input);
+        Directory.CreateDirectory(Path.GetDirectoryName(inputPath)!);
+        File.WriteAllBytes(inputPath, SyntheticImages.Png(8, 8, alpha: true));
+
+        using CancellationTokenSource cancellation = new();
+        cancellation.Cancel();
+
+        OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
+            new MeituRequest(
+                input,
+                MeituOperation.Enhance,
+                BackgroundRemovalDecision.Unspecified,
+                sessionDir,
+                output),
+            cancellation.Token);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Cancelled);
+        result.Failure.MessageKey.ShouldBe("Failure_MeituInterrupted");
+        result.Failure.Context["meituCancelInvoked"].ShouldBe("false");
+        result.Failure.Context["retainedExternalState"].ShouldBe("unknown");
+        h.Elements.Invocations.ShouldBeEmpty();
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     // -----------------------------------------------------------------------------
     // Executable identity (§7)
     // -----------------------------------------------------------------------------

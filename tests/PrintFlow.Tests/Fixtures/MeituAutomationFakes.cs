@@ -814,8 +814,11 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
     {
         string description = Describes(element);
         ValueReads.Add(description);
+        OnGetValue?.Invoke(description);
         return OperationResult.Ok(_values.TryGetValue(description, out string? value) ? value : string.Empty);
     }
+
+    public Action<string>? OnGetValue { get; set; }
 
     public OperationResult<Unit> SetValue(UiElementRef element, string value)
     {

@@ -121,6 +121,13 @@ internal static class DisplayNames
     };
 
     /// <summary>
+    /// Resolves a failure's persisted message key, allowing one stable code to retain useful
+    /// runtime distinctions such as foreground loss versus a closed Meitu process.
+    /// </summary>
+    internal static string Failure(OperationFailure failure) =>
+        Strings.Resolve(failure.MessageKey);
+
+    /// <summary>
     /// The operator label for a white-underbase branch, carrying its guidance (Part 3C3B §7).
     /// </summary>
     /// <remarks>

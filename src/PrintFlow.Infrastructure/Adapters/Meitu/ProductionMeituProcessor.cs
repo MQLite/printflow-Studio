@@ -95,6 +95,9 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        try
+        {
+
         if (!Enum.IsDefined(request.Operation))
         {
             return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
@@ -172,6 +175,28 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             : await ProcessBackgroundRemovalAsync(
                 request, opened.Value, sourceBefore.Value, startedAt, cancellationToken)
                 .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // PrintFlow has no signed Meitu Cancel-button policy in D1. Cancellation stops this
+            // orchestration and, most importantly, licenses no delayed input. Meitu may still be
+            // Busy or showing a result, so the next attempt must re-enter through EnsureReady
+            // and prove a safe state rather than continuing this attempt.
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.Cancelled,
+                "PrintFlow orchestration was cancelled. No further Meitu input was produced; " +
+                "Meitu may continue externally and its retained state is unknown.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["adapterId"] = AdapterId,
+                    ["operation"] = request.Operation.ToString(),
+                    ["retainedExternalState"] = "unknown",
+                    ["meituCancelInvoked"] = "false",
+                    ["forceTerminationInvoked"] = "false",
+                },
+                messageKey: "Failure_MeituInterrupted"));
+        }
     }
 
     private async Task<OperationResult<AdapterOutput>> ProcessEnhancementAsync(

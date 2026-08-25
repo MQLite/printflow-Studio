@@ -487,6 +487,29 @@ public sealed class ProductionMeituExportTests : IDisposable
         result.Value.AdapterNotes!.ShouldContain("signed empty state");
     }
 
+    [Fact]
+    public async Task Cleanup_failure_after_valid_output_is_a_warning_not_lost_success()
+    {
+        Scenario s = Build();
+        Action<string>? scriptedInvoke = s.Elements.OnInvoke;
+        s.Elements.OnInvoke = invoked =>
+        {
+            scriptedInvoke?.Invoke(invoked);
+            if (invoked == ResultCloseId)
+            {
+                s.Elements.SetTexts(new WindowHandle(0x1000), ["unexpected retained editor state"]);
+            }
+        };
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : "");
+        File.Exists(s.OutputAbsolute).ShouldBeTrue();
+        string notes = result.Value.AdapterNotes.ShouldNotBeNull();
+        notes.ShouldContain("WARNING:");
+        notes.ShouldContain("output is valid");
+    }
+
     // -----------------------------------------------------------------------------
     // Output failures (§32)
     // -----------------------------------------------------------------------------
@@ -509,6 +532,34 @@ public sealed class ProductionMeituExportTests : IDisposable
         result.IsFailure.ShouldBeTrue();
         result.Failure.Code.ShouldBe(FailureCode.OutputMissing);
         result.Failure.Context["exists"].ShouldBe("false");
+        File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Cancellation_before_export_confirm_sends_no_confirm_and_produces_no_file()
+    {
+        Scenario s = Build();
+        using CancellationTokenSource cancellation = new();
+        s.Elements.OnGetValue = element =>
+        {
+            if (element == "1001")
+            {
+                cancellation.Cancel();
+            }
+        };
+
+        OperationResult<AdapterOutput> result = await s.Adapter.ProcessAsync(
+            new MeituRequest(
+                Working,
+                MeituOperation.Enhance,
+                BackgroundRemovalDecision.Unspecified,
+                WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"),
+                s.Output),
+            cancellation.Token);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Cancelled);
+        s.DestinationConfirms[0].ShouldBe(0);
         File.Exists(s.OutputAbsolute).ShouldBeFalse();
     }
 

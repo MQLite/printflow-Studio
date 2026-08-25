@@ -6,6 +6,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Persistence;
@@ -167,6 +168,112 @@ public sealed class FakeAdapterScenarioTests
 
         AutomationLockState lockState = (await harness.Repository.GetAutomationLockAsync(CancellationToken.None)).Value;
         lockState.IsHeld.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Meitu_process_loss_after_start_creates_no_Revision_and_releases_the_lock()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = (await service.ImportAsync(
+            WorkflowType.PrepareAsset, harness.WriteSourcePng(), "lost", "tester",
+            CancellationToken.None)).Value.Id;
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.ConfirmOriginal(), "tester", CancellationToken.None));
+
+        harness.FakeMeitu.SetScenario(FakeAdapterScenario.FailWith(FailureCode.MeituTargetLost));
+        OperationResult<SessionView> result = await service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        SessionAggregate reloaded = (await harness.Repository.LoadAsync(id, CancellationToken.None)).Value!;
+        ProcessingAttempt attempt = reloaded.Attempts.Single(a => a.Step == StepKind.Enhancement);
+        attempt.Status.ShouldBe(AttemptStatus.Failed);
+        attempt.OutputRevisionId.ShouldBeNull();
+        reloaded.Revisions.ShouldNotContain(r => r.Operation == OperationKind.Enhance);
+        (await harness.Repository.GetAutomationLockAsync(CancellationToken.None)).Value.IsHeld.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Structured_failure_context_survives_persistence_and_reload()
+    {
+        using SessionServiceHarness harness = new();
+        OperationFailure scripted = OperationFailure.Create(
+            FailureCode.MeituTargetLost,
+            "Meitu exited during the signed Busy observation.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["targetLoss"] = "process-exited",
+                ["retainedExternalState"] = "gone",
+            },
+            messageKey: "Failure_MeituClosed");
+        ISessionService service = harness.CreateServiceWithMeitu(new FailingMeitu(scripted));
+        SessionId id = (await service.ImportAsync(
+            WorkflowType.PrepareAsset, harness.WriteSourcePng(), "audit", "tester",
+            CancellationToken.None)).Value.Id;
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.ConfirmOriginal(), "tester", CancellationToken.None));
+
+        _ = await service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None);
+
+        OperationFailure reloaded = (await harness.Repository.LoadAsync(id, CancellationToken.None)).Value!
+            .Attempts.Single(a => a.Step == StepKind.Enhancement).Failure.ShouldNotBeNull();
+        reloaded.Code.ShouldBe(scripted.Code);
+        reloaded.MessageKey.ShouldBe(scripted.MessageKey);
+        reloaded.TechnicalDetail.ShouldBe(scripted.TechnicalDetail);
+        reloaded.IsRetryable.ShouldBeTrue();
+        reloaded.Context.ShouldBe(scripted.Context);
+    }
+
+    [Fact]
+    public async Task Successful_adapter_notes_and_cleanup_warnings_survive_restart()
+    {
+        using SessionServiceHarness harness = new();
+        const string warning = "WARNING: output valid; Meitu retained an unknown screen";
+        ISessionService service = harness.CreateServiceWithMeitu(
+            new AnnotatingMeitu(harness.FakeMeitu, warning));
+        SessionId id = (await service.ImportAsync(
+            WorkflowType.PrepareAsset, harness.WriteSourcePng(), "notes", "tester",
+            CancellationToken.None)).Value.Id;
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.ConfirmOriginal(), "tester", CancellationToken.None));
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None));
+
+        ISessionService restarted = harness.CreateService();
+        _ = await restarted.LoadAsync(id, CancellationToken.None);
+        ProcessingAttempt attempt = (await harness.Repository.LoadAsync(id, CancellationToken.None)).Value!
+            .Attempts.Single(a => a.Step == StepKind.Enhancement);
+        attempt.Status.ShouldBe(AttemptStatus.Succeeded);
+        attempt.OutputRevisionId.ShouldNotBeNull();
+        attempt.AdapterNotes.ShouldBe(warning);
+    }
+
+    private sealed class FailingMeitu(OperationFailure failure) : IMeituProcessor
+    {
+        public string AdapterId => "structured-failing-meitu";
+        public AdapterExecutionMode Mode => AdapterExecutionMode.Fake;
+        public Task<OperationResult<AdapterOutput>> ProcessAsync(
+            MeituRequest request, CancellationToken cancellationToken) =>
+            Task.FromResult(OperationResult.Fail<AdapterOutput>(failure));
+    }
+
+    private sealed class AnnotatingMeitu(IMeituProcessor inner, string notes) : IMeituProcessor
+    {
+        public string AdapterId => inner.AdapterId;
+        public AdapterExecutionMode Mode => inner.Mode;
+
+        public async Task<OperationResult<AdapterOutput>> ProcessAsync(
+            MeituRequest request, CancellationToken cancellationToken)
+        {
+            OperationResult<AdapterOutput> result = await inner.ProcessAsync(request, cancellationToken);
+            return result.IsFailure
+                ? result
+                : OperationResult.Ok(result.Value with { AdapterNotes = notes });
+        }
     }
 
     private static async Task Must(Task<OperationResult<SessionView>> resultTask)

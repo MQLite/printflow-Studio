@@ -529,9 +529,19 @@ public sealed class SessionService : ISessionService
             .OfType<WorkflowEffect.RecordAttemptStarted>()
             .FirstOrDefault()?.RetrySequence ?? 0;
 
+        AttemptId? retryOf = retrySequence == 0
+            ? null
+            : aggregate.Attempts
+                .Where(attempt => attempt.Step == work.Step)
+                .OrderByDescending(attempt => attempt.RetrySequence)
+                .ThenByDescending(attempt => attempt.StartedAtUtc)
+                .Select(attempt => (AttemptId?)attempt.Id)
+                .FirstOrDefault();
+
         ProcessingAttempt runningAttempt = ProcessingAttempt.Start(
             context.NewAttemptId, aggregate.Session.Id, work.Step, work.InputRevision,
-            work.Operation, work.ProcessorId, context.NowUtc, retrySequence: retrySequence);
+            work.Operation, work.ProcessorId, context.NowUtc,
+            retryOfAttemptId: retryOf, retrySequence: retrySequence);
 
         // The parameter record, written with the opening transaction — before any pixel work —
         // so the row says what this attempt was asked to do rather than what it turned out to
@@ -578,14 +588,40 @@ public sealed class SessionService : ISessionService
             Attempts = [.. aggregate.Attempts, runningAttempt],
         };
 
-        OperationResult<(WorkspaceFileRef Output, FileFacts Facts)> produced =
-            await PerformStepWorkAsync(
+        OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)> produced;
+        try
+        {
+            produced = await PerformStepWorkAsync(
                 afterStart, started.State, definition, work, runningAttempt, context, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            produced = OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                OperationFailure.Create(
+                    FailureCode.Cancelled,
+                    "PrintFlow orchestration was cancelled after the attempt started. No further " +
+                    "adapter input was requested; the external application may still be running.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["attemptId"] = runningAttempt.Id.ToString(),
+                        ["step"] = work.Step.ToString(),
+                        ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
+                    }));
+        }
 
         if (produced.IsFailure)
         {
+            // Cancellation is the one failure whose caller token cannot be used to close the
+            // attempt: it is already cancelled. The adapter has stopped receiving input, while
+            // this short metadata transaction truthfully ends the attempt and releases the
+            // global automation lock. A process crash before this commit is still covered by
+            // startup Running -> Interrupted recovery.
+            CancellationToken closingToken = produced.Failure.Code == FailureCode.Cancelled
+                ? CancellationToken.None
+                : cancellationToken;
             return await FailAttemptAsync(
-                afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, cancellationToken);
+                afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, closingToken);
         }
 
         // The Revision hangs off the Revision this attempt actually consumed. For a manual crop
@@ -604,7 +640,8 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(finished.Rejection!));
         }
 
-        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(revisionId, context.NowUtc);
+        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(
+            revisionId, context.NowUtc, produced.Value.AdapterNotes);
         ProcessingSession sessionAfterFinish = MergeSession(sessionAfterStart, finished.State, finished.Effects, context.NowUtc);
 
         List<PrintOutput> newOutputs = [];
@@ -645,7 +682,7 @@ public sealed class SessionService : ISessionService
     /// the same value by construction, not two reads of a setting that could have moved in
     /// between (Epic 11300 Part C2B1 §12).
     /// </remarks>
-    private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(
+    private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
         ProducingWork work, ProcessingAttempt attempt, CommandContext context,
         CancellationToken cancellationToken)
@@ -661,14 +698,14 @@ public sealed class SessionService : ISessionService
             // hash-bound approval already covers the promoted file by construction (plan §7.3).
             if (input is not { } sourceRef)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                     FailureCode.PreconditionNotMet, "Nothing to promote: no upstream Revision.");
             }
 
             OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
             if (patterns.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(patterns.Failure);
+                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(patterns.Failure);
             }
 
             string proposedName = aggregate.Session.OutputName.Value + ".png";
@@ -676,13 +713,13 @@ public sealed class SessionService : ISessionService
                 _workspace.ReserveOutput(session, WorkspaceArea.Approved, proposedName, patterns.Value);
             if (reserved.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(reserved.Failure);
+                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(reserved.Failure);
             }
 
             OperationResult<Unit> written = await _workspace.WriteReservedAsync(reserved.Value, sourceRef, cancellationToken);
             if (written.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(written.Failure);
+                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(written.Failure);
             }
 
             return await InspectAsync(reserved.Value, cancellationToken);
@@ -690,7 +727,7 @@ public sealed class SessionService : ISessionService
 
         if (input is not { } upstreamRef)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+            return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                 FailureCode.PreconditionNotMet, $"Step {work.Step} has no upstream Revision to work from.");
         }
 
@@ -698,7 +735,7 @@ public sealed class SessionService : ISessionService
             await _workspace.CreateWorkingCopyAsync(session, context.NewAttemptId, upstreamRef, cancellationToken);
         if (workingCopy.IsFailure)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(workingCopy.Failure);
+            return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(workingCopy.Failure);
         }
 
         switch (work.Adapter)
@@ -723,7 +760,7 @@ public sealed class SessionService : ISessionService
                 OperationResult<NamingPatternSet> meituPatterns = _presetProvider.GetNamingPatterns();
                 if (meituPatterns.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(meituPatterns.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(meituPatterns.Failure);
                 }
 
                 string producedName = OutputFileNaming.BuildProposedFileName(
@@ -747,7 +784,7 @@ public sealed class SessionService : ISessionService
                 {
                     if (attempt.BackgroundRemovalAuthority is not { } authority)
                     {
-                        return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                        return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                             FailureCode.PreconditionNotMet,
                             "Background removal reached the adapter without a recorded reviewed-content authority. " +
                             "No request is built: a missing product decision is not something to guess at.");
@@ -766,36 +803,37 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(result.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(result.Failure);
                 }
 
-                return await InspectAsync(result.Value.ProducedFile, cancellationToken);
+                return await InspectAsync(
+                    result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
             }
 
             case AdapterKind.Photoshop:
             {
                 if (state.Dimensions is not { } dimensions)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                         FailureCode.PreconditionNotMet, "Photoshop output requires confirmed print dimensions.");
                 }
 
                 if (state.WhiteUnderbaseBranch is not { } branch)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                         FailureCode.PreconditionNotMet, "Photoshop output requires an explicit white-underbase branch.");
                 }
 
                 OperationResult<ProductionPresetRef> preset = _presetProvider.GetVerifiedPreset();
                 if (preset.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(preset.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(preset.Failure);
                 }
 
                 OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
                 if (patterns.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(patterns.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(patterns.Failure);
                 }
 
                 string tiffName = OutputFileNaming.BuildProposedFileName(
@@ -805,7 +843,7 @@ public sealed class SessionService : ISessionService
                     _workspace.ReserveOutput(session, WorkspaceArea.Approved, tiffName, patterns.Value);
                 if (reserved.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(reserved.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(reserved.Failure);
                 }
 
                 OperationResult<AdapterOutput> result = await _photoshop.GenerateAsync(
@@ -815,10 +853,11 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(result.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(result.Failure);
                 }
 
-                return await InspectAsync(result.Value.ProducedFile, cancellationToken);
+                return await InspectAsync(
+                    result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
             }
 
             case AdapterKind.Internal:
@@ -828,7 +867,7 @@ public sealed class SessionService : ISessionService
                 // internal step routed here by accident would silently be trimmed.
                 if (definition.Kind != StepKind.Trim)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                         FailureCode.PreconditionNotMet,
                         $"Step {definition.Kind} is internal but has no deterministic processor.");
                 }
@@ -846,7 +885,7 @@ public sealed class SessionService : ISessionService
                         cancellationToken);
 
                     return cropped.IsFailure
-                        ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(cropped.Failure)
+                        ? OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(cropped.Failure)
                         : await InspectAsync(cropped.Value.ProducedFile, cancellationToken);
                 }
 
@@ -863,7 +902,7 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (trimmed.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(trimmed.Failure);
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(trimmed.Failure);
                 }
 
                 TrimResult result = trimmed.Value;
@@ -875,7 +914,7 @@ public sealed class SessionService : ISessionService
                     // that never happened. The step ends in Failed with a stable code the
                     // manual-crop surface (Epic 11200 Part C) can route on, and the attempt
                     // row keeps the reason (Part B §10).
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                         OperationFailure.Create(
                             FailureCode.ManualCropRequired,
                             result.ManualCropReason ?? "No usable alpha content was found.",
@@ -886,14 +925,14 @@ public sealed class SessionService : ISessionService
             }
 
             default:
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                     FailureCode.PreconditionNotMet, $"Unsupported adapter kind '{work.Adapter}'.");
         }
     }
 
     private OperationResult<PrintOutput> BuildPrintOutput(
         SessionId sessionId, RevisionId revisionId, WorkflowSnapshot stateBeforeFinish,
-        (WorkspaceFileRef Output, FileFacts Facts) work, CommandContext context)
+        (WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes) work, CommandContext context)
     {
         if (stateBeforeFinish.Dimensions is not { } dimensions)
         {
@@ -925,14 +964,14 @@ public sealed class SessionService : ISessionService
             work.Output, work.Facts.ByteLength, work.Facts.Sha256, context.NowUtc));
     }
 
-    private async Task<OperationResult<(WorkspaceFileRef, FileFacts)>> InspectAsync(
-        WorkspaceFileRef file, CancellationToken cancellationToken)
+    private async Task<OperationResult<(WorkspaceFileRef, FileFacts, string?)>> InspectAsync(
+        WorkspaceFileRef file, CancellationToken cancellationToken, string? adapterNotes = null)
     {
         string absolute = _workspace.ResolveAbsolute(file);
         OperationResult<FileFacts> inspected = await _fileInspector.InspectAsync(absolute, cancellationToken);
         return inspected.IsSuccess
-            ? OperationResult.Ok((file, inspected.Value))
-            : OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(inspected.Failure);
+            ? OperationResult.Ok((file, inspected.Value, adapterNotes))
+            : OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(inspected.Failure);
     }
 
     private async Task<OperationResult<SessionView>> FailAttemptAsync(
@@ -954,8 +993,10 @@ public sealed class SessionService : ISessionService
             aggregate, updatedSession, failedTransition.State, failedTransition.Effects, context,
             upsertAttempts: [failedAttempt]);
 
-        await _repository.CommitAsync(mutation, cancellationToken);
-        return OperationResult.Fail<SessionView>(failure);
+        OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
+        return committed.IsSuccess
+            ? OperationResult.Fail<SessionView>(failure)
+            : OperationResult.Fail<SessionView>(committed.Failure);
     }
 
     private async Task<OperationResult<SessionView>> FailImportAsync(

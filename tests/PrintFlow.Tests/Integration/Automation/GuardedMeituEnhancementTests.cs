@@ -260,6 +260,20 @@ public sealed class GuardedMeituEnhancementTests
     // -----------------------------------------------------------------------------
 
     [Fact]
+    public async Task Cancellation_before_the_action_produces_no_operation_input()
+    {
+        Scenario s = Build();
+        using CancellationTokenSource cancellation = new();
+        cancellation.Cancel();
+
+        await Should.ThrowAsync<OperationCanceledException>(() =>
+            s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, cancellation.Token));
+
+        s.EnhancementInvocations.ShouldBe(0);
+        s.Elements.Invocations.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task Expected_A_observed_B_produces_zero_Enhancement_invocations()
     {
         Scenario s = Build(identityValue: "PF_B2A_B_副本");
@@ -466,10 +480,36 @@ public sealed class GuardedMeituEnhancementTests
             await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.Timeout);
         run.Failure.Context["wantedPhase"].ShouldBe("Busy");
         run.Failure.Context["lastPhase"].ShouldBe("Unobserved");
         run.Failure.Context["exported"].ShouldBe("false");
         run.Failure.Context["revisionCreated"].ShouldBe("false");
+        s.EnhancementInvocations.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Process_exit_while_Busy_is_structured_and_produces_no_further_input()
+    {
+        Scenario s = Build(afterInvoke: [BusyScreen()]);
+        Action<WindowHandle>? scriptedRead = s.Elements.OnReadTextSnapshot;
+        int busyReads = 0;
+        s.Elements.OnReadTextSnapshot = handle =>
+        {
+            scriptedRead?.Invoke(handle);
+            if (s.Invoked && ++busyReads == 1)
+            {
+                s.Locator.DeadProcessIds.Add(s.Editor.Process.ProcessId);
+            }
+        };
+
+        OperationResult<MeituEnhancementOutcome> run =
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        run.Failure.MessageKey.ShouldBe("Failure_MeituClosed");
+        run.Failure.Context["targetLoss"].ShouldBe("process-exited");
         s.EnhancementInvocations.ShouldBe(1);
     }
 
@@ -489,6 +529,7 @@ public sealed class GuardedMeituEnhancementTests
             await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.Timeout);
         run.Failure.Context["wantedPhase"].ShouldBe("Complete");
         run.Failure.Context["lastPhase"].ShouldBe("Busy");
         run.Failure.Context["exported"].ShouldBe("false");
@@ -514,6 +555,20 @@ public sealed class GuardedMeituEnhancementTests
         run.IsFailure.ShouldBeTrue();
         run.Failure.Context["wantedPhase"].ShouldBe("Complete");
         run.Failure.Context["lastPhase"].ShouldBe("Unobserved");
+        s.EnhancementInvocations.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Unknown_editor_state_during_processing_stops_immediately_without_navigation()
+    {
+        Scenario s = Build(afterInvoke: [BusyScreen(), ["unrecognised screen"]]);
+
+        OperationResult<MeituEnhancementOutcome> run =
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+
+        run.IsFailure.ShouldBeTrue();
+        run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        run.Failure.Context["operatorActionRequired"].ShouldBe("true");
         s.EnhancementInvocations.ShouldBe(1);
     }
 

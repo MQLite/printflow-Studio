@@ -368,18 +368,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc, EndedAtUtc,
                  ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
-                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha)
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
+                 AdapterNotes)
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
-                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha)
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
+                 @AdapterNotes)
             ON CONFLICT(Id) DO UPDATE SET
                 EndedAtUtc = excluded.EndedAtUtc,
                 ResultStatus = excluded.ResultStatus,
                 OutputRevisionId = excluded.OutputRevisionId,
                 FailureCode = excluded.FailureCode,
-                FailureDetailJson = excluded.FailureDetailJson;
+                FailureDetailJson = excluded.FailureDetailJson,
+                AdapterNotes = excluded.AdapterNotes;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

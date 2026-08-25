@@ -265,7 +265,7 @@
     <value>Meitu is running but its window could not be found, so nothing was sent to it.</value>
   </data>
   <data name="Failure_MeituTargetLost" xml:space="preserve">
-    <value>Meitu was no longer the active window, so nothing was clicked or typed. Please leave Meitu in front and try again.</value>
+    <value>Meitu's verified window or foreground changed, so no further input was sent. Return it to a safe screen and try again.</value>
   </data>
   <data name="Failure_MeituUnknownState" xml:space="preserve">
     <value>Meitu is on a screen this program does not recognise. Nothing was changed. Please return Meitu to its start page or finish what is open, then try again.</value>
@@ -275,6 +275,12 @@
   </data>
   <data name="Failure_MeituOpenInputFailed" xml:space="preserve">
     <value>The prepared file could not be handed to Meitu, so nothing was opened.</value>
+  </data>
+  <data name="Failure_MeituClosed" xml:space="preserve">
+    <value>Meitu closed during processing. The unfinished attempt was stopped and can be retried.</value>
+  </data>
+  <data name="Failure_MeituInterrupted" xml:space="preserve">
+    <value>Meitu processing was interrupted. Meitu may still be running; check its screen before retrying.</value>
   </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
@@ -426,4 +432,3 @@
     <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
   </data>
 </root>
-

@@ -265,7 +265,7 @@
     <value>美图正在运行，但未找到它的窗口，因此没有向它发送任何操作。</value>
   </data>
   <data name="Failure_MeituTargetLost" xml:space="preserve">
-    <value>美图已不是当前活动窗口，因此没有执行任何点击或输入。请让美图保持在最前，然后重试。</value>
+    <value>已验证的美图窗口或前台状态发生变化，因此未再发送任何操作。请将美图恢复到安全界面后重试。</value>
   </data>
   <data name="Failure_MeituUnknownState" xml:space="preserve">
     <value>美图当前显示的界面本程序无法识别，未做任何更改。请将美图恢复到起始页，或先完成已打开的编辑，然后重试。</value>
@@ -275,6 +275,12 @@
   </data>
   <data name="Failure_MeituOpenInputFailed" xml:space="preserve">
     <value>未能将准备好的文件交给美图，因此没有打开任何文件。</value>
+  </data>
+  <data name="Failure_MeituClosed" xml:space="preserve">
+    <value>美图在处理过程中已关闭。未完成的尝试已停止，可以重试。</value>
+  </data>
+  <data name="Failure_MeituInterrupted" xml:space="preserve">
+    <value>美图处理已中断。美图可能仍在运行；重试前请先检查其界面。</value>
   </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>效果不达标</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>边缘错误</value></data>
@@ -426,4 +432,3 @@
     <value>去除背景：自动选择 — 已针对已审图片版本 {0} 授权</value>
   </data>
 </root>
-

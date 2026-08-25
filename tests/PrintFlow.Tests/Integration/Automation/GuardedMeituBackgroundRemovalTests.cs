@@ -154,6 +154,24 @@ public sealed class GuardedMeituBackgroundRemovalTests
     }
 
     [Fact]
+    public async Task Cancellation_before_the_action_produces_no_operation_input()
+    {
+        Scenario s = Build();
+        using CancellationTokenSource cancellation = new();
+        cancellation.Cancel();
+
+        await Should.ThrowAsync<OperationCanceledException>(() =>
+            s.Driver.RunBackgroundRemovalAsync(
+                s.Editor,
+                ExpectedFile,
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                cancellation.Token));
+
+        s.ActionCount.ShouldBe(0);
+        s.Elements.Invocations.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task Unspecified_mode_requires_a_product_decision_before_even_identity_input()
     {
         Scenario s = Build();
@@ -236,7 +254,32 @@ public sealed class GuardedMeituBackgroundRemovalTests
         Scenario s = Build(afterAction: []);
         OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
         result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Timeout);
         result.Failure.Context["wantedPhase"].ShouldBe("Busy");
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Process_exit_while_Busy_is_structured_and_sends_no_return_input()
+    {
+        Scenario s = Build(afterAction: [BackgroundBusyScreen()]);
+        Action<WindowHandle>? scriptedRead = s.Elements.OnReadTextSnapshot;
+        int busyReads = 0;
+        s.Elements.OnReadTextSnapshot = handle =>
+        {
+            scriptedRead?.Invoke(handle);
+            if (s.ActionInvoked && ++busyReads == 1)
+            {
+                s.Locator.DeadProcessIds.Add(s.Editor.Process.ProcessId);
+            }
+        };
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        result.Failure.MessageKey.ShouldBe("Failure_MeituClosed");
         s.ActionCount.ShouldBe(1);
         s.ReturnCount.ShouldBe(0);
     }
@@ -247,6 +290,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
         Scenario s = Build(afterAction: [BackgroundBusyScreen()]);
         OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
         result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Timeout);
         result.Failure.Context["wantedPhase"].ShouldBe("Complete");
         result.Failure.Context["lastPhase"].ShouldBe("Busy");
         s.ActionCount.ShouldBe(1);
@@ -260,6 +304,20 @@ public sealed class GuardedMeituBackgroundRemovalTests
         OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
         result.IsFailure.ShouldBeTrue();
         result.Failure.Context["lastPhase"].ShouldBe("Unobserved");
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Unknown_editor_state_during_processing_stops_without_navigation()
+    {
+        Scenario s = Build(afterAction: [BackgroundBusyScreen(), ["unrecognised screen"]]);
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        result.Failure.Context["operatorActionRequired"].ShouldBe("true");
+        s.ActionCount.ShouldBe(1);
         s.ReturnCount.ShouldBe(0);
     }
 

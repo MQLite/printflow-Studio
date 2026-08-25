@@ -314,6 +314,10 @@ internal static class Strings
 
     internal static string Failure_MeituOpenInputFailed => Get(nameof(Failure_MeituOpenInputFailed));
 
+    internal static string Failure_MeituClosed => Get(nameof(Failure_MeituClosed));
+
+    internal static string Failure_MeituInterrupted => Get(nameof(Failure_MeituInterrupted));
+
     internal static string Rejection_InsufficientResult => Get(nameof(Rejection_InsufficientResult));
 
     internal static string Rejection_EdgeError => Get(nameof(Rejection_EdgeError));
@@ -504,6 +508,8 @@ internal static class Strings
     /// A missing string is a translation gap, not a reason to fail startup, so the key is
     /// shown instead — visible in the UI and therefore hard to leave unfixed.
     /// </remarks>
+    internal static string Resolve(string key) => Get(key);
+
     private static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 }

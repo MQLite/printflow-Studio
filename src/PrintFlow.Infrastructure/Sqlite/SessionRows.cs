@@ -38,6 +38,7 @@ internal sealed class SessionRow
     public string? BackgroundRemovalRevisionId { get; set; }
 
     public string? BackgroundRemovalReviewedSha { get; set; }
+
 }
 
 internal sealed class StepRow
@@ -118,6 +119,9 @@ internal sealed class AttemptRow
     public string? BackgroundRemovalRevisionId { get; set; }
 
     public string? BackgroundRemovalReviewedSha { get; set; }
+
+    // Successful runtime evidence, including cleanup warnings (Epic 11300 Part D1).
+    public string? AdapterNotes { get; set; }
 }
 
 internal sealed class ReviewRow

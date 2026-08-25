@@ -581,6 +581,7 @@ internal static class Mappers
         BackgroundRemovalDecision = attempt.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
         BackgroundRemovalRevisionId = attempt.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
+        AdapterNotes = attempt.AdapterNotes,
     };
 
     public static ProcessingAttempt ToDomain(AttemptRow row)
@@ -588,9 +589,8 @@ internal static class Mappers
         Domain.Results.OperationFailure? failure = null;
         if (row.FailureCode is not null)
         {
-            failure = Domain.Results.OperationFailure.Create(
-                Enum.Parse<Domain.Results.FailureCode>(row.FailureCode),
-                row.FailureDetailJson ?? row.FailureCode);
+            Domain.Results.FailureCode code = Enum.Parse<Domain.Results.FailureCode>(row.FailureCode);
+            failure = ReadFailure(code, row.FailureDetailJson);
         }
 
         return new ProcessingAttempt(
@@ -614,7 +614,54 @@ internal static class Mappers
             BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
                 row.BackgroundRemovalReviewedSha),
+            AdapterNotes = row.AdapterNotes,
         };
+    }
+
+    private static Domain.Results.OperationFailure ReadFailure(
+        Domain.Results.FailureCode code, string? detailJson)
+    {
+        if (string.IsNullOrWhiteSpace(detailJson))
+        {
+            return Domain.Results.OperationFailure.Create(code, code.ToString());
+        }
+
+        try
+        {
+            using System.Text.Json.JsonDocument document =
+                System.Text.Json.JsonDocument.Parse(detailJson);
+            System.Text.Json.JsonElement root = document.RootElement;
+
+            string messageKey = root.TryGetProperty("MessageKey", out System.Text.Json.JsonElement key)
+                ? key.GetString() ?? $"Failure_{code}"
+                : $"Failure_{code}";
+            string technicalDetail = root.TryGetProperty(
+                    "TechnicalDetail", out System.Text.Json.JsonElement detail)
+                ? detail.GetString() ?? code.ToString()
+                : code.ToString();
+            bool retryable = root.TryGetProperty(
+                    "IsRetryable", out System.Text.Json.JsonElement retry) &&
+                retry.ValueKind is System.Text.Json.JsonValueKind.True;
+
+            Dictionary<string, string> context = new(StringComparer.Ordinal);
+            if (root.TryGetProperty("Context", out System.Text.Json.JsonElement values) &&
+                values.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                foreach (System.Text.Json.JsonProperty property in values.EnumerateObject())
+                {
+                    context[property.Name] = property.Value.GetString() ?? property.Value.ToString();
+                }
+            }
+
+            return Domain.Results.OperationFailure.Create(
+                code, technicalDetail, retryable, context.Count == 0 ? null : context, messageKey);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Rows written by the earliest builds stored plain detail text. Preserve it rather
+            // than making a legacy audit unreadable merely because it predates structured JSON.
+            return Domain.Results.OperationFailure.Create(code, detailJson);
+        }
     }
 
     public static ReviewRow ToRow(ReviewDecision review) => new()

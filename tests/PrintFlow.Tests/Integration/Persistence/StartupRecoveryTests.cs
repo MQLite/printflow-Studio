@@ -103,11 +103,66 @@ public sealed class StartupRecoveryTests
 
         ProcessingAttempt fresh = attempts.Single(a => a.Id != crashedAttemptId);
         fresh.Status.ShouldBe(AttemptStatus.Succeeded);
+        fresh.RetryOfAttemptId.ShouldBe(old.Id);
+        fresh.RetrySequence.ShouldBeGreaterThan(old.RetrySequence);
+        aggregate.Steps.Single(s => s.Step == StepKind.Enhancement).State
+            .ShouldBe(StepState.ReviewRequired);
 
         // A brand new Working\<attemptId>\ — the interrupted attempt's directory is never reused.
         Revision produced = aggregate.Revisions.Single(r => r.Operation == OperationKind.Enhance);
         produced.File.RelativePath.ShouldContain(fresh.Id.Value.ToString("D"));
         produced.File.RelativePath.ShouldNotContain(crashedAttemptId.Value.ToString("D"));
+    }
+
+    [Fact]
+    public async Task Background_Removal_recovery_preserves_authority_and_retries_on_a_new_path()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await StartSessionAsync(harness, service);
+
+        harness.FakeMeitu.SetScenario(FakeAdapterScenario.Succeed);
+        SessionView enhanced = (await service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester",
+            CancellationToken.None)).Value;
+        Sha256 enhancementHash = enhanced.Steps.Single(s => s.Step == StepKind.Enhancement)
+            .CurrentRevisionSha256!.Value;
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.Approve(StepKind.Enhancement, enhancementHash), "tester",
+            CancellationToken.None));
+
+        AttemptId crashedAttemptId = await CrashDuringAsync(
+            harness, service, id, StepKind.BackgroundRemoval);
+        BackgroundRemovalAuthority authorityBefore = (await LoadAsync(harness, id)).Attempts
+            .Single(a => a.Id == crashedAttemptId).BackgroundRemovalAuthority.ShouldNotBeNull();
+
+        await RecoverAsync(harness, new FakeProcessLiveness(ProcessLiveness.Dead));
+        ISessionService restarted = harness.CreateService();
+        await Must(restarted.ExecuteAsync(
+            id, new WorkflowCommand.Retry(StepKind.BackgroundRemoval), "tester",
+            CancellationToken.None));
+        (await restarted.LoadAsync(id, CancellationToken.None)).Value.CanRunBackgroundRemoval
+            .ShouldBeTrue("unchanged reviewed content keeps its existing authority");
+
+        harness.FakeMeitu.SetScenario(FakeAdapterScenario.Succeed);
+        SessionView retried = (await restarted.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.BackgroundRemoval), "tester",
+            CancellationToken.None)).Value;
+
+        SessionAggregate aggregate = await LoadAsync(harness, id);
+        ProcessingAttempt old = aggregate.Attempts.Single(a => a.Id == crashedAttemptId);
+        ProcessingAttempt fresh = aggregate.Attempts.Single(
+            a => a.Step == StepKind.BackgroundRemoval && a.Id != crashedAttemptId);
+        old.Status.ShouldBe(AttemptStatus.Interrupted);
+        fresh.Status.ShouldBe(AttemptStatus.Succeeded);
+        fresh.RetryOfAttemptId.ShouldBe(old.Id);
+        fresh.BackgroundRemovalAuthority.ShouldBe(authorityBefore);
+        retried.Steps.Single(s => s.Step == StepKind.BackgroundRemoval).State
+            .ShouldBe(StepState.ReviewRequired);
+
+        Revision cutout = aggregate.Revisions.Single(r => r.Operation == OperationKind.RemoveBackground);
+        cutout.File.RelativePath.ShouldContain(fresh.Id.Value.ToString("D"));
+        cutout.File.RelativePath.ShouldNotContain(old.Id.Value.ToString("D"));
     }
 
     // -------------------------------------------------------------------------------------
@@ -281,6 +336,13 @@ public sealed class StartupRecoveryTests
         StartupRecoveryReport report = await RecoverAsync(harness, liveness);
 
         report.IsNoOp.ShouldBeTrue();
+
+        ISessionService restarted = harness.CreateService();
+        _ = await restarted.LoadAsync(id, CancellationToken.None);
+        SessionAggregate resumed = await LoadAsync(harness, id);
+        resumed.Revisions.Count(r => r.Operation == OperationKind.Enhance).ShouldBe(1);
+        resumed.Attempts.Count(a => a.Step == StepKind.Enhancement)
+            .ShouldBe(1, "a committed success is recovered, not rerun or duplicated");
 
         // Nothing was held, so nothing needed a liveness question in the first place.
         liveness.CallCount.ShouldBe(0);

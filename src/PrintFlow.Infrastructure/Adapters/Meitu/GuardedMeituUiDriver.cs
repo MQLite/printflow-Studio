@@ -1304,13 +1304,6 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (!_locator.IsAlive(target.Process))
-        {
-            return OperationResult.Fail<MeituTarget>(
-                FailureCode.MeituTargetLost,
-                $"Meitu process {target.Process.ProcessId} is no longer running; no input was sent.");
-        }
-
         OperationResult<ExternalWindowRef> window = RefreshOwnedWindow(target);
         if (window.IsFailure)
         {
@@ -1338,10 +1331,39 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     /// <summary>Re-reads the window and re-confirms it still belongs to the expected process.</summary>
     private OperationResult<ExternalWindowRef> RefreshOwnedWindow(MeituTarget target)
     {
+        if (!_locator.IsAlive(target.Process))
+        {
+            return OperationResult.Fail<ExternalWindowRef>(OperationFailure.Create(
+                FailureCode.MeituTargetLost,
+                $"Meitu process {target.Process.ProcessId} exited after PrintFlow verified it. " +
+                "No further input was produced.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["targetLoss"] = "process-exited",
+                    ["processId"] = target.Process.ProcessId.ToString(
+                        System.Globalization.CultureInfo.InvariantCulture),
+                    ["inputSent"] = "false",
+                    ["retainedExternalState"] = "gone",
+                },
+                messageKey: "Failure_MeituClosed"));
+        }
+
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(target.Window.Handle);
         if (refreshed.IsFailure)
         {
-            return refreshed;
+            return OperationResult.Fail<ExternalWindowRef>(OperationFailure.Create(
+                FailureCode.MeituTargetLost,
+                $"The verified Meitu window {target.Window.Handle} disappeared. No further input " +
+                "was produced.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["targetLoss"] = "window-disappeared",
+                    ["windowHandle"] = target.Window.Handle.ToString(),
+                    ["inputSent"] = "false",
+                    ["retainedExternalState"] = "unknown",
+                }));
         }
 
         if (refreshed.Value.OwningProcessId != target.Process.ProcessId)
@@ -1350,10 +1372,21 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             // window is destroyed. Re-checking ownership is what stops PrintFlow addressing the
             // successor as though it were Meitu.
             return OperationResult.Fail<ExternalWindowRef>(
-                FailureCode.MeituTargetLost,
-                $"Window {target.Window.Handle} now belongs to process " +
-                $"{refreshed.Value.OwningProcessId}, not the verified Meitu process " +
-                $"{target.Process.ProcessId}.");
+                OperationFailure.Create(
+                    FailureCode.MeituTargetLost,
+                    $"Window {target.Window.Handle} now belongs to process " +
+                    $"{refreshed.Value.OwningProcessId}, not the verified Meitu process " +
+                    $"{target.Process.ProcessId}.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["targetLoss"] = "handle-reused",
+                        ["expectedProcessId"] = target.Process.ProcessId.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["actualProcessId"] = refreshed.Value.OwningProcessId.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["inputSent"] = "false",
+                    }));
         }
 
         return refreshed;
@@ -2078,19 +2111,62 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 last = MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation);
             }
 
+            if (last == MeituBackgroundRemovalPhase.Unobserved)
+            {
+                // The fast operation-specific read intentionally sees only Busy/result markers.
+                // Distinguish an ordinary, still-recognised editor (which may legitimately take
+                // a moment to show Busy) from a genuinely Unknown screen, which must stop now.
+                OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
+                    target,
+                    expectedWorkingCopyFileName,
+                    observedDocumentIdentity,
+                    cancellationToken).ConfigureAwait(false);
+                if (full.IsFailure)
+                {
+                    return full;
+                }
+
+                if (full.Value.State == MeituStartingState.KnownModal)
+                {
+                    return OperationResult.Fail<MeituStateSnapshot>(
+                        FailureCode.MeituBlockingDialog,
+                        "A Meitu-owned modal appeared during Background Removal. It was not " +
+                        "dismissed and no further input was produced.");
+                }
+
+                if (full.Value.State == MeituStartingState.Unknown)
+                {
+                    return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                        FailureCode.MeituUnknownState,
+                        "Meitu changed to an unrecognised editor state during Background Removal. " +
+                        "PrintFlow stopped without navigation, export or further input.",
+                        isRetryable: true,
+                        context: new Dictionary<string, string>
+                        {
+                            ["phase"] = last.ToString(),
+                            ["inputSent"] = "false",
+                            ["exported"] = "false",
+                            ["operatorActionRequired"] = "true",
+                        }));
+                }
+            }
+
             if (_clock.GetUtcNow() >= deadline)
             {
                 return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
-                    FailureCode.MeituUnknownState,
+                    FailureCode.Timeout,
                     $"Meitu did not reach the signed Background Removal '{wanted}' state within " +
                     $"{timeout.TotalSeconds:0} s; last phase was '{last}'. No export or Revision exists.",
-                    isRetryable: false,
+                    isRetryable: true,
                     context: new Dictionary<string, string>
                     {
                         ["wantedPhase"] = wanted.ToString(),
                         ["lastPhase"] = last.ToString(),
                         ["exported"] = "false",
                         ["revisionCreated"] = "false",
+                        ["retainedExternalState"] = wanted == MeituBackgroundRemovalPhase.Complete
+                            ? "possibly-busy"
+                            : "unknown",
                     }));
             }
 
@@ -2440,14 +2516,31 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 return snapshot;
             }
 
-            if (_clock.GetUtcNow() >= deadline)
+            if (lastPhase == MeituEnhancementPhase.Unobserved &&
+                snapshot.Value.State == MeituStartingState.Unknown)
             {
                 return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                     FailureCode.MeituUnknownState,
+                    "Meitu changed to an unrecognised editor state while Enhancement was being " +
+                    "observed. PrintFlow stopped without navigation, export or further input.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["phase"] = lastPhase.ToString(),
+                        ["inputSent"] = "false",
+                        ["exported"] = "false",
+                        ["operatorActionRequired"] = "true",
+                    }));
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                    FailureCode.Timeout,
                     $"Meitu did not reach the signed Enhancement '{wanted}' state within " +
                     $"{timeout.TotalSeconds:0} s; the last positively recognised phase was '{lastPhase}'. " +
                     "No output was exported and no Revision was created.",
-                    isRetryable: false,
+                    isRetryable: true,
                     context: new Dictionary<string, string>
                     {
                         ["wantedPhase"] = wanted.ToString(),
@@ -2457,6 +2550,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                             timeout.TotalSeconds.ToString("0", System.Globalization.CultureInfo.InvariantCulture),
                         ["exported"] = "false",
                         ["revisionCreated"] = "false",
+                        ["retainedExternalState"] = wanted == MeituEnhancementPhase.Complete
+                            ? "possibly-busy"
+                            : "unknown",
                     }));
             }
 
@@ -2752,6 +2848,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return await CancelDestinationAsync<MeituExportEvidence>(
                 target, dialog, shape, confirm.Failure, cancellationToken).ConfigureAwait(false);
         }
+
+        // This is the irreversible export input. A cancellation observed here must win over a
+        // confirm prepared earlier; D1 never issues delayed input after cancellation.
+        cancellationToken.ThrowIfCancellationRequested();
 
         OperationResult<Unit> invoked = _elements.Invoke(confirm.Value);
         if (invoked.IsFailure)
@@ -3085,10 +3185,18 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     {
         if (!_locator.IsAlive(target.Process))
         {
-            return OperationResult.Fail<ExternalWindowRef>(
+            return OperationResult.Fail<ExternalWindowRef>(OperationFailure.Create(
                 FailureCode.MeituTargetLost,
                 $"Meitu process {target.Process.ProcessId} exited while its {description} was open; " +
-                "nothing further was written or invoked.");
+                "nothing further was written or invoked.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["targetLoss"] = "process-exited",
+                    ["inputSent"] = "false",
+                    ["retainedExternalState"] = "gone",
+                },
+                messageKey: "Failure_MeituClosed"));
         }
 
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(surface);

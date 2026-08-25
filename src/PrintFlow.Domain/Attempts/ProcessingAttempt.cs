@@ -124,16 +124,29 @@ public sealed record ProcessingAttempt(
     /// </remarks>
     public BackgroundRemovalAuthority? BackgroundRemovalAuthority { get; init; }
 
+    /// <summary>
+    /// Adapter-supplied completion evidence and cleanup warnings for a successful attempt.
+    /// </summary>
+    /// <remarks>
+    /// Kept on the attempt rather than the Revision because it describes the runtime that
+    /// produced the Revision, including a non-fatal inability to return an external application
+    /// to neutral state. Null for failed/interrupted attempts and for processors with nothing
+    /// useful to add.
+    /// </remarks>
+    public string? AdapterNotes { get; init; }
+
     /// <summary>Records the reviewed-content authority this attempt is about to run under.</summary>
     public ProcessingAttempt WithBackgroundRemovalAuthority(BackgroundRemovalAuthority authority) =>
         this with { BackgroundRemovalAuthority = authority };
 
-    public ProcessingAttempt Succeed(RevisionId outputRevisionId, DateTimeOffset endedAtUtc) =>
+    public ProcessingAttempt Succeed(
+        RevisionId outputRevisionId, DateTimeOffset endedAtUtc, string? adapterNotes = null) =>
         this with
         {
             Status = AttemptStatus.Succeeded,
             OutputRevisionId = outputRevisionId,
             EndedAtUtc = endedAtUtc,
+            AdapterNotes = adapterNotes,
         };
 
     public ProcessingAttempt Fail(OperationFailure failure, DateTimeOffset endedAtUtc) =>

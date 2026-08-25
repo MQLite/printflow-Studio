@@ -172,6 +172,37 @@ public sealed class AutomationBoundaryTests
         offenders.ShouldBeEmpty($"'{bannedToken}' sends input with no verifiable target.");
     }
 
+    [Theory]
+    [InlineData("TerminateProcess")]
+    [InlineData("Process.Kill")]
+    [InlineData(".Kill(")]
+    [InlineData("taskkill")]
+    public void D1_introduces_no_force_process_termination_API(string bannedToken)
+    {
+        List<string> offenders = [];
+        foreach (string project in new[]
+                 {
+                     "PrintFlow.Domain", "PrintFlow.Workflow", "PrintFlow.Infrastructure", "PrintFlow.App",
+                 })
+        {
+            foreach ((string file, string[] lines) in SourceOf(project, subdirectory: null))
+            {
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string trimmed = lines[i].TrimStart();
+                    if (!trimmed.StartsWith("//", StringComparison.Ordinal) &&
+                        !trimmed.StartsWith("///", StringComparison.Ordinal) &&
+                        lines[i].Contains(bannedToken, StringComparison.OrdinalIgnoreCase))
+                    {
+                        offenders.Add($"{project}/{Path.GetFileName(file)}:{i + 1}: {trimmed}");
+                    }
+                }
+            }
+        }
+
+        offenders.ShouldBeEmpty("D2 owns Stop, force termination and operator takeover.");
+    }
+
     [Fact]
     public void The_document_identity_probe_exposes_no_path_coordinate_or_shortcut_surface()
     {

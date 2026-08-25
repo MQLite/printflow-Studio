@@ -2147,6 +2147,6 @@ public sealed partial class SessionViewModel : ObservableObject
     private static string Describe(OperationFailure failure) => string.Format(
         CultureInfo.CurrentCulture,
         Strings.Session_ActionFailed,
-        DisplayNames.Failure(failure.Code),
+        DisplayNames.Failure(failure),
         failure.Code);
 }
