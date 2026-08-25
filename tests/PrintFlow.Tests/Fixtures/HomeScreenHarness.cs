@@ -136,6 +136,9 @@ internal sealed class CountingMeituProcessor : IMeituProcessor
     }
 }
 
+/// <summary>The service and screen a restart produced, so a test can drive both.</summary>
+internal sealed record RestartedSession(ISessionService Sessions, SessionViewModel Screen);
+
 /// <summary>
 /// A Home screen wired to the real session service, real workspace and real SQLite database.
 /// </summary>
@@ -196,7 +199,24 @@ internal sealed class HomeScreenHarness : IDisposable
     public WorkflowSelectionViewModel WorkflowSelection(RecordingNavigation navigation) =>
         new(Sessions, navigation);
 
+    /// <summary>
+    /// A session screen over a freshly built service — what "close the application and open it
+    /// again" looks like from a test (Epic 11300 Part C2B2 §21).
+    /// </summary>
+    /// <remarks>
+    /// The database, the workspace and the files are the same ones; only the service, the view
+    /// model and every field either of them holds are new. That is what makes a restart test
+    /// worth running: anything the screen remembered in memory is gone, so what it shows
+    /// afterwards can only have come from persistence.
+    /// </remarks>
+    public RestartedSession RestartSession(RecordingNavigation navigation)
+    {
+        ISessionService restarted = _harness.CreateService();
+        return new RestartedSession(restarted, new SessionViewModel(restarted, Previews, navigation));
+    }
+
     /// <summary>A session screen over the same service (Epic 11100 Part 3C3A §19).</summary>
+
     public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, Previews, navigation);
 
     /// <summary>The read-only image seam the session screen previews through (Part C1 §3).</summary>

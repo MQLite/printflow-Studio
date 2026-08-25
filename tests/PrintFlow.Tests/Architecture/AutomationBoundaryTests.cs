@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Engine;
@@ -564,8 +565,27 @@ public sealed class AutomationBoundaryTests
         meituTypesInWorkflow.ShouldBe(["IMeituProcessor", "MeituOperation", "MeituRequest"]);
     }
 
+    /// <summary>
+    /// The Background Removal authority is a typed product decision that no adapter code can
+    /// manufacture (Epic 11300 Part C2B1 §29).
+    /// </summary>
+    /// <remarks>
+    /// Three separate claims, and each has a way of quietly failing:
+    /// <list type="bullet">
+    ///   <item>A <c>bool</c> or a string would make "automatic selection is on" expressible at
+    ///         all, which is the session-wide permission the whole design exists to prevent.</item>
+    ///   <item>The type lives in <c>PrintFlow.Domain</c>, not in the adapter surface and not in
+    ///         Infrastructure. That is what lets the session, the attempt row and the request all
+    ///         name the same value, and what keeps a UI-automation assembly from owning a product
+    ///         decision.</item>
+    ///   <item><c>SessionService</c> builds the request from the authority the attempt already
+    ///         recorded. A literal authorised value anywhere in that file would be the service
+    ///         deciding on the operator's behalf, so the source is checked for its absence rather
+    ///         than for a comment promising it (§12).</item>
+    /// </list>
+    /// </remarks>
     [Fact]
-    public void Background_Removal_authority_is_typed_and_the_normal_workflow_leaves_it_unspecified()
+    public void Background_Removal_authority_is_a_typed_domain_decision_the_service_never_invents()
     {
         PropertyInfo decision = typeof(MeituRequest).GetProperty(
             nameof(MeituRequest.BackgroundRemovalDecision))!;
@@ -574,12 +594,35 @@ public sealed class AutomationBoundaryTests
         decision.PropertyType.ShouldNotBe(typeof(bool));
         decision.PropertyType.ShouldNotBe(typeof(string));
 
+        typeof(BackgroundRemovalDecision).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+        typeof(BackgroundRemovalAuthority).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+
         string sessionService = File.ReadAllText(Path.Combine(
             ProjectDirectory("PrintFlow.Workflow"), "Services", "SessionService.cs"));
-        sessionService.ShouldContain(
-            "BackgroundRemovalDecision.Unspecified", Case.Sensitive);
+
+        sessionService.ShouldContain("attempt.BackgroundRemovalAuthority", Case.Sensitive);
         sessionService.ShouldNotContain(
             "BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent", Case.Sensitive);
+
+        // No adapter assembly may construct the request either: the decision reaches Meitu only
+        // by way of the service that checked it.
+        foreach (string file in InfrastructureSources())
+        {
+            File.ReadAllText(file).ShouldNotContain(
+                "new MeituRequest(", Case.Sensitive,
+                Path.GetFileName(file) + " builds a Meitu request; SessionService owns that.");
+        }
+    }
+
+    /// <summary>Every Infrastructure source file, excluding build output.</summary>
+    private static IEnumerable<string> InfrastructureSources()
+    {
+        string separator = Path.DirectorySeparatorChar.ToString();
+        return Directory
+            .GetFiles(ProjectDirectory("PrintFlow.Infrastructure"), "*.cs", SearchOption.AllDirectories)
+            .Where(f =>
+                !f.Contains(separator + "bin" + separator, StringComparison.Ordinal) &&
+                !f.Contains(separator + "obj" + separator, StringComparison.Ordinal));
     }
 
     /// <summary>

@@ -193,6 +193,16 @@ public sealed class TransitionMatrixTests
                 global::PrintFlow.Domain.Outputs.WhiteUnderbaseBranch.W1_1px, "matrix probe"),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(
                 global::PrintFlow.Domain.Trimming.TrimMargin.Uniform(2)),
+
+            // The matrix probes with the revision it forced onto the step under test, which is
+            // usually not the one BackgroundRemoval would consume. That is the point here: the
+            // matrix asserts only that every combination has an explicit outcome, and a payload
+            // naming unrelated content must still be refused rather than fall through
+            // (Epic 11300 Part C2B1 §8).
+            CommandKind.SetBackgroundRemovalDecision => new WorkflowCommand.SetBackgroundRemovalDecision(
+                global::PrintFlow.Domain.Sessions.BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                revision,
+                hash),
             CommandKind.ReturnToStep => new WorkflowCommand.ReturnToStep(step),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),

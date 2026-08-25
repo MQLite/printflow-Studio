@@ -77,7 +77,74 @@ public sealed class LocalisationResourceTests
         }
     }
 
+    /// <summary>
+    /// The Background Removal authority strings exist in both languages, by name
+    /// (Epic 11300 Part C2B2 §22).
+    /// </summary>
+    /// <remarks>
+    /// The two parity tests above already catch a key present in one file and missing from the
+    /// other. What they cannot catch is both files losing a string together — a rename that
+    /// tidied one side and then the other, leaving a screen with no wording for the operator
+    /// action at all. Naming this slice's strings explicitly is what makes that a test failure
+    /// rather than a silent gap.
+    /// </remarks>
+    [Fact]
+    public void The_background_removal_authority_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_BackgroundRemovalHeading",
+            "Session_BackgroundRemovalHint",
+            "Session_BackgroundRemovalAuthorise",
+            "Session_BackgroundRemovalConfirmQuestion",
+            "Session_BackgroundRemovalConfirm",
+            "Session_BackgroundRemovalCancel",
+            "Session_BackgroundRemovalAuthorised",
+            "Session_BackgroundRemovalNotAuthorised",
+            "Session_BackgroundRemovalRunnable",
+            "Session_BackgroundRemovalAttemptAudit",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("the operator action needs English wording.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// The confirmation promises nothing about the result (§11).
+    /// </summary>
+    /// <remarks>
+    /// A wording test, deliberately. The confirmation is where an operator decides to let Meitu
+    /// choose the subject, and the one thing it must not do is imply the choice will be right —
+    /// "guaranteed", "perfect", "always" and the rest are claims this product cannot make about
+    /// an AI cutout, and a later edit that added one would be a promise nobody meant to give.
+    /// </remarks>
+    [Theory]
+    [InlineData("guarantee")]
+    [InlineData("guaranteed")]
+    [InlineData("perfect")]
+    [InlineData("always correct")]
+    [InlineData("no need to check")]
+    public void The_confirmation_claims_nothing_about_cutout_quality(string forbidden)
+    {
+        string confirmation = ValueOf(NeutralResx, "Session_BackgroundRemovalConfirmQuestion");
+
+        confirmation.ShouldNotContain(forbidden, Case.Insensitive);
+    }
+
+    private static string ValueOf(string relativePath, string key)
+    {
+        XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));
+
+        return document.Root!.Elements("data")
+            .Single(data => data.Attribute("name")!.Value == key)
+            .Element("value")!.Value;
+    }
+
     private static IReadOnlySet<string> KeysOf(string relativePath)
+
     {
         XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));
 

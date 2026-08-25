@@ -469,6 +469,34 @@ internal static class Strings
     /// <summary>Composite format: top, right, bottom, left — all in pixels.</summary>
     internal static string Session_TrimSummaryEdges => Get(nameof(Session_TrimSummaryEdges));
 
+    // --- Background removal authority (Epic 11300 Part C2B2 §3, §9, §11, §14) -----------
+
+    internal static string Session_BackgroundRemovalHeading => Get(nameof(Session_BackgroundRemovalHeading));
+
+    internal static string Session_BackgroundRemovalHint => Get(nameof(Session_BackgroundRemovalHint));
+
+    internal static string Session_BackgroundRemovalAuthorise => Get(nameof(Session_BackgroundRemovalAuthorise));
+
+    /// <summary>Scoped to the displayed image, and claiming nothing about cutout quality (§11).</summary>
+    internal static string Session_BackgroundRemovalConfirmQuestion =>
+        Get(nameof(Session_BackgroundRemovalConfirmQuestion));
+
+    internal static string Session_BackgroundRemovalConfirm => Get(nameof(Session_BackgroundRemovalConfirm));
+
+    internal static string Session_BackgroundRemovalCancel => Get(nameof(Session_BackgroundRemovalCancel));
+
+    /// <summary>Composite format: the short form of the authorised Revision (§9).</summary>
+    internal static string Session_BackgroundRemovalAuthorised => Get(nameof(Session_BackgroundRemovalAuthorised));
+
+    internal static string Session_BackgroundRemovalNotAuthorised =>
+        Get(nameof(Session_BackgroundRemovalNotAuthorised));
+
+    internal static string Session_BackgroundRemovalRunnable => Get(nameof(Session_BackgroundRemovalRunnable));
+
+    /// <summary>Composite format: the short form of the Revision the attempt was authorised over (§14).</summary>
+    internal static string Session_BackgroundRemovalAttemptAudit =>
+        Get(nameof(Session_BackgroundRemovalAttemptAudit));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

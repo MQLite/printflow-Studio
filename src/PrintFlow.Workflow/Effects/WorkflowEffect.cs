@@ -119,6 +119,21 @@ public abstract record WorkflowEffect
     /// </remarks>
     public sealed record PersistTrimParameters(TrimMargin Margin) : WorkflowEffect;
 
+    /// <summary>
+    /// Persist the reviewed-content authority the next Background Removal attempt may run under
+    /// (Epic 11300 Part C2B1 §5, §10).
+    /// </summary>
+    /// <remarks>
+    /// The session-level half of the authority record: it is what "Run Background Removal"
+    /// reads, so a decision an operator made before closing the app is still there when they
+    /// reopen it (§20). The audit half is separate and lives on
+    /// <c>ProcessingAttempt.BackgroundRemovalAuthority</c>, written when the attempt starts —
+    /// that is the row that must never be rewritten when the operator later authorises
+    /// different content (§11, §18).
+    /// </remarks>
+    public sealed record PersistBackgroundRemovalDecision(
+        BackgroundRemovalAuthority Authority) : WorkflowEffect;
+
     /// <summary>Persist the explicit white-underbase decision and its justification.</summary>
     public sealed record PersistWhiteUnderbaseBranch(
         WhiteUnderbaseBranch Branch,

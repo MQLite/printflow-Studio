@@ -151,6 +151,82 @@ public sealed class MigrationTests
     }
 
     /// <summary>
+    /// A database written before 0003 gains the background-removal columns and keeps its rows
+    /// (Epic 11300 Part C2B1 §28).
+    /// </summary>
+    /// <remarks>
+    /// The starting point is built by replaying 0001 and 0002 off the shipped assembly, so it is
+    /// the schema that actually shipped rather than a copy that can fall behind it. The session
+    /// row written before the columns existed is the point: it must survive, and its new columns
+    /// must read NULL -- "this session recorded no decision", never "the default was used". There
+    /// is no default, and a session that recorded nothing still needs an explicit authority
+    /// before background removal can run (§7).
+    /// </remarks>
+    [Fact]
+    public void A_pre_0003_database_upgrades_and_keeps_its_rows()
+    {
+        using TempDatabase database = new(migrate: false);
+
+        using (SqliteConnection seeded = database.OpenRaw())
+        {
+            Execute(seeded, ReadMigrationScript("0001_initial_schema.sql"));
+            Execute(seeded, ReadMigrationScript("0002_trim_parameters.sql"));
+            Execute(
+                seeded,
+                "INSERT INTO SchemaMigration (Version, Name, AppliedAtUtc, ScriptSha256) " +
+                "VALUES (1, 'initial_schema', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (2, 'trim_parameters', '2026-01-01T00:00:00.000Z', 'SEED');");
+            Execute(seeded, "PRAGMA user_version = 2;");
+
+            Execute(
+                seeded,
+                """
+                INSERT INTO ProcessingSession
+                    (Id, WorkflowType, OutputName, CurrentStep, State, WorkspacePath,
+                     CreatedAtUtc, UpdatedAtUtc, TrimMode, TrimMarginTop, TrimMarginRight,
+                     TrimMarginBottom, TrimMarginLeft)
+                VALUES
+                    ('pre-0003-session', 'PREPARE_ASSET', 'legacy', 'BackgroundRemoval', 'ACTIVE',
+                     'Sessions/pre-0003', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z',
+                     'UNIFORM_MARGIN', 3, 3, 3, 3);
+                """);
+        }
+
+        using SqliteConnection upgraded = database.OpenRaw();
+        var result = MigrationRunner.Migrate(upgraded);
+
+        result.IsSuccess.ShouldBeTrue();
+        ReadUserVersion(upgraded).ShouldBe(MigrationRunner.NewestKnownVersion);
+
+        foreach (string table in new[] { "ProcessingSession", "ProcessingAttempt" })
+        {
+            IReadOnlyList<string> columns = ColumnsOf(upgraded, table);
+            foreach (string column in new[]
+                     {
+                         "BackgroundRemovalDecision", "BackgroundRemovalRevisionId",
+                         "BackgroundRemovalReviewedSha",
+                     })
+            {
+                columns.ShouldContain(column, $"{table} is missing {column} after the upgrade.");
+            }
+        }
+
+        // The row survived with the value it did record, and says nothing about a decision it
+        // never made.
+        using SqliteCommand row = upgraded.CreateCommand();
+        row.CommandText =
+            "SELECT TrimMode, BackgroundRemovalDecision, BackgroundRemovalRevisionId, " +
+            "       BackgroundRemovalReviewedSha " +
+            "FROM ProcessingSession WHERE Id = 'pre-0003-session';";
+        using SqliteDataReader reader = row.ExecuteReader();
+        reader.Read().ShouldBeTrue();
+        reader.GetString(0).ShouldBe("UNIFORM_MARGIN");
+        reader.IsDBNull(1).ShouldBeTrue();
+        reader.IsDBNull(2).ShouldBeTrue();
+        reader.IsDBNull(3).ShouldBeTrue();
+    }
+
+    /// <summary>
     /// Reads a migration back off the shipped assembly, so a test's "before" state is the script
     /// that actually shipped rather than a copy that can quietly fall behind it.
     /// </summary>

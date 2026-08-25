@@ -407,6 +407,11 @@ public sealed class ArtefactPreviewTests
         {
             if (earlier == step)
             {
+                if (step == StepKind.BackgroundRemoval)
+                {
+                    await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
+                }
+
                 OperationResult<SessionView> ran = await service.ExecuteAsync(
                     id, new WorkflowCommand.StartStep(step), "tester", CancellationToken.None);
                 ran.IsSuccess.ShouldBeTrue(ran.IsFailure ? ran.Failure.ToString() : "");
@@ -421,6 +426,14 @@ public sealed class ArtefactPreviewTests
 
     private static async Task RunAndApproveAsync(ISessionService service, SessionId id, StepKind step)
     {
+        // Background Removal cannot start without an explicit reviewed-content authority since
+        // Epic 11300 Part C2B1 (§7), so authorising is part of running it normally rather than
+        // an extra this helper invented.
+        if (step == StepKind.BackgroundRemoval)
+        {
+            await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
+        }
+
         OperationResult<SessionView> started =
             await service.ExecuteAsync(id, new WorkflowCommand.StartStep(step), "tester", CancellationToken.None);
         started.IsSuccess.ShouldBeTrue(started.IsFailure ? started.Failure.ToString() : "");

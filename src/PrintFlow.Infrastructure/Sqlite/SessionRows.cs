@@ -30,6 +30,14 @@ internal sealed class SessionRow
     public int? TrimMarginRight { get; set; }
     public int? TrimMarginBottom { get; set; }
     public int? TrimMarginLeft { get; set; }
+
+    // The pending reviewed-content authority for background removal: what the NEXT run would be
+    // allowed to do (Epic 11300 Part C2B1 §10). All three move together, or all three are null.
+    public string? BackgroundRemovalDecision { get; set; }
+
+    public string? BackgroundRemovalRevisionId { get; set; }
+
+    public string? BackgroundRemovalReviewedSha { get; set; }
 }
 
 internal sealed class StepRow
@@ -102,6 +110,14 @@ internal sealed class AttemptRow
     public int? TrimMarginRight { get; set; }
     public int? TrimMarginBottom { get; set; }
     public int? TrimMarginLeft { get; set; }
+
+    // What THIS attempt was authorised by, when it was an authorised background removal
+    // (Epic 11300 Part C2B1 §11). Null for everything else, including an enhancement.
+    public string? BackgroundRemovalDecision { get; set; }
+
+    public string? BackgroundRemovalRevisionId { get; set; }
+
+    public string? BackgroundRemovalReviewedSha { get; set; }
 }
 
 internal sealed class ReviewRow

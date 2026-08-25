@@ -99,6 +99,35 @@ public sealed record ProcessingAttempt(
     public ProcessingAttempt WithTrimParameters(TrimMargin margin) =>
         this with { TrimParameters = margin };
 
+    /// <summary>
+    /// The reviewed-content authority this attempt ran Background Removal under
+    /// (Epic 11300 Part C2B1 §11).
+    /// </summary>
+    /// <remarks>
+    /// The answer to "who authorised automatic selection over this content, and which content
+    /// was it?" — recorded on the attempt rather than only on the session, for the same reason
+    /// <see cref="TrimParameters"/> is. A session-level record answers "what would the
+    /// <i>next</i> run be allowed to do", and that value changes: an operator who rejects a
+    /// cutout, returns upstream and authorises different content would, under a session-only
+    /// record, have retrospectively rewritten what the first attempt was authorised to do. An
+    /// attempt row is written once and never rewritten, so both readings stay side by side
+    /// (§18).
+    /// <para>
+    /// Null for everything that is not an authorised Background Removal — an Enhancement call,
+    /// a promotion, a trim, a manual crop. Null therefore reads as "this attempt had no
+    /// background-removal authority", never as "it used the default"; there is no default.
+    /// </para>
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter, so every existing call site
+    /// keeps saying what it meant.
+    /// </para>
+    /// </remarks>
+    public BackgroundRemovalAuthority? BackgroundRemovalAuthority { get; init; }
+
+    /// <summary>Records the reviewed-content authority this attempt is about to run under.</summary>
+    public ProcessingAttempt WithBackgroundRemovalAuthority(BackgroundRemovalAuthority authority) =>
+        this with { BackgroundRemovalAuthority = authority };
+
     public ProcessingAttempt Succeed(RevisionId outputRevisionId, DateTimeOffset endedAtUtc) =>
         this with
         {

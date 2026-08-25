@@ -67,6 +67,14 @@ public sealed record SessionAggregate(
             // it is a decision the operator made that no Revision records, so a reload that
             // dropped it would silently re-trim at zero margin (Epic 11200 Part C3 §13).
             TrimMargin = Session.TrimMargin,
+
+            // Carried across for the same reason, and with the same caveat: what is restored is
+            // the *pending* authority, not permission to run. Whether it still authorises
+            // anything is decided by WorkflowSnapshot.UsableBackgroundRemovalAuthority against
+            // the upstream result these very rows describe, so a decision that survived a
+            // restart is usable only if the content it named survived with it
+            // (Epic 11300 Part C2B1 §9, §20).
+            BackgroundRemovalAuthority = Session.BackgroundRemovalAuthority,
         };
     }
 }

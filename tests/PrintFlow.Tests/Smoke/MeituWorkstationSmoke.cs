@@ -4,6 +4,7 @@ using System.Text;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;

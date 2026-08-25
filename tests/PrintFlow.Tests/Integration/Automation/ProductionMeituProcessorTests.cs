@@ -1,6 +1,7 @@
 using System.IO;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Imaging;

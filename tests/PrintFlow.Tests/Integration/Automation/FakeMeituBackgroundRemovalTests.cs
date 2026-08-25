@@ -1,5 +1,6 @@
 using System.IO;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Imaging;

@@ -210,13 +210,15 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  CompletedAtUtc, HandedOffAtUtc, HandOffReason, AbandonedAtUtc, AbandonReason,
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
                  DimensionsPreset, WhiteUnderbaseBranch,
-                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft)
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha)
             VALUES
                 (@Id, @WorkflowType, @OutputName, @CurrentStep, @State, @WorkspacePath, @CreatedAtUtc, @UpdatedAtUtc,
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
                  @DimensionsPreset, @WhiteUnderbaseBranch,
-                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft)
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha)
             ON CONFLICT(Id) DO UPDATE SET
                 WorkflowType = excluded.WorkflowType,
                 OutputName = excluded.OutputName,
@@ -242,7 +244,15 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 TrimMarginTop = excluded.TrimMarginTop,
                 TrimMarginRight = excluded.TrimMarginRight,
                 TrimMarginBottom = excluded.TrimMarginBottom,
-                TrimMarginLeft = excluded.TrimMarginLeft;
+                TrimMarginLeft = excluded.TrimMarginLeft,
+
+                -- The session pending background-removal authority, so it updates for the same
+                -- reason: it is what the next run would be allowed to do, and the operator may
+                -- authorise different content. The attempt copy is the one that must never be
+                -- rewritten (Epic 11300 Part C2B1 §10, §11).
+                BackgroundRemovalDecision = excluded.BackgroundRemovalDecision,
+                BackgroundRemovalRevisionId = excluded.BackgroundRemovalRevisionId,
+                BackgroundRemovalReviewedSha = excluded.BackgroundRemovalReviewedSha;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }
@@ -342,11 +352,12 @@ public sealed class SqliteSessionRepository : ISessionRepository
     /// Inserts an attempt, or updates the fields that legitimately change when it ends.
     /// </summary>
     /// <remarks>
-    /// The trim-parameter columns are deliberately absent from the <c>DO UPDATE</c> clause.
-    /// They are written once, with the attempt's opening transaction, and describe what this
-    /// attempt was asked to do — so leaving them out is what makes "a retry with a different
-    /// margin never rewrites the first attempt's settings" a property of the SQL rather than a
-    /// promise about the caller (Epic 11200 Part C3 §15).
+    /// The trim-parameter and background-removal columns are deliberately absent from the
+    /// <c>DO UPDATE</c> clause. They are written once, with the attempt's opening transaction,
+    /// and describe what this attempt was asked to do and what authorised it — so leaving them out is what makes "a retry with a different
+    /// margin never rewrites the first attempt's settings, and a later decision never rewrites
+    /// what an earlier cutout was authorised by" a property of the SQL rather than a promise
+    /// about the caller (Epic 11200 Part C3 §15; Epic 11300 Part C2B1 §11, §18).
     /// </remarks>
     private static Task UpsertAttemptAsync(SqliteConnection connection, SqliteTransaction transaction, ProcessingAttempt attempt)
     {
@@ -356,11 +367,13 @@ public sealed class SqliteSessionRepository : ISessionRepository
             INSERT INTO ProcessingAttempt
                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc, EndedAtUtc,
                  ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
-                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft)
+                 TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha)
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
-                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft)
+                 @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha)
             ON CONFLICT(Id) DO UPDATE SET
                 EndedAtUtc = excluded.EndedAtUtc,
                 ResultStatus = excluded.ResultStatus,

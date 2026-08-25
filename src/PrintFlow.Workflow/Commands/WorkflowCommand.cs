@@ -124,6 +124,39 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record SetTrimParameters(TrimMargin Margin) : WorkflowCommand;
 
+    /// <summary>
+    /// Record the operator's explicit authority for Meitu's automatic selection over the
+    /// reviewed content Background Removal is about to consume (Epic 11300 Part C2B1 §5).
+    /// </summary>
+    /// <remarks>
+    /// The command exists because the authority is a <b>product decision about specific
+    /// content</b>, not a setting. <paramref name="ReviewedRevisionId"/> and
+    /// <paramref name="DisplayedHash"/> are what the operator was actually looking at when they
+    /// decided, and the engine accepts the decision only when that is still the artefact
+    /// Background Removal will consume — so "I authorised automatic selection for this photo"
+    /// can never quietly become "automatic selection is on for this session" (§4, §6).
+    /// <para>
+    /// It is a <b>decision</b> and not an attempt: accepting one starts nothing, produces no
+    /// file, and creates no Revision. <see cref="StartStep"/> for Background Removal then
+    /// requires it, so what runs is always something a human authorised over content they saw.
+    /// </para>
+    /// <para>
+    /// <paramref name="Decision"/> must be an explicit authorisation.
+    /// <c>BackgroundRemovalDecision.Unspecified</c> is the absence of a decision, and a command
+    /// carrying it is refused rather than recorded — recording it would leave a row that reads
+    /// like a decision and authorises nothing (§7).
+    /// </para>
+    /// <para>
+    /// The reviewed hash goes through the existing exact-hash authority — the same pair
+    /// <see cref="Approve"/> binds to — rather than any new file hashing path. Nothing here
+    /// opens a file (§4).
+    /// </para>
+    /// </remarks>
+    public sealed record SetBackgroundRemovalDecision(
+        BackgroundRemovalDecision Decision,
+        RevisionId ReviewedRevisionId,
+        Sha256 DisplayedHash) : WorkflowCommand;
+
     /// <summary>Go back to an earlier step, invalidating everything derived from it.</summary>
     public sealed record ReturnToStep(StepKind Target) : WorkflowCommand;
 

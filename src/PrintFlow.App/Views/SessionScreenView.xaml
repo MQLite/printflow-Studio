@@ -654,6 +654,96 @@
                     </Border>
 
                     <!--
+                        Background removal, reviewed-content authority (Epic 11300 Part C2B2
+                        §3–§9). Visible exactly while CanAuthoriseAutomaticSelection is true,
+                        which is the engine's own answer to whether
+                        SetBackgroundRemovalDecision would be accepted — this file states no
+                        condition of its own, and in particular re-derives no staleness rule
+                        (§7).
+                    -->
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding CanAuthoriseAutomaticSelection, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding BackgroundRemovalHint}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       Margin="0,6,0,0" />
+
+                            <!--
+                                The unauthorised half (§9). An explicit action about the image on
+                                screen, not a settings checkbox: nothing here is ticked, and
+                                nothing carries over to the next artefact (§4).
+                            -->
+                            <StackPanel Margin="0,10,0,0"
+                                        Visibility="{Binding IsAutomaticSelectionPending, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding AutomaticSelectionNotAuthorisedNotice}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+
+                                <Button Content="{Binding AuthoriseAutomaticSelectionLabel}"
+                                        Command="{Binding BeginAutomaticSelectionCommand}"
+                                        IsEnabled="{Binding CanBeginAutomaticSelection}"
+                                        HorizontalAlignment="Left"
+                                        Padding="14,6"
+                                        Margin="0,10,0,0" />
+
+                                <!--
+                                    The confirmation (§11). It says Meitu decides the subject on
+                                    its own and that the result still needs checking; it promises
+                                    nothing about quality and claims nothing about later versions
+                                    of the image.
+                                -->
+                                <Border BorderBrush="#33000000"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="10"
+                                        Margin="0,10,0,0"
+                                        Visibility="{Binding IsConfirmingAutomaticSelection, Converter={StaticResource BoolToVisibility}}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding AutomaticSelectionConfirmQuestion}"
+                                                   TextWrapping="Wrap" />
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                            <Button Content="{Binding ConfirmAutomaticSelectionLabel}"
+                                                    Command="{Binding ConfirmAutomaticSelectionCommand}"
+                                                    Padding="14,6"
+                                                    Margin="0,0,8,0" />
+
+                                            <Button Content="{Binding CancelAutomaticSelectionLabel}"
+                                                    Command="{Binding CancelAutomaticSelectionCommand}"
+                                                    Padding="14,6" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!--
+                                The authorised half (§9). It names the Revision the authority
+                                covers, and it disappears of its own accord once the upstream
+                                changes — because the read model stops reporting a usable
+                                authority, not because this file checks anything.
+                            -->
+                            <TextBlock Text="{Binding AutomaticSelectionAuthorisedNotice}"
+                                       TextWrapping="Wrap"
+                                       FontWeight="SemiBold"
+                                       Margin="0,10,0,0"
+                                       Visibility="{Binding IsAutomaticSelectionAuthorised, Converter={StaticResource BoolToVisibility}}" />
+
+                            <!-- Readiness, from CanRunBackgroundRemoval and nothing else (§8). -->
+                            <TextBlock Text="{Binding BackgroundRemovalRunnableNotice}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding CanRunBackgroundRemoval, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
                         Trim margin (Epic 11200 Part C3 §9–§12). Visible exactly while
                         CanSetTrimParameters is true, which the workflow layer answers from the
                         engine's legality plus the attempt history — so this panel disappears on
@@ -892,6 +982,20 @@
                                        Opacity="0.8"
                                        Margin="0,8,0,0"
                                        Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+
+                            <!--
+                                The authority the cutout under review was produced under
+                                (Epic 11300 Part C2B2 §14, §15). It comes from the producing
+                                attempt, which is written once and never rewritten — so a later
+                                change to the session's pending authority cannot relabel this
+                                result. Empty, and therefore collapsed, for anything that is not
+                                an authorised background removal.
+                            -->
+                            <TextBlock Text="{Binding BackgroundRemovalAttemptAudit}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasBackgroundRemovalAttemptAudit, Converter={StaticResource BoolToVisibility}}" />
 
                             <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <ComboBox ItemsSource="{Binding RejectionReasons}"

@@ -167,6 +167,8 @@ public sealed class MeituOutputNamingTests
                 enhanced.Value.Steps.Single(s => s.Step == StepKind.Enhancement).CurrentRevisionSha256!.Value),
             "tester", CancellationToken.None);
 
+        await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
+
         OperationResult<SessionView> cutout = await service.ExecuteAsync(
             id, new WorkflowCommand.StartStep(StepKind.BackgroundRemoval), "tester", CancellationToken.None);
         cutout.IsSuccess.ShouldBeTrue(cutout.IsFailure ? cutout.Failure.ToString() : string.Empty);

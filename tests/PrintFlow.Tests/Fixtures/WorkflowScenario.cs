@@ -103,8 +103,20 @@ internal sealed class WorkflowScenario
     }
 
     /// <summary>Runs a producing step through start, success and approval.</summary>
+    /// <remarks>
+    /// Background Removal is authorised first, because since Epic 11300 Part C2B1 it cannot be
+    /// started without an explicit reviewed-content decision (§7). Doing it here rather than in
+    /// every caller keeps this helper meaning "run this step normally" -- the authorisation is
+    /// part of what running Background Removal normally now involves, not an extra the tests
+    /// invented. Tests about the decision itself issue the command directly.
+    /// </remarks>
     public RevisionId CompleteStep(StepKind kind)
     {
+        if (kind == StepKind.BackgroundRemoval)
+        {
+            AuthoriseBackgroundRemoval();
+        }
+
         Must(new WorkflowCommand.StartStep(kind));
         RevisionId produced = NextRevision();
         Sha256 hash = HashOf(produced);
@@ -116,6 +128,28 @@ internal sealed class WorkflowScenario
         }
 
         return produced;
+    }
+
+    /// <summary>
+    /// Records the reviewed-content authority for whatever Background Removal will currently
+    /// consume (Epic 11300 Part C2B1 §5).
+    /// </summary>
+    /// <remarks>
+    /// Reads the upstream result from the snapshot rather than taking it as an argument, so it
+    /// authorises the artefact actually on offer and can never accidentally authorise a stale
+    /// one. A test that wants to prove stale authority is refused issues the command itself with
+    /// the id and hash it means.
+    /// </remarks>
+    public WorkflowScenario AuthoriseBackgroundRemoval()
+    {
+        (RevisionId Id, Sha256 Sha256) upstream = State.UpstreamResultOf(StepKind.BackgroundRemoval)
+            ?? throw new InvalidOperationException(
+                "BackgroundRemoval has no upstream result to authorise.");
+
+        return Must(new WorkflowCommand.SetBackgroundRemovalDecision(
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            upstream.Id,
+            upstream.Sha256));
     }
 
     public StepState StateOf(StepKind kind) =>

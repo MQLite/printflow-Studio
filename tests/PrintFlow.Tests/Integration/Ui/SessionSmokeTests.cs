@@ -100,6 +100,8 @@ public sealed class SessionSmokeTests
 
         (await app.LoadAsync(id)).ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.BackgroundRemoval);
 
+        await app.AuthoriseBackgroundRemovalAsync();
+
         await session.RunStepCommand.ExecuteAsync(null);
         session.IsReviewRequired.ShouldBeTrue();
 
@@ -321,6 +323,7 @@ public sealed class SessionSmokeTests
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
         await session.RunStepCommand.ExecuteAsync(null);          // Enhancement
         await session.ApproveCommand.ExecuteAsync(null);
+        await app.AuthoriseBackgroundRemovalAsync();
         await session.RunStepCommand.ExecuteAsync(null);          // BackgroundRemoval
         await session.ApproveCommand.ExecuteAsync(null);
         await session.RunStepCommand.ExecuteAsync(null);          // Trim
@@ -408,9 +411,10 @@ public sealed class SessionSmokeTests
 
         SessionViewModel session = await app.ImportAndChooseAsync("smoke-f.png", WorkflowType.PrepareAsset);
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
-        await session.RunStepCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // Enhancement
         await session.ApproveCommand.ExecuteAsync(null);
-        await session.RunStepCommand.ExecuteAsync(null);
+        await app.AuthoriseBackgroundRemovalAsync();
+        await session.RunStepCommand.ExecuteAsync(null);          // BackgroundRemoval
         await session.PreviewsLoaded;
 
         session.Notice.ShouldBeNull();
@@ -434,11 +438,12 @@ public sealed class SessionSmokeTests
             SyntheticImages.PngWithAlpha(12, 10, (x, y) => x is >= 3 and <= 7 && y is >= 2 and <= 6 ? (byte)255 : (byte)0));
 
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
-        await session.RunStepCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // Enhancement
         await session.ApproveCommand.ExecuteAsync(null);
-        await session.RunStepCommand.ExecuteAsync(null);
+        await app.AuthoriseBackgroundRemovalAsync();
+        await session.RunStepCommand.ExecuteAsync(null);          // BackgroundRemoval
         await session.ApproveCommand.ExecuteAsync(null);
-        await session.RunStepCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);          // Trim
         await session.PreviewsLoaded;
 
         session.Notice.ShouldBeNull();
@@ -984,6 +989,22 @@ public sealed class SessionSmokeTests
 
         /// <summary>The session the navigation service currently has a screen open for.</summary>
         public SessionId OpenSessionId { get; private set; }
+
+        /// <summary>
+        /// Records the reviewed-content authority for the artefact Background Removal is about to
+        /// consume, through the application's own session service (Epic 11300 Part C2B1 §5).
+        /// </summary>
+        /// <remarks>
+        /// Issued against the service rather than a screen control, because C2B1 deliberately
+        /// ships no operator UI for it -- the service/read-model seam is the whole of what this
+        /// slice exposes, and C2B2 owns the control that will call it (§21). The screen is not
+        /// refreshed afterwards on purpose: RunStep reads the current step from what the screen
+        /// already holds and the service reloads the decision from the database, so this proves
+        /// the persisted authority is what authorises the run.
+        /// </remarks>
+        public Task AuthoriseBackgroundRemovalAsync() =>
+            SessionServiceHarness.AuthoriseBackgroundRemovalAsync(
+                Services.GetRequiredService<ISessionService>(), OpenSessionId);
 
         public static async Task<SmokeApplication> StartAsync()
         {

@@ -421,6 +421,26 @@ public sealed partial class SessionViewModel : ObservableObject
     [ObservableProperty]
     private string? _leftMarginText;
 
+    // --- Background removal authority (Epic 11300 Part C2B2 §4, §10) ----------------------
+    //
+    // One piece of state, and it is the confirmation panel being open. Opening it changes
+    // nothing about the session, and only Confirm issues a command — the same shape the return
+    // confirmation and the crop surface have, and what makes §10's "opening the screen must not
+    // authorise" structural rather than promised.
+
+    /// <summary>
+    /// Whether the authorisation confirmation is on screen, waiting to be confirmed or
+    /// cancelled (§4, §11).
+    /// </summary>
+    /// <remarks>
+    /// Screen state, never persisted. Having looked at what automatic selection will do is not
+    /// a fact about the session, and this deliberately is not a checkbox whose ticked-ness
+    /// outlives the artefact it was ticked for (§4).
+    /// </remarks>
+    [ObservableProperty]
+    private bool _isConfirmingAutomaticSelection;
+
+
     private SessionView? _session;
 
     public SessionViewModel(
@@ -798,6 +818,124 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <inheritdoc cref="TrimParametersSummary" />
     public bool HasTrimParameters => _session?.HasTrimParameters == true;
 
+    // --- Background removal authority (Epic 11300 Part C2B2 §3, §7–§9, §14) --------------
+
+    public string BackgroundRemovalHeading => Strings.Session_BackgroundRemovalHeading;
+
+    /// <summary>What automatic selection is, in one line. Advice, never a decision (§3).</summary>
+    public string BackgroundRemovalHint => Strings.Session_BackgroundRemovalHint;
+
+    /// <summary>
+    /// The operator action, worded as a decision about this image (§3).
+    /// </summary>
+    /// <remarks>
+    /// "Use Automatic Selection for this image", not "enable automatic background removal".
+    /// The authority the command records is bound to one Revision and one hash, so a label
+    /// that read like a session setting would be describing something the system cannot do.
+    /// </remarks>
+    public string AuthoriseAutomaticSelectionLabel => Strings.Session_BackgroundRemovalAuthorise;
+
+    /// <summary>
+    /// What the operator confirms before the authority is recorded (§11).
+    /// </summary>
+    /// <remarks>
+    /// It says Meitu decides the subject on its own and that the result still needs checking.
+    /// It promises nothing about cutout quality and claims nothing about later versions of the
+    /// image, because the authority covers neither.
+    /// </remarks>
+    public string AutomaticSelectionConfirmQuestion => Strings.Session_BackgroundRemovalConfirmQuestion;
+
+    public string ConfirmAutomaticSelectionLabel => Strings.Session_BackgroundRemovalConfirm;
+
+    public string CancelAutomaticSelectionLabel => Strings.Session_BackgroundRemovalCancel;
+
+    /// <summary>What is shown while nothing authorises a run (§8, §9).</summary>
+    public string AutomaticSelectionNotAuthorisedNotice => Strings.Session_BackgroundRemovalNotAuthorised;
+
+    /// <summary>What is shown once the step would really start (§8).</summary>
+    public string BackgroundRemovalRunnableNotice => Strings.Session_BackgroundRemovalRunnable;
+
+    /// <summary>
+    /// Whether the authorisation control is offered at all (§7).
+    /// </summary>
+    /// <remarks>
+    /// Read straight off <see cref="SessionView.CanSetBackgroundRemovalDecision"/>, which is the
+    /// engine's own answer to "would <c>SetBackgroundRemovalDecision</c> be accepted right now".
+    /// This screen restates none of it: not the step, not the step state, not the session state.
+    /// </remarks>
+    public bool CanAuthoriseAutomaticSelection => _session?.CanSetBackgroundRemovalDecision == true;
+
+    /// <summary>True once the confirmation may be opened: the offer is real and nothing is in flight.</summary>
+    public bool CanBeginAutomaticSelection =>
+        CanAuthoriseAutomaticSelection && _session?.CurrentArtefact is not null && !IsBusy;
+
+    /// <summary>
+    /// Whether an authority covering the artefact on screen is in force (§9).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.BackgroundRemovalDecision"/> is already the <i>usable</i>
+    /// authority — the read model reports Unspecified for one granted over content that has
+    /// since been replaced — so this is a reading of that single answer and not a second
+    /// staleness rule. There is deliberately no comparison of Revisions or hashes anywhere in
+    /// this file: a screen with its own opinion about staleness would eventually disagree with
+    /// the engine that decides whether the run starts (§2, §6).
+    /// </remarks>
+    public bool IsAutomaticSelectionAuthorised =>
+        _session?.BackgroundRemovalDecision == BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
+
+    /// <summary>
+    /// Whether the screen is in the unauthorised state (§9).
+    /// </summary>
+    /// <remarks>
+    /// The plain negation of <see cref="IsAutomaticSelectionAuthorised"/>, which exists so the
+    /// view can collapse one half and expand the other without an inverting converter. It adds
+    /// no condition of its own — in particular, an authority that has gone stale returns the
+    /// screen here on its own, because the read model has already stopped reporting it (§9).
+    /// </remarks>
+    public bool IsAutomaticSelectionPending => !IsAutomaticSelectionAuthorised;
+
+    /// <summary>The authorised state as one compact line, naming the Revision it covers (§9).</summary>
+    public string AutomaticSelectionAuthorisedNotice =>
+        _session?.BackgroundRemovalDecisionRevisionId is { } revision
+            ? string.Format(
+                CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAuthorised, ShortRevision(revision))
+            : string.Empty;
+
+    /// <summary>
+    /// Whether Background Removal would really start if asked (§8).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.CanRunBackgroundRemoval"/>, and never
+    /// "<see cref="IsAutomaticSelectionAuthorised"/> is true": readiness is the engine probing
+    /// the real <c>StartStep</c>, which weighs the step state and the automation lock as well as
+    /// the decision. Inferring it from the decision alone would offer a run in states where the
+    /// command would be refused (§8).
+    /// </remarks>
+    public bool CanRunBackgroundRemoval => _session?.CanRunBackgroundRemoval == true;
+
+    /// <summary>
+    /// The authority the cutout under review was produced under (§14, §15).
+    /// </summary>
+    /// <remarks>
+    /// From <see cref="SessionView.BackgroundRemovalAttemptDecision"/> — the immutable record on
+    /// the attempt that produced this exact Revision — and never from the session's current
+    /// decision. The two differ the moment an operator returns upstream and authorises different
+    /// content, and it is the historical one that describes what is on screen (§15).
+    /// <para>
+    /// It names the reviewed Revision in short form and says nothing else: no attempt id, no
+    /// timestamps, no adapter detail (§14).
+    /// </para>
+    /// </remarks>
+    public string BackgroundRemovalAttemptAudit =>
+        _session is { HasBackgroundRemovalAttemptAuthority: true, BackgroundRemovalAttemptReviewedRevisionId: { } reviewed }
+            ? string.Format(
+                CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAttemptAudit, ShortRevision(reviewed))
+            : string.Empty;
+
+    /// <inheritdoc cref="BackgroundRemovalAttemptAudit" />
+    public bool HasBackgroundRemovalAttemptAudit => _session?.HasBackgroundRemovalAttemptAuthority == true;
+
+
     /// <summary>
     /// The unmissable warning that this installation produces synthetic results
     /// (Part 3C3A §8).
@@ -895,7 +1033,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>A short revision identifier, enough to tell two results apart on screen.</summary>
     public string ArtefactRevision => _session?.CurrentArtefact is { } artefact
-        ? artefact.RevisionId.Value.ToString("N", CultureInfo.InvariantCulture)[..8]
+        ? ShortRevision(artefact.RevisionId)
         : string.Empty;
 
     // --- Command availability ------------------------------------------------------------
@@ -1234,7 +1372,74 @@ public sealed partial class SessionViewModel : ObservableObject
             new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
     }
 
+    // --- Background removal authority (Part C2B2 §5, §6, §10, §11) ------------------------
+
+    /// <summary>
+    /// Opens the confirmation. Changes nothing about the session (§10).
+    /// </summary>
+    /// <remarks>
+    /// No command, no attempt, no authority: this is the operator being told what automatic
+    /// selection will do, before anything records that they accepted it. The offer itself still
+    /// comes from the workflow layer — pressing this when
+    /// <see cref="CanAuthoriseAutomaticSelection"/> is false does nothing.
+    /// </remarks>
+    [RelayCommand]
+    private void BeginAutomaticSelection()
+    {
+        if (!CanBeginAutomaticSelection)
+        {
+            return;
+        }
+
+        IsConfirmingAutomaticSelection = true;
+    }
+
+    /// <summary>
+    /// Closes the confirmation, discarding it (§10).
+    /// </summary>
+    /// <remarks>
+    /// The same structural guarantee <see cref="CancelReturn"/> has: this method cannot leave a
+    /// trace because it has nothing to leave one with. It touches no file, issues no command and
+    /// reaches no service.
+    /// </remarks>
+    [RelayCommand]
+    private void CancelAutomaticSelection() => IsConfirmingAutomaticSelection = false;
+
+    /// <summary>
+    /// Authorises automatic selection for the artefact this screen displayed (§5, §6).
+    /// </summary>
+    /// <remarks>
+    /// The Revision and the hash come from <see cref="SessionView.CurrentArtefact"/> — the
+    /// artefact whose metadata is on the screen the operator is looking at — and from nowhere
+    /// else: not from a filename, not from a field cached when the session was opened, not from
+    /// a previous selection, and not from the adapter. Nothing here opens a file or computes a
+    /// hash (§5, §17).
+    /// <para>
+    /// That is also the whole of the stale-screen answer (§6). A screen still showing Revision A
+    /// sends A's identity, so if the session has moved to B the engine refuses the command
+    /// outright rather than transferring A's authority to B — the same exact-hash rule
+    /// <see cref="ApproveAsync"/> relies on. There is deliberately no retry against B: the
+    /// operator has not seen B.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task ConfirmAutomaticSelectionAsync(CancellationToken cancellationToken)
+    {
+        if (_session?.CurrentArtefact is not { } displayed)
+        {
+            return;
+        }
+
+        await RunAsync(
+            new WorkflowCommand.SetBackgroundRemovalDecision(
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                displayed.RevisionId,
+                displayed.Sha256),
+            cancellationToken).ConfigureAwait(true);
+    }
+
     // --- Trim margin (Part C3 §9–§13) -----------------------------------------------------
+
 
     /// <summary>
     /// Records the chosen trim margin through the ordinary command path (§13).
@@ -1397,6 +1602,26 @@ public sealed partial class SessionViewModel : ObservableObject
 
     private bool Allows(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
 
+    /// <summary>
+    /// Eight hex characters of a Revision id — enough to tell two apart on screen.
+    /// </summary>
+    /// <remarks>
+    /// The <b>last</b> eight, not the first. Revision ids are UUIDv7, whose leading digits are a
+    /// millisecond timestamp: two Revisions produced within about a minute of each other — which
+    /// is exactly the pair an operator is asked to distinguish after a re-run — share their
+    /// leading eight characters entirely. The trailing digits are the random part, so a short
+    /// form taken from the end actually differs when the Revisions do
+    /// (Epic 11300 Part C2B2 §9, §14).
+    /// <para>
+    /// Display only, exactly like <see cref="ArtefactHash"/>. Nothing on this screen ever
+    /// compares Revisions, and the identity a command carries is always the full value taken
+    /// from the read model.
+    /// </para>
+    /// </remarks>
+    private static string ShortRevision(RevisionId revision) =>
+        revision.Value.ToString("N", CultureInfo.InvariantCulture)[^8..];
+
+
     /// <summary>Floating-point slack, so eight steps of ×1.25 still count as reaching 800%.</summary>
     private const double ZoomTolerance = 1e-9;
 
@@ -1541,6 +1766,7 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CanBeginReturn));
+        OnPropertyChanged(nameof(CanBeginAutomaticSelection));
     }
 
     /// <summary>Leaves the return confirmation closed with nothing chosen. Issues no command.</summary>
@@ -1801,6 +2027,12 @@ public sealed partial class SessionViewModel : ObservableObject
         // warning about a step the operator is no longer looking at (§24).
         ClearReturnState();
 
+        // And the same again for the authorisation confirmation. It was opened about one
+        // specific artefact; leaving it standing across a state change would put a Confirm
+        // button in front of an operator for an image that is no longer the one on screen
+        // (Part C2B2 §6, §12).
+        IsConfirmingAutomaticSelection = false;
+
         ClearPreviews();
         PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);
 
@@ -1876,6 +2108,15 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(PendingTrimSummary));
         OnPropertyChanged(nameof(TrimParametersSummary));
         OnPropertyChanged(nameof(HasTrimParameters));
+
+        OnPropertyChanged(nameof(CanAuthoriseAutomaticSelection));
+        OnPropertyChanged(nameof(CanBeginAutomaticSelection));
+        OnPropertyChanged(nameof(IsAutomaticSelectionAuthorised));
+        OnPropertyChanged(nameof(IsAutomaticSelectionPending));
+        OnPropertyChanged(nameof(AutomaticSelectionAuthorisedNotice));
+        OnPropertyChanged(nameof(CanRunBackgroundRemoval));
+        OnPropertyChanged(nameof(BackgroundRemovalAttemptAudit));
+        OnPropertyChanged(nameof(HasBackgroundRemovalAttemptAudit));
     }
 
     /// <summary>Re-seeds the mode selector and the margin boxes from a persisted margin.</summary>

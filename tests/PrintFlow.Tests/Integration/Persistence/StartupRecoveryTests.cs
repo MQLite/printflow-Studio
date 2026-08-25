@@ -310,6 +310,14 @@ public sealed class StartupRecoveryTests
     private static async Task<AttemptId> CrashDuringAsync(
         SessionServiceHarness harness, ISessionService service, SessionId id, StepKind step)
     {
+        // Authorising first is part of starting Background Removal at all since Epic 11300
+        // Part C2B1 (§7): without it the step is refused before the adapter is ever reached, so
+        // there would be no running attempt to crash during.
+        if (step == StepKind.BackgroundRemoval)
+        {
+            await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(service, id);
+        }
+
         harness.FakeMeitu.SetScenario(FakeAdapterScenario.HangUntilCancelled);
 
         // Deliberately never awaited and never cancelled: the hung call writes nothing more,

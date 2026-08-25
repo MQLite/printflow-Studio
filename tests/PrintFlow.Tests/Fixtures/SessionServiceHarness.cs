@@ -1,11 +1,14 @@
 using Microsoft.Extensions.Time.Testing;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
 using PrintFlow.Infrastructure.Sqlite;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
@@ -153,6 +156,40 @@ internal sealed class SessionServiceHarness : IDisposable
         EnvironmentGate,
         SystemIdGenerator.Instance,
         Clock);
+
+    /// <summary>
+    /// Records the reviewed-content authority for whatever Background Removal is currently about
+    /// to consume (Epic 11300 Part C2B1 §5).
+    /// </summary>
+    /// <remarks>
+    /// Built from <c>SessionView.CurrentArtefact</c> — the artefact the read model says is on
+    /// screen — rather than from a revision the test dug out of the database, because that is
+    /// exactly what the operator UI in C2B2 will have to hand. Authorising anything else would be
+    /// testing a path no screen can take.
+    /// <para>
+    /// Tests that mean to prove stale or mismatched authority is refused construct the command
+    /// themselves with the id and hash they intend.
+    /// </para>
+    /// </remarks>
+    public static async Task AuthoriseBackgroundRemovalAsync(ISessionService service, SessionId id)
+    {
+        OperationResult<SessionView> loaded = await service.LoadAsync(id, CancellationToken.None);
+        loaded.IsSuccess.ShouldBeTrue(loaded.IsFailure ? loaded.Failure.ToString() : "");
+
+        ArtefactView reviewed = loaded.Value.CurrentArtefact
+            ?? throw new InvalidOperationException("There is no artefact on screen to authorise.");
+
+        OperationResult<SessionView> decided = await service.ExecuteAsync(
+            id,
+            new WorkflowCommand.SetBackgroundRemovalDecision(
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                reviewed.RevisionId,
+                reviewed.Sha256),
+            "tester",
+            CancellationToken.None);
+
+        decided.IsSuccess.ShouldBeTrue(decided.IsFailure ? decided.Failure.ToString() : "");
+    }
 
     public string WriteSourcePng(string fileName = "source.png") =>
         Workspace.CreateSourceFile(fileName, SyntheticImages.Png(6, 5, alpha: true));

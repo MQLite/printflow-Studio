@@ -403,4 +403,27 @@
   <data name="Session_TrimSummaryTight" xml:space="preserve"><value>裁切：紧贴</value></data>
   <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>裁切：统一 {0} 像素</value></data>
   <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>裁切：上 {0} / 右 {1} / 下 {2} / 左 {3} 像素</value></data>
+
+  <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
+  <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>去除背景</value></data>
+  <data name="Session_BackgroundRemovalHint" xml:space="preserve">
+    <value>美图会自动判定上方图片的前景主体。运行该步骤前，请先针对此图片授权。</value>
+  </data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>对此图片使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
+    <value>美图将自行判定此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
+  </data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认</value></data>
+  <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
+    <value>已对此图片授权自动选择 · 版本 {0}</value>
+  </data>
+  <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
+    <value>尚未授权。对此图片授权自动选择后，方可使用“运行步骤”。</value>
+  </data>
+  <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>可以运行去除背景。</value></data>
+  <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
+    <value>去除背景：自动选择 — 已针对已审图片版本 {0} 授权</value>
+  </data>
 </root>
+

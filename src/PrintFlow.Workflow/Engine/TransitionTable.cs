@@ -27,6 +27,7 @@ public enum CommandKind
     SetPrintDimensions,
     SelectWhiteUnderbaseBranch,
     SetTrimParameters,
+    SetBackgroundRemovalDecision,
     ReturnToStep,
     Complete,
     AddAnotherSize,
@@ -77,6 +78,12 @@ public static class TransitionTable
         // this table, because the table answers "what does the *target step's* state permit",
         // and this command names no step (Epic 11200 Part C3 §13).
         CommandKind.SetTrimParameters,
+
+        // And a reviewed-content authority for Background Removal, for the same reason: it
+        // names no step, changes no step state, and starts nothing. Whether Background Removal
+        // is the current step and is between attempts is a guard the engine applies, not a row
+        // in this table (Epic 11300 Part C2B1 §5, §6).
+        CommandKind.SetBackgroundRemovalDecision,
         CommandKind.ReturnToStep,
         CommandKind.Complete,
         CommandKind.AddAnotherSize,

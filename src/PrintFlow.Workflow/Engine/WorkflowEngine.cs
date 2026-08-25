@@ -55,6 +55,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
             WorkflowCommand.SelectWhiteUnderbaseBranch c => SelectWhiteUnderbaseBranch(state, c),
             WorkflowCommand.SetTrimParameters c => SetTrimParameters(state, c),
+            WorkflowCommand.SetBackgroundRemovalDecision c => SetBackgroundRemovalDecision(state, c),
             WorkflowCommand.ReturnToStep c => ReturnToStep(state, c, context),
             WorkflowCommand.Complete => Complete(state, context),
             WorkflowCommand.AddAnotherSize => AddAnotherSize(state, context),
@@ -280,6 +281,108 @@ public sealed class WorkflowEngine : IWorkflowEngine
             state with { TrimMargin = command.Margin },
             new WorkflowEffect.PersistTrimParameters(command.Margin));
     }
+
+    /// <summary>
+    /// Records the reviewed-content authority the next Background Removal attempt may run
+    /// under (Epic 11300 Part C2B1 §5, §6).
+    /// </summary>
+    /// <remarks>
+    /// Every guard here exists to keep one sentence true: the decision means "automatic
+    /// selection is authorised for <i>this</i> reviewed content", never "automatic selection is
+    /// enabled for this session" (§4).
+    /// <list type="bullet">
+    ///   <item>The session must be active, and the workflow must actually contain the step.</item>
+    ///   <item>The decision must be an explicit authorisation. <c>Unspecified</c> is the absence
+    ///         of a decision, so a command carrying it is refused rather than recorded (§7).</item>
+    ///   <item>Background Removal must be the current step and <i>between</i> attempts, the same
+    ///         window <see cref="SetTrimParameters"/> uses and for the same reason: authorising
+    ///         content mid-attempt, or after a result is already awaiting review, would leave the
+    ///         session claiming an authority the attempt row does not describe (§11).</item>
+    ///   <item>The supplied Revision and hash must be exactly what Background Removal will
+    ///         consume. This is the whole of §6 and §8: authority granted for Revision A cannot
+    ///         be recorded against a session whose upstream has since become B, and a hash that
+    ///         no longer matches means the operator decided about bytes that are gone (§24).</item>
+    /// </list>
+    /// <para>
+    /// Accepting one starts nothing. No attempt, no working copy, no adapter call, no Revision.
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition SetBackgroundRemovalDecision(
+        WorkflowSnapshot state, WorkflowCommand.SetBackgroundRemovalDecision command)
+    {
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
+        {
+            return NotActive(state, nameof(WorkflowCommand.SetBackgroundRemovalDecision));
+        }
+
+        if (!state.Definition.Contains(StepKind.BackgroundRemoval))
+        {
+            return NotInWorkflow(state, StepKind.BackgroundRemoval);
+        }
+
+        if (command.Decision != BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                $"'{command.Decision}' is not an explicit authorisation. Unspecified is the absence of a " +
+                "decision, not a value that can be recorded.");
+        }
+
+        if (state.CurrentStep is not { Step: StepKind.BackgroundRemoval } backgroundRemoval)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "A background-removal decision can only be set while BackgroundRemoval is the current step; " +
+                "it authorises the run that is about to happen.");
+        }
+
+        if (!AcceptsBackgroundRemovalDecision(backgroundRemoval.State))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"BackgroundRemoval is {backgroundRemoval.State}; reviewed content is authorised between " +
+                "attempts, not during one or after a result has been produced.");
+        }
+
+        if (state.UpstreamResultOf(StepKind.BackgroundRemoval) is not { } upstream)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "BackgroundRemoval has no validated upstream result, so there is no reviewed content to authorise.");
+        }
+
+        if (upstream.Id != command.ReviewedRevisionId)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"Revision {command.ReviewedRevisionId} is not what BackgroundRemoval will consume ({upstream.Id}); " +
+                "authority is granted for reviewed content, never transferred to other content.");
+        }
+
+        if (!upstream.Sha256.Equals(command.DisplayedHash))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The displayed hash {command.DisplayedHash.ShortForm} does not match the current upstream result " +
+                $"{upstream.Sha256.ShortForm}; the content reviewed is no longer the content on offer.");
+        }
+
+        BackgroundRemovalAuthority authority = BackgroundRemovalAuthority.For(
+            command.Decision, upstream.Id, upstream.Sha256);
+
+        return WorkflowTransition.Accepted(
+            state with { BackgroundRemovalAuthority = authority },
+            new WorkflowEffect.PersistBackgroundRemovalDecision(authority));
+    }
+
+    /// <summary>The BackgroundRemoval step states in which a new attempt is the next action.</summary>
+    /// <remarks>
+    /// Written out rather than expressed as "not Processing and not ReviewRequired", so a step
+    /// state added later is excluded until someone decides it belongs — the same reasoning as
+    /// <see cref="AcceptsTrimParameters"/>.
+    /// </remarks>
+    private static bool AcceptsBackgroundRemovalDecision(StepState state) => state is
+        StepState.Waiting or StepState.RetryRequired or StepState.Failed or StepState.Interrupted;
 
     /// <summary>The Trim step states in which a new deterministic attempt is the next action.</summary>
     /// <remarks>
@@ -546,6 +649,25 @@ public sealed class WorkflowEngine : IWorkflowEngine
                     RejectionCode.PreconditionNotMet,
                     "Photoshop output requires an explicit white-underbase branch (W1_0px, W1_1px or W1_2px). There is no default.");
             }
+        }
+
+        // Background Removal must not begin without an explicit, still-usable authority for the
+        // content it is about to consume. Refused here, before the automation lock, before the
+        // attempt row, before the working copy and before the adapter call — a missing product
+        // decision is not a failed Meitu processing attempt, and recording one as such would put
+        // a fabricated failure in the audit history (Epic 11300 Part C2B1 §7, §26).
+        //
+        // UsableBackgroundRemovalAuthority, not BackgroundRemovalAuthority: holding an authority
+        // is not the same as being authorised. One granted over Revision A does not carry to a
+        // session whose upstream is now B, and one whose bound hash no longer matches describes
+        // bytes that are gone (§8, §24). Nothing re-binds it silently; the operator decides again.
+        if (command.Step == StepKind.BackgroundRemoval && state.UsableBackgroundRemovalAuthority is null)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "PRODUCT DECISION REQUIRED: background removal requires an explicit authority for the reviewed " +
+                "content it will consume. There is no default, and an authority granted over different or " +
+                "since-changed content does not carry over.");
         }
 
         RevisionId? input = state.UpstreamRevisionOf(command.Step);
@@ -1170,6 +1292,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
+            CommandKind.SetBackgroundRemovalDecision
+                when state.Definition.Contains(StepKind.BackgroundRemoval)
+                    && state.UpstreamResultOf(StepKind.BackgroundRemoval) is { } reviewed =>
+                new WorkflowCommand.SetBackgroundRemovalDecision(
+                    ProbeBackgroundRemovalDecision, reviewed.Id, reviewed.Sha256),
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
             CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),
@@ -1180,6 +1307,27 @@ public sealed class WorkflowEngine : IWorkflowEngine
             _ => null,
         };
     }
+
+    /// <summary>
+    /// The stand-in decision used when probing
+    /// <see cref="CommandKind.SetBackgroundRemovalDecision"/>.
+    /// </summary>
+    /// <remarks>
+    /// Emphatically not a default, and for the same reason <see cref="ProbeBranch"/> is not:
+    /// the probed transition is discarded and only its accepted/rejected verdict is read, so no
+    /// session acquires an authority nobody granted. It has to name the authorised member rather
+    /// than <c>Unspecified</c>, because probing with the refusal value would answer a question
+    /// about a command the handler rejects outright — the probe would then always say "no" and
+    /// tell the screen nothing about whether the operator may decide (Epic 11300 Part C2B1 §22).
+    /// <para>
+    /// The revision and hash are the session's <b>actual</b> current upstream result, never
+    /// invented ones. An invented pair would answer a question about content that does not
+    /// exist; the real pair means the probe reports exactly the guards that vary — is the
+    /// session active, is BackgroundRemoval the current step, is it between attempts.
+    /// </para>
+    /// </remarks>
+    private const BackgroundRemovalDecision ProbeBackgroundRemovalDecision =
+        BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent;
 
     /// <summary>
     /// The stand-in reason used when probing a command that requires one.

@@ -72,6 +72,60 @@ public sealed record WorkflowSnapshot(
     public TrimMargin TrimMargin { get; init; } = TrimMargin.Tight;
 
     /// <summary>
+    /// The reviewed-content authority the next Background Removal attempt would run under
+    /// (Epic 11300 Part C2B1 §4).
+    /// </summary>
+    /// <remarks>
+    /// <b>Null by default, and that is deliberate.</b> Authorising Meitu to select a subject
+    /// automatically is a judgement about content a human looked at, so there is nothing for the
+    /// software to default to — the same reason <see cref="WhiteUnderbaseBranch"/> is null until
+    /// chosen (MVP design §12), and the opposite of <see cref="TrimMargin"/>, whose zero is an
+    /// honest zero rather than a guess.
+    /// <para>
+    /// Holding a non-null value here is not the same as being authorised. The authority names
+    /// the artefact it covers, and <see cref="UsableBackgroundRemovalAuthority"/> is the only
+    /// thing that answers whether it covers the artefact Background Removal is about to consume
+    /// (§8).
+    /// </para>
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter so <c>default</c> is "no
+    /// decision" at every construction site without one of them having to say so.
+    /// </para>
+    /// </remarks>
+    public BackgroundRemovalAuthority? BackgroundRemovalAuthority { get; init; }
+
+    /// <summary>
+    /// The authority that currently authorises a Background Removal run, or null when none
+    /// does (Epic 11300 Part C2B1 §8, §9, §23).
+    /// </summary>
+    /// <remarks>
+    /// The single definition of "the authority is still usable", asked by the engine before it
+    /// will start the step, by the decision command before it will re-bind, and by
+    /// <c>SessionView</c> before it will report the session as ready. One predicate is what
+    /// makes an offered control and an accepted command unable to disagree.
+    /// <para>
+    /// This is also the whole of the invalidation strategy (§9). A stale authority is not
+    /// hunted down and deleted when its Revision is replaced; it is simply never usable again,
+    /// because the artefact it names is no longer the one on offer. Retry over byte-identical
+    /// reviewed content therefore stays authorised without anything having to re-grant it (§17),
+    /// and a changed upstream stops being authorised without anything having to revoke it (§19).
+    /// </para>
+    /// </remarks>
+    public BackgroundRemovalAuthority? UsableBackgroundRemovalAuthority
+    {
+        get
+        {
+            if (BackgroundRemovalAuthority is not { } authority ||
+                UpstreamResultOf(StepKind.BackgroundRemoval) is not { } upstream)
+            {
+                return null;
+            }
+
+            return authority.Authorises(upstream.Id, upstream.Sha256) ? authority : null;
+        }
+    }
+
+    /// <summary>
     /// Value equality, including the step list element by element.
     /// </summary>
     /// <remarks>
@@ -103,6 +157,7 @@ public sealed record WorkflowSnapshot(
             && Nullable.Equals(WhiteUnderbaseBranch, other.WhiteUnderbaseBranch)
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
+            && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
             && Steps.SequenceEqual(other.Steps);
     }
 
@@ -119,6 +174,7 @@ public sealed record WorkflowSnapshot(
         hash.Add(WhiteUnderbaseBranch);
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
+        hash.Add(BackgroundRemovalAuthority);
 
         foreach (SessionStep step in Steps)
         {
@@ -222,6 +278,41 @@ public sealed record WorkflowSnapshot(
             if (step.CurrentRevisionId is not null)
             {
                 found = step.CurrentRevisionId;
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// The most recent Revision offered by a step strictly before <paramref name="kind"/>,
+    /// together with the hash of the bytes that step is offering
+    /// (Epic 11300 Part C2B1 §4).
+    /// </summary>
+    /// <remarks>
+    /// The same search <see cref="UpstreamRevisionOf"/> performs, answering with both halves of
+    /// the artefact identity instead of only the id. A reviewed-content authority has to be
+    /// checked against both: an id alone still matches after the bytes underneath it changed,
+    /// which is the one case §24 exists to refuse.
+    /// <para>
+    /// Null when no upstream result exists, and also when one exists without a recorded hash —
+    /// the two are written together by every path that sets them, so a half-filled step is a
+    /// state no authority should be matched against.
+    /// </para>
+    /// </remarks>
+    public (RevisionId Id, Sha256 Sha256)? UpstreamResultOf(StepKind kind)
+    {
+        (RevisionId, Sha256)? found = null;
+        foreach (SessionStep step in Steps)
+        {
+            if (step.Step == kind)
+            {
+                break;
+            }
+
+            if (step.CurrentRevisionId is RevisionId id && step.CurrentRevisionSha256 is Sha256 hash)
+            {
+                found = (id, hash);
             }
         }
 

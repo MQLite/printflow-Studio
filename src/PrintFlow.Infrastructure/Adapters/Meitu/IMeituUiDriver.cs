@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Ports;
 

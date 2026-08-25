@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;

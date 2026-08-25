@@ -403,4 +403,27 @@
   <data name="Session_TrimSummaryTight" xml:space="preserve"><value>Trim: Tight</value></data>
   <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>Trim: Uniform {0} px</value></data>
   <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>Trim: T {0} / R {1} / B {2} / L {3} px</value></data>
+
+  <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
+  <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>Background removal</value></data>
+  <data name="Session_BackgroundRemovalHint" xml:space="preserve">
+    <value>Meitu decides the foreground subject automatically for the image shown above. Authorise it for this image before running the step.</value>
+  </data>
+  <data name="Session_BackgroundRemovalAuthorise" xml:space="preserve"><value>Use Automatic Selection for this image</value></data>
+  <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
+    <value>Meitu will decide the foreground subject of this image on its own. Check the result before approving it. This applies to the image shown above only, not to later versions of it.</value>
+  </data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>Confirm</value></data>
+  <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
+    <value>Automatic Selection authorised for this image · Revision {0}</value>
+  </data>
+  <data name="Session_BackgroundRemovalNotAuthorised" xml:space="preserve">
+    <value>Not authorised yet. Run Step becomes available once Automatic Selection is authorised for this image.</value>
+  </data>
+  <data name="Session_BackgroundRemovalRunnable" xml:space="preserve"><value>Ready to run background removal.</value></data>
+  <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
+    <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
+  </data>
 </root>
+

@@ -441,8 +441,15 @@ public sealed class ImagePreviewControlTests
         session.Open(harness.Navigation.WorkflowSelectionFor!);
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
 
+        // Enhancement.
         await session.RunStepCommand.ExecuteAsync(null);
         await session.ApproveCommand.ExecuteAsync(null);
+
+        // Background Removal, which since Epic 11300 Part C2B1 needs an explicit
+        // reviewed-content authority before it will start (§7). C2B1 ships no control for it, so
+        // the test issues the command through the service seam the operator UI will use in C2B2.
+        await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(
+            harness.Sessions, harness.Navigation.WorkflowSelectionFor!.Id);
         await session.RunStepCommand.ExecuteAsync(null);
         await session.ApproveCommand.ExecuteAsync(null);
 

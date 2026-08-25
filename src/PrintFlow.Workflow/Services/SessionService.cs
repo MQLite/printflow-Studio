@@ -431,6 +431,20 @@ public sealed class SessionService : ISessionService
             WorkflowCommand.Approve approve => FindRevision(aggregate, snapshot.Step(approve.Step)?.CurrentRevisionId),
             WorkflowCommand.Reject reject => FindRevision(aggregate, snapshot.Step(reject.Step)?.CurrentRevisionId),
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
+
+            // Authorising reviewed content is a decision about specific bytes, exactly as an
+            // Approve is, so it is checked exactly as an Approve is (Epic 11300 Part C2B2 §20).
+            // Without this the operator could authorise automatic selection over a file that had
+            // already changed underneath the screen: the engine compares the displayed hash with
+            // the Revision's *recorded* hash, and a file mutated in place still matches its own
+            // record. The mutation would surface at StartStep instead — after an authority had
+            // been written for content nobody reviewed.
+            //
+            // It is the same guard, resolving the same Revision StartStep would: no second
+            // hashing path exists, and none is added here.
+            WorkflowCommand.SetBackgroundRemovalDecision =>
+                FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.BackgroundRemoval)),
+
             _ => null,
         };
 
@@ -530,6 +544,21 @@ public sealed class SessionService : ISessionService
             runningAttempt = runningAttempt.WithTrimParameters(started.State.TrimMargin);
         }
 
+        // The reviewed-content authority, written with the same opening transaction and for the
+        // same reason: the row must say what this attempt was authorised to do, not what the
+        // session was later allowed to do. A second attempt over different reviewed content gets
+        // its own row; this one is never rewritten (Epic 11300 Part C2B1 §11, §18).
+        //
+        // Reading the *usable* authority rather than the raw one is not a second guard — the
+        // engine already refused to start the step without one — it is the same predicate, so
+        // what is snapshotted is exactly what the engine validated and never a stale record that
+        // happened to still be sitting on the session (§8).
+        if (work.Step == StepKind.BackgroundRemoval &&
+            started.State.UsableBackgroundRemovalAuthority is { } authority)
+        {
+            runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(authority);
+        }
+
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
 
         SessionMutation opening = BuildMetadataMutation(
@@ -550,7 +579,8 @@ public sealed class SessionService : ISessionService
         };
 
         OperationResult<(WorkspaceFileRef Output, FileFacts Facts)> produced =
-            await PerformStepWorkAsync(afterStart, started.State, definition, work, context, cancellationToken);
+            await PerformStepWorkAsync(
+                afterStart, started.State, definition, work, runningAttempt, context, cancellationToken);
 
         if (produced.IsFailure)
         {
@@ -607,9 +637,18 @@ public sealed class SessionService : ISessionService
             [.. afterStart.Attempts, succeededAttempt]);
     }
 
+    /// <summary>Performs one attempt's file work, whatever kind of work that is.</summary>
+    /// <remarks>
+    /// <paramref name="attempt"/> is the row already written by the opening transaction, and it
+    /// is deliberately what the Meitu request is built from rather than the live session state:
+    /// the decision that reaches the adapter and the decision the audit history records are then
+    /// the same value by construction, not two reads of a setting that could have moved in
+    /// between (Epic 11300 Part C2B1 §12).
+    /// </remarks>
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts)>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
-        ProducingWork work, CommandContext context, CancellationToken cancellationToken)
+        ProducingWork work, ProcessingAttempt attempt, CommandContext context,
+        CancellationToken cancellationToken)
     {
         WorkspaceDirRef session = aggregate.Session.Workspace;
         WorkspaceFileRef? input = work.InputRevision is RevisionId inputId
@@ -694,11 +733,34 @@ public sealed class SessionService : ISessionService
                     aggregate.Session.OutputName,
                     meituPatterns.Value);
 
+                // The decision the attempt row already recorded, never a constant and never a
+                // fresh read of the session. For background removal the engine refused to start
+                // the step at all without a usable authority, so the value here is one a human
+                // granted over content they reviewed; the guard below is what makes that a
+                // property of this code rather than a promise about a caller elsewhere
+                // (Epic 11300 Part C2B1 §7, §12).
+                //
+                // Enhancement is unchanged: it is not a background removal, so it carries
+                // Unspecified exactly as it always has, and nothing about its behaviour moves.
+                BackgroundRemovalDecision decision = BackgroundRemovalDecision.Unspecified;
+                if (operation == MeituOperation.RemoveBackground)
+                {
+                    if (attempt.BackgroundRemovalAuthority is not { } authority)
+                    {
+                        return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(
+                            FailureCode.PreconditionNotMet,
+                            "Background removal reached the adapter without a recorded reviewed-content authority. " +
+                            "No request is built: a missing product decision is not something to guess at.");
+                    }
+
+                    decision = authority.Decision;
+                }
+
                 OperationResult<AdapterOutput> result = await _meitu.ProcessAsync(
                     new MeituRequest(
                         workingCopy.Value,
                         operation,
-                        BackgroundRemovalDecision.Unspecified,
+                        decision,
                         ParentDirOf(workingCopy.Value),
                         SiblingOf(workingCopy.Value, producedName)),
                     cancellationToken);
@@ -1063,6 +1125,7 @@ public sealed class SessionService : ISessionService
             Dimensions = newSnapshot.Dimensions,
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
             TrimMargin = newSnapshot.TrimMargin,
+            BackgroundRemovalAuthority = newSnapshot.BackgroundRemovalAuthority,
         };
 
         foreach (WorkflowEffect effect in effects)

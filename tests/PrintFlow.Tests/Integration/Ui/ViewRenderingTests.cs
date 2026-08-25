@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using PrintFlow.App;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Tests.Fixtures;
@@ -422,8 +423,15 @@ public sealed class ViewRenderingTests
         session.Open(harness.Navigation.WorkflowSelectionFor!);
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
 
+        // Enhancement.
         await session.RunStepCommand.ExecuteAsync(null);
         await session.ApproveCommand.ExecuteAsync(null);
+
+        // Background Removal, which since Epic 11300 Part C2B1 needs an explicit
+        // reviewed-content authority before it will start (§7). C2B1 ships no control for it, so
+        // the decision is issued through the service seam C2B2 will build the control on.
+        await SessionServiceHarness.AuthoriseBackgroundRemovalAsync(
+            harness.Sessions, harness.Navigation.WorkflowSelectionFor!.Id);
         await session.RunStepCommand.ExecuteAsync(null);
         await session.ApproveCommand.ExecuteAsync(null);
 
@@ -629,8 +637,182 @@ public sealed class ViewRenderingTests
     }
 
     // -------------------------------------------------------------------------------------
+    // Background removal authority (Epic 11300 Part C2B2 §23)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// All four Background Removal states render, at the representative window size (§23).
+    /// </summary>
+    /// <remarks>
+    /// One test rather than four, because the four are one journey: undecided, authorised,
+    /// ReviewRequired with the attempt's authority beside the result, and back to unauthorised
+    /// after the reviewed content is replaced. Driving them in sequence is what proves the
+    /// panels really do appear and disappear, which four independently constructed states would
+    /// not.
+    /// <para>
+    /// One view model drives the session and a <i>separate</i> one is opened for each render.
+    /// A rendered <c>ItemsControl</c> leaves a WPF <c>CollectionView</c> bound to the view
+    /// model's collections on the STA thread that built it, and mutating those collections
+    /// afterwards from the test thread throws — so the screen that was rendered is never driven
+    /// again. Only a test has this problem: the application has one UI thread throughout.
+    /// </para>
+    /// <para>
+    /// Each state is measured against <see cref="WpfRendering.ReviewViewport"/> — the size the
+    /// operator screens are signed off against — so a panel that pushed the screen past the
+    /// window would fail here rather than in front of an operator. There is no golden
+    /// screenshot anywhere in this file (§23).
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_four_background_removal_states_render_and_fit_the_window()
+    {
+        using HomeScreenHarness harness = new();
+        SessionViewModel driver = await PrepareAssetAtBackgroundRemovalAsync(harness);
+        SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
+
+        // 1. Undecided: the authorisation panel is offered, with the confirmation open so its
+        //    bindings are resolved too, and there is no run.
+        driver.CanAuthoriseAutomaticSelection.ShouldBeTrue();
+        driver.IsAutomaticSelectionPending.ShouldBeTrue();
+        driver.CanRunBackgroundRemoval.ShouldBeFalse();
+        await RenderStateAsync(harness, id, confirming: true);
+
+        // 2. Authorised: the status line replaces the action, and the run becomes available.
+        driver.BeginAutomaticSelectionCommand.Execute(null);
+        await driver.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
+        await driver.PreviewsLoaded;
+        driver.IsAutomaticSelectionAuthorised.ShouldBeTrue();
+        driver.CanRunBackgroundRemoval.ShouldBeTrue();
+        await RenderStateAsync(harness, id, confirming: false);
+
+        // 3. ReviewRequired: the cutout, its before/after pair, and the producing attempt's
+        //    authority in the review panel.
+        await driver.RunStepCommand.ExecuteAsync(null);
+        await driver.PreviewsLoaded;
+        driver.IsReviewRequired.ShouldBeTrue();
+        driver.HasBackgroundRemovalAttemptAudit.ShouldBeTrue();
+        driver.CanAuthoriseAutomaticSelection.ShouldBeFalse("the decision panel is gone during a review.");
+        await RenderStateAsync(harness, id, confirming: false);
+
+        // 4. Stale: the reviewed content is replaced, so the authority the session still holds
+        //    is no longer usable and the screen is back where it started.
+        await driver.RejectCommand.ExecuteAsync(null);
+        driver.SelectedReturnTarget = driver.ReturnTargets.Single(t => t.Step == StepKind.Enhancement);
+        driver.BeginReturnCommand.Execute(null);
+        await driver.ConfirmReturnCommand.ExecuteAsync(null);
+        await driver.RunStepCommand.ExecuteAsync(null);
+        await driver.ApproveCommand.ExecuteAsync(null);
+        await driver.PreviewsLoaded;
+
+        driver.Notice.ShouldBeNull();
+        driver.IsAutomaticSelectionAuthorised.ShouldBeFalse();
+        driver.CanAuthoriseAutomaticSelection.ShouldBeTrue();
+        driver.CanRunBackgroundRemoval.ShouldBeFalse();
+        await RenderStateAsync(harness, id, confirming: false);
+    }
+
+    /// <summary>
+    /// The Background Removal panels render with the Chinese resources loaded (§22, §23).
+    /// </summary>
+    /// <remarks>
+    /// The same honest half a build can judge as the trim panels above: every binding still
+    /// resolves with the satellite loaded, the strings really are translated rather than raw
+    /// resource keys, and nothing outgrows the window. Whether the Chinese wording reads well
+    /// is a human judgement (§24).
+    /// </remarks>
+    [Fact]
+    public async Task The_background_removal_panels_fit_the_window_with_the_Chinese_resources()
+    {
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo chinese = CultureInfo.GetCultureInfo("zh-CN");
+            CultureInfo.CurrentUICulture = chinese;
+            CultureInfo.CurrentCulture = chinese;
+
+            using HomeScreenHarness harness = new();
+            SessionViewModel driver = await PrepareAssetAtBackgroundRemovalAsync(harness);
+            SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
+
+            // A missing translation would fall back to the resource key, which these would equal.
+            driver.BackgroundRemovalHeading.ShouldNotBe("Session_BackgroundRemovalHeading");
+            driver.BackgroundRemovalHint.ShouldNotBe("Session_BackgroundRemovalHint");
+            driver.AuthoriseAutomaticSelectionLabel.ShouldNotBe("Session_BackgroundRemovalAuthorise");
+            driver.AutomaticSelectionConfirmQuestion.ShouldNotBe("Session_BackgroundRemovalConfirmQuestion");
+            driver.AutomaticSelectionNotAuthorisedNotice.ShouldNotBe("Session_BackgroundRemovalNotAuthorised");
+
+            await RenderStateAsync(harness, id, confirming: true);
+
+            driver.BeginAutomaticSelectionCommand.Execute(null);
+            await driver.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
+            await driver.PreviewsLoaded;
+            driver.AutomaticSelectionAuthorisedNotice.ShouldNotStartWith("Session_");
+            await RenderStateAsync(harness, id, confirming: false);
+
+            await driver.RunStepCommand.ExecuteAsync(null);
+            await driver.PreviewsLoaded;
+            driver.BackgroundRemovalAttemptAudit.ShouldNotStartWith("Session_");
+            await RenderStateAsync(harness, id, confirming: false);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    /// <summary>
+    /// Opens a fresh screen on the session as it stands and renders it, asserting it asks for
+    /// no more room than the window it is given.
+    /// </summary>
+    /// <remarks>
+    /// Fresh every time, so the rendered screen is thrown away rather than driven on — see the
+    /// journey test's remarks for why that matters.
+    /// </remarks>
+    private static async Task RenderStateAsync(HomeScreenHarness harness, SessionId id, bool confirming)
+    {
+        SessionViewModel screen = harness.Session(new RecordingNavigation());
+        screen.Open((await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value);
+        await screen.PreviewsLoaded;
+
+        if (confirming)
+        {
+            screen.BeginAutomaticSelectionCommand.Execute(null);
+            screen.IsConfirmingAutomaticSelection.ShouldBeTrue();
+        }
+
+        RenderResult<int> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+            () => new SessionScreenView { DataContext = screen }, WpfRendering.ReviewViewport, _ => 0);
+
+        rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+        rendered.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
+    }
+
+    /// <summary>
+    /// Imports, confirms, runs and approves Enhancement, and stops on Background Removal.
+    /// </summary>
+    private static async Task<SessionViewModel> PrepareAssetAtBackgroundRemovalAsync(HomeScreenHarness harness)
+    {
+        harness.FilePicker.Path = harness.Inner.WriteBorderedSourcePng("br-render.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+
+        SessionViewModel session = harness.Session(new RecordingNavigation());
+        session.Open(harness.Navigation.WorkflowSelectionFor!);
+        await session.ConfirmOriginalCommand.ExecuteAsync(null);
+        await session.RunStepCommand.ExecuteAsync(null);
+        await session.ApproveCommand.ExecuteAsync(null);
+        await session.PreviewsLoaded;
+
+        session.Notice.ShouldBeNull();
+        return session;
+    }
+
+    // -------------------------------------------------------------------------------------
 
     private static readonly Size Viewport = new(1200, 900);
+
 
     private static void RenderOnStaThread(Func<UserControl> create) =>
         WpfRendering.RenderExpectingNoBindingErrors(create, Viewport);

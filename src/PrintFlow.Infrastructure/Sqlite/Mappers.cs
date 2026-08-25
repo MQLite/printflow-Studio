@@ -239,6 +239,59 @@ internal static class Mappers
         };
     }
 
+    public static string ToText(BackgroundRemovalDecision value) => value switch
+    {
+        BackgroundRemovalDecision.Unspecified => "UNSPECIFIED",
+        BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent =>
+            "USE_AUTOMATIC_SELECTION_FOR_REVIEWED_CONTENT",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static BackgroundRemovalDecision ToBackgroundRemovalDecision(string text) => text switch
+    {
+        "UNSPECIFIED" => BackgroundRemovalDecision.Unspecified,
+        "USE_AUTOMATIC_SELECTION_FOR_REVIEWED_CONTENT" =>
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+        _ => throw new InvalidOperationException($"Unknown BackgroundRemovalDecision '{text}' in database."),
+    };
+
+    /// <summary>
+    /// Rebuilds a <see cref="BackgroundRemovalAuthority"/> from its three columns, or null when
+    /// none was stored (Epic 11300 Part C2B1 §10).
+    /// </summary>
+    /// <remarks>
+    /// All three columns are required together, and a row holding only some of them is refused
+    /// rather than patched up. The authority means "automatic selection is authorised for THIS
+    /// reviewed content", so a decision with no artefact attached is not a weaker authority --
+    /// it is the session-wide permission this design exists to prevent (§4).
+    /// <para>
+    /// Goes back through <see cref="BackgroundRemovalAuthority.For"/> rather than constructing
+    /// the record directly, so a stored <c>UNSPECIFIED</c> is refused here exactly as the command
+    /// refuses it. Reading is the last place that invariant can still be enforced, and the
+    /// database CHECK is the first.
+    /// </para>
+    /// </remarks>
+    public static BackgroundRemovalAuthority? ToBackgroundRemovalAuthority(
+        string? decision, string? revisionId, string? reviewedSha)
+    {
+        if (decision is null && revisionId is null && reviewedSha is null)
+        {
+            return null;
+        }
+
+        if (decision is null || revisionId is null || reviewedSha is null)
+        {
+            throw new InvalidOperationException(
+                "A background-removal authority row is missing part of its content binding; " +
+                "a decision without the reviewed Revision and hash authorises nothing specific.");
+        }
+
+        return BackgroundRemovalAuthority.For(
+            ToBackgroundRemovalDecision(decision),
+            RevisionId.From(Guid.Parse(revisionId)),
+            Sha256.Parse(reviewedSha));
+    }
+
     public static string ToText(WhiteUnderbaseBranch value) => value switch
     {
         WhiteUnderbaseBranch.W1_0px => "W1_0PX",
@@ -323,6 +376,13 @@ internal static class Mappers
         TrimMarginRight = session.TrimMargin.Right,
         TrimMarginBottom = session.TrimMargin.Bottom,
         TrimMarginLeft = session.TrimMargin.Left,
+
+        // Written only when one exists, unlike the trim margin: a session always has a pending
+        // trim decision, and never has a background-removal authority until a human grants one
+        // (Epic 11300 Part C2B1 §10).
+        BackgroundRemovalDecision = session.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
+        BackgroundRemovalRevisionId = session.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
+        BackgroundRemovalReviewedSha = session.BackgroundRemovalAuthority?.ReviewedSha256.Value,
     };
 
     public static ProcessingSession ToDomain(SessionRow row)
@@ -355,6 +415,13 @@ internal static class Mappers
             TrimMargin = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft) ?? TrimMargin.Tight,
+
+            // A row written before migration 0003 has no background-removal columns and reads
+            // back as null, which is exactly what it meant: no authority was ever recorded, so
+            // background removal on that session still needs an explicit decision (§7).
+            BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
+                row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
+                row.BackgroundRemovalReviewedSha),
         };
     }
 
@@ -507,6 +574,13 @@ internal static class Mappers
         TrimMarginRight = attempt.TrimParameters?.Right,
         TrimMarginBottom = attempt.TrimParameters?.Bottom,
         TrimMarginLeft = attempt.TrimParameters?.Left,
+
+        // Null for anything that was not an authorised background removal, which is the honest
+        // reading: "this attempt had no reviewed-content authority", never "it used the default"
+        // (Epic 11300 Part C2B1 §11).
+        BackgroundRemovalDecision = attempt.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
+        BackgroundRemovalRevisionId = attempt.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
+        BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
     };
 
     public static ProcessingAttempt ToDomain(AttemptRow row)
@@ -537,6 +611,9 @@ internal static class Mappers
             TrimParameters = ToTrimMargin(
                 row.TrimMode, row.TrimMarginTop, row.TrimMarginRight,
                 row.TrimMarginBottom, row.TrimMarginLeft),
+            BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
+                row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
+                row.BackgroundRemovalReviewedSha),
         };
     }
 

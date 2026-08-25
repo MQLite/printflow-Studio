@@ -49,6 +49,10 @@ public sealed class RecoveryAndBranchTests
         scenario.Must(new WorkflowCommand.ConfirmOriginal());
         scenario.Must(new WorkflowCommand.Skip(StepKind.Enhancement));
 
+        // The reviewed content is the import root, because enhancement produced nothing -- so
+        // that is what the operator authorises (Epic 11300 Part C2B1 §7).
+        scenario.AuthoriseBackgroundRemoval();
+
         scenario.Apply(new WorkflowCommand.StartStep(StepKind.BackgroundRemoval));
 
         // Background removal works from the import root, because enhancement produced nothing.

@@ -177,6 +177,28 @@ public sealed record PrintOutputView(
 /// The margin the attempt that produced <see cref="CurrentArtefact"/> actually ran with, or
 /// null when that artefact was not produced by a deterministic trim (Part C3 §18).
 /// </param>
+/// <param name="BackgroundRemovalDecision">
+/// The reviewed-content decision that <b>currently</b> authorises a Background Removal run, or
+/// <see cref="Domain.Sessions.BackgroundRemovalDecision.Unspecified"/> when nothing does
+/// (Epic 11300 Part C2B1 §22).
+/// </param>
+/// <param name="BackgroundRemovalDecisionRevisionId">
+/// The Revision that decision was granted over, or null when there is no usable decision.
+/// </param>
+/// <param name="CanSetBackgroundRemovalDecision">
+/// Whether the reviewed-content authorisation may be recorded right now (§22).
+/// </param>
+/// <param name="CanRunBackgroundRemoval">
+/// Whether Background Removal would actually start if asked — decision included (§23).
+/// </param>
+/// <param name="BackgroundRemovalAttemptDecision">
+/// The decision the attempt that produced <see cref="CurrentArtefact"/> actually ran under, or
+/// <see cref="Domain.Sessions.BackgroundRemovalDecision.Unspecified"/> when that artefact was
+/// not produced by an authorised Background Removal (Epic 11300 Part C2B2 §15, §16).
+/// </param>
+/// <param name="BackgroundRemovalAttemptReviewedRevisionId">
+/// The Revision that attempt's authority was granted over, or null when it had none.
+/// </param>
 /// <remarks>
 /// <see cref="CanManualCrop"/> is reported rather than left to the screen because it depends on
 /// attempt history the UI does not have and must not reconstruct. It is the same predicate
@@ -188,6 +210,13 @@ public sealed record PrintOutputView(
 /// second needs the attempt row that produced the result on screen. Neither is derivable from
 /// anything the shell can see, and a screen that guessed would be guessing about what an
 /// operator is being asked to approve.
+/// </para>
+/// <para>
+/// <see cref="BackgroundRemovalAttemptDecision"/> is the third of the same family, and the
+/// distinction it draws is the point of it: <see cref="BackgroundRemovalDecision"/> answers
+/// "what would the <i>next</i> run be allowed to do", while this answers "what did the result
+/// on screen actually run under". A review that showed the first in place of the second would
+/// relabel history every time the session's pending authority changed (Part C2B2 §15).
 /// </para>
 /// </remarks>
 public sealed record SessionView(
@@ -210,7 +239,13 @@ public sealed record SessionView(
     IReadOnlyList<ReturnTargetView> ReturnTargets,
     TrimMargin TrimMargin,
     bool CanSetTrimParameters,
-    TrimMargin? CurrentTrimParameters)
+    TrimMargin? CurrentTrimParameters,
+    BackgroundRemovalDecision BackgroundRemovalDecision,
+    RevisionId? BackgroundRemovalDecisionRevisionId,
+    bool CanSetBackgroundRemovalDecision,
+    bool CanRunBackgroundRemoval,
+    BackgroundRemovalDecision BackgroundRemovalAttemptDecision,
+    RevisionId? BackgroundRemovalAttemptReviewedRevisionId)
 {
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
@@ -220,6 +255,18 @@ public sealed record SessionView(
     /// (§18).
     /// </summary>
     public bool HasTrimParameters => CurrentTrimParameters is not null;
+
+    /// <summary>
+    /// Whether the artefact on screen was produced under a recorded reviewed-content authority
+    /// (Part C2B2 §14).
+    /// </summary>
+    /// <remarks>
+    /// Answered from <see cref="BackgroundRemovalAttemptDecision"/> alone, so it is false for
+    /// every artefact that is not an authorised background-removal result — a trim, a manual
+    /// crop, a promotion — rather than falling back to whatever the session currently holds.
+    /// </remarks>
+    public bool HasBackgroundRemovalAttemptAuthority =>
+        BackgroundRemovalAttemptDecision != Domain.Sessions.BackgroundRemovalDecision.Unspecified;
 
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
@@ -264,6 +311,13 @@ public sealed record SessionView(
         bool canManualCrop = ManualCropEligibility.IsEligible(snapshot, attempts)
             && availableCommands.Contains(CommandKind.SubmitManualCrop);
 
+        BackgroundRemovalAuthority? usable = snapshot.UsableBackgroundRemovalAuthority;
+
+        // Resolved before the projection so the two authorities sit side by side here, where
+        // the difference between them is visible: one is what the next run may do, the other is
+        // what the result on screen already did.
+        BackgroundRemovalAuthority? producingAuthority = ResolveAttemptAuthority(current, attempts);
+
         return new SessionView(
             snapshot.SessionId,
             snapshot.WorkflowType,
@@ -285,7 +339,33 @@ public sealed record SessionView(
                 step, snapshot.Definition.IndexOf(step)))],
             snapshot.TrimMargin,
             availableCommands.Contains(CommandKind.SetTrimParameters) && !canManualCrop,
-            ResolveTrimParameters(current, attempts));
+            ResolveTrimParameters(current, attempts),
+
+            // The *usable* authority, never the raw one. A session can hold an authority granted
+            // over content that has since been replaced, and reporting that as the current
+            // decision would present a stale record as readiness, which is the one thing §23
+            // forbids. Unspecified and null are what "nothing authorises a run right now" looks
+            // like, and there is no third state meaning "probably fine".
+            usable?.Decision ?? BackgroundRemovalDecision.Unspecified,
+            usable?.ReviewedRevisionId,
+
+            // Both answered by the engine's own probe rather than by re-deriving the rules here.
+            // AvailableCommands probes StartStep with the *current* step, so asking whether it is
+            // offered while BackgroundRemoval is current is exactly asking whether
+            // StartStep(BackgroundRemoval) would be accepted, decision and step state included.
+            // An offered control and an accepted command cannot disagree because only one of them
+            // is deciding (§23).
+            availableCommands.Contains(CommandKind.SetBackgroundRemovalDecision),
+            snapshot.CurrentStep is { Step: StepKind.BackgroundRemoval }
+                && availableCommands.Contains(CommandKind.StartStep),
+
+            // The producing attempt's own authority, resolved exactly as the trim parameters
+            // beside it are and never from `usable` above: the two answer different questions,
+            // and a review that borrowed the pending one would rewrite what the operator is
+            // being told about a result every time the session's next-run authority moved
+            // (§15).
+            producingAuthority?.Decision ?? BackgroundRemovalDecision.Unspecified,
+            producingAuthority?.ReviewedRevisionId);
     }
 
     /// <summary>
@@ -315,6 +395,41 @@ public sealed record SessionView(
             if (attempt.OutputRevisionId == result.RevisionId)
             {
                 return attempt.TrimParameters;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The reviewed-content authority the attempt that produced <paramref name="current"/> ran
+    /// under (Part C2B2 §15).
+    /// </summary>
+    /// <remarks>
+    /// Found through <see cref="ProcessingAttempt.OutputRevisionId"/> — the attempt that says it
+    /// produced this exact Revision — for the same reason
+    /// <see cref="ResolveTrimParameters"/> is: after a reject-and-re-run the history holds two
+    /// background-removal attempts, and "the authority of whatever ran last" would label the
+    /// cutout on screen with a decision that produced a different file.
+    /// <para>
+    /// Only for the step's own result. While the screen shows the file a step is about to
+    /// <i>consume</i>, there is no produced result for an audit line to describe, and the
+    /// session's pending authority is emphatically not a substitute for one.
+    /// </para>
+    /// </remarks>
+    private static BackgroundRemovalAuthority? ResolveAttemptAuthority(
+        ArtefactView? current, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (current is not { IsCurrentStepResult: true } result)
+        {
+            return null;
+        }
+
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.OutputRevisionId == result.RevisionId)
+            {
+                return attempt.BackgroundRemovalAuthority;
             }
         }
 
