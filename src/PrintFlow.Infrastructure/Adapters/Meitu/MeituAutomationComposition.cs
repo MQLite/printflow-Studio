@@ -99,7 +99,8 @@ public static class MeituAutomationComposition
         WicFileInspector inspector = new();
 
         return new ProductionMeituProcessor(
-            baselines, locator, driver, workspace, inspector, new FileSystemMeituOutputProbe(),
+            baselines, locator, driver, workspace, inspector, new WicMeituTransparencyInspector(),
+            new FileSystemMeituOutputProbe(),
             resolved, clock);
     }
 }

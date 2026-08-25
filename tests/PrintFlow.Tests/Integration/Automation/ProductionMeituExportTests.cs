@@ -41,6 +41,7 @@ public sealed class ProductionMeituExportTests : IDisposable
 
     private const string WorkingRelative = "Sessions/S_1/Working/A_1/PF_B2B_A.png";
     private const string OutputRelative = "Sessions/S_1/Working/A_1/PF_B2B_A_HD.png";
+    private const string CutoutRelative = "Sessions/S_1/Working/A_1/PF_B2B_A_CUTOUT.png";
     private const string ExpectedIdentity = "PF_B2B_A_副本";
 
     private static readonly MeituAutomationOptions FastOptions = new()
@@ -52,6 +53,8 @@ public sealed class ProductionMeituExportTests : IDisposable
         AutoEnhancementWatchTimeout = TimeSpan.FromMilliseconds(60),
         EnhancementBusyTimeout = TimeSpan.FromMilliseconds(200),
         EnhancementCompletionTimeout = TimeSpan.FromMilliseconds(300),
+        BackgroundRemovalBusyTimeout = TimeSpan.FromMilliseconds(200),
+        BackgroundRemovalCompletionTimeout = TimeSpan.FromMilliseconds(300),
         OutputStabilityTimeout = TimeSpan.FromMilliseconds(400),
         OutputPollInterval = TimeSpan.FromMilliseconds(5),
     };
@@ -85,6 +88,10 @@ public sealed class ProductionMeituExportTests : IDisposable
         CorruptBytes,
         ShrunkPng,
         JpegBytes,
+        CutoutPng,
+        OpaquePng,
+        FullyTransparentPng,
+        WrongSizeCutoutPng,
     }
 
     private sealed class Scenario
@@ -98,6 +105,10 @@ public sealed class ProductionMeituExportTests : IDisposable
         public required string WorkingAbsolute { get; init; }
 
         public required string OutputAbsolute { get; init; }
+
+        public required WorkspaceFileRef Output { get; init; }
+
+        public required MeituOperation Operation { get; init; }
 
         /// <summary>
         /// Confirms of the destination dialog specifically, counted as they happen.
@@ -129,7 +140,12 @@ public sealed class ProductionMeituExportTests : IDisposable
     private Scenario Build(
         ExportProduces produces = ExportProduces.UpscaledPng,
         bool moduleRetainedAcrossLoad = false,
-        bool staleModuleWithoutWork = false)
+        bool staleModuleWithoutWork = false,
+        bool backgroundRemoval = false,
+        bool mutateSourceOnExport = false,
+        bool backgroundBusyObserved = true,
+        string? cutoutFileName = null,
+        IMeituOutputProbe? outputProbe = null)
     {
         ExternalProcessRef process = MeituFakes.Process() with { ExecutablePath = _executablePath };
         ExternalWindowRef editor = MeituFakes.Window(
@@ -151,10 +167,24 @@ public sealed class ProductionMeituExportTests : IDisposable
         locator.PutInForeground(editor);
 
         IWorkspace workspace = new FileWorkspace(_temp.Root);
+        WorkspaceFileRef output = backgroundRemoval
+            ? WorkspaceFileRef.Create(
+                cutoutFileName is null
+                    ? CutoutRelative
+                    : $"Sessions/S_1/Working/A_1/{cutoutFileName}",
+                WorkspaceArea.Working)
+            : Output;
         string workingAbsolute = workspace.ResolveAbsolute(Working);
-        string outputAbsolute = workspace.ResolveAbsolute(Output);
+        string outputAbsolute = workspace.ResolveAbsolute(output);
         Directory.CreateDirectory(Path.GetDirectoryName(workingAbsolute)!);
-        File.WriteAllBytes(workingAbsolute, SyntheticImages.Png(320, 240, dpi: 300, alpha: true));
+        File.WriteAllBytes(
+            workingAbsolute,
+            backgroundRemoval
+                ? SyntheticImages.OpaqueRgbPng(
+                    320, 240, (x, y) => x is > 80 and < 240 && y is > 40 and < 220
+                        ? ((byte)35, (byte)85, (byte)190)
+                        : ((byte)238, (byte)238, (byte)238))
+                : SyntheticImages.Png(320, 240, dpi: 300, alpha: true));
 
         // Meitu starts on its signed empty editor, so the run goes through the whole real
         // sequence: picker, open, load observation, identity, enhancement, export.
@@ -164,6 +194,10 @@ public sealed class ProductionMeituExportTests : IDisposable
         elements.AddEditorCloseControl(editor.Handle, process.ProcessId);
         elements.AddEditorOpenControl(editor.Handle, process.ProcessId);
         elements.AddEnhancementAction(editor.Handle, processId: process.ProcessId);
+        elements.AddBackgroundPageAction(
+            editor.Handle, MeituFakes.BackgroundActionMarker, process.ProcessId);
+        elements.AddBackgroundPageAction(
+            editor.Handle, MeituFakes.BackgroundReturnMarker, process.ProcessId);
         elements.AddDialogControl(picker.Handle, PickerFileNameId, "Edit", process.ProcessId);
         elements.AddDialogControl(picker.Handle, PickerOpenId, "Button", process.ProcessId);
 
@@ -179,20 +213,33 @@ public sealed class ProductionMeituExportTests : IDisposable
         int[] confirms = [0];
         int enhancementReads = 0;
         bool enhancing = false;
+        bool removingBackground = false;
+        int backgroundReads = 0;
         bool documentLoaded = false;
         bool pickerUp = false;
 
         elements.OnReadTextSnapshot = _ =>
         {
-            if (!documentLoaded || !enhancing)
+            if (!documentLoaded)
             {
                 return;
             }
 
-            // Busy for a few reads, then the settled panel — the observed shape of a run.
-            elements.SetTexts(
-                editor.Handle,
-                ++enhancementReads <= 3 ? MeituFakes.BusyTexts() : MeituFakes.CompletedTexts());
+            if (enhancing)
+            {
+                // Busy for a few reads, then the settled panel — the observed shape of a run.
+                elements.SetTexts(
+                    editor.Handle,
+                    ++enhancementReads <= 3 ? MeituFakes.BusyTexts() : MeituFakes.CompletedTexts());
+            }
+            else if (removingBackground)
+            {
+                elements.SetTexts(
+                    editor.Handle,
+                    backgroundBusyObserved && ++backgroundReads <= 3
+                        ? MeituFakes.BackgroundBusyTexts()
+                        : MeituFakes.BackgroundCompletedTexts());
+            }
         };
 
         elements.OnInvoke = invoked =>
@@ -232,6 +279,16 @@ public sealed class ProductionMeituExportTests : IDisposable
                     enhancementReads = 0;
                     break;
 
+                case MeituFakes.BackgroundActionMarker:
+                    removingBackground = true;
+                    backgroundReads = 0;
+                    break;
+
+                case MeituFakes.BackgroundReturnMarker:
+                    removingBackground = false;
+                    elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+                    break;
+
                 case SaveId:
                     locator.OwnedDialogs.Add(surface);
                     locator.PutInForeground(surface);
@@ -250,6 +307,12 @@ public sealed class ProductionMeituExportTests : IDisposable
                 case ConfirmId:
                     confirms[0]++;
                     Produce(produces, elements, outputAbsolute);
+                    if (mutateSourceOnExport)
+                    {
+                        using FileStream mutation = new(
+                            workingAbsolute, FileMode.Append, FileAccess.Write, FileShare.Read);
+                        mutation.WriteByte(0x01);
+                    }
                     locator.Replace(process, editor);
                     locator.OwnedDialogs.Remove(surface);
                     locator.OwnedDialogs.Add(result);
@@ -278,11 +341,14 @@ public sealed class ProductionMeituExportTests : IDisposable
         {
             Adapter = new ProductionMeituProcessor(
                 baselines, locator, driver, workspace, new WicFileInspector(),
-                new FileSystemMeituOutputProbe(), FastOptions, TimeProvider.System),
+                new WicMeituTransparencyInspector(),
+                outputProbe ?? new FileSystemMeituOutputProbe(), FastOptions, TimeProvider.System),
             Elements = elements,
             Workspace = workspace,
             WorkingAbsolute = workingAbsolute,
             OutputAbsolute = outputAbsolute,
+            Output = output,
+            Operation = backgroundRemoval ? MeituOperation.RemoveBackground : MeituOperation.Enhance,
             DestinationConfirms = confirms,
         };
     }
@@ -318,6 +384,24 @@ public sealed class ProductionMeituExportTests : IDisposable
                 File.WriteAllBytes(path, SyntheticImages.Jpeg(1280, 960));
                 break;
 
+            case ExportProduces.CutoutPng:
+                File.WriteAllBytes(path, SyntheticImages.PngWithAlpha(
+                    320, 240, (x, y) => x < 32 || y < 24 ? (byte)0 : (byte)255));
+                break;
+
+            case ExportProduces.OpaquePng:
+                File.WriteAllBytes(path, SyntheticImages.PngWithAlpha(320, 240, (_, _) => 255));
+                break;
+
+            case ExportProduces.FullyTransparentPng:
+                File.WriteAllBytes(path, SyntheticImages.PngWithAlpha(320, 240, (_, _) => 0));
+                break;
+
+            case ExportProduces.WrongSizeCutoutPng:
+                File.WriteAllBytes(path, SyntheticImages.PngWithAlpha(
+                    160, 120, (x, _) => x == 0 ? (byte)0 : (byte)255));
+                break;
+
             case ExportProduces.Nothing:
                 break;
         }
@@ -326,9 +410,22 @@ public sealed class ProductionMeituExportTests : IDisposable
     private Task<OperationResult<AdapterOutput>> ProcessAsync(Scenario s) =>
         s.Adapter.ProcessAsync(
             new MeituRequest(
-                Working, MeituOperation.Enhance,
-                WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"), Output),
+                Working,
+                s.Operation,
+                s.Operation == MeituOperation.RemoveBackground
+                    ? BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent
+                    : BackgroundRemovalDecision.Unspecified,
+                WorkspaceDirRef.Create("Sessions/S_1/Working/A_1"),
+                s.Output),
             CancellationToken.None);
+
+    private sealed class NeverSettlesProbe : IMeituOutputProbe
+    {
+        private long _length;
+
+        public MeituOutputObservation Probe(string absolutePath) =>
+            new(true, ++_length, true);
+    }
 
     // -----------------------------------------------------------------------------
     // Success (§3, §27)
@@ -536,5 +633,133 @@ public sealed class ProductionMeituExportTests : IDisposable
         s.Invocations(MeituFakes.ModuleAutomationId).ShouldBe(0);
         s.DestinationConfirms[0].ShouldBe(0);
         File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Background Removal C2A
+    // -----------------------------------------------------------------------------
+
+    [Fact]
+    public async Task A_reviewed_content_cutout_succeeds_through_the_production_seam()
+    {
+        Scenario s = Build(ExportProduces.CutoutPng, backgroundRemoval: true);
+        byte[] sourceBefore = await File.ReadAllBytesAsync(s.WorkingAbsolute);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : string.Empty);
+        result.Value.ProducedFile.ShouldBe(s.Output);
+        result.Value.ProducedFile.FileName.ShouldBe("PF_B2B_A_CUTOUT.png");
+        (await File.ReadAllBytesAsync(s.WorkingAbsolute)).ShouldBe(sourceBefore);
+        s.DestinationConfirms[0].ShouldBe(1);
+        s.Invocations(MeituFakes.BackgroundActionMarker).ShouldBe(1);
+        s.Invocations(MeituFakes.BackgroundReturnMarker).ShouldBe(1);
+        result.Value.AdapterNotes!.ShouldContain("UseAutomaticSelectionForReviewedContent");
+        result.Value.AdapterNotes!.ShouldContain("transparent pixels");
+        result.Value.AdapterNotes!.ShouldContain("visible pixels");
+    }
+
+    [Fact]
+    public async Task An_opaque_PNG_is_not_a_cutout()
+    {
+        Scenario s = Build(ExportProduces.OpaquePng, backgroundRemoval: true);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.TechnicalDetail.ShouldContain("completely opaque");
+    }
+
+    [Fact]
+    public async Task A_fully_transparent_PNG_has_lost_the_foreground()
+    {
+        Scenario s = Build(ExportProduces.FullyTransparentPng, backgroundRemoval: true);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.TechnicalDetail.ShouldContain("completely transparent");
+    }
+
+    [Fact]
+    public async Task A_cutout_that_changes_canvas_dimensions_is_refused()
+    {
+        Scenario s = Build(ExportProduces.WrongSizeCutoutPng, backgroundRemoval: true);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Context["sourcePixels"].ShouldBe("320x240");
+        result.Failure.Context["outputPixels"].ShouldBe("160x120");
+    }
+
+    [Fact]
+    public async Task A_cutout_export_that_mutates_its_source_is_refused()
+    {
+        Scenario s = Build(
+            ExportProduces.CutoutPng, backgroundRemoval: true, mutateSourceOnExport: true);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.TechnicalDetail.ShouldContain("is not the file it was before the run");
+    }
+
+    [Fact]
+    public async Task A_stale_completion_panel_without_current_load_Busy_is_not_exported()
+    {
+        Scenario s = Build(
+            ExportProduces.CutoutPng, backgroundRemoval: true, backgroundBusyObserved: false);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        s.DestinationConfirms[0].ShouldBe(0);
+        File.Exists(s.OutputAbsolute).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData("Name_CUTOUT.jpg")]
+    [InlineData("Name_HD.png")]
+    public async Task A_wrong_cutout_name_or_extension_is_refused_before_Meitu(
+        string fileName)
+    {
+        Scenario s = Build(
+            ExportProduces.CutoutPng, backgroundRemoval: true, cutoutFileName: fileName);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Context["exportInvoked"].ShouldBe("false");
+        s.Elements.Invocations.ShouldBeEmpty();
+        s.DestinationConfirms[0].ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task An_existing_cutout_destination_is_never_overwritten()
+    {
+        Scenario s = Build(ExportProduces.CutoutPng, backgroundRemoval: true);
+        byte[] existing = [7, 8, 9];
+        await File.WriteAllBytesAsync(s.OutputAbsolute, existing);
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        (await File.ReadAllBytesAsync(s.OutputAbsolute)).ShouldBe(existing);
+        s.DestinationConfirms[0].ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_cutout_that_never_stabilises_is_refused()
+    {
+        Scenario s = Build(
+            ExportProduces.CutoutPng,
+            backgroundRemoval: true,
+            outputProbe: new NeverSettlesProbe());
+
+        OperationResult<AdapterOutput> result = await ProcessAsync(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.TechnicalDetail.ShouldContain("did not settle");
     }
 }

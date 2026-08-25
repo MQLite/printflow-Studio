@@ -124,11 +124,10 @@ public static class ServiceRegistration
                 break;
 
             case "Production":
-                // Epic 11300 Part A added a production Meitu adapter, but it implements the
-                // safety foundation only — it cannot enhance or remove a background, and no
-                // production Photoshop adapter exists at all (Epic 11400). Wiring a half-built
-                // production graph here would put an adapter that always fails in front of an
-                // operator, so the composition root still refuses.
+                // The controlled Epic 11300 seam can now produce validated Enhancement and
+                // reviewed-content Background Removal outputs, but C2B has not yet added the
+                // workflow authority path and no production Photoshop adapter exists (Epic
+                // 11400). Global Production composition therefore remains closed.
                 //
                 // Failing closed rather than falling back to the fake remains the point: a
                 // workstation configured for Production must never quietly run against fakes.
@@ -137,8 +136,8 @@ public static class ServiceRegistration
                 // controlled smoke and from tests but not from any session (Part A §6, §22).
                 throw new NotSupportedException(
                     "Adapters:Mode is 'Production', but production automation is incomplete: the Meitu " +
-                    "adapter implements only the Epic 11300 Part A foundation and no production Photoshop " +
-                    "adapter exists (Epic 11400). Refusing to start rather than silently substituting a fake.");
+                    "Background Removal workflow authority/integration and the production Photoshop " +
+                    "adapter are not implemented. Refusing to start rather than silently substituting a fake.");
 
             default:
                 throw new NotSupportedException(

@@ -48,10 +48,3 @@ public static class MeituBackgroundRemovalRule
         return seen >= minimum;
     }
 }
-
-/// <summary>The explicit reviewed-content authority required by the signed product policy.</summary>
-public enum MeituBackgroundRemovalModeDecision
-{
-    Unspecified,
-    UseAutomaticSelectionForReviewedContent,
-}

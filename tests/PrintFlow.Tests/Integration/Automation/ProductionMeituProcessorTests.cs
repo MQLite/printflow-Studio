@@ -87,6 +87,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         IWorkspace workspace = new FileWorkspace(_workspace.Root);
         ProductionMeituProcessor adapter = new(
             baselines, locator, driver, workspace, new WicFileInspector(),
+            new WicMeituTransparencyInspector(),
             new FileSystemMeituOutputProbe(), FastOptions, TimeProvider.System);
 
         return new Harness(adapter, locator, elements, input, evidence, workspace);
@@ -110,7 +111,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
     /// so a Revision that should never exist has an operator-readable reason for not existing.
     /// </remarks>
     [Fact]
-    public async Task The_workflow_seam_still_refuses_background_removal_outright()
+    public async Task Unspecified_background_removal_is_refused_before_Meitu_interaction()
     {
         Harness h = Build();
         WorkspaceDirRef sessionDir = WorkspaceDirRef.Create("Sessions/S_1");
@@ -119,13 +120,17 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             "Sessions/S_1/Working/A_1/a_CUTOUT.png", WorkspaceArea.Working);
 
         OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
-            new MeituRequest(input, MeituOperation.RemoveBackground, sessionDir, output),
+            new MeituRequest(
+                input, MeituOperation.RemoveBackground, BackgroundRemovalDecision.Unspecified,
+                sessionDir, output),
             CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
-        result.Failure.Code.ShouldBe(FailureCode.AdapterUnavailable);
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
         result.Failure.IsRetryable.ShouldBeFalse();
         result.Failure.Context["adapterId"].ShouldBe("meitu-xiuxiu-production-v1");
+        result.Failure.Context["decision"].ShouldBe("Unspecified");
+        result.Failure.Context["inputSent"].ShouldBe("false");
 
         // Refused before anything at all: no window was looked at, nothing was invoked.
         h.Elements.Invocations.ShouldBeEmpty();
@@ -150,7 +155,9 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         WorkspaceFileRef file = WorkspaceFileRef.Create("Sessions/S_1/Working/A_1/a.png", WorkspaceArea.Working);
 
         OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
-            new MeituRequest(file, MeituOperation.Enhance, sessionDir, file), CancellationToken.None);
+            new MeituRequest(
+                file, MeituOperation.Enhance, BackgroundRemovalDecision.Unspecified, sessionDir, file),
+            CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
         result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
@@ -173,7 +180,9 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         WorkspaceFileRef output = WorkspaceFileRef.Create($"Sessions/S_1/{area}/a_HD.png", area);
 
         OperationResult<AdapterOutput> result = await h.Adapter.ProcessAsync(
-            new MeituRequest(input, MeituOperation.Enhance, sessionDir, output), CancellationToken.None);
+            new MeituRequest(
+                input, MeituOperation.Enhance, BackgroundRemovalDecision.Unspecified, sessionDir, output),
+            CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
         result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
@@ -725,7 +734,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             await h.Adapter.RemoveBackgroundAsync(
                 opened,
                 reference,
-                MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                 CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();

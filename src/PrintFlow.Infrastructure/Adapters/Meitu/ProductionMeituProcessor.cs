@@ -11,15 +11,10 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// The production Meitu adapter (Epic 11300 Part A §5).
 /// </summary>
 /// <remarks>
-/// This slice implements the <i>foundation</i> only: identify or launch the accepted Meitu,
-/// confirm a recognised safe state, and hand over a PrintFlow-created working copy. Enhancement
-/// and background removal are Part B.
-///
-/// <see cref="ProcessAsync"/> — the workflow seam — therefore always fails, and that is the
-/// design rather than an omission. Returning a success from it would create a Revision on the
-/// strength of having opened a file, which §24 forbids in the plainest terms: "opened
-/// successfully" is not "processing succeeded". The foundation is reached through
-/// <see cref="IMeituAutomationFoundation"/> instead, which no workflow code can see.
+/// The controlled production seam now completes Enhancement and reviewed-content Background
+/// Removal end to end. A success means a new managed output has been exported, settled,
+/// inspected and validated while its Working input remained byte-for-byte unchanged; merely
+/// opening a file or observing an operation finish is never a success boundary.
 ///
 /// <see cref="Mode"/> is <see cref="AdapterExecutionMode.Production"/>, so
 /// <c>IEnvironmentGate</c> remains authoritative over every step this adapter would back. The
@@ -33,6 +28,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     private readonly IMeituUiDriver _driver;
     private readonly IWorkspace _workspace;
     private readonly IFileInspector _inspector;
+    private readonly IMeituTransparencyInspector _transparencyInspector;
     private readonly IMeituOutputProbe _outputs;
     private readonly MeituAutomationOptions _options;
     private readonly TimeProvider _clock;
@@ -43,6 +39,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         IMeituUiDriver driver,
         IWorkspace workspace,
         IFileInspector inspector,
+        IMeituTransparencyInspector transparencyInspector,
         IMeituOutputProbe outputs,
         MeituAutomationOptions options,
         TimeProvider clock)
@@ -52,6 +49,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         ArgumentNullException.ThrowIfNull(driver);
         ArgumentNullException.ThrowIfNull(workspace);
         ArgumentNullException.ThrowIfNull(inspector);
+        ArgumentNullException.ThrowIfNull(transparencyInspector);
         ArgumentNullException.ThrowIfNull(outputs);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
@@ -61,6 +59,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         _driver = driver;
         _workspace = workspace;
         _inspector = inspector;
+        _transparencyInspector = transparencyInspector;
         _outputs = outputs;
         _options = options;
         _clock = clock;
@@ -85,27 +84,48 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     /// which was read to the end, and which inspects as a PNG no smaller than the working copy —
     /// with that working copy still byte-for-byte what PrintFlow handed over.
     ///
-    /// <see cref="MeituOperation.RemoveBackground"/> still refuses unconditionally. The route
-    /// below is specific to Enhancement in every part: its module, its Busy and completion
-    /// signatures, and a dimension rule that would be wrong for a cut-out.
+    /// Enhancement and Background Removal share only the proven open/export/stability/source
+    /// machinery. Each keeps its own action/completion correlation and output rule: Enhancement
+    /// accepts a non-shrinking PNG, while Background Removal requires a same-size PNG containing
+    /// both real transparency and visible foreground.
     /// </remarks>
     public async Task<OperationResult<AdapterOutput>> ProcessAsync(
         MeituRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (request.Operation != MeituOperation.Enhance)
+        if (!Enum.IsDefined(request.Operation))
         {
             return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
                 FailureCode.AdapterUnavailable,
-                $"The production Meitu adapter automates Enhancement only; '{request.Operation}' is a " +
-                "later slice. No file was produced and no Revision may be created.",
+                $"The production Meitu adapter does not recognise operation '{request.Operation}'. " +
+                "No file was produced and no Revision may be created.",
                 isRetryable: false,
                 context: new Dictionary<string, string>
                 {
                     ["adapterId"] = AdapterId,
                     ["operation"] = request.Operation.ToString(),
-                    ["implementedScope"] = "Enhancement: open, identify, enhance, export, validate",
+                    ["implementedScope"] = "Enhancement and reviewed-content Background Removal",
+                }));
+        }
+
+        // The refusal is deliberately first. Unspecified is the value the normal Session route
+        // supplies until C2B adds reviewed-content/operator authority, and it must produce zero
+        // Meitu interaction rather than becoming automatic selection anywhere below.
+        if (request.Operation == MeituOperation.RemoveBackground &&
+            request.BackgroundRemovalDecision !=
+                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
+        {
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.PreconditionNotMet,
+                "PRODUCT DECISION REQUIRED: reviewed-content authority was not supplied for " +
+                "Background Removal, so no Meitu input was produced.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["decision"] = request.BackgroundRemovalDecision.ToString(),
+                    ["inputSent"] = "false",
+                    ["adapterId"] = AdapterId,
                 }));
         }
 
@@ -113,6 +133,16 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         if (references.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(references.Failure);
+        }
+
+        if (request.Operation == MeituOperation.RemoveBackground)
+        {
+            OperationResult<Unit> destination = MeituCutoutOutputRule.ValidateDestination(
+                request.Input, request.ExpectedOutput);
+            if (destination.IsFailure)
+            {
+                return OperationResult.Fail<AdapterOutput>(destination.Failure);
+            }
         }
 
         DateTimeOffset startedAt = _clock.GetUtcNow();
@@ -134,35 +164,88 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<AdapterOutput>(opened.Failure);
         }
 
+        return request.Operation == MeituOperation.Enhance
+            ? await ProcessEnhancementAsync(
+                request, opened.Value, sourceBefore.Value, startedAt, cancellationToken)
+                .ConfigureAwait(false)
+            : await ProcessBackgroundRemovalAsync(
+                request, opened.Value, sourceBefore.Value, startedAt, cancellationToken)
+                .ConfigureAwait(false);
+    }
+
+    private async Task<OperationResult<AdapterOutput>> ProcessEnhancementAsync(
+        MeituRequest request,
+        MeituOpenedWorkingCopy opened,
+        FileFacts sourceBefore,
+        DateTimeOffset startedAt,
+        CancellationToken cancellationToken)
+    {
         OperationResult<MeituEnhancementOutcome> enhanced =
-            await EnhanceAsync(opened.Value, request.Input, cancellationToken).ConfigureAwait(false);
+            await EnhanceAsync(opened, request.Input, cancellationToken).ConfigureAwait(false);
         if (enhanced.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(enhanced.Failure);
         }
 
         OperationResult<MeituExportedOutput> exported = await ExportEnhancedResultAsync(
-            enhanced.Value, request.Input, sourceBefore.Value, request.ExpectedOutput, cancellationToken)
+            enhanced.Value, request.Input, sourceBefore, request.ExpectedOutput, cancellationToken)
             .ConfigureAwait(false);
         if (exported.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(exported.Failure);
         }
 
-        // The output exists and is valid from here on, and nothing below may take that away.
-        // §26 is explicit: a Meitu that could not be returned to a neutral state is a warning
-        // about the next attempt, not a reason to discard a file this one legitimately produced.
         string cleanup = await ReturnToNeutralStateAsync(enhanced.Value.Target, cancellationToken)
             .ConfigureAwait(false);
 
         return OperationResult.Ok(new AdapterOutput(
             exported.Value.File,
             _clock.GetUtcNow() - startedAt,
-            $"meitu:enhance; source {Describe(sourceBefore.Value)}; output {Describe(exported.Value.Facts)}; " +
+            $"meitu:enhance; source {Describe(sourceBefore)}; output {Describe(exported.Value.Facts)}; " +
             $"format {exported.Value.Evidence.ConfirmedFormatValue}; " +
             $"settled after {exported.Value.ObservationsToSettle} observation(s); " +
-            $"enhancement {(opened.Value.Load.AutoStartedEnhancement ? "auto-started by Meitu and waited out" : "invoked by PrintFlow")}; " +
+            $"enhancement {(opened.Load.AutoStartedEnhancement ? "auto-started by Meitu and waited out" : "invoked by PrintFlow")}; " +
             $"cleanup {cleanup}"));
+    }
+
+    private async Task<OperationResult<AdapterOutput>> ProcessBackgroundRemovalAsync(
+        MeituRequest request,
+        MeituOpenedWorkingCopy opened,
+        FileFacts sourceBefore,
+        DateTimeOffset startedAt,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<MeituBackgroundRemovalOutcome> removed = await RemoveBackgroundAsync(
+            opened,
+            request.Input,
+            request.BackgroundRemovalDecision,
+            cancellationToken).ConfigureAwait(false);
+        if (removed.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(removed.Failure);
+        }
+
+        OperationResult<MeituExportedOutput> exported = await ExportBackgroundRemovalResultAsync(
+            removed.Value, request.Input, sourceBefore, request.ExpectedOutput, cancellationToken)
+            .ConfigureAwait(false);
+        if (exported.IsFailure)
+        {
+            return OperationResult.Fail<AdapterOutput>(exported.Failure);
+        }
+
+        string cleanup = await ReturnToNeutralStateAsync(removed.Value.Target, cancellationToken)
+            .ConfigureAwait(false);
+        MeituTransparencyFacts alpha = exported.Value.Transparency!;
+
+        return OperationResult.Ok(new AdapterOutput(
+            exported.Value.File,
+            _clock.GetUtcNow() - startedAt,
+            $"meitu:remove-background; decision {request.BackgroundRemovalDecision}; " +
+            $"source {Describe(sourceBefore)}; output {Describe(exported.Value.Facts)}; " +
+            $"format {exported.Value.Evidence.ConfirmedFormatValue}; " +
+            $"transparent pixels {alpha.TransparentPixelCount}/{alpha.PixelCount}; " +
+            $"visible pixels {alpha.VisiblePixelCount}/{alpha.PixelCount}; " +
+            $"settled after {exported.Value.ObservationsToSettle} observation(s); cleanup {cleanup}"));
     }
 
     /// <summary>
@@ -202,7 +285,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<Unit>(
                 FailureCode.PreconditionNotMet,
                 $"The expected output '{request.ExpectedOutput.RelativePath}' is the working copy itself. " +
-                "The enhanced result must be a new file: exporting over the input would destroy the bytes " +
+                "The result must be a new file: exporting over the input would destroy the bytes " +
                 "the attempt is validated against. Nothing was invoked.");
         }
 
@@ -225,6 +308,94 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     {
         ArgumentNullException.ThrowIfNull(enhancement);
         ArgumentNullException.ThrowIfNull(workingCopyFactsBefore);
+
+        return await ExportValidatedResultAsync(
+            MeituOperation.Enhance,
+            enhancement.Target,
+            enhancement.ObservedDocumentIdentity,
+            workingCopy,
+            workingCopyFactsBefore,
+            output,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituExportedOutput>> ExportBackgroundRemovalResultAsync(
+        MeituBackgroundRemovalOutcome backgroundRemoval,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(backgroundRemoval);
+        ArgumentNullException.ThrowIfNull(workingCopyFactsBefore);
+
+        if (backgroundRemoval.ModeDecision !=
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(
+                FailureCode.PreconditionNotMet,
+                "The completed Background Removal observation carries no reviewed-content " +
+                "authority. Nothing was exported.");
+        }
+
+        // Busy and completion are non-nullable observations on the outcome. Requiring the
+        // operation-specific phases again prevents a manually fabricated/stale completion
+        // record from becoming export authority.
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure || baseline.Value.BackgroundRemoval is not { } signature)
+        {
+            return baseline.IsFailure
+                ? OperationResult.Fail<MeituExportedOutput>(baseline.Failure)
+                : OperationResult.Fail<MeituExportedOutput>(
+                    FailureCode.EnvironmentNotVerified,
+                    "The verified preset carries no Background Removal signature. Nothing was exported.");
+        }
+
+        if (MeituBackgroundRemovalRule.Classify(signature, backgroundRemoval.Busy.Observation) !=
+                MeituBackgroundRemovalPhase.Busy ||
+            MeituBackgroundRemovalRule.Classify(signature, backgroundRemoval.Completion.Observation) !=
+                MeituBackgroundRemovalPhase.Complete ||
+            !string.Equals(
+                backgroundRemoval.IdentityAfterCompletion.Observation.ObservedDocumentIdentity,
+                backgroundRemoval.ObservedDocumentIdentity,
+                StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<MeituExportedOutput>(
+                FailureCode.MeituUnknownState,
+                "Background Removal export requires current-run Busy, positive completion and exact " +
+                "post-completion identity correlation. Nothing was exported.");
+        }
+
+        OperationResult<Unit> destination = MeituCutoutOutputRule.ValidateDestination(workingCopy, output);
+        if (destination.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(destination.Failure);
+        }
+
+        return await ExportValidatedResultAsync(
+            MeituOperation.RemoveBackground,
+            backgroundRemoval.Target,
+            backgroundRemoval.ObservedDocumentIdentity,
+            workingCopy,
+            workingCopyFactsBefore,
+            output,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The one signed Save → 另存为 → controlled dialog → stability → inspection route shared
+    /// by both operations. Only the final output rule varies.
+    /// </summary>
+    private async Task<OperationResult<MeituExportedOutput>> ExportValidatedResultAsync(
+        MeituOperation operation,
+        MeituTarget target,
+        string observedDocumentIdentity,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        CancellationToken cancellationToken)
+    {
 
         // Restated rather than inherited, exactly as the enhancement route restates it. This
         // method resolves two references to real paths and drives an application to write to one
@@ -268,15 +439,15 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         }
 
         OperationResult<MeituExportEvidence> exported = await _driver.ExportResultAsync(
-            enhancement.Target,
+            target,
             workingCopy.FileName,
-            enhancement.ObservedDocumentIdentity,
+            observedDocumentIdentity,
             destination,
             cancellationToken).ConfigureAwait(false);
 
         if (exported.IsFailure)
         {
-            return Capture<MeituExportedOutput>(enhancement.Target, exported.Failure, "export-failed");
+            return Capture<MeituExportedOutput>(target, exported.Failure, "export-failed");
         }
 
         // §13, §14. From here the screen is irrelevant: the file system is the authority on
@@ -295,8 +466,27 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             return OperationResult.Fail<MeituExportedOutput>(outputFacts.Failure);
         }
 
-        OperationResult<Unit> valid = MeituEnhancementOutputRule.Validate(
-            workingCopyFactsBefore, outputFacts.Value, ImageFormat.Png);
+        MeituTransparencyFacts? transparency = null;
+        OperationResult<Unit> valid;
+        if (operation == MeituOperation.RemoveBackground)
+        {
+            OperationResult<MeituTransparencyFacts> alpha = await _transparencyInspector
+                .InspectAsync(destination, cancellationToken).ConfigureAwait(false);
+            if (alpha.IsFailure)
+            {
+                return OperationResult.Fail<MeituExportedOutput>(alpha.Failure);
+            }
+
+            transparency = alpha.Value;
+            valid = MeituCutoutOutputRule.Validate(
+                workingCopyFactsBefore, outputFacts.Value, transparency);
+        }
+        else
+        {
+            valid = MeituEnhancementOutputRule.Validate(
+                workingCopyFactsBefore, outputFacts.Value, ImageFormat.Png);
+        }
+
         if (valid.IsFailure)
         {
             return OperationResult.Fail<MeituExportedOutput>(valid.Failure);
@@ -315,7 +505,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         return unchanged.IsFailure
             ? OperationResult.Fail<MeituExportedOutput>(unchanged.Failure)
             : OperationResult.Ok(new MeituExportedOutput(
-                output, outputFacts.Value, exported.Value, settled.Value));
+                output, outputFacts.Value, exported.Value, settled.Value, transparency));
     }
 
     /// <summary>
@@ -637,7 +827,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     public async Task<OperationResult<MeituBackgroundRemovalOutcome>> RemoveBackgroundAsync(
         MeituOpenedWorkingCopy opened,
         WorkspaceFileRef workingCopy,
-        MeituBackgroundRemovalModeDecision modeDecision,
+        BackgroundRemovalDecision modeDecision,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(opened);

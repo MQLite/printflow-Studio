@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
 
@@ -48,7 +49,8 @@ public sealed record MeituExportedOutput(
     WorkspaceFileRef File,
     FileFacts Facts,
     MeituExportEvidence Evidence,
-    int ObservationsToSettle);
+    int ObservationsToSettle,
+    MeituTransparencyFacts? Transparency);
 
 /// <summary>
 /// The Epic 11300 Part A foundation: get to a verified Meitu in a known safe state, and hand it
@@ -121,7 +123,7 @@ public interface IMeituAutomationFoundation
     Task<OperationResult<MeituBackgroundRemovalOutcome>> RemoveBackgroundAsync(
         MeituOpenedWorkingCopy opened,
         WorkspaceFileRef workingCopy,
-        MeituBackgroundRemovalModeDecision modeDecision,
+        BackgroundRemovalDecision modeDecision,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -152,6 +154,18 @@ public interface IMeituAutomationFoundation
     /// </remarks>
     Task<OperationResult<MeituExportedOutput>> ExportEnhancedResultAsync(
         MeituEnhancementOutcome enhancement,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Exports a completed, current-load-correlated Background Removal result through the same
+    /// signed Save/另存为 route, then requires a same-size readable PNG with both transparent
+    /// pixels and visible foreground while proving the Working copy is unchanged.
+    /// </summary>
+    Task<OperationResult<MeituExportedOutput>> ExportBackgroundRemovalResultAsync(
+        MeituBackgroundRemovalOutcome backgroundRemoval,
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,

@@ -11,6 +11,21 @@ public enum MeituOperation
     RemoveBackground,
 }
 
+/// <summary>
+/// The explicit authority required before production Background Removal may use Meitu's
+/// automatic selection over content that has already been reviewed for that purpose.
+/// </summary>
+/// <remarks>
+/// <see cref="Unspecified"/> is a refusal state, not a default. Epic 11300 Part C2B will add
+/// the operator/reviewed-content workflow that can supply the authorised value; until then the
+/// ordinary session route must pass <see cref="Unspecified"/> explicitly.
+/// </remarks>
+public enum BackgroundRemovalDecision
+{
+    Unspecified,
+    UseAutomaticSelectionForReviewedContent,
+}
+
 /// <summary>A validated file an adapter produced.</summary>
 public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elapsed, string? AdapterNotes);
 
@@ -18,6 +33,7 @@ public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elaps
 public sealed record MeituRequest(
     WorkspaceFileRef Input,
     MeituOperation Operation,
+    BackgroundRemovalDecision BackgroundRemovalDecision,
     WorkspaceDirRef WorkingDirectory,
     WorkspaceFileRef ExpectedOutput);
 

@@ -75,9 +75,18 @@ public sealed class FakeMeituProcessor : IMeituProcessor
     private async Task<OperationResult<AdapterOutput>> SucceedAsync(
         MeituRequest request, CancellationToken cancellationToken)
     {
-        OperationResult<Unit> written = await _workspace
-            .WriteReservedAsync(request.ExpectedOutput, request.Input, cancellationToken)
-            .ConfigureAwait(false);
+        // The fake does not turn Unspecified into automatic selection. It drives no Meitu mode
+        // at all: its Background Removal branch is deterministic local fixture generation. The
+        // reviewed-content authority remains meaningful only to the production route until C2B
+        // adds the real workflow caller that can supply it.
+        OperationResult<Unit> written = request.Operation == MeituOperation.RemoveBackground
+            ? await FakeBackgroundRemovalPng.WriteAsync(
+                _workspace.ResolveAbsolute(request.Input),
+                _workspace.ResolveAbsolute(request.ExpectedOutput),
+                cancellationToken).ConfigureAwait(false)
+            : await _workspace
+                .WriteReservedAsync(request.ExpectedOutput, request.Input, cancellationToken)
+                .ConfigureAwait(false);
 
         return written.IsFailure
             ? OperationResult.Fail<AdapterOutput>(written.Failure)

@@ -2,6 +2,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Integration.Automation;
 
@@ -137,7 +138,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
         OperationResult<MeituBackgroundRemovalOutcome> result = await s.Driver.RunBackgroundRemovalAsync(
             s.Editor,
             ExpectedFile,
-            MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
@@ -156,7 +157,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
     {
         Scenario s = Build();
         OperationResult<MeituBackgroundRemovalOutcome> result = await s.Driver.RunBackgroundRemovalAsync(
-            s.Editor, ExpectedFile, MeituBackgroundRemovalModeDecision.Unspecified, CancellationToken.None);
+            s.Editor, ExpectedFile, BackgroundRemovalDecision.Unspecified, CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
         result.Failure.TechnicalDetail.ShouldContain("PRODUCT DECISION REQUIRED");
@@ -300,7 +301,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
         await Should.ThrowAsync<OperationCanceledException>(() => s.Driver.RunBackgroundRemovalAsync(
             s.Editor,
             ExpectedFile,
-            MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
             cancellation.Token));
         s.ActionCount.ShouldBe(1);
         s.ReturnCount.ShouldBe(0);
@@ -321,7 +322,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
         scenario.Driver.RunBackgroundRemovalAsync(
             scenario.Editor,
             ExpectedFile,
-            MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
             CancellationToken.None);
 
     private static string[] IdleScreen() => [.. MeituFakes.EditorMarkers, "普通面板"];

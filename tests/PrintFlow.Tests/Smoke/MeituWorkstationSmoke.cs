@@ -7,6 +7,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
 using FileWorkspace = PrintFlow.Infrastructure.Workspace.FileWorkspace;
@@ -230,7 +231,7 @@ public sealed class MeituWorkstationSmoke
                     await foundation.RemoveBackgroundAsync(
                         opened.Value,
                         workingCopy,
-                        MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent,
+                        BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                         CancellationToken.None);
                 if (removed.IsFailure)
                 {
@@ -1131,7 +1132,8 @@ public sealed class MeituWorkstationSmoke
 
             OperationResult<AdapterOutput> result = await adapter.ProcessAsync(
                 new MeituRequest(
-                    workingCopy, MeituOperation.Enhance, ParentOf(workingCopy), output),
+                    workingCopy, MeituOperation.Enhance, BackgroundRemovalDecision.Unspecified,
+                    ParentOf(workingCopy), output),
                 CancellationToken.None);
 
             if (result.IsFailure)
@@ -1159,7 +1161,9 @@ public sealed class MeituWorkstationSmoke
             // Background removal, through the same seam, on the same machine.
             OperationResult<AdapterOutput> cutout = await adapter.ProcessAsync(
                 new MeituRequest(
-                    workingCopy, MeituOperation.RemoveBackground, ParentOf(workingCopy),
+                    workingCopy, MeituOperation.RemoveBackground,
+                    BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                    ParentOf(workingCopy),
                     SiblingOf(workingCopy, "unused_CUTOUT.png")),
                 CancellationToken.None);
 
@@ -1178,6 +1182,115 @@ public sealed class MeituWorkstationSmoke
     }
 
     private const string EnableSeamVariable = "PRINTFLOW_MEITU_SMOKE_SEAM";
+    private const string EnableBackgroundSeamVariable = "PRINTFLOW_MEITU_SMOKE_BACKGROUND_SEAM";
+
+    /// <summary>
+    /// C2A's real controlled-seam proof. It uses a fresh opaque RGB synthetic source, carries
+    /// reviewed-content authority on the request, and reaches no Session, attempt or Revision.
+    /// </summary>
+    [Fact]
+    public async Task Run_one_Background_Removal_through_the_production_adapter_seam()
+    {
+        if (Environment.GetEnvironmentVariable(EnableBackgroundSeamVariable) != "1" ||
+            Environment.GetEnvironmentVariable(EnableExportVariable) != "1")
+        {
+            return;
+        }
+
+        StringBuilder transcript = new();
+        void Log(string line)
+        {
+            transcript.AppendLine(line);
+            Console.WriteLine(line);
+        }
+
+        string root = Path.Combine(
+            Path.GetTempPath(), "PrintFlowMeituCutoutSeam", Guid.NewGuid().ToString("N"));
+        string evidenceDirectory = Path.Combine(root, "Evidence");
+        bool mayStillBeLoaded = true;
+
+        try
+        {
+            Log($"# Meitu Background Removal production-seam smoke — {DateTimeOffset.Now:O}");
+
+            PrintFlowConfiguration configuration =
+                PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            (string workingPath, WorkspaceFileRef workingCopy, IWorkspace workspace) =
+                PrepareOpaqueBackgroundRemovalWorkingCopy(root);
+            WorkspaceFileRef output = SiblingOf(
+                workingCopy,
+                $"{Path.GetFileNameWithoutExtension(workingCopy.FileName)}_CUTOUT.png");
+            string outputPath = workspace.ResolveAbsolute(output);
+
+            WicFileInspector fileInspector = new();
+            FileFacts sourceBefore = (await fileInspector.InspectAsync(
+                workingPath, CancellationToken.None)).Value;
+            string sourcePixelFormat = SyntheticImages.FormatOf(workingPath).ToString();
+
+            Log($"working copy          : {workingCopy.RelativePath}");
+            Log($"expected output       : {output.RelativePath}");
+            Log($"decision              : {BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent}");
+            Log($"source dimensions     : {sourceBefore.PixelWidth}x{sourceBefore.PixelHeight}");
+            Log($"source pixel format   : {sourcePixelFormat}");
+            Log($"source SHA-256        : {sourceBefore.Sha256}");
+
+            IMeituProcessor adapter = MeituAutomationComposition.CreateProductionProcessor(
+                manifest, expected, workspace, evidenceDirectory, TimeProvider.System);
+            OperationResult<AdapterOutput> result = await adapter.ProcessAsync(
+                new MeituRequest(
+                    workingCopy,
+                    MeituOperation.RemoveBackground,
+                    BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                    ParentOf(workingCopy),
+                    output),
+                CancellationToken.None);
+
+            if (result.IsFailure)
+            {
+                Log($"RESULT                : REFUSED — {result.Failure.Code}");
+                Log($"detail                : {result.Failure.TechnicalDetail}");
+                foreach (KeyValuePair<string, string> entry in result.Failure.Context)
+                {
+                    Log($"  {entry.Key,-20}: {entry.Value}");
+                }
+
+                Log("No AdapterOutput and no Revision were produced.");
+                return;
+            }
+
+            FileFacts outputFacts = (await fileInspector.InspectAsync(
+                outputPath, CancellationToken.None)).Value;
+            FileFacts sourceAfter = (await fileInspector.InspectAsync(
+                workingPath, CancellationToken.None)).Value;
+            MeituTransparencyFacts alpha = (await new WicMeituTransparencyInspector().InspectAsync(
+                outputPath, CancellationToken.None)).Value;
+            string outputPixelFormat = SyntheticImages.FormatOf(outputPath).ToString();
+
+            Log("RESULT                : SUCCESS");
+            Log($"AdapterOutput         : {result.Value.ProducedFile.RelativePath}");
+            Log($"output dimensions     : {outputFacts.PixelWidth}x{outputFacts.PixelHeight}");
+            Log($"output pixel format   : {outputPixelFormat}");
+            Log($"HasAlpha              : {outputFacts.HasAlpha}");
+            Log($"transparent pixels    : {alpha.TransparentPixelCount}/{alpha.PixelCount} " +
+                $"({alpha.HasTransparentPixels})");
+            Log($"visible pixels        : {alpha.VisiblePixelCount}/{alpha.PixelCount} " +
+                $"({alpha.HasVisiblePixels})");
+            Log($"file size             : {outputFacts.ByteLength}");
+            Log($"output SHA-256        : {outputFacts.Sha256}");
+            Log($"source unchanged      : {sourceBefore.Sha256.Equals(sourceAfter.Sha256)}");
+            Log($"adapter notes         : {result.Value.AdapterNotes}");
+            Log("No session, repository or workflow engine was composed; no Revision exists.");
+
+            mayStillBeLoaded = result.Value.AdapterNotes?.Contains(
+                "the editor was returned to its signed empty state", StringComparison.Ordinal) != true;
+        }
+        finally
+        {
+            WriteTranscript(transcript.ToString());
+            CleanUp(root, evidenceDirectory, mayStillBeLoaded);
+        }
+    }
 
     private static WorkspaceDirRef ParentOf(WorkspaceFileRef file)
     {
@@ -1224,6 +1337,33 @@ public sealed class MeituWorkstationSmoke
             NamingArtifactKind.Enhanced, OutputName.Sanitise(stem), NamingPatternSet.DesignDefault);
 
         return WorkspaceFileRef.Create(directory + name, WorkspaceArea.Working);
+    }
+
+    private static (string AbsolutePath, WorkspaceFileRef Reference, IWorkspace Workspace)
+        PrepareOpaqueBackgroundRemovalWorkingCopy(string root)
+    {
+        string token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
+        WorkspaceFileRef reference = WorkspaceFileRef.Create(
+            $"Sessions/S_SMOKE/Working/A_1/PF_BACKGROUND_C2A_{token}.png",
+            WorkspaceArea.Working);
+        IWorkspace workspace = new FileWorkspace(root);
+        string absolute = workspace.ResolveAbsolute(reference);
+        Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
+
+        File.WriteAllBytes(
+            absolute,
+            SyntheticImages.OpaqueRgbPng(
+                480,
+                360,
+                (x, y) =>
+                {
+                    bool foreground = x is > 140 and < 340 && y is > 55 and < 330;
+                    return foreground
+                        ? ((byte)30, (byte)75, (byte)175)
+                        : ((byte)240, (byte)240, (byte)240);
+                }));
+
+        return (absolute, reference, workspace);
     }
 
     private static string Describe(FileFacts facts) =>

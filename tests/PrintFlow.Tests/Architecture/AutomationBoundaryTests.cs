@@ -564,6 +564,24 @@ public sealed class AutomationBoundaryTests
         meituTypesInWorkflow.ShouldBe(["IMeituProcessor", "MeituOperation", "MeituRequest"]);
     }
 
+    [Fact]
+    public void Background_Removal_authority_is_typed_and_the_normal_workflow_leaves_it_unspecified()
+    {
+        PropertyInfo decision = typeof(MeituRequest).GetProperty(
+            nameof(MeituRequest.BackgroundRemovalDecision))!;
+
+        decision.PropertyType.ShouldBe(typeof(BackgroundRemovalDecision));
+        decision.PropertyType.ShouldNotBe(typeof(bool));
+        decision.PropertyType.ShouldNotBe(typeof(string));
+
+        string sessionService = File.ReadAllText(Path.Combine(
+            ProjectDirectory("PrintFlow.Workflow"), "Services", "SessionService.cs"));
+        sessionService.ShouldContain(
+            "BackgroundRemovalDecision.Unspecified", Case.Sensitive);
+        sessionService.ShouldNotContain(
+            "BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent", Case.Sensitive);
+    }
+
     /// <summary>
     /// The production adapter is not registered by the composition root.
     /// </summary>

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
 
@@ -1738,7 +1739,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     public async Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
-        MeituBackgroundRemovalModeDecision modeDecision,
+        BackgroundRemovalDecision modeDecision,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
@@ -1750,7 +1751,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(signature.Failure);
         }
 
-        if (modeDecision != MeituBackgroundRemovalModeDecision.UseAutomaticSelectionForReviewedContent)
+        if (modeDecision != BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent)
         {
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(OperationFailure.Create(
                 FailureCode.PreconditionNotMet,

@@ -698,6 +698,7 @@ public sealed class SessionService : ISessionService
                     new MeituRequest(
                         workingCopy.Value,
                         operation,
+                        BackgroundRemovalDecision.Unspecified,
                         ParentDirOf(workingCopy.Value),
                         SiblingOf(workingCopy.Value, producedName)),
                     cancellationToken);

@@ -73,7 +73,9 @@ public sealed class ProductionAdapterGateTests
 
         WorkspaceFileRef file = WorkspaceFileRef.Create("Sessions/S/Working/a.png", WorkspaceArea.Working);
         OperationResult<AdapterOutput> result = await adapter.ProcessAsync(
-            new MeituRequest(file, MeituOperation.Enhance, WorkspaceDirRef.Create("Sessions/S"), file),
+            new MeituRequest(
+                file, MeituOperation.Enhance, BackgroundRemovalDecision.Unspecified,
+                WorkspaceDirRef.Create("Sessions/S"), file),
             CancellationToken.None);
 
         result.IsFailure.ShouldBeTrue();
@@ -94,6 +96,7 @@ public sealed class ProductionAdapterGateTests
 
         return new ProductionMeituProcessor(
             baselines, locator, driver, new FileWorkspace(workspace.Root), new WicFileInspector(),
+            new WicMeituTransparencyInspector(),
             new FileSystemMeituOutputProbe(), options, TimeProvider.System);
     }
 

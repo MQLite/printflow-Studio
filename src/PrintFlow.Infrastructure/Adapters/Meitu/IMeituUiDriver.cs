@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
 
@@ -205,7 +206,7 @@ public interface IMeituUiDriver
     Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
-        MeituBackgroundRemovalModeDecision modeDecision,
+        BackgroundRemovalDecision modeDecision,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -352,7 +353,7 @@ public sealed record MeituEnhancementOutcome(
 public sealed record MeituBackgroundRemovalOutcome(
     MeituTarget Target,
     string ObservedDocumentIdentity,
-    MeituBackgroundRemovalModeDecision ModeDecision,
+    BackgroundRemovalDecision ModeDecision,
     string ObservedAutomaticModeName,
     MeituStateSnapshot IdentityBeforeAction,
     MeituStateSnapshot Busy,
