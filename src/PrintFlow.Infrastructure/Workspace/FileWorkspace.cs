@@ -103,6 +103,15 @@ public sealed class FileWorkspace : IWorkspace
 
             File.SetAttributes(targetAbsolute.Value, FileAttributes.ReadOnly);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Cancellation of an in-flight import is an ordinary operator-facing outcome, not a
+            // programmer error, so it leaves this boundary as a result like every other adapter's
+            // does (FakeBackgroundRemovalPng, DeterministicAlphaTrimProcessor, WicImagePreviewDecoder,
+            // ProductionMeituProcessor). Guarded on the token because an OperationCanceledException
+            // that does not belong to this import is somebody else's failure, not a cancellation.
+            return CancelledImport(targetAbsolute.Value, sourceAbsolutePath);
+        }
         catch (IOException ex)
         {
             return OperationResult.Fail<WorkspaceFileRef>(
@@ -454,6 +463,65 @@ public sealed class FileWorkspace : IWorkspace
         WorkspaceArea.Logs => "Logs",
         _ => throw new ArgumentOutOfRangeException(nameof(area), area, "Unknown workspace area."),
     };
+
+    /// <summary>
+    /// Converts a cancelled in-flight source import into the structured failure the ordinary
+    /// operator-facing surface already knows how to report, and disposes of the half-copied
+    /// destination.
+    /// </summary>
+    /// <remarks>
+    /// The partial destination is <b>quarantined, never deleted</b>. By the time this runs the
+    /// copy's streams have already been disposed by the <c>await using</c> blocks unwinding, so
+    /// the move is against a closed handle — and <see cref="Quarantine"/> reports a failure
+    /// rather than falling back to a hard delete if some scanner still holds the file, which is
+    /// the solution-wide rule that there is no hard-delete path anywhere.
+    ///
+    /// Quarantining is the right existing semantic rather than a new one: those bytes are
+    /// precisely what <see cref="IWorkspace.Quarantine"/> exists for — a file on disk with no
+    /// corresponding metadata. Nothing ever treats them as a source, because no
+    /// <see cref="WorkspaceFileRef"/> to them is returned and the caller's Import attempt fails,
+    /// so no Revision and no InputSnapshot is written; moving them out of <c>Source\</c> as well
+    /// means a later reader of that directory cannot mistake a truncated file for the snapshot
+    /// a successful import would have left under the very same name.
+    /// </remarks>
+    private OperationResult<WorkspaceFileRef> CancelledImport(string targetAbsolutePath, string sourceAbsolutePath)
+    {
+        string disposition;
+        string? dispositionDetail = null;
+
+        if (!File.Exists(targetAbsolutePath))
+        {
+            disposition = "none";
+        }
+        else
+        {
+            OperationResult<Unit> quarantined = Quarantine(
+                targetAbsolutePath,
+                $"Cancelled part-way through importing '{sourceAbsolutePath}'. These bytes are a " +
+                "truncated copy, never a source snapshot.");
+
+            disposition = quarantined.IsSuccess ? "quarantined" : "retained";
+            dispositionDetail = quarantined.IsFailure ? quarantined.Failure.ToString() : null;
+        }
+
+        Dictionary<string, string> context = new()
+        {
+            ["sourceFileName"] = System.IO.Path.GetFileName(sourceAbsolutePath),
+            ["partialDestination"] = disposition,
+        };
+
+        if (dispositionDetail is not null)
+        {
+            context["partialDestinationDetail"] = dispositionDetail;
+        }
+
+        return OperationResult.Fail<WorkspaceFileRef>(OperationFailure.Create(
+            FailureCode.Cancelled,
+            "The source import was cancelled before the copy completed. No source snapshot was " +
+            "created, and the half-written destination was not kept as one.",
+            isRetryable: true,
+            context: context));
+    }
 
     private static string InsertBeforeExtension(string fileName, string suffix)
     {

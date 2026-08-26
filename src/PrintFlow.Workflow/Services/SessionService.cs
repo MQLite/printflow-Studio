@@ -187,26 +187,46 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(committedOpening.Failure);
         }
 
-        OperationResult<WorkspaceFileRef> imported =
-            await _workspace.ImportSourceAsync(workspaceDir, sourceAbsolutePath, cancellationToken);
-        if (imported.IsFailure)
+        OperationResult<(WorkspaceFileRef Source, FileFacts Facts)> established;
+        try
         {
-            return await FailImportAsync(session, started.State, context, runningAttempt, imported.Failure, cancellationToken);
+            established = await EstablishSourceAsync(workspaceDir, sourceAbsolutePath, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The same containment RunProducingStepAsync already gives every producing step,
+            // extended to the one producing path that had none. Import is the only operation an
+            // operator can start from Home, and its command is cancellable, so an escape here is
+            // an escape all the way out of the view model — which is a terminated shell, not a
+            // reported failure. Nothing in this method's own awaits can reach here today (the
+            // workspace and the repository both answer cancellation structurally), so this is the
+            // boundary that keeps that true rather than a second cancellation policy.
+            established = OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(OperationFailure.Create(
+                FailureCode.Cancelled,
+                "The import was cancelled before the source was established. No source snapshot " +
+                "and no Revision were created.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["attemptId"] = runningAttempt.Id.ToString(),
+                    ["step"] = StepKind.Import.ToString(),
+                    ["retainedExternalState"] = "none",
+                }));
         }
 
-        OperationResult<FileFacts> inspected =
-            await _fileInspector.InspectAsync(_workspace.ResolveAbsolute(imported.Value), cancellationToken);
-        if (inspected.IsFailure)
+        if (established.IsFailure)
         {
-            return await FailImportAsync(session, started.State, context, runningAttempt, inspected.Failure, cancellationToken);
+            return await FailImportAsync(session, started.State, context, runningAttempt, established.Failure, cancellationToken);
         }
+
+        (WorkspaceFileRef importedSource, FileFacts sourceFacts) = established.Value;
 
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision rootRevision = Revision.Create(
-            revisionId, id, null, OperationKind.Import, imported.Value, inspected.Value, context.NowUtc);
+            revisionId, id, null, OperationKind.Import, importedSource, sourceFacts, context.NowUtc);
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
-            context.NewAttemptId, StepKind.Import, revisionId, inspected.Value.Sha256);
+            context.NewAttemptId, StepKind.Import, revisionId, sourceFacts.Sha256);
         WorkflowTransition finished = _engine.Apply(started.State, succeeded, context);
         if (finished.IsRejected)
         {
@@ -1339,6 +1359,33 @@ public sealed class SessionService : ISessionService
                $"signed cancel invoked {(stop.OperationCancelWasInvoked ? "yes" : "no")}; " +
                $"left Busy after cancel {(stop.OperationLeftBusyAfterCancel ? "yes" : "no")}; " +
                $"retained external state {retained}; force termination no";
+    }
+
+    /// <summary>
+    /// The two steps that turn the operator's chosen file into an established source: the copy
+    /// into the managed workspace, and the inspection that describes what was copied.
+    /// </summary>
+    /// <remarks>
+    /// Together rather than separately because neither half is a source on its own — a copy
+    /// nothing has read is not something a Revision may be written against — and because that
+    /// makes them one cancellable unit with one containment boundary at the caller.
+    /// </remarks>
+    private async Task<OperationResult<(WorkspaceFileRef Source, FileFacts Facts)>> EstablishSourceAsync(
+        WorkspaceDirRef workspaceDir, string sourceAbsolutePath, CancellationToken cancellationToken)
+    {
+        OperationResult<WorkspaceFileRef> imported =
+            await _workspace.ImportSourceAsync(workspaceDir, sourceAbsolutePath, cancellationToken);
+        if (imported.IsFailure)
+        {
+            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(imported.Failure);
+        }
+
+        OperationResult<FileFacts> inspected =
+            await _fileInspector.InspectAsync(_workspace.ResolveAbsolute(imported.Value), cancellationToken);
+
+        return inspected.IsFailure
+            ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(inspected.Failure)
+            : OperationResult.Ok((imported.Value, inspected.Value));
     }
 
     private async Task<OperationResult<SessionView>> FailImportAsync(
