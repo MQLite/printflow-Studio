@@ -125,19 +125,21 @@ public static class ServiceRegistration
 
             case "Production":
                 // The controlled Epic 11300 seam can now produce validated Enhancement and
-                // reviewed-content Background Removal outputs, but C2B has not yet added the
-                // workflow authority path and no production Photoshop adapter exists (Epic
-                // 11400). Global Production composition therefore remains closed.
+                // reviewed-content Background Removal outputs. Global Production composition
+                // nevertheless remains closed.
                 //
                 // Failing closed rather than falling back to the fake remains the point: a
                 // workstation configured for Production must never quietly run against fakes.
                 // The Part A foundation is exercised through
                 // MeituAutomationComposition.CreateFoundation, which is reachable from the
-                // controlled smoke and from tests but not from any session (Part A §6, §22).
+                // controlled smoke and from tests but not from the normal Production
+                // composition. Epic 11300's Meitu workflow authority is complete, but global
+                // Production still waits for the Epic 11400 Photoshop adapter and Epic 11500's
+                // authoritative workstation EnvironmentGate.
                 throw new NotSupportedException(
-                    "Adapters:Mode is 'Production', but production automation is incomplete: the Meitu " +
-                    "Background Removal workflow authority/integration and the production Photoshop " +
-                    "adapter are not implemented. Refusing to start rather than silently substituting a fake.");
+                    "Adapters:Mode is 'Production', but global production automation remains closed: " +
+                    "the production Photoshop adapter is owned by Epic 11400 and workstation verification " +
+                    "is owned by Epic 11500. Refusing to start rather than silently substituting a fake.");
 
             default:
                 throw new NotSupportedException(
