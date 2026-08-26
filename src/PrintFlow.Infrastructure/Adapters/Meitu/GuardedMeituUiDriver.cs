@@ -816,9 +816,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
     /// <inheritdoc />
     public async Task<OperationResult<MeituLoadObservation>> ObserveLoadedDocumentAsync(
-        MeituTarget target, string expectedWorkingCopyFileName, CancellationToken cancellationToken)
+        MeituTarget target, string expectedWorkingCopyFileName, IAutomationStopSignal stop,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(stop);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
 
         OperationResult<MeituEnhancementSignature> signature = EnhancementSignature();
@@ -888,6 +890,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             signature.Value,
             MeituEnhancementPhase.Complete,
             _options.EnhancementCompletionTimeout,
+            stop,
             cancellationToken).ConfigureAwait(false);
 
         return completion.IsFailure
@@ -1280,6 +1283,450 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     }
 
     /// <inheritdoc />
+    /// <summary>
+    /// The refusal for a Stop that arrived before any operation input was produced
+    /// (Epic 11300 Part D2A §5), or <c>null</c> when no stop is pending.
+    /// </summary>
+    /// <remarks>
+    /// Both modes produce the same answer here, and that is correct rather than a shortcut:
+    /// before the operation has been invoked there is nothing to cancel and nothing to take
+    /// over, so "stop safely" and "leave Meitu alone" describe the same action — do not start.
+    /// The two are still distinguished in the audit, which is written from the mode by the
+    /// workflow layer rather than from this failure.
+    /// </remarks>
+    private static OperationFailure? StopBeforeOperation(IAutomationStopSignal stop)
+    {
+        if (stop.RequestedMode is not { } mode)
+        {
+            return null;
+        }
+
+        return OperationFailure.Create(
+            FailureCode.Cancelled,
+            $"The operator requested '{mode}' before any Meitu operation was invoked. PrintFlow " +
+            "stopped its own orchestration; no operation input was produced, nothing was exported " +
+            "and Meitu retains nothing from this attempt.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["stopMode"] = mode.ToString(),
+                ["phase"] = ExternalOperationPhase.NotStarted.ToString(),
+                ["inputSent"] = "false",
+                ["meituCancelInvoked"] = "false",
+                ["forceTerminationInvoked"] = "false",
+            });
+    }
+
+    /// <summary>
+    /// Honours a Stop that arrived while <paramref name="operation"/> is positively Busy, and
+    /// returns the failure that ends the run — or <c>null</c> when no stop is pending
+    /// (Epic 11300 Part D2A §9, §10, §19).
+    /// </summary>
+    /// <remarks>
+    /// The whole of §9 and §10 in one place, and the branch structure is the specification:
+    /// <list type="bullet">
+    ///   <item>a takeover produces <b>no input whatsoever</b>, from Busy as from anywhere else.
+    ///   It does not click the cancel first, because "take over" does not mean "cancel then
+    ///   take over" (§19);</item>
+    ///   <item>a stop tries the exact signed cancel <b>once</b>, and only if
+    ///   <see cref="AutomationStopPolicy"/> permits it for the reported phase;</item>
+    ///   <item>a cancel that cannot be proven — missing, ambiguous, disabled, wrong process,
+    ///   target lost, blocked by a modal — is <b>not</b> escalated. PrintFlow stops its own
+    ///   orchestration and reports that the operation may still be running (§10).</item>
+    /// </list>
+    /// A cancel that fails to resolve therefore looks, from the caller's side, exactly like a
+    /// stop with no cancel available: same failure code, same "no Revision", different audit.
+    /// That is deliberate — the difference matters to the operator, not to the control flow.
+    /// </remarks>
+    private async Task<OperationFailure?> StopDuringBusyAsync(
+        IAutomationStopSignal stop,
+        MeituTarget target,
+        MeituOperation operation,
+        string? expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        if (stop.RequestedMode is not { } mode)
+        {
+            return null;
+        }
+
+        AutomationStopResolution resolution = AutomationStopPolicy.Resolve(mode, stop.Phase);
+        if (!resolution.MayProduceAnyInput || !resolution.MayInvokeOperationCancel)
+        {
+            return OperationFailure.Create(
+                FailureCode.Cancelled,
+                mode == AutomationStopMode.TakeOver
+                    ? "The operator took over Meitu while the operation was running. PrintFlow produced no " +
+                      "further input of any kind: nothing was cancelled, dismissed or closed, and Meitu was " +
+                      "left exactly as it was. The operation may still be running and the operator owns it."
+                    : "The operator stopped this operation, and the current phase does not permit PrintFlow " +
+                      "to invoke Meitu's cancel. Orchestration stopped with no further input; the operation " +
+                      "may still be running.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["stopMode"] = mode.ToString(),
+                    ["phase"] = stop.Phase.ToString(),
+                    ["inputSent"] = "false",
+                    ["meituCancelInvoked"] = "false",
+                    ["forceTerminationInvoked"] = "false",
+                });
+        }
+
+        OperationResult<MeituCancelOutcome> cancelled = await CancelRunningOperationAsync(
+            target, operation, expectedWorkingCopyFileName, cancellationToken).ConfigureAwait(false);
+
+        if (cancelled.IsFailure)
+        {
+            // §10. Nothing was invoked and nothing is guessed at. The operator is told plainly
+            // that Meitu may still be working, with the structural reason preserved.
+            Dictionary<string, string> context = new(cancelled.Failure.Context)
+            {
+                ["stopMode"] = mode.ToString(),
+                ["phase"] = stop.Phase.ToString(),
+                ["meituCancelInvoked"] = "false",
+                ["forceTerminationInvoked"] = "false",
+                ["operatorActionRequired"] = "true",
+            };
+
+            return OperationFailure.Create(
+                FailureCode.Cancelled,
+                "The operator stopped this operation, but PrintFlow could not prove Meitu's cancel " +
+                $"control and therefore invoked nothing. {cancelled.Failure.TechnicalDetail} The external " +
+                "operation may still be running and operator action may be required.",
+                isRetryable: true,
+                context: context);
+        }
+
+        stop.ReportOperationCancelled();
+
+        return OperationFailure.Create(
+            FailureCode.Cancelled,
+            "The operator stopped this operation. PrintFlow invoked the signed Meitu cancel control " +
+            $"exactly once; Meitu {(cancelled.Value.LeftBusy ? "positively left its busy state" : "had not left its busy state when PrintFlow stopped observing")}. " +
+            $"The screen was last seen as '{cancelled.Value.StateAfterCancel.State}'. Nothing was exported " +
+            "and no Revision was created.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["stopMode"] = mode.ToString(),
+                ["phase"] = stop.Phase.ToString(),
+                ["meituCancelInvoked"] = "true",
+                ["meituLeftBusy"] = cancelled.Value.LeftBusy ? "true" : "false",
+                ["stateAfterCancel"] = cancelled.Value.StateAfterCancel.State.ToString(),
+                ["exported"] = "false",
+                ["revisionCreated"] = "false",
+                ["forceTerminationInvoked"] = "false",
+            });
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<MeituCancelOutcome>> CancelRunningOperationAsync(
+        MeituTarget target,
+        MeituOperation operation,
+        string? expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(baseline.Failure);
+        }
+
+        // 1. Read the screen first, and read it read-only. Everything that follows rests on
+        //    this one observation: the operation correlation, the control resolution, and the
+        //    "was it Busy before" half of the outcome. Taking it once means the cancel cannot be
+        //    authorised by one reading of the screen and aimed by a different one.
+        //
+        //    It is the fast signed-marker read rather than the full Qt-tree walk, and that is a
+        //    correctness requirement rather than an optimisation. A live D2A Stop against 抠图
+        //    refused with "current-load Busy correlation absent" while the cutout was genuinely
+        //    running: the full walk takes longer than the cutout's whole Busy window, so by the
+        //    time it returned the operation had finished. The refusal was correct — PrintFlow
+        //    could not establish what was running — but it made Stop unusable for the shorter of
+        //    the two operations. Part C1 met the same problem observing Busy and solved it the
+        //    same way.
+        OperationResult<MeituStateSnapshot> busy = await ReadOperationPhaseSnapshotAsync(
+            target, baseline.Value, operation, expectedWorkingCopyFileName, cancellationToken)
+            .ConfigureAwait(false);
+        if (busy.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(busy.Failure);
+        }
+
+        // 2. A Meitu-owned modal over a running operation is §10's "state became Unknown" and
+        //    §20's takeover scenario. PrintFlow does not read it, dismiss it, or click past it
+        //    to reach a cancel that may be underneath it.
+        if (busy.Value.State == MeituStartingState.KnownModal)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(OperationFailure.Create(
+                FailureCode.MeituBlockingDialog,
+                "A dialog owned by Meitu is in front of the running operation. PrintFlow does not " +
+                "dismiss dialogs it cannot identify, so no cancel was invoked. The external operation " +
+                "may still be running and the operator must resolve it.",
+                isRetryable: false,
+                context: CancelContext(operation, busy.Value, "blocking dialog in front of the operation")));
+        }
+
+        // 3. Product eligibility before any tree walk (§7). Refusing here means the walk that
+        //    would have found a control never happens, so a successful resolution can never be
+        //    mistaken for evidence that this operation was the one running.
+        OperationResult<Unit> eligible = MeituBusyCancelRule.Eligible(
+            baseline.Value, operation, busy.Value.Observation);
+        if (eligible.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(eligible.Failure);
+        }
+
+        // 4. Foreground, process and window, immediately before the input — the same guard every
+        //    other input path in this class takes, and for the same reason.
+        OperationResult<MeituTarget> verified = await VerifyTargetAsync(target, cancellationToken)
+            .ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(verified.Failure);
+        }
+
+        OperationResult<UiElementRef> control = FindBusyCancelControl(
+            verified.Value, baseline.Value.BusyCancel!);
+        if (control.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(control.Failure);
+        }
+
+        // 5. Verified once more, deliberately: resolving the control walked the automation tree,
+        //    which takes long enough for the foreground to change underneath it.
+        OperationResult<MeituTarget> stillOurs = await VerifyTargetAsync(verified.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if (stillOurs.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(stillOurs.Failure);
+        }
+
+        OperationResult<Unit> invoked = _elements.Invoke(control.Value);
+        if (invoked.IsFailure)
+        {
+            return OperationResult.Fail<MeituCancelOutcome>(invoked.Failure);
+        }
+
+        // 6. One invocation has happened. From here nothing may produce further input — not on
+        //    timeout, not on an unreadable screen, and not on cancellation of the token. The
+        //    only remaining job is to find out what Meitu did (§9, §11).
+        return await ObserveAfterCancelAsync(
+            stillOurs.Value, baseline.Value, operation, busy.Value, expectedWorkingCopyFileName,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Watches, read-only, for the operation to stop matching its signed Busy signature after
+    /// the single cancel invocation (Epic 11300 Part D2A §11).
+    /// </summary>
+    /// <remarks>
+    /// Reports rather than judges. Leaving Busy is recorded as a fact and the resulting screen
+    /// is recorded as whatever it classifies as — including <c>Unknown</c>, which this slice
+    /// deliberately does not treat as a failure here. §11 forbids assuming a cancelled operation
+    /// returns to <c>KnownEditorWithExpectedWorkingCopy</c>, and the honest consequence is that
+    /// an unrecognised post-cancel screen is a state to report to the operator, not an error to
+    /// raise about a cancel that may well have worked.
+    /// <para>
+    /// The token is observed but never allowed to produce input. A cancelled token stops the
+    /// watching and yields the last state read, because the alternative — throwing — would lose
+    /// the record that a cancel was invoked at all, and that record is what the audit needs
+    /// most (§29).
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<MeituCancelOutcome>> ObserveAfterCancelAsync(
+        MeituTarget target,
+        MeituBaseline baseline,
+        MeituOperation operation,
+        MeituStateSnapshot busyBefore,
+        string? expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.CancelSettleTimeout;
+        MeituStateSnapshot latest = busyBefore;
+
+        while (true)
+        {
+            // The same fast signed-marker read the correlation used, for the same reason: the
+            // question is whether *this* operation's Busy has stopped matching, and a full walk
+            // is both slower than the window being watched and no more informative about it.
+            OperationResult<MeituStateSnapshot> snapshot = await ReadOperationPhaseSnapshotAsync(
+                target, baseline, operation, expectedWorkingCopyFileName, CancellationToken.None)
+                .ConfigureAwait(false);
+
+            if (snapshot.IsSuccess)
+            {
+                latest = snapshot.Value;
+                if (!StillBusy(baseline, operation, latest.Observation))
+                {
+                    return OperationResult.Ok(new MeituCancelOutcome(
+                        operation, busyBefore, LeftBusy: true, latest));
+                }
+            }
+
+            if (cancellationToken.IsCancellationRequested || _clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Ok(new MeituCancelOutcome(
+                    operation, busyBefore, LeftBusy: false, latest));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, CancellationToken.None).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Reads the screen through <b>the same mechanism the named operation's own observation
+    /// loop uses</b>, so the cancel correlates on the terms its markers were signed for
+    /// (Epic 11300 Part D2A §7).
+    /// </summary>
+    /// <remarks>
+    /// The per-operation split is a correctness requirement, discovered the hard way during the
+    /// live D2A Stops, and it is worth stating plainly because it looks like duplication:
+    /// <list type="bullet">
+    ///   <item><b>Background Removal</b> is observed by Part C1's fast exact-name marker query,
+    ///   because its Busy window can be under two seconds and a managed walk of Meitu's whole Qt
+    ///   tree does not reliably return inside it. Its signed markers — 智能识别中, 返回结果中,
+    ///   图片合成中, 取消 — are the exact automation names Meitu reports.</item>
+    ///   <item><b>Enhancement</b> is observed by the full read plus
+    ///   <c>MeituEnhancementRule</c>'s substring matching, because its signed markers are
+    ///   <i>fragments</i>: Meitu's actual automation names are 变清晰中，请稍候… and the longer
+    ///   变清晰时长… sentence, and the evidence records the stable stems rather than the
+    ///   full strings. An exact-name query matches neither, so a fast read of the enhancement
+    ///   markers finds only 取消 — one marker where the signature requires two — and reports
+    ///   "not busy" about an operation that is plainly running.</item>
+    /// </list>
+    /// A first attempt used the fast read for both. It made 抠图 stoppable and quietly made
+    /// 变清晰 unstoppable: every live Stop refused with "current-load Busy correlation absent"
+    /// while the enhancement was visibly in flight. The refusals were safe — nothing was
+    /// invoked — but they were refusals about PrintFlow's own reading rather than about Meitu.
+    /// <para>
+    /// D2A does not change either observation loop; §2 preserves the Enhancement and Background
+    /// Removal success boundaries, and how each detects Busy is part of them. What this method
+    /// does is <i>match</i> them, so the cancel asks the same question the loop just answered.
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<MeituStateSnapshot>> ReadOperationPhaseSnapshotAsync(
+        MeituTarget target,
+        MeituBaseline baseline,
+        MeituOperation operation,
+        string? expectedWorkingCopyFileName,
+        CancellationToken cancellationToken)
+    {
+        if (operation == MeituOperation.RemoveBackground)
+        {
+            if (baseline.BackgroundRemoval is not { } removal)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(
+                    FailureCode.EnvironmentNotVerified,
+                    "The verified preset carries no Background Removal signature, so PrintFlow cannot " +
+                    "establish that it is running. Nothing was cancelled and no input was sent.");
+            }
+
+            return ReadBackgroundRemovalPhaseSnapshot(
+                target, expectedWorkingCopyFileName ?? string.Empty, string.Empty, removal);
+        }
+
+        if (baseline.Enhancement is null)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(
+                FailureCode.EnvironmentNotVerified,
+                "The verified preset carries no Enhancement signature, so PrintFlow cannot establish " +
+                "that it is running. Nothing was cancelled and no input was sent.");
+        }
+
+        return await InspectStateCoreAsync(
+            target, expectedWorkingCopyFileName, observedDocumentIdentity: null, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>Whether the operation's own signed Busy signature still matches.</summary>
+    private static bool StillBusy(
+        MeituBaseline baseline, MeituOperation operation, MeituObservation observation) =>
+        operation == MeituOperation.Enhance
+            ? baseline.Enhancement is { } enhancement && MeituEnhancementRule.IsBusy(enhancement, observation)
+            : baseline.BackgroundRemoval is { } removal &&
+              MeituBackgroundRemovalRule.Classify(removal, observation) == MeituBackgroundRemovalPhase.Busy;
+
+    /// <summary>
+    /// Resolves the one element that may be invoked to cancel, or refuses
+    /// (Epic 11300 Part D2A §8).
+    /// </summary>
+    /// <remarks>
+    /// The query is by exact name beneath the one verified window, which is where a name-based
+    /// approach would <i>stop</i>; here it is only how candidates are gathered. Every candidate
+    /// then goes to <see cref="MeituBusyCancelRule"/> with its walked ancestry, and the rule
+    /// refuses unless exactly one survives the full signed structure. The live decoy this
+    /// separation exists for is the open picker's own Cancel, whose automation name is exactly
+    /// 取消.
+    /// </remarks>
+    private OperationResult<UiElementRef> FindBusyCancelControl(
+        MeituTarget target, MeituBusyCancelSignature signature)
+    {
+        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
+            target.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: signature.Control.Name));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(found.Failure);
+        }
+
+        List<UiElementRef> elements = [];
+        List<MeituBusyCancelCandidate> candidates = [];
+
+        foreach (UiElementRef element in found.Value)
+        {
+            OperationResult<UiElementIdentity> identity = _elements.Describe(element);
+            if (identity.IsFailure)
+            {
+                continue;
+            }
+
+            ImmutableArray<string>.Builder ancestry = ImmutableArray.CreateBuilder<string>();
+            UiElementRef current = element;
+            for (int level = 0; level < signature.RequiredAncestorClassNames.Length; level++)
+            {
+                OperationResult<UiElementRef> parent = _elements.GetParent(current);
+                if (parent.IsFailure)
+                {
+                    break;
+                }
+
+                current = parent.Value;
+                OperationResult<UiElementIdentity> described = _elements.Describe(current);
+                if (described.IsFailure)
+                {
+                    break;
+                }
+
+                ancestry.Add(described.Value.ClassName);
+            }
+
+            elements.Add(element);
+            candidates.Add(new MeituBusyCancelCandidate(identity.Value, ancestry.ToImmutable()));
+        }
+
+        OperationResult<int> chosen = MeituBusyCancelRule.SelectCancelControl(
+            signature, target.Process.ProcessId, candidates);
+
+        return chosen.IsFailure
+            ? OperationResult.Fail<UiElementRef>(chosen.Failure)
+            : OperationResult.Ok(elements[chosen.Value]);
+    }
+
+    private static Dictionary<string, string> CancelContext(
+        MeituOperation operation, MeituStateSnapshot snapshot, string why) => new()
+    {
+        ["operation"] = operation.ToString(),
+        ["reason"] = why,
+        ["state"] = snapshot.State.ToString(),
+        ["inputSent"] = "false",
+        ["meituCancelInvoked"] = "false",
+        ["forceTerminationInvoked"] = "false",
+    };
+
+    /// <inheritdoc />
     public OperationResult<EvidenceRef> CaptureEvidence(MeituTarget target, string reason)
     {
         ArgumentNullException.ThrowIfNull(target);
@@ -1659,9 +2106,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     public async Task<OperationResult<MeituEnhancementOutcome>> RunEnhancementAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(stop);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
 
         // Before anything at all: is there a signed Enhancement route to run? Resolving this
@@ -1699,7 +2148,19 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituEnhancementOutcome>(editor.Failure);
         }
 
-        // §10, §11. The final guard and the one irreversible action.
+        // A stop that arrives before the action is invoked is Part D2A §5: cancel PrintFlow's
+        // own orchestration, produce no Meitu operation input at all, and leave Meitu holding
+        // nothing from this attempt. Checked here rather than only in the wait loop because
+        // this is the last moment at which "no operation input" is still true.
+        if (StopBeforeOperation(stop) is { } stoppedEarly)
+        {
+            return OperationResult.Fail<MeituEnhancementOutcome>(stoppedEarly);
+        }
+
+        // §10, §11. The final guard and the one irreversible action. The phase moves before the
+        // invoke, not after it: if the process dies between the two, the honest record is that
+        // an operation may have been requested, never that none was.
+        stop.ReportPhase(ExternalOperationPhase.OperationRequested);
         OperationResult<MeituTarget> invoked = await InvokeEnhancementAsync(
             editor.Value, expectedWorkingCopyFileName, identity, signature.Value, cancellationToken)
             .ConfigureAwait(false);
@@ -1719,6 +2180,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             signature.Value,
             MeituEnhancementPhase.Busy,
             _options.EnhancementBusyTimeout,
+            stop,
             cancellationToken).ConfigureAwait(false);
         if (busy.IsFailure)
         {
@@ -1734,11 +2196,16 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             signature.Value,
             MeituEnhancementPhase.Complete,
             _options.EnhancementCompletionTimeout,
+            stop,
             cancellationToken).ConfigureAwait(false);
         if (complete.IsFailure)
         {
             return OperationResult.Fail<MeituEnhancementOutcome>(complete.Failure);
         }
+
+        // §13. Processing has finished and nothing has been exported. From here a Stop means
+        // "do not export" and nothing more — the result Meitu is holding stays where it is.
+        stop.ReportPhase(ExternalOperationPhase.CompletedBeforeExport);
 
         // §15. The same signed probe again. It has to be the same route rather than a cheaper
         // re-read, because the claim being made is the same claim: this is exactly the document
@@ -1774,9 +2241,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         MeituTarget target,
         string expectedWorkingCopyFileName,
         BackgroundRemovalDecision modeDecision,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(stop);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
 
         OperationResult<MeituBackgroundRemovalSignature> signature = BackgroundRemovalSignature();
@@ -1833,6 +2302,14 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(editor.Failure);
         }
 
+        // §5, as on the Enhancement route: a stop that arrives before the 抠图 page is entered
+        // leaves Meitu holding nothing from this attempt.
+        if (StopBeforeOperation(stop) is { } stoppedEarly)
+        {
+            return OperationResult.Fail<MeituBackgroundRemovalOutcome>(stoppedEarly);
+        }
+
+        stop.ReportPhase(ExternalOperationPhase.OperationRequested);
         OperationResult<MeituTarget> invoked = await InvokeBackgroundRemovalAsync(
             editor.Value,
             expectedWorkingCopyFileName,
@@ -1851,6 +2328,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             signature.Value,
             MeituBackgroundRemovalPhase.Busy,
             _options.BackgroundRemovalBusyTimeout,
+            stop,
             cancellationToken).ConfigureAwait(false);
         if (busy.IsFailure)
         {
@@ -1864,11 +2342,16 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             signature.Value,
             MeituBackgroundRemovalPhase.Complete,
             _options.BackgroundRemovalCompletionTimeout,
+            stop,
             cancellationToken).ConfigureAwait(false);
         if (completion.IsFailure)
         {
             return OperationResult.Fail<MeituBackgroundRemovalOutcome>(completion.Failure);
         }
+
+        // §13. The cutout exists inside Meitu and nothing has been written. A stop from here
+        // means do not export — the 调整 return below is navigation, not output.
+        stop.ReportPhase(ExternalOperationPhase.CompletedBeforeExport);
 
         OperationResult<MeituTarget> returned = await InvokeBackgroundRemovalReturnAsync(
             invoked.Value, signature.Value, cancellationToken).ConfigureAwait(false);
@@ -2057,6 +2540,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         MeituBackgroundRemovalSignature signature,
         MeituBackgroundRemovalPhase wanted,
         TimeSpan timeout,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
@@ -2076,6 +2560,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
             if (snapshot.Value.State == MeituStartingState.KnownModal)
             {
+                // §20. Recorded before the refusal, so a takeover requested a moment later
+                // resolves against the blocked screen rather than the last happy phase.
+                stop.ReportPhase(ExternalOperationPhase.UnknownOrBlocked);
                 return OperationResult.Fail<MeituStateSnapshot>(
                     FailureCode.MeituBlockingDialog,
                     "A Meitu-owned modal appeared during Background Removal. It was not dismissed and no " +
@@ -2083,6 +2570,21 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             }
 
             last = MeituBackgroundRemovalRule.Classify(signature, snapshot.Value.Observation);
+
+            if (last == MeituBackgroundRemovalPhase.Busy)
+            {
+                stop.ReportPhase(ExternalOperationPhase.Busy);
+            }
+
+            // §9, checked while Busy is still true — the only phase in which the signed cancel
+            // is eligible.
+            if (await StopDuringBusyAsync(
+                    stop, target, MeituOperation.RemoveBackground, expectedWorkingCopyFileName,
+                    cancellationToken).ConfigureAwait(false) is { } stopped)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(stopped);
+            }
+
             if (last == wanted)
             {
                 if (wanted == MeituBackgroundRemovalPhase.Busy)
@@ -2473,6 +2975,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         MeituEnhancementSignature signature,
         MeituEnhancementPhase wanted,
         TimeSpan timeout,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
@@ -2494,6 +2997,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             // through. PrintFlow does not read it, dismiss it or click it (§19).
             if (snapshot.Value.State == MeituStartingState.KnownModal)
             {
+                // §20. The phase becomes UnknownOrBlocked before the failure is built, so a
+                // takeover requested a moment later resolves against what is actually on screen
+                // rather than against the last phase PrintFlow was happy about.
+                stop.ReportPhase(ExternalOperationPhase.UnknownOrBlocked);
                 return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                     FailureCode.MeituBlockingDialog,
                     "A dialog owned by Meitu appeared while Enhancement was being observed. PrintFlow does " +
@@ -2511,6 +3018,25 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             }
 
             lastPhase = MeituEnhancementRule.Classify(signature, snapshot.Value.Observation);
+
+            // Reported from what was just read rather than from where the code has got to. This
+            // is the value AutomationStopPolicy resolves against, so it has to describe Meitu
+            // and not PrintFlow's position in the sequence (§4).
+            if (lastPhase == MeituEnhancementPhase.Busy)
+            {
+                stop.ReportPhase(ExternalOperationPhase.Busy);
+            }
+
+            // §9. Checked after the phase is reported and before the wanted-state return, so a
+            // Stop that arrives during Busy is honoured while Busy is still true — which is the
+            // only phase in which the signed cancel is eligible at all.
+            if (await StopDuringBusyAsync(
+                    stop, target, MeituOperation.Enhance, expectedWorkingCopyFileName, cancellationToken)
+                .ConfigureAwait(false) is { } stopped)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(stopped);
+            }
+
             if (lastPhase == wanted)
             {
                 return snapshot;
@@ -2519,6 +3045,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             if (lastPhase == MeituEnhancementPhase.Unobserved &&
                 snapshot.Value.State == MeituStartingState.Unknown)
             {
+                stop.ReportPhase(ExternalOperationPhase.UnknownOrBlocked);
                 return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                     FailureCode.MeituUnknownState,
                     "Meitu changed to an unrecognised editor state while Enhancement was being " +
@@ -2633,9 +3160,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         string expectedWorkingCopyFileName,
         string observedDocumentIdentity,
         string destinationAbsolutePath,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(stop);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
         ArgumentException.ThrowIfNullOrWhiteSpace(observedDocumentIdentity);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationAbsolutePath);
@@ -2667,6 +3196,14 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituExportEvidence>(editor.Failure);
         }
 
+        // §13. The last moment at which "no export has started" is still true. A stop here means
+        // exactly what §13 says it means — do not export — and the processed result Meitu is
+        // holding is left alone rather than discarded.
+        if (StopBeforeExport(stop) is { } stoppedBeforeExport)
+        {
+            return OperationResult.Fail<MeituExportEvidence>(stoppedBeforeExport);
+        }
+
         OperationResult<Unit> raised = await InvokeKnownElementAsync(
             editor.Value, KnownMeituElement.EditorSaveControl, cancellationToken).ConfigureAwait(false);
         if (raised.IsFailure)
@@ -2681,9 +3218,51 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituExportEvidence>(surface.Failure);
         }
 
+        // §14. A save surface is now open and nothing irreversible has happened. From here a
+        // stop prefers the signed cancel route this validated export already contains, rather
+        // than walking away and leaving a modal blocking the editor.
+        stop.ReportPhase(ExternalOperationPhase.ExportPrepared);
+
         return await DriveExportSurfaceAsync(
-            editor.Value, surface.Value, signature.Value, destination.Value, cancellationToken)
+            editor.Value, surface.Value, signature.Value, destination.Value, stop, cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The refusal for a Stop that arrived after processing finished but before any export
+    /// input (Epic 11300 Part D2A §13), or <c>null</c> when no stop is pending.
+    /// </summary>
+    /// <remarks>
+    /// Note what this deliberately does <b>not</b> do: it does not close the document, does not
+    /// undo the operation, and does not attempt to discard the processed result. §13 permits
+    /// exactly one thing here — not exporting — and the retained result is reported rather than
+    /// tidied away, because discarding an operator's processed image is a separate, signed,
+    /// explicitly requested action that this slice does not have.
+    /// </remarks>
+    private static OperationFailure? StopBeforeExport(IAutomationStopSignal stop)
+    {
+        if (stop.RequestedMode is not { } mode)
+        {
+            return null;
+        }
+
+        return OperationFailure.Create(
+            FailureCode.Cancelled,
+            $"The operator requested '{mode}' after processing finished and before the export began. " +
+            "PrintFlow exported nothing and created no Revision. Meitu may still be holding the " +
+            "processed result; PrintFlow has not discarded it and has not saved it.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["stopMode"] = mode.ToString(),
+                ["phase"] = ExternalOperationPhase.CompletedBeforeExport.ToString(),
+                ["inputSent"] = "false",
+                ["exported"] = "false",
+                ["revisionCreated"] = "false",
+                ["meituCancelInvoked"] = "false",
+                ["forceTerminationInvoked"] = "false",
+                ["retainedExternalState"] = RetainedExternalState.ProcessedResultRetained.ToString(),
+            });
     }
 
     /// <summary>
@@ -2708,12 +3287,24 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         ExternalWindowRef surface,
         MeituExportSignature signature,
         MeituExportDestination destination,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         OperationResult<ExternalWindowRef> verified = VerifyExportSurface(target, surface.Handle, signature);
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        // §14. The save surface is open and nothing has been confirmed. Backing out uses the
+        // signed cancel that is already part of this validated route — the same control a
+        // read-back failure would use — so the operator is not left with a modal over the
+        // editor. This is the one place where a stop legitimately produces input, and it
+        // produces the input that writes nothing.
+        if (StopBeforeExportConfirm(stop) is { } stoppedAtSurface)
+        {
+            return await CancelExportSurfaceAsync<MeituExportEvidence>(
+                target, surface, stoppedAtSurface, cancellationToken).ConfigureAwait(false);
         }
 
         // Format first, because it is the check most likely to refuse and the one §11 will not
@@ -2768,8 +3359,44 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         }
 
         return await ConfirmDestinationAsync(
-            target, dialog.Value, signature, destination, format.Value, baseName.Value, cancellationToken)
-            .ConfigureAwait(false);
+            target, dialog.Value, signature, destination, format.Value, baseName.Value, stop,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The refusal for a Stop that arrived while an export surface or destination dialog is
+    /// open and nothing irreversible has happened (Epic 11300 Part D2A §14).
+    /// </summary>
+    /// <remarks>
+    /// Returned to a caller that will back out through the signed cancel for that exact
+    /// surface, which is why this method produces only the failure and never the input: keeping
+    /// "what to say" separate from "which control to press" is what stops a future edit from
+    /// reaching for a cancel on a surface whose signed route has not been established.
+    /// </remarks>
+    private static OperationFailure? StopBeforeExportConfirm(IAutomationStopSignal stop)
+    {
+        if (stop.RequestedMode is not { } mode)
+        {
+            return null;
+        }
+
+        return OperationFailure.Create(
+            FailureCode.Cancelled,
+            $"The operator requested '{mode}' with Meitu's save surface open and before the " +
+            "irreversible confirm. PrintFlow backed out through the signed cancel control for that " +
+            "exact surface: no confirm was invoked, no file was written and no Revision was created.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["stopMode"] = mode.ToString(),
+                ["phase"] = ExternalOperationPhase.ExportPrepared.ToString(),
+                ["confirmInvoked"] = "false",
+                ["exported"] = "false",
+                ["revisionCreated"] = "false",
+                ["meituCancelInvoked"] = "false",
+                ["forceTerminationInvoked"] = "false",
+                ["retainedExternalState"] = RetainedExternalState.ProcessedResultRetained.ToString(),
+            });
     }
 
     /// <summary>
@@ -2783,6 +3410,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         MeituExportDestination destination,
         string confirmedFormat,
         string confirmedBaseName,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         MeituExportDestinationSignature shape = signature.Destination;
@@ -2791,6 +3419,15 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         if (verified.IsFailure)
         {
             return OperationResult.Fail<MeituExportEvidence>(verified.Failure);
+        }
+
+        // §14 again, on the destination dialog this time. Its signed cancel is part of the same
+        // validated route, so a stop that arrives here also leaves the screen unblocked and the
+        // filesystem untouched.
+        if (StopBeforeExportConfirm(stop) is { } stoppedAtDialog)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, stoppedAtDialog, cancellationToken).ConfigureAwait(false);
         }
 
         OperationResult<UiElementRef> field = FindDestinationControl(
@@ -2849,9 +3486,24 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 target, dialog, shape, confirm.Failure, cancellationToken).ConfigureAwait(false);
         }
 
+        // §14, last chance. A stop that arrived while the confirm control was being located
+        // still backs out through the signed cancel rather than confirming: the check is here,
+        // immediately before the invocation, because that is the only position from which it
+        // can be true that no confirm happened.
+        if (StopBeforeExportConfirm(stop) is { } stoppedAtConfirm)
+        {
+            return await CancelDestinationAsync<MeituExportEvidence>(
+                target, dialog, shape, stoppedAtConfirm, cancellationToken).ConfigureAwait(false);
+        }
+
         // This is the irreversible export input. A cancellation observed here must win over a
         // confirm prepared earlier; D1 never issues delayed input after cancellation.
         cancellationToken.ThrowIfCancellationRequested();
+
+        // §15. Reported before the invoke, never after. If PrintFlow dies between the two, the
+        // honest record is that a write may have been confirmed — and a later Stop resolving
+        // against this phase correctly refuses to claim it can cancel a filesystem write.
+        stop.ReportPhase(ExternalOperationPhase.ExportConfirmed);
 
         OperationResult<Unit> invoked = _elements.Invoke(confirm.Value);
         if (invoked.IsFailure)

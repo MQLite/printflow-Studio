@@ -3,6 +3,8 @@ using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Tests.Fixtures;
 
+using PrintFlow.Workflow.Ports;
+
 namespace PrintFlow.Tests.Integration.Automation;
 
 /// <summary>
@@ -109,7 +111,7 @@ public sealed class MeituLoadObservationTests
         Scenario s = Build(Idle(), Idle(), Idle());
 
         OperationResult<MeituLoadObservation> load =
-            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         load.IsSuccess.ShouldBeTrue();
         load.Value.PhaseAtOpen.ShouldBe(MeituEnhancementPhase.Unobserved);
@@ -133,7 +135,7 @@ public sealed class MeituLoadObservationTests
         Scenario s = Build(Busy(), Busy(), Busy(), Panel());
 
         OperationResult<MeituLoadObservation> load =
-            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         load.IsSuccess.ShouldBeTrue(load.IsFailure ? load.Failure.TechnicalDetail : string.Empty);
         load.Value.PhaseAtOpen.ShouldBe(MeituEnhancementPhase.Busy);
@@ -159,7 +161,7 @@ public sealed class MeituLoadObservationTests
         Scenario s = Build(Panel(), Panel(), Busy(), Busy(), Panel());
 
         OperationResult<MeituLoadObservation> load =
-            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         load.IsSuccess.ShouldBeTrue(load.IsFailure ? load.Failure.TechnicalDetail : string.Empty);
         load.Value.PhaseAtOpen.ShouldBe(MeituEnhancementPhase.Complete);
@@ -181,7 +183,7 @@ public sealed class MeituLoadObservationTests
         Scenario s = Build(Panel(), Panel(), Panel(), Panel(), Panel(), Panel(), Panel(), Panel());
 
         OperationResult<MeituLoadObservation> load =
-            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         load.IsSuccess.ShouldBeTrue();
         load.Value.PhaseAtOpen.ShouldBe(MeituEnhancementPhase.Complete);
@@ -201,7 +203,7 @@ public sealed class MeituLoadObservationTests
         Scenario s = Build(Busy());
 
         OperationResult<MeituLoadObservation> load =
-            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         load.IsFailure.ShouldBeTrue();
         load.Failure.Context["exported"].ShouldBe("false");
@@ -247,7 +249,8 @@ public sealed class MeituLoadObservationTests
             new StubMeituBaselineProvider(MeituFakes.Baseline()), FastOptions, TimeProvider.System);
 
         OperationResult<MeituLoadObservation> load = await driver.ObserveLoadedDocumentAsync(
-            new MeituTarget(process, editor), ExpectedFile, CancellationToken.None);
+            new MeituTarget(process, editor), ExpectedFile, InertAutomationStopSignal.Instance,
+            CancellationToken.None);
 
         load.IsSuccess.ShouldBeTrue(load.IsFailure ? load.Failure.TechnicalDetail : string.Empty);
         load.Value.AutoStartedEnhancement.ShouldBeFalse();
@@ -272,7 +275,8 @@ public sealed class MeituLoadObservationTests
             FastOptions, TimeProvider.System);
 
         OperationResult<MeituLoadObservation> load = await driver.ObserveLoadedDocumentAsync(
-            new MeituTarget(process, editor), ExpectedFile, CancellationToken.None);
+            new MeituTarget(process, editor), ExpectedFile, InertAutomationStopSignal.Instance,
+            CancellationToken.None);
 
         load.IsFailure.ShouldBeTrue();
         elements.Invocations.ShouldBeEmpty();
@@ -286,7 +290,7 @@ public sealed class MeituLoadObservationTests
         await cancelled.CancelAsync();
 
         await Should.ThrowAsync<OperationCanceledException>(() =>
-            s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, cancelled.Token));
+            s.Driver.ObserveLoadedDocumentAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, cancelled.Token));
 
         s.Elements.Invocations.ShouldBeEmpty();
         s.Input.Sends.ShouldBeEmpty();

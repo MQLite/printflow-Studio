@@ -4,6 +4,8 @@ using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Tests.Fixtures;
 
+using PrintFlow.Workflow.Ports;
+
 namespace PrintFlow.Tests.Integration.Automation;
 
 /// <summary>
@@ -183,7 +185,7 @@ public sealed class GuardedMeituExportTests
 
     private Task<OperationResult<MeituExportEvidence>> ExportAsync(Scenario s, string? destination = null) =>
         s.Driver.ExportResultAsync(
-            s.Editor, ExpectedFile, ExpectedIdentity, destination ?? Destination(), CancellationToken.None);
+            s.Editor, ExpectedFile, ExpectedIdentity, destination ?? Destination(), InertAutomationStopSignal.Instance, CancellationToken.None);
 
     // -----------------------------------------------------------------------------
     // The whole route, once
@@ -304,7 +306,7 @@ public sealed class GuardedMeituExportTests
         Scenario s = Build();
 
         OperationResult<MeituExportEvidence> export = await s.Driver.ExportResultAsync(
-            s.Editor, ExpectedFile, ExpectedIdentity, "Working/A_1/a_HD.png", CancellationToken.None);
+            s.Editor, ExpectedFile, ExpectedIdentity, "Working/A_1/a_HD.png", InertAutomationStopSignal.Instance, CancellationToken.None);
 
         export.IsFailure.ShouldBeTrue();
         s.Elements.Invocations.ShouldBeEmpty();
@@ -549,7 +551,7 @@ public sealed class GuardedMeituExportTests
         await cancelled.CancelAsync();
 
         await Should.ThrowAsync<OperationCanceledException>(() => s.Driver.ExportResultAsync(
-            s.Editor, ExpectedFile, ExpectedIdentity, Destination(), cancelled.Token));
+            s.Editor, ExpectedFile, ExpectedIdentity, Destination(), InertAutomationStopSignal.Instance, cancelled.Token));
 
         s.Invocations(DestinationConfirmId).ShouldBe(0);
         s.Elements.ValueWrites.ShouldBeEmpty();

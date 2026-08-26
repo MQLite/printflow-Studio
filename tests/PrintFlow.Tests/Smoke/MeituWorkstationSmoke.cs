@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
@@ -11,6 +12,7 @@ using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 using FileWorkspace = PrintFlow.Infrastructure.Workspace.FileWorkspace;
 
 namespace PrintFlow.Tests.Smoke;
@@ -66,6 +68,36 @@ public sealed class MeituWorkstationSmoke
     private const string PresetSha256Variable = "PRINTFLOW_MEITU_SMOKE_PRESET_SHA256";
     private const string EnableExportVariable = "PRINTFLOW_MEITU_SMOKE_EXPORT";
     private const string EnableCloseVariable = "PRINTFLOW_MEITU_SMOKE_CLOSE";
+
+    /// <summary>
+    /// Reads the Busy screen while an operation is genuinely in flight, so the actionable owner
+    /// of the 取消 marker can be established structurally (Epic 11300 Part D2A §6).
+    /// </summary>
+    /// <remarks>
+    /// Read-only throughout, and separate from every switch above precisely because it is: it
+    /// invokes the operation being observed (which the enhance/background switches already
+    /// gate) and then only <i>looks</i>. It never invokes the cancel it is discovering — §6
+    /// forbids clicking until the structure is proven, and this run is what produces the proof.
+    /// </remarks>
+    private const string EnableCancelDiscoveryVariable = "PRINTFLOW_MEITU_SMOKE_CANCEL_DISCOVERY";
+
+    /// <summary>
+    /// Which operation the Busy-cancel discovery and the supervised Stop drive:
+    /// <c>enhance</c> or <c>background</c>.
+    /// </summary>
+    private const string CancelOperationVariable = "PRINTFLOW_MEITU_SMOKE_CANCEL_OPERATION";
+
+    /// <summary>
+    /// Allows the supervised live Stop: one guarded invocation of the resolved, signed cancel
+    /// control while the operation is positively Busy (Epic 11300 Part D2A §33).
+    /// </summary>
+    private const string EnableStopVariable = "PRINTFLOW_MEITU_SMOKE_STOP";
+
+    /// <summary>
+    /// Allows the supervised live Take Over: the operation is started and then abandoned with
+    /// zero further PrintFlow input (Epic 11300 Part D2A §34).
+    /// </summary>
+    private const string EnableTakeOverVariable = "PRINTFLOW_MEITU_SMOKE_TAKEOVER";
 
     [Fact]
     public async Task Locate_identify_and_classify_the_workstation_Meitu()
@@ -188,7 +220,7 @@ public sealed class MeituWorkstationSmoke
             // the image; deleting a file while Meitu holds it is not a safe cleanup strategy.
             mayStillBeLoaded = true;
             OperationResult<MeituOpenedWorkingCopy> opened =
-                await foundation.OpenWorkingCopyAsync(workingCopy, CancellationToken.None);
+                await foundation.OpenWorkingCopyAsync(workingCopy, InertAutomationStopSignal.Instance, CancellationToken.None);
 
             if (opened.IsFailure)
             {
@@ -233,6 +265,7 @@ public sealed class MeituWorkstationSmoke
                         opened.Value,
                         workingCopy,
                         BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                        InertAutomationStopSignal.Instance,
                         CancellationToken.None);
                 if (removed.IsFailure)
                 {
@@ -274,7 +307,7 @@ public sealed class MeituWorkstationSmoke
             DescribeEnhancementTarget(opened.Value.Target, baseline.Value, Log);
 
             OperationResult<MeituEnhancementOutcome> enhanced = await foundation.EnhanceAsync(
-                opened.Value, workingCopy, CancellationToken.None);
+                opened.Value, workingCopy, InertAutomationStopSignal.Instance, CancellationToken.None);
 
             if (enhanced.IsFailure)
             {
@@ -318,7 +351,8 @@ public sealed class MeituWorkstationSmoke
             Log($"source facts         : {Describe(sourceFacts.Value)}");
 
             OperationResult<MeituExportedOutput> exported = await foundation.ExportEnhancedResultAsync(
-                enhanced.Value, workingCopy, sourceFacts.Value, output, CancellationToken.None);
+                enhanced.Value, workingCopy, sourceFacts.Value, output,
+                InertAutomationStopSignal.Instance, CancellationToken.None);
 
             if (exported.IsFailure)
             {
@@ -1292,6 +1326,418 @@ public sealed class MeituWorkstationSmoke
             CleanUp(root, evidenceDirectory, mayStillBeLoaded);
         }
     }
+
+    /// <summary>
+    /// Establishes, live and read-only, what the 取消 affordance actually is while an operation
+    /// is Busy (Epic 11300 Part D2A §6, §7).
+    /// </summary>
+    /// <remarks>
+    /// The observation cannot be taken any other way. The cancel affordance exists only while
+    /// the operation is running, so a static walk of the editor never sees it — which is why
+    /// this drives one real operation and then watches, rather than inspecting a screenshot or
+    /// reasoning from the Enhancement evidence's Busy marker list.
+    /// <para>
+    /// It invokes nothing it discovers. §6 is explicit that the cancel must not be clicked until
+    /// it is structurally proven, and the whole purpose of this run is to produce that proof; a
+    /// discovery pass that also clicked would have proven nothing and cancelled something. The
+    /// supervised Stop that does invoke it is a separate switch and a separate run (§33).
+    /// </para>
+    /// <para>
+    /// It polls concurrently with the operation rather than after it. Both the Enhancement and
+    /// the Background Removal routes block until completion, and by the time they return the
+    /// affordance has already gone — the Enhancement evidence records 取消 disappearing
+    /// together with the progress text. The concurrent read is <c>FindAll</c>/<c>Describe</c>
+    /// only: it produces no input, so it cannot disturb the run it is watching.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Discover_the_busy_cancel_control_while_an_operation_is_running()
+    {
+        if (Environment.GetEnvironmentVariable(EnableCancelDiscoveryVariable) != "1")
+        {
+            return;
+        }
+
+        StringBuilder transcript = new();
+        void Log(string line)
+        {
+            transcript.AppendLine(line);
+            Console.WriteLine(line);
+        }
+
+        string root = Path.Combine(Path.GetTempPath(), "PrintFlowMeituSmoke", Guid.NewGuid().ToString("N"));
+        string evidenceDirectory = Path.Combine(root, "Evidence");
+        bool mayStillBeLoaded = false;
+        bool background = string.Equals(
+            Environment.GetEnvironmentVariable(CancelOperationVariable), "background", StringComparison.OrdinalIgnoreCase);
+
+        try
+        {
+            Log($"# Meitu Busy-cancel discovery — {DateTimeOffset.Now:O}");
+            Log($"operation            : {(background ? "Background Removal (抠图)" : "Enhancement (AI变清晰)")}");
+            Log("mode                 : READ-ONLY discovery. The cancel affordance is never invoked here.");
+
+            PrintFlowConfiguration configuration =
+                PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            PresetMeituBaselineProvider baselines = new(manifest, expected);
+            OperationResult<MeituBaseline> baseline = baselines.GetVerifiedBaseline();
+            if (baseline.IsFailure)
+            {
+                Log($"baseline             : REFUSED — {baseline.Failure.Code}");
+                return;
+            }
+
+            (string workingCopyPath, WorkspaceFileRef workingCopy, IWorkspace workspace) = background
+                ? PrepareOpaqueBackgroundRemovalWorkingCopy(root)
+                : PrepareSyntheticWorkingCopy(root);
+            Log($"synthetic working copy: {workingCopyPath}");
+
+            IMeituAutomationFoundation foundation = MeituAutomationComposition.CreateFoundation(
+                manifest, expected, workspace, evidenceDirectory, TimeProvider.System);
+
+            OperationResult<MeituReadiness> ready = await foundation.EnsureReadyAsync(CancellationToken.None);
+            if (ready.IsFailure)
+            {
+                Log($"readiness            : STOPPED — {ready.Failure.Code}");
+                Log($"detail               : {ready.Failure.TechnicalDetail}");
+                return;
+            }
+
+            Log($"state                : {ready.Value.State.State}");
+
+            Log(string.Empty);
+            Log("## Busy observation (read-only, concurrent with the whole run)");
+            Log("The watcher starts before the open, because Meitu keeps the selected module across");
+            Log("document loads and can therefore begin work with no PrintFlow input at all — an");
+            Log("auto-started run shows the same 取消 affordance and must be observed too.");
+
+            using CancellationTokenSource watching = new();
+            Task<int> watcher = Task.Run(
+                () => WatchBusyCancelAsync(ready.Value.Target, Log, watching.Token), watching.Token);
+
+            mayStillBeLoaded = true;
+            OperationResult<MeituOpenedWorkingCopy> opened =
+                await foundation.OpenWorkingCopyAsync(workingCopy, InertAutomationStopSignal.Instance, CancellationToken.None);
+
+            OperationResult<PrintFlow.Domain.Results.Unit> ran;
+            if (opened.IsFailure)
+            {
+                Log($"open                 : REFUSED — {opened.Failure.Code}");
+                Log($"detail               : {opened.Failure.TechnicalDetail}");
+                ran = OperationResult.Fail<PrintFlow.Domain.Results.Unit>(opened.Failure);
+            }
+            else
+            {
+                Log($"opened identity      : {opened.Value.State.Observation.ObservedDocumentIdentity}");
+                ran = background
+                    ? Discard(await foundation.RemoveBackgroundAsync(
+                        opened.Value,
+                        workingCopy,
+                        BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                        InertAutomationStopSignal.Instance,
+                        CancellationToken.None))
+                    : Discard(await foundation.EnhanceAsync(
+                        opened.Value, workingCopy, InertAutomationStopSignal.Instance,
+                        CancellationToken.None));
+            }
+
+            await watching.CancelAsync();
+            int samples = await watcher;
+
+            Log(string.Empty);
+            Log($"operation outcome    : {(ran.IsSuccess ? "completed" : $"STOPPED — {ran.Failure.Code}")}");
+            if (ran.IsFailure)
+            {
+                Log($"detail               : {ran.Failure.TechnicalDetail}");
+            }
+
+            Log($"busy samples with 取消: {samples}");
+            Log("STOP                 : nothing was cancelled, exported or closed by this run.");
+        }
+        finally
+        {
+            WriteTranscript(transcript.ToString());
+            CleanUp(root, evidenceDirectory, mayStillBeLoaded);
+        }
+    }
+
+    /// <summary>
+    /// Polls, read-only, for every element named exactly 取消 beneath the verified window and
+    /// records its control-view ancestry (Epic 11300 Part D2A §6).
+    /// </summary>
+    /// <remarks>
+    /// Exact-name matching rather than the substring sweep the C1 discovery used. The question
+    /// here is narrower and the looser match would answer a different one: §8 forbids resolving
+    /// a cancel by substring, so the discovery that will justify the signed rule matches the way
+    /// the rule will.
+    /// <para>
+    /// Ancestry is recorded to depth 4, which is one level deeper than the ModuleButton walk
+    /// needs, so the evidence shows what is <i>above</i> the actionable owner as well — the
+    /// thing that distinguishes a cancel belonging to the operation's own progress panel from
+    /// one belonging to some other surface.
+    /// </para>
+    /// </remarks>
+    private static async Task<int> WatchBusyCancelAsync(
+        MeituTarget target, Action<string> log, CancellationToken cancellationToken)
+    {
+        UiaElementProvider elements = new();
+        HashSet<string> reported = new(StringComparer.Ordinal);
+        int samples = 0;
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            OperationResult<IReadOnlyList<UiElementRef>> found = elements.FindAll(
+                target.Window.Handle, new UiElementQuery(UiControlKind.Any, Name: "取消"));
+
+            if (found.IsSuccess && found.Value.Count > 0)
+            {
+                samples++;
+                for (int index = 0; index < found.Value.Count; index++)
+                {
+                    List<string> ancestry = [];
+                    UiElementRef current = found.Value[index];
+                    for (int depth = 0; depth <= 4; depth++)
+                    {
+                        OperationResult<UiElementIdentity> identity = elements.Describe(current);
+                        if (identity.IsFailure)
+                        {
+                            ancestry.Add($"depth {depth}: UNREADABLE — {identity.Failure.Code}");
+                            break;
+                        }
+
+                        UiElementIdentity value = identity.Value;
+                        ancestry.Add(
+                            $"depth {depth}: {value}; patterns=" +
+                            $"{(value.SupportedPatterns.IsDefaultOrEmpty ? "(none)" : string.Join(", ", value.SupportedPatterns))}; " +
+                            $"enabled={value.IsEnabled}; offscreen={value.IsOffscreen}; bounds={value.Bounds}");
+
+                        OperationResult<UiElementRef> parent = elements.GetParent(current);
+                        if (parent.IsFailure)
+                        {
+                            break;
+                        }
+
+                        current = parent.Value;
+                    }
+
+                    string key = string.Join("\n", ancestry);
+                    if (reported.Add(key))
+                    {
+                        log($"  cancel candidate [{index}] — first seen at sample {samples}");
+                        foreach (string line in ancestry)
+                        {
+                            log($"    {line}");
+                        }
+                    }
+                }
+            }
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+        }
+
+        return samples;
+    }
+
+    /// <summary>
+    /// The supervised live Stop and the supervised live Take Over
+    /// (Epic 11300 Part D2A §33, §34).
+    /// </summary>
+    /// <remarks>
+    /// One method for both because the arrangement is identical and only the requested mode
+    /// differs — which is itself the thing being demonstrated: the operator's two controls reach
+    /// the same seam and the difference in what happens is entirely the policy's doing.
+    /// <list type="bullet">
+    ///   <item><b>Stop</b> (§33): the operation is driven to positively observed Busy, one
+    ///   guarded invocation of the exact signed cancel is produced, and Busy is watched for
+    ///   exit. No export, no Revision, and Meitu is never killed.</item>
+    ///   <item><b>Take Over</b> (§34): the operation is started and then abandoned with
+    ///   <i>zero</i> further PrintFlow input. Meitu is left running and the operator owns it;
+    ///   the smoke does not require anyone to finish the image.</item>
+    /// </list>
+    /// <para>
+    /// The stop is requested through the real <see cref="AutomationRunRegistry"/> rather than by
+    /// setting a flag directly, so what is exercised is the production channel an operator's
+    /// button press actually takes. It is requested from a watcher task once the adapter reports
+    /// Busy, which is how it arrives while the run is in flight rather than before it.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Supervised_live_stop_or_take_over_of_a_running_operation()
+    {
+        bool stop = Environment.GetEnvironmentVariable(EnableStopVariable) == "1";
+        bool takeOver = Environment.GetEnvironmentVariable(EnableTakeOverVariable) == "1";
+        if (!stop && !takeOver)
+        {
+            return;
+        }
+
+        AutomationStopMode mode = stop ? AutomationStopMode.StopOperation : AutomationStopMode.TakeOver;
+        bool background = string.Equals(
+            Environment.GetEnvironmentVariable(CancelOperationVariable), "background",
+            StringComparison.OrdinalIgnoreCase);
+
+        StringBuilder transcript = new();
+        void Log(string line)
+        {
+            transcript.AppendLine(line);
+            Console.WriteLine(line);
+        }
+
+        string root = Path.Combine(Path.GetTempPath(), "PrintFlowMeituSmoke", Guid.NewGuid().ToString("N"));
+        string evidenceDirectory = Path.Combine(root, "Evidence");
+        bool mayStillBeLoaded = false;
+
+        try
+        {
+            Log($"# Meitu supervised {mode} smoke — {DateTimeOffset.Now:O}");
+            Log($"operation            : {(background ? "Background Removal (抠图)" : "Enhancement (AI变清晰)")}");
+            Log($"mode                 : {mode}");
+            Log(mode == AutomationStopMode.TakeOver
+                ? "expectation          : ZERO further PrintFlow input after the request. Nothing cancelled."
+                : "expectation          : exactly ONE guarded invocation of the signed cancel. Nothing killed.");
+
+            PrintFlowConfiguration configuration =
+                PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+            (string manifest, Sha256 expected) = PresetForSmoke(configuration);
+            PresetMeituBaselineProvider baselines = new(manifest, expected);
+            OperationResult<MeituBaseline> baseline = baselines.GetVerifiedBaseline();
+            if (baseline.IsFailure)
+            {
+                Log($"baseline             : REFUSED — {baseline.Failure.Code}");
+                return;
+            }
+
+            Log($"signed cancel        : {(baseline.Value.BusyCancel is { } signed ? $"{signed.Control.ControlTypeName}/{signed.Control.ClassName} id~'{signed.Control.AutomationIdContains}' name='{signed.Control.Name}'" : "NOT SIGNED")}");
+            if (baseline.Value.BusyCancel is null && stop)
+            {
+                Log("STOP                 : no signed cancel evidence, so a live Stop would invoke nothing.");
+                return;
+            }
+
+            (string workingCopyPath, WorkspaceFileRef workingCopy, IWorkspace workspace) = background
+                ? PrepareOpaqueBackgroundRemovalWorkingCopy(root)
+                : PrepareSyntheticWorkingCopy(root);
+            Log($"synthetic working copy: {workingCopyPath}");
+
+            IMeituAutomationFoundation foundation = MeituAutomationComposition.CreateFoundation(
+                manifest, expected, workspace, evidenceDirectory, TimeProvider.System);
+
+            OperationResult<MeituReadiness> ready = await foundation.EnsureReadyAsync(CancellationToken.None);
+            if (ready.IsFailure)
+            {
+                Log($"readiness            : STOPPED — {ready.Failure.Code}");
+                Log($"detail               : {ready.Failure.TechnicalDetail}");
+                return;
+            }
+
+            Log($"state                : {ready.Value.State.State}");
+
+            // The real production channel: the registry the SessionService owns, the signal the
+            // adapter reads, and RequestStop as the only way in.
+            AutomationRunRegistry runs = new();
+            SessionId session = SessionId.From(Guid.CreateVersion7());
+            IAutomationStopSignal signal = runs.Begin(
+                session,
+                AttemptId.From(Guid.CreateVersion7()),
+                background ? StepKind.BackgroundRemoval : StepKind.Enhancement,
+                drivesExternalApplication: true);
+
+            mayStillBeLoaded = true;
+            OperationResult<MeituOpenedWorkingCopy> opened =
+                await foundation.OpenWorkingCopyAsync(workingCopy, signal, CancellationToken.None);
+            if (opened.IsFailure)
+            {
+                Log($"open                 : REFUSED — {opened.Failure.Code}");
+                Log($"detail               : {opened.Failure.TechnicalDetail}");
+                return;
+            }
+
+            Log($"opened identity      : {opened.Value.State.Observation.ObservedDocumentIdentity}");
+            Log(string.Empty);
+            Log("## The request, made once the operation is positively Busy");
+
+            using CancellationTokenSource watching = new();
+            Task requester = Task.Run(
+                async () =>
+                {
+                    while (!watching.IsCancellationRequested)
+                    {
+                        if (signal.Phase == ExternalOperationPhase.Busy)
+                        {
+                            OperationResult<PrintFlow.Domain.Results.Unit> requested =
+                                runs.RequestStop(session, mode);
+                            Log($"request              : {(requested.IsSuccess ? "accepted" : $"REFUSED — {requested.Failure.TechnicalDetail}")}");
+                            return;
+                        }
+
+                        try
+                        {
+                            // Tight, because the shorter of the two operations has a Busy window
+                            // of roughly a second and a half and the request has to land inside
+                            // it. A slower poll does not produce a wrong answer — PrintFlow
+                            // refuses when it can no longer establish what is running — but it
+                            // produces a refusal that says nothing about whether Stop works.
+                            await Task.Delay(TimeSpan.FromMilliseconds(25), watching.Token)
+                                .ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return;
+                        }
+                    }
+                },
+                watching.Token);
+
+            OperationResult<PrintFlow.Domain.Results.Unit> ran = background
+                ? Discard(await foundation.RemoveBackgroundAsync(
+                    opened.Value,
+                    workingCopy,
+                    BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                    signal,
+                    CancellationToken.None))
+                : Discard(await foundation.EnhanceAsync(
+                    opened.Value, workingCopy, signal, CancellationToken.None));
+
+            await watching.CancelAsync();
+            await requester;
+
+            Log(string.Empty);
+            Log($"phase reached        : {signal.Phase}");
+            Log($"signed cancel invoked: {(signal.OperationCancelWasInvoked ? "YES — exactly once" : "no")}");
+            Log($"outcome              : {(ran.IsSuccess ? "the operation completed before the request landed" : ran.Failure.Code.ToString())}");
+            if (ran.IsFailure)
+            {
+                Log($"detail               : {ran.Failure.TechnicalDetail}");
+                foreach (KeyValuePair<string, string> entry in ran.Failure.Context)
+                {
+                    Log($"  {entry.Key,-24}: {entry.Value}");
+                }
+            }
+
+            Log($"retained external    : {AutomationStopPolicy.RetainedFor(signal.Phase, signal.OperationCancelWasInvoked)}");
+            Log("STOP                 : no export, no AdapterOutput, no Revision, no process termination.");
+            Log("Meitu was left for the operator; PrintFlow closed nothing and killed nothing.");
+        }
+        finally
+        {
+            WriteTranscript(transcript.ToString());
+            CleanUp(root, evidenceDirectory, mayStillBeLoaded);
+        }
+    }
+
+    /// <summary>Erases an outcome's payload, keeping only whether it succeeded and why not.</summary>
+    private static OperationResult<PrintFlow.Domain.Results.Unit> Discard<T>(OperationResult<T> result) =>
+        result.IsSuccess
+            ? OperationResult.Ok()
+            : OperationResult.Fail<PrintFlow.Domain.Results.Unit>(result.Failure);
 
     private static WorkspaceDirRef ParentOf(WorkspaceFileRef file)
     {

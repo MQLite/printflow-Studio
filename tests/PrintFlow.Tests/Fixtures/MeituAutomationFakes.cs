@@ -245,6 +245,43 @@ internal static class MeituFakes
     /// <param name="fileDialog">The signed picker signature, or <c>null</c>.</param>
     /// <param name="documentIdentity">The signed Save-dialog document identity, or <c>null</c>.</param>
     /// <param name="editorEmpty">The signed empty-editor signature, with its open control.</param>
+    /// <summary>The automation id of the fake Busy-cancel button, matching the signed shape.</summary>
+    internal const string BusyCancelAutomationId =
+        "MainWindow.MaskDialog.MaskCenterWidget.LoadingMaskWidget.cancel";
+
+    /// <summary>The exact automation name the cancel carries — the same one the file picker uses.</summary>
+    /// <remarks>
+    /// Identical to <see cref="DecoyCancelAutomationId"/>'s name on purpose. The workstation
+    /// evidence records that Meitu's open picker has a Cancel button named exactly 取消, so a
+    /// fake in which the two had different names would let a name-only rule pass every test here
+    /// and dismiss a file dialog on the real machine.
+    /// </remarks>
+    internal const string BusyCancelName = "取消";
+
+    /// <summary>The file picker's own Cancel, which is the live decoy this rule must refuse.</summary>
+    internal const string DecoyCancelAutomationId = "2";
+
+    /// <summary>
+    /// The signed Busy-cancel route, with the real one's structure and none of its real values
+    /// (Epic 11300 Part D2A §6).
+    /// </summary>
+    /// <remarks>
+    /// The named element <i>is</i> the button here, unlike the Enhancement and close-document
+    /// shapes where the name belongs to a label above the control that acts. That asymmetry is
+    /// what the workstation showed, and reproducing it is the point: a fake that used a
+    /// marker-to-owner walk would let a walk-based implementation pass and then climb past the
+    /// real button to the progress mask.
+    /// </remarks>
+    internal static MeituBusyCancelSignature BusyCancel() => new(
+        new MeituControlSignature(
+            Name: BusyCancelName,
+            AutomationIdContains: "MaskDialog.MaskCenterWidget.LoadingMaskWidget.cancel",
+            ControlTypeName: "Button",
+            ClassName: "QPushButton",
+            RequiredPattern: UiPatternKind.Invoke),
+        ["LoadingMaskWidget", "SpecialMaskWidget", "MaskDialog"],
+        ["Enhance", "RemoveBackground"]);
+
     internal static MeituBaseline Baseline(
         MeituCardShape? card = null,
         MeituFileDialogSignature? fileDialog = null,
@@ -253,7 +290,8 @@ internal static class MeituFakes
         MeituCloseDocumentSignature? closeDocument = null,
         MeituEnhancementSignature? enhancement = null,
         MeituExportSignature? export = null,
-        MeituBackgroundRemovalSignature? backgroundRemoval = null) => new(
+        MeituBackgroundRemovalSignature? backgroundRemoval = null,
+        MeituBusyCancelSignature? busyCancel = null) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -268,7 +306,8 @@ internal static class MeituFakes
         closeDocument ?? CloseDocument(),
         enhancement ?? Enhancement(),
         export ?? Export(),
-        backgroundRemoval ?? BackgroundRemoval());
+        backgroundRemoval ?? BackgroundRemoval(),
+        busyCancel ?? BusyCancel());
 
     /// <summary>A baseline whose optional evidence is exactly as supplied, including absent.</summary>
     /// <remarks>
@@ -284,7 +323,8 @@ internal static class MeituFakes
         bool closeDocument = false,
         bool enhancement = false,
         bool export = false,
-        bool backgroundRemoval = false) => new(
+        bool backgroundRemoval = false,
+        bool busyCancel = false) => new(
         ExecutablePath,
         ExecutableSha256,
         "9.9.9.9",
@@ -299,7 +339,8 @@ internal static class MeituFakes
         closeDocument ? null : CloseDocument(),
         enhancement ? null : Enhancement(),
         export ? null : Export(),
-        backgroundRemoval ? null : BackgroundRemoval());
+        backgroundRemoval ? null : BackgroundRemoval(),
+        busyCancel ? null : BusyCancel());
 
     internal static ExternalProcessRef Process(int id = 4242) =>
         new(id, ExecutablePath, new DateTimeOffset(2026, 8, 24, 9, 0, 0, TimeSpan.Zero));
@@ -637,6 +678,82 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
             [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Toggle],
             new UiBounds(372, marker == MeituFakes.BackgroundActionMarker ? 625 : 337, 56, 56),
             enabled, offscreen));
+    }
+
+    /// <summary>
+    /// Adds the progress mask's cancel button and its three signed ancestors, shaped exactly
+    /// like the observed one (Epic 11300 Part D2A §6).
+    /// </summary>
+    /// <param name="window">The window the mask lives beneath.</param>
+    /// <param name="automationId">The button's automation id; the default is the signed one.</param>
+    /// <param name="className">The button's class; a wrong one must be refused.</param>
+    /// <param name="ancestorClasses">
+    /// The classes of the three ancestors, innermost first. Supplying different ones is how a
+    /// test states "the button is somewhere else in the tree".
+    /// </param>
+    /// <remarks>
+    /// The ancestors are real elements rather than implied, because the rule walks to them and a
+    /// fake without them would let an implementation that skipped the ancestry check pass.
+    /// </remarks>
+    public FakeUiElement AddBusyCancel(
+        WindowHandle window,
+        string automationId = MeituFakes.BusyCancelAutomationId,
+        string className = "QPushButton",
+        string[]? ancestorClasses = null,
+        int processId = 4242,
+        bool enabled = true,
+        bool offscreen = false)
+    {
+        string[] classes = ancestorClasses ?? ["LoadingMaskWidget", "SpecialMaskWidget", "MaskDialog"];
+
+        FakeUiElement? parent = null;
+        for (int depth = classes.Length - 1; depth >= 0; depth--)
+        {
+            parent = Add(window, new UiElementIdentity(
+                depth == classes.Length - 1 ? "Window" : "Group",
+                $"MainWindow.ancestor{depth}",
+                string.Empty,
+                classes[depth],
+                processId,
+                [UiPatternKind.Invoke, UiPatternKind.Value],
+                new UiBounds(-3, -3, 1920, 1040),
+                true,
+                false),
+                parent);
+        }
+
+        return Add(window, new UiElementIdentity(
+            ControlTypeName: "Button",
+            AutomationId: automationId,
+            Name: MeituFakes.BusyCancelName,
+            ClassName: className,
+            ProcessId: processId,
+            SupportedPatterns: [UiPatternKind.Invoke, UiPatternKind.Value],
+            Bounds: new UiBounds(904, 537, 104, 28),
+            IsEnabled: enabled,
+            IsOffscreen: offscreen),
+            parent);
+    }
+
+    /// <summary>
+    /// Adds the open picker's own Cancel button — the live decoy, named exactly 取消
+    /// (Epic 11300 Part D2A §8).
+    /// </summary>
+    /// <remarks>
+    /// Its parent is a <c>#32770</c> dialog rather than the progress mask, and its id is the
+    /// bare <c>2</c> the workstation reported. Both are what must refuse it; neither its name
+    /// nor its control type does.
+    /// </remarks>
+    public FakeUiElement AddDecoyPickerCancel(WindowHandle window, int processId = 4242)
+    {
+        FakeUiElement dialog = Add(window, new UiElementIdentity(
+            "Window", string.Empty, "打开图片", "#32770", processId,
+            [UiPatternKind.Window], new UiBounds(0, 0, 1920, 1040), true, false));
+
+        return Add(window, new UiElementIdentity(
+            "Button", MeituFakes.DecoyCancelAutomationId, MeituFakes.BusyCancelName, "Button",
+            processId, [UiPatternKind.Invoke], new UiBounds(1807, 994, 88, 26), true, false),
+            dialog);
     }
 
     /// <summary>Adds the loaded editor's close-document control, shaped like the observed one.</summary>

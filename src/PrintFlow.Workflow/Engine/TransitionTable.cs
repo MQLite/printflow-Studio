@@ -32,9 +32,16 @@ public enum CommandKind
     Complete,
     AddAnotherSize,
     AbandonSession,
+
+    /// <summary>Bring a handed-off session back under automation, explicitly (Part D2A §22).</summary>
+    ReenterAutomation,
+
     AttemptSucceeded,
     AttemptFailed,
     AttemptInterrupted,
+
+    /// <summary>A human stopped a running attempt (Part D2A §12, §19).</summary>
+    AttemptCancelled,
 }
 
 /// <summary>What the step-level table says about one state/command pair.</summary>
@@ -88,6 +95,11 @@ public static class TransitionTable
         CommandKind.Complete,
         CommandKind.AddAnotherSize,
         CommandKind.AbandonSession,
+
+        // Re-entry after a takeover is decided entirely by the session: it is legal exactly
+        // when the session is HandedOff, which is a state no step row records. It names no
+        // step in its payload for the same reason (Epic 11300 Part D2A §22).
+        CommandKind.ReenterAutomation,
     ];
 
     /// <summary>
@@ -104,11 +116,19 @@ public static class TransitionTable
         ],
 
         // A running attempt is finished by the system, never by the operator.
+        //
+        // AttemptCancelled belongs in this row and nowhere else, and that is what makes an
+        // operator Stop safe to model. The operator does not close the attempt — they ask the
+        // run to stop, and the application layer raises this once the run has actually
+        // unwound and reported what it left behind. A Stop pressed against a step that is not
+        // Processing has nothing to close, and the table refuses it rather than inventing a
+        // stopped attempt (Epic 11300 Part D2A §12, §24).
         [StepState.Processing] =
         [
             CommandKind.AttemptSucceeded,
             CommandKind.AttemptFailed,
             CommandKind.AttemptInterrupted,
+            CommandKind.AttemptCancelled,
         ],
 
         [StepState.ReviewRequired] =
@@ -209,6 +229,14 @@ public static class TransitionTable
 
         CommandKind.AttemptFailed => StepState.Failed,
         CommandKind.AttemptInterrupted => StepState.Interrupted,
+
+        // A stopped attempt lands on Interrupted, not Failed. Nothing failed — a person ended
+        // the run — and Interrupted is this workflow's existing "did not finish, produced
+        // nothing" state, from which Retry, Skip and HandOff are already legal. Reusing it also
+        // means a crash *during* a stop, which startup recovery closes as Interrupted, leaves
+        // the step in the same place a completed stop would: no second recovery state, and no
+        // duplicate (Epic 11300 Part D2A §12, §31).
+        CommandKind.AttemptCancelled => StepState.Interrupted,
 
         // HandOff ends the session's automated progression; the step keeps its state.
         CommandKind.HandOff => StepState.ReviewRequired,

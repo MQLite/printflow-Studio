@@ -61,6 +61,7 @@ public sealed class FakePhotoshopOutputProcessor : IPhotoshopOutputProcessor
             _workspace,
             _hangStarted,
             () => Task.FromResult(Succeed(request)),
+            InertAutomationStopSignal.Instance,
             cancellationToken);
     }
 

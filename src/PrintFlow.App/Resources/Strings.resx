@@ -431,4 +431,42 @@
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
     <value>Background removal: Automatic Selection — authorised for reviewed Revision {0}</value>
   </data>
+  <data name="Session_Stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="Session_StopHint" xml:space="preserve">
+    <value>Stops this automated operation safely. Meitu is not closed.</value>
+  </data>
+  <data name="Session_StoppingNotice" xml:space="preserve">
+    <value>Stopping — PrintFlow is asking Meitu to cancel this operation. Please wait.</value>
+  </data>
+  <data name="Session_TakeOver" xml:space="preserve"><value>Take Over in Meitu</value></data>
+  <data name="Session_TakeOverHint" xml:space="preserve">
+    <value>Stops PrintFlow automation and leaves Meitu as it is, for you to work in.</value>
+  </data>
+  <data name="Session_TakingOverNotice" xml:space="preserve">
+    <value>Handing over — PrintFlow has stopped controlling Meitu and is sending nothing further.</value>
+  </data>
+  <data name="Session_TakeOverConfirmQuestion" xml:space="preserve">
+    <value>Take over in Meitu? PrintFlow will stop controlling Meitu for this operation and will send it nothing further. Meitu is left exactly as it is — it is not cancelled and not closed, so it may still be working and you may need to finish or close it yourself. This attempt will not produce a Revision, and returning to automation needs an explicit Return to automation.</value>
+  </data>
+  <data name="Session_TakeOverConfirm" xml:space="preserve"><value>Take over</value></data>
+  <data name="Session_TakeOverCancel" xml:space="preserve"><value>Keep automating</value></data>
+  <data name="Session_RetainedOperationRunning" xml:space="preserve">
+    <value>Meitu may still be running this operation. PrintFlow has stopped sending it anything; check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_RetainedProcessedResult" xml:space="preserve">
+    <value>Meitu may still be holding the processed result. Nothing was exported and nothing was discarded; check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_RetainedUnknown" xml:space="preserve">
+    <value>PrintFlow could not establish what Meitu is doing. Check Meitu before starting another attempt.</value>
+  </data>
+  <data name="Session_ReenterAutomation" xml:space="preserve"><value>Return to automation</value></data>
+  <data name="Session_ReenterAutomationHint" xml:space="preserve">
+    <value>This session was handed over to you. Returning to automation starts a new attempt from a fresh working copy; the handed-over attempt stays in the history.</value>
+  </data>
+  <data name="Failure_AutomationStopped" xml:space="preserve">
+    <value>You stopped this operation. No result was produced and no Revision was created.</value>
+  </data>
+  <data name="Failure_AutomationHandedOff" xml:space="preserve">
+    <value>You took over in Meitu. PrintFlow stopped this attempt and sent Meitu nothing further; no Revision was created.</value>
+  </data>
 </root>

@@ -245,10 +245,31 @@ public sealed record SessionView(
     bool CanSetBackgroundRemovalDecision,
     bool CanRunBackgroundRemoval,
     BackgroundRemovalDecision BackgroundRemovalAttemptDecision,
-    RevisionId? BackgroundRemovalAttemptReviewedRevisionId)
+    RevisionId? BackgroundRemovalAttemptReviewedRevisionId,
+    AutomationStopAudit? LastAutomationStop)
 {
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
+
+    /// <summary>
+    /// Whether the operator should be warned about what the external application may still be
+    /// holding or doing (Epic 11300 Part D2A §21, §37).
+    /// </summary>
+    /// <remarks>
+    /// False after a stop whose signed cancel positively took effect, and true after one that
+    /// could not resolve a cancel — the honest split. PrintFlow cannot establish that the
+    /// external application is finished or safe once it has stopped looking at it, so there is
+    /// no state here that says so.
+    /// </remarks>
+    public bool HasRetainedExternalState =>
+        LastAutomationStop?.OperatorActionMayBeRequired == true;
+
+    /// <summary>
+    /// Whether the operator must explicitly re-enter automation before this session can be
+    /// driven again (Epic 11300 Part D2A §22, §30).
+    /// </summary>
+    public bool RequiresAutomationReentry =>
+        State == SessionState.HandedOff && AvailableCommands.Contains(CommandKind.ReenterAutomation);
 
     /// <summary>
     /// Whether the artefact on screen carries deterministic trim parameters worth stating
@@ -365,7 +386,58 @@ public sealed record SessionView(
             // being told about a result every time the session's next-run authority moved
             // (§15).
             producingAuthority?.Decision ?? BackgroundRemovalDecision.Unspecified,
-            producingAuthority?.ReviewedRevisionId);
+            producingAuthority?.ReviewedRevisionId,
+
+            // What the last stop on the current step left behind, so the screen can warn about
+            // an external application that may still be running or still be holding a processed
+            // result. Read from the closed attempt row, which is the only durable record of it
+            // and survives a restart exactly as the rest of the history does (Part D2A §29).
+            ResolveLastStop(snapshot, attempts));
+    }
+
+    /// <summary>
+    /// The stop that ended the current step's most recent attempt, when one did
+    /// (Epic 11300 Part D2A §29).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately scoped to the current step's <b>most recent</b> attempt rather than to any
+    /// stopped attempt in the history. The value drives a warning about what the external
+    /// application may still be holding <i>now</i>, and a stop from three retries ago says
+    /// nothing about that — a warning sourced from it would still be on screen after a
+    /// subsequent run had succeeded.
+    /// <para>
+    /// Returns null the moment the step moves on, because the newest attempt is then the one
+    /// that succeeded or failed rather than the one that was stopped.
+    /// </para>
+    /// </remarks>
+    private static AutomationStopAudit? ResolveLastStop(
+        WorkflowSnapshot snapshot, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (snapshot.CurrentStep is not { } current)
+        {
+            return null;
+        }
+
+        ProcessingAttempt? newest = null;
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.Step != current.Step)
+            {
+                continue;
+            }
+
+            if (newest is null ||
+                attempt.RetrySequence > newest.RetrySequence ||
+                (attempt.RetrySequence == newest.RetrySequence &&
+                 attempt.StartedAtUtc >= newest.StartedAtUtc))
+            {
+                newest = attempt;
+            }
+        }
+
+        return newest is { Status: AttemptStatus.Cancelled }
+            ? AutomationStopAudit.Read(newest.Failure)
+            : null;
     }
 
     /// <summary>

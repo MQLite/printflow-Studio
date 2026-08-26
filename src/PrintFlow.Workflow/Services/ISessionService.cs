@@ -2,6 +2,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Workflow.Services;
 
@@ -48,4 +49,45 @@ public interface ISessionService
     /// shows" is a product rule rather than a presentation detail (Epic 11100 Part 3C2 §8).
     /// </remarks>
     Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// What this session's automation is doing right now (Epic 11300 Part D2A §28).
+    /// </summary>
+    /// <remarks>
+    /// Synchronous and non-mutating, because the question it answers has to be answerable
+    /// <i>while</i> <see cref="ExecuteAsync"/> has not returned. That is the whole point: a
+    /// Stop control is needed exactly when a command is in flight, which is exactly when no
+    /// newer <see cref="SessionView"/> exists.
+    /// </remarks>
+    AutomationRuntimeView GetAutomationRuntime(SessionId id);
+
+    /// <summary>
+    /// Raised whenever <see cref="GetAutomationRuntime"/> would return something different, so
+    /// a screen can re-read it rather than poll.
+    /// </summary>
+    event EventHandler<AutomationRuntimeView>? AutomationRuntimeChanged;
+
+    /// <summary>
+    /// Asks the run in flight to stop, in the mode the operator chose
+    /// (Epic 11300 Part D2A §3, §17, §27).
+    /// </summary>
+    /// <remarks>
+    /// Records the request and returns immediately; it does not wait for the run to unwind.
+    /// The run is inside <see cref="ExecuteAsync"/> on another thread, and the call that
+    /// started it is the one that reports the outcome — so a Stop that blocked until the run
+    /// finished would deadlock the screen against the very operation it is stopping.
+    /// <para>
+    /// Nothing here reaches an external application. What it does is set a flag the running
+    /// adapter reads at its next safe point; what the adapter is then permitted to do is
+    /// decided by <see cref="Ports.AutomationStopPolicy"/> from the phase it has actually
+    /// reached. In particular <see cref="Ports.AutomationStopMode.TakeOver"/> permits no input
+    /// at all, from any phase (§19, §20).
+    /// </para>
+    /// <para>
+    /// Refuses when nothing is running for this session, and refuses a second request against a
+    /// run that is already stopping — §9 permits exactly one cancel invocation, and pressing
+    /// Stop twice is how a second one would happen.
+    /// </para>
+    /// </remarks>
+    OperationResult<Unit> RequestStop(SessionId id, AutomationStopMode mode);
 }

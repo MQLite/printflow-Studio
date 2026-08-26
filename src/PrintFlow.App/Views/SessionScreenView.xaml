@@ -214,6 +214,100 @@
                        Margin="0,0,0,6" />
 
             <!--
+                Stop and Take Over (Epic 11300 Part D2A §24, §25, §27). Both are bound to the
+                workflow layer's own answers — CanStopAutomation and CanTakeOverAutomation —
+                and this file states no condition of its own. In particular it does NOT bind to
+                IsBusy: that is true for every command the screen issues, including an approval,
+                and a Stop offered beside a review decision would offer to stop nothing.
+
+                They are two buttons rather than one because they mean different things and
+                §27 requires the operator to be able to tell them apart: Stop tries to cancel
+                the operation, Take Over leaves Meitu alone. Neither closes Meitu.
+            -->
+            <StackPanel Orientation="Horizontal"
+                        Margin="0,0,0,8"
+                        Visibility="{Binding CanStopAutomation, Converter={StaticResource BoolToVisibility}}">
+                <Button Content="{Binding StopLabel}"
+                        Command="{Binding StopAutomationCommand}"
+                        Padding="14,6"
+                        Margin="0,0,8,0" />
+                <Button Content="{Binding TakeOverLabel}"
+                        Command="{Binding BeginTakeOverCommand}"
+                        Padding="14,6"
+                        Margin="0,0,12,0"
+                        Visibility="{Binding CanTakeOverAutomation,
+                                     Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Text="{Binding StopHint}"
+                           TextWrapping="Wrap"
+                           MaxWidth="420"
+                           Opacity="0.7"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- What PrintFlow is doing while a stop unwinds. Nothing here is a promise (§21). -->
+            <TextBlock Text="{Binding StoppingNotice}"
+                       TextWrapping="Wrap"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,8"
+                       Visibility="{Binding IsStopping, Converter={StaticResource BoolToVisibility}}" />
+
+            <!--
+                The Take Over confirmation (§26). It states all four things the operator has to
+                know before agreeing: automation stops, Meitu is left as it is, this attempt
+                produces no Revision, and coming back needs an explicit return. It deliberately
+                does not claim Meitu is safe or finished.
+            -->
+            <Border BorderThickness="1"
+                    BorderBrush="#B0B0B0"
+                    Padding="12"
+                    Margin="0,0,0,8"
+                    Visibility="{Binding IsConfirmingTakeOver, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding TakeOverConfirmQuestion}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="{Binding TakeOverConfirmLabel}"
+                                Command="{Binding ConfirmTakeOverCommand}"
+                                Padding="14,6"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding TakeOverCancelLabel}"
+                                Command="{Binding CancelTakeOverCommand}"
+                                Padding="14,6" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!--
+                What Meitu may still be holding after a stop (§21, §29). Read from the closed
+                attempt row, so it survives the run ending and a restart, and it is absent after
+                a stop whose signed cancel positively took effect.
+            -->
+            <TextBlock Text="{Binding RetainedExternalStateNotice}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8"
+                       Visibility="{Binding HasRetainedExternalState,
+                                    Converter={StaticResource BoolToVisibility}}" />
+
+            <!--
+                Explicit re-entry after a takeover (§22, §30). Nothing anywhere else lifts
+                SessionState.HandedOff, so this is the only way back — which is what stops a
+                restart from silently resuming handed-off work.
+            -->
+            <StackPanel Margin="0,0,0,8"
+                        Visibility="{Binding CanReenterAutomation,
+                                     Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding ReenterAutomationHint}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,6"
+                           Opacity="0.75" />
+                <Button Content="{Binding ReenterAutomationLabel}"
+                        Command="{Binding ReenterAutomationCommand}"
+                        HorizontalAlignment="Left"
+                        Padding="14,6" />
+            </StackPanel>
+
+            <!--
                 A trim that cannot honestly decide (Epic 11200 Part C1 §17). Shown in addition
                 to the failure line above, never instead of it. There is still no fabricated
                 "after" beside this message, because no Revision was produced — what Part C2

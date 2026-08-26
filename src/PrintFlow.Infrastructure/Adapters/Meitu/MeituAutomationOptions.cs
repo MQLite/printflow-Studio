@@ -99,6 +99,20 @@ public sealed record MeituAutomationOptions
     /// </remarks>
     public string WelcomeOpenEntryName { get; init; } = "图片编辑";
 
+    /// <summary>
+    /// How long to watch for the operation to leave Busy after one signed cancel invocation
+    /// (Epic 11300 Part D2A §9, §11).
+    /// </summary>
+    /// <remarks>
+    /// Short, and short on purpose. Expiring is not a failure and does not cause a second
+    /// invocation — §9 permits exactly one. What it means is that PrintFlow stops watching and
+    /// reports honestly that the operation had not left Busy, so the retained-external-state
+    /// record says the work may still be running (§10). Waiting minutes would delay that honest
+    /// report without making it any more likely to change: a cancel Meitu accepted takes effect
+    /// in about a second, and one it ignored will not start taking effect later.
+    /// </remarks>
+    public TimeSpan CancelSettleTimeout { get; init; } = TimeSpan.FromSeconds(15);
+
     /// <summary>How many automation names one state observation reads.</summary>
     public int SnapshotItemLimit { get; init; } = 400;
 }

@@ -134,6 +134,143 @@ public sealed class LocalisationResourceTests
         confirmation.ShouldNotContain(forbidden, Case.Insensitive);
     }
 
+    /// <summary>
+    /// The Stop and Take Over strings exist in both languages, by name
+    /// (Epic 11300 Part D2A §37).
+    /// </summary>
+    /// <remarks>
+    /// Named explicitly for the same reason the Background Removal set is: the two parity tests
+    /// above catch a key present in one file and missing from the other, but not both files
+    /// losing a string together. An operator control that silently lost its wording would show a
+    /// resource key on the button that stops Meitu.
+    /// </remarks>
+    [Fact]
+    public void The_stop_and_take_over_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_Stop",
+            "Session_StopHint",
+            "Session_StoppingNotice",
+            "Session_TakeOver",
+            "Session_TakeOverHint",
+            "Session_TakingOverNotice",
+            "Session_TakeOverConfirmQuestion",
+            "Session_TakeOverConfirm",
+            "Session_TakeOverCancel",
+            "Session_RetainedOperationRunning",
+            "Session_RetainedProcessedResult",
+            "Session_RetainedUnknown",
+            "Session_ReenterAutomation",
+            "Session_ReenterAutomationHint",
+            "Failure_AutomationStopped",
+            "Failure_AutomationHandedOff",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("the operator action needs English wording.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// The takeover confirmation states all four consequences and overstates none (§21, §26).
+    /// </summary>
+    /// <remarks>
+    /// A wording test, deliberately, and the mirror of the cutout-quality one below. §26 lists
+    /// four things the operator must be told, and §21 forbids implying the external application
+    /// is safe or finished — which is precisely the reassurance a later edit would be tempted to
+    /// add to a confirmation that currently sounds alarming.
+    /// </remarks>
+    [Theory]
+    [InlineData("stop controlling Meitu")]
+    [InlineData("left exactly as it is")]
+    [InlineData("will not produce a Revision")]
+    [InlineData("Return to automation")]
+    public void The_take_over_confirmation_states_each_consequence(string required)
+    {
+        ValueOf(NeutralResx, "Session_TakeOverConfirmQuestion")
+            .ShouldContain(required, Case.Insensitive);
+    }
+
+    /// <summary>
+    /// Nothing PrintFlow says about a stop claims the external application is safe or finished
+    /// (§21).
+    /// </summary>
+    /// <remarks>
+    /// PrintFlow stopped looking at Meitu; it cannot establish either, and a message that said
+    /// so would be the one piece of wording an operator would act on without checking. The scan
+    /// covers every stop-related string in both languages so a translation cannot introduce a
+    /// promise the English does not make.
+    /// </remarks>
+    [Theory]
+    [InlineData("safely closed")]
+    [InlineData("has finished")]
+    [InlineData("is finished")]
+    [InlineData("no longer running")]
+    [InlineData("nothing further to do")]
+    public void No_stop_message_claims_the_external_application_is_finished(string forbidden)
+    {
+        string[] stopStrings =
+        [
+            "Session_StopHint",
+            "Session_StoppingNotice",
+            "Session_TakeOverHint",
+            "Session_TakingOverNotice",
+            "Session_TakeOverConfirmQuestion",
+            "Session_RetainedOperationRunning",
+            "Session_RetainedProcessedResult",
+            "Session_RetainedUnknown",
+            "Failure_AutomationStopped",
+            "Failure_AutomationHandedOff",
+        ];
+
+        foreach (string key in stopStrings)
+        {
+            ValueOf(NeutralResx, key).ShouldNotContain(forbidden, Case.Insensitive);
+        }
+    }
+
+    /// <summary>
+    /// Stop and Take Over are worded as different actions (§27).
+    /// </summary>
+    /// <remarks>
+    /// The distinction §27 asks the operator to understand has to be visible in the words. Two
+    /// labels that were near-synonyms would be the "one ambiguous button" split in two, which is
+    /// no better.
+    /// </remarks>
+    [Fact]
+    public void Stop_and_take_over_are_not_worded_as_the_same_action()
+    {
+        foreach (string resx in new[] { NeutralResx, ChineseResx })
+        {
+            string stop = ValueOf(resx, "Session_Stop");
+            string takeOver = ValueOf(resx, "Session_TakeOver");
+
+            stop.ShouldNotBe(takeOver);
+            takeOver.Length.ShouldBeGreaterThan(
+                stop.Length,
+                "Take Over names an external application and an ownership change; Stop does not.");
+        }
+    }
+
+    /// <summary>
+    /// Neither label promises to close or kill the external application (§3, §27).
+    /// </summary>
+    [Theory]
+    [InlineData("kill")]
+    [InlineData("terminate")]
+    [InlineData("force quit")]
+    [InlineData("end task")]
+    public void No_operator_label_offers_to_terminate_the_external_application(string forbidden)
+    {
+        foreach (string key in new[] { "Session_Stop", "Session_StopHint", "Session_TakeOver", "Session_TakeOverHint" })
+        {
+            ValueOf(NeutralResx, key).ShouldNotContain(forbidden, Case.Insensitive);
+        }
+    }
+
     private static string ValueOf(string relativePath, string key)
     {
         XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));

@@ -7,6 +7,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Effects;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Fixtures;
 
@@ -233,4 +234,35 @@ internal static class SystemCommands
 
     public static WorkflowCommand Interrupted(AttemptId attempt, StepKind step) =>
         new WorkflowCommand.System.AttemptInterrupted(attempt, step);
+
+    /// <summary>
+    /// A human stopping a running attempt, with the audit context the workflow layer writes
+    /// (Epic 11300 Part D2A §12, §29).
+    /// </summary>
+    /// <remarks>
+    /// Carries the real context keys rather than an empty dictionary, so a test that asserts on
+    /// the persisted audit is asserting against the same shape production writes.
+    /// </remarks>
+    public static WorkflowCommand Cancelled(
+        AttemptId attempt,
+        StepKind step,
+        AutomationStopMode mode = AutomationStopMode.StopOperation,
+        ExternalOperationPhase phase = ExternalOperationPhase.Busy,
+        bool cancelInvoked = false) =>
+        new WorkflowCommand.System.AttemptCancelled(
+            attempt,
+            step,
+            OperationFailure.Create(
+                FailureCode.Cancelled,
+                $"synthetic operator {mode} at {phase}",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    [AutomationStopAudit.StopRequestedKey] = "true",
+                    [AutomationStopAudit.ModeKey] = mode.ToString(),
+                    [AutomationStopAudit.PhaseKey] = phase.ToString(),
+                    [AutomationStopAudit.CancelInvokedKey] = cancelInvoked ? "true" : "false",
+                    [AutomationStopAudit.RetainedKey] =
+                        AutomationStopPolicy.RetainedFor(phase, cancelInvoked).ToString(),
+                }));
 }

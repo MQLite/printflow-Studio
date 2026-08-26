@@ -89,6 +89,30 @@ public abstract record WorkflowCommand
     /// <summary>Transfer the work to the operator. Ends automated progression for this session.</summary>
     public sealed record HandOff(StepKind Step, string Reason) : WorkflowCommand;
 
+    /// <summary>
+    /// Bring a handed-off session back under automation, explicitly (Epic 11300 Part D2A §22).
+    /// </summary>
+    /// <remarks>
+    /// The whole of §22 in one command. A takeover ends automation, and re-entry must be a
+    /// thing the operator <i>does</i> rather than something that happens because they reopened
+    /// the app or pressed Run again — so <c>SessionState.HandedOff</c> refuses every ordinary
+    /// progression command (<see cref="Engine.SessionStateRules.AllowsProgress"/>), and this is
+    /// the only command that lifts it.
+    /// <para>
+    /// It creates no attempt and no Revision. What it does is return the session to
+    /// <c>Active</c> and put the handed-off step back to <c>Waiting</c>, from which the ordinary
+    /// <see cref="StartStep"/> path produces a <b>new</b> attempt against a fresh working copy
+    /// with the usual safe-state verification. The handed-off attempt is untouched: it is a
+    /// closed row, and it stays in the history exactly as it was written (§15, §23).
+    /// </para>
+    /// <para>
+    /// It adopts nothing. There is no payload naming a file, no folder scan and no filename
+    /// inference anywhere on this path, so whatever the operator did in the external application
+    /// while they owned it cannot become this session's output by re-entering (§23).
+    /// </para>
+    /// </remarks>
+    public sealed record ReenterAutomation : WorkflowCommand;
+
     /// <summary>Confirm the target physical dimensions.</summary>
     public sealed record SetPrintDimensions(PrintDimensions Dimensions) : WorkflowCommand;
 
@@ -236,6 +260,48 @@ public abstract record WorkflowCommand
             public AttemptId AttemptId { get; }
 
             public StepKind Step { get; }
+        }
+
+        /// <summary>
+        /// A human stopped a running attempt: an operator Stop, or an operator taking the
+        /// external application over (Epic 11300 Part D2A §12, §19).
+        /// </summary>
+        /// <remarks>
+        /// A separate command from <see cref="AttemptFailed"/> because the two are separate
+        /// claims about what happened, and conflating them would make the history unreadable in
+        /// the direction that matters. <c>AttemptFailed</c> asserts that automation ran and did
+        /// not produce a valid result — a real production event, and the thing a step's Failed
+        /// state is about. A stop asserts that a person ended the run; nothing failed, and the
+        /// step's own state afterwards is <c>Interrupted</c>, the state meaning "this did not
+        /// finish" (§12).
+        /// <para>
+        /// It carries an <see cref="OperationFailure"/> all the same, and that is not a
+        /// contradiction: <c>OperationFailure</c> is this codebase's structured "why did this
+        /// not produce anything" record, and it is where §29's audit lives — which mode was
+        /// requested, whether a signed cancel was invoked, and what the external application may
+        /// still be holding. The code on it is <c>FailureCode.Cancelled</c>.
+        /// </para>
+        /// <para>
+        /// Like every other <see cref="System"/> command, the UI cannot construct one: a screen
+        /// that could synthesise "this attempt was cancelled" could close an attempt without a
+        /// run having stopped.
+        /// </para>
+        /// </remarks>
+        public sealed record AttemptCancelled : System
+        {
+            internal AttemptCancelled(AttemptId attemptId, StepKind step, OperationFailure failure)
+            {
+                AttemptId = attemptId;
+                Step = step;
+                Failure = failure;
+            }
+
+            public AttemptId AttemptId { get; }
+
+            public StepKind Step { get; }
+
+            /// <summary>Why the run stopped, and what it left behind. Never null.</summary>
+            public OperationFailure Failure { get; }
         }
     }
 }

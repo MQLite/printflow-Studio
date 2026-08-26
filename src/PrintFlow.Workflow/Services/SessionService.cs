@@ -75,6 +75,20 @@ public sealed class SessionService : ISessionService
     private readonly RevisionIntegrityGuard _integrityGuard;
     private readonly IIdGenerator _idGenerator;
     private readonly TimeProvider _timeProvider;
+
+    /// <summary>
+    /// Which attempt is currently driving automation, and the only route an operator's Stop
+    /// takes to reach it (Epic 11300 Part D2A §28).
+    /// </summary>
+    /// <remarks>
+    /// Owned here rather than injected because its lifetime is exactly this service's: it holds
+    /// in-process state about a run this service is performing, and a second
+    /// <see cref="SessionService"/> sharing one would be able to stop a run it is not
+    /// executing. It is emphatically not the automation lock — that one is persisted,
+    /// machine-wide, and survives this process (§32).
+    /// </remarks>
+    private readonly AutomationRunRegistry _runs = new();
+
     private readonly int _processId;
     private readonly string _machineName;
 
@@ -120,7 +134,18 @@ public sealed class SessionService : ISessionService
         _integrityGuard = new RevisionIntegrityGuard(workspace, fileInspector);
         _processId = Environment.ProcessId;
         _machineName = Environment.MachineName;
+        _runs.Changed += (_, view) => AutomationRuntimeChanged?.Invoke(this, view);
     }
+
+    /// <inheritdoc />
+    public event EventHandler<AutomationRuntimeView>? AutomationRuntimeChanged;
+
+    /// <inheritdoc />
+    public AutomationRuntimeView GetAutomationRuntime(SessionId id) => _runs.For(id);
+
+    /// <inheritdoc />
+    public OperationResult<Unit> RequestStop(SessionId id, AutomationStopMode mode) =>
+        _runs.RequestStop(id, mode);
 
     /// <inheritdoc />
     public async Task<OperationResult<SessionView>> ImportAsync(
@@ -588,11 +613,18 @@ public sealed class SessionService : ISessionService
             Attempts = [.. aggregate.Attempts, runningAttempt],
         };
 
+        // Registered only now, after the attempt row exists. A Stop that arrived before the
+        // opening transaction would have nothing to close and no row to audit against, so the
+        // window in which Stop is offered is exactly the window in which it is meaningful
+        // (Part D2A §24, §28).
+        IAutomationStopSignal stop = _runs.Begin(
+            aggregate.Session.Id, runningAttempt.Id, work.Step, definition.IsAdapterBacked);
+
         OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)> produced;
         try
         {
             produced = await PerformStepWorkAsync(
-                afterStart, started.State, definition, work, runningAttempt, context, cancellationToken);
+                afterStart, started.State, definition, work, runningAttempt, context, stop, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -609,20 +641,69 @@ public sealed class SessionService : ISessionService
                         ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
                     }));
         }
-
-        if (produced.IsFailure)
+        finally
         {
-            // Cancellation is the one failure whose caller token cannot be used to close the
-            // attempt: it is already cancelled. The adapter has stopped receiving input, while
-            // this short metadata transaction truthfully ends the attempt and releases the
-            // global automation lock. A process crash before this commit is still covered by
-            // startup Running -> Interrupted recovery.
-            CancellationToken closingToken = produced.Failure.Code == FailureCode.Cancelled
-                ? CancellationToken.None
-                : cancellationToken;
-            return await FailAttemptAsync(
-                afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, closingToken);
+            // Unregistered whatever happened, so a later Stop against a finished run is refused
+            // rather than setting a flag nothing will ever read.
+            _runs.End(runningAttempt.Id);
         }
+
+        // §15 and §16, in the order the code has to take them. A Stop that arrives while the
+        // work is already finishing does not get to undo it: an adapter that returned a
+        // validated output has produced a real file, and the success transaction below runs to
+        // completion. The requested stop is honoured afterwards, by ending the session's
+        // automated progression — never by rewriting what the attempt did.
+        if (produced.IsSuccess)
+        {
+            return await CompleteProducingStepAsync(
+                aggregate, afterStart, started, context, work, runningAttempt, produced.Value, stop,
+                cancellationToken);
+        }
+
+        if (stop.RequestedMode is { } stopped)
+        {
+            // The operator asked for this, so it is recorded as a stop rather than as a
+            // failure — including when the run ended on some other adapter failure while
+            // stopping. Both facts survive: the mode and retained external state go into the
+            // structured context, and whatever the adapter reported goes into the detail (§29).
+            return await StopAttemptAsync(
+                afterStart, started.State, context, work.Step, runningAttempt, definition,
+                stopped, stop, produced.Failure);
+        }
+
+        // Cancellation is the one failure whose caller token cannot be used to close the
+        // attempt: it is already cancelled. The adapter has stopped receiving input, while
+        // this short metadata transaction truthfully ends the attempt and releases the
+        // global automation lock. A process crash before this commit is still covered by
+        // startup Running -> Interrupted recovery.
+        CancellationToken closingToken = produced.Failure.Code == FailureCode.Cancelled
+            ? CancellationToken.None
+            : cancellationToken;
+        return await FailAttemptAsync(
+            afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, closingToken);
+    }
+
+    /// <summary>
+    /// Commits the success transaction for a producing step, then honours a stop that arrived
+    /// while it was finishing (Epic 11300 Part D2A §15, §16).
+    /// </summary>
+    /// <remarks>
+    /// Extracted from <see cref="RunProducingStepAsync"/> so the success path reads in one
+    /// piece and so §16's boundary sits at a visible seam: everything in this method happens
+    /// <i>after</i> the point where a Stop can still prevent an output, and nothing in it
+    /// consults <paramref name="stop"/> until the Revision has been committed.
+    /// </remarks>
+    private async Task<OperationResult<SessionView>> CompleteProducingStepAsync(
+        SessionAggregate aggregate,
+        SessionAggregate afterStart,
+        WorkflowTransition started,
+        CommandContext context,
+        ProducingWork work,
+        ProcessingAttempt runningAttempt,
+        (WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes) produced,
+        IAutomationStopSignal stop,
+        CancellationToken cancellationToken)
+    {
 
         // The Revision hangs off the Revision this attempt actually consumed. For a manual crop
         // that is the file the operator drew on, which is what makes ManualImport lineage
@@ -630,10 +711,10 @@ public sealed class SessionService : ISessionService
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision newRevision = Revision.Create(
             revisionId, aggregate.Session.Id, work.InputRevision, work.Operation,
-            produced.Value.Output, produced.Value.Facts, context.NowUtc);
+            produced.Output, produced.Facts, context.NowUtc);
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
-            context.NewAttemptId, work.Step, revisionId, produced.Value.Facts.Sha256);
+            context.NewAttemptId, work.Step, revisionId, produced.Facts.Sha256);
         WorkflowTransition finished = _engine.Apply(started.State, succeeded, context);
         if (finished.IsRejected)
         {
@@ -641,14 +722,15 @@ public sealed class SessionService : ISessionService
         }
 
         ProcessingAttempt succeededAttempt = runningAttempt.Succeed(
-            revisionId, context.NowUtc, produced.Value.AdapterNotes);
-        ProcessingSession sessionAfterFinish = MergeSession(sessionAfterStart, finished.State, finished.Effects, context.NowUtc);
+            revisionId, context.NowUtc, produced.AdapterNotes);
+        ProcessingSession sessionAfterFinish = MergeSession(
+            afterStart.Session, finished.State, finished.Effects, context.NowUtc);
 
         List<PrintOutput> newOutputs = [];
         if (work.Step == StepKind.PhotoshopOutput)
         {
             OperationResult<PrintOutput> output = BuildPrintOutput(
-                aggregate.Session.Id, revisionId, started.State, produced.Value, context);
+                aggregate.Session.Id, revisionId, started.State, produced, context);
             if (output.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(output.Failure);
@@ -661,17 +743,38 @@ public sealed class SessionService : ISessionService
             afterStart, sessionAfterFinish, finished.State, finished.Effects, context,
             newRevisions: [newRevision], upsertAttempts: [succeededAttempt], upsertOutputs: newOutputs);
 
-        OperationResult<Unit> committedFinish = await _repository.CommitAsync(finishing, cancellationToken);
+        // Closed on CancellationToken.None when a stop is pending, for the same reason a
+        // cancelled attempt is: the validated file already exists, and losing the transaction
+        // that records it would leave a real output with no Revision — the one outcome §16
+        // exists to prevent.
+        OperationResult<Unit> committedFinish = await _repository.CommitAsync(
+            finishing, stop.RequestedMode is null ? cancellationToken : CancellationToken.None);
         if (committedFinish.IsFailure)
         {
             return OperationResult.Fail<SessionView>(committedFinish.Failure);
         }
 
+        SessionAggregate afterFinish = afterStart with
+        {
+            Session = sessionAfterFinish,
+            Steps = finished.State.Steps,
+            Revisions = [.. afterStart.Revisions, newRevision],
+            Attempts = [.. afterStart.Attempts, succeededAttempt],
+            Outputs = OutputsAfter(afterStart.Outputs, finishing),
+        };
+
+        // §16's boundary, on the far side of the success transaction. A Take Over that arrived
+        // while the export was completing still hands Meitu to the operator — but it hands over
+        // a session whose Attempt and Revision are complete, and it cannot turn either into a
+        // failure, because the only thing left to change is the session's automated
+        // progression. A plain Stop has nothing further to do: the run is over.
+        if (stop.RequestedMode == AutomationStopMode.TakeOver)
+        {
+            return await HandOffAfterSuccessAsync(afterFinish, finished.State, context, work.Step, stop);
+        }
+
         return ViewOf(
-            finished.State,
-            [.. afterStart.Revisions, newRevision],
-            OutputsAfter(afterStart.Outputs, finishing),
-            [.. afterStart.Attempts, succeededAttempt]);
+            finished.State, afterFinish.Revisions, afterFinish.Outputs, afterFinish.Attempts);
     }
 
     /// <summary>Performs one attempt's file work, whatever kind of work that is.</summary>
@@ -685,7 +788,7 @@ public sealed class SessionService : ISessionService
     private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
         ProducingWork work, ProcessingAttempt attempt, CommandContext context,
-        CancellationToken cancellationToken)
+        IAutomationStopSignal stop, CancellationToken cancellationToken)
     {
         WorkspaceDirRef session = aggregate.Session.Workspace;
         WorkspaceFileRef? input = work.InputRevision is RevisionId inputId
@@ -799,7 +902,14 @@ public sealed class SessionService : ISessionService
                         operation,
                         decision,
                         ParentDirOf(workingCopy.Value),
-                        SiblingOf(workingCopy.Value, producedName)),
+                        SiblingOf(workingCopy.Value, producedName))
+                    {
+                        // The one seam through which an operator's Stop reaches Meitu. What the
+                        // adapter may do with it is decided by AutomationStopPolicy from the
+                        // phase the adapter itself reports — this only hands over the channel
+                        // (Part D2A §4, §9).
+                        Stop = stop,
+                    },
                     cancellationToken);
                 if (result.IsFailure)
                 {
@@ -999,6 +1109,220 @@ public sealed class SessionService : ISessionService
             : OperationResult.Fail<SessionView>(committed.Failure);
     }
 
+    /// <summary>
+    /// The stable English reason recorded on the session when an operator takes the external
+    /// application over from a running attempt (Epic 11300 Part D2A §18, §29).
+    /// </summary>
+    /// <remarks>
+    /// English and unlocalised, like every other persisted internal value (MVP design §13.4).
+    /// What the operator reads is the shell's own wording, resolved from the resource file at
+    /// display time; this is what the audit row says.
+    /// </remarks>
+    internal const string TakeOverHandOffReason =
+        "Operator took over the external application while an automated attempt was running.";
+
+    /// <summary>
+    /// Closes a running attempt because a human stopped it, and — for a takeover — hands the
+    /// session to the operator (Epic 11300 Part D2A §12, §18, §19, §29).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately a sibling of <see cref="FailAttemptAsync"/> rather than a flag on it. The
+    /// two produce different attempt statuses, different step states and different session
+    /// outcomes, and the one thing that must never happen — a stop being recorded as an
+    /// automation failure — is exactly what a shared method with a boolean would eventually do.
+    /// <para>
+    /// Everything is committed on <see cref="CancellationToken.None"/>. The caller's token is
+    /// very often already cancelled by the time a stop unwinds, and a metadata transaction that
+    /// gave up here would leave the attempt <c>Running</c> and the automation lock held — the
+    /// exact state §32 requires not to survive a stop. A crash before this commit is still
+    /// covered by D1's startup <c>Running → Interrupted</c> recovery.
+    /// </para>
+    /// <para>
+    /// The takeover's <c>HandOff</c> is applied as a second command against the state the first
+    /// one produced, not synthesised: it goes through the same engine, the same guards and the
+    /// same effects as an operator pressing Hand Off on a stopped step, which is what makes
+    /// §18's "use the existing HandedOff semantics" true rather than merely intended. That
+    /// command emits no adapter call and no external input of any kind.
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<SessionView>> StopAttemptAsync(
+        SessionAggregate aggregate,
+        WorkflowSnapshot stateAfterStart,
+        CommandContext context,
+        StepKind step,
+        ProcessingAttempt runningAttempt,
+        StepDefinition definition,
+        AutomationStopMode mode,
+        IAutomationStopSignal stop,
+        OperationFailure? adapterFailure)
+    {
+        OperationFailure failure = DescribeStop(
+            mode, stop, definition.IsAdapterBacked, runningAttempt, step, adapterFailure);
+
+        WorkflowCommand.System.AttemptCancelled cancelled = new(runningAttempt.Id, step, failure);
+        WorkflowTransition stopped = _engine.Apply(stateAfterStart, cancelled, context);
+        if (stopped.IsRejected)
+        {
+            return OperationResult.Fail<SessionView>(MapRejection(stopped.Rejection!));
+        }
+
+        ProcessingAttempt cancelledAttempt = runningAttempt.Cancel(
+            failure, context.NowUtc, DescribeRetainedState(mode, stop, definition.IsAdapterBacked));
+
+        WorkflowSnapshot state = stopped.State;
+        List<WorkflowEffect> effects = [.. stopped.Effects];
+
+        if (mode == AutomationStopMode.TakeOver)
+        {
+            WorkflowTransition handedOff = _engine.Apply(
+                state, new WorkflowCommand.HandOff(step, TakeOverHandOffReason), context);
+            if (handedOff.IsRejected)
+            {
+                return OperationResult.Fail<SessionView>(MapRejection(handedOff.Rejection!));
+            }
+
+            state = handedOff.State;
+            effects.AddRange(handedOff.Effects);
+        }
+
+        ProcessingSession updatedSession = MergeSession(aggregate.Session, state, effects, context.NowUtc);
+        SessionMutation mutation = BuildMetadataMutation(
+            aggregate, updatedSession, state, effects, context, upsertAttempts: [cancelledAttempt]);
+
+        OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
+        return committed.IsFailure
+            ? OperationResult.Fail<SessionView>(committed.Failure)
+            : OperationResult.Fail<SessionView>(failure);
+    }
+
+    /// <summary>
+    /// Hands the session to the operator after an attempt that had already succeeded
+    /// (Epic 11300 Part D2A §16).
+    /// </summary>
+    /// <remarks>
+    /// The narrow case where §16 and §17 meet: the operator asked to take Meitu over, and the
+    /// export finished before the request could stop anything. The Revision stands. What
+    /// changes is only the session's automated progression, so the same <c>HandOff</c> command
+    /// an operator could have pressed a moment later does the whole job.
+    /// <para>
+    /// A refusal here is not an error to surface: the step may have landed somewhere
+    /// <c>HandOff</c> is not legal from, and in that case the honest outcome is the successful
+    /// view the run actually produced rather than a failure about a takeover that arrived too
+    /// late to mean anything.
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<SessionView>> HandOffAfterSuccessAsync(
+        SessionAggregate aggregate,
+        WorkflowSnapshot state,
+        CommandContext context,
+        StepKind step,
+        IAutomationStopSignal stop)
+    {
+        WorkflowTransition handedOff = _engine.Apply(
+            state, new WorkflowCommand.HandOff(step, TakeOverHandOffReason), context);
+        if (handedOff.IsRejected)
+        {
+            return ViewOf(state, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts);
+        }
+
+        ProcessingSession updatedSession = MergeSession(
+            aggregate.Session, handedOff.State, handedOff.Effects, context.NowUtc);
+        SessionMutation mutation = BuildMetadataMutation(
+            aggregate, updatedSession, handedOff.State, handedOff.Effects, context);
+
+        OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
+        return committed.IsFailure
+            ? OperationResult.Fail<SessionView>(committed.Failure)
+            : ViewOf(handedOff.State, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts);
+    }
+
+    /// <summary>
+    /// Builds the structured record of one stop: what was asked for, how far the operation had
+    /// got, whether a signed cancel was actually invoked, and what may be left running
+    /// (Epic 11300 Part D2A §29).
+    /// </summary>
+    /// <remarks>
+    /// The keys are the audit §29 enumerates, and they are written here — once, from the signal
+    /// — rather than by each adapter, so a stop against the fake adapter and a stop against
+    /// production produce the same queryable shape. Anything the adapter itself observed is
+    /// preserved in the technical detail rather than replacing it.
+    /// <para>
+    /// <c>meituCancelInvoked</c> is read from the signal and never from the mode. "The operator
+    /// pressed Stop during Busy" and "a signed cancel control was resolved and invoked" are
+    /// different claims, and §10 turns on the difference: the second is false whenever the
+    /// control could not be proven, and the audit has to say so.
+    /// </para>
+    /// </remarks>
+    private static OperationFailure DescribeStop(
+        AutomationStopMode mode,
+        IAutomationStopSignal stop,
+        bool drivesExternalApplication,
+        ProcessingAttempt attempt,
+        StepKind step,
+        OperationFailure? adapterFailure)
+    {
+        RetainedExternalState retained = drivesExternalApplication
+            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationCancelWasInvoked)
+            : RetainedExternalState.None;
+
+        string headline = mode == AutomationStopMode.TakeOver
+            ? "The operator took over the external application. PrintFlow stopped this attempt and " +
+              "produced no further automated input; nothing was cancelled, dismissed or closed."
+            : stop.OperationCancelWasInvoked
+                ? "The operator stopped this operation. PrintFlow invoked the signed cancel control " +
+                  "once and the external application positively left its busy state."
+                : "The operator stopped this operation. PrintFlow stopped its own orchestration; no " +
+                  "cancel control was invoked, so the external operation may still be running and " +
+                  "operator action may be required.";
+
+        AutomationStopAudit record = new(mode, stop.Phase, stop.OperationCancelWasInvoked, retained);
+
+        Dictionary<string, string> audit = new()
+        {
+            [AutomationStopAudit.StopRequestedKey] = "true",
+            [AutomationStopAudit.ModeKey] = mode.ToString(),
+            [AutomationStopAudit.PhaseKey] = stop.Phase.ToString(),
+            [AutomationStopAudit.CancelInvokedKey] = stop.OperationCancelWasInvoked ? "true" : "false",
+            [AutomationStopAudit.RetainedKey] = retained.ToString(),
+            ["operatorActionRequired"] = record.OperatorActionMayBeRequired ? "true" : "false",
+            ["forceTerminationInvoked"] = "false",
+            ["revisionCreated"] = "false",
+            ["attemptId"] = attempt.Id.ToString(),
+            ["step"] = step.ToString(),
+        };
+
+        if (adapterFailure is not null)
+        {
+            audit["adapterFailureCode"] = adapterFailure.Code.ToString();
+        }
+
+        string detail = adapterFailure is null
+            ? headline
+            : $"{headline} The run reported: {adapterFailure.TechnicalDetail}";
+
+        return OperationFailure.Create(
+            FailureCode.Cancelled,
+            detail,
+            isRetryable: true,
+            context: audit,
+            messageKey: mode == AutomationStopMode.TakeOver
+                ? "Failure_AutomationHandedOff"
+                : "Failure_AutomationStopped");
+    }
+
+    /// <summary>The human-readable retained-state note kept on the stopped attempt row (§29).</summary>
+    private static string DescribeRetainedState(
+        AutomationStopMode mode, IAutomationStopSignal stop, bool drivesExternalApplication)
+    {
+        RetainedExternalState retained = drivesExternalApplication
+            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationCancelWasInvoked)
+            : RetainedExternalState.None;
+
+        return $"stop:{mode}; phase {stop.Phase}; " +
+               $"signed cancel invoked {(stop.OperationCancelWasInvoked ? "yes" : "no")}; " +
+               $"retained external state {retained}; force termination no";
+    }
+
     private async Task<OperationResult<SessionView>> FailImportAsync(
         ProcessingSession session, WorkflowSnapshot stateAfterStart, CommandContext context,
         ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken)
@@ -1176,6 +1500,17 @@ public sealed class SessionService : ISessionService
                 WorkflowEffect.MarkSessionCompleted c => updated with { CompletedAtUtc = c.AtUtc },
                 WorkflowEffect.MarkSessionHandedOff h => updated with { HandedOffAtUtc = h.AtUtc, HandOffReason = h.Reason },
                 WorkflowEffect.MarkSessionAbandoned a => updated with { AbandonedAtUtc = a.AtUtc, AbandonReason = a.Reason },
+
+                // Re-entry clears the session-level handoff record because those two fields
+                // answer "is this session handed off right now", and it no longer is. The
+                // history of the takeover lives on the closed attempt row, which is never
+                // rewritten (Epic 11300 Part D2A §15, §22).
+                WorkflowEffect.MarkSessionReenteredAutomation => updated with
+                {
+                    HandedOffAtUtc = null,
+                    HandOffReason = null,
+                },
+
                 _ => updated,
             };
         }

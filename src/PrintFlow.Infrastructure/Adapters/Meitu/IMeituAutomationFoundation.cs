@@ -87,7 +87,7 @@ public interface IMeituAutomationFoundation
     /// </param>
     /// <param name="cancellationToken">Cancellation stops the sequence without further interaction.</param>
     Task<OperationResult<MeituOpenedWorkingCopy>> OpenWorkingCopyAsync(
-        WorkspaceFileRef workingCopy, CancellationToken cancellationToken);
+        WorkspaceFileRef workingCopy, IAutomationStopSignal stop, CancellationToken cancellationToken);
     /// <summary>
     /// Runs the signed Enhancement action over a working copy already open in the verified
     /// Meitu, and observes it through to positively evidenced completion.
@@ -115,7 +115,8 @@ public interface IMeituAutomationFoundation
     /// it did not watch happen (§20, §21, §22).
     /// </remarks>
     Task<OperationResult<MeituEnhancementOutcome>> EnhanceAsync(
-        MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, CancellationToken cancellationToken);
+        MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, IAutomationStopSignal stop,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Runs only the C1 Background Removal UI action/completion slice. The required mode
@@ -125,6 +126,7 @@ public interface IMeituAutomationFoundation
         MeituOpenedWorkingCopy opened,
         WorkspaceFileRef workingCopy,
         BackgroundRemovalDecision modeDecision,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -158,6 +160,7 @@ public interface IMeituAutomationFoundation
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -170,6 +173,7 @@ public interface IMeituAutomationFoundation
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>

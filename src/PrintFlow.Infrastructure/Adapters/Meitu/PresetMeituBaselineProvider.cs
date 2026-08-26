@@ -154,6 +154,13 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
             return OperationResult.Fail<MeituBaseline>(backgroundRemoval.Failure);
         }
 
+        OperationResult<MeituBusyCancelSignature?> busyCancel = ReadOptional(
+            root, BusyCancelEvidence, "Meitu Busy-cancel evidence", ReadBusyCancel);
+        if (busyCancel.IsFailure)
+        {
+            return OperationResult.Fail<MeituBaseline>(busyCancel.Failure);
+        }
+
         return OperationResult.Ok(new MeituBaseline(
             executablePath,
             digest,
@@ -169,7 +176,57 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
             closeDocument.Value,
             enhancement.Value,
             export.Value,
-            backgroundRemoval.Value));
+            backgroundRemoval.Value,
+            busyCancel.Value));
+    }
+
+    /// <summary>
+    /// Reads the signed control that abandons a running Meitu operation
+    /// (Epic 11300 Part D2A §6, §7).
+    /// </summary>
+    /// <remarks>
+    /// Every one of the three refusals below is a fail-closed rule rather than input validation.
+    /// Missing ancestry, an empty confirmed-operations list, or an unparseable control each
+    /// leave <c>BusyCancel</c> unreadable, which leaves an operator Stop unable to cancel Meitu
+    /// — and that is the correct outcome, because the alternative is invoking something on
+    /// evidence that does not describe it (§10).
+    /// </remarks>
+    private static OperationResult<MeituBusyCancelSignature> ReadBusyCancel(JsonElement root)
+    {
+        if (!root.TryGetProperty("busyCancel", out JsonElement cancel) ||
+            cancel.ValueKind != JsonValueKind.Object)
+        {
+            return OperationResult.Fail<MeituBusyCancelSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Busy-cancel evidence declares no busyCancel object.");
+        }
+
+        OperationResult<MeituControlSignature> control = ReadControl(
+            cancel, "control", allowEmptyName: false, evidence: "Busy-cancel");
+        if (control.IsFailure)
+        {
+            return OperationResult.Fail<MeituBusyCancelSignature>(control.Failure);
+        }
+
+        ImmutableArray<string> ancestors = StringArray(cancel, "requiredAncestorClassNames");
+        if (ancestors.IsDefaultOrEmpty)
+        {
+            return OperationResult.Fail<MeituBusyCancelSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Busy-cancel evidence records no required ancestor chain, so the control " +
+                "could only be recognised by its own properties. Refused.");
+        }
+
+        ImmutableArray<string> operations = StringArray(cancel, "confirmedForOperations");
+        if (operations.IsDefaultOrEmpty)
+        {
+            return OperationResult.Fail<MeituBusyCancelSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu Busy-cancel evidence names no operation whose cancellation was positively " +
+                "observed, so it authorises cancelling nothing. Refused.");
+        }
+
+        return OperationResult.Ok(new MeituBusyCancelSignature(control.Value, ancestors, operations));
     }
 
     private const string StartPageCardEvidence = @"apps\meitu\start-page-card-target.json";
@@ -180,6 +237,7 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
     private const string EnhancementEvidence = @"apps\meitu\editor-enhancement.json";
     private const string ExportEvidence = @"apps\meitu\editor-export.json";
     private const string BackgroundRemovalEvidence = @"apps\meitu\editor-background-removal.json";
+    private const string BusyCancelEvidence = @"apps\meitu\editor-busy-cancel.json";
 
     /// <summary>
     /// Reads one optional evidence file the preset may or may not vouch for.

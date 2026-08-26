@@ -162,6 +162,7 @@ public interface IMeituUiDriver
     Task<OperationResult<MeituLoadObservation>> ObserveLoadedDocumentAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -195,19 +196,29 @@ public interface IMeituUiDriver
     /// successful result means the state transitions were observed, and nothing about the
     /// resulting image (§16, §20).
     /// </remarks>
+    /// <param name="stop">
+    /// The operator's Stop channel, and the phases this run reports back through it
+    /// (Epic 11300 Part D2A §4, §9). Required rather than optional: a caller who could omit it
+    /// would produce a run that cannot be stopped, and that is not a default anyone should be
+    /// able to reach by accident. Pass <c>InertAutomationStopSignal.Instance</c> to say
+    /// explicitly that nothing can stop this call.
+    /// </param>
     Task<OperationResult<MeituEnhancementOutcome>> RunEnhancementAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
     /// Runs the C1 Background Removal action through Busy and positive completion, then returns
     /// to the ordinary editor and reconfirms exact document identity. Produces no file.
     /// </summary>
+    /// <param name="stop">The operator's Stop channel; see <see cref="RunEnhancementAsync"/>.</param>
     Task<OperationResult<MeituBackgroundRemovalOutcome>> RunBackgroundRemovalAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
         BackgroundRemovalDecision modeDecision,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -252,11 +263,19 @@ public interface IMeituUiDriver
     /// through the signed cancel control rather than invoked a second time, because a confirm
     /// that was already accepted and a confirm that was ignored look identical from here.
     /// </remarks>
+    /// <param name="stop">
+    /// The operator's Stop channel; see <see cref="RunEnhancementAsync"/>. A stop that arrives
+    /// while the destination dialog is open backs out through the signed cancel control that is
+    /// already part of this validated route, rather than leaving a modal blocking the editor
+    /// (Part D2A §14). A stop that arrives after the confirm has been invoked changes nothing
+    /// here: PrintFlow cannot cancel a filesystem write and does not pretend to (§15).
+    /// </param>
     Task<OperationResult<MeituExportEvidence>> ExportResultAsync(
         MeituTarget target,
         string expectedWorkingCopyFileName,
         string observedDocumentIdentity,
         string destinationAbsolutePath,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -276,9 +295,100 @@ public interface IMeituUiDriver
     Task<OperationResult<bool>> DismissExportResultSurfaceAsync(
         MeituTarget target, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Invokes the exact signed control that abandons the operation Meitu is currently running,
+    /// once, and then observes what Meitu actually does (Epic 11300 Part D2A §9, §11).
+    /// </summary>
+    /// <param name="target">The verified process and window running the operation.</param>
+    /// <param name="operation">
+    /// Which operation the caller believes is running. Checked rather than trusted: the signed
+    /// evidence must cover it <b>and</b> its own Busy signature must match the screen right now,
+    /// because Meitu raises one shared progress mask for both operations and the control alone
+    /// therefore says nothing about which one it would cancel (§7).
+    /// </param>
+    /// <param name="expectedWorkingCopyFileName">The Working copy this attempt handed over.</param>
+    /// <param name="cancellationToken">
+    /// Cancellation stops the <i>observation</i> after the invocation. It never causes a second
+    /// invocation and never suppresses the first.
+    /// </param>
+    /// <remarks>
+    /// This is the only method in this interface whose whole purpose is to <i>stop</i> work, and
+    /// it is deliberately not expressible as anything more general. There is no
+    /// <c>InvokeCancelByName</c>, no <c>FindCancelElement</c> and no way for a caller to name
+    /// the control — the parameters carry an operation and a file name, so a future caller has
+    /// no vocabulary in which to ask for an arbitrary element to be clicked (§8).
+    /// <para>
+    /// It invokes <b>at most once</b>. §9 forbids automatic retry, and the reason is the same
+    /// one that governs the export confirm: a cancel that was accepted and a cancel that was
+    /// ignored look identical from here, so a second invocation would be a coin flip on an
+    /// irreversible-in-effect action.
+    /// </para>
+    /// <para>
+    /// It returns what it <i>observed</i> rather than a verdict, which is why
+    /// <see cref="MeituCancelOutcome"/> has no <c>Succeeded</c> member. §11 requires the
+    /// post-cancel screen to be determined live rather than assumed, and this slice's evidence
+    /// explicitly did not establish it — so the record carries the state Meitu was actually left
+    /// in, including when that state is <c>Unknown</c>.
+    /// </para>
+    /// <para>
+    /// It never terminates anything. No process API is reachable from here, and a cancel that
+    /// cannot be resolved is a refusal with nothing sent, never an escalation (§3, §10).
+    /// </para>
+    /// </remarks>
+    Task<OperationResult<MeituCancelOutcome>> CancelRunningOperationAsync(
+        MeituTarget target,
+        MeituOperation operation,
+        string? expectedWorkingCopyFileName,
+        CancellationToken cancellationToken);
+
     /// <summary>Captures the target window as local failure evidence.</summary>
     OperationResult<EvidenceRef> CaptureEvidence(MeituTarget target, string reason);
 }
+
+/// <summary>
+/// What one guarded cancel invocation positively observed (Epic 11300 Part D2A §11, §12).
+/// </summary>
+/// <param name="Operation">The operation whose Busy was correlated before the invocation.</param>
+/// <param name="BusyBeforeCancel">The observation in which that operation was positively Busy.</param>
+/// <param name="LeftBusy">
+/// Whether Meitu positively stopped matching the operation's Busy signature after the single
+/// invocation. False means the cancel was sent and the operation was still running when
+/// observation stopped — which is reported, not retried.
+/// </param>
+/// <param name="StateAfterCancel">
+/// What was actually read after the invocation. Reported rather than predicted: §11 requires
+/// the post-cancel screen to be observed rather than assumed.
+/// </param>
+/// <remarks>
+/// <see cref="StateAfterCancel"/> needs one caveat to be read correctly, and it is a caveat
+/// about <i>scope</i> rather than about Meitu. The read behind it is the fast signed-marker one
+/// — it asks only whether this operation's own Busy and completion markers are showing, because
+/// that is the question a cancel has to answer inside a Busy window that can last under two
+/// seconds. It is <b>not</b> the full <see cref="MeituStateClassifier"/> pass, so
+/// <c>MeituStartingState.Unknown</c> here means "not this operation's Busy", never "Meitu is on
+/// a screen PrintFlow cannot recognise". <see cref="MeituStateSnapshot.Observation"/> carries the
+/// markers that were actually seen.
+/// <para>
+/// The live post-cancel screens are recorded in the signed Busy-cancel evidence rather than
+/// asserted here: a cancelled 变清晰 returns to the ordinary editor tool list with the document
+/// still loaded, and a cancelled 抠图 stays inside the 抠图 page with its own controls showing.
+/// Neither is <c>KnownEditorWithExpectedWorkingCopy</c>, which is exactly why §11 forbids
+/// assuming it — the next attempt re-enters through the ordinary readiness path and proves the
+/// state for itself.
+/// </para>
+/// </remarks>
+/// <remarks>
+/// There is deliberately no <c>Succeeded</c>, no <c>DocumentIntact</c> and no
+/// <c>ReadyForRetry</c> member anywhere on this record. A cancel that worked perfectly is still
+/// an attempt that produced nothing (§12), and the one inference this type must not make
+/// available is that leaving Busy means the editor is back in a safe, input-eligible state.
+/// The next attempt re-enters through the ordinary readiness path and proves that for itself.
+/// </remarks>
+public sealed record MeituCancelOutcome(
+    MeituOperation Operation,
+    MeituStateSnapshot BusyBeforeCancel,
+    bool LeftBusy,
+    MeituStateSnapshot StateAfterCancel);
 
 /// <summary>
 /// What Meitu did with a document on its own initiative between the open and the first thing

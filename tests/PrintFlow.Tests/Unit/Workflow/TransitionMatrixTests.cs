@@ -154,7 +154,17 @@ public sealed class TransitionMatrixTests
         }
     }
 
-    /// <summary>A running attempt is concluded only by the system, never by the operator.</summary>
+    /// <summary>
+    /// A running attempt is concluded only by the system, never by the operator.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="CommandKind.AttemptCancelled"/> joined this list in Epic 11300 Part D2A and
+    /// does not weaken it. An operator Stop is not this command: the operator asks the run to
+    /// stop, and the application layer raises this once the run has actually unwound and
+    /// reported what it left behind — exactly as it raises <c>AttemptFailed</c> when an adapter
+    /// fails. Its constructor is internal to <c>PrintFlow.Workflow</c> like every other system
+    /// command, so no view model can close an attempt by constructing one (§12).
+    /// </remarks>
     [Fact]
     public void Processing_accepts_only_system_commands()
     {
@@ -167,6 +177,7 @@ public sealed class TransitionMatrixTests
             CommandKind.AttemptSucceeded,
             CommandKind.AttemptFailed,
             CommandKind.AttemptInterrupted,
+            CommandKind.AttemptCancelled,
         ], ignoreOrder: true);
     }
 
@@ -213,6 +224,9 @@ public sealed class TransitionMatrixTests
                 AttemptId.From(Guid.CreateVersion7()), step, global::PrintFlow.Domain.Results.FailureCode.Timeout),
             CommandKind.AttemptInterrupted =>
                 SystemCommands.Interrupted(AttemptId.From(Guid.CreateVersion7()), step),
+            CommandKind.AttemptCancelled =>
+                SystemCommands.Cancelled(AttemptId.From(Guid.CreateVersion7()), step),
+            CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unhandled command kind."),
         };
     }

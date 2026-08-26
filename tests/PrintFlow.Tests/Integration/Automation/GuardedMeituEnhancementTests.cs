@@ -3,6 +3,8 @@ using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Tests.Fixtures;
 
+using PrintFlow.Workflow.Ports;
+
 namespace PrintFlow.Tests.Integration.Automation;
 
 /// <summary>
@@ -201,7 +203,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build();
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsSuccess.ShouldBeTrue(run.IsFailure ? run.Failure.TechnicalDetail : string.Empty);
         run.Value.ObservedDocumentIdentity.ShouldBe(ExpectedIdentity);
@@ -229,7 +231,7 @@ public sealed class GuardedMeituEnhancementTests
     {
         Scenario s = Build();
 
-        await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+        await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         int save = s.Elements.Invocations.IndexOf(SaveId);
         int cancel = s.Elements.Invocations.IndexOf(CancelId);
@@ -247,7 +249,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build();
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsSuccess.ShouldBeTrue();
         s.Elements.ValueWrites.ShouldBeEmpty();
@@ -267,7 +269,7 @@ public sealed class GuardedMeituEnhancementTests
         cancellation.Cancel();
 
         await Should.ThrowAsync<OperationCanceledException>(() =>
-            s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, cancellation.Token));
+            s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, cancellation.Token));
 
         s.EnhancementInvocations.ShouldBe(0);
         s.Elements.Invocations.ShouldBeEmpty();
@@ -279,7 +281,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(identityValue: "PF_B2A_B_副本");
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -294,7 +296,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(raiseSaveSurface: false);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         s.EnhancementInvocations.ShouldBe(0);
@@ -314,7 +316,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(baseline: MeituFakes.BaselineWithout(enhancement: true));
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -334,7 +336,7 @@ public sealed class GuardedMeituEnhancementTests
         s.Locator.Foreground = new ForegroundIdentity(new WindowHandle(0xDEAD), 999, "explorer");
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
@@ -350,7 +352,7 @@ public sealed class GuardedMeituEnhancementTests
         s.Locator.Replace(s.Editor.Process, s.Editor.Window with { OwningProcessId = 9999 });
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
@@ -364,7 +366,7 @@ public sealed class GuardedMeituEnhancementTests
         s.Locator.DeadProcessIds.Add(s.Editor.Process.ProcessId);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
@@ -378,7 +380,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(enhancementPresent: false);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Context["inputSent"].ShouldBe("false");
@@ -409,7 +411,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(initialScreen: CompletedScreen(), afterInvoke: []);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Context["phase"].ShouldBe("Complete");
@@ -460,7 +462,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(initialScreen: BusyScreen(), afterInvoke: []);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         s.EnhancementInvocations.ShouldBe(0);
@@ -477,7 +479,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(afterInvoke: []);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.Timeout);
@@ -504,7 +506,7 @@ public sealed class GuardedMeituEnhancementTests
         };
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
@@ -526,7 +528,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(afterInvoke: [BusyScreen()]);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.Timeout);
@@ -550,7 +552,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(afterInvoke: [BusyScreen(), BusyScreen(), IdleScreen()]);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Context["wantedPhase"].ShouldBe("Complete");
@@ -564,7 +566,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build(afterInvoke: [BusyScreen(), ["unrecognised screen"]]);
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -588,7 +590,7 @@ public sealed class GuardedMeituEnhancementTests
         };
 
         await Should.ThrowAsync<OperationCanceledException>(
-            () => s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, cancellation.Token));
+            () => s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, cancellation.Token));
 
         s.EnhancementInvocations.ShouldBe(1);
         s.Input.Sends.ShouldBeEmpty();
@@ -619,7 +621,7 @@ public sealed class GuardedMeituEnhancementTests
         };
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituBlockingDialog);
@@ -659,7 +661,7 @@ public sealed class GuardedMeituEnhancementTests
         };
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -674,7 +676,7 @@ public sealed class GuardedMeituEnhancementTests
         Scenario s = Build();
 
         OperationResult<MeituEnhancementOutcome> run =
-            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, CancellationToken.None);
+            await s.Driver.RunEnhancementAsync(s.Editor, ExpectedFile, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsSuccess.ShouldBeTrue();
         s.Invocations(SaveId).ShouldBe(2);

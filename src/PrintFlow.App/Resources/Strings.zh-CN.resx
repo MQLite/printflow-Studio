@@ -431,4 +431,42 @@
   <data name="Session_BackgroundRemovalAttemptAudit" xml:space="preserve">
     <value>去除背景：自动选择 — 已针对已审图片版本 {0} 授权</value>
   </data>
+  <data name="Session_Stop" xml:space="preserve"><value>停止</value></data>
+  <data name="Session_StopHint" xml:space="preserve">
+    <value>安全停止本次自动操作，不会关闭美图秀秀。</value>
+  </data>
+  <data name="Session_StoppingNotice" xml:space="preserve">
+    <value>正在停止 —— PrintFlow 正在请求美图秀秀取消本次操作，请稍候。</value>
+  </data>
+  <data name="Session_TakeOver" xml:space="preserve"><value>在美图秀秀中手动接管</value></data>
+  <data name="Session_TakeOverHint" xml:space="preserve">
+    <value>停止 PrintFlow 自动化，美图秀秀保持原样交给你手动操作。</value>
+  </data>
+  <data name="Session_TakingOverNotice" xml:space="preserve">
+    <value>正在移交 —— PrintFlow 已停止控制美图秀秀，不会再发送任何操作。</value>
+  </data>
+  <data name="Session_TakeOverConfirmQuestion" xml:space="preserve">
+    <value>确定要在美图秀秀中手动接管吗？PrintFlow 将停止控制本次操作的美图秀秀，并且不再向它发送任何指令。美图秀秀会保持原样 —— 既不取消也不关闭，因此它可能仍在运行，你可能需要自行完成或关闭它。本次尝试不会生成版本记录；要恢复自动化，需要明确执行「恢复自动处理」。</value>
+  </data>
+  <data name="Session_TakeOverConfirm" xml:space="preserve"><value>手动接管</value></data>
+  <data name="Session_TakeOverCancel" xml:space="preserve"><value>继续自动处理</value></data>
+  <data name="Session_RetainedOperationRunning" xml:space="preserve">
+    <value>美图秀秀可能仍在执行本次操作。PrintFlow 已停止向它发送任何指令；开始新的尝试前请先检查美图秀秀。</value>
+  </data>
+  <data name="Session_RetainedProcessedResult" xml:space="preserve">
+    <value>美图秀秀可能仍保留着处理结果。未导出任何文件，也未丢弃任何内容；开始新的尝试前请先检查美图秀秀。</value>
+  </data>
+  <data name="Session_RetainedUnknown" xml:space="preserve">
+    <value>PrintFlow 无法确认美图秀秀当前的状态。开始新的尝试前请先检查美图秀秀。</value>
+  </data>
+  <data name="Session_ReenterAutomation" xml:space="preserve"><value>恢复自动处理</value></data>
+  <data name="Session_ReenterAutomationHint" xml:space="preserve">
+    <value>本会话已移交给你手动处理。恢复自动处理会以全新的工作副本开始一次新的尝试；已移交的那次尝试仍保留在历史记录中。</value>
+  </data>
+  <data name="Failure_AutomationStopped" xml:space="preserve">
+    <value>你停止了本次操作。未产生任何结果，也未创建版本记录。</value>
+  </data>
+  <data name="Failure_AutomationHandedOff" xml:space="preserve">
+    <value>你已在美图秀秀中手动接管。PrintFlow 已停止本次尝试，未再向美图秀秀发送任何指令，也未创建版本记录。</value>
+  </data>
 </root>

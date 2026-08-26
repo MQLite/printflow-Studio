@@ -23,6 +23,7 @@ internal static class FakeAdapterExecution
         IWorkspace workspace,
         TaskCompletionSource? hangStarted,
         Func<Task<OperationResult<AdapterOutput>>> succeed,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         switch (scenario.Kind)
@@ -69,6 +70,47 @@ internal static class FakeAdapterExecution
 
                 return OperationResult.Fail<AdapterOutput>(
                     FailureCode.Cancelled, "Fake adapter cancelled while hanging.");
+
+            case FakeAdapterScenarioKind.ReportPhaseAndWaitForStop:
+            {
+                stop.ReportPhase(scenario.Phase);
+                hangStarted?.TrySetResult();
+
+                // Polled rather than awaited on a handle, because the signal is the same object
+                // the UI thread writes to and adding a synchronisation primitive to it would put
+                // scheduling policy into a workflow port. The wait ends on the caller's token as
+                // well, so a test that forgets to stop still terminates.
+                while (stop.RequestedMode is null && !cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(5), cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+
+                // No file is written on any path out of here, so the workflow layer's "a stopped
+                // attempt produces no Revision" rule is exercised against an adapter that
+                // genuinely produced nothing rather than one that produced something ignored.
+                return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                    FailureCode.Cancelled,
+                    stop.RequestedMode is { } mode
+                        ? $"Fake adapter stopped by operator request '{mode}' at phase '{scenario.Phase}'. " +
+                          "No file was produced. The fake drives no external application, so nothing " +
+                          "was cancelled in one."
+                        : "Fake adapter stopped without an operator request. No file was produced.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["phase"] = scenario.Phase.ToString(),
+                        ["meituCancelInvoked"] = "false",
+                        ["forceTerminationInvoked"] = "false",
+                    }));
+            }
 
             default:
                 throw new InvalidOperationException($"Unhandled fake adapter scenario '{scenario.Kind}'.");

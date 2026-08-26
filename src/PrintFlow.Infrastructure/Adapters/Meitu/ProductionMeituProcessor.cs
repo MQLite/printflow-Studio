@@ -162,7 +162,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         }
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await OpenWorkingCopyAsync(request.Input, cancellationToken).ConfigureAwait(false);
+            await OpenWorkingCopyAsync(request.Input, request.Stop, cancellationToken).ConfigureAwait(false);
         if (opened.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(opened.Failure);
@@ -207,14 +207,14 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         CancellationToken cancellationToken)
     {
         OperationResult<MeituEnhancementOutcome> enhanced =
-            await EnhanceAsync(opened, request.Input, cancellationToken).ConfigureAwait(false);
+            await EnhanceAsync(opened, request.Input, request.Stop, cancellationToken).ConfigureAwait(false);
         if (enhanced.IsFailure)
         {
             return OperationResult.Fail<AdapterOutput>(enhanced.Failure);
         }
 
         OperationResult<MeituExportedOutput> exported = await ExportEnhancedResultAsync(
-            enhanced.Value, request.Input, sourceBefore, request.ExpectedOutput, cancellationToken)
+            enhanced.Value, request.Input, sourceBefore, request.ExpectedOutput, request.Stop, cancellationToken)
             .ConfigureAwait(false);
         if (exported.IsFailure)
         {
@@ -245,6 +245,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             opened,
             request.Input,
             request.BackgroundRemovalDecision,
+            request.Stop,
             cancellationToken).ConfigureAwait(false);
         if (removed.IsFailure)
         {
@@ -252,7 +253,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         }
 
         OperationResult<MeituExportedOutput> exported = await ExportBackgroundRemovalResultAsync(
-            removed.Value, request.Input, sourceBefore, request.ExpectedOutput, cancellationToken)
+            removed.Value, request.Input, sourceBefore, request.ExpectedOutput, request.Stop, cancellationToken)
             .ConfigureAwait(false);
         if (exported.IsFailure)
         {
@@ -330,6 +331,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(enhancement);
@@ -342,6 +344,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             workingCopy,
             workingCopyFactsBefore,
             output,
+            stop,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -351,6 +354,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(backgroundRemoval);
@@ -406,6 +410,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             workingCopy,
             workingCopyFactsBefore,
             output,
+            stop,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -420,6 +425,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
 
@@ -469,6 +475,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             workingCopy.FileName,
             observedDocumentIdentity,
             destination,
+            stop,
             cancellationToken).ConfigureAwait(false);
 
         if (exported.IsFailure)
@@ -528,9 +535,18 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         OperationResult<Unit> unchanged = MeituEnhancementOutputRule.ConfirmSourceUnchanged(
             workingCopyFactsBefore, sourceAfter.Value, workingCopy.FileName);
 
-        return unchanged.IsFailure
-            ? OperationResult.Fail<MeituExportedOutput>(unchanged.Failure)
-            : OperationResult.Ok(new MeituExportedOutput(
+        if (unchanged.IsFailure)
+        {
+            return OperationResult.Fail<MeituExportedOutput>(unchanged.Failure);
+        }
+
+        // §16. A validated output now exists on the controlled path. Recording the phase here —
+        // after every check that could still have refused it, and before the caller can create
+        // a Revision from it — is what makes "a late Stop cannot erase a validated success" a
+        // fact about the reported phase rather than a hope about timing.
+        stop.ReportPhase(ExternalOperationPhase.OutputValidated);
+
+        return OperationResult.Ok(new MeituExportedOutput(
                 output, outputFacts.Value, exported.Value, settled.Value, transparency));
     }
 
@@ -674,7 +690,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
 
     /// <inheritdoc />
     public async Task<OperationResult<MeituOpenedWorkingCopy>> OpenWorkingCopyAsync(
-        WorkspaceFileRef workingCopy, CancellationToken cancellationToken)
+        WorkspaceFileRef workingCopy, IAutomationStopSignal stop, CancellationToken cancellationToken)
     {
         // The working-copy boundary, checked before anything is resolved to a path and long
         // before Meitu is asked to open anything. A Source, Approved or Rejected reference is
@@ -762,7 +778,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         // captures the one fact that cannot be recovered later: whether the work now running
         // started after *this* open (§20, §21, §22).
         OperationResult<MeituLoadObservation> load = await _driver
-            .ObserveLoadedDocumentAsync(opened.Value, workingCopy.FileName, cancellationToken)
+            .ObserveLoadedDocumentAsync(opened.Value, workingCopy.FileName, stop, cancellationToken)
             .ConfigureAwait(false);
         if (load.IsFailure)
         {
@@ -788,7 +804,8 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
 
     /// <inheritdoc />
     public async Task<OperationResult<MeituEnhancementOutcome>> EnhanceAsync(
-        MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, CancellationToken cancellationToken)
+        MeituOpenedWorkingCopy opened, WorkspaceFileRef workingCopy, IAutomationStopSignal stop,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(opened);
 
@@ -841,7 +858,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         // the pre-invoke guard — which refuses, naming the reason that actually applies: the
         // module is selected, so invoking it would deselect it rather than start work (§21).
         OperationResult<MeituEnhancementOutcome> run = await _driver
-            .RunEnhancementAsync(opened.Target, workingCopy.FileName, cancellationToken)
+            .RunEnhancementAsync(opened.Target, workingCopy.FileName, stop, cancellationToken)
             .ConfigureAwait(false);
 
         return run.IsFailure
@@ -854,6 +871,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
         MeituOpenedWorkingCopy opened,
         WorkspaceFileRef workingCopy,
         BackgroundRemovalDecision modeDecision,
+        IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(opened);
@@ -871,6 +889,7 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
                 opened.Target,
                 workingCopy.FileName,
                 modeDecision,
+                stop,
                 cancellationToken)
             .ConfigureAwait(false);
 

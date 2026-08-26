@@ -21,7 +21,27 @@ public sealed record MeituRequest(
     MeituOperation Operation,
     BackgroundRemovalDecision BackgroundRemovalDecision,
     WorkspaceDirRef WorkingDirectory,
-    WorkspaceFileRef ExpectedOutput);
+    WorkspaceFileRef ExpectedOutput)
+{
+    /// <summary>
+    /// The channel through which the operator's Stop or Take Over reaches this run, and through
+    /// which the run reports how far it has got (Epic 11300 Part D2A §4, §9).
+    /// </summary>
+    /// <remarks>
+    /// An <c>init</c> property with a null-object default rather than a positional parameter,
+    /// so every existing construction site keeps meaning what it meant: a request with no stop
+    /// signal is an unattended one, and the adapter reads
+    /// <see cref="InertAutomationStopSignal"/> unconditionally rather than null-checking.
+    /// <para>
+    /// Deliberately not the <c>CancellationToken</c> the call already carries. A cancelled token
+    /// means "produce no more input", which is the wrong instruction for the single phase where
+    /// stopping requires one further exactly-signed input; and a token cannot say whether the
+    /// operator asked to cancel Meitu's work or to take Meitu over, which is the difference that
+    /// decides whether that input is permitted at all (§9, §19, §27).
+    /// </para>
+    /// </remarks>
+    public IAutomationStopSignal Stop { get; init; } = InertAutomationStopSignal.Instance;
+}
 
 /// <summary>What the Photoshop adapter is asked to do.</summary>
 /// <remarks>

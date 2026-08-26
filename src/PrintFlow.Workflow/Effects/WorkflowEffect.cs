@@ -174,4 +174,34 @@ public abstract record WorkflowEffect
 
     /// <summary>Record that an attempt was interrupted by a crash or shutdown.</summary>
     public sealed record RecordAttemptInterrupted(AttemptId AttemptId, StepKind Step) : WorkflowEffect;
+
+    /// <summary>
+    /// Record that a human stopped a running attempt, and what it left behind
+    /// (Epic 11300 Part D2A §12, §29).
+    /// </summary>
+    /// <remarks>
+    /// Carries the <see cref="OperationFailure"/> rather than a bare "stopped" flag because the
+    /// audit §29 asks for is entirely in its structured context: which mode was requested,
+    /// whether a signed cancel was positively invoked, and whether the external application may
+    /// still be running. A flag would record that a stop happened and lose every question an
+    /// operator actually asks afterwards.
+    /// </remarks>
+    public sealed record RecordAttemptCancelled(
+        AttemptId AttemptId,
+        StepKind Step,
+        OperationFailure Failure) : WorkflowEffect;
+
+    /// <summary>
+    /// Return a handed-off session to automation at the operator's explicit request
+    /// (Epic 11300 Part D2A §22).
+    /// </summary>
+    /// <remarks>
+    /// Clears the handoff record on the session rather than leaving it standing, because the
+    /// session-level fields answer "is this session currently handed off" and the answer has
+    /// changed. The <i>history</i> of the takeover is not stored there and is not lost: it is
+    /// the closed, never-rewritten attempt row the takeover produced, whose status is
+    /// <c>Cancelled</c> and whose structured context says a takeover was what stopped it
+    /// (§15, §29).
+    /// </remarks>
+    public sealed record MarkSessionReenteredAutomation(DateTimeOffset AtUtc) : WorkflowEffect;
 }

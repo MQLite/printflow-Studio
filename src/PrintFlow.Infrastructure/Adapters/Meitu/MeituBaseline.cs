@@ -83,10 +83,68 @@ public sealed record MeituBaseline(
     MeituCloseDocumentSignature? CloseDocument = null,
     MeituEnhancementSignature? Enhancement = null,
     MeituExportSignature? Export = null,
-    MeituBackgroundRemovalSignature? BackgroundRemoval = null)
+    MeituBackgroundRemovalSignature? BackgroundRemoval = null,
+    MeituBusyCancelSignature? BusyCancel = null)
 {
     /// <summary>The loaded-editor portion of the signed identity evidence.</summary>
     public MeituEditorSignature? EditorWithWorkingCopy => DocumentIdentity?.Editor;
+}
+
+/// <summary>
+/// The signed control that abandons an operation Meitu is currently running
+/// (Epic 11300 Part D2A §6, §7, §8).
+/// </summary>
+/// <param name="Control">
+/// The full signature of the actionable element itself. Unlike the enhancement and
+/// close-document routes, the automation name here belongs to the button rather than to a
+/// label above it, so there is no marker-to-owner walk and no ancestor depth: owner depth is
+/// zero, and that is signed evidence rather than an assumption.
+/// </param>
+/// <param name="RequiredAncestorClassNames">
+/// The control-view ancestor classes the resolved element must sit beneath, innermost first —
+/// observed as <c>LoadingMaskWidget</c> → <c>SpecialMaskWidget</c> → <c>MaskDialog</c>. The
+/// automation id already encodes that path, so this is a second, independent statement of the
+/// same fact: it is what stops a coincidentally-named id from passing as the progress mask's
+/// own cancel.
+/// </param>
+/// <param name="ConfirmedOperations">
+/// The operations this cancel has been positively observed to abandon, by the stable English
+/// <c>MeituOperation</c> name. An operation absent from this set is refused, whatever the
+/// control walk finds.
+/// </param>
+/// <remarks>
+/// One signature, not one per operation, and the reason is a live observation rather than a
+/// simplification. Meitu raises a <b>single shared</b> <c>LoadingMaskWidget</c> progress mask
+/// for both 抠图 and AI变清晰, and both produced the identical automation id
+/// <c>MainWindow.MaskDialog.MaskCenterWidget.LoadingMaskWidget.cancel</c>. Signing two
+/// per-operation controls would have fabricated a distinction the workstation does not have.
+/// <para>
+/// The consequence is the important part, and it is why <see cref="ConfirmedOperations"/>
+/// exists alongside <see cref="MeituBusyCancelRule"/>'s Busy correlation: because the control
+/// cannot say which operation is running, resolving it is <b>never</b> evidence that the
+/// expected operation is the one being cancelled. That has to come from the operation's own
+/// signed Busy signature matching at the same instant (§7).
+/// </para>
+/// <para>
+/// Nullable like every other evidence-backed member, and for the same fail-closed reason: a
+/// preset that vouches for no cancel evidence leaves Stop unable to invoke anything, and
+/// PrintFlow reports that it stopped its own orchestration without cancelling Meitu rather than
+/// looking for a button named 取消 (§10).
+/// </para>
+/// </remarks>
+public sealed record MeituBusyCancelSignature(
+    MeituControlSignature Control,
+    ImmutableArray<string> RequiredAncestorClassNames,
+    ImmutableArray<string> ConfirmedOperations)
+{
+    /// <summary>Whether the signed evidence positively covers <paramref name="operation"/>.</summary>
+    /// <remarks>
+    /// Exact, ordinal comparison against the stable English enum name. A loose match here would
+    /// let an operation nobody observed inherit the confidence of one that was.
+    /// </remarks>
+    public bool Covers(string operation) =>
+        !ConfirmedOperations.IsDefaultOrEmpty &&
+        ConfirmedOperations.Contains(operation, StringComparer.Ordinal);
 }
 
 /// <summary>

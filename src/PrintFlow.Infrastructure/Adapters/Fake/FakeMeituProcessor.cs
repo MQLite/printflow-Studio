@@ -40,7 +40,12 @@ public sealed class FakeMeituProcessor : IMeituProcessor
     {
         ArgumentNullException.ThrowIfNull(scenario);
         _scenario = scenario;
-        _hangStarted = scenario.Kind == FakeAdapterScenarioKind.HangUntilCancelled
+
+        // Both waiting scenarios arm it. A stop test needs the same guarantee a cancellation
+        // test does — that the call has actually begun waiting before the test acts — and
+        // without it the stop lands before the run registered and is refused.
+        _hangStarted = scenario.Kind is FakeAdapterScenarioKind.HangUntilCancelled
+            or FakeAdapterScenarioKind.ReportPhaseAndWaitForStop
             ? new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
             : null;
     }
@@ -69,6 +74,7 @@ public sealed class FakeMeituProcessor : IMeituProcessor
             _workspace,
             _hangStarted,
             () => SucceedAsync(request, cancellationToken),
+            request.Stop,
             cancellationToken);
     }
 

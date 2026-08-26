@@ -209,6 +209,9 @@ public sealed class AutomationBoundaryTests
         MethodInfo method = typeof(IMeituUiDriver).GetMethod(
             nameof(IMeituUiDriver.ConfirmWorkingCopyIdentityAsync))!;
 
+        // No `stop` here, deliberately. The identity probe raises the Save surface and cancels
+        // it again without saving; it produces no operation for an operator to stop, and the
+        // list is exact so that a later edit cannot quietly give it one (Part D2A §4).
         method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
             ["target", "expectedWorkingCopyFileName", "cancellationToken"]);
         method.GetParameters().ShouldNotContain(parameter =>
@@ -247,8 +250,12 @@ public sealed class AutomationBoundaryTests
         MethodInfo method = typeof(IMeituUiDriver).GetMethod(
             nameof(IMeituUiDriver.RunEnhancementAsync))!;
 
+        // `stop` joined this list in Part D2A and widens nothing: IAutomationStopSignal carries
+        // an operator's Stop or Take Over and the phase the run reports back, and exposes no
+        // control name, coordinate or keystroke. The list stays exact so that a parameter which
+        // *would* widen the surface still fails here (§8, §38).
         method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
-            ["target", "expectedWorkingCopyFileName", "cancellationToken"]);
+            ["target", "expectedWorkingCopyFileName", "stop", "cancellationToken"]);
         method.GetParameters().ShouldNotContain(parameter =>
             parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
             parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
@@ -320,7 +327,7 @@ public sealed class AutomationBoundaryTests
             nameof(IMeituUiDriver.RunBackgroundRemovalAsync))!;
 
         method.GetParameters().Select(parameter => parameter.Name).ShouldBe(
-            ["target", "expectedWorkingCopyFileName", "modeDecision", "cancellationToken"]);
+            ["target", "expectedWorkingCopyFileName", "modeDecision", "stop", "cancellationToken"]);
         method.GetParameters().ShouldNotContain(parameter =>
             parameter.Name!.Contains("path", StringComparison.OrdinalIgnoreCase) ||
             parameter.Name.Contains("coordinate", StringComparison.OrdinalIgnoreCase) ||
@@ -344,7 +351,20 @@ public sealed class AutomationBoundaryTests
         route.ShouldNotContain("SendKeys", Case.Insensitive);
         route.ShouldNotContain("mouse", Case.Insensitive);
         route.ShouldNotContain("coordinate", Case.Insensitive);
-        route.ShouldNotContain("Export", Case.Sensitive);
+
+        // Named entry points rather than the bare word "Export". The claim being made is that
+        // this route performs no export — it neither raises the Save surface nor drives the
+        // destination dialog — and naming the methods says exactly that. A bare substring said
+        // it less precisely and stopped being true in Part D2A for a reason that is the
+        // opposite of a violation: the route now reports the phase
+        // ExternalOperationPhase.CompletedBeforeExport, whose whole purpose is to record that
+        // nothing has been exported (§13).
+        route.ShouldNotContain(nameof(IMeituUiDriver.ExportResultAsync), Case.Sensitive);
+        route.ShouldNotContain("DriveExportSurfaceAsync", Case.Sensitive);
+        route.ShouldNotContain("ConfirmDestinationAsync", Case.Sensitive);
+        route.ShouldNotContain("EditorSaveControl", Case.Sensitive);
+        route.ShouldNotContain("ExportSaveAsControl", Case.Sensitive);
+        route.ShouldNotContain("ExportDestinationConfirmButton", Case.Sensitive);
     }
 
     /// <summary>

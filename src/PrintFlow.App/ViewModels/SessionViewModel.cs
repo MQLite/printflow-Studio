@@ -13,6 +13,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
@@ -270,8 +271,32 @@ public sealed partial class SessionViewModel : ObservableObject
     private const string HandedOffFromSessionReason =
         "Handed off to the operator from the session screen.";
 
+    /// <summary>
+    /// What the running automation is doing, as the workflow layer reports it
+    /// (Epic 11300 Part D2A §24, §25, §28).
+    /// </summary>
+    /// <remarks>
+    /// The authority for whether Stop and Take Over are offered, and the reason neither is a
+    /// XAML rule. It is refreshed from <see cref="ISessionService.AutomationRuntimeChanged"/>
+    /// rather than derived from <see cref="IsBusy"/>: <c>IsBusy</c> is true for every command
+    /// this screen issues, including an approval, and offering "Stop the operation" beside a
+    /// review decision would be offering to stop something that is not running.
+    /// </remarks>
+    private AutomationRuntimeView _runtime = AutomationRuntimeView.Idle;
+
     [ObservableProperty]
     private string? _notice;
+
+    /// <summary>
+    /// Whether the Take Over confirmation is standing (Epic 11300 Part D2A §26).
+    /// </summary>
+    /// <remarks>
+    /// A confirmation rather than a straight button, because a takeover is not undoable in the
+    /// way a mis-click usually is: it ends automation for the attempt, and returning needs an
+    /// explicit re-entry. It changes nothing while it stands — opening it issues no command.
+    /// </remarks>
+    [ObservableProperty]
+    private bool _isConfirmingTakeOver;
 
     [ObservableProperty]
     private bool _isBusy;
@@ -453,6 +478,12 @@ public sealed partial class SessionViewModel : ObservableObject
         _sessions = sessions;
         _previews = previews;
         _navigation = navigation;
+
+        // The Stop and Take Over controls have to appear and disappear *while* a command is in
+        // flight, which is exactly when no new SessionView exists to rebuild the screen from.
+        // Subscribing is what makes them live; polling would be the alternative and would put a
+        // timer in a view model (Part D2A §28).
+        _sessions.AutomationRuntimeChanged += OnAutomationRuntimeChanged;
 
         RejectionReasons = new ReadOnlyCollection<RejectionReasonChoice>(
             Enum.GetValues<RejectionReason>().Select(reason => new RejectionReasonChoice(reason)).ToList());
@@ -681,6 +712,108 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the one that would be wrong (§3, §13).
     /// </remarks>
     public bool CanManualCrop => _session?.CanManualCrop == true;
+
+    // --- Stop and Take Over (Epic 11300 Part D2A §24–§28) ---------------------------------
+
+    /// <summary>
+    /// Whether a Stop control should be shown (§24).
+    /// </summary>
+    /// <remarks>
+    /// Read straight off <see cref="AutomationRuntimeView.CanStopAutomation"/>, which is the
+    /// workflow layer's own answer. Nothing here restates "an attempt is running": a screen
+    /// that worked that out for itself would be a second copy of the rule, and the first thing
+    /// such a copy does is offer Stop on an idle review screen where it means nothing.
+    /// </remarks>
+    public bool CanStopAutomation => _runtime.CanStopAutomation;
+
+    /// <summary>
+    /// Whether a Take Over control should be shown (§25).
+    /// </summary>
+    /// <remarks>
+    /// Narrower than <see cref="CanStopAutomation"/> by one condition the workflow layer
+    /// applies: the run must actually drive an external application. A deterministic trim has
+    /// no Meitu to hand over, and offering the control there would be the generic always-on
+    /// session button §25 rules out.
+    /// </remarks>
+    public bool CanTakeOverAutomation => _runtime.CanTakeOverAutomation;
+
+    /// <summary>Whether the operator has already asked this run to stop or be taken over.</summary>
+    public bool IsStopping =>
+        _runtime.State is AutomationRuntimeState.StopRequested or AutomationRuntimeState.TakeOverRequested;
+
+    /// <summary>What the screen says while a stop is unwinding, or null when none is (§37).</summary>
+    /// <remarks>
+    /// Two messages rather than one, because the two requests promise different things. Stop
+    /// says PrintFlow is trying to cancel the external work; Take Over says PrintFlow has let go
+    /// and is not touching anything. Showing the first while the second is happening would tell
+    /// the operator PrintFlow is doing something to Meitu that it is deliberately not doing.
+    /// </remarks>
+    public string? StoppingNotice => _runtime.State switch
+    {
+        AutomationRuntimeState.StopRequested => Strings.Session_StoppingNotice,
+        AutomationRuntimeState.TakeOverRequested => Strings.Session_TakingOverNotice,
+        _ => null,
+    };
+
+    /// <summary>
+    /// Whether the operator needs to be told what the external application may still be holding
+    /// (§21, §37).
+    /// </summary>
+    /// <remarks>
+    /// From the closed attempt row rather than from the live runtime, so it survives the run
+    /// ending and a restart. False after a stop whose signed cancel positively took effect —
+    /// there is nothing left to warn about — and true after one that could not resolve a cancel.
+    /// </remarks>
+    public bool HasRetainedExternalState => _session?.HasRetainedExternalState == true;
+
+    /// <summary>
+    /// The warning about what Meitu may still be doing, or null when there is nothing to say.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately never claims the external application is safe, finished or idle. PrintFlow
+    /// stopped looking at it, and the honest statements are "it may still be running" and "it
+    /// may still be holding a result" (§21).
+    /// </remarks>
+    public string? RetainedExternalStateNotice => _session?.LastAutomationStop switch
+    {
+        null => null,
+        { Retained: RetainedExternalState.OperationMayStillBeRunning } =>
+            Strings.Session_RetainedOperationRunning,
+        { Retained: RetainedExternalState.ProcessedResultRetained } =>
+            Strings.Session_RetainedProcessedResult,
+        { Retained: RetainedExternalState.Unknown } => Strings.Session_RetainedUnknown,
+        _ => null,
+    };
+
+    /// <summary>
+    /// Whether the operator must explicitly return this session to automation (§22, §30).
+    /// </summary>
+    public bool CanReenterAutomation => _session?.RequiresAutomationReentry == true;
+
+    /// <summary>The confirmation text shown before a takeover is carried out (§26).</summary>
+    public string TakeOverConfirmQuestion => Strings.Session_TakeOverConfirmQuestion;
+
+    public string StopLabel => Strings.Session_Stop;
+
+    /// <summary>
+    /// The one-line explanation shown beside the two controls (§27).
+    /// </summary>
+    /// <remarks>
+    /// Both hints together rather than one each, so the operator reads the <i>distinction</i>
+    /// at the moment of choosing. Told separately, "stops this operation safely" and "leaves
+    /// Meitu as it is" are each easy to read as the other.
+    /// </remarks>
+    public string StopHint => $"{Strings.Session_StopHint} {Strings.Session_TakeOverHint}";
+
+    public string TakeOverLabel => Strings.Session_TakeOver;
+
+    public string TakeOverConfirmLabel => Strings.Session_TakeOverConfirm;
+
+    public string TakeOverCancelLabel => Strings.Session_TakeOverCancel;
+
+    public string ReenterAutomationLabel => Strings.Session_ReenterAutomation;
+
+    public string ReenterAutomationHint => Strings.Session_ReenterAutomationHint;
 
     /// <summary>True while a drawn rectangle is ready to be submitted (§23).</summary>
     public bool CanApplyManualCrop => IsCropping && CropSelection is not null && !IsBusy;
@@ -1229,6 +1362,111 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private Task HandOffAsync(CancellationToken cancellationToken) =>
         RunAsync(step => new WorkflowCommand.HandOff(step, HandedOffFromSessionReason), cancellationToken);
+
+    // --- Stop and Take Over commands (Epic 11300 Part D2A §24–§27) -------------------------
+
+    /// <summary>
+    /// Asks the running operation to stop safely (§9, §27).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately <b>not</b> routed through <see cref="RunAsync"/>, and the reason is
+    /// structural rather than stylistic. <c>RunAsync</c> returns immediately while
+    /// <see cref="IsBusy"/> is true, and <c>IsBusy</c> is true for the whole of the run this is
+    /// trying to stop — so a Stop that went through it would silently do nothing exactly when
+    /// it is needed. It is also not a <c>WorkflowCommand</c>: it changes no session state and
+    /// creates no attempt. It sets a flag the running adapter reads, and the call that started
+    /// the run reports the outcome.
+    /// <para>
+    /// What Stop is permitted to do about Meitu is decided in the workflow layer from the phase
+    /// the adapter reports, not here. This screen cannot express "click cancel", and it does not
+    /// know whether one will be clicked (§38).
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private void StopAutomation()
+    {
+        if (_session is null || !CanStopAutomation)
+        {
+            return;
+        }
+
+        Notice = null;
+        OperationResult<Unit> requested = _sessions.RequestStop(
+            _session.Id, AutomationStopMode.StopOperation);
+
+        if (requested.IsFailure)
+        {
+            // Reported rather than swallowed. "Stop did nothing" is precisely the outcome an
+            // operator must not be left guessing about.
+            Notice = Describe(requested.Failure);
+        }
+    }
+
+    /// <summary>
+    /// Opens the Take Over confirmation. Changes nothing (§26).
+    /// </summary>
+    /// <remarks>
+    /// Cannot leave a trace, because it has nothing to leave one with: it issues no command and
+    /// reaches no service. The same property <see cref="CancelManualCrop"/> has, and for the
+    /// same reason — an operator who opens a confirmation and thinks better of it has not
+    /// changed anything.
+    /// </remarks>
+    [RelayCommand]
+    private void BeginTakeOver()
+    {
+        if (!CanTakeOverAutomation)
+        {
+            return;
+        }
+
+        IsConfirmingTakeOver = true;
+    }
+
+    /// <summary>Closes the Take Over confirmation without taking over (§26).</summary>
+    [RelayCommand]
+    private void CancelTakeOver() => IsConfirmingTakeOver = false;
+
+    /// <summary>
+    /// Stops PrintFlow automation and leaves Meitu for the operator (§17, §19, §20).
+    /// </summary>
+    /// <remarks>
+    /// The same one-line mechanism as <see cref="StopAutomation"/> with a different mode, and
+    /// the difference is entirely in what the workflow layer then permits: a takeover resolves
+    /// to "produce no input at all" from every phase, including Busy and including a blocking
+    /// modal. This screen has no way to make it mean anything else.
+    /// </remarks>
+    [RelayCommand]
+    private void ConfirmTakeOver()
+    {
+        IsConfirmingTakeOver = false;
+
+        if (_session is null)
+        {
+            return;
+        }
+
+        Notice = null;
+        OperationResult<Unit> requested = _sessions.RequestStop(
+            _session.Id, AutomationStopMode.TakeOver);
+
+        if (requested.IsFailure)
+        {
+            Notice = Describe(requested.Failure);
+        }
+    }
+
+    /// <summary>
+    /// Returns a handed-off session to automation, explicitly (§22).
+    /// </summary>
+    /// <remarks>
+    /// An ordinary command through the ordinary path, unlike the two above: it changes session
+    /// state, so it goes through the engine like everything else. It starts nothing — the
+    /// operator still presses Run Step afterwards, which is what produces the new attempt
+    /// against a fresh working copy.
+    /// </remarks>
+    [RelayCommand]
+    private Task ReenterAutomationAsync(CancellationToken cancellationToken) =>
+        RunAsync(new WorkflowCommand.ReenterAutomation(), cancellationToken);
 
     // --- Manual crop commands (Part C2 §5, §12, §22) --------------------------------------
 
@@ -1986,6 +2224,62 @@ public sealed partial class SessionViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Adopts the workflow layer's live automation state (Epic 11300 Part D2A §28).
+    /// </summary>
+    /// <remarks>
+    /// Filtered to this session on purpose. The registry reports one run at a time for the whole
+    /// process, and a screen showing session A must not offer to stop session B's run just
+    /// because something somewhere is running.
+    /// <para>
+    /// Raised from whichever thread the run is on, so the property notifications go through
+    /// <see cref="System.Windows.Threading.Dispatcher"/> when one is available. A test host has
+    /// none, and there the direct call is correct.
+    /// </para>
+    /// </remarks>
+    private void OnAutomationRuntimeChanged(object? sender, AutomationRuntimeView runtime)
+    {
+        AutomationRuntimeView adopted = _session is not null && runtime.SessionId == _session.Id
+            ? runtime
+            : AutomationRuntimeView.Idle;
+
+        void Apply()
+        {
+            _runtime = adopted;
+
+            // A takeover confirmation left standing after the run has ended would offer to take
+            // over something that is no longer running, so it closes with the run (§26).
+            if (!adopted.CanTakeOverAutomation)
+            {
+                IsConfirmingTakeOver = false;
+            }
+
+            NotifyAutomationRuntimeChanged();
+        }
+
+        System.Windows.Threading.Dispatcher? dispatcher =
+            System.Windows.Application.Current?.Dispatcher;
+
+        if (dispatcher is null || dispatcher.CheckAccess())
+        {
+            Apply();
+        }
+        else
+        {
+            dispatcher.Invoke(Apply);
+        }
+    }
+
+    private void NotifyAutomationRuntimeChanged()
+    {
+        OnPropertyChanged(nameof(CanStopAutomation));
+        OnPropertyChanged(nameof(CanTakeOverAutomation));
+        OnPropertyChanged(nameof(IsStopping));
+        OnPropertyChanged(nameof(StoppingNotice));
+        StopAutomationCommand.NotifyCanExecuteChanged();
+        BeginTakeOverCommand.NotifyCanExecuteChanged();
+    }
+
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         if (_session is null)
@@ -2032,6 +2326,20 @@ public sealed partial class SessionViewModel : ObservableObject
         // button in front of an operator for an image that is no longer the one on screen
         // (Part C2B2 §6, §12).
         IsConfirmingAutomaticSelection = false;
+
+        // The run this screen was showing has finished by the time a new view arrives, so the
+        // takeover confirmation goes with it — offering to take over a run that has ended would
+        // be a button that cannot do what it says (Part D2A §26).
+        IsConfirmingTakeOver = false;
+
+        // Re-read rather than left as it was: the retained-external-state warning and the
+        // re-entry offer both come from what was just persisted, and the run's own live state
+        // is idle again by now.
+        _runtime = _sessions.GetAutomationRuntime(session.Id);
+        NotifyAutomationRuntimeChanged();
+        OnPropertyChanged(nameof(HasRetainedExternalState));
+        OnPropertyChanged(nameof(RetainedExternalStateNotice));
+        OnPropertyChanged(nameof(CanReenterAutomation));
 
         ClearPreviews();
         PreviewsLoaded = LoadPreviewsAsync(session, _previewGeneration, CancellationToken.None);

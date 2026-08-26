@@ -14,7 +14,37 @@ public enum AttemptStatus
 
     Succeeded,
     Failed,
+
+    /// <summary>
+    /// The attempt did not finish and produced nothing, because the run itself stopped.
+    /// </summary>
+    /// <remarks>
+    /// Written by startup recovery for an attempt whose process died mid-run (Epic 11300
+    /// Part D1). It is deliberately <i>not</i> what an operator Stop produces — see
+    /// <see cref="Cancelled"/> — so "the computer stopped" and "a human stopped it" stay
+    /// distinguishable in the history.
+    /// </remarks>
     Interrupted,
+
+    /// <summary>
+    /// A human ended the attempt: an operator Stop, or an operator taking Meitu over
+    /// (Epic 11300 Part D2A §12, §19).
+    /// </summary>
+    /// <remarks>
+    /// Never carries an output Revision, which the database enforces as well as this type does
+    /// — the <c>ProcessingAttempt</c> CHECK admits an <c>OutputRevisionId</c> only for
+    /// <c>SUCCEEDED</c>. That is what makes §12's rule structural: a Meitu operation that
+    /// cancelled cleanly is still an attempt that produced nothing, and there is no such thing
+    /// as a "cancelled Revision" for it to point at.
+    /// <para>
+    /// Why an operator's Stop and their Take Over share one status rather than having one each:
+    /// both are "a human ended this attempt without a result", and what separates them is not
+    /// the attempt's outcome but what happens to the external application afterwards. That
+    /// difference is recorded where it belongs — in <see cref="ProcessingAttempt.Failure"/>'s
+    /// structured context and in <see cref="ProcessingAttempt.AdapterNotes"/> — rather than by
+    /// splitting a lifecycle value in two (§29).
+    /// </para>
+    /// </remarks>
     Cancelled,
 }
 
@@ -154,6 +184,33 @@ public sealed record ProcessingAttempt(
 
     public ProcessingAttempt Interrupt(DateTimeOffset endedAtUtc) =>
         this with { Status = AttemptStatus.Interrupted, EndedAtUtc = endedAtUtc };
+
+    /// <summary>
+    /// Ends the attempt because a human stopped it, recording why and what was left behind
+    /// (Epic 11300 Part D2A §12, §29).
+    /// </summary>
+    /// <remarks>
+    /// Takes <paramref name="adapterNotes"/>, which <see cref="Fail"/> and
+    /// <see cref="Interrupt"/> do not, and the asymmetry is deliberate. A stop is the one
+    /// non-success whose <i>external</i> consequences an operator has to be told about: whether
+    /// a signed cancel was actually invoked, whether the application positively left Busy, and
+    /// whether it may still be holding a processed result. None of that fits in a failure code,
+    /// and all of it is exactly what the adapter observed.
+    /// <para>
+    /// <see cref="OutputRevisionId"/> is left null by construction — the record is copied with
+    /// a status change and nothing else — so §12's "no cancelled Revision" holds here for the
+    /// same reason it holds for a failure.
+    /// </para>
+    /// </remarks>
+    public ProcessingAttempt Cancel(
+        OperationFailure failure, DateTimeOffset endedAtUtc, string? adapterNotes = null) =>
+        this with
+        {
+            Status = AttemptStatus.Cancelled,
+            Failure = failure,
+            EndedAtUtc = endedAtUtc,
+            AdapterNotes = adapterNotes,
+        };
 
     /// <summary>True when this attempt legitimately carries an output Revision.</summary>
     public bool ProducedRevision => Status == AttemptStatus.Succeeded && OutputRevisionId is not null;

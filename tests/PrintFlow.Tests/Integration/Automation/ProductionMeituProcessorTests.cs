@@ -454,7 +454,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         WorkspaceFileRef notWorking = WorkspaceFileRef.Create("Sessions/S_1/Any/customer.png", area);
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await h.Adapter.OpenWorkingCopyAsync(notWorking, CancellationToken.None);
+            await h.Adapter.OpenWorkingCopyAsync(notWorking, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
@@ -540,7 +540,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         };
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
+            await h.Adapter.OpenWorkingCopyAsync(working, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         opened.IsSuccess.ShouldBeTrue();
         opened.Value.State.State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
@@ -562,7 +562,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             "Sessions/S_1/Working/A_1/gone.png", WorkspaceArea.Working);
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await h.Adapter.OpenWorkingCopyAsync(missing, CancellationToken.None);
+            await h.Adapter.OpenWorkingCopyAsync(missing, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.OutputMissing);
@@ -634,7 +634,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         File.WriteAllBytes(absolute, [0x89, 0x50, 0x4E, 0x47]);
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
+            await h.Adapter.OpenWorkingCopyAsync(working, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -695,7 +695,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         File.WriteAllBytes(absolute, [0x89, 0x50, 0x4E, 0x47]);
 
         OperationResult<MeituOpenedWorkingCopy> opened =
-            await h.Adapter.OpenWorkingCopyAsync(working, CancellationToken.None);
+            await h.Adapter.OpenWorkingCopyAsync(working, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
@@ -736,7 +736,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             MeituFakes.QuietLoad());
 
         OperationResult<MeituEnhancementOutcome> run =
-            await h.Adapter.EnhanceAsync(opened, reference, CancellationToken.None);
+            await h.Adapter.EnhanceAsync(opened, reference, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
@@ -770,6 +770,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
                 opened,
                 reference,
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+                InertAutomationStopSignal.Instance,
                 CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
@@ -810,7 +811,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             MeituFakes.QuietLoad());
 
         OperationResult<MeituEnhancementOutcome> run =
-            await h.Adapter.EnhanceAsync(opened, working, CancellationToken.None);
+            await h.Adapter.EnhanceAsync(opened, working, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         h.Elements.Invocations.Count(i => i == MeituFakes.ModuleAutomationId).ShouldBe(0);
@@ -841,7 +842,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
             MeituFakes.QuietLoad());
 
         OperationResult<MeituEnhancementOutcome> run =
-            await h.Adapter.EnhanceAsync(opened, working, CancellationToken.None);
+            await h.Adapter.EnhanceAsync(opened, working, InertAutomationStopSignal.Instance, CancellationToken.None);
 
         run.IsFailure.ShouldBeTrue();
         run.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);

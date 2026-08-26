@@ -63,6 +63,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.System.AttemptSucceeded c => AttemptSucceeded(state, c, context),
             WorkflowCommand.System.AttemptFailed c => AttemptFailed(state, c, context),
             WorkflowCommand.System.AttemptInterrupted c => AttemptInterrupted(state, c, context),
+            WorkflowCommand.System.AttemptCancelled c => AttemptCancelled(state, c, context),
+            WorkflowCommand.ReenterAutomation => ReenterAutomation(state, context),
             _ => WorkflowTransition.Rejected(
                 RejectionCode.CommandNotApplicable,
                 $"The engine has no handler for command '{command.Kind}'."),
@@ -1110,6 +1112,115 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(state.WithStep(interrupted), effects);
     }
 
+    /// <summary>
+    /// Closes a running attempt because a human stopped it (Epic 11300 Part D2A §12, §16).
+    /// </summary>
+    /// <remarks>
+    /// The rule that matters here is the one that is <i>absent</i>: nothing in this handler can
+    /// reach a Revision. It sets a step state and records a failure, exactly as
+    /// <see cref="AttemptFailed"/> does, and it has no parameter naming an output — so §12's
+    /// "no cancelled Revision" is a property of the signature rather than a discipline.
+    /// <para>
+    /// §16's boundary is enforced by <see cref="TransitionTable"/> rather than restated here.
+    /// A step whose attempt already succeeded is no longer <c>Processing</c>, and
+    /// <see cref="CommandKind.AttemptCancelled"/> is legal only from <c>Processing</c> — so a
+    /// Stop that arrives after a validated output has been committed is refused, and cannot
+    /// rewrite a completed Attempt/Revision transaction into a failure. That is the whole of
+    /// "late Stop cannot erase success", and it is a table row rather than an <c>if</c>.
+    /// </para>
+    /// <para>
+    /// The automation lock is released unconditionally, and unlike <see cref="AttemptFailed"/>
+    /// this does not first ask whether the step is adapter-backed. A stopped run is over
+    /// however it was performed, and holding a global lock on behalf of a run that has stopped
+    /// is exactly the state §32 requires not to persist.
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition AttemptCancelled(
+        WorkflowSnapshot state, WorkflowCommand.System.AttemptCancelled command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, command.Step, CommandKind.AttemptCancelled);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        SessionStep stopped = resolved.Step!.WithState(
+            TransitionTable.Destination(CommandKind.AttemptCancelled, resolved.Definition!), context.NowUtc);
+
+        return WorkflowTransition.Accepted(
+            state.WithStep(stopped),
+            [
+                new WorkflowEffect.RecordAttemptCancelled(command.AttemptId, command.Step, command.Failure),
+                new WorkflowEffect.ReleaseAutomationLock(),
+            ]);
+    }
+
+    /// <summary>
+    /// Returns a handed-off session to automation, at the operator's explicit request
+    /// (Epic 11300 Part D2A §22, §30).
+    /// </summary>
+    /// <remarks>
+    /// The one command that lifts <c>SessionState.HandedOff</c>, and therefore the one thing
+    /// standing between a takeover and automation quietly resuming. Everything else that could
+    /// drive the session forward goes through <see cref="Resolve"/>, which refuses a session
+    /// that is not <c>Active</c> — so a restart, a reload, or an operator pressing Run again
+    /// all fail closed until this command is issued (§30).
+    /// <para>
+    /// It starts nothing. The step goes back to <c>Waiting</c>, which is exactly where
+    /// <see cref="Retry"/> leaves it, and the new attempt is produced by the ordinary
+    /// <see cref="StartStep"/> path afterwards — with the fresh working copy and the normal
+    /// safe-state verification that path already performs. Re-entry is therefore explicit
+    /// twice over: once to leave the handed-off state, and once to begin work (§22).
+    /// </para>
+    /// <para>
+    /// No effect here touches a file, an attempt row or a Revision. The handed-off attempt is
+    /// closed history and stays exactly as it was written (§15), and nothing scans the external
+    /// application or the workspace for whatever the operator produced while they owned it
+    /// (§23).
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition ReenterAutomation(WorkflowSnapshot state, CommandContext context)
+    {
+        if (state.SessionState != SessionState.HandedOff)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The session is {state.SessionState}; returning to automation applies only to a " +
+                "session that was handed off to the operator.");
+        }
+
+        SessionStep? current = state.CurrentStep;
+        if (current is null)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The session has no step left to return to, so there is no automation to re-enter.");
+        }
+
+        // Only from a step that actually stopped. A handed-off session sitting on an Approved
+        // or ReviewRequired step has a result waiting for a decision, and re-entry must not
+        // quietly discard it by resetting the step to Waiting.
+        if (current.State is not (StepState.Interrupted or StepState.Failed or StepState.RetryRequired))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.IllegalStateTransition,
+                $"Step {current.Step} is {current.State}; returning to automation applies to a step " +
+                "whose attempt stopped without a result.");
+        }
+
+        SessionStep reset = current with
+        {
+            State = StepState.Waiting,
+            CurrentRevisionId = null,
+            CurrentRevisionSha256 = null,
+            EnteredStateAtUtc = context.NowUtc,
+        };
+
+        return WorkflowTransition.Accepted(
+            state.WithStep(reset) with { SessionState = SessionState.Active },
+            [new WorkflowEffect.MarkSessionReenteredAutomation(context.NowUtc)]);
+    }
+
     // ---------------------------------------------------------------------------------
     // Shared guards
     // ---------------------------------------------------------------------------------
@@ -1300,6 +1411,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.Complete => new WorkflowCommand.Complete(),
             CommandKind.AddAnotherSize => new WorkflowCommand.AddAnotherSize(),
             CommandKind.AbandonSession => new WorkflowCommand.AbandonSession(ProbeReason),
+
+            // Probed with the real command, because it has no payload at all: what varies, and
+            // therefore what the answer reports, is whether the session is handed off and
+            // whether its current step is one whose attempt stopped without a result
+            // (Epic 11300 Part D2A §22).
+            CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
             CommandKind.Approve when current?.CurrentRevisionSha256 is Sha256 hash =>
                 new WorkflowCommand.Approve(step, hash),
             CommandKind.Reject when current?.CurrentRevisionSha256 is Sha256 hash =>

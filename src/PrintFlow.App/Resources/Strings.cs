@@ -167,6 +167,40 @@ internal static class Strings
 
     internal static string Session_HandedOffNotice => Get(nameof(Session_HandedOffNotice));
 
+    // --- Stop and Take Over (Epic 11300 Part D2A §37) -------------------------------------
+
+    internal static string Session_Stop => Get(nameof(Session_Stop));
+
+    internal static string Session_StopHint => Get(nameof(Session_StopHint));
+
+    internal static string Session_StoppingNotice => Get(nameof(Session_StoppingNotice));
+
+    internal static string Session_TakeOver => Get(nameof(Session_TakeOver));
+
+    internal static string Session_TakeOverHint => Get(nameof(Session_TakeOverHint));
+
+    internal static string Session_TakingOverNotice => Get(nameof(Session_TakingOverNotice));
+
+    internal static string Session_TakeOverConfirmQuestion => Get(nameof(Session_TakeOverConfirmQuestion));
+
+    internal static string Session_TakeOverConfirm => Get(nameof(Session_TakeOverConfirm));
+
+    internal static string Session_TakeOverCancel => Get(nameof(Session_TakeOverCancel));
+
+    internal static string Session_RetainedOperationRunning => Get(nameof(Session_RetainedOperationRunning));
+
+    internal static string Session_RetainedProcessedResult => Get(nameof(Session_RetainedProcessedResult));
+
+    internal static string Session_RetainedUnknown => Get(nameof(Session_RetainedUnknown));
+
+    internal static string Session_ReenterAutomation => Get(nameof(Session_ReenterAutomation));
+
+    internal static string Session_ReenterAutomationHint => Get(nameof(Session_ReenterAutomationHint));
+
+    internal static string Failure_AutomationStopped => Get(nameof(Failure_AutomationStopped));
+
+    internal static string Failure_AutomationHandedOff => Get(nameof(Failure_AutomationHandedOff));
+
     internal static string Session_ReviewHeading => Get(nameof(Session_ReviewHeading));
 
     internal static string Session_RejectReasonLabel => Get(nameof(Session_RejectReasonLabel));
