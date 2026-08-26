@@ -812,3 +812,336 @@ real WPF flow, five states passed human inspection in en-US and two more in zh-C
 shell-terminating defect plus a structural gap in the visual gate itself were found and recorded.
 
 EPIC 11300 NOT READY
+
+## Final Gate Closure Run R4 — 27 August 2026
+
+R4 is the final closure run requested after both Final Gate blockers were corrected. It preserves
+the original NOT READY finding and the complete R2/R3 discovery history above. R4 added no feature,
+did not start Epic 11400, did not enable global Production mode, and did not add force termination.
+
+### R4.1 Blocker-fix commits and history
+
+Both blocker corrections are present as ordinary commits in intact history:
+
+| Blocker | Product correction | Report commit | R4 result |
+|---|---|---|---|
+| R2 accepted named-token patterns reached positional `string.Format` and threw `FormatException` | `6f82780` — `11300: render accepted named-token naming patterns` | `7f8d557` | PASS |
+| R3 workspace import cancellation escaped and terminated the shell | `d40e823` — `11300: return workspace import cancellation as a result` | `8f029b7` | PASS |
+
+No commit was amended, squashed or rewritten. Nothing was pushed.
+
+### R4.2 Preflight
+
+Preflight began on `master` at `8f029b7`, 11 local commits ahead of `origin/master`. The working
+tree was clean. `git log --oneline --decorate -15` showed the R2 fix, the R3 fix, both reports and
+the prior Final Gate history in normal order. The per-user .NET 10.0.400 SDK was used because the
+system muxer did not expose the repository's required SDK.
+
+| Check | R4 preflight result |
+|---|---|
+| `git status -sb` | clean known tree; `master...origin/master [ahead 11]` |
+| `dotnet build` | PASS — **0 warnings, 0 errors** |
+| Complete suite at preflight | deliberately not run; reserved for R4.18 |
+| Package vulnerability audit at preflight | deliberately not repeated; reserved for R4.18 |
+
+### R4.3 Focused blocker-fix regressions
+
+One focused filter covered `AcceptedNamingContractTests`,
+`NamingContractWorkflowRegressionTests`, `NamingContractCrashRegressionTests`,
+`NamingContractBoundaryTests`, `WorkspaceImportCancellationTests`, and
+`ImportCancellationShellBoundaryTests`: **21 passed, 0 failed, 0 skipped**.
+
+This proved the accepted v1.8.0 patterns and the real Fake workflow still produce:
+
+- `{Name}_HD.png`;
+- `{Name}_CUTOUT.png` and CUTOUT `ReviewRequired`;
+- `{Name}_{SizeMm}mm_CMYK_W.tif`; and
+- `_{Sequence:00}`.
+
+The producing paths use `NamingPatternRenderer`; no positional `string.Format` rendering path is
+used. Import cancellation returns structured `Cancelled`, does not escape through the shell
+boundary, and does not leave a partial file valid as Source.
+
+### R4.4 Evidence gate before live work
+
+| Item | R4 result |
+|---|---|
+| Configured preset | `printflow-workstation-v1`, version `1.8.0` |
+| Manifest SHA-256 | `DE76464F011A54F80704BB6C32A2E0D00EFF9AB24834FF7D05EF8E9CF3DB60E4` — exact |
+| Manifest attribute | read-only |
+| `sourceManifestIntegrity` | **18/18 exact**, 0 missing, 0 mismatch |
+| Meitu executable | `C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe` |
+| File/product version | `7.8.7.5` / `7.8.7.5` |
+| Executable SHA-256 | `D65C6D82323275361EA0ADFBB3F6A5C0D2A5CF4CF63EA3AF1A7DDD4544B037B1` |
+
+No separate preset sign-off was created or required. Project policy explicitly does not require
+one for this closure run.
+
+### R4.5 Gate-order clarification and controlled seam
+
+R4 accepts the closure brief's clarification: E/F/H/I intrinsically require a genuinely running
+external operation and may be rendered through the already-authorised controlled Production seam
+before the complete visual gate closes. The shipped application configuration remained
+`Adapters.Mode = Fake` throughout. `FoundationEnvironmentGate` was not weakened or changed.
+
+The visual fixture was an external QA-only WPF harness under the user's temporary directory,
+outside Git. It composed the real application shell and service path, replaced only the Meitu
+processor and environment gate inside that harness process, and used fresh synthetic files. It did
+not modify product source or an accepted runtime configuration.
+
+### R4.6 Carried-forward visual states
+
+Neither blocker fix changed XAML, localisation resources or layout. As authorised by the R4 brief,
+the previously accepted states carry forward:
+
+| Locale | Carried states | Result |
+|---|---|---|
+| zh-CN | A, B, C, D, G | PASS |
+| en-US | A, B, C, D, G | PASS |
+
+G also remained naturally visible and acceptable in the R4 handed-off screens.
+
+### R4.7 zh-CN E/F/H/I human inspection
+
+Fresh synthetic Enhancement attempts were driven only until the real external automation was
+positively Busy. The real PrintFlow WPF window was then presented to the operator.
+
+| State | Human result |
+|---|---|
+| E. Stop available while external automation is running | **PASS** |
+| F. Take Over confirmation | **PASS** |
+| H. Return to automation | **PASS** |
+| I. retained-external-state / manual-close guidance | **PASS** |
+
+The operator explicitly returned `zh-CN E/F PASS` and `zh-CN H/I PASS`. Wording was natural, no
+clipping or overlap was reported, Stop and Take Over were visibly distinct, consequences were
+understandable, and no wording implied force-close.
+
+The technical Take Over run `zh7` reached Busy, consumed the operator Take Over signal, completed
+with `HandedOff=True`, `Reenter=True`, and `Retained=True`, and displayed the Chinese operator-owned
+guidance. Persistence recorded the Enhancement attempt as `CANCELLED` with `FailureCode=Cancelled`,
+no output Revision id, and only the imported source Revision. Explicit re-entry was then accepted
+through the ordinary `ISessionService` command path: `HandedOff -> Active`, with re-entry no longer
+required. The exact retained `R4-ZH7-TAKEOVER.png` document was subsequently closed through the
+signed route and Meitu reached its signed empty-editor state.
+
+### R4.8 en-US E/F/H/I human inspection
+
+The en-US E/F run `en1` was a separate fresh synthetic Enhancement. Its real Busy window and Take
+Over confirmation were physically inspected before the operation completed naturally. The fresh
+`en2` attempt then performed Take Over and presented the HandedOff state for H/I.
+
+| State | Human result |
+|---|---|
+| E. Stop available while external automation is running | **PASS** |
+| F. Take Over confirmation | **PASS** |
+| H. Return to automation | **PASS** |
+| I. retained-external-state / manual-close guidance | **PASS** |
+
+The operator explicitly returned `en-US E/F PASS` and `en-US H/I PASS`. The `en2` status recorded
+`HandedOff=True`, `Reenter=True`, `Retained=True` and the English notice that PrintFlow stopped the
+attempt, sent Meitu nothing further, and created no Revision. Its database confirms a cancelled
+Enhancement attempt with no output Revision and only the imported source Revision. Explicit
+re-entry was accepted through the ordinary service path, after which the exact retained
+`R4-EN2-TAKEOVER.png` document was closed and the signed empty-editor state was confirmed.
+
+Final human visual status is therefore:
+
+- **zh-CN A–I = PASS**; and
+- **en-US A–I = PASS**.
+
+### R4.9 en-US culture limitation
+
+The accepted limitation remains a NOTE, not a blocker: en-US neutral UI resources were used while
+`CurrentCulture` remained `zh-CN`. The inspection validates English wording, layout, wrapping,
+control meaning and action distinction. It does not claim en-US numeric or date localisation
+coverage.
+
+### R4.10 Visual corrections
+
+None. No wording, spacing, width, wrapping, alignment or margin defect was reported. No XAML,
+resource or product source file changed in R4.
+
+### R4.11 Controlled Enhancement final regression
+
+The first launch was safely refused before input because an unrelated desktop window owned the
+foreground. It produced no output or Revision. After the accepted Meitu editor was positively
+restored to foreground, one fresh synthetic Enhancement completed through the Production adapter
+seam:
+
+| Fact | Result |
+|---|---|
+| Working source | `PF_BACKGROUND_C1_6E2989AC9DFA.png` |
+| Controlled relative output | `Sessions/S_SMOKE/Working/A_1/PF_BACKGROUND_C1_6E2989AC9DFA_HD.png` |
+| Source dimensions | `320x240` |
+| Output dimensions | `1280x960` |
+| Output bytes | `1,159,183` |
+| Output SHA-256 | `5207F744E04267CE1AA68BEAC7C0602CF5FBA62A8D17A2EA9B3139417F643ECC` |
+| Settling | 3 stable observations |
+| Source before SHA-256 | `C2BFBF036791E041BAA05E229992D84816BD5F3D9DD76997CEB386187FC20E65` |
+| Source after SHA-256 | same — unchanged |
+| Result | validated PNG `AdapterOutput` |
+| Cleanup | successful Enhancement returned the editor to signed empty; the built-in negative follow-up's exact retained document was then closed through the signed route |
+
+The exact actual filename proves `{Name}_HD.png` on the real Meitu path. No session, persistence
+repository or workflow engine was composed by this seam smoke, so it created no Revision.
+
+### R4.12 Controlled Background Removal final regression
+
+A separate fresh opaque RGB synthetic source was used with explicit
+`UseAutomaticSelectionForReviewedContent` authority:
+
+| Fact | Result |
+|---|---|
+| Working source | `PF_BACKGROUND_C2A_714FF565A5E4.png` |
+| Controlled relative output | `Sessions/S_SMOKE/Working/A_1/PF_BACKGROUND_C2A_714FF565A5E4_CUTOUT.png` |
+| Source/output dimensions | `480x360` / `480x360` — exact preservation |
+| Source pixel format | `Bgr24` |
+| Output pixel format | `Bgra32`, `HasAlpha=True` |
+| Transparent pixels | `149,305 / 172,800` — present |
+| Visible pixels | `55,473 / 172,800` — present |
+| Output bytes | `4,788` |
+| Output SHA-256 | `E9E83B1890D8CBF5963C0D5561845DD8C209F72555908D055AC41A0104ABFD99` |
+| Source SHA-256 | `9C601AD12C9AE4DFF1682B63DC47E15F2150A3B42BFE171909CAAF6009EBF6D6` before and after |
+| Settling | 3 stable observations |
+| Cleanup | editor returned to signed empty state |
+
+The result was a validated PNG `AdapterOutput`; no Revision was reachable from the seam smoke. The
+exact actual filename proves the R2 blocker pattern `{Name}_CUTOUT.png` works through real Meitu.
+No cutout-quality claim is made.
+
+### R4.13 Controlled Stop regression
+
+A fresh synthetic Enhancement established real Busy before the ordinary production stop registry
+accepted `StopOperation`.
+
+| Required behavior | R4 result |
+|---|---|
+| Exact signed control | `Button/QPushButton`, automation id containing `MaskDialog.MaskCenterWidget.LoadingMaskWidget.cancel`, exact name `取消` |
+| Invocation count | **exactly one** |
+| Left Busy positively | **yes** |
+| Outcome | structured `Cancelled` |
+| Export / AdapterOutput / Revision | none |
+| Process termination | none; `forceTerminationInvoked=false` |
+
+The post-cancel screen was conservatively classified `Unknown`, while the operation-correlated
+evidence positively proved it left Busy. The exact retained synthetic document
+`PF_BACKGROUND_C1_F7D8B0161F79.png` was then identified and closed through the signed route; the
+editor reached its signed empty state. No duplicate Background Removal Stop was run.
+
+### R4.14 Take Over evidence
+
+The visual Take Over runs satisfy the Final-QA regression and were reused rather than duplicated:
+
+- a real external Enhancement was positively Busy;
+- Take Over was requested through the real runtime stop channel;
+- the Take Over policy permitted **zero further PrintFlow Meitu input**;
+- each attempt closed as Cancelled and the session became HandedOff;
+- Meitu and the synthetic document were left operator-owned;
+- no output was adopted and no output Revision was created; and
+- explicit re-entry was required and later accepted through the ordinary workflow command path.
+
+No separate duplicate Take Over smoke was run.
+
+### R4.15 Actual HD/CUTOUT naming proof
+
+| Artifact | Actual filename | Contract | Result |
+|---|---|---|---|
+| Enhancement | `PF_BACKGROUND_C1_6E2989AC9DFA_HD.png` | `{Name}_HD.png` | PASS |
+| Background Removal | `PF_BACKGROUND_C2A_714FF565A5E4_CUTOUT.png` | `{Name}_CUTOUT.png` | PASS |
+
+Both were produced by the real Meitu adapter path, not Fake. The accepted runtime JSON contains no
+positional `{0}` naming syntax; `{Name}`, `{SizeMm}`, `{Sequence}` and `{Sequence:00}` remain the
+named-token authority.
+
+### R4.16 Final external Meitu state
+
+| Question | R4 final state |
+|---|---|
+| Is Meitu running? | **Yes** |
+| PID / path | `28736` / `C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe` |
+| Document loaded? | **No** — signed empty-editor state confirmed after the final exact-document close |
+| Modal open? | **No** — current accessibility tree contains no `MainWindow.MaskDialog` |
+| Positively identified state | `KnownEditorEmpty` |
+| Process killed or force-closed? | **No** |
+
+R4 synthetic workspaces remain outside Git under `D:\PrintFlowStudio\QA\R4\Visual` and temporary
+`PrintFlowMeitu*` roots. The active editor references none of them, so the R4 visual, successful
+Enhancement and Stop workspaces may safely be removed later. They were intentionally retained for
+the report rather than turning Final QA into housekeeping. The successful Background Removal smoke
+cleaned its controlled root. Temporary text transcripts are also outside Git and may be removed.
+The historical R2/R3 artefacts remain retained for the reasons already recorded above and do not
+block closure.
+
+### R4.17 Evidence re-verification after live work
+
+After every live operation and exact-document cleanup:
+
+| Item | Result |
+|---|---|
+| v1.8.0 manifest SHA-256 | `DE76464F011A54F80704BB6C32A2E0D00EFF9AB24834FF7D05EF8E9CF3DB60E4` — unchanged |
+| Manifest read-only | yes |
+| `sourceManifestIntegrity` | **18/18 unchanged**, 0 drift |
+| Meitu path/version/SHA-256 | unchanged and exact |
+| v1.9.0 preset | **none created** |
+
+### R4.18 Single authoritative complete automated gate
+
+No product source changed during R4, so the complete suite was run exactly once, near the final
+gate as required:
+
+| Gate | Authoritative R4 result |
+|---|---|
+| `dotnet restore PrintFlowStudio.sln --locked-mode` | PASS |
+| `dotnet build PrintFlowStudio.sln --no-restore` | PASS — **0 warnings, 0 errors** |
+| `dotnet test PrintFlowStudio.sln --no-build --no-restore` | **8,307 passed, 0 failed, 0 skipped** in 58.4842 s |
+| `dotnet list PrintFlowStudio.sln package --vulnerable --include-transitive --no-restore` | no vulnerable direct or transitive packages in all five projects |
+| `git diff --check` | clean |
+
+The initial mistyped solution name `PrintFlow.sln` was rejected before restore because that file
+does not exist; the required locked restore immediately followed against the correct
+`PrintFlowStudio.sln` and passed. It did not create a second suite run.
+
+### R4.19 Repository and security hygiene
+
+| Gate | R4 result |
+|---|---|
+| Tracked raster/source/output artefacts | none; 0 tracked PNG/JPEG/TIFF files |
+| Tracked runtime DB / WAL / SHM | none |
+| Tracked smoke transcripts / UI dumps / screenshots | none |
+| Tracked external baseline/evidence files | none |
+| `Adapters.Mode` | `Fake` in `appsettings.json` |
+| `FoundationEnvironmentGate` | unchanged; last product change remains `3aabb04`, and Production still returns `EnvironmentNotVerified` |
+| Force termination | absent from product source and forbidden by the green compiled boundary tests |
+| Positional `{0}` in accepted runtime JSON | none |
+| Working tree before report edit | clean |
+
+`tests/PrintFlow.Tests/Fixtures/SyntheticImages.cs` is tracked test source code, not a synthetic
+image artefact. All customer-like files and outputs used in R4 were synthetic and outside Git. No
+customer artwork was used.
+
+### R4.20 Remaining notes
+
+There is no unresolved Epic 11300 blocker. The following non-blocking notes are retained plainly:
+
+1. en-US numeric/date localisation was not exercised because `CurrentCulture` remained `zh-CN`;
+   English resources, wording and layout did pass human inspection.
+2. One Enhancement pre-attempt failed closed on foreground ownership before any input; the fresh
+   retry against the positively foregrounded accepted Meitu window passed completely.
+3. R2/R3 and R4 synthetic workspaces remain outside Git as documented QA evidence and are not
+   claimed by active Meitu documents.
+
+### R4.21 Epic 11400 handoff
+
+Epic 11300's named-token blocker, import-cancellation blocker, visual A–I matrix, controlled
+Enhancement, controlled Background Removal, Stop, Take Over, evidence, complete suite, dependency
+and repository gates are closed. Epic 11400 may begin in a separate task. No Epic 11400 work was
+started or claimed here.
+
+### R4.22 Git state and verdict
+
+R4 changed no product source. The only repository change in this closure run is this appended R4
+report section. It is committed with an ordinary commit on `master`; after that commit the branch
+is 12 local commits ahead of `origin/master`. No amend, history rewrite or push was performed.
+
+EPIC 11300 PASS WITH NOTES — READY FOR EPIC 11400
