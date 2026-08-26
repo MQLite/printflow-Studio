@@ -470,3 +470,345 @@ R2 closure is blocked by the unhandled accepted-manifest naming-pattern mismatch
 incomplete human visual gate. Post-visual controlled Meitu regressions remain correctly unrun.
 
 EPIC 11300 NOT READY
+
+## Final Gate Closure Run R3 — 26 August 2026
+
+R3 is a closure-only run. It did not start Epic 11400, did not enable global Production mode, and
+did not modify the accepted v1.8.0 manifest. The original Final Gate NOT READY (§16) and the R2
+NOT READY naming-contract discovery are preserved above exactly as written; nothing in this section
+rewrites or softens the R2 `FormatException` finding.
+
+### R3.1 Preflight
+
+Working tree clean, `master` ahead of `origin/master` by 8 commits. No push, amend, rebase or
+history rewrite occurred at any point in R3.
+
+| Gate | R3 preflight result |
+|---|---|
+| `git status -sb` | `## master...origin/master [ahead 8]`, clean tree |
+| `dotnet restore --locked-mode` | passed, all five projects |
+| `dotnet build` | passed; **0 warnings, 0 errors** |
+| `dotnet test` | **8,298 passed, 0 failed, 0 skipped** |
+| `dotnet list package --vulnerable --include-transitive` | no vulnerable packages in all five projects |
+
+This matches the reported baseline exactly.
+
+### R3.2 Naming blocker fix references and reverification
+
+| Commit | Subject |
+|---|---|
+| `6f82780` | 11300: render accepted named-token naming patterns |
+| `7f8d557` | Report: Epic 11300 final gate naming contract fix |
+
+The accepted production contract is unchanged and remains the named-token form:
+
+| Manifest property | Accepted value |
+|---|---|
+| `enhancedPattern` | `{Name}_HD.png` |
+| `cutoutPattern` | `{Name}_CUTOUT.png` |
+| `productionTiffPattern` | `{Name}_{SizeMm}mm_CMYK_W.tif` |
+| `collisionPattern` | `_{Sequence:00}` |
+
+These four values were read directly out of the accepted manifest at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.8.0.json` during R3 and
+match `AcceptedNamingContract` character for character.
+
+`OutputFileNaming` and `NamingPatternRenderer` no longer pass those values to positional
+`string.Format`. The only remaining occurrences of the string `string.Format` under
+`src/PrintFlow.Domain/Files/` and `src/PrintFlow.Domain/Outputs/` are documentation comments that
+explain why it must not be used. `OutputFileNaming.BuildProposedFileName` dispatches every pattern
+through `NamingPatternRenderer.Render` with an explicitly supplied, closed token vocabulary.
+
+The focused naming/preset/contract regression group passed **151 tests**, covering `{Name}`,
+`{SizeMm}`, `{Sequence}` and `{Sequence:00}`, malformed-brace rejection, separator/drive/traversal
+rejection, and the real v1.8.0 preset route. No naming behaviour was modified in R3.
+
+### R3.3 Evidence re-verification
+
+| Item | R3 result |
+|---|---|
+| Configured preset | `printflow-workstation-v1`, version `1.8.0`, status `ACCEPTED_IMMUTABLE` |
+| Manifest SHA-256 | `DE76464F011A54F80704BB6C32A2E0D00EFF9AB24834FF7D05EF8E9CF3DB60E4` — **matches** |
+| `sourceManifestIntegrity` | **18/18 hashes match**, 0 drift |
+| Meitu path | `C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe` — present |
+| Meitu version | `7.8.7.5` — matches |
+| Meitu executable SHA-256 | `D65C6D82323275361EA0ADFBB3F6A5C0D2A5CF4CF63EA3AF1A7DDD4544B037B1` — **matches** |
+
+The manifest file remains read-only and was opened read-only. No separate preset sign-off record was
+created; project policy does not require one.
+
+### R3.4 Retained R2 zh-CN A–C
+
+The naming-contract fix touched no XAML, no localisation resource and no layout. zh-CN A–C were
+re-observed in passing during the R3 fixture run and their rendering did not visibly differ from R2,
+so under the brief they were not re-inspected and their R2 PASS results carry forward:
+
+| Locale | State | Result | Source |
+|---|---|---|---|
+| zh-CN | A. Background Removal undecided | PASS | R2, carried forward |
+| zh-CN | B. Automatic Selection confirmation open | PASS | R2, carried forward |
+| zh-CN | C. Background Removal authorised | PASS | R2, carried forward |
+
+### R3.5 zh-CN D–I human results
+
+The real Debug WPF application was launched with `Adapters.Mode = Fake` and the inspection window
+placed at the accepted 1920×1040 work area. A fresh synthetic source was created for the run —
+`D:\PrintFlowStudio\QA\R3\R3-VISUAL-SYNTHETIC.png`, 480×360, SHA-256
+`145F14F2A9F46BCD1545C3288BE43A13A6874321F1117C159A27DCADDD425135`. No customer artwork was used.
+The operator physically inspected the visible application; accessibility text was used only to
+navigate and to record what was on screen, never as a substitute for human judgement.
+
+| Locale | State | R3 human result |
+|---|---|---|
+| zh-CN | D. CUTOUT ReviewRequired with producing-attempt authority audit line | **PASS** |
+| zh-CN | E. Stop available during an active external-style operation | **NOT INSPECTABLE — unreachable in Fake mode** |
+| zh-CN | F. Take Over confirmation | **NOT INSPECTABLE — unreachable in Fake mode** |
+| zh-CN | G. HandedOff / manual-recovery state | **PASS** |
+| zh-CN | H. Return to automation | **NOT INSPECTABLE — unreachable in Fake mode** |
+| zh-CN | I. unresponsive / manual-close guidance | **NOT INSPECTABLE — unreachable in Fake mode** |
+
+**State D was produced successfully.** The Fake Background Removal path that terminated the WPF
+process in R2 ran to completion and reached CUTOUT `待审核` without an unhandled exception. This is
+the functional confirmation of the naming fix in the real WPF flow. The state displayed the
+producing-attempt authority audit line `去除背景：自动选择 — 已针对已审图片版本 eb20d84f 授权`, output
+`R3-VISUAL-SYNTHETIC_CUTOUT.png`, 480×360 preserved, and Revision short id `cfd20290`.
+
+### R3.6 en-US A–I human results
+
+`CultureInfo.CurrentUICulture` on this workstation resolves to `zh-Hans-CN` and the application has
+no in-application locale switch, so en-US was obtained by launching an unmodified copy of the same
+Debug output with the `zh-CN` satellite resource folder absent, which falls back to the neutral
+(en-US) resources embedded in the main assembly. No product code, repository file, OS language
+setting or accepted workstation `uiCulture` was changed to do this. A second fresh synthetic source
+was used — `R3-VISUAL-SYNTHETIC-ENUS.png`, 480×360, SHA-256
+`3BD46346C5412E2CB049FB99CD8004FB5AF0CE69E0ABC3C7D927F86DE167775C`.
+
+| Locale | State | R3 human result |
+|---|---|---|
+| en-US | A. Background Removal undecided | **PASS** |
+| en-US | B. Automatic Selection confirmation open | **PASS** |
+| en-US | C. Background Removal authorised | **PASS** |
+| en-US | D. CUTOUT ReviewRequired with producing-attempt authority audit | **PASS** |
+| en-US | E. Stop available | **NOT INSPECTABLE — unreachable in Fake mode** |
+| en-US | F. Take Over confirmation | **NOT INSPECTABLE — unreachable in Fake mode** |
+| en-US | G. HandedOff / manual-recovery | **PASS** |
+| en-US | H. Return to automation | **NOT INSPECTABLE — unreachable in Fake mode** |
+| en-US | I. unresponsive / manual-close guidance | **NOT INSPECTABLE — unreachable in Fake mode** |
+
+en-US state D produced `R3-VISUAL-SYNTHETIC-ENUS_CUTOUT.png` with authority audit line
+`Background removal: Automatic Selection — authorised for reviewed Revision 67d68c3a` and Revision
+short id `7caeb73f`.
+
+One fidelity limitation is recorded rather than hidden: this launch changes only *UI resource*
+resolution. `CultureInfo.CurrentCulture` remains `zh-CN`, so en-US number and date formatting was
+not exercised. Every en-US judgement above therefore covers wording, clipping, overlap, control
+distinction, consequence, short-id legibility and wrapping, but not locale-specific numeric or date
+formatting.
+
+### R3.7 Why E, F, H and I are not reachable in Fake mode
+
+This is a structural finding about the gate itself, not an operator or tooling failure. The four
+uninspected states are each gated on a genuinely running external-application automation:
+
+| State | Gate | Source |
+|---|---|---|
+| E. Stop offered | `CanStopAutomation => State == AutomationRuntimeState.Running` | `AutomationRuntime.cs` line 77 |
+| F. Take Over offered | `CanTakeOverAutomation => State == Running && DrivesExternalApplication` | `AutomationRuntime.cs` lines 89–90 |
+| H. Re-enter automation | `RequiresAutomationReentry => State == HandedOff && AvailableCommands.Contains(ReenterAutomation)`, populated from `LastAutomationStop` | `SessionView.cs` lines 271–272 |
+| I. Retained external state / manual-close guidance | `HasRetainedExternalState => LastAutomationStop?.OperatorActionMayBeRequired == true` | `SessionView.cs` line 265, `AutomationControl.cs` line 337 |
+
+The shipped Fake adapter always runs `FakeAdapterScenario.Succeed`. `FakeMeituProcessor.SetScenario`
+is a test-only seam, and `AdaptersConfiguration` exposes only `Mode`, so there is no supported
+configuration by which a Fake operation can be made to occupy an interruptible Busy window. This was
+also confirmed empirically: the Fake Background Removal was sampled every 250 ms from the instant
+`执行步骤` was invoked and had already reached CUTOUT review at the first sample, so no Busy window
+was ever observable. `LastAutomationStop` is populated only by a real automation Stop, which is why
+the HandedOff state reached in R3 correctly offered no re-entry control.
+
+Producing E, F, H and I therefore requires live external automation through the controlled
+production seam. §9 of the closure brief defers all live Meitu work until after the human visual
+gate passes, and the human visual gate cannot pass without E, F, H and I. **The brief is circular on
+this point and needs a gate-level decision before Epic 11300 can close.** R3 did not resolve that
+circularity by itself, did not enable global Production, and did not touch live Meitu.
+
+### R3.8 Visual corrections
+
+None. No wording, spacing, alignment, width, wrapping or margin defect was reported by the operator
+in any of the seven states inspected across the two locales. No XAML, localisation resource or
+layout file was modified in R3.
+
+### R3.9 New defect discovered during R3 — unhandled cancellation in workspace import
+
+While preparing the zh-CN fixture, the WPF process terminated a second time, with a **different**
+unhandled exception from the R2 one. Windows Application log at 15:46:03 records `.NET Runtime`
+event 1026 and `Application Error` event 1000:
+
+`System.Threading.Tasks.TaskCanceledException: A task was canceled.`
+at `PrintFlow.Infrastructure.Workspace.FileWorkspace.ImportSourceAsync` (`FileWorkspace.cs:101`).
+
+Cause: two file pickers were open concurrently because the QA harness invoked the `ChooseFile`
+command a second time through UI Automation while the first picker's modal had already disabled the
+main window. The operator selected a file in both. The second command execution cancelled the first
+execution's `CancellationToken`, and `ImportSourceAsync` catches only `IOException` and
+`UnauthorizedAccessException` around `input.CopyToAsync(output, cancellationToken)`. The resulting
+`OperationCanceledException` escaped unhandled and terminated the shell.
+
+Scope, stated honestly in both directions:
+
+- The **trigger** was an automation artefact. A mouse-driven operator cannot open a second picker,
+  because `ShowDialog()` disables the owner window. A subsequent single, clean import through the
+  same path succeeded and produced no crash.
+- The **defect** is nonetheless real and is a deviation from this codebase's own established
+  convention. `FakeAdapterExecution`, `FakeBackgroundRemovalPng`, `ProductionMeituProcessor`,
+  `DeterministicAlphaTrimProcessor`, `WicImagePreviewDecoder`, `WicManualCropProcessor`,
+  `WicMeituTransparencyInspector`, `RecycleBin` and `SessionService` all catch
+  `OperationCanceledException` and convert it into a structured failure. `ImportSourceAsync` is the
+  outlier, and any cancellation of an in-flight import terminates the WPF process rather than
+  surfacing a `WorkspaceError` through the ordinary failure surface.
+
+This is the same failure *family* as the R2 blocker — a producing-path exception escaping the view
+model and killing the shell — and it was not fixed in R3, because §8 of the closure brief permits
+only small presentation corrections during the visual phase. It is recorded here as an open defect
+for a follow-up fix pass, on the same footing R2 gave the `FormatException`.
+
+### R3.10 Post-visual automated gate
+
+The human visual gate did not pass A–I in both locales, so this is recorded as the R3 final
+automated gate rather than as a post-visual-PASS gate:
+
+| Gate | R3 final result |
+|---|---|
+| `dotnet restore --locked-mode` | passed |
+| `dotnet build` | passed; **0 warnings, 0 errors** |
+| `dotnet test` | **8,298 passed, 0 failed, 0 skipped** |
+| `dotnet list package --vulnerable --include-transitive` | no vulnerable packages in all five projects |
+
+### R3.11–14 Controlled live Meitu regressions
+
+In accordance with the ordered gate in §9, and because the human visual gate is incomplete, none of
+the controlled live regressions were started:
+
+| Required regression | R3 result |
+|---|---|
+| Controlled Enhancement Final-QA | NOT RUN — visual gate incomplete |
+| Controlled Background Removal Final-QA | NOT RUN — visual gate incomplete |
+| Controlled Stop | NOT RUN — visual gate incomplete |
+| Controlled Take Over | NOT RUN — visual gate incomplete |
+
+No customer artwork, no global Production mode, no process termination, no Meitu force-close and no
+Epic 11400 work was used or started. Historical D2A/B2B/C2A slice observations remain historical
+evidence and are not presented as R3 reruns.
+
+### R3.15 Final Meitu retained state
+
+| Question | R3 retained state |
+|---|---|
+| Is Meitu running? | **No** |
+| Accepted PID/path if running | n/a — not running at R3 close |
+| Is a document loaded? | Unknown — no process remains to probe |
+| Is any modal open? | Unknown — no process remains to probe |
+| Positively identified editor state | Not positively identified at close |
+| Retained synthetic workspace | Yes — see R3.16 |
+| May it safely be deleted? | Not as part of this gate |
+
+Recorded plainly: Meitu **was** running at R3 preflight as PID 30712 from the accepted path with the
+accepted version and hash, and is **not** running at R3 close. PrintFlow performed no Meitu
+interaction whatsoever during R3 — every operation ran through the Fake adapter — so this transition
+was not caused by PrintFlow. No force termination occurred, and no force-termination capability
+exists in the product to have caused it. R3 did not perform extra navigation to reach a prettier
+final state, and `KnownEditorEmpty` was therefore not pursued.
+
+### R3.16 R2 interrupted fixture and R3 fixtures
+
+The R2 interrupted-session and quarantine files were not deleted. They remain outside Git:
+
+- `D:\PrintFlowStudio\Quarantine\20260826T024336Z_opaque-rgb.png`
+- `D:\PrintFlowStudio\Quarantine\20260826T024336Z_opaque-rgb.png.reason.txt`
+- session `S_20260826T023959Z_a06dab27`
+
+They do not block PASS: no active Meitu process references them, no Revision claims them, they are
+outside Git, and their retained reason is documented here and in the R2 section. Retained reason:
+they are the historical record of the R2 `FormatException` discovery.
+
+R3 additionally left four sessions, also outside Git and retained as QA artefacts:
+`S_20260826T034558Z_3ecd10fb` and `S_20260826T034603Z_e45d642a` (the two concurrent imports from the
+R3.9 cancellation crash), `S_20260826T044623Z_f3e8dbff` (zh-CN visual fixture) and
+`S_20260826T050246Z_c77b2824` (en-US visual fixture), plus the two synthetic sources under
+`D:\PrintFlowStudio\QA\R3\`.
+
+### R3.17 Evidence re-verification after the R3 UI work
+
+Re-verified after all R3 application work completed:
+
+| Item | Result |
+|---|---|
+| v1.8.0 manifest SHA-256 | `DE76464F…3DB60E4` — **unchanged** |
+| `sourceManifestIntegrity` | **18/18 unchanged**, 0 drift |
+| Meitu path / version / SHA-256 | **unchanged** |
+| Preset versions on disk | v1.0.0 … v1.5.0, v1.8.0 — **no v1.9.0 created** |
+
+### R3.18 Naming-contract proof from the R3 runs
+
+Both produced files follow the accepted named-token contract exactly, with no positional syntax:
+
+| Locale | Produced file | Bytes | SHA-256 (first 16) |
+|---|---|---|---|
+| zh-CN | `R3-VISUAL-SYNTHETIC_CUTOUT.png` | 2,533 | `04D7D41E5E954502` |
+| en-US | `R3-VISUAL-SYNTHETIC-ENUS_CUTOUT.png` | 2,610 | `FAA0A88FB9FC91C5` |
+
+Both match `{Name}_CUTOUT.png` against their session's established output name, and the SHA-256
+prefixes displayed on screen (`04D7D41E5E95`, `FAA0A88FB9FC`) agree with the files on disk. Both
+synthetic sources were byte-identical before and after their runs. A scan of the accepted runtime
+configuration — the v1.8.0 manifest and the committed `appsettings.json` — found **no positional
+`{0}`-style token anywhere**. Tests remain green for `{Name}`, `{SizeMm}`, `{Sequence}` and
+`{Sequence:00}`.
+
+This is Fake-adapter evidence produced through the real WPF flow and the real naming renderer. It is
+not, and is not presented as, live-Meitu evidence; the live `<Name>_HD.png` and `<Name>_CUTOUT.png`
+proofs required by §11 and §12 remain outstanding with those regressions.
+
+No Photoshop automation was exercised.
+
+### R3.19 Repository and security gate
+
+| Gate | R3 result |
+|---|---|
+| `git status -sb` | clean tree, `ahead 8` |
+| `git diff --check` | clean |
+| Tracked synthetic source / HD / CUTOUT / runtime DB / transcript / UI dump / screenshot / external evidence | **none** |
+| `Adapters.Mode` | `Fake` |
+| `FoundationEnvironmentGate` | unchanged — last touched at `3aabb04`, untouched by every Epic 11300 commit |
+| Force-termination capability | **absent** — no `Process.Kill`, `TerminateProcess`, `NtTerminateProcess`, `ZwTerminateProcess`, `TerminateJobObject` or `taskkill` in any production assembly; the only occurrences are the boundary tests that forbid them |
+
+The two R3 synthetic sources and both CUTOUT outputs live under `D:\PrintFlowStudio\`, outside the
+repository, and nothing from this run was added to Git. No commit, push, amend or history rewrite
+was performed in R3.
+
+### R3.20 Remaining notes and Epic 11400 handoff
+
+Outstanding before Epic 11300 can close:
+
+1. **A gate-level decision on the R3.7 circularity.** E, F, H and I cannot be produced in Fake mode,
+   and §9 defers the live automation that would produce them until after the visual gate passes.
+   Either the brief permits the controlled production seam to render those four states for
+   inspection, or the visual gate's scope is amended to reflect what Fake mode can show.
+2. **The `ImportSourceAsync` cancellation defect** (R3.9) — an unhandled
+   `OperationCanceledException` terminates the shell instead of returning a structured
+   `WorkspaceError`, contrary to the convention every other async production path follows.
+3. **The four controlled live Meitu regressions** (R3.11–14) remain unrun, including the live
+   `<Name>_HD.png` and `<Name>_CUTOUT.png` naming proofs.
+4. **en-US numeric and date formatting** was not exercised (R3.6).
+
+Epic 11400 was not started and no Epic 11400 work is claimed by this report.
+
+### R3.21 Git state
+
+`master`, ahead of `origin/master` by 9 commits after this report commit. R3 changed no product
+source file: its single commit adds this report section only. No push, no amend, no history
+rewrite.
+
+R3 fixed nothing and hid nothing: the R2 naming defect is confirmed fixed and live-proved in the
+real WPF flow, five states passed human inspection in en-US and two more in zh-CN, and a second
+shell-terminating defect plus a structural gap in the visual gate itself were found and recorded.
+
+EPIC 11300 NOT READY
