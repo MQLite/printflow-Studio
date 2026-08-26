@@ -440,7 +440,7 @@
   </data>
   <data name="Session_TakeOver" xml:space="preserve"><value>在美图秀秀中手动接管</value></data>
   <data name="Session_TakeOverHint" xml:space="preserve">
-    <value>停止 PrintFlow 自动化，美图秀秀保持原样交给你手动操作。</value>
+    <value>停止 PrintFlow 自动化，美图秀秀保持原样交给你手动操作。PrintFlow 不会强制关闭美图秀秀。如果接管后美图秀秀无响应，请通过美图秀秀或 Windows 手动关闭后再恢复自动处理。</value>
   </data>
   <data name="Session_TakingOverNotice" xml:space="preserve">
     <value>正在移交 —— PrintFlow 已停止控制美图秀秀，不会再发送任何操作。</value>

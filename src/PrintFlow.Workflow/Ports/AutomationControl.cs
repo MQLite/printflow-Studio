@@ -9,9 +9,10 @@ namespace PrintFlow.Workflow.Ports;
 /// <remarks>
 /// Two values, deliberately not three. Neither of them means "terminate the external
 /// application": there is no member here that an adapter could read as permission to end a
-/// process, and D2A introduces no API that could carry out such an instruction if there were
-/// (§3). Force termination is D2B's subject and gets its own decision, not a third value
-/// quietly added to this enum.
+/// process, and no API exists that could carry out such an instruction if there were (§3).
+/// Epic 11300 Part D2B rejects force termination as product policy: exact process identity does
+/// not prove that the process contains only the current Attempt's document, so destructive
+/// process control is not a third value quietly added to this enum.
 /// <para>
 /// The distinction between the two is <b>who owns the external application afterwards</b>, and
 /// that is why they cannot be collapsed into one button (§27):
@@ -271,9 +272,10 @@ public static class AutomationStopPolicy
 /// <param name="Mode">Which of the two things the operator asked for.</param>
 /// <param name="Phase">How far the external operation had got when they asked.</param>
 /// <param name="SignedCancelInvoked">
-/// Whether an exact signed cancel control was resolved and invoked, and the operation
-/// positively left Busy. False whenever the control could not be proven — which is the
-/// distinction §10 and §29 both turn on.
+/// Whether an exact signed cancel control was resolved and invoked. False whenever the control
+/// could not be proven. Whether it took effect is expressed independently by
+/// <paramref name="Retained"/> (and persisted as <c>meituLeftBusy</c>), so an unresponsive
+/// Meitu is distinguishable from both success and an unavailable Cancel.
 /// </param>
 /// <param name="Retained">What the external application may still be holding or doing.</param>
 /// <remarks>
@@ -374,7 +376,7 @@ public interface IAutomationStopSignal
     ExternalOperationPhase Phase { get; }
 
     /// <summary>
-    /// Whether a signed operation cancel was invoked and the operation positively left Busy.
+    /// Whether a signed operation cancel was invoked exactly once.
     /// </summary>
     /// <remarks>
     /// The single fact that separates §29's "Meitu Cancel positively invoked" from "Stop
@@ -384,14 +386,26 @@ public interface IAutomationStopSignal
     /// </remarks>
     bool OperationCancelWasInvoked { get; }
 
+    /// <summary>
+    /// Whether Meitu positively left Busy after the signed cancel invocation.
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="OperationCancelWasInvoked"/> because an unresponsive Meitu may
+    /// accept the invocation without leaving Busy. In that case the audit must say both
+    /// "invoked" and "may still be running"; collapsing the two would falsely report a clean
+    /// cancellation (Epic 11300 Part D2B).
+    /// </remarks>
+    bool OperationLeftBusyAfterCancel { get; }
+
     /// <summary>Records the phase the running operation has reached.</summary>
     void ReportPhase(ExternalOperationPhase phase);
 
     /// <summary>
-    /// Records that a signed operation cancel was invoked and the operation positively left
-    /// Busy, so the audit can distinguish that from a stop where no cancel was possible (§29).
+    /// Records that a signed operation cancel was invoked and whether the operation positively
+    /// left Busy, so the audit can distinguish success, unresponsiveness and an unavailable
+    /// cancel (§29; Epic 11300 Part D2B).
     /// </summary>
-    void ReportOperationCancelled();
+    void ReportOperationCancelOutcome(bool leftBusy);
 
     /// <summary>What the current request permits right now, or <c>null</c> when none was made.</summary>
     AutomationStopResolution? Resolve() =>
@@ -426,13 +440,16 @@ public sealed class InertAutomationStopSignal : IAutomationStopSignal
     public bool OperationCancelWasInvoked => false;
 
     /// <inheritdoc />
+    public bool OperationLeftBusyAfterCancel => false;
+
+    /// <inheritdoc />
     public void ReportPhase(ExternalOperationPhase phase)
     {
         // Nothing is listening. Discarding the report is the whole point of the null object.
     }
 
     /// <inheritdoc />
-    public void ReportOperationCancelled()
+    public void ReportOperationCancelOutcome(bool leftBusy)
     {
     }
 }

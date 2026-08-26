@@ -1398,7 +1398,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 context: context);
         }
 
-        stop.ReportOperationCancelled();
+        stop.ReportOperationCancelOutcome(cancelled.Value.LeftBusy);
 
         return OperationFailure.Create(
             FailureCode.Cancelled,

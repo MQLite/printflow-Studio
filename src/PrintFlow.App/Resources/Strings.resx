@@ -440,7 +440,7 @@
   </data>
   <data name="Session_TakeOver" xml:space="preserve"><value>Take Over in Meitu</value></data>
   <data name="Session_TakeOverHint" xml:space="preserve">
-    <value>Stops PrintFlow automation and leaves Meitu as it is, for you to work in.</value>
+    <value>Stops PrintFlow automation and leaves Meitu as it is, for you to work in. PrintFlow will not force-close Meitu. If Meitu is unresponsive after takeover, close it manually through Meitu or Windows before returning to automation.</value>
   </data>
   <data name="Session_TakingOverNotice" xml:space="preserve">
     <value>Handing over — PrintFlow has stopped controlling Meitu and is sending nothing further.</value>

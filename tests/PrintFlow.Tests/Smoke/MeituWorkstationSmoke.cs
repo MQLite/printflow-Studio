@@ -1712,6 +1712,7 @@ public sealed class MeituWorkstationSmoke
             Log(string.Empty);
             Log($"phase reached        : {signal.Phase}");
             Log($"signed cancel invoked: {(signal.OperationCancelWasInvoked ? "YES — exactly once" : "no")}");
+            Log($"left Busy after cancel: {(signal.OperationLeftBusyAfterCancel ? "YES" : "no")}");
             Log($"outcome              : {(ran.IsSuccess ? "the operation completed before the request landed" : ran.Failure.Code.ToString())}");
             if (ran.IsFailure)
             {
@@ -1722,7 +1723,7 @@ public sealed class MeituWorkstationSmoke
                 }
             }
 
-            Log($"retained external    : {AutomationStopPolicy.RetainedFor(signal.Phase, signal.OperationCancelWasInvoked)}");
+            Log($"retained external    : {AutomationStopPolicy.RetainedFor(signal.Phase, signal.OperationLeftBusyAfterCancel)}");
             Log("STOP                 : no export, no AdapterOutput, no Revision, no process termination.");
             Log("Meitu was left for the operator; PrintFlow closed nothing and killed nothing.");
         }

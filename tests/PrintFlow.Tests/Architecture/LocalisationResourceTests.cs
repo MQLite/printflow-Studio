@@ -175,6 +175,54 @@ public sealed class LocalisationResourceTests
     }
 
     /// <summary>
+    /// Both supported languages state the D2B manual-recovery policy for an unresponsive
+    /// handed-off Meitu instance.
+    /// </summary>
+    [Fact]
+    public void Take_over_guidance_has_force_close_and_manual_recovery_parity()
+    {
+        string english = ValueOf(NeutralResx, "Session_TakeOverHint");
+        english.ShouldContain("will not force-close Meitu", Case.Insensitive);
+        english.ShouldContain("unresponsive after takeover", Case.Insensitive);
+        english.ShouldContain("close it manually", Case.Insensitive);
+        english.ShouldContain("Windows", Case.Insensitive);
+        english.ShouldContain("before returning to automation", Case.Insensitive);
+
+        string chinese = ValueOf(ChineseResx, "Session_TakeOverHint");
+        chinese.ShouldContain("不会强制关闭美图秀秀", Case.Sensitive);
+        chinese.ShouldContain("接管后美图秀秀无响应", Case.Sensitive);
+        chinese.ShouldContain("手动关闭", Case.Sensitive);
+        chinese.ShouldContain("Windows", Case.Sensitive);
+        chinese.ShouldContain("恢复自动处理", Case.Sensitive);
+    }
+
+    /// <summary>No operator action is labelled as a destructive process-control action.</summary>
+    [Theory]
+    [InlineData("kill")]
+    [InlineData("terminate")]
+    [InlineData("force close")]
+    [InlineData("force-close")]
+    public void Operator_action_labels_offer_no_force_termination(string forbidden)
+    {
+        string[] actionKeys =
+        [
+            "Session_Stop",
+            "Session_TakeOver",
+            "Session_TakeOverConfirm",
+            "Session_TakeOverCancel",
+            "Session_ReenterAutomation",
+        ];
+
+        foreach (string resource in new[] { NeutralResx, ChineseResx })
+        {
+            foreach (string key in actionKeys)
+            {
+                ValueOf(resource, key).ShouldNotContain(forbidden, Case.Insensitive);
+            }
+        }
+    }
+
+    /// <summary>
     /// The takeover confirmation states all four consequences and overstates none (§21, §26).
     /// </summary>
     /// <remarks>

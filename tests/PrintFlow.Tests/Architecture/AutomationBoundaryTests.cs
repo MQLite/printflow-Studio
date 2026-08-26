@@ -177,7 +177,7 @@ public sealed class AutomationBoundaryTests
     [InlineData("Process.Kill")]
     [InlineData(".Kill(")]
     [InlineData("taskkill")]
-    public void D1_introduces_no_force_process_termination_API(string bannedToken)
+    public void Production_source_contains_no_force_process_termination_API(string bannedToken)
     {
         List<string> offenders = [];
         foreach (string project in new[]
@@ -200,7 +200,7 @@ public sealed class AutomationBoundaryTests
             }
         }
 
-        offenders.ShouldBeEmpty("D2 owns Stop, force termination and operator takeover.");
+        offenders.ShouldBeEmpty("D2B policy prohibits force termination of Meitu.");
     }
 
     [Fact]

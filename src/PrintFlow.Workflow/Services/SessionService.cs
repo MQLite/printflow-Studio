@@ -1262,15 +1262,19 @@ public sealed class SessionService : ISessionService
         OperationFailure? adapterFailure)
     {
         RetainedExternalState retained = drivesExternalApplication
-            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationCancelWasInvoked)
+            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationLeftBusyAfterCancel)
             : RetainedExternalState.None;
 
         string headline = mode == AutomationStopMode.TakeOver
             ? "The operator took over the external application. PrintFlow stopped this attempt and " +
               "produced no further automated input; nothing was cancelled, dismissed or closed."
-            : stop.OperationCancelWasInvoked
+            : stop.OperationCancelWasInvoked && stop.OperationLeftBusyAfterCancel
                 ? "The operator stopped this operation. PrintFlow invoked the signed cancel control " +
                   "once and the external application positively left its busy state."
+                : stop.OperationCancelWasInvoked
+                    ? "The operator stopped this operation. PrintFlow invoked the signed cancel control " +
+                      "once, but the external application did not positively leave its busy state. " +
+                      "It may be unresponsive and operator action is required."
                 : "The operator stopped this operation. PrintFlow stopped its own orchestration; no " +
                   "cancel control was invoked, so the external operation may still be running and " +
                   "operator action may be required.";
@@ -1283,6 +1287,7 @@ public sealed class SessionService : ISessionService
             [AutomationStopAudit.ModeKey] = mode.ToString(),
             [AutomationStopAudit.PhaseKey] = stop.Phase.ToString(),
             [AutomationStopAudit.CancelInvokedKey] = stop.OperationCancelWasInvoked ? "true" : "false",
+            ["meituLeftBusy"] = stop.OperationLeftBusyAfterCancel ? "true" : "false",
             [AutomationStopAudit.RetainedKey] = retained.ToString(),
             ["operatorActionRequired"] = record.OperatorActionMayBeRequired ? "true" : "false",
             ["forceTerminationInvoked"] = "false",
@@ -1315,11 +1320,12 @@ public sealed class SessionService : ISessionService
         AutomationStopMode mode, IAutomationStopSignal stop, bool drivesExternalApplication)
     {
         RetainedExternalState retained = drivesExternalApplication
-            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationCancelWasInvoked)
+            ? AutomationStopPolicy.RetainedFor(stop.Phase, stop.OperationLeftBusyAfterCancel)
             : RetainedExternalState.None;
 
         return $"stop:{mode}; phase {stop.Phase}; " +
                $"signed cancel invoked {(stop.OperationCancelWasInvoked ? "yes" : "no")}; " +
+               $"left Busy after cancel {(stop.OperationLeftBusyAfterCancel ? "yes" : "no")}; " +
                $"retained external state {retained}; force termination no";
     }
 

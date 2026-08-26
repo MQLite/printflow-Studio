@@ -258,7 +258,8 @@ public sealed class AutomationRunRegistry
         private readonly object _gate = new();
         private AutomationStopMode? _mode;
         private ExternalOperationPhase _phase = ExternalOperationPhase.NotStarted;
-        private bool _cancelled;
+        private bool _cancelInvoked;
+        private bool _leftBusyAfterCancel;
 
         public SessionId SessionId { get; } = sessionId;
 
@@ -293,7 +294,19 @@ public sealed class AutomationRunRegistry
             {
                 lock (_gate)
                 {
-                    return _cancelled;
+                    return _cancelInvoked;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public bool OperationLeftBusyAfterCancel
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _leftBusyAfterCancel;
                 }
             }
         }
@@ -323,11 +336,12 @@ public sealed class AutomationRunRegistry
             notify(view);
         }
 
-        public void ReportOperationCancelled()
+        public void ReportOperationCancelOutcome(bool leftBusy)
         {
             lock (_gate)
             {
-                _cancelled = true;
+                _cancelInvoked = true;
+                _leftBusyAfterCancel = leftBusy;
             }
         }
 

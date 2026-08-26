@@ -2,6 +2,7 @@ using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Tests.Fixtures;
@@ -138,6 +139,46 @@ public sealed class StopAndTakeOverTests
         audit.Retained.ShouldBe(RetainedExternalState.OperationMayStillBeRunning);
         audit.OperatorActionMayBeRequired.ShouldBeTrue();
         view.HasRetainedExternalState.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// A signed Cancel that was invoked once but did not make Meitu leave Busy remains an
+    /// operator-action-required state; it is not reported as a clean cancellation and has no
+    /// escalation route (Epic 11300 Part D2B).
+    /// </summary>
+    /// <remarks>
+    /// The guarded-driver test <c>A_cancel_that_does_not_take_effect_is_reported_and_never_repeated</c>
+    /// proves the one actual invocation and read-only settle timeout. This workflow-level half
+    /// supplies that outcome at the adapter seam so the persisted audit can be asserted without
+    /// pretending a fake automation tree is a real Meitu process.
+    /// </remarks>
+    [Fact]
+    public async Task An_unresponsive_cancel_outcome_requires_manual_recovery_and_never_escalates()
+    {
+        CancelDoesNotSettleMeitu meitu = new();
+        using Fixture fixture = await Fixture.AtEnhancementAsync(meitu);
+
+        Task<OperationResult<SessionView>> run = fixture.Service.ExecuteAsync(
+            fixture.Id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester",
+            CancellationToken.None);
+        await meitu.BusyObserved;
+
+        fixture.Service.RequestStop(fixture.Id, AutomationStopMode.StopOperation).IsSuccess.ShouldBeTrue();
+        (await run).Failure.Code.ShouldBe(FailureCode.Cancelled);
+
+        SessionView view = (await fixture.Service.LoadAsync(fixture.Id, CancellationToken.None)).Value;
+        AutomationStopAudit audit = view.LastAutomationStop.ShouldNotBeNull();
+        audit.SignedCancelInvoked.ShouldBeTrue("the signed Cancel was invoked once");
+        audit.Retained.ShouldBe(RetainedExternalState.OperationMayStillBeRunning,
+            "Meitu never positively left Busy");
+        audit.OperatorActionMayBeRequired.ShouldBeTrue();
+
+        ProcessingAttempt attempt = (await fixture.AggregateAsync()).Attempts
+            .Single(a => a.Step == StepKind.Enhancement);
+        attempt.OutputRevisionId.ShouldBeNull();
+        OperationFailure failure = attempt.Failure.ShouldNotBeNull();
+        failure.Context["meituLeftBusy"].ShouldBe("false");
+        failure.Context["forceTerminationInvoked"].ShouldBe("false");
     }
 
     // -----------------------------------------------------------------------------
@@ -298,6 +339,13 @@ public sealed class StopAndTakeOverTests
         reloaded.CanContinueProcessing.ShouldBeFalse();
         restarted.GetAutomationRuntime(fixture.Id).State.ShouldBe(AutomationRuntimeState.Idle);
 
+        SessionAggregate persisted = await fixture.AggregateAsync();
+        persisted.Attempts.Single(a => a.Step == StepKind.Enhancement).OutputRevisionId.ShouldBeNull(
+            "manual Meitu work or closure after takeover is never inferred as PrintFlow output");
+        persisted.Revisions.ShouldNotContain(
+            revision => revision.Operation == OperationKind.Enhance,
+            "a handed-off Meitu process is not monitored or adopted");
+
         OperationResult<SessionView> resumed = await restarted.ExecuteAsync(
             fixture.Id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None);
         resumed.IsFailure.ShouldBeTrue("a handed-off session must not be driven without explicit re-entry");
@@ -322,6 +370,10 @@ public sealed class StopAndTakeOverTests
 
         reentered.State.ShouldBe(SessionState.Active);
         reentered.Steps.Single(s => s.Step == StepKind.Enhancement).State.ShouldBe(StepState.Waiting);
+        restarted.GetAutomationRuntime(fixture.Id).State.ShouldBe(AutomationRuntimeState.Idle,
+            "re-entry itself neither launches nor terminates Meitu");
+        (await fixture.AggregateAsync()).Attempts.Count(a => a.Step == StepKind.Enhancement).ShouldBe(1,
+            "the new Attempt begins only when the operator explicitly runs the step");
 
         fixture.Harness.FakeMeitu.SetScenario(FakeAdapterScenario.Succeed);
         OperationResult<SessionView> ran = await restarted.ExecuteAsync(
@@ -574,6 +626,37 @@ public sealed class StopAndTakeOverTests
     /// has not returned. A helper that set a flag before starting the run would test a
     /// different, easier thing.
     /// </remarks>
+    private sealed class CancelDoesNotSettleMeitu : IMeituProcessor
+    {
+        private readonly TaskCompletionSource _busyObserved =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public string AdapterId => "test-meitu-cancel-does-not-settle";
+
+        public AdapterExecutionMode Mode => AdapterExecutionMode.Fake;
+
+        public Task BusyObserved => _busyObserved.Task;
+
+        public async Task<OperationResult<AdapterOutput>> ProcessAsync(
+            MeituRequest request, CancellationToken cancellationToken)
+        {
+            request.Stop.ReportPhase(ExternalOperationPhase.Busy);
+            _busyObserved.TrySetResult();
+
+            while (request.Stop.RequestedMode is null)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(5), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            request.Stop.ReportOperationCancelOutcome(leftBusy: false);
+            return OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
+                FailureCode.Cancelled,
+                "The signed Cancel was invoked once, but Meitu remained Busy. No output was produced.",
+                isRetryable: true));
+        }
+    }
+
     private sealed class Fixture : IDisposable
     {
         private Fixture(SessionServiceHarness harness, ISessionService service, SessionId id)
@@ -589,10 +672,12 @@ public sealed class StopAndTakeOverTests
 
         public SessionId Id { get; }
 
-        public static async Task<Fixture> AtEnhancementAsync()
+        public static async Task<Fixture> AtEnhancementAsync(IMeituProcessor? meitu = null)
         {
             SessionServiceHarness harness = new();
-            ISessionService service = harness.CreateService();
+            ISessionService service = meitu is null
+                ? harness.CreateService()
+                : harness.CreateServiceWithMeitu(meitu);
             SessionId id = (await service.ImportAsync(
                 WorkflowType.PrepareAsset, harness.WriteSourcePng(), "art", "tester",
                 CancellationToken.None)).Value.Id;

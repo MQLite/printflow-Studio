@@ -12,7 +12,7 @@ namespace PrintFlow.Tests.Architecture;
 
 /// <summary>
 /// Where Stop and Take Over are allowed to live, and what they are structurally unable to do
-/// (Epic 11300 Part D2A §3, §8, §36.19, §38).
+/// (Epic 11300 Part D2A §3, §8, §36.19, §38 and Part D2B policy).
 /// </summary>
 /// <remarks>
 /// The rules here are about <b>absence</b>, which is the only kind of rule a codebase forgets.
@@ -34,7 +34,8 @@ public sealed class StopAndTakeOverBoundaryTests
     /// The same scan D1 introduced, kept and re-stated for D2A rather than relaxed. Stop is
     /// deliberately not Kill: the whole slice is built on asking Meitu to abandon its work
     /// through a control it exposes, and an available <c>Kill</c> would make every one of those
-    /// careful refusals optional. Force termination is D2B's subject and gets its own decision.
+    /// careful refusals optional. D2B made that decision: force termination remains absent by
+    /// production policy.
     /// <para>
     /// Comment lines are exempt because this rule is itself documented in prose that has to name
     /// what it forbids — including in this file.
@@ -46,7 +47,7 @@ public sealed class StopAndTakeOverBoundaryTests
     [InlineData(".Kill(")]
     [InlineData("taskkill")]
     [InlineData("ExitProcess")]
-    public void D2A_introduces_no_force_process_termination_API(string bannedToken)
+    public void Production_contains_no_force_process_termination_token(string bannedToken)
     {
         List<string> offenders = [];
 
@@ -72,7 +73,7 @@ public sealed class StopAndTakeOverBoundaryTests
         }
 
         offenders.ShouldBeEmpty(
-            "Stop is not Kill. D2B owns force termination; D2A must introduce no way to perform it.");
+            "Stop is not Kill. D2B policy permits no way to force-terminate Meitu.");
     }
 
     /// <summary>
@@ -82,7 +83,7 @@ public sealed class StopAndTakeOverBoundaryTests
     /// <remarks>
     /// The token scan above catches an implementation; this catches an <i>intention</i>. A third
     /// <see cref="AutomationStopMode"/> called <c>ForceTerminate</c> would compile, would pass
-    /// every scan, and would be the first half of D2B arriving in D2A.
+    /// every scan, and would violate D2B's permanent two-mode policy.
     /// </remarks>
     [Fact]
     public void The_stop_vocabulary_names_no_termination_mode()
@@ -95,7 +96,7 @@ public sealed class StopAndTakeOverBoundaryTests
         {
             modes.ShouldNotContain(
                 mode => mode.Contains(forbidden, StringComparison.OrdinalIgnoreCase),
-                $"'{forbidden}' is not something D2A may express.");
+                $"'{forbidden}' is not something PrintFlow may express as a stop mode.");
         }
     }
 

@@ -339,11 +339,12 @@ public sealed class AutomationStopPolicyTests
         IAutomationStopSignal inert = InertAutomationStopSignal.Instance;
 
         inert.ReportPhase(ExternalOperationPhase.Busy);
-        inert.ReportOperationCancelled();
+        inert.ReportOperationCancelOutcome(leftBusy: true);
 
         inert.RequestedMode.ShouldBeNull();
         inert.Phase.ShouldBe(ExternalOperationPhase.NotStarted);
         inert.OperationCancelWasInvoked.ShouldBeFalse();
+        inert.OperationLeftBusyAfterCancel.ShouldBeFalse();
         inert.Resolve().ShouldBeNull();
     }
 }

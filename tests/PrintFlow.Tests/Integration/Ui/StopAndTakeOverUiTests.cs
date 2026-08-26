@@ -1,3 +1,4 @@
+using System.Globalization;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Attempts;
@@ -285,22 +286,38 @@ public sealed class StopAndTakeOverUiTests
     [Fact]
     public async Task The_two_controls_are_worded_as_different_actions()
     {
-        using HomeScreenHarness harness = new();
-        (SessionViewModel screen, _) = await AtEnhancementAsync(harness, "stop-wording.png");
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo english = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.CurrentUICulture = english;
+            CultureInfo.CurrentCulture = english;
 
-        screen.StopLabel.ShouldNotBe(screen.TakeOverLabel);
+            using HomeScreenHarness harness = new();
+            (SessionViewModel screen, _) = await AtEnhancementAsync(harness, "stop-wording.png");
 
-        // The hint carries both halves, because §27 asks the operator to understand the
-        // *distinction* and each half read alone is easy to mistake for the other.
-        screen.StopHint.ShouldContain("safely", Case.Insensitive);
-        screen.StopHint.ShouldContain("leaves Meitu as it is", Case.Insensitive);
+            screen.StopLabel.ShouldNotBe(screen.TakeOverLabel);
 
-        // Neither offers to close Meitu. Note that saying "Meitu is not closed" is the opposite
-        // of offering to — so the assertion is about the promise, not the word.
-        screen.StopHint.ShouldContain("Meitu is not closed", Case.Insensitive);
-        screen.StopHint.ShouldNotContain("closes Meitu", Case.Insensitive);
-        screen.TakeOverConfirmQuestion.ShouldNotContain("closes Meitu", Case.Insensitive);
-        screen.TakeOverConfirmQuestion.ShouldContain("not closed", Case.Insensitive);
+            // The hint carries both halves, because §27 asks the operator to understand the
+            // *distinction* and each half read alone is easy to mistake for the other.
+            screen.StopHint.ShouldContain("safely", Case.Insensitive);
+            screen.StopHint.ShouldContain("leaves Meitu as it is", Case.Insensitive);
+
+            // Neither offers to close Meitu. Note that saying "Meitu is not closed" is the opposite
+            // of offering to — so the assertion is about the promise, not the word.
+            screen.StopHint.ShouldContain("Meitu is not closed", Case.Insensitive);
+            screen.StopHint.ShouldContain("will not force-close Meitu", Case.Insensitive);
+            screen.StopHint.ShouldContain("close it manually", Case.Insensitive);
+            screen.StopHint.ShouldNotContain("closes Meitu", Case.Insensitive);
+            screen.TakeOverConfirmQuestion.ShouldNotContain("closes Meitu", Case.Insensitive);
+            screen.TakeOverConfirmQuestion.ShouldContain("not closed", Case.Insensitive);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     // -------------------------------------------------------------------------------------
