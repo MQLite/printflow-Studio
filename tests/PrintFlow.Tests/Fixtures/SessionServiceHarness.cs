@@ -105,7 +105,11 @@ internal sealed class SessionServiceHarness : IDisposable
     /// simulate reopening the app, and a counter-based generator would restart at the same
     /// values and collide with rows the first instance already wrote.
     /// </remarks>
-    public ISessionService CreateService() => new SessionService(
+    /// <param name="preset">
+    /// A preset provider in place of the fixture-backed one, for tests about what the workflow
+    /// does with naming patterns it cannot render (naming-contract fix §6).
+    /// </param>
+    public ISessionService CreateService(IWorkstationPresetProvider? preset = null) => new SessionService(
         WorkflowEngine.Instance,
         Repository,
         FileWorkspace,
@@ -114,7 +118,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FakePhotoshop,
         Trim,
         ManualCrop,
-        Preset,
+        preset ?? Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
         Clock);
@@ -143,7 +147,8 @@ internal sealed class SessionServiceHarness : IDisposable
     /// for tests that need to prove something about a non-fake <see cref="AdapterExecutionMode"/>
     /// (Epic 11100 Part 3A §8: <see cref="IEnvironmentGate"/> blocking a production adapter).
     /// </summary>
-    public ISessionService CreateServiceWithMeitu(IMeituProcessor meitu) => new SessionService(
+    public ISessionService CreateServiceWithMeitu(
+        IMeituProcessor meitu, IWorkstationPresetProvider? preset = null) => new SessionService(
         WorkflowEngine.Instance,
         Repository,
         FileWorkspace,
@@ -152,7 +157,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FakePhotoshop,
         Trim,
         ManualCrop,
-        Preset,
+        preset ?? Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
         Clock);

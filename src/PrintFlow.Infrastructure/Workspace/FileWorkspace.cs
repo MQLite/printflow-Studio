@@ -177,8 +177,14 @@ public sealed class FileWorkspace : IWorkspace
         const int maxAttempts = 99;
         for (int sequence = 1; sequence <= maxAttempts; sequence++)
         {
-            string candidateName = OutputFileNaming.BuildCollisionCandidate(proposedFileName, patterns, sequence);
-            string relative = $"{session.RelativePath}/{AreaFolder(area)}/{candidateName}";
+            OperationResult<string> candidateName =
+                OutputFileNaming.BuildCollisionCandidate(proposedFileName, patterns, sequence);
+            if (candidateName.IsFailure)
+            {
+                return OperationResult.Fail<WorkspaceFileRef>(candidateName.Failure);
+            }
+
+            string relative = $"{session.RelativePath}/{AreaFolder(area)}/{candidateName.Value}";
 
             OperationResult<string> absolute = PathGuard.ResolveWithinRoot(_rootAbsolute, relative);
             if (absolute.IsFailure)

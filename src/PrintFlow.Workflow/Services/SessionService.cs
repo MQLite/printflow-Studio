@@ -866,12 +866,20 @@ public sealed class SessionService : ISessionService
                     return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(meituPatterns.Failure);
                 }
 
-                string producedName = OutputFileNaming.BuildProposedFileName(
+                // A pattern the naming authority cannot render is reported, not thrown: it
+                // arrives as preset data, and an exception escaping here would leave the
+                // shell with an unhandled fault rather than a failed step (naming-contract
+                // fix §6).
+                OperationResult<string> producedName = OutputFileNaming.BuildProposedFileName(
                     work.Operation == OperationKind.Enhance
                         ? NamingArtifactKind.Enhanced
                         : NamingArtifactKind.Cutout,
                     aggregate.Session.OutputName,
                     meituPatterns.Value);
+                if (producedName.IsFailure)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(producedName.Failure);
+                }
 
                 // The decision the attempt row already recorded, never a constant and never a
                 // fresh read of the session. For background removal the engine refused to start
@@ -902,7 +910,7 @@ public sealed class SessionService : ISessionService
                         operation,
                         decision,
                         ParentDirOf(workingCopy.Value),
-                        SiblingOf(workingCopy.Value, producedName))
+                        SiblingOf(workingCopy.Value, producedName.Value))
                     {
                         // The one seam through which an operator's Stop reaches Meitu. What the
                         // adapter may do with it is decided by AutomationStopPolicy from the
@@ -946,11 +954,15 @@ public sealed class SessionService : ISessionService
                     return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(patterns.Failure);
                 }
 
-                string tiffName = OutputFileNaming.BuildProposedFileName(
+                OperationResult<string> tiffName = OutputFileNaming.BuildProposedFileName(
                     NamingArtifactKind.ProductionTiff, aggregate.Session.OutputName, patterns.Value, dimensions.WidthMm);
+                if (tiffName.IsFailure)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(tiffName.Failure);
+                }
 
                 OperationResult<WorkspaceFileRef> reserved =
-                    _workspace.ReserveOutput(session, WorkspaceArea.Approved, tiffName, patterns.Value);
+                    _workspace.ReserveOutput(session, WorkspaceArea.Approved, tiffName.Value, patterns.Value);
                 if (reserved.IsFailure)
                 {
                     return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(reserved.Failure);

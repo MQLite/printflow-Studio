@@ -28,8 +28,8 @@ public sealed class WorkstationPresetProviderTests
 
         OperationResult<NamingPatternSet> patterns = provider.GetNamingPatterns();
         patterns.IsSuccess.ShouldBeTrue();
-        patterns.Value.EnhancedPattern.ShouldBe("{0}_HD.png");
-        patterns.Value.ProductionTiffPattern.ShouldBe("{0}_{1}mm_CMYK_W.tif");
+        patterns.Value.EnhancedPattern.ShouldBe(AcceptedNamingContract.EnhancedPattern);
+        patterns.Value.ProductionTiffPattern.ShouldBe(AcceptedNamingContract.ProductionTiffPattern);
     }
 
     [Fact]

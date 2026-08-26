@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Tests.Unit.Naming;
 
@@ -83,15 +84,33 @@ public sealed class OutputFileNamingTests
     [Fact]
     public void Enhanced_pattern_matches_the_design_example()
     {
-        OutputFileNaming.BuildProposedFileName(NamingArtifactKind.Enhanced, OutputName.Parse("Name"), Patterns)
-            .ShouldBe("Name_HD.png");
+        Rendered(NamingArtifactKind.Enhanced, "Name").ShouldBe("Name_HD.png");
     }
 
     [Fact]
     public void Cutout_pattern_matches_the_design_example()
     {
-        OutputFileNaming.BuildProposedFileName(NamingArtifactKind.Cutout, OutputName.Parse("Name"), Patterns)
-            .ShouldBe("Name_CUTOUT.png");
+        Rendered(NamingArtifactKind.Cutout, "Name").ShouldBe("Name_CUTOUT.png");
+    }
+
+    /// <summary>
+    /// <c>{Name}_HD.png</c> applied to <c>Example</c> is <c>Example_HD.png</c>
+    /// (naming-contract fix §8).
+    /// </summary>
+    [Fact]
+    public void The_accepted_enhanced_pattern_renders_the_accepted_name()
+    {
+        Rendered(NamingArtifactKind.Enhanced, "Example").ShouldBe("Example_HD.png");
+    }
+
+    /// <summary>
+    /// <c>{Name}_CUTOUT.png</c> applied to <c>Example</c> is <c>Example_CUTOUT.png</c> — the
+    /// exact rendering the R2 Final Gate crashed short of (naming-contract fix §8).
+    /// </summary>
+    [Fact]
+    public void The_accepted_cutout_pattern_renders_the_accepted_name()
+    {
+        Rendered(NamingArtifactKind.Cutout, "Example").ShouldBe("Example_CUTOUT.png");
     }
 
     [Fact]
@@ -99,7 +118,7 @@ public sealed class OutputFileNamingTests
     {
         OutputFileNaming.BuildProposedFileName(
                 NamingArtifactKind.ProductionTiff, OutputName.Parse("Name"), Patterns, targetWidthMm: 280)
-            .ShouldBe("Name_280mm_CMYK_W.tif");
+            .Value.ShouldBe("Name_280mm_CMYK_W.tif");
     }
 
     [Fact]
@@ -112,8 +131,52 @@ public sealed class OutputFileNamingTests
     [Fact]
     public void Collision_candidates_follow_base_02_03()
     {
-        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 1).ShouldBe("Name.png");
-        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 2).ShouldBe("Name_02.png");
-        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 3).ShouldBe("Name_03.png");
+        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 1).Value.ShouldBe("Name.png");
+        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 2).Value.ShouldBe("Name_02.png");
+        OutputFileNaming.BuildCollisionCandidate("Name.png", Patterns, 3).Value.ShouldBe("Name_03.png");
+    }
+
+    /// <summary>
+    /// A pattern this artefact kind cannot render is a structured failure, not an exception
+    /// (naming-contract fix §6, §8).
+    /// </summary>
+    /// <remarks>
+    /// Positional syntax is the case that matters historically: no accepted manifest has ever
+    /// used it, and it is now refused rather than silently accepted by composite formatting.
+    /// </remarks>
+    [Theory]
+    [InlineData("{0}_HD.png")]
+    [InlineData("{Foo}_HD.png")]
+    [InlineData("{Name_HD.png")]
+    [InlineData("Name}_HD.png")]
+    [InlineData("")]
+    public void An_unrenderable_enhanced_pattern_fails_structurally(string pattern)
+    {
+        OperationResult<string> result = OutputFileNaming.BuildProposedFileName(
+            NamingArtifactKind.Enhanced,
+            OutputName.Parse("Name"),
+            Patterns with { EnhancedPattern = pattern });
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+    }
+
+    /// <summary>An unrenderable collision suffix fails the same way.</summary>
+    [Fact]
+    public void An_unrenderable_collision_pattern_fails_structurally()
+    {
+        OperationResult<string> result = OutputFileNaming.BuildCollisionCandidate(
+            "Name.png", Patterns with { CollisionSuffixPattern = "_{0:D2}" }, sequence: 2);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+    }
+
+    private static string Rendered(NamingArtifactKind kind, string name)
+    {
+        OperationResult<string> result =
+            OutputFileNaming.BuildProposedFileName(kind, OutputName.Parse(name), Patterns);
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : string.Empty);
+        return result.Value;
     }
 }

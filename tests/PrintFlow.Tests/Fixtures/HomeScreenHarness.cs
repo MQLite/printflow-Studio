@@ -152,10 +152,14 @@ internal sealed class HomeScreenHarness : IDisposable
 {
     private readonly SessionServiceHarness _harness = new();
 
-    public HomeScreenHarness()
+    /// <param name="preset">
+    /// A preset provider in place of the fixture-backed one, so a screen can be driven against
+    /// naming patterns the renderer cannot honour (naming-contract fix §6, §11).
+    /// </param>
+    public HomeScreenHarness(IWorkstationPresetProvider? preset = null)
     {
         Meitu = new CountingMeituProcessor(_harness.FakeMeitu);
-        Sessions = _harness.CreateServiceWithMeitu(Meitu);
+        Sessions = _harness.CreateServiceWithMeitu(Meitu, preset);
         Home = new HomeViewModel(Sessions, Navigation, FilePicker, StartupStatus);
     }
 

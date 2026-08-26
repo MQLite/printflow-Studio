@@ -1781,10 +1781,11 @@ public sealed class MeituWorkstationSmoke
         string directory = slash < 0 ? string.Empty : relative[..(slash + 1)];
         string stem = Path.GetFileNameWithoutExtension(workingCopy.FileName);
 
-        string name = OutputFileNaming.BuildProposedFileName(
+        OperationResult<string> name = OutputFileNaming.BuildProposedFileName(
             NamingArtifactKind.Enhanced, OutputName.Sanitise(stem), NamingPatternSet.DesignDefault);
+        name.IsSuccess.ShouldBeTrue(name.IsFailure ? name.Failure.ToString() : string.Empty);
 
-        return WorkspaceFileRef.Create(directory + name, WorkspaceArea.Working);
+        return WorkspaceFileRef.Create(directory + name.Value, WorkspaceArea.Working);
     }
 
     private static (string AbsolutePath, WorkspaceFileRef Reference, IWorkspace Workspace)
