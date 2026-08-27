@@ -22,8 +22,11 @@ namespace PrintFlow.Infrastructure.Automation;
 public sealed class Win32ScopedInputSink : IScopedInputSink
 {
     private const ushort VkControl = 0x11;
+    private const ushort VkShift = 0x10;
     private const ushort VkEscape = 0x1B;
     private const ushort VkO = 0x4F;
+    private const ushort VkS = 0x53;
+    private const ushort VkW = 0x57;
 
     private readonly IExternalAppWindowLocator _locator;
 
@@ -86,6 +89,22 @@ public sealed class Win32ScopedInputSink : IScopedInputSink
             Key(VkControl, down: false),
         ],
         KnownShortcut.Escape => [Key(VkEscape, down: true), Key(VkEscape, down: false)],
+        KnownShortcut.SaveAsProbe =>
+        [
+            Key(VkControl, down: true),
+            Key(VkShift, down: true),
+            Key(VkS, down: true),
+            Key(VkS, down: false),
+            Key(VkShift, down: false),
+            Key(VkControl, down: false),
+        ],
+        KnownShortcut.CloseActiveDocument =>
+        [
+            Key(VkControl, down: true),
+            Key(VkW, down: true),
+            Key(VkW, down: false),
+            Key(VkControl, down: false),
+        ],
         _ => throw new ArgumentOutOfRangeException(
             nameof(shortcut), shortcut, "Unknown shortcut; no key sequence is defined for it."),
     };

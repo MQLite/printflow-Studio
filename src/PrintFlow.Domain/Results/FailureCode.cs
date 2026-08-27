@@ -111,4 +111,65 @@ public enum FailureCode
     /// control, so no file was opened.
     /// </summary>
     MeituOpenInputFailed,
+
+    /// <summary>
+    /// The Photoshop executable named by the signed workstation preset is absent, unreadable,
+    /// or does not match the accepted binary identity (Epic 11400 Part A §5).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately a separate code from <see cref="MeituNotInstalled"/> rather than a shared
+    /// "external application missing". The two have different accepted binaries, different
+    /// evidence chains and different repair procedures, and an operator reading a failure needs
+    /// to know which application to look at without parsing the message text.
+    /// </remarks>
+    PhotoshopNotInstalled,
+
+    /// <summary>
+    /// Photoshop was started from the accepted executable but never reached an identifiable
+    /// window in a recognised safe state before the bounded launch timeout expired.
+    /// </summary>
+    PhotoshopLaunchFailed,
+
+    /// <summary>
+    /// A Photoshop process exists, but no top-level window belonging to that exact process
+    /// could be identified — so there is no target any interaction may be addressed to.
+    /// </summary>
+    PhotoshopWindowNotFound,
+
+    /// <summary>
+    /// The verified Photoshop window stopped being the interaction target — most often because
+    /// another application took the foreground — so the pending input was abandoned unsent.
+    /// </summary>
+    PhotoshopTargetLost,
+
+    /// <summary>
+    /// Photoshop is on a screen PrintFlow cannot positively recognise. Automation stops;
+    /// nothing is clicked, dismissed or closed on the strength of a guess.
+    /// </summary>
+    PhotoshopUnknownState,
+
+    /// <summary>
+    /// A dialog owned by Photoshop is blocking its main window. PrintFlow never guesses how to
+    /// dismiss one — the operator resolves it.
+    /// </summary>
+    PhotoshopBlockingDialog,
+
+    /// <summary>
+    /// The managed Working file could not be handed to Photoshop through a positively
+    /// identified control, so no file was opened.
+    /// </summary>
+    PhotoshopOpenInputFailed,
+
+    /// <summary>
+    /// Photoshop is holding a document, but PrintFlow could not positively establish that it is
+    /// the exact managed Working file this attempt handed over (Epic 11400 Part A §11, §12).
+    /// </summary>
+    /// <remarks>
+    /// Distinct from <see cref="PhotoshopUnknownState"/> on purpose, because the two describe
+    /// opposite problems. Unknown state means PrintFlow does not recognise the screen at all.
+    /// This means the screen was recognised perfectly well and the document on it is not — or
+    /// cannot be shown to be — the one that was asked for, which is exactly the condition that
+    /// must never be allowed to continue into an irreversible production step.
+    /// </remarks>
+    PhotoshopDocumentIdentityUnconfirmed,
 }

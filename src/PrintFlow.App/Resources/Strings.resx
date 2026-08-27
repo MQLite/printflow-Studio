@@ -282,6 +282,30 @@
   <data name="Failure_MeituInterrupted" xml:space="preserve">
     <value>Meitu processing was interrupted. Meitu may still be running; check its screen before retrying.</value>
   </data>
+  <data name="Failure_PhotoshopNotInstalled" xml:space="preserve">
+    <value>The approved Photoshop program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
+  </data>
+  <data name="Failure_PhotoshopLaunchFailed" xml:space="preserve">
+    <value>Photoshop was started but did not become ready in time. Please open Photoshop yourself and try again.</value>
+  </data>
+  <data name="Failure_PhotoshopWindowNotFound" xml:space="preserve">
+    <value>Photoshop is running but its window could not be found, so nothing was sent to it.</value>
+  </data>
+  <data name="Failure_PhotoshopTargetLost" xml:space="preserve">
+    <value>Photoshop's verified window or foreground changed, so no further input was sent. Bring Photoshop to the front and try again.</value>
+  </data>
+  <data name="Failure_PhotoshopUnknownState" xml:space="preserve">
+    <value>Photoshop is on a screen this program does not recognise. Nothing was changed. Please return Photoshop to its start screen or finish what is open, then try again.</value>
+  </data>
+  <data name="Failure_PhotoshopBlockingDialog" xml:space="preserve">
+    <value>A message window is open in Photoshop. This program will not close it for you — please deal with it, then try again.</value>
+  </data>
+  <data name="Failure_PhotoshopOpenInputFailed" xml:space="preserve">
+    <value>The prepared file could not be handed to Photoshop, so nothing was opened.</value>
+  </data>
+  <data name="Failure_PhotoshopDocumentIdentityUnconfirmed" xml:space="preserve">
+    <value>This program could not confirm that Photoshop is showing the exact prepared file, so it stopped. Nothing was changed and no output was made.</value>
+  </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>Result not good enough</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>Edge error</value></data>
   <data name="Rejection_MissingContent" xml:space="preserve"><value>Missing content</value></data>

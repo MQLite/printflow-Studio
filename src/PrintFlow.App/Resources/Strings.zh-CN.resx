@@ -282,6 +282,30 @@
   <data name="Failure_MeituInterrupted" xml:space="preserve">
     <value>美图处理已中断。美图可能仍在运行；重试前请先检查其界面。</value>
   </data>
+  <data name="Failure_PhotoshopNotInstalled" xml:space="preserve">
+    <value>本机未找到已认可的 Photoshop 程序，或其版本与认可版本不符。请检查工作站配置。</value>
+  </data>
+  <data name="Failure_PhotoshopLaunchFailed" xml:space="preserve">
+    <value>Photoshop 已启动但未在规定时间内就绪。请手动打开 Photoshop 后重试。</value>
+  </data>
+  <data name="Failure_PhotoshopWindowNotFound" xml:space="preserve">
+    <value>Photoshop 正在运行，但未能找到其窗口，因此未向其发送任何操作。</value>
+  </data>
+  <data name="Failure_PhotoshopTargetLost" xml:space="preserve">
+    <value>Photoshop 已核验的窗口或前台焦点发生变化，因此未再发送任何输入。请将 Photoshop 置于前台后重试。</value>
+  </data>
+  <data name="Failure_PhotoshopUnknownState" xml:space="preserve">
+    <value>Photoshop 当前界面本程序无法识别，未做任何更改。请将 Photoshop 返回起始界面或先处理完已打开的内容，然后重试。</value>
+  </data>
+  <data name="Failure_PhotoshopBlockingDialog" xml:space="preserve">
+    <value>Photoshop 中有弹窗处于打开状态。本程序不会代为关闭，请先自行处理后重试。</value>
+  </data>
+  <data name="Failure_PhotoshopOpenInputFailed" xml:space="preserve">
+    <value>准备好的文件未能交给 Photoshop，因此没有打开任何文件。</value>
+  </data>
+  <data name="Failure_PhotoshopDocumentIdentityUnconfirmed" xml:space="preserve">
+    <value>本程序无法确认 Photoshop 打开的正是指定的准备文件，因此已停止。未做任何更改，也未生成任何输出。</value>
+  </data>
   <data name="Rejection_InsufficientResult" xml:space="preserve"><value>效果不达标</value></data>
   <data name="Rejection_EdgeError" xml:space="preserve"><value>边缘错误</value></data>
   <data name="Rejection_MissingContent" xml:space="preserve"><value>内容缺失</value></data>

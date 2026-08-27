@@ -352,6 +352,23 @@ internal static class Strings
 
     internal static string Failure_MeituInterrupted => Get(nameof(Failure_MeituInterrupted));
 
+    internal static string Failure_PhotoshopNotInstalled => Get(nameof(Failure_PhotoshopNotInstalled));
+
+    internal static string Failure_PhotoshopLaunchFailed => Get(nameof(Failure_PhotoshopLaunchFailed));
+
+    internal static string Failure_PhotoshopWindowNotFound => Get(nameof(Failure_PhotoshopWindowNotFound));
+
+    internal static string Failure_PhotoshopTargetLost => Get(nameof(Failure_PhotoshopTargetLost));
+
+    internal static string Failure_PhotoshopUnknownState => Get(nameof(Failure_PhotoshopUnknownState));
+
+    internal static string Failure_PhotoshopBlockingDialog => Get(nameof(Failure_PhotoshopBlockingDialog));
+
+    internal static string Failure_PhotoshopOpenInputFailed => Get(nameof(Failure_PhotoshopOpenInputFailed));
+
+    internal static string Failure_PhotoshopDocumentIdentityUnconfirmed =>
+        Get(nameof(Failure_PhotoshopDocumentIdentityUnconfirmed));
+
     internal static string Rejection_InsufficientResult => Get(nameof(Rejection_InsufficientResult));
 
     internal static string Rejection_EdgeError => Get(nameof(Rejection_EdgeError));

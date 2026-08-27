@@ -117,6 +117,15 @@ internal static class DisplayNames
         FailureCode.MeituUnknownState => Strings.Failure_MeituUnknownState,
         FailureCode.MeituBlockingDialog => Strings.Failure_MeituBlockingDialog,
         FailureCode.MeituOpenInputFailed => Strings.Failure_MeituOpenInputFailed,
+        FailureCode.PhotoshopNotInstalled => Strings.Failure_PhotoshopNotInstalled,
+        FailureCode.PhotoshopLaunchFailed => Strings.Failure_PhotoshopLaunchFailed,
+        FailureCode.PhotoshopWindowNotFound => Strings.Failure_PhotoshopWindowNotFound,
+        FailureCode.PhotoshopTargetLost => Strings.Failure_PhotoshopTargetLost,
+        FailureCode.PhotoshopUnknownState => Strings.Failure_PhotoshopUnknownState,
+        FailureCode.PhotoshopBlockingDialog => Strings.Failure_PhotoshopBlockingDialog,
+        FailureCode.PhotoshopOpenInputFailed => Strings.Failure_PhotoshopOpenInputFailed,
+        FailureCode.PhotoshopDocumentIdentityUnconfirmed =>
+            Strings.Failure_PhotoshopDocumentIdentityUnconfirmed,
         _ => code.ToString(),
     };
 

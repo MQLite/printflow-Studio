@@ -1009,9 +1009,20 @@ internal sealed class RecordingInputSink : IScopedInputSink
 {
     public List<(WindowHandle Target, KnownShortcut Shortcut)> Sends { get; } = [];
 
+    /// <summary>
+    /// Runs after each send, so a test can model what the keystroke did to the fake desktop.
+    /// </summary>
+    /// <remarks>
+    /// Needed for shortcuts whose whole effect is a change of state rather than a new surface —
+    /// closing a document, for instance, is observed as the window title ceasing to name it, and
+    /// a fake that never changed the title could only prove that a wait times out.
+    /// </remarks>
+    public Action<KnownShortcut>? OnSend { get; set; }
+
     public OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut)
     {
         Sends.Add((verifiedTarget, shortcut));
+        OnSend?.Invoke(shortcut);
         return OperationResult.Ok();
     }
 }

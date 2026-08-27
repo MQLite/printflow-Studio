@@ -30,6 +30,18 @@ internal static partial class NativeMethods
 
     internal const uint GW_OWNER = 4;
 
+    // -- messages addressed to one identified child control -----------------------------
+    //
+    // These three are the whole of the control-actuation vocabulary. Each is addressed to a
+    // specific window handle that has already been shown to belong to the verified process, so
+    // — unlike SendInput — none of them can be delivered to whatever happens to hold focus.
+    // Nothing here can express a coordinate (Epic 11400 Part A §10).
+
+    internal const uint WM_SETTEXT = 0x000C;
+    internal const uint WM_GETTEXT = 0x000D;
+    internal const uint WM_GETTEXTLENGTH = 0x000E;
+    internal const uint BM_CLICK = 0x00F5;
+
     internal const int PW_RENDERFULLCONTENT = 0x00000002;
 
     internal const uint SRCCOPY = 0x00CC0020;
@@ -133,6 +145,29 @@ internal static partial class NativeMethods
 
     [LibraryImport("user32.dll", EntryPoint = "GetClassNameW")]
     internal static partial int GetClassName(nint hWnd, [Out] ushort[] text, int count);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool EnumChildWindows(nint parent, EnumWindowsProc callback, nint lParam);
+
+    [LibraryImport("user32.dll")]
+    internal static partial int GetDlgCtrlID(nint hWnd);
+
+    // -- one identified control ----------------------------------------------------------
+    //
+    // Three overloads of the same entry point, one per message shape, so each call site is
+    // statically prevented from passing the wrong lParam kind. There is deliberately no
+    // general-purpose SendMessage(uint, nint, nint) here: a free-form message primitive would
+    // let a caller send anything to anything, which is the opposite of what this seam is for.
+
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial nint SendSetText(nint hWnd, uint message, nint wParam, string text);
+
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    internal static partial nint SendGetText(nint hWnd, uint message, nint wParam, [Out] ushort[] text);
+
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    internal static partial nint SendControlMessage(nint hWnd, uint message, nint wParam, nint lParam);
 
     // -- foreground and activation ------------------------------------------------------
 
