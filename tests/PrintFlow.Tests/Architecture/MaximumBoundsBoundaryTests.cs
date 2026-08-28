@@ -1,0 +1,367 @@
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Sessions;
+using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
+
+namespace PrintFlow.Tests.Architecture;
+
+/// <summary>
+/// The limiting edge is decided in exactly one place, and the production Photoshop path cannot
+/// reach the legacy independent-pixel pair (Epic 11400 Part B1A.2A §6, §17, §23).
+/// </summary>
+/// <remarks>
+/// The specific way this slice could go wrong is not a wrong number; it is a <b>second</b>
+/// answer. <c>FitWithinBounds</c> chooses which single edge Photoshop may be given, and any other
+/// code that worked that out for itself — a screen previewing a size, an adapter deriving a
+/// target, a service tidying a plan — would be a rule free to drift from the one the engine
+/// enforces. The one that decides what Photoshop is actually told would be the wrong one to be
+/// wrong.
+/// <para>
+/// The second failure mode is subtler and is what §17 exists for.
+/// <c>PrintDimensions.PixelWidth</c> and <c>PixelHeight</c> are two independent millimetre
+/// conversions that still sit on the request for display and naming. Sending both to Photoshop
+/// would be the non-proportional stretch the accepted contract prohibits, and it would look
+/// entirely reasonable at the call site.
+/// </para>
+/// <para>
+/// Source text as well as reflection, because both failures are lines someone adds while wiring
+/// something up rather than types that reach a signature.
+/// </para>
+/// </remarks>
+public sealed class MaximumBoundsBoundaryTests
+{
+    // -------------------------------------------------------------------------------------
+    // §6, §23: one limiting-edge authority, and it is pure Domain code
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The calculator and the plan live in the Domain and nowhere else (§23).
+    /// </summary>
+    [Fact]
+    public void The_fit_calculation_and_the_plan_are_declared_only_in_the_domain()
+    {
+        typeof(FitWithinBounds).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+        typeof(PrintPreparationPlan).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+        typeof(PrintDimensionSemantics).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+        typeof(LimitingEdge).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+        typeof(PhotoshopResizeMode).Assembly.GetName().Name.ShouldBe("PrintFlow.Domain");
+    }
+
+    /// <summary>
+    /// Nothing outside the Domain calls the fit calculation (§6, §23).
+    /// </summary>
+    /// <remarks>
+    /// Workflow reaches it through <c>PrintPreparationPlan.For</c>, which is the only creator of a
+    /// plan; Infrastructure and the shell reach it not at all. A screen or an adapter calling the
+    /// calculator directly would not be wrong arithmetic — it would be a second plan, produced
+    /// outside the audited path and bound to nothing.
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.Workflow")]
+    [InlineData("PrintFlow.Infrastructure")]
+    [InlineData("PrintFlow.App")]
+    public void No_project_outside_the_domain_calls_the_fit_calculation(string project)
+    {
+        Offenders(project, subdirectory: null, "FitWithinBounds").ShouldBeEmpty(
+            "a plan is created only through PrintPreparationPlan.For, which is the calculator's " +
+            "single caller.");
+    }
+
+    /// <summary>
+    /// Neither the shell nor Infrastructure constructs a plan (§23).
+    /// </summary>
+    /// <remarks>
+    /// Plan construction is <c>SessionService</c>'s, because only it holds the upstream Revision
+    /// whose bytes were just re-verified and whose pixels the fit is calculated from. A plan built
+    /// anywhere else would be bound to whatever that code happened to have to hand.
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.Infrastructure")]
+    [InlineData("PrintFlow.App")]
+    public void No_project_outside_the_workflow_service_constructs_a_plan(string project)
+    {
+        Offenders(project, subdirectory: null, @"PrintPreparationPlan\.For").ShouldBeEmpty(
+            "SessionService owns plan construction; everything else reads the plan it produced.");
+    }
+
+    /// <summary>The service that owns plan construction really does construct it (§23).</summary>
+    /// <remarks>
+    /// The positive half of the rule above. Without it the two bans would still pass in a codebase
+    /// where nothing produced a plan at all.
+    /// </remarks>
+    [Fact]
+    public void The_session_service_constructs_the_plan()
+    {
+        WorkflowSource("Services", "SessionService.cs")
+            .ShouldContain("PrintPreparationPlan.For(", Case.Sensitive);
+    }
+
+    /// <summary>
+    /// No view model re-derives the limiting edge or whether a plan still applies (§23).
+    /// </summary>
+    /// <remarks>
+    /// The read model already reports only the <i>usable</i> plan, so the shell has nothing left
+    /// to decide. The members named here are the raw materials of a second staleness rule or a
+    /// second edge selection; the display fields the UI slice will bind to —
+    /// <c>LimitingEdge</c>, <c>MaxWidthMm</c>, <c>NeedsDimensionReview</c> — are deliberately not
+    /// banned, because naming a value is display and comparing them is a decision.
+    /// </remarks>
+    [Theory]
+    [InlineData("Covers")]
+    [InlineData("UsablePrintPreparationPlan")]
+    [InlineData("SourceRevisionId")]
+    [InlineData("SourceSha256")]
+    [InlineData("Rehydrate")]
+    public void No_view_model_restates_the_stale_plan_rule(string banned)
+    {
+        Offenders("PrintFlow.App", "ViewModels", banned).ShouldBeEmpty(
+            "staleness is decided once, in the workflow layer; the shell reads the answer.");
+    }
+
+    /// <summary>
+    /// No resampling vocabulary reaches the Workflow layer or the shell (§23).
+    /// </summary>
+    /// <remarks>
+    /// The policy is a closed Domain enum with two members, and it is fixed by the accepted
+    /// contract rather than chosen. A resampling name appearing as text in a command, a view model
+    /// or a screen would be an operator-selectable resample arriving by the back door — the one
+    /// thing B1A.1 settled by refusing.
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.Workflow", "BICUBIC")]
+    [InlineData("PrintFlow.Workflow", "ResampleMethod")]
+    [InlineData("PrintFlow.Workflow", "BicubicSharper")]
+    [InlineData("PrintFlow.App", "BICUBIC")]
+    [InlineData("PrintFlow.App", "ResampleMethod")]
+    [InlineData("PrintFlow.App", "BicubicSharper")]
+    public void No_resampling_vocabulary_reaches_the_workflow_or_the_shell(string project, string banned)
+    {
+        Offenders(project, subdirectory: null, banned).ShouldBeEmpty(
+            "the resampling policy is fixed by contract and travels as a neutral Domain enum.");
+    }
+
+    /// <summary>
+    /// The Domain names no Photoshop COM or DOM type (§5, §23).
+    /// </summary>
+    /// <remarks>
+    /// The neutral <c>PhotoshopResizeMode</c> is PrintFlow's vocabulary; mapping it to
+    /// <c>ResampleMethod.NONE</c> or <c>ResampleMethod.BICUBICSHARPER</c> belongs beside the
+    /// Photoshop driver, when a production resize exists. Its enum member is named
+    /// <c>BicubicSharper</c> because that is what the operation is, not because a COM constant
+    /// leaked upwards — so the automation vocabulary is what is banned here.
+    /// </remarks>
+    [Theory]
+    [InlineData("ResampleMethod")]
+    [InlineData("Interop")]
+    [InlineData("ComImport")]
+    [InlineData("Marshal")]
+    [InlineData("System.Runtime.InteropServices")]
+    public void The_domain_names_no_photoshop_automation_type(string banned)
+    {
+        Offenders("PrintFlow.Domain", subdirectory: null, banned).ShouldBeEmpty(
+            "the Domain states a neutral resize policy; COM belongs to one adapter.");
+    }
+
+    // -------------------------------------------------------------------------------------
+    // §17: the production path cannot use the legacy independent-pixel pair
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>The request carries the typed plan, not a loose pair of numbers (§17).</summary>
+    /// <remarks>
+    /// Structural, and non-nullable on purpose: a request that could be built without a plan is a
+    /// request some future call site would build without one.
+    /// </remarks>
+    [Fact]
+    public void The_photoshop_request_carries_a_typed_preparation_plan()
+    {
+        PropertyInfo preparation = typeof(PhotoshopRequest)
+            .GetProperty(nameof(PhotoshopRequest.Preparation))
+            .ShouldNotBeNull();
+
+        preparation.PropertyType.ShouldBe(typeof(PrintPreparationPlan));
+
+        // A positional parameter of the primary constructor, so it cannot be omitted.
+        typeof(PhotoshopRequest)
+            .GetConstructors()
+            .ShouldContain(c => c.GetParameters()
+                .Any(p => p.ParameterType == typeof(PrintPreparationPlan)));
+    }
+
+    /// <summary>
+    /// No Photoshop adapter derives a target pair from the legacy independent-pixel fields (§17).
+    /// </summary>
+    /// <remarks>
+    /// The regression §17 asks for, and the reason it is worth having: the fields are still on the
+    /// request, still populated, and reading them would compile, run, and produce two numbers that
+    /// look exactly like a size. Sending both to Photoshop is the non-proportional stretch the
+    /// contract prohibits, and it would only be visible in the output.
+    /// <para>
+    /// The scan covers both adapters and the service that builds the request, because "the
+    /// production Photoshop path" is all three.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("Dimensions.PixelWidth")]
+    [InlineData("Dimensions.PixelHeight")]
+    [InlineData("Preparation.SourcePixelWidth")]
+    [InlineData("Preparation.SourcePixelHeight")]
+    public void The_photoshop_path_derives_no_target_pair_from_independent_pixels(string banned)
+    {
+        List<string> offenders =
+        [
+            .. Offenders("PrintFlow.Infrastructure", Path.Combine("Adapters", "Photoshop"), banned),
+            .. Offenders("PrintFlow.Infrastructure", Path.Combine("Adapters", "Fake"), banned),
+            .. Offenders("PrintFlow.Workflow", "Services", banned),
+        ];
+
+        offenders.ShouldBeEmpty(
+            "the executable geometry is the plan's single limiting edge; two independently " +
+            "converted numbers are not a Photoshop target.");
+    }
+
+    /// <summary>
+    /// The plan states a projection and never an actual result (§20).
+    /// </summary>
+    /// <remarks>
+    /// Nothing in this slice has read anything back from Photoshop, so a member called
+    /// <c>ActualWidth</c> would be a claim no code could honestly make. B1A.3 adds the real
+    /// read-back; until then the vocabulary itself keeps the two apart.
+    /// </remarks>
+    [Fact]
+    public void Neither_the_plan_nor_the_attempt_claims_an_actual_photoshop_result()
+    {
+        foreach (Type type in new[]
+                 {
+                     typeof(PrintPreparationPlan), typeof(ProcessingAttempt),
+                     typeof(ProcessingSession), typeof(SessionView),
+                 })
+        {
+            foreach (PropertyInfo property in type.GetProperties())
+            {
+                property.Name.ShouldNotStartWith("Actual");
+                property.Name.ShouldNotContain("PhotoshopResult");
+            }
+        }
+    }
+
+    /// <summary>
+    /// No production Photoshop mutation, W1 action, TIFF save or Revision path was enabled (§23).
+    /// </summary>
+    /// <remarks>
+    /// The scope statement re-checked from this slice's angle. The B1 boundary tests already prove
+    /// the adapter names no action and constructs no <c>AdapterOutput</c>; what is new here is that
+    /// a typed geometry plan now reaches the request, which is exactly the change that would make
+    /// "just resize it while we are here" tempting.
+    /// <para>
+    /// The patterns name <b>calls</b> rather than words. Part A's Save As <i>probe</i> — a
+    /// keystroke used to detect a blocking dialog and covered by its own reviewed-shortcut test —
+    /// is not a save, and the adapter's refusal message legitimately says out loud which
+    /// operations are not implemented. Banning the vocabulary rather than the invocation would
+    /// have failed on the sentence explaining the boundary.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(@"\bresizeImage\s*\(")]
+    [InlineData(@"\bResizeImage\s*\(")]
+    [InlineData(@"\bchangeMode\s*\(")]
+    [InlineData(@"\bConvertProfile\s*\(")]
+    [InlineData(@"\.SaveAs\s*\(")]
+    [InlineData(@"\bDoAction\s*\(")]
+    public void The_production_photoshop_adapter_gained_no_mutation_capability(string banned)
+    {
+        Offenders("PrintFlow.Infrastructure", Path.Combine("Adapters", "Photoshop"), banned)
+            .ShouldBeEmpty("production resizing, colour conversion and the TIFF save are B1A.3.");
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Source helpers
+    // -------------------------------------------------------------------------------------
+
+    private static string WorkflowSource(params string[] relativePath) =>
+        File.ReadAllText(Path.Combine(
+            [FindProjectDirectory("PrintFlow.Workflow"), .. relativePath]));
+
+    private static IReadOnlyList<string> Offenders(string project, string? subdirectory, string banned)
+    {
+        List<string> offenders = [];
+
+        foreach ((string file, string[] lines) in SourceOf(project, subdirectory))
+        {
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (Contains(lines[i], banned))
+                {
+                    offenders.Add($"{Path.GetFileName(file)}:{i + 1}: {lines[i].Trim()}");
+                }
+            }
+        }
+
+        return offenders;
+    }
+
+    /// <summary>
+    /// Matches in executable text only, never inside a comment.
+    /// </summary>
+    /// <remarks>
+    /// The comments in this slice discuss these very names — explaining why the production path
+    /// must not read <c>Dimensions.PixelWidth</c> requires writing it down — and a scan that failed
+    /// on the explanation would push the reasoning out of the code, which is the opposite of what
+    /// these tests are for.
+    /// </remarks>
+    private static bool Contains(string line, string pattern)
+    {
+        string trimmed = line.TrimStart();
+        if (trimmed.StartsWith("//", StringComparison.Ordinal) ||
+            trimmed.StartsWith("///", StringComparison.Ordinal) ||
+            trimmed.StartsWith("*", StringComparison.Ordinal) ||
+            trimmed.StartsWith("--", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return Regex.IsMatch(line, pattern, RegexOptions.None, TimeSpan.FromSeconds(5));
+    }
+
+    private static IEnumerable<(string File, string[] Lines)> SourceOf(string project, string? subdirectory)
+    {
+        string directory = FindProjectDirectory(project);
+        if (subdirectory is not null)
+        {
+            directory = Path.Combine(directory, subdirectory);
+        }
+
+        if (!Directory.Exists(directory))
+        {
+            yield break;
+        }
+
+        foreach (string file in Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories))
+        {
+            if (file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
+                file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            yield return (file, File.ReadAllLines(file));
+        }
+    }
+
+    private static string FindProjectDirectory(string projectName)
+    {
+        DirectoryInfo? current = new(AppContext.BaseDirectory);
+        while (current is not null && !File.Exists(Path.Combine(current.FullName, "PrintFlowStudio.sln")))
+        {
+            current = current.Parent;
+        }
+
+        return current is null
+            ? throw new InvalidOperationException(
+                "Could not locate the repository root (PrintFlowStudio.sln) above " + AppContext.BaseDirectory)
+            : Path.Combine(current.FullName, "src", projectName);
+    }
+}

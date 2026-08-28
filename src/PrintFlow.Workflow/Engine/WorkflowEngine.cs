@@ -431,13 +431,18 @@ public sealed class WorkflowEngine : IWorkflowEngine
         }
 
         // Print dimensions and the W1 branch are decisions attached to the run being
-        // rewound, so they are cleared with it and must be made again explicitly.
+        // rewound, so they are cleared with it and must be made again explicitly. The
+        // maximum-bound plan and its semantics marker go with them: the plan is what those
+        // millimetres mean against a particular source, and leaving one behind without the other
+        // would be a reading with nothing to read (Epic 11400 Part B1A.2A §4).
         bool clearsDimensions = state.Definition.IndexOf(StepKind.PrintDimensions) >= target.Ordinal;
 
         WorkflowSnapshot newState = state with
         {
             Steps = steps,
             Dimensions = clearsDimensions ? null : state.Dimensions,
+            DimensionSemantics = clearsDimensions ? null : state.DimensionSemantics,
+            PrintPreparationPlan = clearsDimensions ? null : state.PrintPreparationPlan,
             WhiteUnderbaseBranch = clearsDimensions ? null : state.WhiteUnderbaseBranch,
             LatestApprovedRevisionId = LatestApprovedBefore(steps, target.Ordinal),
             HasDerivedRevision = HasDerivedRevision(steps),
@@ -538,7 +543,14 @@ public sealed class WorkflowEngine : IWorkflowEngine
         {
             SessionState = SessionState.Active,
             Steps = steps,
+
+            // Each additional size is its own decision, so the plan is cleared with the
+            // dimensions it belongs to rather than carried forward. A plan retained here would
+            // let the second output run on limits the operator recorded for the first
+            // (Epic 11400 Part B1A.2A §4).
             Dimensions = null,
+            DimensionSemantics = null,
+            PrintPreparationPlan = null,
             WhiteUnderbaseBranch = null,
         };
 
@@ -643,6 +655,33 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 return WorkflowTransition.Rejected(
                     RejectionCode.PreconditionNotMet,
                     "Photoshop output requires confirmed print dimensions.");
+            }
+
+            // The maximum-bound plan, refused here — before the automation lock, before the
+            // attempt row, before the working copy and before the adapter call — so a legacy or
+            // stale plan produces no attempt at all rather than a fabricated Photoshop failure
+            // (Epic 11400 Part B1A.2A §10, §15).
+            //
+            // UsablePrintPreparationPlan, not PrintPreparationPlan: holding a plan is not the
+            // same as being able to run it. A plan calculated against Revision A does not carry
+            // to a session whose upstream is now B, and one whose bound hash no longer matches
+            // describes bytes that are gone (§7). Nothing rebinds it silently; the operator
+            // reconfirms the limits against the content Photoshop will actually consume.
+            //
+            // A legacy exact pair fails here too, and deliberately for its own reason: those two
+            // millimetres were never a fit box, and which of them was meant as the limiting edge
+            // is not something to infer from the source ratio (§10).
+            if (state.UsablePrintPreparationPlan is null)
+            {
+                return WorkflowTransition.Rejected(
+                    RejectionCode.PreconditionNotMet,
+                    state.DimensionSemantics == PrintDimensionSemantics.LegacyExactPair
+                        ? "DIMENSION REVIEW REQUIRED: this session's print size was recorded as two exact " +
+                          "dimensions, before maximum bounds existed. The limits must be reconfirmed under the " +
+                          "current contract; nothing infers which edge was intended."
+                        : "Photoshop output requires a maximum-bound preparation plan calculated from the exact " +
+                          "upstream Revision it will consume. A plan calculated from different or since-changed " +
+                          "content does not carry over.");
             }
 
             if (state.WhiteUnderbaseBranch is null)
@@ -995,6 +1034,27 @@ public sealed class WorkflowEngine : IWorkflowEngine
             effects);
     }
 
+    /// <summary>
+    /// Records the maximum physical bounds a production output must fit within
+    /// (Epic 11400 Part B1A.2A §4, §8, §14).
+    /// </summary>
+    /// <remarks>
+    /// The command is the one it always was and the payload is unchanged; what changed is what
+    /// the payload <i>means</i>. Under the accepted B1A.1 contract the two millimetres are limits
+    /// rather than two exact output dimensions, and which single edge Photoshop receives is
+    /// <see cref="Domain.Outputs.FitWithinBounds"/>'s answer against the source pixels — never an
+    /// axis the operator picked (§3).
+    /// <para>
+    /// The engine states the legality it can see: the session is active, PrintDimensions is the
+    /// current step, the workflow produces a TIFF, the millimetres are positive, and an upstream
+    /// result actually exists to fit against. It cannot see source pixels — a snapshot carries no
+    /// <c>FileFacts</c> — so the calculation and its binding belong to
+    /// <c>SessionService</c>, which holds the Revisions and re-verifies the bytes first (§14).
+    /// </para>
+    /// <para>
+    /// Accepting one starts nothing: no attempt, no working copy, no adapter call, no Revision.
+    /// </para>
+    /// </remarks>
     private static WorkflowTransition SetPrintDimensions(
         WorkflowSnapshot state, WorkflowCommand.SetPrintDimensions command, CommandContext context)
     {
@@ -1010,8 +1070,27 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 RejectionCode.InvalidPayload, "Print dimensions must be positive.");
         }
 
+        // Bounds mean nothing without something to fit inside them, and a plan calculated from
+        // no source would be a plan calculated from a guess (§8). This is the same upstream
+        // result the plan binds to and the same one Photoshop output will consume.
+        if (state.UpstreamResultOf(StepKind.PhotoshopOutput) is null)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "Photoshop output has no validated upstream result, so there are no source pixels to fit " +
+                "within the requested bounds.");
+        }
+
         SessionStep confirmed = resolved.Step!.WithState(StepState.Approved, context.NowUtc);
-        WorkflowSnapshot newState = state.WithStep(confirmed) with { Dimensions = command.Dimensions };
+        WorkflowSnapshot newState = state.WithStep(confirmed) with
+        {
+            Dimensions = command.Dimensions,
+
+            // Stated here rather than left for the service to remember: anything the engine
+            // accepts through this handler was recorded under the current contract, so the
+            // reading and the pair are written by the same act (§9).
+            DimensionSemantics = PrintDimensionSemantics.MaxBoundsV1,
+        };
 
         return WorkflowTransition.Accepted(
             newState,

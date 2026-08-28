@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
@@ -466,6 +467,16 @@ public sealed class PhotoshopFoundationTests : IDisposable
             new PhotoshopRequest(
                 input,
                 PrintDimensions.FromMillimetres(200, 100, SizePreset.Custom),
+
+                // A real plan, calculated by the one domain authority rather than assembled by
+                // hand: the refusal below must be the §19 boundary refusing a fully-formed
+                // request, not the request failing to be constructible (Epic 11400 B1A.2A §17).
+                PrintPreparationPlan.For(
+                    RevisionId.From(Guid.Parse("11111111-1111-1111-1111-111111111111")),
+                    Sha256.Parse(new string('a', 64)),
+                    sourcePixelWidth: 1200,
+                    sourcePixelHeight: 600,
+                    PrintDimensions.FromMillimetres(200, 100, SizePreset.Custom)),
                 new ProductionPresetRef("p", "1", Sha256.Parse(new string('0', 64))),
                 WhiteUnderbaseBranch.W1_1px,
                 output.FileName,

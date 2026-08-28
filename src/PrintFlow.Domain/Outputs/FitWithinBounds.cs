@@ -37,6 +37,25 @@ public readonly record struct FitWithinBoundsResult(
     public int ResolutionPpi => PrintDimensions.ProductionDpi;
 
     public bool RequiresShrink => ResizeMode == PhotoshopResizeMode.BicubicSharper;
+
+    /// <summary>The projected width in whole pixels at the fixed production resolution.</summary>
+    /// <remarks>
+    /// Planning evidence, in the same sense <see cref="ProjectedWidthMm"/> is: it proves the
+    /// selected edge fits the other bound and gives Fake mode something deterministic to size
+    /// a synthetic output by. It is never a Photoshop target — sending a pair would be the
+    /// non-proportional resize the contract forbids — and it is never the actual result. The
+    /// real Photoshop-returned pixels are B1A.3's to read (Epic 11400 Part B1A.2A §20).
+    /// <para>
+    /// Computed here rather than by each caller so §6's single-authority rule covers the
+    /// projected pixel calculation too, and through
+    /// <see cref="PrintDimensions.PixelsFromMillimetres"/> so it rounds exactly as every other
+    /// millimetre-to-pixel conversion in the codebase does.
+    /// </para>
+    /// </remarks>
+    public int ProjectedPixelWidth => PrintDimensions.PixelsFromMillimetres(ProjectedWidthMm);
+
+    /// <summary>The projected height in whole pixels at the fixed production resolution.</summary>
+    public int ProjectedPixelHeight => PrintDimensions.PixelsFromMillimetres(ProjectedHeightMm);
 }
 
 /// <summary>

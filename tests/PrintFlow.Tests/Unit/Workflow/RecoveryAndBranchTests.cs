@@ -255,7 +255,7 @@ public sealed class RecoveryAndBranchTests
         WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.GeneratePrintTiff);
         scenario.CompleteImport();
         scenario.Must(new WorkflowCommand.ConfirmOriginal());
-        scenario.Must(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait));
+        scenario.RecordMaximumBounds();
 
         scenario.State.WhiteUnderbaseBranch.ShouldBeNull("there is no default branch");
 
@@ -332,13 +332,24 @@ public sealed class RecoveryAndBranchTests
     {
         WorkflowScenario scenario = CompletedTiffSession();
         scenario.Must(new WorkflowCommand.AddAnotherSize());
-        scenario.Must(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait));
+        scenario.RecordMaximumBounds();
 
         scenario.Must(new WorkflowCommand.ReturnToStep(StepKind.PrintDimensions));
 
         scenario.State.Dimensions.ShouldBeNull();
         scenario.State.WhiteUnderbaseBranch.ShouldBeNull(
             "each output requires its own explicit W1 decision");
+
+        // The reading and the plan go with the pair they belong to. A plan left behind here would
+        // outlive the millimetres it was calculated against, and a semantics marker left behind
+        // would be a reading with nothing to read (Epic 11400 Part B1A.2A §4).
+        scenario.State.DimensionSemantics.ShouldBeNull();
+        scenario.State.PrintPreparationPlan.ShouldBeNull();
+        scenario.State.UsablePrintPreparationPlan.ShouldBeNull();
+
+        // And nothing is under review: a session with no dimensions at all is at an ordinary
+        // unfinished step, not one holding a pair it cannot execute (§10).
+        scenario.State.NeedsDimensionReview.ShouldBeFalse();
     }
 
     [Fact]
@@ -354,6 +365,11 @@ public sealed class RecoveryAndBranchTests
         scenario.State.CurrentStep!.Step.ShouldBe(StepKind.PrintDimensions);
         scenario.State.Dimensions.ShouldBeNull();
         scenario.State.WhiteUnderbaseBranch.ShouldBeNull();
+
+        // The second size is its own decision, plan included: a plan carried forward from the
+        // first output would let this one run on limits nobody recorded for it (§4).
+        scenario.State.DimensionSemantics.ShouldBeNull();
+        scenario.State.PrintPreparationPlan.ShouldBeNull();
 
         // Siblings, not descendants: the existing approved output is left alone.
         scenario.State.ApprovedPrintOutputCount.ShouldBe(approvedBefore);
@@ -382,7 +398,7 @@ public sealed class RecoveryAndBranchTests
         WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.GeneratePrintTiff);
         scenario.CompleteImport();
         scenario.Must(new WorkflowCommand.ConfirmOriginal());
-        scenario.Must(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait));
+        scenario.RecordMaximumBounds();
         scenario.Must(new WorkflowCommand.SelectWhiteUnderbaseBranch(
             WhiteUnderbaseBranch.W1_0px, "fine white detail"));
         scenario.Must(new WorkflowCommand.StartStep(StepKind.PhotoshopOutput));
@@ -423,7 +439,7 @@ public sealed class RecoveryAndBranchTests
         WorkflowScenario scenario = WorkflowScenario.For(WorkflowType.GeneratePrintTiff);
         scenario.CompleteImport();
         scenario.Must(new WorkflowCommand.ConfirmOriginal());
-        scenario.Must(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait));
+        scenario.RecordMaximumBounds();
         scenario.Must(new WorkflowCommand.SelectWhiteUnderbaseBranch(
             WhiteUnderbaseBranch.W1_1px, "ordinary design"));
         scenario.CompleteStep(StepKind.PhotoshopOutput);

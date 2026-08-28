@@ -292,6 +292,177 @@ internal static class Mappers
             Sha256.Parse(reviewedSha));
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Maximum-bound print preparation (Epic 11400 Part B1A.2A §11, §13)
+    // ---------------------------------------------------------------------------------------
+
+    public static string ToText(PrintDimensionSemantics value) => value switch
+    {
+        PrintDimensionSemantics.LegacyExactPair => "LEGACY_EXACT_PAIR",
+        PrintDimensionSemantics.MaxBoundsV1 => "MAX_BOUNDS_V1",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    /// <summary>
+    /// Reads a stored dimension reading, refusing one this build does not understand.
+    /// </summary>
+    /// <remarks>
+    /// The forward half of §13's fail-closed rule. A database written by a newer PrintFlow is
+    /// already refused wholesale by <see cref="MigrationRunner"/>, but a value this build cannot
+    /// interpret must not become a default here either: silently reading an unknown marker as
+    /// maximum bounds is exactly the silent reinterpretation §9 exists to prevent.
+    /// </remarks>
+    public static PrintDimensionSemantics ToPrintDimensionSemantics(string text) => text switch
+    {
+        "LEGACY_EXACT_PAIR" => PrintDimensionSemantics.LegacyExactPair,
+        "MAX_BOUNDS_V1" => PrintDimensionSemantics.MaxBoundsV1,
+        _ => throw new InvalidOperationException(
+            $"Unsupported dimension semantics '{text}' in database; this build cannot say what those " +
+            "millimetres mean, and will not guess."),
+    };
+
+    public static string ToText(PrintPreparationMode value) => value switch
+    {
+        PrintPreparationMode.ResolutionOnly => "RESOLUTION_ONLY",
+        PrintPreparationMode.ProportionalShrink => "PROPORTIONAL_SHRINK",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static PrintPreparationMode ToPrintPreparationMode(string text) => text switch
+    {
+        "RESOLUTION_ONLY" => PrintPreparationMode.ResolutionOnly,
+        "PROPORTIONAL_SHRINK" => PrintPreparationMode.ProportionalShrink,
+        _ => throw new InvalidOperationException($"Unknown PrintPreparationMode '{text}' in database."),
+    };
+
+    public static string ToText(LimitingEdge value) => value switch
+    {
+        LimitingEdge.None => "NONE",
+        LimitingEdge.Width => "WIDTH",
+        LimitingEdge.Height => "HEIGHT",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static LimitingEdge ToLimitingEdge(string text) => text switch
+    {
+        "NONE" => LimitingEdge.None,
+        "WIDTH" => LimitingEdge.Width,
+        "HEIGHT" => LimitingEdge.Height,
+        _ => throw new InvalidOperationException($"Unknown LimitingEdge '{text}' in database."),
+    };
+
+    /// <summary>
+    /// The neutral resampling policy. Deliberately PrintFlow's vocabulary, never Photoshop's.
+    /// </summary>
+    /// <remarks>
+    /// <c>ResampleMethod.NONE</c> and <c>ResampleMethod.BICUBICSHARPER</c> are a COM detail of one
+    /// adapter, and a database that stored them would have made the schema depend on an
+    /// application's automation surface. The mapping to those values belongs beside the Photoshop
+    /// driver when a production resize exists (Epic 11400 Part B1A.2A §5).
+    /// </remarks>
+    public static string ToText(PhotoshopResizeMode value) => value switch
+    {
+        PhotoshopResizeMode.None => "NONE",
+        PhotoshopResizeMode.BicubicSharper => "BICUBIC_SHARPER",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static PhotoshopResizeMode ToPhotoshopResizeMode(string text) => text switch
+    {
+        "NONE" => PhotoshopResizeMode.None,
+        "BICUBIC_SHARPER" => PhotoshopResizeMode.BicubicSharper,
+        _ => throw new InvalidOperationException($"Unknown PhotoshopResizeMode '{text}' in database."),
+    };
+
+    /// <summary>
+    /// Rebuilds a <see cref="PrintPreparationPlan"/> from its columns, or null when none was
+    /// stored (Epic 11400 Part B1A.2A §13).
+    /// </summary>
+    /// <remarks>
+    /// The last defence, behind the database CHECK. Every column of the group is required
+    /// together and a row holding only some of them is refused rather than patched up: each
+    /// missing piece is one a reader would otherwise have to invent, and a plan with an invented
+    /// limiting edge is a plan that hands Photoshop an edge nobody calculated.
+    /// <para>
+    /// Goes back through <see cref="PrintPreparationPlan.Rehydrate"/> rather than constructing the
+    /// record directly, so a self-contradictory row — a shrink with no edge, an edge with no
+    /// value, projected pixels larger than the source — is refused here exactly as the domain
+    /// refuses it. It deliberately does <b>not</b> recalculate the fit: recomputing on read would
+    /// repair a bad row rather than reject it.
+    /// </para>
+    /// <para>
+    /// <paramref name="limitingValueMm"/> is outside the all-or-nothing group on purpose. Its
+    /// absence is meaningful — a resolution-only plan writes no millimetre value — and
+    /// <c>Rehydrate</c> is what pairs it with the mode.
+    /// </para>
+    /// </remarks>
+    public static PrintPreparationPlan? ToPrintPreparationPlan(
+        string? sourceRevisionId,
+        string? sourceSha256,
+        int? sourcePixelWidth,
+        int? sourcePixelHeight,
+        double? maxWidthMm,
+        double? maxHeightMm,
+        string? limitKind,
+        string? mode,
+        string? limitingEdge,
+        double? limitingValueMm,
+        int? projectedPixelWidth,
+        int? projectedPixelHeight,
+        int? productionDpi,
+        string? resizePolicy)
+    {
+        bool anyPresent =
+            sourceRevisionId is not null || sourceSha256 is not null ||
+            sourcePixelWidth is not null || sourcePixelHeight is not null ||
+            maxWidthMm is not null || maxHeightMm is not null ||
+            limitKind is not null || mode is not null ||
+            limitingEdge is not null || limitingValueMm is not null ||
+            projectedPixelWidth is not null || projectedPixelHeight is not null ||
+            productionDpi is not null || resizePolicy is not null;
+
+        if (!anyPresent)
+        {
+            return null;
+        }
+
+        if (sourceRevisionId is null || sourceSha256 is null ||
+            sourcePixelWidth is null || sourcePixelHeight is null ||
+            maxWidthMm is null || maxHeightMm is null ||
+            limitKind is null || mode is null ||
+            limitingEdge is null ||
+            projectedPixelWidth is null || projectedPixelHeight is null ||
+            productionDpi is null || resizePolicy is null)
+        {
+            throw new InvalidOperationException(
+                "A print preparation plan row is missing part of its content; a plan without its source " +
+                "binding, its bounds, its limiting edge and its projected pixels describes no executable " +
+                "operation, and nothing here fills the gaps in.");
+        }
+
+        if (productionDpi.Value != PrintDimensions.ProductionDpi)
+        {
+            throw new InvalidOperationException(
+                $"A print preparation plan row claims {productionDpi.Value} ppi; production resolution is " +
+                $"fixed at {PrintDimensions.ProductionDpi} and is never operator-selected.");
+        }
+
+        return PrintPreparationPlan.Rehydrate(
+            RevisionId.From(Guid.Parse(sourceRevisionId)),
+            Sha256.Parse(sourceSha256),
+            sourcePixelWidth.Value,
+            sourcePixelHeight.Value,
+            maxWidthMm.Value,
+            maxHeightMm.Value,
+            ToSizePreset(limitKind),
+            ToPrintPreparationMode(mode),
+            ToLimitingEdge(limitingEdge),
+            limitingValueMm,
+            projectedPixelWidth.Value,
+            projectedPixelHeight.Value,
+            ToPhotoshopResizeMode(resizePolicy));
+    }
+
     public static string ToText(WhiteUnderbaseBranch value) => value switch
     {
         WhiteUnderbaseBranch.W1_0px => "W1_0PX",
@@ -383,6 +554,28 @@ internal static class Mappers
         BackgroundRemovalDecision = session.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
         BackgroundRemovalRevisionId = session.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = session.BackgroundRemovalAuthority?.ReviewedSha256.Value,
+
+        // Written whenever dimensions are, because it is half of what those millimetres say
+        // rather than metadata about them (Epic 11400 Part B1A.2A §9).
+        DimensionSemantics = session.DimensionSemantics is { } semantics ? ToText(semantics) : null,
+
+        // The session's *pending* plan, so it does update on conflict: it is what the next run
+        // would do, and the operator may record different limits. The attempt's copy is the one
+        // that must never be rewritten (§12).
+        PrintPlanSourceRevisionId = session.PrintPreparationPlan?.SourceRevisionId.ToString(),
+        PrintPlanSourceSha256 = session.PrintPreparationPlan?.SourceSha256.Value,
+        PrintPlanSourcePixelWidth = session.PrintPreparationPlan?.SourcePixelWidth,
+        PrintPlanSourcePixelHeight = session.PrintPreparationPlan?.SourcePixelHeight,
+        PrintPlanMaxWidthMm = session.PrintPreparationPlan?.MaxWidthMm,
+        PrintPlanMaxHeightMm = session.PrintPreparationPlan?.MaxHeightMm,
+        PrintPlanLimitKind = session.PrintPreparationPlan is { } sp ? ToText(sp.LimitKind) : null,
+        PrintPlanMode = session.PrintPreparationPlan is { } sm ? ToText(sm.Mode) : null,
+        PrintPlanLimitingEdge = session.PrintPreparationPlan is { } se ? ToText(se.LimitingEdge) : null,
+        PrintPlanLimitingValueMm = session.PrintPreparationPlan?.LimitingValueMm,
+        PrintPlanProjectedPixelWidth = session.PrintPreparationPlan?.ProjectedPixelWidth,
+        PrintPlanProjectedPixelHeight = session.PrintPreparationPlan?.ProjectedPixelHeight,
+        PrintPlanProductionDpi = session.PrintPreparationPlan?.ProductionDpi,
+        PrintPlanResizePolicy = session.PrintPreparationPlan is { } sr ? ToText(sr.ResizePolicy) : null,
     };
 
     public static ProcessingSession ToDomain(SessionRow row)
@@ -422,6 +615,26 @@ internal static class Mappers
             BackgroundRemovalAuthority = ToBackgroundRemovalAuthority(
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
                 row.BackgroundRemovalReviewedSha),
+
+            // A row written before migration 0005 was backfilled to LEGACY_EXACT_PAIR by that
+            // migration, so a resumed pre-contract session reads back saying exactly what it was:
+            // two independently exact dimensions, kept for audit and not executable as a fit box
+            // until the operator reconfirms them (Epic 11400 Part B1A.2A §9, §10). A row with no
+            // dimensions at all reads back null here, which is the honest absence.
+            DimensionSemantics = row.DimensionSemantics is string ds
+                ? ToPrintDimensionSemantics(ds)
+                : null,
+
+            // Null on every legacy row, and on every session that has not recorded bounds under
+            // the current contract. Null never means "the default plan"; there is none.
+            PrintPreparationPlan = ToPrintPreparationPlan(
+                row.PrintPlanSourceRevisionId, row.PrintPlanSourceSha256,
+                row.PrintPlanSourcePixelWidth, row.PrintPlanSourcePixelHeight,
+                row.PrintPlanMaxWidthMm, row.PrintPlanMaxHeightMm,
+                row.PrintPlanLimitKind, row.PrintPlanMode,
+                row.PrintPlanLimitingEdge, row.PrintPlanLimitingValueMm,
+                row.PrintPlanProjectedPixelWidth, row.PrintPlanProjectedPixelHeight,
+                row.PrintPlanProductionDpi, row.PrintPlanResizePolicy),
         };
     }
 
@@ -581,6 +794,24 @@ internal static class Mappers
         BackgroundRemovalDecision = attempt.BackgroundRemovalAuthority is { } bra ? ToText(bra.Decision) : null,
         BackgroundRemovalRevisionId = attempt.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
+
+        // What THIS attempt ran under. Written once with the opening transaction and left out of
+        // the upsert's DO UPDATE clause, so a later change of limits cannot relabel it
+        // (Epic 11400 Part B1A.2A §12).
+        PrintPlanSourceRevisionId = attempt.PrintPreparationPlan?.SourceRevisionId.ToString(),
+        PrintPlanSourceSha256 = attempt.PrintPreparationPlan?.SourceSha256.Value,
+        PrintPlanSourcePixelWidth = attempt.PrintPreparationPlan?.SourcePixelWidth,
+        PrintPlanSourcePixelHeight = attempt.PrintPreparationPlan?.SourcePixelHeight,
+        PrintPlanMaxWidthMm = attempt.PrintPreparationPlan?.MaxWidthMm,
+        PrintPlanMaxHeightMm = attempt.PrintPreparationPlan?.MaxHeightMm,
+        PrintPlanLimitKind = attempt.PrintPreparationPlan is { } ap ? ToText(ap.LimitKind) : null,
+        PrintPlanMode = attempt.PrintPreparationPlan is { } am ? ToText(am.Mode) : null,
+        PrintPlanLimitingEdge = attempt.PrintPreparationPlan is { } ae ? ToText(ae.LimitingEdge) : null,
+        PrintPlanLimitingValueMm = attempt.PrintPreparationPlan?.LimitingValueMm,
+        PrintPlanProjectedPixelWidth = attempt.PrintPreparationPlan?.ProjectedPixelWidth,
+        PrintPlanProjectedPixelHeight = attempt.PrintPreparationPlan?.ProjectedPixelHeight,
+        PrintPlanProductionDpi = attempt.PrintPreparationPlan?.ProductionDpi,
+        PrintPlanResizePolicy = attempt.PrintPreparationPlan is { } ar ? ToText(ar.ResizePolicy) : null,
         AdapterNotes = attempt.AdapterNotes,
     };
 
@@ -615,6 +846,18 @@ internal static class Mappers
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
                 row.BackgroundRemovalReviewedSha),
             AdapterNotes = row.AdapterNotes,
+
+            // Null on every attempt that was not a Photoshop output, and on every attempt written
+            // before migration 0005 — which is exactly what those rows were: attempts that had no
+            // preparation plan, never attempts that used a default (Epic 11400 Part B1A.2A §12).
+            PrintPreparationPlan = ToPrintPreparationPlan(
+                row.PrintPlanSourceRevisionId, row.PrintPlanSourceSha256,
+                row.PrintPlanSourcePixelWidth, row.PrintPlanSourcePixelHeight,
+                row.PrintPlanMaxWidthMm, row.PrintPlanMaxHeightMm,
+                row.PrintPlanLimitKind, row.PrintPlanMode,
+                row.PrintPlanLimitingEdge, row.PrintPlanLimitingValueMm,
+                row.PrintPlanProjectedPixelWidth, row.PrintPlanProjectedPixelHeight,
+                row.PrintPlanProductionDpi, row.PrintPlanResizePolicy),
         };
     }
 

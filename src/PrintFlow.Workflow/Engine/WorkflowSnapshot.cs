@@ -126,6 +126,95 @@ public sealed record WorkflowSnapshot(
     }
 
     /// <summary>
+    /// What <see cref="Dimensions"/> means on this session (Epic 11400 Part B1A.2A §4, §9).
+    /// </summary>
+    /// <remarks>
+    /// Null exactly when <see cref="Dimensions"/> is null, and never a default: a resumed session
+    /// whose pair was written before the maximum-bound contract reads back as
+    /// <see cref="PrintDimensionSemantics.LegacyExactPair"/> rather than being reinterpreted as a
+    /// fit box (§9).
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter so <c>default</c> is "no
+    /// dimensions and therefore no reading" at every construction site.
+    /// </para>
+    /// </remarks>
+    public PrintDimensionSemantics? DimensionSemantics { get; init; }
+
+    /// <summary>
+    /// The source-bound plan the next Photoshop attempt would run with
+    /// (Epic 11400 Part B1A.2A §5).
+    /// </summary>
+    /// <remarks>
+    /// <b>Null by default, and that is deliberate.</b> A limiting edge is a property of a fit box
+    /// <i>against particular source pixels</i>, so there is nothing for the software to default
+    /// to — the same reason <see cref="BackgroundRemovalAuthority"/> is null until granted.
+    /// <para>
+    /// Holding a non-null value here is not the same as being runnable. The plan names the
+    /// artefact it was calculated from, and
+    /// <see cref="UsablePrintPreparationPlan"/> is the only thing that answers whether that is
+    /// still the artefact Photoshop is about to consume (§7).
+    /// </para>
+    /// </remarks>
+    public PrintPreparationPlan? PrintPreparationPlan { get; init; }
+
+    /// <summary>
+    /// The plan that currently permits a Photoshop output run, or null when none does
+    /// (Epic 11400 Part B1A.2A §7, §15, §16).
+    /// </summary>
+    /// <remarks>
+    /// The single definition of "the plan is still usable", asked by the engine before it will
+    /// start the step, by the service before it snapshots the plan onto an attempt, and by
+    /// <c>SessionView</c> before it reports readiness. One predicate is what makes an offered
+    /// control and an accepted command unable to disagree — the arrangement
+    /// <see cref="UsableBackgroundRemovalAuthority"/> established, applied to the same problem.
+    /// <para>
+    /// It is also the whole invalidation strategy. A stale plan is never hunted down and deleted;
+    /// it is simply never usable again, because the artefact it names is no longer the one on
+    /// offer. A retry over byte-identical upstream content therefore stays runnable without
+    /// anything re-granting it (§16), and a changed upstream stops being runnable without
+    /// anything revoking it.
+    /// </para>
+    /// <para>
+    /// The semantics check comes first and is not redundant. A legacy exact pair has no plan at
+    /// all, so it fails here for the honest reason — its dimensions were never a fit box — rather
+    /// than by accidentally missing a binding (§10).
+    /// </para>
+    /// </remarks>
+    public PrintPreparationPlan? UsablePrintPreparationPlan
+    {
+        get
+        {
+            if (DimensionSemantics != PrintDimensionSemantics.MaxBoundsV1 ||
+                PrintPreparationPlan is not { } plan ||
+                UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
+            {
+                return null;
+            }
+
+            return plan.Covers(upstream.Id, upstream.Sha256) ? plan : null;
+        }
+    }
+
+    /// <summary>
+    /// Whether the operator must reconfirm the print limits before Photoshop output can run
+    /// (Epic 11400 Part B1A.2A §10, §19).
+    /// </summary>
+    /// <remarks>
+    /// True exactly when this session already holds dimensions that cannot be executed: a legacy
+    /// exact pair, or a maximum-bound plan whose source has since changed. It is deliberately
+    /// <i>not</i> true for a session that simply has not set dimensions yet — that one is not
+    /// under review, it is at an ordinary unfinished step.
+    /// <para>
+    /// The historical dimensions stay on the session in both cases. This says they need looking
+    /// at again, never that they should be discarded or guessed at.
+    /// </para>
+    /// </remarks>
+    public bool NeedsDimensionReview =>
+        Definition.Contains(StepKind.PhotoshopOutput) &&
+        Dimensions is not null &&
+        UsablePrintPreparationPlan is null;
+
+    /// <summary>
     /// Value equality, including the step list element by element.
     /// </summary>
     /// <remarks>
@@ -158,6 +247,8 @@ public sealed record WorkflowSnapshot(
             && ApprovedPrintOutputCount == other.ApprovedPrintOutputCount
             && TrimMargin.Equals(other.TrimMargin)
             && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
+            && Nullable.Equals(DimensionSemantics, other.DimensionSemantics)
+            && Equals(PrintPreparationPlan, other.PrintPreparationPlan)
             && Steps.SequenceEqual(other.Steps);
     }
 
@@ -175,6 +266,8 @@ public sealed record WorkflowSnapshot(
         hash.Add(ApprovedPrintOutputCount);
         hash.Add(TrimMargin);
         hash.Add(BackgroundRemovalAuthority);
+        hash.Add(DimensionSemantics);
+        hash.Add(PrintPreparationPlan);
 
         foreach (SessionStep step in Steps)
         {

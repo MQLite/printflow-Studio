@@ -75,6 +75,17 @@ public sealed record SessionAggregate(
             // restart is usable only if the content it named survived with it
             // (Epic 11300 Part C2B1 §9, §20).
             BackgroundRemovalAuthority = Session.BackgroundRemovalAuthority,
+
+            // Carried across for the same reason and with the same caveat: what is restored is
+            // the *pending* plan and what the recorded millimetres mean, not permission to run.
+            // Whether the plan still applies is decided by
+            // WorkflowSnapshot.UsablePrintPreparationPlan against the upstream result these very
+            // rows describe, so a plan that survived a restart is usable only if the content it
+            // was calculated from survived with it. A resumed legacy session restores its
+            // historical pair and its LegacyExactPair reading, and is refused at StartStep
+            // (Epic 11400 Part B1A.2A §7, §10).
+            DimensionSemantics = Session.DimensionSemantics,
+            PrintPreparationPlan = Session.PrintPreparationPlan,
         };
     }
 }

@@ -295,6 +295,21 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(integrity.Failure);
         }
 
+        // Calculated before the command is applied, so a session whose source cannot support a
+        // plan records no bounds at all rather than bounds with nothing behind them. Its inputs
+        // are the bytes EnsureIntegrityAsync has just re-verified (Epic 11400 Part B1A.2A §14).
+        PrintPreparationPlan? plan = null;
+        if (command is WorkflowCommand.SetPrintDimensions setBounds)
+        {
+            OperationResult<PrintPreparationPlan> planned = PlanMaximumBounds(aggregate, snapshot, setBounds.Dimensions);
+            if (planned.IsFailure)
+            {
+                return OperationResult.Fail<SessionView>(planned.Failure);
+            }
+
+            plan = planned.Value;
+        }
+
         WorkflowTransition transition = _engine.Apply(snapshot, command, context);
         if (transition.IsRejected)
         {
@@ -304,8 +319,16 @@ public sealed class SessionService : ISessionService
         ProducingWork? work = ProducingWorkOf(transition.Effects);
         if (work is null)
         {
-            ProcessingSession updatedSession = MergeSession(aggregate.Session, transition.State, transition.Effects, context.NowUtc);
-            SessionMutation mutation = BuildMetadataMutation(aggregate, updatedSession, transition.State, transition.Effects, context);
+            // The engine accepted the bounds and stamped the semantics; the plan it could not
+            // calculate is attached here, to the state it produced. Nothing else in the slice
+            // writes this field, so the accepted bounds and the plan behind them are always the
+            // same act.
+            WorkflowSnapshot state = plan is null
+                ? transition.State
+                : transition.State with { PrintPreparationPlan = plan };
+
+            ProcessingSession updatedSession = MergeSession(aggregate.Session, state, transition.Effects, context.NowUtc);
+            SessionMutation mutation = BuildMetadataMutation(aggregate, updatedSession, state, transition.Effects, context);
 
             OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
             if (committed.IsFailure)
@@ -314,10 +337,92 @@ public sealed class SessionService : ISessionService
             }
 
             return ViewOf(
-                transition.State, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts);
+                state, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts);
         }
 
         return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
+    }
+
+    /// <summary>
+    /// Calculates the source-bound plan for <paramref name="limits"/>, or reports why it cannot
+    /// (Epic 11400 Part B1A.2A §5, §6, §8).
+    /// </summary>
+    /// <remarks>
+    /// Everything the pure engine cannot see, in one place. It reads the source's <b>own</b>
+    /// validated pixel dimensions and hands them to
+    /// <see cref="PrintPreparationPlan.For"/>, which is the only creator of a plan and reaches
+    /// <c>FitWithinBounds</c> — so limiting-edge selection has exactly one implementation and
+    /// this method contains none of it (§6).
+    /// <para>
+    /// Every refusal below is a "there is nothing to fit" rather than a fallback. Nothing here
+    /// reads a filename, a screen value, a guessed size, or the independently converted
+    /// <c>PrintDimensions.PixelWidth</c> — each of those would produce a plan for a different
+    /// image wearing this one's binding (§8, §17).
+    /// </para>
+    /// </remarks>
+    private static OperationResult<PrintPreparationPlan> PlanMaximumBounds(
+        SessionAggregate aggregate, WorkflowSnapshot snapshot, PrintDimensions limits)
+    {
+        if (snapshot.UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
+        {
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.PreconditionNotMet,
+                "Photoshop output has no validated upstream result, so there are no source pixels to fit " +
+                "within the requested bounds.");
+        }
+
+        if (FindRevision(aggregate, upstream.Id) is not { } source)
+        {
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.PreconditionNotMet,
+                $"Upstream Revision {upstream.Id} is not loaded on this session; nothing may be fitted to it.");
+        }
+
+        if (!source.IsValid)
+        {
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.PreconditionNotMet,
+                $"Upstream Revision {upstream.Id} has been invalidated; bounds recorded against it would " +
+                "describe a file the workflow will not consume.");
+        }
+
+        // Belt and braces against the step row and the Revision row disagreeing about which bytes
+        // are on offer. The binding is only as good as the hash it carries, so a disagreement is
+        // refused rather than resolved in either direction.
+        if (!source.Sha256.Equals(upstream.Sha256))
+        {
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.RevisionIntegrityMismatch,
+                $"Upstream Revision {upstream.Id} and its step entry disagree about the current hash; " +
+                "no plan may be bound to an artefact whose identity is unsettled.");
+        }
+
+        if (!source.Facts.HasPixelDimensions)
+        {
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.PreconditionNotMet,
+                $"Upstream Revision {upstream.Id} has no recorded pixel dimensions, so no fit can be " +
+                "calculated. Nothing is guessed from the file name or the requested millimetres.");
+        }
+
+        try
+        {
+            return OperationResult.Ok(PrintPreparationPlan.For(
+                upstream.Id,
+                upstream.Sha256,
+                source.Facts.PixelWidth!.Value,
+                source.Facts.PixelHeight!.Value,
+                limits));
+        }
+        catch (Exception ex) when (ex is ArgumentException or ArgumentOutOfRangeException)
+        {
+            // A size the fit calculation will not produce is an ordinary thing for an operator to
+            // type, so it is reported rather than thrown out of the command path.
+            return OperationResult.Fail<PrintPreparationPlan>(
+                FailureCode.PreconditionNotMet,
+                $"No maximum-bound plan fits {limits.MaxWidthMm:0.##}×{limits.MaxHeightMm:0.##} mm to " +
+                $"{source.Facts.PixelWidth}×{source.Facts.PixelHeight} px: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -490,6 +595,18 @@ public sealed class SessionService : ISessionService
             WorkflowCommand.SetBackgroundRemovalDecision =>
                 FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.BackgroundRemoval)),
 
+            // Recording maximum bounds is a decision about specific pixels, so it is checked
+            // exactly as an Approve is (Epic 11400 Part B1A.2A §14). The plan's limiting edge is
+            // calculated from the source's own dimensions and bound to its hash; without this the
+            // operator could record bounds against a file that had already changed underneath,
+            // and the mutation would only surface at StartStep — after a plan had been written
+            // for content nobody fitted anything to.
+            //
+            // The same Revision StartStep would resolve, through the same guard. No second
+            // hashing path exists, and none is added here.
+            WorkflowCommand.SetPrintDimensions =>
+                FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.PhotoshopOutput)),
+
             _ => null,
         };
 
@@ -612,6 +729,21 @@ public sealed class SessionService : ISessionService
             started.State.UsableBackgroundRemovalAuthority is { } authority)
         {
             runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(authority);
+        }
+
+        // The maximum-bound plan, written with the same opening transaction and for the same
+        // reason: the row must say which fit box and which source produced this output, not what
+        // the session was later allowed to do. A second attempt against different limits or
+        // different content gets its own row; this one is never rewritten, because the attempt
+        // upsert leaves these columns out of its DO UPDATE clause (Epic 11400 Part B1A.2A §12).
+        //
+        // The *usable* plan rather than the raw one — not a second guard, the same predicate the
+        // engine just applied, so what is snapshotted is exactly what was validated and never a
+        // stale plan that happened to still be sitting on the session (§7).
+        if (work.Step == StepKind.PhotoshopOutput &&
+            started.State.UsablePrintPreparationPlan is { } preparation)
+        {
+            runningAttempt = runningAttempt.WithPrintPreparationPlan(preparation);
         }
 
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
@@ -962,6 +1094,19 @@ public sealed class SessionService : ISessionService
                         FailureCode.PreconditionNotMet, "Photoshop output requires an explicit white-underbase branch.");
                 }
 
+                // The plan the attempt row already recorded, never a fresh read of the session
+                // and never a recalculation here. The engine refused to start the step without a
+                // usable plan, so the value is one that was bound to the exact bytes about to be
+                // opened; this guard is what makes that a property of this code rather than a
+                // promise about a caller elsewhere (Epic 11400 Part B1A.2A §12, §17).
+                if (attempt.PrintPreparationPlan is not { } preparation)
+                {
+                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                        FailureCode.PreconditionNotMet,
+                        "Photoshop output reached the adapter without a recorded maximum-bound preparation plan. " +
+                        "No request is built: the limiting edge is not something to work out here.");
+                }
+
                 OperationResult<ProductionPresetRef> preset = _presetProvider.GetVerifiedPreset();
                 if (preset.IsFailure)
                 {
@@ -990,8 +1135,8 @@ public sealed class SessionService : ISessionService
 
                 OperationResult<AdapterOutput> result = await _photoshop.GenerateAsync(
                     new PhotoshopRequest(
-                        workingCopy.Value, dimensions, preset.Value, branch, reserved.Value.FileName,
-                        ParentDirOf(workingCopy.Value), reserved.Value),
+                        workingCopy.Value, dimensions, preparation, preset.Value, branch,
+                        reserved.Value.FileName, ParentDirOf(workingCopy.Value), reserved.Value),
                     cancellationToken);
                 if (result.IsFailure)
                 {
@@ -1556,6 +1701,11 @@ public sealed class SessionService : ISessionService
             WhiteUnderbaseBranch = newSnapshot.WhiteUnderbaseBranch,
             TrimMargin = newSnapshot.TrimMargin,
             BackgroundRemovalAuthority = newSnapshot.BackgroundRemovalAuthority,
+
+            // Carried across with the dimensions they belong to, so the pair, its reading and the
+            // plan behind it are always written and cleared together (Epic 11400 Part B1A.2A §4).
+            DimensionSemantics = newSnapshot.DimensionSemantics,
+            PrintPreparationPlan = newSnapshot.PrintPreparationPlan,
         };
 
         foreach (WorkflowEffect effect in effects)

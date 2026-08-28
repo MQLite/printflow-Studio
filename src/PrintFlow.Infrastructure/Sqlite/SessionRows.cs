@@ -39,6 +39,41 @@ internal sealed class SessionRow
 
     public string? BackgroundRemovalReviewedSha { get; set; }
 
+    // What the Dimensions* columns above actually mean on this row (Epic 11400 Part B1A.2A §9).
+    // NULL exactly when no dimensions are recorded; LEGACY_EXACT_PAIR on every row written before
+    // the maximum-bound contract.
+    public string? DimensionSemantics { get; set; }
+
+    // The pending source-bound preparation plan: what the NEXT Photoshop output would run with
+    // (§11). All thirteen move together, or all thirteen are null -- except
+    // PrintPlanLimitingValueMm, whose absence is meaningful and is paired with the mode.
+    public string? PrintPlanSourceRevisionId { get; set; }
+
+    public string? PrintPlanSourceSha256 { get; set; }
+
+    public int? PrintPlanSourcePixelWidth { get; set; }
+
+    public int? PrintPlanSourcePixelHeight { get; set; }
+
+    public double? PrintPlanMaxWidthMm { get; set; }
+
+    public double? PrintPlanMaxHeightMm { get; set; }
+
+    public string? PrintPlanLimitKind { get; set; }
+
+    public string? PrintPlanMode { get; set; }
+
+    public string? PrintPlanLimitingEdge { get; set; }
+
+    public double? PrintPlanLimitingValueMm { get; set; }
+
+    public int? PrintPlanProjectedPixelWidth { get; set; }
+
+    public int? PrintPlanProjectedPixelHeight { get; set; }
+
+    public int? PrintPlanProductionDpi { get; set; }
+
+    public string? PrintPlanResizePolicy { get; set; }
 }
 
 internal sealed class StepRow
@@ -122,6 +157,38 @@ internal sealed class AttemptRow
 
     // Successful runtime evidence, including cleanup warnings (Epic 11300 Part D1).
     public string? AdapterNotes { get; set; }
+
+    // The immutable snapshot of the plan THIS Photoshop output ran under (Epic 11400 Part
+    // B1A.2A §12). Null for everything else -- a Meitu call, a trim, a manual crop, a promotion.
+    // Self-contained: the bounds and limit kind are here too, so the audit row never has to be
+    // joined back to a session that may since have changed its mind.
+    public string? PrintPlanSourceRevisionId { get; set; }
+
+    public string? PrintPlanSourceSha256 { get; set; }
+
+    public int? PrintPlanSourcePixelWidth { get; set; }
+
+    public int? PrintPlanSourcePixelHeight { get; set; }
+
+    public double? PrintPlanMaxWidthMm { get; set; }
+
+    public double? PrintPlanMaxHeightMm { get; set; }
+
+    public string? PrintPlanLimitKind { get; set; }
+
+    public string? PrintPlanMode { get; set; }
+
+    public string? PrintPlanLimitingEdge { get; set; }
+
+    public double? PrintPlanLimitingValueMm { get; set; }
+
+    public int? PrintPlanProjectedPixelWidth { get; set; }
+
+    public int? PrintPlanProjectedPixelHeight { get; set; }
+
+    public int? PrintPlanProductionDpi { get; set; }
+
+    public string? PrintPlanResizePolicy { get; set; }
 }
 
 internal sealed class ReviewRow

@@ -75,6 +75,46 @@ public sealed record ProcessingSession(
     /// </remarks>
     public BackgroundRemovalAuthority? BackgroundRemovalAuthority { get; init; }
 
+    /// <summary>
+    /// What <see cref="Dimensions"/> means on this session (Epic 11400 Part B1A.2A §4, §9).
+    /// </summary>
+    /// <remarks>
+    /// Null exactly when <see cref="Dimensions"/> is null. The two move together because the
+    /// reading is not metadata <i>about</i> the pair — it is half of what the pair says, and a
+    /// size whose reading is unknown is a size nothing may act on.
+    /// <para>
+    /// Rows written before the maximum-bound migration read back as
+    /// <see cref="PrintDimensionSemantics.LegacyExactPair"/>, which is what they were: two
+    /// independently exact dimensions. They stay readable for audit and display and are never
+    /// executable as a Photoshop plan until the operator reconfirms the limits under the new
+    /// semantics (§10).
+    /// </para>
+    /// </remarks>
+    public PrintDimensionSemantics? DimensionSemantics { get; init; }
+
+    /// <summary>
+    /// The source-bound plan the next Photoshop attempt would run with
+    /// (Epic 11400 Part B1A.2A §5, §11).
+    /// </summary>
+    /// <remarks>
+    /// The <i>pending</i> plan, and only that: it says what "Run Photoshop Output" would do
+    /// next, never what an earlier attempt did — that belongs to
+    /// <c>ProcessingAttempt.PrintPreparationPlan</c>, which is written once and never rewritten
+    /// (§12), exactly as the trim parameters and the background-removal authority are.
+    /// <para>
+    /// Null on a legacy session and until the operator records maximum bounds. Holding a
+    /// non-null value is not the same as being runnable: the plan names the artefact it was
+    /// calculated from, and only <c>WorkflowSnapshot.UsablePrintPreparationPlan</c> answers
+    /// whether that is still the artefact Photoshop will consume (§7, §15).
+    /// </para>
+    /// <para>
+    /// Retained rather than cleared when its bound Revision is replaced, for the same reason the
+    /// background-removal authority is: usability is decided by an exact match, so a stale plan
+    /// cannot authorise anything and does not need hunting down (§16).
+    /// </para>
+    /// </remarks>
+    public PrintPreparationPlan? PrintPreparationPlan { get; init; }
+
     /// <summary>Creates a new active session positioned at its first step.</summary>
     public static ProcessingSession Start(
         SessionId id,

@@ -153,6 +153,47 @@ internal sealed class WorkflowScenario
             upstream.Sha256));
     }
 
+    /// <summary>
+    /// Records maximum bounds and the source-bound plan they produce, for whatever Photoshop
+    /// output will currently consume (Epic 11400 Part B1A.2A §5, §14).
+    /// </summary>
+    /// <remarks>
+    /// The engine half and the service half, in the order production performs them. The engine
+    /// accepts the millimetres and stamps the semantics; the plan itself is calculated from the
+    /// source's pixels, which a pure snapshot does not carry — in production <c>SessionService</c>
+    /// reads them off the upstream Revision's <c>FileFacts</c>, and here they are supplied.
+    /// <para>
+    /// It goes through <see cref="PrintPreparationPlan.For"/> rather than assembling a record, so
+    /// even a fixture cannot invent a limiting edge the one domain calculator would not have
+    /// chosen (§6). The upstream pair is read from the snapshot rather than taken as an argument,
+    /// so it always binds the artefact actually on offer; a test proving a stale plan is refused
+    /// constructs one itself with the id and hash it means.
+    /// </para>
+    /// <para>
+    /// The default source is 2000×1500 px, comfortably inside <see cref="A4Portrait"/>, so the
+    /// ordinary path is a resolution-only plan and nothing is resampled. Tests about shrinking
+    /// pass their own.
+    /// </para>
+    /// </remarks>
+    public WorkflowScenario RecordMaximumBounds(
+        PrintDimensions? limits = null, int sourcePixelWidth = 2000, int sourcePixelHeight = 1500)
+    {
+        (RevisionId Id, Sha256 Sha256) upstream = State.UpstreamResultOf(StepKind.PhotoshopOutput)
+            ?? throw new InvalidOperationException(
+                "PhotoshopOutput has no upstream result to fit bounds against.");
+
+        PrintDimensions bounds = limits ?? A4Portrait;
+        Must(new WorkflowCommand.SetPrintDimensions(bounds));
+
+        State = State with
+        {
+            PrintPreparationPlan = PrintPreparationPlan.For(
+                upstream.Id, upstream.Sha256, sourcePixelWidth, sourcePixelHeight, bounds),
+        };
+
+        return this;
+    }
+
     public StepState StateOf(StepKind kind) =>
         State.Step(kind)?.State
         ?? throw new InvalidOperationException($"Workflow {State.WorkflowType} has no step {kind}.");

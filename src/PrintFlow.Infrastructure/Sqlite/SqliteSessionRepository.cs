@@ -211,14 +211,28 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  DimensionsWidthMm, DimensionsHeightMm, DimensionsPixelWidth, DimensionsPixelHeight,
                  DimensionsPreset, WhiteUnderbaseBranch,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
-                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha)
+                 BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
+                 DimensionSemantics,
+                 PrintPlanSourceRevisionId, PrintPlanSourceSha256,
+                 PrintPlanSourcePixelWidth, PrintPlanSourcePixelHeight,
+                 PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
+                 PrintPlanMode, PrintPlanLimitingEdge, PrintPlanLimitingValueMm,
+                 PrintPlanProjectedPixelWidth, PrintPlanProjectedPixelHeight,
+                 PrintPlanProductionDpi, PrintPlanResizePolicy)
             VALUES
                 (@Id, @WorkflowType, @OutputName, @CurrentStep, @State, @WorkspacePath, @CreatedAtUtc, @UpdatedAtUtc,
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
                  @DimensionsWidthMm, @DimensionsHeightMm, @DimensionsPixelWidth, @DimensionsPixelHeight,
                  @DimensionsPreset, @WhiteUnderbaseBranch,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
-                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha)
+                 @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
+                 @DimensionSemantics,
+                 @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
+                 @PrintPlanSourcePixelWidth, @PrintPlanSourcePixelHeight,
+                 @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
+                 @PrintPlanMode, @PrintPlanLimitingEdge, @PrintPlanLimitingValueMm,
+                 @PrintPlanProjectedPixelWidth, @PrintPlanProjectedPixelHeight,
+                 @PrintPlanProductionDpi, @PrintPlanResizePolicy)
             ON CONFLICT(Id) DO UPDATE SET
                 WorkflowType = excluded.WorkflowType,
                 OutputName = excluded.OutputName,
@@ -252,7 +266,31 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 -- rewritten (Epic 11300 Part C2B1 §10, §11).
                 BackgroundRemovalDecision = excluded.BackgroundRemovalDecision,
                 BackgroundRemovalRevisionId = excluded.BackgroundRemovalRevisionId,
-                BackgroundRemovalReviewedSha = excluded.BackgroundRemovalReviewedSha;
+                BackgroundRemovalReviewedSha = excluded.BackgroundRemovalReviewedSha,
+
+                -- The reading of the millimetres above, updated with them: a session that
+                -- reconfirms its limits under the current contract stops being a legacy row, and
+                -- one rewound past PrintDimensions clears both together (Epic 11400 §4, §9).
+                DimensionSemantics = excluded.DimensionSemantics,
+
+                -- The session's *pending* preparation plan, so it updates for the same reason the
+                -- trim margin and the background-removal authority do: it is what the next run
+                -- would do, and the operator may record different limits. The attempt copy is the
+                -- one that must never be rewritten (§12).
+                PrintPlanSourceRevisionId = excluded.PrintPlanSourceRevisionId,
+                PrintPlanSourceSha256 = excluded.PrintPlanSourceSha256,
+                PrintPlanSourcePixelWidth = excluded.PrintPlanSourcePixelWidth,
+                PrintPlanSourcePixelHeight = excluded.PrintPlanSourcePixelHeight,
+                PrintPlanMaxWidthMm = excluded.PrintPlanMaxWidthMm,
+                PrintPlanMaxHeightMm = excluded.PrintPlanMaxHeightMm,
+                PrintPlanLimitKind = excluded.PrintPlanLimitKind,
+                PrintPlanMode = excluded.PrintPlanMode,
+                PrintPlanLimitingEdge = excluded.PrintPlanLimitingEdge,
+                PrintPlanLimitingValueMm = excluded.PrintPlanLimitingValueMm,
+                PrintPlanProjectedPixelWidth = excluded.PrintPlanProjectedPixelWidth,
+                PrintPlanProjectedPixelHeight = excluded.PrintPlanProjectedPixelHeight,
+                PrintPlanProductionDpi = excluded.PrintPlanProductionDpi,
+                PrintPlanResizePolicy = excluded.PrintPlanResizePolicy;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }
@@ -352,12 +390,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
     /// Inserts an attempt, or updates the fields that legitimately change when it ends.
     /// </summary>
     /// <remarks>
-    /// The trim-parameter and background-removal columns are deliberately absent from the
-    /// <c>DO UPDATE</c> clause. They are written once, with the attempt's opening transaction,
-    /// and describe what this attempt was asked to do and what authorised it — so leaving them out is what makes "a retry with a different
-    /// margin never rewrites the first attempt's settings, and a later decision never rewrites
-    /// what an earlier cutout was authorised by" a property of the SQL rather than a promise
-    /// about the caller (Epic 11200 Part C3 §15; Epic 11300 Part C2B1 §11, §18).
+    /// The trim-parameter, background-removal and print-plan columns are deliberately absent from
+    /// the <c>DO UPDATE</c> clause. They are written once, with the attempt's opening transaction,
+    /// and describe what this attempt was asked to do, what authorised it and which fit box
+    /// produced it — so leaving them out is what makes "a retry with a different margin never
+    /// rewrites the first attempt's settings, a later decision never rewrites what an earlier
+    /// cutout was authorised by, and a later change of limits never relabels an earlier output" a
+    /// property of the SQL rather than a promise about the caller (Epic 11200 Part C3 §15;
+    /// Epic 11300 Part C2B1 §11, §18; Epic 11400 Part B1A.2A §12).
     /// </remarks>
     private static Task UpsertAttemptAsync(SqliteConnection connection, SqliteTransaction transaction, ProcessingAttempt attempt)
     {
@@ -369,13 +409,25 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  ResultStatus, OutputRevisionId, FailureCode, FailureDetailJson, RetryOfAttemptId, RetrySequence,
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
                  BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
-                 AdapterNotes)
+                 AdapterNotes,
+                 PrintPlanSourceRevisionId, PrintPlanSourceSha256,
+                 PrintPlanSourcePixelWidth, PrintPlanSourcePixelHeight,
+                 PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
+                 PrintPlanMode, PrintPlanLimitingEdge, PrintPlanLimitingValueMm,
+                 PrintPlanProjectedPixelWidth, PrintPlanProjectedPixelHeight,
+                 PrintPlanProductionDpi, PrintPlanResizePolicy)
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
                  @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
-                 @AdapterNotes)
+                 @AdapterNotes,
+                 @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
+                 @PrintPlanSourcePixelWidth, @PrintPlanSourcePixelHeight,
+                 @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
+                 @PrintPlanMode, @PrintPlanLimitingEdge, @PrintPlanLimitingValueMm,
+                 @PrintPlanProjectedPixelWidth, @PrintPlanProjectedPixelHeight,
+                 @PrintPlanProductionDpi, @PrintPlanResizePolicy)
             ON CONFLICT(Id) DO UPDATE SET
                 EndedAtUtc = excluded.EndedAtUtc,
                 ResultStatus = excluded.ResultStatus,

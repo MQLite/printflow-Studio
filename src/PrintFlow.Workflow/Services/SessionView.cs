@@ -199,6 +199,36 @@ public sealed record PrintOutputView(
 /// <param name="BackgroundRemovalAttemptReviewedRevisionId">
 /// The Revision that attempt's authority was granted over, or null when it had none.
 /// </param>
+/// <param name="DimensionSemantics">
+/// What this session's recorded millimetres mean — a legacy exact pair, or maximum bounds under
+/// the accepted contract. Null when no dimensions are recorded (Epic 11400 Part B1A.2A §19).
+/// </param>
+/// <param name="MaxWidthMm">
+/// The maximum width of the <b>currently usable</b> plan's fit box, or null when nothing is
+/// usable. A legacy pair reports null here while still appearing in <see cref="SessionView.Dimensions"/>.
+/// </param>
+/// <param name="MaxHeightMm">The maximum height of the currently usable plan's fit box.</param>
+/// <param name="PreparationMode">
+/// Whether the next Photoshop run would set resolution only or shrink proportionally. Null when
+/// no plan is usable.
+/// </param>
+/// <param name="LimitingEdge">
+/// The single edge the plan would give Photoshop, selected automatically by
+/// <c>FitWithinBounds</c>. Never an operator choice, and null when no plan is usable.
+/// </param>
+/// <param name="ProjectedPixelWidth">
+/// Planning evidence that the selected edge fits the other bound. Never a Photoshop target and
+/// never an actual result (§20).
+/// </param>
+/// <param name="ProjectedPixelHeight">The other half of that planning evidence.</param>
+/// <param name="NeedsDimensionReview">
+/// Whether recorded dimensions exist that cannot be executed — a legacy exact pair, or a plan
+/// whose source has since changed — so the operator must reconfirm the limits (§10).
+/// </param>
+/// <param name="CanSetMaximumBounds">Whether maximum bounds may be recorded right now.</param>
+/// <param name="CanRunPhotoshopOutput">
+/// Whether Photoshop output would actually start if asked — plan included (§15).
+/// </param>
 /// <remarks>
 /// <see cref="CanManualCrop"/> is reported rather than left to the screen because it depends on
 /// attempt history the UI does not have and must not reconstruct. It is the same predicate
@@ -246,7 +276,17 @@ public sealed record SessionView(
     bool CanRunBackgroundRemoval,
     BackgroundRemovalDecision BackgroundRemovalAttemptDecision,
     RevisionId? BackgroundRemovalAttemptReviewedRevisionId,
-    AutomationStopAudit? LastAutomationStop)
+    AutomationStopAudit? LastAutomationStop,
+    PrintDimensionSemantics? DimensionSemantics,
+    double? MaxWidthMm,
+    double? MaxHeightMm,
+    PrintPreparationMode? PreparationMode,
+    LimitingEdge? LimitingEdge,
+    int? ProjectedPixelWidth,
+    int? ProjectedPixelHeight,
+    bool NeedsDimensionReview,
+    bool CanSetMaximumBounds,
+    bool CanRunPhotoshopOutput)
 {
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
@@ -334,6 +374,11 @@ public sealed record SessionView(
 
         BackgroundRemovalAuthority? usable = snapshot.UsableBackgroundRemovalAuthority;
 
+        // The plan that would actually run, asked once here and read several times below, so the
+        // read model cannot report a limiting edge from one plan and readiness from another
+        // (Epic 11400 Part B1A.2A §19).
+        PrintPreparationPlan? usablePlan = snapshot.UsablePrintPreparationPlan;
+
         // Resolved before the projection so the two authorities sit side by side here, where
         // the difference between them is visible: one is what the next run may do, the other is
         // what the result on screen already did.
@@ -392,7 +437,38 @@ public sealed record SessionView(
             // an external application that may still be running or still be holding a processed
             // result. Read from the closed attempt row, which is the only durable record of it
             // and survives a restart exactly as the rest of the history does (Part D2A §29).
-            ResolveLastStop(snapshot, attempts));
+            ResolveLastStop(snapshot, attempts),
+
+            // What the recorded millimetres mean. Reported even for a legacy pair, because
+            // "these are two exact dimensions from before the contract" is precisely what the
+            // operator has to be told before they can reconfirm them (Epic 11400 Part B1A.2A §19).
+            snapshot.DimensionSemantics,
+
+            // Every field below comes from the *usable* plan, never the raw one. A session can
+            // hold a plan calculated against content that has since been replaced, and reporting
+            // its limiting edge as the current one would present a stale record as readiness —
+            // the one thing §19 forbids. Null is what "nothing is planned right now" looks like,
+            // and there is no third state meaning "probably still fine".
+            usablePlan?.MaxWidthMm,
+            usablePlan?.MaxHeightMm,
+            usablePlan?.Mode,
+            usablePlan?.LimitingEdge,
+            usablePlan?.ProjectedPixelWidth,
+            usablePlan?.ProjectedPixelHeight,
+
+            // The snapshot's own predicate rather than a comparison rebuilt here, so an offered
+            // "reconfirm the size" control and the engine's refusal to start Photoshop cannot
+            // disagree about whether a plan still applies (§10, §19).
+            snapshot.NeedsDimensionReview,
+
+            // Both answered by the engine's own probe rather than by re-deriving the rules here.
+            // AvailableCommands probes StartStep with the *current* step, so asking whether it is
+            // offered while PhotoshopOutput is current is exactly asking whether
+            // StartStep(PhotoshopOutput) would be accepted — plan, W1 branch and step state
+            // included (§15).
+            availableCommands.Contains(CommandKind.SetPrintDimensions),
+            snapshot.CurrentStep is { Step: StepKind.PhotoshopOutput }
+                && availableCommands.Contains(CommandKind.StartStep));
     }
 
     /// <summary>

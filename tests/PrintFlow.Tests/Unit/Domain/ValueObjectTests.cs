@@ -276,6 +276,13 @@ public sealed class ValueObjectTests
             // Epic 11300 Part A §21 — the minimum stable set for Meitu automation.
             "MeituNotInstalled", "MeituLaunchFailed", "MeituWindowNotFound", "MeituTargetLost",
             "MeituUnknownState", "MeituBlockingDialog", "MeituOpenInputFailed",
+
+            // Epic 11400 Part A — the same stable set for Photoshop automation, plus the one
+            // code that has no Meitu counterpart: PrintFlow will not proceed against a Photoshop
+            // document it cannot positively identify as the file it handed over.
+            "PhotoshopNotInstalled", "PhotoshopLaunchFailed", "PhotoshopWindowNotFound",
+            "PhotoshopTargetLost", "PhotoshopUnknownState", "PhotoshopBlockingDialog",
+            "PhotoshopOpenInputFailed", "PhotoshopDocumentIdentityUnconfirmed",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

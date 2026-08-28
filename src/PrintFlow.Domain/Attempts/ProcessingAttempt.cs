@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
@@ -168,6 +169,36 @@ public sealed record ProcessingAttempt(
     /// <summary>Records the reviewed-content authority this attempt is about to run under.</summary>
     public ProcessingAttempt WithBackgroundRemovalAuthority(BackgroundRemovalAuthority authority) =>
         this with { BackgroundRemovalAuthority = authority };
+
+    /// <summary>
+    /// The source-bound maximum-bound plan this attempt produced its output under
+    /// (Epic 11400 Part B1A.2A §12).
+    /// </summary>
+    /// <remarks>
+    /// The answer to "which fit box, which source, and which single edge produced this TIFF?" —
+    /// recorded on the attempt rather than only on the session, for the same reason
+    /// <see cref="TrimParameters"/> and <see cref="BackgroundRemovalAuthority"/> are. A
+    /// session-level record answers "what would the <i>next</i> run do", and that value changes:
+    /// an operator who rejects an output, returns upstream and records different limits would,
+    /// under a session-only record, have retrospectively relabelled what the first attempt did.
+    /// An attempt row is written once and never rewritten — the upsert leaves these columns out
+    /// of its <c>DO UPDATE</c> clause — so both readings stay side by side.
+    /// <para>
+    /// Null for everything that is not a Photoshop output — a Meitu call, a trim, a manual crop,
+    /// a promotion. Null therefore reads as "this attempt had no preparation plan", never as "it
+    /// used the default"; there is no default, and the workflow refuses to start Photoshop
+    /// output without a currently usable plan (§15).
+    /// </para>
+    /// <para>
+    /// An <c>init</c> property rather than a positional parameter, so every existing call site
+    /// keeps saying what it meant.
+    /// </para>
+    /// </remarks>
+    public PrintPreparationPlan? PrintPreparationPlan { get; init; }
+
+    /// <summary>Records the source-bound plan this attempt is about to run with.</summary>
+    public ProcessingAttempt WithPrintPreparationPlan(PrintPreparationPlan plan) =>
+        this with { PrintPreparationPlan = plan };
 
     public ProcessingAttempt Succeed(
         RevisionId outputRevisionId, DateTimeOffset endedAtUtc, string? adapterNotes = null) =>

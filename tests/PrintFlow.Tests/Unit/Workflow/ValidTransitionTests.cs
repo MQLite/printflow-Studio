@@ -112,7 +112,7 @@ public sealed class ValidTransitionTests
 
         scenario.CompleteImport();
         scenario.Must(new WorkflowCommand.ConfirmOriginal("finished design"));
-        scenario.Must(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait));
+        scenario.RecordMaximumBounds();
         scenario.Must(new WorkflowCommand.SelectWhiteUnderbaseBranch(
             WhiteUnderbaseBranch.W1_1px, "ordinary design"));
         scenario.CompleteStep(StepKind.PhotoshopOutput);

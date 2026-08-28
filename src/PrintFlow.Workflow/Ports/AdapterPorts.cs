@@ -47,10 +47,27 @@ public sealed record MeituRequest(
 /// <remarks>
 /// <see cref="Branch"/> is non-nullable on purpose: there is no way to ask for a production
 /// TIFF without having made the white-underbase decision (MVP design §12).
+/// <para>
+/// <see cref="Preparation"/> is non-nullable for exactly the same reason, and it is the
+/// <b>executable</b> geometry authority (Epic 11400 Part B1A.2A §17). It says which single edge
+/// Photoshop may be given, in millimetres, at the fixed 300 ppi, with a neutral resampling
+/// policy the adapter maps to <c>ResampleMethod.NONE</c> or
+/// <c>ResampleMethod.BICUBICSHARPER</c> — and it is bound to the exact Revision and hash of
+/// <see cref="ApprovedInput"/>, so the plan and the pixels cannot describe different files.
+/// </para>
+/// <para>
+/// <see cref="Dimensions"/> is retained for display, naming and audit compatibility — the
+/// output file name is built from its millimetres, and a <c>PrintOutput</c> records them. Its
+/// <c>PixelWidth</c> and <c>PixelHeight</c> are the independent millimetre conversions the
+/// pre-existing model carries, and they are <b>not</b> a Photoshop target pair: sending both
+/// would be the non-proportional stretch the accepted contract prohibits. Production code takes
+/// its geometry from <see cref="Preparation"/> and nowhere else.
+/// </para>
 /// </remarks>
 public sealed record PhotoshopRequest(
     WorkspaceFileRef ApprovedInput,
     PrintDimensions Dimensions,
+    PrintPreparationPlan Preparation,
     ProductionPresetRef Preset,
     WhiteUnderbaseBranch Branch,
     string OutputFileName,

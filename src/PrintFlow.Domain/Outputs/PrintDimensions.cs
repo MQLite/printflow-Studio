@@ -134,6 +134,26 @@ public readonly record struct PrintDimensions
             : throw new ArgumentOutOfRangeException(
                 nameof(preset), preset, "Only a named preset has a nominal size; Custom is entered explicitly.");
 
+    /// <summary>
+    /// Converts millimetres to whole pixels at the fixed production resolution.
+    /// </summary>
+    /// <remarks>
+    /// The one millimetre-to-pixel rule in the codebase, made public rather than left private
+    /// because <see cref="FitWithinBounds"/> has to state its projected plan in pixels, and a
+    /// second rounding rule beside this one would be a second answer to "how many pixels is
+    /// 280 mm" (Epic 11400 Part B1A.2A §6).
+    /// <para>
+    /// It is arithmetic and emphatically not a resize instruction. It produces no Photoshop
+    /// target pair; which single edge Photoshop is allowed to receive is
+    /// <see cref="FitWithinBounds"/>'s answer alone.
+    /// </para>
+    /// </remarks>
+    public static int PixelsFromMillimetres(double millimetres) =>
+        IsUsableMillimetres(millimetres)
+            ? ToPixels(millimetres)
+            : throw new ArgumentOutOfRangeException(
+                nameof(millimetres), millimetres, "A pixel conversion needs positive finite millimetres.");
+
     private static bool IsUsableMillimetres(double millimetres) =>
         double.IsFinite(millimetres) && millimetres > 0;
 
