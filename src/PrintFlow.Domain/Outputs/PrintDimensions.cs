@@ -14,13 +14,21 @@ public enum SizePreset
 }
 
 /// <summary>
-/// Target physical dimensions for a production output, at the fixed production resolution.
+/// Operator-facing maximum physical bounds for a production output, at the fixed production
+/// resolution.
 /// </summary>
 /// <remarks>
-/// Production resolution is fixed at 300 DPI (MVP design §8.3). Non-proportional stretching
-/// is never permitted, and resizing is shrink-only — but the *limits* that make those rules
-/// concrete come from the signed workstation preset, not from this type. Epic 11100 models
-/// the value and its internal consistency; Epic 11400 applies it through Photoshop.
+/// Production resolution is fixed at 300 DPI (MVP design §8.3). Under the accepted Epic 11400
+/// B1A.1 contract, <see cref="WidthMm"/> and <see cref="HeightMm"/> are limits rather than two
+/// independently exact output dimensions. The source aspect ratio determines which limit is
+/// written to Photoshop; Photoshop derives the other edge with proportions constrained.
+/// Non-proportional stretching is never permitted and resizing is shrink-only.
+/// <para>
+/// The existing pixel properties remain the independent millimetre conversions needed by the
+/// pre-existing UI and persistence model. They are not an executable Photoshop target pair.
+/// The future B1A migration must replace that legacy representation after it can record the
+/// actual constrained Photoshop result.
+/// </para>
 /// </remarks>
 public readonly record struct PrintDimensions
 {
@@ -42,6 +50,12 @@ public readonly record struct PrintDimensions
     public double WidthMm { get; }
 
     public double HeightMm { get; }
+
+    /// <summary>The accepted fit box's maximum width; an explicit name for <see cref="WidthMm"/>.</summary>
+    public double MaxWidthMm => WidthMm;
+
+    /// <summary>The accepted fit box's maximum height; an explicit name for <see cref="HeightMm"/>.</summary>
+    public double MaxHeightMm => HeightMm;
 
     public int PixelWidth { get; }
 
