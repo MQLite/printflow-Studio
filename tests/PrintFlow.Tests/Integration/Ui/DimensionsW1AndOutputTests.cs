@@ -45,17 +45,21 @@ public sealed class DimensionsW1AndOutputTests
         OpenSession open = await AtDimensionsAsync(harness, "dimensions.png");
         SessionViewModel screen = open.Screen;
 
-        screen.CanSetDimensions.ShouldBeTrue();
-        screen.ConfirmedDimensions.ShouldBe(Strings.DimensionsNotSet);
+        screen.CanSetMaximumBounds.ShouldBeTrue();
+        screen.ConfirmedMaximumBounds.ShouldBe(Strings.DimensionsNotSet);
 
         screen.WidthMmText = "200";
         screen.HeightMmText = "150";
 
-        // The pixel preview is the domain's own conversion at 300 dpi, before anything is sent.
-        screen.PendingDimensions.ShouldContain("2362");
-        screen.PendingDimensions.ShouldContain("1772");
+        // The preview states the limits and nothing else. Under the maximum-bound contract the
+        // independent millimetre-to-pixel conversion is not what the image would become, so a
+        // pixel figure here would be a number the plan never uses (Epic 11400 Part B1A.2B §7).
+        screen.PendingMaximumBounds.ShouldContain("200");
+        screen.PendingMaximumBounds.ShouldContain("150");
+        screen.PendingMaximumBounds.ShouldNotContain("2362");
+        screen.PendingMaximumBounds.ShouldNotContain("1772");
 
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         SessionAggregate persisted = await open.ReloadAsync();
@@ -70,8 +74,8 @@ public sealed class DimensionsW1AndOutputTests
         StepOf(persisted, StepKind.PrintDimensions).State.ShouldBe(StepState.Approved);
         persisted.ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.PhotoshopOutput);
 
-        screen.CanSetDimensions.ShouldBeFalse();
-        screen.ConfirmedDimensions.ShouldContain("200");
+        screen.CanSetMaximumBounds.ShouldBeFalse();
+        screen.ConfirmedMaximumBounds.ShouldContain("200");
     }
 
     /// <summary>
@@ -98,16 +102,16 @@ public sealed class DimensionsW1AndOutputTests
 
         screen.WidthMmText = width;
         screen.HeightMmText = height;
-        screen.PendingDimensions.ShouldBeEmpty();
+        screen.PendingMaximumBounds.ShouldBeEmpty();
 
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
 
         screen.Notice.ShouldNotBeNullOrWhiteSpace();
 
         SessionAggregate persisted = await open.ReloadAsync();
         persisted.Session.Dimensions.ShouldBeNull();
         StepOf(persisted, StepKind.PrintDimensions).State.ShouldBe(StepState.Waiting);
-        screen.CanSetDimensions.ShouldBeTrue();
+        screen.CanSetMaximumBounds.ShouldBeTrue();
     }
 
     /// <summary>
@@ -132,7 +136,7 @@ public sealed class DimensionsW1AndOutputTests
         screen.HeightMmText.ShouldBe(297d.ToString(CultureInfo.CurrentCulture));
         (await open.ReloadAsync()).Session.Dimensions.ShouldBeNull();
 
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         PrintDimensions stored = (await open.ReloadAsync()).Session.Dimensions.ShouldNotBeNull();
@@ -154,7 +158,7 @@ public sealed class DimensionsW1AndOutputTests
         screen.ApplyPresetCommand.Execute(screen.SizePresets.Single(c => c.Preset == SizePreset.A5));
         screen.WidthMmText = "120";
 
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         PrintDimensions stored = (await open.ReloadAsync()).Session.Dimensions.ShouldNotBeNull();
@@ -237,11 +241,11 @@ public sealed class DimensionsW1AndOutputTests
 
         // A branch alone is not enough: the session is still waiting for a size.
         screen.CanRunStep.ShouldBeFalse();
-        screen.CanSetDimensions.ShouldBeTrue();
+        screen.CanSetMaximumBounds.ShouldBeTrue();
 
         screen.WidthMmText = "200";
         screen.HeightMmText = "150";
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         // Both recorded: now, and only now, the step may start.
@@ -267,7 +271,7 @@ public sealed class DimensionsW1AndOutputTests
 
         screen.WidthMmText = "200";
         screen.HeightMmText = "150";
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         SessionAggregate persisted = await open.ReloadAsync();
@@ -380,7 +384,7 @@ public sealed class DimensionsW1AndOutputTests
 
         screen.WidthMmText = "200";
         screen.HeightMmText = "150";
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.CanComplete.ShouldBeFalse();                     // PhotoshopOutput, not started
 
         // Asking anyway is refused by the engine, and nothing completes.
@@ -400,7 +404,7 @@ public sealed class DimensionsW1AndOutputTests
         SessionViewModel screen = open.Screen;
 
         // Neither production decision is ever offered: this workflow produces no TIFF.
-        screen.CanSetDimensions.ShouldBeFalse();
+        screen.CanSetMaximumBounds.ShouldBeFalse();
         screen.CanSelectWhiteUnderbase.ShouldBeFalse();
         screen.IsFakeTiffOutput.ShouldBeFalse();
 
@@ -510,7 +514,7 @@ public sealed class DimensionsW1AndOutputTests
         persisted.Session.Dimensions.ShouldBeNull();
         persisted.Session.WhiteUnderbaseBranch.ShouldBeNull();
 
-        screen.CanSetDimensions.ShouldBeTrue();
+        screen.CanSetMaximumBounds.ShouldBeTrue();
         screen.SelectedWhiteUnderbaseChoice.ShouldBeNull();
         screen.ConfirmedWhiteUnderbase.ShouldBe(Strings.W1NotChosen);
 
@@ -759,7 +763,7 @@ public sealed class DimensionsW1AndOutputTests
     {
         screen.WidthMmText = widthMm.ToString(CultureInfo.CurrentCulture);
         screen.HeightMmText = 150d.ToString(CultureInfo.CurrentCulture);
-        await screen.SetDimensionsCommand.ExecuteAsync(null);
+        await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         screen.SelectedWhiteUnderbaseChoice =
@@ -778,7 +782,7 @@ public sealed class DimensionsW1AndOutputTests
             WorkflowEngine.Instance.AvailableCommands(persisted.ToSnapshot());
 
         SessionViewModel screen = open.Screen;
-        screen.CanSetDimensions.ShouldBe(legal.Contains(CommandKind.SetPrintDimensions));
+        screen.CanSetMaximumBounds.ShouldBe(legal.Contains(CommandKind.SetPrintDimensions));
         screen.CanSelectWhiteUnderbase.ShouldBe(legal.Contains(CommandKind.SelectWhiteUnderbaseBranch));
         screen.CanComplete.ShouldBe(legal.Contains(CommandKind.Complete));
         screen.CanAddAnotherSize.ShouldBe(legal.Contains(CommandKind.AddAnotherSize));

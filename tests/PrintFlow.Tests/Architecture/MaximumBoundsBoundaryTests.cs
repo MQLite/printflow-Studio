@@ -278,8 +278,154 @@ public sealed class MaximumBoundsBoundaryTests
     }
 
     // -------------------------------------------------------------------------------------
+    // Part B1A.2B §29: the operator UI reads the plan and decides nothing about it
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// No view model touches the file system (Part B1A.2B §29).
+    /// </summary>
+    /// <remarks>
+    /// The maximum-bound plan is calculated from the source's own pixels, which is exactly the
+    /// value a screen would be tempted to fetch for itself — by opening the image, by measuring a
+    /// preview, or by reading a file's dimensions "just to show the operator". Every one of those
+    /// would be a second reading of the artefact, taken outside the integrity check the command
+    /// path performs.
+    /// </remarks>
+    [Theory]
+    [InlineData(@"System\.IO")]
+    [InlineData(@"\bFile\.")]
+    [InlineData(@"\bDirectory\.")]
+    [InlineData(@"\bPath\.")]
+    [InlineData(@"\bFileStream\b")]
+    public void No_view_model_reaches_the_file_system(string banned)
+    {
+        Offenders("PrintFlow.App", "ViewModels", banned).ShouldBeEmpty(
+            "the shell shows what the workflow layer reported; it never opens an image.");
+    }
+
+    /// <summary>
+    /// The shell never constructs the millimetre-to-pixel conversion for a plan (§29).
+    /// </summary>
+    /// <remarks>
+    /// <c>PixelsFromMillimetres</c> is the Domain's one conversion and is legitimate where a
+    /// millimetre really is being converted — but under the maximum-bound contract the operator's
+    /// two millimetre values are <b>limits</b>, and converting them would produce a pixel pair
+    /// that looks exactly like an output size and is not one. What the image becomes is
+    /// <c>FitWithinBounds</c>' answer, and it reaches the screen through the plan (§7).
+    /// <para>
+    /// The already-produced outputs list is deliberately not in scope. Those rows describe a TIFF
+    /// that exists, recorded before this contract, and Part B1A.2B leaves them exactly as they
+    /// are; what is banned here is deriving pixels from the millimetres an operator is
+    /// <i>currently</i> entering as limits.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("PixelsFromMillimetres")]
+    [InlineData("MillimetresPerInch")]
+    [InlineData("25.4")]
+    public void No_view_model_derives_pixels_from_the_operators_millimetres(string banned)
+    {
+        Offenders("PrintFlow.App", "ViewModels", banned).ShouldBeEmpty(
+            "two independently converted millimetre values are not a projected output size.");
+    }
+
+    /// <summary>
+    /// The shell offers exactly one route to the size decision, and it is the command (§29).
+    /// </summary>
+    /// <remarks>
+    /// The "review the maximum bounds" action added by this slice is a <c>ReturnToStep</c> aimed
+    /// at a target the workflow layer offered — deliberately not a second
+    /// <c>SetPrintDimensions</c> call site reachable from the Photoshop step, which would let a
+    /// screen rewrite the size without rewinding what was derived from the old one (§12).
+    /// </remarks>
+    [Fact]
+    public void The_shell_has_exactly_one_set_print_dimensions_call_site()
+    {
+        Offenders("PrintFlow.App", subdirectory: null, @"WorkflowCommand\.SetPrintDimensions")
+            .Count.ShouldBe(1, "the size is recorded from the size panel and from nowhere else.");
+    }
+
+    /// <summary>
+    /// The review action goes through <c>ReturnToStep</c>, and takes its destination from the
+    /// workflow layer (§29).
+    /// </summary>
+    /// <remarks>
+    /// The positive half of the rule above: without it, the ban would still pass in a shell where
+    /// the review action did nothing at all. The <c>ReturnTargets</c> read is what makes the
+    /// destination the engine's answer rather than an assumption that the size step is always
+    /// behind the Photoshop step.
+    /// </remarks>
+    [Fact]
+    public void The_bounds_review_action_returns_to_a_target_the_workflow_layer_offered()
+    {
+        string screen = ShellSource("ViewModels", "SessionViewModel.cs");
+
+        screen.ShouldContain("ReviewBoundsTarget", Case.Sensitive);
+        screen.ShouldContain("ReturnTargets.FirstOrDefault", Case.Sensitive);
+        screen.ShouldContain("WorkflowCommand.ReturnToStep", Case.Sensitive);
+    }
+
+    /// <summary>
+    /// The read model exposes the producing attempt's plan as a flattened view, not as a
+    /// database entity or a rebindable record (§20).
+    /// </summary>
+    /// <remarks>
+    /// Structural, because the temptation is to hand the shell the <c>PrintPreparationPlan</c>
+    /// itself: it already has every field an audit line needs. It also carries
+    /// <c>SourceRevisionId</c>, <c>SourceSha256</c> and <c>Covers</c> — the raw materials of a
+    /// second staleness rule in a layer that must not hold one.
+    /// </remarks>
+    [Fact]
+    public void The_attempt_preparation_view_carries_no_binding_and_no_actual_result()
+    {
+        PropertyInfo attempt = typeof(SessionView)
+            .GetProperty(nameof(SessionView.AttemptPreparation))
+            .ShouldNotBeNull();
+
+        attempt.PropertyType.ShouldBe(typeof(PrintPreparationAttemptView));
+
+        IEnumerable<string> names = typeof(PrintPreparationAttemptView)
+            .GetProperties()
+            .Select(property => property.Name);
+
+        foreach (string name in names)
+        {
+            name.ShouldNotStartWith("Actual");
+            name.ShouldNotContain("Sha");
+            name.ShouldNotContain("RevisionId");
+        }
+    }
+
+    /// <summary>
+    /// This slice added no migration (§29).
+    /// </summary>
+    /// <remarks>
+    /// A UI and read-model slice has nothing to migrate: no column changed, no stored value was
+    /// reinterpreted, and the semantics column that B1A.2A introduced already carries everything
+    /// the screen reads. A new script here would mean one of those three sentences was wrong.
+    /// </remarks>
+    [Fact]
+    public void The_migration_set_ends_at_the_maximum_bounds_migration()
+    {
+        string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
+
+        IEnumerable<string> scripts = Directory
+            .EnumerateFiles(directory, "*.sql", SearchOption.AllDirectories)
+            .Select(Path.GetFileName)
+            .Where(name => name is not null)
+            .Select(name => name!)
+            .OrderBy(name => name, StringComparer.Ordinal);
+
+        scripts.Last().ShouldStartWith("0005", Case.Sensitive);
+    }
+
+    // -------------------------------------------------------------------------------------
     // Source helpers
     // -------------------------------------------------------------------------------------
+
+    private static string ShellSource(params string[] relativePath) =>
+        File.ReadAllText(Path.Combine([FindProjectDirectory("PrintFlow.App"), .. relativePath]));
+
 
     private static string WorkflowSource(params string[] relativePath) =>
         File.ReadAllText(Path.Combine(

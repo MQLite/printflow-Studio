@@ -171,6 +171,39 @@ internal static class DisplayNames
     };
 
     /// <summary>
+    /// The operator label for what a preparation plan asks the Photoshop run to do
+    /// (Epic 11400 Part B1A.2B §8).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately describes the <i>behaviour</i> rather than the internal resampling policy: an
+    /// operator is told that pixels stay as they are or that the image is reduced proportionally,
+    /// which is the decision they can act on. "Bicubic Sharper" and "None" are auditable Domain
+    /// state and not shop-floor vocabulary, and neither is ever offered as a setting (§9).
+    /// </remarks>
+    internal static string PreparationMode(PrintPreparationMode mode) => mode switch
+    {
+        PrintPreparationMode.ResolutionOnly => Strings.PreparationMode_ResolutionOnly,
+        PrintPreparationMode.ProportionalShrink => Strings.PreparationMode_ProportionalShrink,
+        _ => mode.ToString(),
+    };
+
+    /// <summary>
+    /// The operator label for the edge the plan selected (Part B1A.2B §8).
+    /// </summary>
+    /// <remarks>
+    /// A label over a decision that has already been taken. <c>FitWithinBounds</c> chooses the
+    /// limiting edge from the source pixels, and there is no control anywhere in the shell that
+    /// lets an operator pick a different one (§6).
+    /// </remarks>
+    internal static string LimitingEdge(LimitingEdge edge) => edge switch
+    {
+        Domain.Outputs.LimitingEdge.None => Strings.LimitingEdge_None,
+        Domain.Outputs.LimitingEdge.Width => Strings.LimitingEdge_Width,
+        Domain.Outputs.LimitingEdge.Height => Strings.LimitingEdge_Height,
+        _ => edge.ToString(),
+    };
+
+    /// <summary>
     /// The operator label for a trim mode, carrying what it means (Epic 11200 Part C3 §9).
     /// </summary>
     /// <remarks>

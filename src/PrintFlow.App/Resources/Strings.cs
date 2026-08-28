@@ -234,23 +234,95 @@ internal static class Strings
 
     // --- Part 3C3B: dimensions, W1 and production output ---------------------------------
 
-    internal static string Session_DimensionsHeading => Get(nameof(Session_DimensionsHeading));
+    // The wording is maximum-bound throughout (Epic 11400 Part B1A.2B §4): the two millimetre
+    // boxes are limits the image is fitted inside, not two exact output dimensions. Nothing here
+    // names an axis to choose or a resampling method — neither is an operator decision (§9).
 
-    internal static string Session_DimensionsHint => Get(nameof(Session_DimensionsHint));
+    internal static string Session_MaxBoundsHeading => Get(nameof(Session_MaxBoundsHeading));
 
-    internal static string Session_LabelWidthMm => Get(nameof(Session_LabelWidthMm));
+    internal static string Session_MaxBoundsHint => Get(nameof(Session_MaxBoundsHint));
 
-    internal static string Session_LabelHeightMm => Get(nameof(Session_LabelHeightMm));
+    internal static string Session_LabelMaxWidthMm => Get(nameof(Session_LabelMaxWidthMm));
 
-    internal static string Session_DimensionsConfirm => Get(nameof(Session_DimensionsConfirm));
+    internal static string Session_LabelMaxHeightMm => Get(nameof(Session_LabelMaxHeightMm));
 
-    /// <summary>Shown when the typed millimetres are not a size the domain will accept.</summary>
-    internal static string Session_DimensionsInvalid => Get(nameof(Session_DimensionsInvalid));
+    internal static string Session_LabelMaxLongEdgeMm => Get(nameof(Session_LabelMaxLongEdgeMm));
+
+    internal static string Session_MaxBoundsConfirm => Get(nameof(Session_MaxBoundsConfirm));
+
+    /// <summary>Shown when the typed millimetres are not limits the domain will accept.</summary>
+    internal static string Session_MaxBoundsInvalid => Get(nameof(Session_MaxBoundsInvalid));
+
+    /// <summary>Composite format: maximum width mm, maximum height mm.</summary>
+    internal static string Session_MaxBoundsSummary => Get(nameof(Session_MaxBoundsSummary));
+
+    /// <summary>Composite format: the one long-edge limit, in millimetres.</summary>
+    internal static string Session_MaxLongEdgeSummary => Get(nameof(Session_MaxLongEdgeSummary));
 
     /// <summary>Composite format: width mm, height mm, pixel width, pixel height, DPI.</summary>
     internal static string Session_DimensionsSummary => Get(nameof(Session_DimensionsSummary));
 
     internal static string Session_DimensionsNotSet => Get(nameof(Session_DimensionsNotSet));
+
+    // --- Part B1A.2B: the projected preparation plan and the review it may need ------------
+
+    internal static string Session_PreparationHeading => Get(nameof(Session_PreparationHeading));
+
+    internal static string Session_PreparationResolutionOnly =>
+        Get(nameof(Session_PreparationResolutionOnly));
+
+    internal static string Session_PreparationProportionalShrink =>
+        Get(nameof(Session_PreparationProportionalShrink));
+
+    /// <summary>Composite format: the localised limiting edge.</summary>
+    internal static string Session_PreparationLimitingEdge =>
+        Get(nameof(Session_PreparationLimitingEdge));
+
+    /// <summary>Composite format: projected pixel width, projected pixel height.</summary>
+    internal static string Session_PreparationProjectedSize =>
+        Get(nameof(Session_PreparationProjectedSize));
+
+    /// <summary>Composite format: the fixed production resolution.</summary>
+    internal static string Session_PreparationResolution => Get(nameof(Session_PreparationResolution));
+
+    internal static string Session_PreparationAttemptHeading =>
+        Get(nameof(Session_PreparationAttemptHeading));
+
+    /// <summary>Composite format: maximum width mm, maximum height mm.</summary>
+    internal static string Session_PreparationAttemptBounds =>
+        Get(nameof(Session_PreparationAttemptBounds));
+
+    /// <summary>Composite format: projected pixel width, projected pixel height, PPI.</summary>
+    internal static string Session_PreparationAttemptProjected =>
+        Get(nameof(Session_PreparationAttemptProjected));
+
+    /// <summary>Says plainly that no Photoshop run produced these figures (§19, §21).</summary>
+    internal static string Session_PreparationAttemptProjectionNotice =>
+        Get(nameof(Session_PreparationAttemptProjectionNotice));
+
+    internal static string Session_RunReady => Get(nameof(Session_RunReady));
+
+    internal static string Session_RunNotReady => Get(nameof(Session_RunNotReady));
+
+    /// <summary>The fail-closed warning over dimensions that cannot be executed (§11).</summary>
+    internal static string Session_DimensionReviewRequired =>
+        Get(nameof(Session_DimensionReviewRequired));
+
+    internal static string Session_ReviewMaximumBounds => Get(nameof(Session_ReviewMaximumBounds));
+
+    /// <summary>Labels retained millimetres as history rather than as active limits (§15).</summary>
+    internal static string Session_HistoricalBoundsLabel => Get(nameof(Session_HistoricalBoundsLabel));
+
+    internal static string PreparationMode_ResolutionOnly => Get(nameof(PreparationMode_ResolutionOnly));
+
+    internal static string PreparationMode_ProportionalShrink =>
+        Get(nameof(PreparationMode_ProportionalShrink));
+
+    internal static string LimitingEdge_None => Get(nameof(LimitingEdge_None));
+
+    internal static string LimitingEdge_Width => Get(nameof(LimitingEdge_Width));
+
+    internal static string LimitingEdge_Height => Get(nameof(LimitingEdge_Height));
 
     internal static string Session_PresetsLabel => Get(nameof(Session_PresetsLabel));
 

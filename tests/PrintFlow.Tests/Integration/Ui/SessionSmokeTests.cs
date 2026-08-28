@@ -231,7 +231,7 @@ public sealed class SessionSmokeTests
         await session.ConfirmOriginalCommand.ExecuteAsync(null);
         (await app.LoadAsync(id)).ToSnapshot().CurrentStep!.Step.ShouldBe(StepKind.PrintDimensions);
 
-        session.CanSetDimensions.ShouldBeTrue();
+        session.CanSetMaximumBounds.ShouldBeTrue();
         session.SelectedWhiteUnderbaseChoice.ShouldBeNull();     // no default, ever
 
         await ConfirmSizeAndBranchAsync(session, widthMm: 200, WhiteUnderbaseBranch.W1_1px);
@@ -285,7 +285,7 @@ public sealed class SessionSmokeTests
         await session.AddAnotherSizeCommand.ExecuteAsync(null);
 
         // Reopened with both decisions cleared: the second output makes its own.
-        session.CanSetDimensions.ShouldBeTrue();
+        session.CanSetMaximumBounds.ShouldBeTrue();
         session.SelectedWhiteUnderbaseChoice.ShouldBeNull();
         (await app.LoadAsync(id)).Session.WhiteUnderbaseBranch.ShouldBeNull();
 
@@ -355,7 +355,7 @@ public sealed class SessionSmokeTests
     {
         session.WidthMmText = widthMm.ToString(CultureInfo.CurrentCulture);
         session.HeightMmText = 150d.ToString(CultureInfo.CurrentCulture);
-        await session.SetDimensionsCommand.ExecuteAsync(null);
+        await session.SetMaximumBoundsCommand.ExecuteAsync(null);
         session.Notice.ShouldBeNull();
 
         session.SelectedWhiteUnderbaseChoice =

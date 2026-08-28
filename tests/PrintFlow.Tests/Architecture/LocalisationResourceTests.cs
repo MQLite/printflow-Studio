@@ -175,6 +175,167 @@ public sealed class LocalisationResourceTests
     }
 
     /// <summary>
+    /// The maximum-bound strings exist in both languages, by name
+    /// (Epic 11400 Part B1A.2B §26).
+    /// </summary>
+    /// <remarks>
+    /// Named explicitly for the same reason the two sets above are: the parity tests catch a key
+    /// present in one file and missing from the other, but not both files losing a string
+    /// together. These are the whole operator vocabulary of the maximum-bound decision, so a
+    /// silent gap would leave the size panel showing resource keys.
+    /// </remarks>
+    [Fact]
+    public void The_maximum_bound_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_MaxBoundsHeading",
+            "Session_MaxBoundsHint",
+            "Session_LabelMaxWidthMm",
+            "Session_LabelMaxHeightMm",
+            "Session_LabelMaxLongEdgeMm",
+            "Session_MaxBoundsConfirm",
+            "Session_MaxBoundsInvalid",
+            "Session_MaxBoundsSummary",
+            "Session_MaxLongEdgeSummary",
+            "Session_PreparationHeading",
+            "Session_PreparationResolutionOnly",
+            "Session_PreparationProportionalShrink",
+            "Session_PreparationLimitingEdge",
+            "Session_PreparationProjectedSize",
+            "Session_PreparationResolution",
+            "Session_PreparationAttemptHeading",
+            "Session_PreparationAttemptBounds",
+            "Session_PreparationAttemptProjected",
+            "Session_PreparationAttemptProjectionNotice",
+            "Session_RunReady",
+            "Session_RunNotReady",
+            "Session_DimensionReviewRequired",
+            "Session_ReviewMaximumBounds",
+            "Session_HistoricalBoundsLabel",
+            "PreparationMode_ResolutionOnly",
+            "PreparationMode_ProportionalShrink",
+            "LimitingEdge_None",
+            "LimitingEdge_Width",
+            "LimitingEdge_Height",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("the operator action needs English wording.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// No operator-facing string offers an axis or a resampling method
+    /// (Epic 11400 Part B1A.2B §4, §9).
+    /// </summary>
+    /// <remarks>
+    /// A wording test with teeth: the accepted contract settled that the limiting edge is chosen
+    /// from the source pixels and that the resampling policy is fixed, so a resource that named
+    /// either as something to pick would be an operator-selectable resample arriving by the back
+    /// door — through the one file nobody re-reads.
+    /// <para>
+    /// The scan covers both languages, because a translator adding "双三次" to a Chinese string
+    /// would put it on a Chinese workstation's screen and nowhere else.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("Bicubic")]
+    [InlineData("双三次")]
+    [InlineData("Resample")]
+    [InlineData("重新取样")]
+    [InlineData("Interpolation")]
+    [InlineData("插值")]
+    public void No_operator_string_offers_a_resampling_method(string forbidden)
+    {
+        foreach (string relativePath in new[] { NeutralResx, ChineseResx })
+        {
+            XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));
+
+            IEnumerable<string> offenders = document.Root!.Elements("data")
+                .Where(data => (data.Element("value")?.Value ?? string.Empty)
+                    .Contains(forbidden, StringComparison.OrdinalIgnoreCase))
+                .Select(data => $"{relativePath}: {data.Attribute("name")!.Value}");
+
+            offenders.ShouldBeEmpty(
+                "the resampling policy is fixed by the accepted contract and is not shop-floor " +
+                "vocabulary.");
+        }
+    }
+
+    /// <summary>
+    /// The maximum-bound wording says limits rather than exact output dimensions
+    /// (Epic 11400 Part B1A.2B §4, §5).
+    /// </summary>
+    /// <remarks>
+    /// The defect this catches is a rewording that quietly restores the pre-contract reading —
+    /// "enter the finished size" — while every other test still passes, because nothing else
+    /// looks at what the sentence claims.
+    /// </remarks>
+    [Fact]
+    public void The_maximum_bound_wording_describes_limits_rather_than_an_exact_size()
+    {
+        string english = ValueOf(NeutralResx, "Session_MaxBoundsHint");
+        english.ShouldContain("maximum", Case.Insensitive);
+        english.ShouldContain("proportion", Case.Insensitive);
+        english.ShouldContain("300", Case.Insensitive);
+        english.ShouldNotContain("exact", Case.Insensitive);
+
+        string chinese = ValueOf(ChineseResx, "Session_MaxBoundsHint");
+        chinese.ShouldContain("最大", Case.Sensitive);
+        chinese.ShouldContain("比例", Case.Sensitive);
+        chinese.ShouldContain("300", Case.Sensitive);
+
+        // The confirm action is about limits, not about setting an exact size.
+        ValueOf(NeutralResx, "Session_MaxBoundsConfirm")
+            .ShouldNotContain("exact", Case.Insensitive);
+    }
+
+    /// <summary>
+    /// The attempt audit calls its figures projected and never actual
+    /// (Epic 11400 Part B1A.2B §19).
+    /// </summary>
+    /// <remarks>
+    /// Nothing in this slice has read geometry back from Photoshop, so "actual" or "final" beside
+    /// those numbers would be a claim no code could honestly make — and the wording is the only
+    /// place that claim could appear.
+    /// </remarks>
+    [Theory]
+    [InlineData("Session_PreparationAttemptProjected")]
+    [InlineData("Session_PreparationProjectedSize")]
+    public void The_projected_figures_are_never_described_as_an_actual_photoshop_result(string key)
+    {
+        string english = ValueOf(NeutralResx, key);
+
+        english.ShouldContain("Projected", Case.Insensitive);
+        english.ShouldNotContain("actual", Case.Insensitive);
+        english.ShouldNotContain("final", Case.Insensitive);
+
+        ValueOf(ChineseResx, key).ShouldContain("预计", Case.Sensitive);
+    }
+
+    /// <summary>
+    /// The dimension-review warning is about a size to redo, not about a failure or lost work
+    /// (Epic 11400 Part B1A.2B §11, §13).
+    /// </summary>
+    [Fact]
+    public void The_dimension_review_warning_reports_no_failure_and_no_deletion()
+    {
+        foreach (string forbidden in new[] { "failed", "failure", "error", "deleted", "lost" })
+        {
+            ValueOf(NeutralResx, "Session_DimensionReviewRequired")
+                .ShouldNotContain(forbidden, Case.Insensitive);
+        }
+
+        ValueOf(NeutralResx, "Session_DimensionReviewRequired")
+            .ShouldContain("review", Case.Insensitive);
+        ValueOf(ChineseResx, "Session_DimensionReviewRequired")
+            .ShouldContain("确认", Case.Sensitive);
+    }
+
+    /// <summary>
     /// Both supported languages state the D2B manual-recovery policy for an unresponsive
     /// handed-off Meitu instance.
     /// </summary>

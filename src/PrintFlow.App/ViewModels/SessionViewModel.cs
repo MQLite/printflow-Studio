@@ -144,12 +144,23 @@ public sealed class TrimModeChoice
 }
 
 /// <summary>
-/// One size shortcut, offered beside the millimetre boxes (Epic 11100 Part 3C3B §5).
+/// One maximum-bounds shortcut, offered beside the millimetre boxes (Epic 11100 Part 3C3B §5;
+/// Epic 11400 Part B1A.2B §6).
 /// </summary>
 /// <remarks>
-/// A shortcut and nothing more: pressing it types the preset's nominal millimetres into the
-/// boxes, which the operator can still change before confirming. It confirms nothing, resizes
-/// nothing, and is not a size editor.
+/// A shortcut and nothing more: pressing it types the preset's millimetres into the boxes, which
+/// the operator can still change before confirming. It confirms nothing, resizes nothing, and is
+/// not a size editor.
+/// <para>
+/// Under the accepted maximum-bound contract the two millimetres are <b>limits</b>, so
+/// <see cref="BoundsLabel"/> says so out loud rather than presenting the pair as an exact
+/// width × height output. Which of the two actually governs is decided by <c>FitWithinBounds</c>
+/// from the source pixels, and is not on offer here (§6).
+/// </para>
+/// <para>
+/// Every millimetre comes from <c>PrintDimensions.NominalMillimetres</c>, the one Domain
+/// authority for what a named preset is. Nothing in this file or in XAML states a size (§6).
+/// </para>
 /// </remarks>
 public sealed class SizePresetChoice
 {
@@ -159,15 +170,67 @@ public sealed class SizePresetChoice
         WidthMm = widthMm;
         HeightMm = heightMm;
         Label = DisplayNames.SizePreset(preset);
+        BoundsLabel = SizeText.MaximumBounds(widthMm, heightMm);
     }
 
     public SizePreset Preset { get; }
 
+    /// <summary>The preset's maximum width. A limit, never an exact output width.</summary>
     public double WidthMm { get; }
 
+    /// <inheritdoc cref="WidthMm" />
     public double HeightMm { get; }
 
     public string Label { get; }
+
+    /// <summary>
+    /// The preset's limits in operator wording — a maximum box, or a maximum long edge when the
+    /// two limits are the same (§6).
+    /// </summary>
+    public string BoundsLabel { get; }
+}
+
+/// <summary>
+/// Turns maximum bounds into operator wording, in one place (Epic 11400 Part B1A.2B §5, §6).
+/// </summary>
+/// <remarks>
+/// Formatting only. Nothing here fits an image, selects an edge, converts millimetres to pixels
+/// or decides whether a plan still applies — every one of those is answered by the Domain or the
+/// workflow layer and merely read here (§3).
+/// <para>
+/// The long-edge form is the honest reading of a <b>square</b> fit box: fitting proportionally
+/// inside one constrains whichever source edge is longer to that single limit and lets Photoshop
+/// derive the other, which is exactly what "maximum long edge" means. Presenting a non-square box
+/// that way would hide the second limit, so the box form is what a non-square preset gets (§6).
+/// </para>
+/// </remarks>
+internal static class SizeText
+{
+    /// <summary>Millimetres as an operator reads them: no trailing zeros, no false precision.</summary>
+    private const string Millimetres = "0.##";
+
+    public static string MaximumBounds(double maxWidthMm, double maxHeightMm) =>
+        IsLongEdgeOnly(maxWidthMm, maxHeightMm)
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_MaxLongEdgeSummary,
+                maxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture))
+            : string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_MaxBoundsSummary,
+                maxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture),
+                maxHeightMm.ToString(Millimetres, CultureInfo.CurrentCulture));
+
+    /// <summary>
+    /// Whether the box states one limit rather than two.
+    /// </summary>
+    /// <remarks>
+    /// A square box and a long-edge limit are the same constraint, so this is a statement about
+    /// the numbers rather than a rule about which presets are which — the shell has no business
+    /// holding a second opinion about that.
+    /// </remarks>
+    private static bool IsLongEdgeOnly(double maxWidthMm, double maxHeightMm) =>
+        Math.Abs(maxWidthMm - maxHeightMm) < 0.005;
 }
 
 /// <summary>
@@ -596,15 +659,23 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string RevisionLabel => Strings.Session_LabelRevision;
 
-    public string DimensionsHeading => Strings.Session_DimensionsHeading;
+    public string MaximumBoundsHeading => Strings.Session_MaxBoundsHeading;
 
-    public string DimensionsHint => Strings.Session_DimensionsHint;
+    /// <summary>
+    /// What the two boxes mean, in one sentence (Epic 11400 Part B1A.2B §4, §5).
+    /// </summary>
+    /// <remarks>
+    /// It says limits, proportional fitting, no enlargement and the fixed 300 PPI. It does not
+    /// name an authoritative axis or a resampling method, because neither is an operator decision
+    /// under the accepted contract (§4, §9).
+    /// </remarks>
+    public string MaximumBoundsHint => Strings.Session_MaxBoundsHint;
 
-    public string WidthMmLabel => Strings.Session_LabelWidthMm;
+    public string MaxWidthMmLabel => Strings.Session_LabelMaxWidthMm;
 
-    public string HeightMmLabel => Strings.Session_LabelHeightMm;
+    public string MaxHeightMmLabel => Strings.Session_LabelMaxHeightMm;
 
-    public string ConfirmDimensionsLabel => Strings.Session_DimensionsConfirm;
+    public string ConfirmMaximumBoundsLabel => Strings.Session_MaxBoundsConfirm;
 
     public string PresetsLabel => Strings.Session_PresetsLabel;
 
@@ -1191,15 +1262,16 @@ public sealed partial class SessionViewModel : ObservableObject
     public bool CanHandOff => Allows(CommandKind.HandOff);
 
     /// <summary>
-    /// Whether the dimensions panel is shown (§3).
+    /// Whether the maximum-bounds panel is shown (§3; Epic 11400 Part B1A.2B §5).
     /// </summary>
     /// <remarks>
-    /// "Is the session on the PrintDimensions step" is not restated here: the engine reports
-    /// <c>SetPrintDimensions</c> as available exactly when it would accept one, which is the
-    /// same question and one fewer place to get it wrong. It is what reopens the panel after
-    /// AddAnotherSize as well, with no second rule about reopening.
+    /// "Is the session on the PrintDimensions step" is not restated here: the workflow layer
+    /// reports <see cref="SessionView.CanSetMaximumBounds"/> from the engine's own answer about
+    /// whether <c>SetPrintDimensions</c> would be accepted, which is the same question and one
+    /// fewer place to get it wrong. It is what reopens the panel after AddAnotherSize as well,
+    /// with no second rule about reopening (§18).
     /// </remarks>
-    public bool CanSetDimensions => Allows(CommandKind.SetPrintDimensions);
+    public bool CanSetMaximumBounds => _session?.CanSetMaximumBounds == true;
 
     /// <summary>
     /// Whether the W1 selector is shown (§6).
@@ -1224,9 +1296,21 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public bool CanConfirmWhiteUnderbase => CanSelectWhiteUnderbase && SelectedWhiteUnderbaseChoice is not null;
 
-    /// <summary>The confirmed print size, or a plain "not set".</summary>
-    public string ConfirmedDimensions =>
-        _session?.Dimensions is { } dimensions ? Describe(dimensions) : Strings.Session_DimensionsNotSet;
+    /// <summary>
+    /// The maximum bounds that are currently in force, or a plain "not set"
+    /// (Epic 11400 Part B1A.2B §8, §15, §16).
+    /// </summary>
+    /// <remarks>
+    /// Sourced from <see cref="SessionView.MaxWidthMm"/> and <see cref="SessionView.MaxHeightMm"/>,
+    /// which the read model populates from the <b>usable</b> plan and from nothing else. A legacy
+    /// exact pair and a plan bound to content that has since changed both report null there, so
+    /// neither can appear here as an active limit — they are shown as history instead, by
+    /// <see cref="HistoricalBounds"/> (§15, §16).
+    /// </remarks>
+    public string ConfirmedMaximumBounds =>
+        _session is { MaxWidthMm: { } maxWidth, MaxHeightMm: { } maxHeight }
+            ? SizeText.MaximumBounds(maxWidth, maxHeight)
+            : Strings.Session_DimensionsNotSet;
 
     /// <summary>The confirmed W1 branch, or a plain "not chosen".</summary>
     public string ConfirmedWhiteUnderbase => _session?.WhiteUnderbaseBranch is { } branch
@@ -1234,17 +1318,233 @@ public sealed partial class SessionViewModel : ObservableObject
         : Strings.Session_W1NotChosen;
 
     /// <summary>
-    /// What the typed millimetres would become, or empty while they are not a usable size.
+    /// The limits the typed millimetres would set, or empty while they are not usable limits.
     /// </summary>
     /// <remarks>
-    /// The pixels come from <see cref="PrintDimensions"/>, which derives them at the fixed
-    /// production DPI. This screen does not divide by 25.4 anywhere — the preview and the
-    /// value that gets persisted are computed by the same code, so they cannot disagree
-    /// (§4).
+    /// Millimetres only. It deliberately shows no pixel figure: what the image would <i>become</i>
+    /// depends on the source's own pixels and is <c>FitWithinBounds</c>'s answer, calculated when
+    /// the bounds are recorded and reported back through <see cref="PreparationProjectedSize"/>.
+    /// A pixel pair derived here from the two millimetre values would be the independent
+    /// conversion the accepted contract stopped treating as an output size (§7).
     /// </remarks>
-    public string PendingDimensions => TryReadTypedDimensions(out PrintDimensions typed)
-        ? Describe(typed)
+    public string PendingMaximumBounds => TryReadTypedDimensions(out PrintDimensions typed)
+        ? SizeText.MaximumBounds(typed.MaxWidthMm, typed.MaxHeightMm)
         : string.Empty;
+
+    // --- The projected preparation plan (Epic 11400 Part B1A.2B §8, §10) ------------------
+    //
+    // Every value below is read from SessionView, which reports only the *usable* plan. Nothing
+    // here fits an image, chooses an edge, converts millimetres to pixels, or compares a Revision
+    // or a hash: a screen that worked any of that out for itself would be a second answer, free
+    // to disagree with the one the engine enforces (§3).
+
+    public string PreparationHeading => Strings.Session_PreparationHeading;
+
+    /// <summary>Whether a plan is currently in force and therefore worth summarising (§8).</summary>
+    public bool HasPreparationPlan => _session?.PreparationMode is not null;
+
+    /// <summary>
+    /// What the planned run would do, in a sentence (§8).
+    /// </summary>
+    /// <remarks>
+    /// Describes behaviour rather than the internal resampling policy: pixels unchanged, or a
+    /// proportional reduction. "Bicubic Sharper" is auditable Domain state and never appears as an
+    /// operator setting (§9).
+    /// </remarks>
+    public string PreparationModeText => _session?.PreparationMode switch
+    {
+        PrintPreparationMode.ResolutionOnly => Strings.Session_PreparationResolutionOnly,
+        PrintPreparationMode.ProportionalShrink => Strings.Session_PreparationProportionalShrink,
+        _ => string.Empty,
+    };
+
+    /// <summary>
+    /// Which edge the plan selected, shown only when one was (§8).
+    /// </summary>
+    /// <remarks>
+    /// A read-out, not a control. The edge is chosen by <c>FitWithinBounds</c> from the source
+    /// pixels, and there is nothing anywhere on this screen that lets an operator override it
+    /// (§23).
+    /// </remarks>
+    public string PreparationLimitingEdge => _session?.LimitingEdge is { } edge and not Domain.Outputs.LimitingEdge.None
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_PreparationLimitingEdge,
+            DisplayNames.LimitingEdge(edge))
+        : string.Empty;
+
+    /// <inheritdoc cref="PreparationLimitingEdge" />
+    public bool HasPreparationLimitingEdge => PreparationLimitingEdge.Length > 0;
+
+    /// <summary>
+    /// The pixels the plan projects, as information (§8).
+    /// </summary>
+    /// <remarks>
+    /// Labelled "projected" in every language, because that is what it is: planning evidence that
+    /// the selected edge fits the other bound. It is not a Photoshop target and not a result —
+    /// reading real geometry back from Photoshop is B1A.3's.
+    /// </remarks>
+    public string PreparationProjectedSize =>
+        _session is { ProjectedPixelWidth: { } width, ProjectedPixelHeight: { } height }
+            ? string.Format(
+                CultureInfo.CurrentCulture, Strings.Session_PreparationProjectedSize, width, height)
+            : string.Empty;
+
+    /// <summary>The fixed production resolution, stated rather than offered (§8).</summary>
+    public string PreparationResolution => string.Format(
+        CultureInfo.CurrentCulture, Strings.Session_PreparationResolution, PrintDimensions.ProductionDpi);
+
+    // --- Run readiness and the review a stale or legacy size needs (§10–§13) --------------
+
+    /// <summary>
+    /// Whether Photoshop output would actually start if asked (§10).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.CanRunPhotoshopOutput"/> and nothing else. Neither "dimensions are
+    /// not null" nor "the semantics say MaxBoundsV1" is that question: a session can hold a raw
+    /// plan calculated against content that has since been replaced, and both of those would call
+    /// it ready (§10, §16).
+    /// </remarks>
+    public bool CanRunPhotoshopOutput => _session?.CanRunPhotoshopOutput == true;
+
+    /// <summary>What the readiness state means, for an operator looking for the Run button.</summary>
+    /// <remarks>
+    /// Only while the Photoshop step is the one being worked on — the sentence is about that
+    /// step's readiness, and on any other step it would be answering a question nobody asked.
+    /// </remarks>
+    public string RunReadinessNotice => CanRunPhotoshopOutput
+        ? Strings.Session_RunReady
+        : Strings.Session_RunNotReady;
+
+    /// <inheritdoc cref="RunReadinessNotice" />
+    public bool HasRunReadinessNotice =>
+        _session?.CurrentStep is { Step: StepKind.PhotoshopOutput };
+
+    /// <summary>
+    /// Whether recorded millimetres exist that cannot be executed (§11).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.NeedsDimensionReview"/> is the workflow layer's own predicate,
+    /// covering both a legacy exact pair and a plan whose source has since changed. This screen
+    /// does not tell the two apart, and should not: the operator action is the same, and the
+    /// distinction is not something a shell can establish without comparing Revisions itself
+    /// (§11, §16).
+    /// </remarks>
+    public bool NeedsDimensionReview => _session?.NeedsDimensionReview == true;
+
+    /// <summary>
+    /// The warning shown over dimensions that need reconfirming (§11).
+    /// </summary>
+    /// <remarks>
+    /// It is a size decision to redo, not a Photoshop failure: no attempt was made, nothing was
+    /// processed, and nothing was lost. The wording says exactly that (§11).
+    /// </remarks>
+    public string DimensionReviewWarning => Strings.Session_DimensionReviewRequired;
+
+    public string HistoricalBoundsLabel => Strings.Session_HistoricalBoundsLabel;
+
+    /// <summary>
+    /// The millimetres the session still holds, shown as history while they need review (§15).
+    /// </summary>
+    /// <remarks>
+    /// Read from <see cref="SessionView.Dimensions"/> — the retained pair — rather than from the
+    /// usable plan's bounds, which is precisely why it is labelled unconfirmed. Nothing here
+    /// converts it, adopts it, or marks it as reviewed because it happens to suit the current
+    /// source ratio; that judgement is the operator's, and it is made by confirming bounds again
+    /// (§15).
+    /// </remarks>
+    public string HistoricalBounds => _session?.Dimensions is { } historical
+        ? SizeText.MaximumBounds(historical.MaxWidthMm, historical.MaxHeightMm)
+        : string.Empty;
+
+    /// <inheritdoc cref="HistoricalBounds" />
+    public bool HasHistoricalBounds => NeedsDimensionReview && _session?.Dimensions is not null;
+
+    public string ReviewMaximumBoundsLabel => Strings.Session_ReviewMaximumBounds;
+
+    /// <summary>
+    /// Whether the "review the maximum bounds" action can be offered (§12).
+    /// </summary>
+    /// <remarks>
+    /// Two conditions, and the second is the important one: the workflow layer must currently be
+    /// offering <c>PrintDimensions</c> as a legal return target. That the size step is <i>usually</i>
+    /// behind the Photoshop step is not a licence to assume it always is — the offer comes from
+    /// <see cref="SessionView.ReturnTargets"/>, which the engine produced by applying the real
+    /// <c>ReturnToStep</c> command (§12).
+    /// </remarks>
+    public bool CanReviewMaximumBounds =>
+        NeedsDimensionReview && ReviewBoundsTarget is not null && !IsBusy;
+
+    /// <summary>The real return target this action would use, or null when there is none.</summary>
+    private ReturnTargetRow? ReviewBoundsTarget =>
+        ReturnTargets.FirstOrDefault(target => target.Step == StepKind.PrintDimensions);
+
+    // --- The producing attempt's own plan (§19) -------------------------------------------
+
+    public string PreparationAttemptHeading => Strings.Session_PreparationAttemptHeading;
+
+    /// <summary>
+    /// Whether the result on screen was produced under a recorded plan (§19).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="SessionView.AttemptPreparation"/> is resolved from the attempt that produced
+    /// this exact Revision, so it is false for every artefact that is not a planned Photoshop
+    /// output — and, crucially, it never falls back to the session's pending plan when a result
+    /// has none (§19).
+    /// </remarks>
+    public bool HasPreparationAttemptAudit => _session?.AttemptPreparation is not null;
+
+    /// <summary>The bounds that run actually used (§19).</summary>
+    public string PreparationAttemptBounds => _session?.AttemptPreparation is { } attempt
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_PreparationAttemptBounds,
+            attempt.MaxWidthMm.ToString("0.##", CultureInfo.CurrentCulture),
+            attempt.MaxHeightMm.ToString("0.##", CultureInfo.CurrentCulture))
+        : string.Empty;
+
+    /// <summary>What that run was planned to do, in the same behavioural wording (§19).</summary>
+    public string PreparationAttemptMode => _session?.AttemptPreparation is { } attempt
+        ? DisplayNames.PreparationMode(attempt.Mode)
+        : string.Empty;
+
+    /// <summary>The edge that run selected, including "None" (§19).</summary>
+    /// <remarks>
+    /// Unlike the pending summary, the audit line states the edge even when it is None: an audit
+    /// that silently omitted it would leave a reader unable to tell "no edge was written" from
+    /// "this line was not recorded".
+    /// </remarks>
+    public string PreparationAttemptLimitingEdge => _session?.AttemptPreparation is { } attempt
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_PreparationLimitingEdge,
+            DisplayNames.LimitingEdge(attempt.LimitingEdge))
+        : string.Empty;
+
+    /// <summary>The pixels that run projected, at the resolution it fixed (§19).</summary>
+    public string PreparationAttemptProjected => _session?.AttemptPreparation is { } attempt
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.Session_PreparationAttemptProjected,
+            attempt.ProjectedPixelWidth,
+            attempt.ProjectedPixelHeight,
+            attempt.ProductionDpi)
+        : string.Empty;
+
+    /// <summary>
+    /// The qualification that these figures are a plan and not a Photoshop read-back (§19, §21).
+    /// </summary>
+    /// <remarks>
+    /// Shown from <see cref="PrintPreparationAttemptView.IsFakeProjection"/>, which the workflow
+    /// layer sets from the adapters actually wired up. A screen that guessed from configuration
+    /// could disagree with what really ran — and this is the one line that must not.
+    /// </remarks>
+    public string PreparationAttemptProjectionNotice =>
+        Strings.Session_PreparationAttemptProjectionNotice;
+
+    /// <inheritdoc cref="PreparationAttemptProjectionNotice" />
+    public bool HasPreparationAttemptProjectionNotice =>
+        _session?.AttemptPreparation?.IsFakeProjection == true;
 
     public bool HasOutputs => Outputs.Count > 0;
 
@@ -1706,7 +2006,7 @@ public sealed partial class SessionViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Types a preset's nominal size into the boxes (Part 3C3B §5).
+    /// Types a preset's maximum bounds into the boxes (Part 3C3B §5; Part B1A.2B §6).
     /// </summary>
     /// <remarks>
     /// Confirms nothing. It is a shortcut past typing four digits, after which the operator
@@ -1730,24 +2030,61 @@ public sealed partial class SessionViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Confirms the typed print dimensions through the ordinary command path (§3).
+    /// Confirms the typed maximum bounds through the ordinary command path
+    /// (§3; Epic 11400 Part B1A.2B §7).
     /// </summary>
     /// <remarks>
-    /// The only thing this does with the text is turn it into a number. Whether that number is
-    /// a usable size is <see cref="PrintDimensions.TryFromMillimetres"/>'s answer, and whether
-    /// the session may accept it now is the engine's — neither rule is restated here, and no
-    /// size is silently adjusted to make it acceptable (§4).
+    /// The only thing this does with the text is turn it into a number. Whether those numbers are
+    /// usable limits is <see cref="PrintDimensions.TryFromMillimetres"/>'s answer, and whether the
+    /// session may accept them now is the engine's — neither rule is restated here, and nothing is
+    /// silently adjusted to make it acceptable (§4, §7).
+    /// <para>
+    /// The plan itself is not built here and could not be: calculating one needs the upstream
+    /// Revision's own pixels and its re-verified bytes, which is why <c>SessionService</c> owns
+    /// it. This screen sends millimetres and reads back what the workflow layer decided (§3).
+    /// </para>
     /// </remarks>
     [RelayCommand]
-    private Task SetDimensionsAsync(CancellationToken cancellationToken)
+    private Task SetMaximumBoundsAsync(CancellationToken cancellationToken)
     {
-        if (!TryReadTypedDimensions(out PrintDimensions dimensions))
+        if (!TryReadTypedDimensions(out PrintDimensions bounds))
         {
-            Notice = Strings.Session_DimensionsInvalid;
+            Notice = Strings.Session_MaxBoundsInvalid;
             return Task.CompletedTask;
         }
 
-        return RunAsync(new WorkflowCommand.SetPrintDimensions(dimensions), cancellationToken);
+        return RunAsync(new WorkflowCommand.SetPrintDimensions(bounds), cancellationToken);
+    }
+
+    /// <summary>
+    /// Opens the ordinary return confirmation, aimed at the size step (§12, §13).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately not a second <c>SetPrintDimensions</c> route. Dimensions that need review are
+    /// reconfirmed by going back to the step that owns them, which is what clears the pair and
+    /// everything derived from it — and that is <c>ReturnToStep</c>, with its existing warning and
+    /// its existing Cancel (§12, §13, §14).
+    /// <para>
+    /// The destination comes from <see cref="ReviewBoundsTarget"/>, which is a row the workflow
+    /// layer offered. Pressing this when no such row exists does nothing rather than sending a
+    /// command the engine would refuse.
+    /// </para>
+    /// <para>
+    /// Selecting the target before opening the confirmation matters: assigning
+    /// <see cref="SelectedReturnTarget"/> closes any confirmation that was open, so the order is
+    /// what makes the panel appear at all.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private void ReviewMaximumBounds()
+    {
+        if (ReviewBoundsTarget is not { } target || IsBusy)
+        {
+            return;
+        }
+
+        SelectedReturnTarget = target;
+        IsConfirmingReturn = true;
     }
 
     /// <summary>
@@ -2005,6 +2342,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanBeginAutomaticSelection));
+        OnPropertyChanged(nameof(CanReviewMaximumBounds));
     }
 
     /// <summary>Leaves the return confirmation closed with nothing chosen. Issues no command.</summary>
@@ -2131,16 +2469,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private static bool TryReadPixels(string? text, out int pixels) =>
         int.TryParse(text, NumberStyles.None, CultureInfo.CurrentCulture, out pixels) && pixels >= 0;
 
-    private static string Describe(PrintDimensions dimensions) => string.Format(
-        CultureInfo.CurrentCulture,
-        Strings.Session_DimensionsSummary,
-        dimensions.WidthMm,
-        dimensions.HeightMm,
-        dimensions.PixelWidth,
-        dimensions.PixelHeight,
-        dimensions.Dpi);
-
-    /// <summary>Forgets the unconfirmed size and branch, so the next output decides both afresh.</summary>
+    /// <summary>Forgets the unconfirmed bounds and branch, so the next output decides both afresh.</summary>
     private void ClearPendingDecisions()
     {
         WidthMmText = null;
@@ -2149,18 +2478,18 @@ public sealed partial class SessionViewModel : ObservableObject
         SelectedWhiteUnderbaseChoice = null;
     }
 
-    /// <summary>Editing either box means the size is the operator's, not a preset's.</summary>
+    /// <summary>Editing either box means the limits are the operator's, not a preset's.</summary>
     partial void OnWidthMmTextChanged(string? value)
     {
         _pendingPreset = SizePreset.Custom;
-        OnPropertyChanged(nameof(PendingDimensions));
+        OnPropertyChanged(nameof(PendingMaximumBounds));
     }
 
     /// <inheritdoc cref="OnWidthMmTextChanged" />
     partial void OnHeightMmTextChanged(string? value)
     {
         _pendingPreset = SizePreset.Custom;
-        OnPropertyChanged(nameof(PendingDimensions));
+        OnPropertyChanged(nameof(PendingMaximumBounds));
     }
 
     partial void OnSelectedWhiteUnderbaseChoiceChanged(WhiteUnderbaseChoice? value) =>
@@ -2380,7 +2709,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(IsFakeProcessing));
         OnPropertyChanged(nameof(IsFakeTiffOutput));
 
-        OnPropertyChanged(nameof(ConfirmedDimensions));
+        OnPropertyChanged(nameof(ConfirmedMaximumBounds));
         OnPropertyChanged(nameof(ConfirmedWhiteUnderbase));
         OnPropertyChanged(nameof(HasOutputs));
 
@@ -2403,7 +2732,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanHandOff));
-        OnPropertyChanged(nameof(CanSetDimensions));
+        OnPropertyChanged(nameof(CanSetMaximumBounds));
         OnPropertyChanged(nameof(CanSelectWhiteUnderbase));
         OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
         OnPropertyChanged(nameof(CanComplete));
@@ -2425,6 +2754,30 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRunBackgroundRemoval));
         OnPropertyChanged(nameof(BackgroundRemovalAttemptAudit));
         OnPropertyChanged(nameof(HasBackgroundRemovalAttemptAudit));
+
+        // The maximum-bound decision and everything the workflow layer derived from it
+        // (Epic 11400 Part B1A.2B §8, §10, §11, §19). Every one of these reads the SessionView
+        // that has just replaced the previous one, which is what makes a stale plan stop being
+        // shown as active the moment the upstream changes.
+        OnPropertyChanged(nameof(PendingMaximumBounds));
+        OnPropertyChanged(nameof(HasPreparationPlan));
+        OnPropertyChanged(nameof(PreparationModeText));
+        OnPropertyChanged(nameof(PreparationLimitingEdge));
+        OnPropertyChanged(nameof(HasPreparationLimitingEdge));
+        OnPropertyChanged(nameof(PreparationProjectedSize));
+        OnPropertyChanged(nameof(CanRunPhotoshopOutput));
+        OnPropertyChanged(nameof(RunReadinessNotice));
+        OnPropertyChanged(nameof(HasRunReadinessNotice));
+        OnPropertyChanged(nameof(NeedsDimensionReview));
+        OnPropertyChanged(nameof(HistoricalBounds));
+        OnPropertyChanged(nameof(HasHistoricalBounds));
+        OnPropertyChanged(nameof(CanReviewMaximumBounds));
+        OnPropertyChanged(nameof(HasPreparationAttemptAudit));
+        OnPropertyChanged(nameof(PreparationAttemptBounds));
+        OnPropertyChanged(nameof(PreparationAttemptMode));
+        OnPropertyChanged(nameof(PreparationAttemptLimitingEdge));
+        OnPropertyChanged(nameof(PreparationAttemptProjected));
+        OnPropertyChanged(nameof(HasPreparationAttemptProjectionNotice));
     }
 
     /// <summary>Re-seeds the mode selector and the margin boxes from a persisted margin.</summary>

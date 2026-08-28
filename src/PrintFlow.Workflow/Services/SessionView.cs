@@ -117,6 +117,77 @@ public sealed record PrintOutputView(
 }
 
 /// <summary>
+/// The immutable preparation plan the attempt that produced the artefact on screen actually ran
+/// under (Epic 11400 Part B1A.2B §19, §20).
+/// </summary>
+/// <remarks>
+/// The third member of the family <c>CurrentTrimParameters</c> and
+/// <see cref="SessionView.BackgroundRemovalAttemptDecision"/> already belong to, and it exists for
+/// the same reason they do: the session's <i>pending</i> plan answers "what would the next run be
+/// allowed to do", while this answers "what did the result the operator is reviewing actually run
+/// under". A review panel that showed the pending plan would relabel history every time the
+/// session's next-run plan moved — after a reject, a retry against different limits, or an
+/// Add Another Size.
+/// <para>
+/// A flattened projection of <c>ProcessingAttempt.PrintPreparationPlan</c> rather than the record
+/// itself, so the shell never receives <c>SourceRevisionId</c> or <c>SourceSha256</c> — the raw
+/// materials of a second staleness rule. What is here is exactly what an audit line says out loud.
+/// </para>
+/// <para>
+/// Every field is a <b>projection</b>. Nothing in this slice reads geometry back from Photoshop,
+/// so there is deliberately no <c>Actual</c> anything: <see cref="ProjectedPixelWidth"/> and
+/// <see cref="ProjectedPixelHeight"/> are the planning evidence the plan was validated with, and
+/// the real Photoshop-returned geometry is B1A.3's to record (§19).
+/// </para>
+/// </remarks>
+/// <param name="Semantics">
+/// The reading the plan was written under. Always <c>MaxBoundsV1</c>, because a legacy exact pair
+/// never produced a plan for an attempt to snapshot — stated rather than assumed, so an audit line
+/// says which contract it is quoting.
+/// </param>
+/// <param name="MaxWidthMm">The fit box that attempt ran under. Not a width target.</param>
+/// <param name="MaxHeightMm">The other half of that box. Not a height target.</param>
+/// <param name="Mode">Whether that run resampled at all.</param>
+/// <param name="LimitingEdge">
+/// The single edge the run was allowed to give Photoshop, or <c>None</c>. Selected by
+/// <c>FitWithinBounds</c> when the plan was calculated, and never an operator choice.
+/// </param>
+/// <param name="ProjectedPixelWidth">Planning evidence only. Never a Photoshop result.</param>
+/// <param name="ProjectedPixelHeight">The other half of that evidence.</param>
+/// <param name="ProductionDpi">The fixed production resolution. Never operator-selected.</param>
+/// <param name="IsFakeProjection">
+/// Whether the adapters wired into this installation are deterministic doubles, so a screen can
+/// say plainly that Photoshop was not run. True is the state this slice ships in; it is reported
+/// rather than inferred by a view model reading configuration (§21).
+/// </param>
+public sealed record PrintPreparationAttemptView(
+    PrintDimensionSemantics Semantics,
+    double MaxWidthMm,
+    double MaxHeightMm,
+    PrintPreparationMode Mode,
+    LimitingEdge LimitingEdge,
+    int ProjectedPixelWidth,
+    int ProjectedPixelHeight,
+    int ProductionDpi,
+    bool IsFakeProjection)
+{
+    /// <summary>Whether that run would have resampled pixels at all.</summary>
+    public bool RequiresShrink => Mode == PrintPreparationMode.ProportionalShrink;
+
+    internal static PrintPreparationAttemptView From(
+        PrintPreparationPlan plan, AdapterExecutionMode processingMode) => new(
+        PrintPreparationPlan.Semantics,
+        plan.MaxWidthMm,
+        plan.MaxHeightMm,
+        plan.Mode,
+        plan.LimitingEdge,
+        plan.ProjectedPixelWidth,
+        plan.ProjectedPixelHeight,
+        plan.ProductionDpi,
+        processingMode == AdapterExecutionMode.Fake);
+}
+
+/// <summary>
 /// A flattened, UI-safe read model for one session (Epic 11100 plan §9.2).
 /// </summary>
 /// <remarks>
@@ -229,6 +300,11 @@ public sealed record PrintOutputView(
 /// <param name="CanRunPhotoshopOutput">
 /// Whether Photoshop output would actually start if asked — plan included (§15).
 /// </param>
+/// <param name="AttemptPreparation">
+/// The immutable plan the attempt that produced <see cref="CurrentArtefact"/> ran under, or null
+/// when that artefact was not produced by a planned Photoshop output
+/// (Epic 11400 Part B1A.2B §19).
+/// </param>
 /// <remarks>
 /// <see cref="CanManualCrop"/> is reported rather than left to the screen because it depends on
 /// attempt history the UI does not have and must not reconstruct. It is the same predicate
@@ -286,7 +362,8 @@ public sealed record SessionView(
     int? ProjectedPixelHeight,
     bool NeedsDimensionReview,
     bool CanSetMaximumBounds,
-    bool CanRunPhotoshopOutput)
+    bool CanRunPhotoshopOutput,
+    PrintPreparationAttemptView? AttemptPreparation)
 {
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
@@ -328,6 +405,12 @@ public sealed record SessionView(
     /// </remarks>
     public bool HasBackgroundRemovalAttemptAuthority =>
         BackgroundRemovalAttemptDecision != Domain.Sessions.BackgroundRemovalDecision.Unspecified;
+
+    /// <summary>
+    /// Whether the artefact on screen was produced under a recorded preparation plan
+    /// (Epic 11400 Part B1A.2B §19).
+    /// </summary>
+    public bool HasAttemptPreparation => AttemptPreparation is not null;
 
     /// <summary>Whether this session can still be driven forward (Part 3C2 §11).</summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
@@ -468,7 +551,52 @@ public sealed record SessionView(
             // included (§15).
             availableCommands.Contains(CommandKind.SetPrintDimensions),
             snapshot.CurrentStep is { Step: StepKind.PhotoshopOutput }
-                && availableCommands.Contains(CommandKind.StartStep));
+                && availableCommands.Contains(CommandKind.StartStep),
+
+            // The producing attempt's own plan, resolved exactly as the trim parameters and the
+            // background-removal authority beside it are, and never from `usablePlan` above. The
+            // two answer different questions, and a review that borrowed the pending one would
+            // rewrite what the operator is told about a result every time the session's next-run
+            // plan moved (Part B1A.2B §19).
+            ResolveAttemptPreparation(current, attempts, processingMode));
+    }
+
+    /// <summary>
+    /// The preparation plan the attempt that produced <paramref name="current"/> actually ran
+    /// under (Part B1A.2B §19).
+    /// </summary>
+    /// <remarks>
+    /// Found through <see cref="ProcessingAttempt.OutputRevisionId"/> — the attempt that says it
+    /// produced this exact Revision — for the same reason
+    /// <see cref="ResolveTrimParameters"/> is: after a reject-and-re-run the history holds two
+    /// Photoshop attempts, and "the plan whatever ran last used" would label the output on screen
+    /// with limits that produced a different file.
+    /// <para>
+    /// Only for the step's own result. While the screen shows the file a step is about to
+    /// <i>consume</i>, there is no produced result for an audit line to describe, and the session's
+    /// pending plan is emphatically not a substitute for one.
+    /// </para>
+    /// </remarks>
+    private static PrintPreparationAttemptView? ResolveAttemptPreparation(
+        ArtefactView? current,
+        IReadOnlyList<ProcessingAttempt> attempts,
+        AdapterExecutionMode processingMode)
+    {
+        if (current is not { IsCurrentStepResult: true } result)
+        {
+            return null;
+        }
+
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.OutputRevisionId == result.RevisionId &&
+                attempt.PrintPreparationPlan is { } plan)
+            {
+                return PrintPreparationAttemptView.From(plan, processingMode);
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

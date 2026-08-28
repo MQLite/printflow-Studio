@@ -932,19 +932,25 @@
                     </Border>
 
                     <!--
-                        Print dimensions (§3–§5). Visible exactly while the engine would accept
-                        the command, so it appears on the PrintDimensions step and reappears
-                        after Add Another Size without this file knowing either rule.
+                        Maximum print size (§3–§5; Epic 11400 Part B1A.2B §5, §6). Visible exactly
+                        while the workflow layer would accept the command, so it appears on the
+                        PrintDimensions step and reappears after Add Another Size without this
+                        file knowing either rule.
+
+                        The two boxes are limits. There is deliberately no axis selector and no
+                        resampling control anywhere in this panel: FitWithinBounds chooses the
+                        governing edge from the source pixels, and the resampling policy is fixed
+                        by the accepted contract (§4, §9).
                     -->
                     <Border BorderBrush="#22000000"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanSetDimensions, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding CanSetMaximumBounds, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
-                            <TextBlock Text="{Binding DimensionsHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding DimensionsHint}"
+                            <TextBlock Text="{Binding MaximumBoundsHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding MaximumBoundsHint}"
                                        TextWrapping="Wrap"
                                        Opacity="0.7"
                                        Margin="0,6,0,0" />
@@ -958,12 +964,23 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Content="{Binding Label}"
-                                                CommandParameter="{Binding}"
+                                        <!--
+                                            The preset's own limits under its name, so a shortcut
+                                            never reads as an exact width × height output. Both
+                                            lines come from the view model; no size is stated here.
+                                        -->
+                                        <Button CommandParameter="{Binding}"
                                                 Command="{Binding DataContext.ApplyPresetCommand,
                                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 Padding="10,4"
-                                                Margin="0,0,6,6" />
+                                                Margin="0,0,6,6">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Label}" />
+                                                <TextBlock Text="{Binding BoundsLabel}"
+                                                           FontSize="11"
+                                                           Opacity="0.7" />
+                                            </StackPanel>
+                                        </Button>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -984,27 +1001,122 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding WidthMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                           Text="{Binding MaxWidthMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
                                 <TextBox Grid.Row="1" Grid.Column="0"
                                          Text="{Binding WidthMmText, UpdateSourceTrigger=PropertyChanged}" />
 
                                 <TextBlock Grid.Row="0" Grid.Column="2"
-                                           Text="{Binding HeightMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                           Text="{Binding MaxHeightMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
                                 <TextBox Grid.Row="1" Grid.Column="2"
                                          Text="{Binding HeightMmText, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
-                            <!-- The pixels the domain derives at 300 dpi; nothing computed here. -->
-                            <TextBlock Text="{Binding PendingDimensions}"
+                            <!-- The limits as typed. No pixel figure: what the image becomes is
+                                 FitWithinBounds' answer, and it arrives with the plan (§7). -->
+                            <TextBlock Text="{Binding PendingMaximumBounds}"
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
                                        Margin="0,8,0,0" />
 
-                            <Button Content="{Binding ConfirmDimensionsLabel}"
-                                    Command="{Binding SetDimensionsCommand}"
+                            <Button Content="{Binding ConfirmMaximumBoundsLabel}"
+                                    Command="{Binding SetMaximumBoundsCommand}"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
                                     Margin="0,10,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        The projected preparation plan (Part B1A.2B §8). Read-only, and shown only
+                        while a plan is actually in force — SessionView reports the *usable* plan,
+                        so a stale one simply never appears here (§16).
+                    -->
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding HasPreparationPlan, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding PreparationHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ConfirmedMaximumBounds}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0" />
+                            <TextBlock Text="{Binding PreparationModeText}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,0" />
+                            <TextBlock Text="{Binding PreparationLimitingEdge}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,0"
+                                       Visibility="{Binding HasPreparationLimitingEdge,
+                                                    Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="{Binding PreparationProjectedSize}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,0" />
+                            <TextBlock Text="{Binding PreparationResolution}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,0" />
+
+                            <!-- Readiness from CanRunPhotoshopOutput, never from "a size exists". -->
+                            <TextBlock Text="{Binding RunReadinessNotice}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       FontStyle="Italic"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasRunReadinessNotice,
+                                                    Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        Dimensions that cannot be executed (Part B1A.2B §11–§15). A size decision
+                        to redo, not a Photoshop failure: nothing was attempted and nothing was
+                        lost. The way back is the ordinary ReturnToStep confirmation below, aimed
+                        at the step that owns the decision — there is no second SetPrintDimensions
+                        route from here (§12).
+                    -->
+                    <Border BorderBrush="#55B36B00"
+                            Background="#14B36B00"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding NeedsDimensionReview, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding DimensionReviewWarning}"
+                                       TextWrapping="Wrap" />
+
+                            <!-- Retained millimetres, labelled as history and never as limits. -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding HasHistoricalBounds,
+                                                     Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding HistoricalBoundsLabel}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.6"
+                                           FontSize="11" />
+                                <TextBlock Text="{Binding HistoricalBounds}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                            </StackPanel>
+
+                            <Button Content="{Binding ReviewMaximumBoundsLabel}"
+                                    Command="{Binding ReviewMaximumBoundsCommand}"
+                                    IsEnabled="{Binding CanReviewMaximumBounds}"
+                                    HorizontalAlignment="Left"
+                                    Padding="14,6"
+                                    Margin="0,10,0,0" />
+
+                            <TextBlock Text="{Binding RunReadinessNotice}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.7"
+                                       FontStyle="Italic"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasRunReadinessNotice,
+                                                    Converter={StaticResource BoolToVisibility}}" />
                         </StackPanel>
                     </Border>
 
@@ -1045,8 +1157,8 @@
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Opacity="0.8">
-                                <TextBlock Text="{Binding DimensionsHeading}" Opacity="0.75" Margin="0,0,8,0" />
-                                <TextBlock Text="{Binding ConfirmedDimensions}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding MaximumBoundsHeading}" Opacity="0.75" Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding ConfirmedMaximumBounds}" TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -1090,6 +1202,43 @@
                                        Opacity="0.8"
                                        Margin="0,8,0,0"
                                        Visibility="{Binding HasBackgroundRemovalAttemptAudit, Converter={StaticResource BoolToVisibility}}" />
+
+                            <!--
+                                The preparation plan the output under review was produced under
+                                (Epic 11400 Part B1A.2B §19). Same arrangement as the line above:
+                                it comes from the producing attempt's immutable snapshot, so the
+                                session's *pending* plan moving — after a reject, a different set
+                                of limits, an Add Another Size — cannot relabel this result.
+
+                                The projection notice says plainly that no Photoshop run produced
+                                these figures. Nothing here claims an actual read-back; that is
+                                B1A.3's to record.
+                            -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding HasPreparationAttemptAudit,
+                                                     Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding PreparationAttemptHeading}"
+                                           Opacity="0.6"
+                                           FontSize="11" />
+                                <TextBlock Text="{Binding PreparationAttemptBounds}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptMode}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptLimitingEdge}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptProjected}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptProjectionNotice}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.7"
+                                           FontStyle="Italic"
+                                           Visibility="{Binding HasPreparationAttemptProjectionNotice,
+                                                        Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
 
                             <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <ComboBox ItemsSource="{Binding RejectionReasons}"

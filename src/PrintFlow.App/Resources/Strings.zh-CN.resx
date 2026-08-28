@@ -319,17 +319,24 @@
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
   <data name="Format_Unknown" xml:space="preserve"><value>未知</value></data>
-  <data name="Session_DimensionsHeading" xml:space="preserve">
-    <value>打印尺寸</value>
+  <data name="Session_MaxBoundsHeading" xml:space="preserve">
+    <value>最大打印尺寸</value>
   </data>
-  <data name="Session_DimensionsHint" xml:space="preserve">
-    <value>请输入成品打印的实际物理尺寸，单位为毫米。</value>
+  <data name="Session_MaxBoundsHint" xml:space="preserve">
+    <value>请输入打印成品允许达到的最大宽度和最大高度，单位为毫米。图像会按原图比例适应最大尺寸，既不会被拉伸，也不会被放大。固定输出分辨率：300 PPI。</value>
   </data>
-  <data name="Session_LabelWidthMm" xml:space="preserve"><value>宽度（毫米）</value></data>
-  <data name="Session_LabelHeightMm" xml:space="preserve"><value>高度（毫米）</value></data>
-  <data name="Session_DimensionsConfirm" xml:space="preserve"><value>确认尺寸</value></data>
-  <data name="Session_DimensionsInvalid" xml:space="preserve">
-    <value>宽度和高度都必须是大于零的毫米数值。</value>
+  <data name="Session_LabelMaxWidthMm" xml:space="preserve"><value>最大宽度（mm）</value></data>
+  <data name="Session_LabelMaxHeightMm" xml:space="preserve"><value>最大高度（mm）</value></data>
+  <data name="Session_LabelMaxLongEdgeMm" xml:space="preserve"><value>最大长边（mm）</value></data>
+  <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>确认最大打印尺寸</value></data>
+  <data name="Session_MaxBoundsInvalid" xml:space="preserve">
+    <value>最大宽度和最大高度都必须是大于零的毫米数值。</value>
+  </data>
+  <data name="Session_MaxBoundsSummary" xml:space="preserve">
+    <value>最大 {0} × {1} mm</value>
+  </data>
+  <data name="Session_MaxLongEdgeSummary" xml:space="preserve">
+    <value>最大长边：{0} mm</value>
   </data>
   <data name="Session_DimensionsSummary" xml:space="preserve">
     <value>{0} × {1} 毫米（{2} × {3} 像素，{4} dpi）</value>
@@ -337,8 +344,50 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>尚未设置</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>预设尺寸</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>预设只是填入其标称尺寸，确认之前仍可自行修改毫米数值。</value>
+    <value>预设只是填入其最大尺寸范围，确认之前仍可自行修改毫米数值；具体由哪条边起限制作用，由 PrintFlow 根据图像本身判断。</value>
   </data>
+  <data name="Session_PreparationHeading" xml:space="preserve"><value>打印准备</value></data>
+  <data name="Session_PreparationResolutionOnly" xml:space="preserve">
+    <value>图像已在最大尺寸范围之内，像素尺寸保持不变。</value>
+  </data>
+  <data name="Session_PreparationProportionalShrink" xml:space="preserve">
+    <value>图像将按原图比例缩小，以适应最大尺寸。</value>
+  </data>
+  <data name="Session_PreparationLimitingEdge" xml:space="preserve"><value>起限制作用的边：{0}</value></data>
+  <data name="Session_PreparationProjectedSize" xml:space="preserve">
+    <value>预计尺寸：{0} × {1} 像素</value>
+  </data>
+  <data name="Session_PreparationResolution" xml:space="preserve">
+    <value>固定输出分辨率：{0} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptHeading" xml:space="preserve"><value>本次使用的打印准备</value></data>
+  <data name="Session_PreparationAttemptBounds" xml:space="preserve">
+    <value>最大范围 {0} × {1} mm</value>
+  </data>
+  <data name="Session_PreparationAttemptProjected" xml:space="preserve">
+    <value>预计 {0} × {1} 像素，{2} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptProjectionNotice" xml:space="preserve">
+    <value>此为计划值 — 并未运行 Photoshop。</value>
+  </data>
+  <data name="Session_RunReady" xml:space="preserve">
+    <value>可以运行此步骤：本图片的最大打印尺寸已确认。</value>
+  </data>
+  <data name="Session_RunNotReady" xml:space="preserve">
+    <value>在确认本图片的最大打印尺寸之前，无法运行此步骤。</value>
+  </data>
+  <data name="Session_DimensionReviewRequired" xml:space="preserve">
+    <value>此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大打印尺寸。</value>
+  </data>
+  <data name="Session_ReviewMaximumBounds" xml:space="preserve"><value>重新确认最大尺寸</value></data>
+  <data name="Session_HistoricalBoundsLabel" xml:space="preserve">
+    <value>此前保存，尚未确认为最大尺寸范围</value>
+  </data>
+  <data name="PreparationMode_ResolutionOnly" xml:space="preserve"><value>仅设置分辨率</value></data>
+  <data name="PreparationMode_ProportionalShrink" xml:space="preserve"><value>按比例缩小</value></data>
+  <data name="LimitingEdge_None" xml:space="preserve"><value>无</value></data>
+  <data name="LimitingEdge_Width" xml:space="preserve"><value>宽度</value></data>
+  <data name="LimitingEdge_Height" xml:space="preserve"><value>高度</value></data>
   <data name="Preset_A3Landscape" xml:space="preserve"><value>A3 横向</value></data>
   <data name="Preset_A3Portrait" xml:space="preserve"><value>A3 纵向</value></data>
   <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>

@@ -116,7 +116,7 @@ public sealed class ViewRenderingTests
         using HomeScreenHarness harness = new();
         SessionViewModel session = await TiffSessionAtDimensionsAsync(harness, "dimensions-render.png");
 
-        session.CanSetDimensions.ShouldBeTrue();
+        session.CanSetMaximumBounds.ShouldBeTrue();
         session.CanSelectWhiteUnderbase.ShouldBeTrue();
         session.SizePresets.ShouldNotBeEmpty();
 
@@ -124,7 +124,7 @@ public sealed class ViewRenderingTests
         session.WidthMmText = "200";
         session.HeightMmText = "150";
         session.SelectedWhiteUnderbaseChoice = session.WhiteUnderbaseChoices[0];
-        session.PendingDimensions.ShouldNotBeNullOrWhiteSpace();
+        session.PendingMaximumBounds.ShouldNotBeNullOrWhiteSpace();
 
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
@@ -141,7 +141,7 @@ public sealed class ViewRenderingTests
 
         session.WidthMmText = "200";
         session.HeightMmText = "150";
-        await session.SetDimensionsCommand.ExecuteAsync(null);
+        await session.SetMaximumBoundsCommand.ExecuteAsync(null);
 
         session.SelectedWhiteUnderbaseChoice = session.WhiteUnderbaseChoices[1];
         await session.SelectWhiteUnderbaseCommand.ExecuteAsync(null);

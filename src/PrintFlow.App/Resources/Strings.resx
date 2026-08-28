@@ -319,17 +319,24 @@
   <data name="Format_Psd" xml:space="preserve"><value>PSD</value></data>
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
   <data name="Format_Unknown" xml:space="preserve"><value>Unknown</value></data>
-  <data name="Session_DimensionsHeading" xml:space="preserve">
-    <value>Print dimensions</value>
+  <data name="Session_MaxBoundsHeading" xml:space="preserve">
+    <value>Maximum print size</value>
   </data>
-  <data name="Session_DimensionsHint" xml:space="preserve">
-    <value>Enter the finished physical size of the print, in millimetres.</value>
+  <data name="Session_MaxBoundsHint" xml:space="preserve">
+    <value>Enter the maximum width and maximum height the print may reach, in millimetres. The image is fitted proportionally inside those limits — it is never stretched and never enlarged. Fixed production resolution: 300 PPI.</value>
   </data>
-  <data name="Session_LabelWidthMm" xml:space="preserve"><value>Width (mm)</value></data>
-  <data name="Session_LabelHeightMm" xml:space="preserve"><value>Height (mm)</value></data>
-  <data name="Session_DimensionsConfirm" xml:space="preserve"><value>Confirm dimensions</value></data>
-  <data name="Session_DimensionsInvalid" xml:space="preserve">
-    <value>Enter a width and a height as positive numbers of millimetres.</value>
+  <data name="Session_LabelMaxWidthMm" xml:space="preserve"><value>Maximum width (mm)</value></data>
+  <data name="Session_LabelMaxHeightMm" xml:space="preserve"><value>Maximum height (mm)</value></data>
+  <data name="Session_LabelMaxLongEdgeMm" xml:space="preserve"><value>Maximum long edge (mm)</value></data>
+  <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>Confirm maximum print size</value></data>
+  <data name="Session_MaxBoundsInvalid" xml:space="preserve">
+    <value>Enter a maximum width and a maximum height as positive numbers of millimetres.</value>
+  </data>
+  <data name="Session_MaxBoundsSummary" xml:space="preserve">
+    <value>Maximum {0} × {1} mm</value>
+  </data>
+  <data name="Session_MaxLongEdgeSummary" xml:space="preserve">
+    <value>Maximum long edge: {0} mm</value>
   </data>
   <data name="Session_DimensionsSummary" xml:space="preserve">
     <value>{0} × {1} mm ({2} × {3} px at {4} dpi)</value>
@@ -337,8 +344,50 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>Not set</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>Presets</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>A preset fills in its nominal size. You can still change the millimetres before confirming.</value>
+    <value>A preset fills in its maximum bounds. You can still change the millimetres before confirming, and PrintFlow works out which edge governs from the image itself.</value>
   </data>
+  <data name="Session_PreparationHeading" xml:space="preserve"><value>Print preparation</value></data>
+  <data name="Session_PreparationResolutionOnly" xml:space="preserve">
+    <value>The image already fits within the maximum size. Pixel dimensions will remain unchanged.</value>
+  </data>
+  <data name="Session_PreparationProportionalShrink" xml:space="preserve">
+    <value>The image will be reduced proportionally to fit the maximum size.</value>
+  </data>
+  <data name="Session_PreparationLimitingEdge" xml:space="preserve"><value>Limiting edge: {0}</value></data>
+  <data name="Session_PreparationProjectedSize" xml:space="preserve">
+    <value>Projected size: {0} × {1} px</value>
+  </data>
+  <data name="Session_PreparationResolution" xml:space="preserve">
+    <value>Fixed production resolution: {0} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptHeading" xml:space="preserve"><value>Print preparation used</value></data>
+  <data name="Session_PreparationAttemptBounds" xml:space="preserve">
+    <value>Maximum bounds {0} × {1} mm</value>
+  </data>
+  <data name="Session_PreparationAttemptProjected" xml:space="preserve">
+    <value>Projected {0} × {1} px at {2} PPI</value>
+  </data>
+  <data name="Session_PreparationAttemptProjectionNotice" xml:space="preserve">
+    <value>Projected plan — Photoshop was not run.</value>
+  </data>
+  <data name="Session_RunReady" xml:space="preserve">
+    <value>Run Step is available: the maximum print size is confirmed for this image.</value>
+  </data>
+  <data name="Session_RunNotReady" xml:space="preserve">
+    <value>Run Step stays unavailable until the maximum print size is confirmed for this image.</value>
+  </data>
+  <data name="Session_DimensionReviewRequired" xml:space="preserve">
+    <value>This size was saved under the previous exact-size rule, or the image it was measured against has changed. Review the maximum print bounds before continuing.</value>
+  </data>
+  <data name="Session_ReviewMaximumBounds" xml:space="preserve"><value>Review maximum bounds</value></data>
+  <data name="Session_HistoricalBoundsLabel" xml:space="preserve">
+    <value>Saved earlier, not confirmed as maximum bounds</value>
+  </data>
+  <data name="PreparationMode_ResolutionOnly" xml:space="preserve"><value>Resolution only</value></data>
+  <data name="PreparationMode_ProportionalShrink" xml:space="preserve"><value>Proportional reduction</value></data>
+  <data name="LimitingEdge_None" xml:space="preserve"><value>None</value></data>
+  <data name="LimitingEdge_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="LimitingEdge_Height" xml:space="preserve"><value>Height</value></data>
   <data name="Preset_A3Landscape" xml:space="preserve"><value>A3 landscape</value></data>
   <data name="Preset_A3Portrait" xml:space="preserve"><value>A3 portrait</value></data>
   <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>
