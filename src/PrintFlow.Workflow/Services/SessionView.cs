@@ -141,16 +141,42 @@ public sealed record PrintOutputView(
 /// </para>
 /// </remarks>
 /// <param name="Semantics">
-/// The reading the plan was written under. Always <c>MaxBoundsV1</c>, because a legacy exact pair
-/// never produced a plan for an attempt to snapshot — stated rather than assumed, so an audit line
-/// says which contract it is quoting.
+/// The reading the preparation was written under — <c>MaxBoundsV1</c> or <c>TargetEdgeV1</c>. Never
+/// <c>LegacyExactPair</c>, because a legacy pair never produced a plan for an attempt to snapshot.
+/// Stated rather than assumed, so an audit line says which contract it is quoting.
 /// </param>
-/// <param name="MaxWidthMm">The fit box that attempt ran under. Not a width target.</param>
+/// <param name="MaxWidthMm">
+/// The fit box that attempt ran under, or null for a target-edge run. Not a width target.
+/// </param>
 /// <param name="MaxHeightMm">The other half of that box. Not a height target.</param>
-/// <param name="Mode">Whether that run resampled at all.</param>
+/// <param name="Mode">
+/// Whether a maximum-bound run resampled at all, or null for a target-edge run — whose equivalent
+/// is <paramref name="ResizeDirection"/>, which has three answers rather than two.
+/// </param>
 /// <param name="LimitingEdge">
-/// The single edge the run was allowed to give Photoshop, or <c>None</c>. Selected by
-/// <c>FitWithinBounds</c> when the plan was calculated, and never an operator choice.
+/// The single edge the run was allowed to give Photoshop, or <c>None</c>. Selected by the Domain
+/// calculation when the plan was made, and never an operator choice.
+/// </param>
+/// <param name="LimitingValueMm">The millimetres written to that edge, or null when none was.</param>
+/// <param name="RequestedTargetEdge">
+/// The edge the operator actually asked for on a target-edge run — <c>LongEdge</c> included, so an
+/// audit line can say what was requested as well as what it resolved to. Null for a preset fit.
+/// </param>
+/// <param name="RequestedMillimetres">The operator's exact request, or null for a preset fit.</param>
+/// <param name="PresetOverride">
+/// Whether that run was an explicit override of a named preset's recommendation. Emphatically not
+/// the same fact as an authorised enlargement (§11).
+/// </param>
+/// <param name="ResizeDirection">
+/// Whether that run set resolution only, shrank, or enlarged. Null for a maximum-bound run, which
+/// could never enlarge.
+/// </param>
+/// <param name="ResizePolicy">
+/// The neutral resampling policy the run carried. Never a Photoshop DOM value (§26).
+/// </param>
+/// <param name="WasAuthorisedEnlargement">
+/// Whether that run added pixels under an explicit operator authority. False for everything else,
+/// including a run that merely exceeded a preset recommendation.
 /// </param>
 /// <param name="ProjectedPixelWidth">Planning evidence only. Never a Photoshop result.</param>
 /// <param name="ProjectedPixelHeight">The other half of that evidence.</param>
@@ -162,10 +188,17 @@ public sealed record PrintOutputView(
 /// </param>
 public sealed record PrintPreparationAttemptView(
     PrintDimensionSemantics Semantics,
-    double MaxWidthMm,
-    double MaxHeightMm,
-    PrintPreparationMode Mode,
+    double? MaxWidthMm,
+    double? MaxHeightMm,
+    PrintPreparationMode? Mode,
     LimitingEdge LimitingEdge,
+    double? LimitingValueMm,
+    TargetEdge? RequestedTargetEdge,
+    decimal? RequestedMillimetres,
+    bool PresetOverride,
+    ResizeDirection? ResizeDirection,
+    PhotoshopResizeMode ResizePolicy,
+    bool WasAuthorisedEnlargement,
     int ProjectedPixelWidth,
     int ProjectedPixelHeight,
     int ProductionDpi,
@@ -175,16 +208,171 @@ public sealed record PrintPreparationAttemptView(
     public bool RequiresShrink => Mode == PrintPreparationMode.ProportionalShrink;
 
     internal static PrintPreparationAttemptView From(
-        PrintPreparationPlan plan, AdapterExecutionMode processingMode) => new(
-        PrintPreparationPlan.Semantics,
-        plan.MaxWidthMm,
-        plan.MaxHeightMm,
-        plan.Mode,
-        plan.LimitingEdge,
-        plan.ProjectedPixelWidth,
-        plan.ProjectedPixelHeight,
-        plan.ProductionDpi,
-        processingMode == AdapterExecutionMode.Fake);
+        PhotoshopPreparation preparation, AdapterExecutionMode processingMode)
+    {
+        FitWithinBoundsPreparation? bounds = preparation as FitWithinBoundsPreparation;
+        TargetEdgePreparation? target = preparation as TargetEdgePreparation;
+
+        return new PrintPreparationAttemptView(
+            preparation.Semantics,
+            bounds?.Plan.MaxWidthMm,
+            bounds?.Plan.MaxHeightMm,
+            bounds?.Plan.Mode,
+            preparation.PhotoshopEdge,
+            preparation.PhotoshopEdgeValueMm,
+            target?.Plan.Projection.SelectedTargetEdge,
+            target?.Plan.Projection.RequestedMillimetres,
+            target?.Plan.Selection.PresetOverridden ?? false,
+            target?.Plan.Projection.Direction,
+            preparation.ResizePolicy,
+            target?.IsAuthorisedEnlargement ?? false,
+            preparation.ProjectedPixelWidth,
+            preparation.ProjectedPixelHeight,
+            preparation.ProductionDpi,
+            processingMode == AdapterExecutionMode.Fake);
+    }
+}
+
+/// <summary>
+/// Everything the next Photoshop run's size decision is, and everything the operator may still
+/// decide about it (Epic 11400 Part B1A.2D §28).
+/// </summary>
+/// <remarks>
+/// The seam the flexible-size operator UI will bind to, and the whole of what it is allowed to
+/// know. Every value is reported by the workflow layer: which mode was chosen, which
+/// recommendation it was chosen against, what the request projects to, and whether a run could
+/// start. A screen calculates none of it — no fit, no scale, no limiting edge, no comparison of a
+/// Revision or a hash — because a screen that recalculated any of them could offer a control the
+/// engine would refuse (§28).
+/// <para>
+/// What is deliberately <b>not</b> here: the source SHA-256, the Revision binding, any Photoshop
+/// DOM identifier, and the rational arithmetic behind the projection. Those are the raw materials
+/// of a second staleness rule and a second sizing implementation, and the read model exists so
+/// neither can be built in the shell.
+/// </para>
+/// <para>
+/// Every value reflects the <b>usable</b> decision, never a raw stored one. A session can hold a
+/// plan calculated against content that has since been replaced, and reporting its projection as
+/// the current one would present a stale record as readiness.
+/// </para>
+/// </remarks>
+/// <param name="PresetRecommendations">
+/// The named sizes this installation's verified preset configures, with their executable limits.
+/// Empty when no preset is verified — never a fallback to nominal paper sizes (§3, §4).
+/// </param>
+/// <param name="SizingMode">
+/// Which of the two accepted ways the current size was chosen, or null for a typed custom fit box
+/// and for a session that has not chosen yet.
+/// </param>
+/// <param name="Preset">The named preset behind the decision, or null when there is none.</param>
+/// <param name="RecommendationKind">Whether that preset configures a box or a long edge.</param>
+/// <param name="RecommendationMaxWidthMm">The configured limit the operator was shown.</param>
+/// <param name="RecommendationMaxHeightMm">The other half of it; equal for a long edge.</param>
+/// <param name="PresetOverride">
+/// Whether the operator explicitly replaced that recommendation with their own edge. Separate from
+/// every enlargement fact below, and deliberately so (§11).
+/// </param>
+/// <param name="RequestedTargetEdge">The edge the operator asked for, or null for a preset fit.</param>
+/// <param name="RequestedMillimetres">Their exact request, or null for a preset fit.</param>
+/// <param name="ResolvedLimitingEdge">
+/// The single edge Photoshop would be given. Resolved by the Domain from the source's own pixels —
+/// a <c>LongEdge</c> request becomes a concrete Width or Height — and never an operator choice.
+/// </param>
+/// <param name="ProjectedPixelWidth">Planning evidence only. Never a Photoshop result.</param>
+/// <param name="ProjectedPixelHeight">The other half of that evidence.</param>
+/// <param name="ResizeDirection">
+/// Whether the next run would set resolution only, shrink, or enlarge. Null when no target-edge
+/// plan is usable; a maximum-bound plan reports <c>PreparationMode</c> instead, which has no
+/// enlarging answer to give.
+/// </param>
+/// <param name="ProjectedScalePercent">
+/// The exact projected scale as a percentage, for display. The authoritative form is the reduced
+/// integer ratio the Domain keeps; this is that ratio rendered, never the thing compared (§7).
+/// </param>
+/// <param name="PresetLimitExceeded">
+/// Whether the request goes past the recommendation it overrode. Says nothing about pixels.
+/// </param>
+/// <param name="SourceCapacityExceeded">
+/// Whether the request needs more pixels than the source holds at 300 ppi. Says nothing about
+/// presets. The two are reported separately because they are separate facts, and a screen that
+/// merged them would warn about the wrong thing (§11).
+/// </param>
+/// <param name="NeedsEnlargementAuthority">
+/// Whether a current, correctly sized decision is waiting only on an explicit confirmation.
+/// </param>
+/// <param name="HasUsableEnlargementAuthority">
+/// Whether a granted confirmation actually covers the plan on offer. A retry over unchanged
+/// content keeps this true without anything re-granting it (§30).
+/// </param>
+/// <param name="CanAuthoriseEnlargement">
+/// Whether the confirmation may be given right now — answered by the engine's own probe, so an
+/// offered control and an accepted command cannot disagree.
+/// </param>
+/// <param name="CanSetPresetFitSize">Whether a named preset may be recorded right now.</param>
+/// <param name="CanSetCustomTargetEdgeSize">Whether a custom edge may be recorded right now.</param>
+public sealed record FlexibleSizeView(
+    IReadOnlyList<PresetPrintRecommendation> PresetRecommendations,
+    OperatorSizingMode? SizingMode,
+    SizePreset? Preset,
+    PresetRecommendationKind? RecommendationKind,
+    decimal? RecommendationMaxWidthMm,
+    decimal? RecommendationMaxHeightMm,
+    bool PresetOverride,
+    TargetEdge? RequestedTargetEdge,
+    decimal? RequestedMillimetres,
+    LimitingEdge? ResolvedLimitingEdge,
+    int? ProjectedPixelWidth,
+    int? ProjectedPixelHeight,
+    ResizeDirection? ResizeDirection,
+    decimal? ProjectedScalePercent,
+    bool PresetLimitExceeded,
+    bool SourceCapacityExceeded,
+    bool NeedsEnlargementAuthority,
+    bool HasUsableEnlargementAuthority,
+    bool CanAuthoriseEnlargement,
+    bool CanSetPresetFitSize,
+    bool CanSetCustomTargetEdgeSize)
+{
+    internal static FlexibleSizeView From(
+        WorkflowSnapshot snapshot,
+        IReadOnlyList<CommandKind> availableCommands,
+        IReadOnlyList<PresetPrintRecommendation> presetRecommendations)
+    {
+        // The selection is reported only when the decision behind it is still usable. A session
+        // holding a selection whose source has been replaced is a session with no current size,
+        // and saying otherwise would put a stale record on screen as though it were readiness.
+        PhotoshopPreparation? usable = snapshot.UsablePhotoshopPreparation;
+        TargetEdgePrintPreparationPlan? targetEdge = snapshot.UsableTargetEdgePlan;
+        FlexibleSizeSelection? selection =
+            usable is not null || targetEdge is not null ? snapshot.SizeSelection : null;
+
+        return new FlexibleSizeView(
+            presetRecommendations,
+            selection?.Mode,
+            selection?.Recommendation?.Preset,
+            selection?.Recommendation?.Kind,
+            selection?.Recommendation?.MaxWidthMm,
+            selection?.Recommendation?.MaxHeightMm,
+            selection?.PresetOverridden ?? false,
+            targetEdge?.Projection.SelectedTargetEdge,
+            targetEdge?.Projection.RequestedMillimetres,
+            targetEdge?.Projection.PhotoshopTargetEdge ?? usable?.PhotoshopEdge,
+            targetEdge?.Projection.ProjectedPixelWidth ?? usable?.ProjectedPixelWidth,
+            targetEdge?.Projection.ProjectedPixelHeight ?? usable?.ProjectedPixelHeight,
+            targetEdge?.Projection.Direction,
+            targetEdge?.Projection.ProjectedScale.Percentage,
+            targetEdge?.PresetLimitExceeded ?? false,
+            targetEdge?.SourceCapacityExceeded ?? false,
+            snapshot.NeedsEnlargementAuthority,
+            snapshot.HasUsableEnlargementAuthority,
+
+            // The engine's own probe, exactly as CanRunPhotoshopOutput is. Asking whether the
+            // command is offered is asking whether it would be accepted — plan, source binding
+            // and exact target included (§28).
+            availableCommands.Contains(CommandKind.AuthoriseEnlargement),
+            availableCommands.Contains(CommandKind.SetPresetFitSize),
+            availableCommands.Contains(CommandKind.SetCustomTargetEdgeSize));
+    }
 }
 
 /// <summary>
@@ -363,7 +551,8 @@ public sealed record SessionView(
     bool NeedsDimensionReview,
     bool CanSetMaximumBounds,
     bool CanRunPhotoshopOutput,
-    PrintPreparationAttemptView? AttemptPreparation)
+    PrintPreparationAttemptView? AttemptPreparation,
+    FlexibleSizeView Sizing)
 {
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
@@ -437,8 +626,10 @@ public sealed record SessionView(
         IReadOnlyList<PrintOutput> outputs,
         IReadOnlyList<ProcessingAttempt> attempts,
         AdapterExecutionMode processingMode,
-        IReadOnlyList<StepKind> returnTargets)
+        IReadOnlyList<StepKind> returnTargets,
+        IReadOnlyList<PresetPrintRecommendation> presetRecommendations)
     {
+        ArgumentNullException.ThrowIfNull(presetRecommendations);
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentNullException.ThrowIfNull(availableCommands);
         ArgumentNullException.ThrowIfNull(revisions);
@@ -558,7 +749,12 @@ public sealed record SessionView(
             // two answer different questions, and a review that borrowed the pending one would
             // rewrite what the operator is told about a result every time the session's next-run
             // plan moved (Part B1A.2B §19).
-            ResolveAttemptPreparation(current, attempts, processingMode));
+            ResolveAttemptPreparation(current, attempts, processingMode),
+
+            // The flexible-size seam, assembled from the same snapshot predicates everything else
+            // reads. Nothing here is a second opinion: the UI is told what was decided and what
+            // may be decided next, and calculates none of it (Part B1A.2D §28).
+            FlexibleSizeView.From(snapshot, availableCommands, presetRecommendations));
     }
 
     /// <summary>
@@ -590,9 +786,9 @@ public sealed record SessionView(
         foreach (ProcessingAttempt attempt in attempts)
         {
             if (attempt.OutputRevisionId == result.RevisionId &&
-                attempt.PrintPreparationPlan is { } plan)
+                attempt.Preparation is { } preparation)
             {
-                return PrintPreparationAttemptView.From(plan, processingMode);
+                return PrintPreparationAttemptView.From(preparation, processingMode);
             }
         }
 

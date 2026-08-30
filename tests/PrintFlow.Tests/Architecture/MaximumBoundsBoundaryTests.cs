@@ -59,6 +59,14 @@ public sealed class MaximumBoundsBoundaryTests
     /// plan; Infrastructure and the shell reach it not at all. A screen or an adapter calling the
     /// calculator directly would not be wrong arithmetic — it would be a second plan, produced
     /// outside the audited path and bound to nothing.
+    /// <para>
+    /// The banned text is the <b>invocation</b> — the static class followed by a member access —
+    /// rather than the bare name. <c>FitWithinBoundsPreparation</c> is the union case naming which
+    /// contract a run was made under, and Infrastructure necessarily matches on it to persist and
+    /// to describe a run; that is reading a decision, not making one. Banning the name outright
+    /// would forbid the very type the union exists to be switched over
+    /// (Epic 11400 Part B1A.2D §12).
+    /// </para>
     /// </remarks>
     [Theory]
     [InlineData("PrintFlow.Workflow")]
@@ -66,9 +74,53 @@ public sealed class MaximumBoundsBoundaryTests
     [InlineData("PrintFlow.App")]
     public void No_project_outside_the_domain_calls_the_fit_calculation(string project)
     {
-        Offenders(project, subdirectory: null, "FitWithinBounds").ShouldBeEmpty(
+        Offenders(project, subdirectory: null, @"FitWithinBounds\.").ShouldBeEmpty(
             "a plan is created only through PrintPreparationPlan.For, which is the calculator's " +
             "single caller.");
+    }
+
+    /// <summary>
+    /// Nothing outside the Domain calls the target-edge calculation
+    /// (Epic 11400 Part B1A.2D §17, §35).
+    /// </summary>
+    /// <remarks>
+    /// The flexible-size half of the same rule, and it matters more, not less: a target edge can
+    /// enlarge, so a screen or an adapter that computed one would be producing a projection nobody
+    /// authorised. Workflow reaches it through <c>TargetEdgePrintPreparationPlan.For</c> and
+    /// nothing else does.
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.Workflow")]
+    [InlineData("PrintFlow.Infrastructure")]
+    [InlineData("PrintFlow.App")]
+    public void No_project_outside_the_domain_calls_the_target_edge_calculation(string project)
+    {
+        Offenders(project, subdirectory: null, @"ScaleToTargetEdge\.").ShouldBeEmpty(
+            "a target-edge plan is created only through TargetEdgePrintPreparationPlan.For, which " +
+            "is the calculator's single caller.");
+    }
+
+    /// <summary>
+    /// Infrastructure cannot mint an enlargement authority (Epic 11400 Part B1A.2D §35).
+    /// </summary>
+    /// <remarks>
+    /// Granting permission to enlarge is an operator decision the engine records against the exact
+    /// plan on offer. An adapter or a mapper that could call <c>EnlargementAuthority.For</c> could
+    /// manufacture that permission — from a database row, or from nothing — and the whole point of
+    /// §9 is that the permission names one exact thing a human agreed to.
+    /// <para>
+    /// Rehydration is deliberately not this method: reading a stored authority back is
+    /// <c>EnlargementAuthority.Rehydrate</c>, which refuses an incomplete record and cannot invent
+    /// one, and the mapper is expected to call it.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.Infrastructure")]
+    [InlineData("PrintFlow.App")]
+    public void No_project_outside_the_workflow_grants_enlargement_authority(string project)
+    {
+        Offenders(project, subdirectory: null, @"EnlargementAuthority\.For\(").ShouldBeEmpty(
+            "an enlargement is authorised by the engine, against the plan actually on offer.");
     }
 
     /// <summary>
@@ -170,25 +222,48 @@ public sealed class MaximumBoundsBoundaryTests
     // §17: the production path cannot use the legacy independent-pixel pair
     // -------------------------------------------------------------------------------------
 
-    /// <summary>The request carries the typed plan, not a loose pair of numbers (§17).</summary>
+    /// <summary>
+    /// The request carries the typed preparation union, not a loose pair of numbers and not a
+    /// mode string (§17; Epic 11400 Part B1A.2D §12, §25).
+    /// </summary>
     /// <remarks>
-    /// Structural, and non-nullable on purpose: a request that could be built without a plan is a
-    /// request some future call site would build without one.
+    /// Structural, and non-nullable on purpose: a request that could be built without a
+    /// preparation is a request some future call site would build without one.
+    /// <para>
+    /// The union is closed by a <c>private protected</c> constructor, so the two accepted contracts
+    /// are the only ones that can ever reach an adapter. That is what lets Infrastructure switch
+    /// over them exhaustively instead of testing a discriminator string and defaulting.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_photoshop_request_carries_a_typed_preparation_plan()
+    public void The_photoshop_request_carries_a_typed_preparation_union()
     {
         PropertyInfo preparation = typeof(PhotoshopRequest)
             .GetProperty(nameof(PhotoshopRequest.Preparation))
             .ShouldNotBeNull();
 
-        preparation.PropertyType.ShouldBe(typeof(PrintPreparationPlan));
+        preparation.PropertyType.ShouldBe(typeof(PhotoshopPreparation));
 
         // A positional parameter of the primary constructor, so it cannot be omitted.
         typeof(PhotoshopRequest)
             .GetConstructors()
             .ShouldContain(c => c.GetParameters()
-                .Any(p => p.ParameterType == typeof(PrintPreparationPlan)));
+                .Any(p => p.ParameterType == typeof(PhotoshopPreparation)));
+
+        // Exactly two cases, both in the Domain, and no third can be added from outside it.
+        Type[] cases =
+        [
+            .. typeof(PhotoshopPreparation).Assembly.GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(PhotoshopPreparation))),
+        ];
+        cases.ShouldBe(
+            [typeof(FitWithinBoundsPreparation), typeof(TargetEdgePreparation)],
+            ignoreOrder: true);
+        typeof(PhotoshopPreparation)
+            .GetConstructors(BindingFlags.Instance | BindingFlags.Public)
+            .ShouldBeEmpty(
+                "a public constructor would let any assembly add a preparation the workflow has " +
+                "never validated.");
     }
 
     /// <summary>
@@ -346,6 +421,53 @@ public sealed class MaximumBoundsBoundaryTests
     }
 
     /// <summary>
+    /// No screen or adapter turns a preset name into millimetres
+    /// (Epic 11400 Part B1A.2D §3, §4, §35).
+    /// </summary>
+    /// <remarks>
+    /// The defect this catches is the one the whole slice turns on, and it is invisible on screen:
+    /// <c>PrintDimensions.NominalMillimetres</c> answers "how big is a sheet of A4" — 210 × 297 mm
+    /// — while the configured preset answers "how big does this shop print A4" — a 280 mm maximum
+    /// long edge. A view model that reached for the first would show, record and print a limit
+    /// nobody configured, 17 mm out on every A4 job, and every test asserting "the preset's
+    /// millimetres" would still pass.
+    /// <para>
+    /// So the executable answer comes from
+    /// <c>IWorkstationPresetProvider.GetPrintSizeRecommendations</c>, resolved in the workflow
+    /// layer and reported to the shell. The nominal sizes remain in the Domain as descriptive
+    /// metadata, which is why the ban is on the projects rather than on the method (§4).
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("PrintFlow.App")]
+    [InlineData("PrintFlow.Infrastructure")]
+    public void No_project_outside_the_domain_reads_the_nominal_paper_sizes(string project)
+    {
+        Offenders(project, subdirectory: null, @"NominalMillimetres\(").ShouldBeEmpty(
+            "a named preset's executable limit comes from the verified preset, never from the " +
+            "paper standard it is named after.");
+    }
+
+    /// <summary>
+    /// The preset recommendation is resolved in the workflow layer and reported to the shell
+    /// (§3, §28, §35).
+    /// </summary>
+    /// <remarks>
+    /// The positive half of the rule above. Without it, the ban would still pass in a shell that
+    /// offered no named sizes at all — and the point is not that the shell states no size, it is
+    /// that the size it states came from the verified preset by way of the read model.
+    /// </remarks>
+    [Fact]
+    public void The_session_service_resolves_the_configured_recommendation()
+    {
+        WorkflowSource("Services", "SessionService.cs")
+            .ShouldContain("GetPrintSizeRecommendations()", Case.Sensitive);
+
+        ShellSource("ViewModels", "SessionViewModel.cs")
+            .ShouldContain("Sizing.PresetRecommendations", Case.Sensitive);
+    }
+
+    /// <summary>
     /// The review action goes through <c>ReturnToStep</c>, and takes its destination from the
     /// workflow layer (§29).
     /// </summary>
@@ -397,15 +519,23 @@ public sealed class MaximumBoundsBoundaryTests
     }
 
     /// <summary>
-    /// This slice added no migration (§29).
+    /// The schema is forward-only and moves one script at a time
+    /// (Epic 11400 Part B1A.2A §29; Part B1A.2D §20).
     /// </summary>
     /// <remarks>
-    /// A UI and read-model slice has nothing to migrate: no column changed, no stored value was
-    /// reinterpreted, and the semantics column that B1A.2A introduced already carries everything
-    /// the screen reads. A new script here would mean one of those three sentences was wrong.
+    /// The B1A.2B UI slice added nothing here, because a screen has nothing to migrate. B1A.2D
+    /// added exactly one script, 0006, for the flexible-size selection, the TargetEdgeV1 plan and
+    /// the enlargement authority — and this assertion is what keeps "exactly one" honest: a
+    /// second script appearing in the same slice would mean a migration was added without the
+    /// discussion of what it destroys.
+    /// <para>
+    /// It also fixes the numbering. A script that skipped or reused a version would apply out of
+    /// order against a database in the field, so the newest name is checked rather than merely
+    /// counted.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_maximum_bounds_migration()
+    public void The_migration_set_ends_at_the_flexible_size_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -416,7 +546,7 @@ public sealed class MaximumBoundsBoundaryTests
             .Select(name => name!)
             .OrderBy(name => name, StringComparer.Ordinal);
 
-        scripts.Last().ShouldStartWith("0005", Case.Sensitive);
+        scripts.Last().ShouldStartWith("0006", Case.Sensitive);
     }
 
     // -------------------------------------------------------------------------------------

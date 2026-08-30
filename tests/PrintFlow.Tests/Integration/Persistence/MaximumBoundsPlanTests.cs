@@ -185,14 +185,14 @@ public sealed class MaximumBoundsPlanTests
         SessionAggregate aggregate = await LoadAsync(harness, id);
         ProcessingAttempt attempt = aggregate.Attempts.Single(a => a.Step == StepKind.PhotoshopOutput);
 
-        PrintPreparationPlan snapshot = attempt.PrintPreparationPlan.ShouldNotBeNull();
+        PrintPreparationPlan snapshot = attempt.BoundsPlan().ShouldNotBeNull();
         snapshot.ShouldBe(aggregate.Session.PrintPreparationPlan);
 
         // Nothing else acquired one: a Meitu call, a trim and a promotion have no fit box, and
         // null there reads as "this attempt had no plan", never "it used the default".
         aggregate.Attempts
             .Where(a => a.Step != StepKind.PhotoshopOutput)
-            .ShouldAllBe(a => a.PrintPreparationPlan == null);
+            .ShouldAllBe(a => a.Preparation == null);
     }
 
     /// <summary>
@@ -218,7 +218,7 @@ public sealed class MaximumBoundsPlanTests
         SessionAggregate first = await LoadAsync(harness, id);
         AttemptId firstAttemptId = first.Attempts.Single(a => a.Step == StepKind.PhotoshopOutput).Id;
         PrintPreparationPlan firstPlan = first.Attempts
-            .Single(a => a.Id == firstAttemptId).PrintPreparationPlan.ShouldNotBeNull();
+            .Single(a => a.Id == firstAttemptId).BoundsPlan().ShouldNotBeNull();
         firstPlan.MaxWidthMm.ShouldBe(200);
 
         // Reject, rewind to the size step, and record a different box.
@@ -240,7 +240,7 @@ public sealed class MaximumBoundsPlanTests
 
         // The closed attempt row is untouched: it still says what it ran under.
         after.Attempts.Single(a => a.Id == firstAttemptId)
-            .PrintPreparationPlan.ShouldBe(firstPlan);
+            .BoundsPlan().ShouldBe(firstPlan);
     }
 
     // -------------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ public sealed class MaximumBoundsPlanTests
         second.Attempts.Count(a => a.Step == StepKind.PhotoshopOutput).ShouldBe(2);
         second.Attempts
             .Where(a => a.Step == StepKind.PhotoshopOutput)
-            .ShouldAllBe(a => a.PrintPreparationPlan == original);
+            .ShouldAllBe(a => a.BoundsPlan() == original);
     }
 
     /// <summary>
@@ -548,7 +548,7 @@ public sealed class MaximumBoundsPlanTests
 
         SessionAggregate aggregate = await LoadAsync(harness, id);
         ProcessingAttempt attempt = aggregate.Attempts.Single(a => a.Step == StepKind.PhotoshopOutput);
-        PrintPreparationPlan plan = attempt.PrintPreparationPlan.ShouldNotBeNull();
+        PrintPreparationPlan plan = attempt.BoundsPlan().ShouldNotBeNull();
 
         string notes = attempt.AdapterNotes.ShouldNotBeNull();
         notes.ShouldStartWith("fake");

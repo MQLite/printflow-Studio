@@ -31,4 +31,11 @@ internal sealed class StubNamingPresetProvider : IWorkstationPresetProvider
             "test-workstation-v1", "0.0.1", Sha256.Parse(new string('a', 64))));
 
     public OperationResult<NamingPatternSet> GetNamingPatterns() => OperationResult.Ok(_patterns);
+
+    /// <summary>
+    /// The same recommendations the synthetic manifest configures, so a naming test can still
+    /// record a named preset size if it needs one.
+    /// </summary>
+    public OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations() =>
+        OperationResult.Ok(PresetFixture.Recommendations);
 }

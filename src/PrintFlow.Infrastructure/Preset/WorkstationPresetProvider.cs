@@ -58,7 +58,14 @@ public sealed class WorkstationPresetProvider : IWorkstationPresetProvider
     public OperationResult<NamingPatternSet> GetNamingPatterns() =>
         _verification.Value.Map(v => v.Naming);
 
-    private readonly record struct VerifiedPreset(ProductionPresetRef Reference, NamingPatternSet Naming);
+    /// <inheritdoc />
+    public OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations() =>
+        _verification.Value.Map(v => v.Recommendations);
+
+    private readonly record struct VerifiedPreset(
+        ProductionPresetRef Reference,
+        NamingPatternSet Naming,
+        PresetPrintRecommendationSet Recommendations);
 
     private OperationResult<VerifiedPreset> Verify()
     {
@@ -103,9 +110,11 @@ public sealed class WorkstationPresetProvider : IWorkstationPresetProvider
         }
 
         NamingPatternSet naming;
+        PresetPrintRecommendationSet recommendations;
         try
         {
             naming = ReadNamingPatterns(bytes);
+            recommendations = ReadPrintSizeRecommendations(bytes);
         }
         catch (JsonException ex)
         {
@@ -113,10 +122,101 @@ public sealed class WorkstationPresetProvider : IWorkstationPresetProvider
                 FailureCode.EnvironmentNotVerified,
                 $"Workstation preset manifest is not valid JSON: {ex.Message}");
         }
+        catch (Exception ex) when (ex is ArgumentException or ArgumentOutOfRangeException)
+        {
+            // A configured limit the Domain refuses — zero, negative, or a named size written
+            // twice — is a manifest saying something no production run could act on. Refused
+            // rather than partially loaded: a half-read geometry contract would silently offer
+            // fewer sizes than the shop configured (Epic 11400 Part B1A.2D §3).
+            return OperationResult.Fail<VerifiedPreset>(
+                FailureCode.EnvironmentNotVerified,
+                $"Workstation preset geometry contract is not usable: {ex.Message}");
+        }
 
         ProductionPresetRef reference = new(_presetId, _presetVersion, actual);
-        return OperationResult.Ok(new VerifiedPreset(reference, naming));
+        return OperationResult.Ok(new VerifiedPreset(reference, naming, recommendations));
     }
+
+    /// <summary>
+    /// Reads <c>productionGeometryContract.resize.limitsMillimetres</c> — the executable
+    /// named-size recommendations (Epic 11400 Part B1A.2D §3, §4).
+    /// </summary>
+    /// <remarks>
+    /// <b>The only place a preset name becomes millimetres.</b> Each configured entry states
+    /// either a two-bound box (<c>maxWidth</c> and <c>maxHeight</c>) or a single
+    /// <c>maxLongEdge</c>, and the two are kept apart rather than normalised, because which form
+    /// was configured is part of what the shop decided (§6).
+    /// <para>
+    /// There is deliberately <b>no fallback</b>, unlike the naming patterns above. A missing
+    /// naming pattern has a documented design default to fall back to; a missing print limit does
+    /// not, and <c>PrintDimensions.NominalMillimetres</c> is emphatically not one — the ISO paper
+    /// size a preset is named after and the limit this shop prints it at are different numbers.
+    /// A manifest that configures nothing yields an empty set, and no named size is offered (§4).
+    /// </para>
+    /// <para>
+    /// An entry the manifest does not name in <see cref="SizePreset"/> vocabulary is skipped
+    /// rather than guessed at. A future preset naming a size this build does not know about is
+    /// not an error — the build simply cannot offer it — and inventing an enum member for it here
+    /// would be this code deciding what the shop meant.
+    /// </para>
+    /// </remarks>
+    private static PresetPrintRecommendationSet ReadPrintSizeRecommendations(byte[] manifestBytes)
+    {
+        using JsonDocument document = JsonDocument.Parse(manifestBytes);
+
+        if (!document.RootElement.TryGetProperty("productionGeometryContract", out JsonElement geometry) ||
+            !geometry.TryGetProperty("resize", out JsonElement resize) ||
+            !resize.TryGetProperty("limitsMillimetres", out JsonElement limits) ||
+            limits.ValueKind != JsonValueKind.Object)
+        {
+            return new PresetPrintRecommendationSet([]);
+        }
+
+        List<PresetPrintRecommendation> recommendations = [];
+        foreach (JsonProperty entry in limits.EnumerateObject())
+        {
+            if (PresetOf(entry.Name) is not { } preset || entry.Value.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            if (DecimalOrNull(entry.Value, "maxLongEdge") is { } longEdge)
+            {
+                recommendations.Add(PresetPrintRecommendation.MaximumLongEdge(preset, longEdge));
+                continue;
+            }
+
+            if (DecimalOrNull(entry.Value, "maxWidth") is { } width &&
+                DecimalOrNull(entry.Value, "maxHeight") is { } height)
+            {
+                recommendations.Add(PresetPrintRecommendation.MaximumBox(preset, width, height));
+            }
+        }
+
+        return new PresetPrintRecommendationSet(recommendations);
+    }
+
+    /// <summary>The manifest's size keys, in this build's vocabulary.</summary>
+    /// <remarks>
+    /// Written out rather than derived from the enum name, because the manifest's spelling is a
+    /// published contract and the enum's is an implementation detail. If either is renamed, this
+    /// mapping is where the two are reconciled deliberately.
+    /// </remarks>
+    private static SizePreset? PresetOf(string manifestKey) => manifestKey switch
+    {
+        "A3_LANDSCAPE" => SizePreset.A3Landscape,
+        "A3_PORTRAIT" => SizePreset.A3Portrait,
+        "A4" => SizePreset.A4,
+        "A5" => SizePreset.A5,
+        _ => null,
+    };
+
+    private static decimal? DecimalOrNull(JsonElement element, string propertyName) =>
+        element.TryGetProperty(propertyName, out JsonElement value) &&
+        value.ValueKind == JsonValueKind.Number &&
+        value.TryGetDecimal(out decimal millimetres)
+            ? millimetres
+            : null;
 
     /// <summary>
     /// Reads <c>storageAndNamingContract</c> from the manifest, falling back to the MVP

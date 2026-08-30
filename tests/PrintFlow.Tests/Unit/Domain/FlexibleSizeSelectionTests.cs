@@ -12,24 +12,37 @@ public sealed class FlexibleSizeSelectionTests
 
     private static readonly Sha256 Bytes = Sha256.Parse(new string('A', 64));
 
+    /// <summary>
+    /// The configured A4 recommendation, as v1.11.0 states it: a 280 mm maximum long edge, not
+    /// the 297 mm ISO page the preset is named after (Epic 11400 Part B1A.2D §3, §4).
+    /// </summary>
+    private static readonly PresetPrintRecommendation A4Recommendation =
+        PresetPrintRecommendation.MaximumLongEdge(SizePreset.A4, 280m);
+
     [Fact]
     public void Named_preset_without_override_uses_preset_authority_and_exposes_no_axis()
     {
-        FlexibleSizeSelection selection = FlexibleSizeSelection.PresetFit(SizePreset.A4);
+        FlexibleSizeSelection selection = FlexibleSizeSelection.PresetFit(A4Recommendation);
 
         selection.Mode.ShouldBe(OperatorSizingMode.PresetFit);
         selection.BasedOnPreset.ShouldBe(SizePreset.A4);
         selection.PresetOverridden.ShouldBeFalse();
         selection.SelectedTargetEdge.ShouldBeNull();
         selection.RequestedMillimetres.ShouldBeNull();
-        selection.ConfiguredPresetLimitMm.ShouldBeNull();
+
+        // The recommendation the operator was shown is retained even when nothing overrode it,
+        // so a persisted preset decision says which configured limit it was made against and is
+        // never re-derived from a paper standard afterwards (Part B1A.2D §3, §6).
+        selection.Recommendation.ShouldBe(A4Recommendation);
+        selection.ConfiguredPresetLimitMm.ShouldBe(280m);
+        selection.PresetLimitExceeded.ShouldBeFalse();
     }
 
     [Fact]
     public void Preset_override_retains_both_recommendation_and_exact_request()
     {
         FlexibleSizeSelection selection =
-            FlexibleSizeSelection.OverridePreset(SizePreset.A4, 280m, TargetEdge.LongEdge, 320m);
+            FlexibleSizeSelection.OverridePreset(A4Recommendation, TargetEdge.LongEdge, 320m);
 
         selection.Mode.ShouldBe(OperatorSizingMode.CustomTargetEdge);
         selection.BasedOnPreset.ShouldBe(SizePreset.A4);
@@ -48,7 +61,7 @@ public sealed class FlexibleSizeSelectionTests
             Bytes,
             6000,
             4000,
-            FlexibleSizeSelection.OverridePreset(SizePreset.A4, 280m, TargetEdge.LongEdge, 320m));
+            FlexibleSizeSelection.OverridePreset(A4Recommendation, TargetEdge.LongEdge, 320m));
 
         plan.Semantics.ShouldBe(PrintDimensionSemantics.TargetEdgeV1);
         plan.PresetLimitExceeded.ShouldBeTrue();
@@ -65,7 +78,7 @@ public sealed class FlexibleSizeSelectionTests
             Bytes,
             3000,
             2000,
-            FlexibleSizeSelection.OverridePreset(SizePreset.A4, 280m, TargetEdge.LongEdge, 320m));
+            FlexibleSizeSelection.OverridePreset(A4Recommendation, TargetEdge.LongEdge, 320m));
 
         plan.PresetLimitExceeded.ShouldBeTrue();
         plan.SourceCapacityExceeded.ShouldBeTrue();
@@ -75,7 +88,7 @@ public sealed class FlexibleSizeSelectionTests
     [Fact]
     public void An_ordinary_preset_cannot_be_reinterpreted_as_TargetEdgeV1()
     {
-        FlexibleSizeSelection preset = FlexibleSizeSelection.PresetFit(SizePreset.A4);
+        FlexibleSizeSelection preset = FlexibleSizeSelection.PresetFit(A4Recommendation);
 
         Should.Throw<ArgumentException>(() =>
             TargetEdgePrintPreparationPlan.For(Revision, Bytes, 6000, 4000, preset));

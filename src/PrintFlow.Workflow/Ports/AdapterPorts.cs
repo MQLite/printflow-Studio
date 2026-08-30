@@ -49,11 +49,20 @@ public sealed record MeituRequest(
 /// TIFF without having made the white-underbase decision (MVP design §12).
 /// <para>
 /// <see cref="Preparation"/> is non-nullable for exactly the same reason, and it is the
-/// <b>executable</b> geometry authority (Epic 11400 Part B1A.2A §17). It says which single edge
-/// Photoshop may be given, in millimetres, at the fixed 300 ppi, with a neutral resampling
-/// policy the adapter maps to <c>ResampleMethod.NONE</c> or
-/// <c>ResampleMethod.BICUBICSHARPER</c> — and it is bound to the exact Revision and hash of
-/// <see cref="ApprovedInput"/>, so the plan and the pixels cannot describe different files.
+/// <b>executable</b> geometry authority (Epic 11400 Part B1A.2A §17; Part B1A.2D §25). It says
+/// which single edge Photoshop may be given, in millimetres, at the fixed 300 ppi, with a
+/// neutral resampling policy the adapter maps to <c>ResampleMethod.NONE</c>,
+/// <c>ResampleMethod.BICUBICSHARPER</c> or <c>ResampleMethod.PRESERVEDETAILS</c> — and it is
+/// bound to the exact Revision and hash of <see cref="ApprovedInput"/>, so the plan and the
+/// pixels cannot describe different files.
+/// </para>
+/// <para>
+/// It is the closed <see cref="PhotoshopPreparation"/> union, carrying the <b>immutable attempt
+/// snapshot</b> rather than a reference to anything the session may still change. So the adapter
+/// receives a fully resolved operation and decides none of it: not whether an override was
+/// allowed, not whether an enlargement was authorised, and not which preset recommendation
+/// applies. An unauthorised enlargement is not a case for it to detect — the value cannot be
+/// constructed (§25).
 /// </para>
 /// <para>
 /// <see cref="Dimensions"/> is retained for display, naming and audit compatibility — the
@@ -67,7 +76,7 @@ public sealed record MeituRequest(
 public sealed record PhotoshopRequest(
     WorkspaceFileRef ApprovedInput,
     PrintDimensions Dimensions,
-    PrintPreparationPlan Preparation,
+    PhotoshopPreparation Preparation,
     ProductionPresetRef Preset,
     WhiteUnderbaseBranch Branch,
     string OutputFileName,

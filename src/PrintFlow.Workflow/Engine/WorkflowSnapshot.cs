@@ -196,6 +196,128 @@ public sealed record WorkflowSnapshot(
     }
 
     /// <summary>
+    /// The operator's current size decision in the flexible-size vocabulary
+    /// (Epic 11400 Part B1A.2D §6).
+    /// </summary>
+    /// <remarks>
+    /// What was chosen, not what it works out to. Null on a session whose bounds were typed
+    /// rather than chosen from a named preset, and on every session recorded before the
+    /// flexible-size contract. Null never means "PresetFit was assumed" (§21).
+    /// </remarks>
+    public FlexibleSizeSelection? SizeSelection { get; init; }
+
+    /// <summary>
+    /// The TargetEdgeV1 plan the next Photoshop attempt would run with
+    /// (Epic 11400 Part B1A.2D §8).
+    /// </summary>
+    /// <remarks>
+    /// The flexible-size sibling of <see cref="PrintPreparationPlan"/>. At most one of the two is
+    /// set, and <see cref="DimensionSemantics"/> says which — an existing MaxBoundsV1 record is
+    /// never re-read as a target-edge plan (§5, §18).
+    /// </remarks>
+    public TargetEdgePrintPreparationPlan? TargetEdgePlan { get; init; }
+
+    /// <summary>
+    /// The operator's explicit permission to enlarge, when one has been granted
+    /// (Epic 11400 Part B1A.2D §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// <b>Null by default, and that is deliberate.</b> Nothing creates one when a size is
+    /// recorded: adding pixels the source does not hold is a separate judgement, made knowingly
+    /// and confirmed a second time (§10).
+    /// <para>
+    /// Holding a non-null value here is not the same as being authorised — the authority names the
+    /// exact source, edge, request and projection it covers, and
+    /// <see cref="UsablePhotoshopPreparation"/> is the only thing that answers whether it covers
+    /// the run about to start.
+    /// </para>
+    /// </remarks>
+    public EnlargementAuthority? EnlargementAuthority { get; init; }
+
+    /// <summary>
+    /// The TargetEdgeV1 plan that currently permits a Photoshop output run, or null when none
+    /// does (Epic 11400 Part B1A.2D §13).
+    /// </summary>
+    /// <remarks>
+    /// The same shape as <see cref="UsablePrintPreparationPlan"/>, asking the semantics question
+    /// first for the same reason: a session holding maximum bounds fails here honestly — those
+    /// millimetres were never a target edge — rather than by accidentally missing a binding.
+    /// <para>
+    /// It says nothing about enlargement. Whether the plan may actually run is
+    /// <see cref="UsablePhotoshopPreparation"/>'s answer, which is where the authority requirement
+    /// lives, so a caller cannot get "the plan is current" and read it as "the plan may run".
+    /// </para>
+    /// </remarks>
+    public TargetEdgePrintPreparationPlan? UsableTargetEdgePlan
+    {
+        get
+        {
+            if (DimensionSemantics != PrintDimensionSemantics.TargetEdgeV1 ||
+                TargetEdgePlan is not { } plan ||
+                UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
+            {
+                return null;
+            }
+
+            return plan.Covers(upstream.Id, upstream.Sha256) ? plan : null;
+        }
+    }
+
+    /// <summary>
+    /// The one authority for "could Photoshop output start right now, and with what"
+    /// (Epic 11400 Part B1A.2D §13).
+    /// </summary>
+    /// <remarks>
+    /// <b>Every caller asks this and nothing else.</b> The engine's <c>StartStep</c> precondition,
+    /// the attempt snapshot, and <c>SessionView</c>'s readiness all read this single property, so
+    /// an offered control, an accepted command and a written audit row cannot disagree about what
+    /// "usable" means — the arrangement <see cref="UsableBackgroundRemovalAuthority"/> established,
+    /// extended to a decision that now has two accepted shapes.
+    /// <para>
+    /// It answers with a <see cref="PhotoshopPreparation"/> rather than a boolean, which is what
+    /// makes the agreement structural: the value a caller receives <i>is</i> the thing that was
+    /// validated, so nothing downstream re-derives which plan applied or re-checks whether an
+    /// enlargement was permitted. A <see cref="TargetEdgePreparation"/> cannot even be constructed
+    /// for an enlargement without its matching authority (§12).
+    /// </para>
+    /// <para>
+    /// The whole invalidation strategy lives here too. A stale plan is never hunted down and
+    /// deleted; it simply stops being returned, because the artefact it names is no longer the one
+    /// on offer. Retry over byte-identical content therefore stays runnable — enlargement
+    /// authority included — without anything re-granting it, and a changed upstream stops being
+    /// runnable without anything revoking it (§30).
+    /// </para>
+    /// </remarks>
+    public PhotoshopPreparation? UsablePhotoshopPreparation
+    {
+        get
+        {
+            if (UsablePrintPreparationPlan is { } bounds)
+            {
+                return new FitWithinBoundsPreparation(bounds);
+            }
+
+            if (UsableTargetEdgePlan is not { } plan)
+            {
+                return null;
+            }
+
+            // The authority is matched against this exact plan, never merely held. An enlargement
+            // with no matching authority is not "nearly runnable": it is a missing product
+            // decision, and returning null is what makes StartStep refuse before an attempt row
+            // exists (§10, §14).
+            EnlargementAuthority? authority =
+                plan.RequiresEnlargementAuthority && EnlargementAuthority?.Authorises(plan) == true
+                    ? EnlargementAuthority
+                    : null;
+
+            return plan.IsExecutableWith(authority)
+                ? new TargetEdgePreparation(plan, authority)
+                : null;
+        }
+    }
+
+    /// <summary>
     /// Whether the operator must reconfirm the print limits before Photoshop output can run
     /// (Epic 11400 Part B1A.2A §10, §19).
     /// </summary>
@@ -212,7 +334,30 @@ public sealed record WorkflowSnapshot(
     public bool NeedsDimensionReview =>
         Definition.Contains(StepKind.PhotoshopOutput) &&
         Dimensions is not null &&
-        UsablePrintPreparationPlan is null;
+        UsablePhotoshopPreparation is null &&
+        !NeedsEnlargementAuthority;
+
+    /// <summary>
+    /// Whether a current, correctly sized decision is waiting only on the operator's explicit
+    /// permission to enlarge (Epic 11400 Part B1A.2D §10, §28).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately separate from <see cref="NeedsDimensionReview"/>, because the two ask the
+    /// operator for opposite things. A session needing dimension review has a size that cannot be
+    /// executed and must be chosen again; a session needing enlargement authority has a size that
+    /// is exactly right and needs confirming. Telling an operator to redo a size they meant would
+    /// be the software losing their decision (§11).
+    /// </remarks>
+    public bool NeedsEnlargementAuthority =>
+        UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } plan &&
+        EnlargementAuthority?.Authorises(plan) != true;
+
+    /// <summary>
+    /// Whether a granted enlargement authority actually covers the plan on offer (§10, §30).
+    /// </summary>
+    public bool HasUsableEnlargementAuthority =>
+        UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } plan &&
+        EnlargementAuthority?.Authorises(plan) == true;
 
     /// <summary>
     /// Value equality, including the step list element by element.
@@ -249,6 +394,9 @@ public sealed record WorkflowSnapshot(
             && Equals(BackgroundRemovalAuthority, other.BackgroundRemovalAuthority)
             && Nullable.Equals(DimensionSemantics, other.DimensionSemantics)
             && Equals(PrintPreparationPlan, other.PrintPreparationPlan)
+            && Equals(SizeSelection, other.SizeSelection)
+            && Equals(TargetEdgePlan, other.TargetEdgePlan)
+            && Equals(EnlargementAuthority, other.EnlargementAuthority)
             && Steps.SequenceEqual(other.Steps);
     }
 
@@ -268,6 +416,9 @@ public sealed record WorkflowSnapshot(
         hash.Add(BackgroundRemovalAuthority);
         hash.Add(DimensionSemantics);
         hash.Add(PrintPreparationPlan);
+        hash.Add(SizeSelection);
+        hash.Add(TargetEdgePlan);
+        hash.Add(EnlargementAuthority);
 
         foreach (SessionStep step in Steps)
         {

@@ -49,6 +49,43 @@ public static class MigrationRunner
                 $"this build only knows schema versions up to {highestKnown}. Refusing to open.");
         }
 
+        // Foreign keys are suspended for the migration pass and restored before anything else
+        // runs (Epic 11400 Part B1A.2D §20).
+        //
+        // SQLite cannot alter or drop a CHECK constraint, so widening one means the documented
+        // twelve-step rebuild: create the table afresh, copy the rows, drop the original, rename.
+        // With enforcement on, that DROP performs an implicit delete which fires every
+        // ON DELETE CASCADE pointing at the table — it would take the session's steps, revisions,
+        // attempts and outputs with it. The pragma is therefore not a convenience; a rebuild is
+        // not correctly expressible without it.
+        //
+        // It is set here rather than inside a script because SQLite silently ignores
+        // `PRAGMA foreign_keys` inside a transaction, and every script runs in one. Suspension
+        // lasts exactly as long as the pass: the restore below runs on both the success and the
+        // failure path, so no connection is handed back to the application with enforcement off,
+        // and a rebuild that copies rows incorrectly still fails its own script's transaction.
+        bool foreignKeysWereOn = ReadForeignKeys(connection);
+        if (foreignKeysWereOn)
+        {
+            Execute(connection, transaction: null, "PRAGMA foreign_keys = OFF;");
+        }
+
+        try
+        {
+            return Apply(connection, migrations, currentVersion);
+        }
+        finally
+        {
+            if (foreignKeysWereOn)
+            {
+                Execute(connection, transaction: null, "PRAGMA foreign_keys = ON;");
+            }
+        }
+    }
+
+    private static OperationResult<Unit> Apply(
+        SqliteConnection connection, IReadOnlyList<Migration> migrations, long currentVersion)
+    {
         foreach (Migration migration in migrations)
         {
             if (migration.Version <= currentVersion)
@@ -93,12 +130,20 @@ public static class MigrationRunner
         return OperationResult.Ok();
     }
 
-    private static void Execute(SqliteConnection connection, SqliteTransaction transaction, string sql)
+    private static void Execute(SqliteConnection connection, SqliteTransaction? transaction, string sql)
     {
         using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = sql;
         command.ExecuteNonQuery();
+    }
+
+    private static bool ReadForeignKeys(SqliteConnection connection)
+    {
+        using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "PRAGMA foreign_keys;";
+        object? result = command.ExecuteScalar();
+        return result is not null && Convert.ToInt64(result, CultureInfo.InvariantCulture) != 0;
     }
 
     private static long ReadUserVersion(SqliteConnection connection)

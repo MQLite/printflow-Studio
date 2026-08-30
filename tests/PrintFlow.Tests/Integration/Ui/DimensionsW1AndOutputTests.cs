@@ -115,11 +115,17 @@ public sealed class DimensionsW1AndOutputTests
     }
 
     /// <summary>
-    /// A preset fills the boxes in and nothing more; confirming is still a separate act
-    /// (Part 3C3B §5).
+    /// A preset shows the <b>configured</b> limits and nothing more; confirming is still a
+    /// separate act (Part 3C3B §5; Epic 11400 Part B1A.2D §3, §4).
     /// </summary>
+    /// <remarks>
+    /// The millimetres are the point of this test now. A4 shows 280 mm, which is what the verified
+    /// preset configures as its maximum long edge — not 210 × 297, the ISO page the preset is
+    /// <i>named after</i>. A build that read the nominal size as the production limit would print
+    /// every A4 job 17 mm too long on the long edge and call it configured behaviour.
+    /// </remarks>
     [Fact]
-    public async Task A_preset_fills_the_millimetres_in_and_the_operator_can_still_change_them()
+    public async Task A_preset_shows_its_configured_limits_and_the_operator_can_still_change_them()
     {
         using HomeScreenHarness harness = new();
         OpenSession open = await AtDimensionsAsync(harness, "preset.png");
@@ -129,19 +135,21 @@ public sealed class DimensionsW1AndOutputTests
             [SizePreset.A3Landscape, SizePreset.A3Portrait, SizePreset.A4, SizePreset.A5]);
 
         SizePresetChoice a4 = screen.SizePresets.Single(choice => choice.Preset == SizePreset.A4);
+        a4.Recommendation.Kind.ShouldBe(PresetRecommendationKind.MaximumLongEdge);
+        a4.Recommendation.MaxLongEdgeMm.ShouldBe(280m);
         screen.ApplyPresetCommand.Execute(a4);
 
-        // Filling the boxes confirms nothing on its own.
-        screen.WidthMmText.ShouldBe(210d.ToString(CultureInfo.CurrentCulture));
-        screen.HeightMmText.ShouldBe(297d.ToString(CultureInfo.CurrentCulture));
+        // The configured recommendation, never PrintDimensions.NominalMillimetres.
+        screen.WidthMmText.ShouldBe(280d.ToString(CultureInfo.CurrentCulture));
+        screen.HeightMmText.ShouldBe(280d.ToString(CultureInfo.CurrentCulture));
         (await open.ReloadAsync()).Session.Dimensions.ShouldBeNull();
 
         await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
 
         PrintDimensions stored = (await open.ReloadAsync()).Session.Dimensions.ShouldNotBeNull();
-        stored.WidthMm.ShouldBe(210);
-        stored.HeightMm.ShouldBe(297);
+        stored.WidthMm.ShouldBe(280);
+        stored.HeightMm.ShouldBe(280);
         stored.Preset.ShouldBe(SizePreset.A4);
     }
 

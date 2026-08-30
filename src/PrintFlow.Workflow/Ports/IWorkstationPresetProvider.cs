@@ -38,4 +38,23 @@ public interface IWorkstationPresetProvider
     /// they come from here (Epic 11100 Task 11107; plan §13.2).
     /// </remarks>
     OperationResult<NamingPatternSet> GetNamingPatterns();
+
+    /// <summary>
+    /// Returns the executable named-size recommendations carried by the verified preset
+    /// (<c>productionGeometryContract.resize.limitsMillimetres</c>), or a failure when the preset
+    /// itself is not verified (Epic 11400 Part B1A.2D §3).
+    /// </summary>
+    /// <remarks>
+    /// <b>This is the only authority for what a named preset means as a print size.</b> No screen,
+    /// view model, service or adapter may state an A4 or A5 production value, and nothing derives
+    /// one from <see cref="PrintDimensions.NominalMillimetres"/> — the ISO paper size a preset is
+    /// named after and the limit this shop prints it at are different numbers, and the preset is
+    /// the one that decides (§3, §4).
+    /// <para>
+    /// A preset that configures no recommendation for a named size does not fall back to a paper
+    /// standard: that size is simply not offered. Absence is fail-closed, as everything about a
+    /// signed preset is.
+    /// </para>
+    /// </remarks>
+    OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations();
 }

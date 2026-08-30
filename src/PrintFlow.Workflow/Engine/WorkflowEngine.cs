@@ -53,6 +53,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.Skip c => Skip(state, c, context),
             WorkflowCommand.HandOff c => HandOff(state, c, context),
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
+            WorkflowCommand.SetPresetFitSize c => SetPresetFitSize(state, c, context),
+            WorkflowCommand.SetCustomTargetEdgeSize c => SetCustomTargetEdgeSize(state, c, context),
+            WorkflowCommand.AuthoriseEnlargement c => AuthoriseEnlargement(state, c),
             WorkflowCommand.SelectWhiteUnderbaseBranch c => SelectWhiteUnderbaseBranch(state, c),
             WorkflowCommand.SetTrimParameters c => SetTrimParameters(state, c),
             WorkflowCommand.SetBackgroundRemovalDecision c => SetBackgroundRemovalDecision(state, c),
@@ -443,6 +446,14 @@ public sealed class WorkflowEngine : IWorkflowEngine
             Dimensions = clearsDimensions ? null : state.Dimensions,
             DimensionSemantics = clearsDimensions ? null : state.DimensionSemantics,
             PrintPreparationPlan = clearsDimensions ? null : state.PrintPreparationPlan,
+
+            // The flexible-size decision goes with them, enlargement authority included. Returning
+            // to the size step exists so the operator can choose a different target, and an
+            // authority that survived that would be a confirmation of the old target still sitting
+            // beside the new one (Epic 11400 Part B1A.2D §31).
+            SizeSelection = clearsDimensions ? null : state.SizeSelection,
+            TargetEdgePlan = clearsDimensions ? null : state.TargetEdgePlan,
+            EnlargementAuthority = clearsDimensions ? null : state.EnlargementAuthority,
             WhiteUnderbaseBranch = clearsDimensions ? null : state.WhiteUnderbaseBranch,
             LatestApprovedRevisionId = LatestApprovedBefore(steps, target.Ordinal),
             HasDerivedRevision = HasDerivedRevision(steps),
@@ -551,6 +562,14 @@ public sealed class WorkflowEngine : IWorkflowEngine
             Dimensions = null,
             DimensionSemantics = null,
             PrintPreparationPlan = null,
+
+            // A new output size starts with no target, no override and no permission to enlarge.
+            // Carrying an enlargement confirmation from the previous sibling would authorise a
+            // second run nobody was asked about; the completed sibling keeps its own immutable
+            // audit either way (Epic 11400 Part B1A.2D §32).
+            SizeSelection = null,
+            TargetEdgePlan = null,
+            EnlargementAuthority = null,
             WhiteUnderbaseBranch = null,
         };
 
@@ -671,17 +690,30 @@ public sealed class WorkflowEngine : IWorkflowEngine
             // A legacy exact pair fails here too, and deliberately for its own reason: those two
             // millimetres were never a fit box, and which of them was meant as the limiting edge
             // is not something to infer from the source ratio (§10).
-            if (state.UsablePrintPreparationPlan is null)
+            // UsablePhotoshopPreparation is the one authority (Part B1A.2D §13): it covers both
+            // accepted sizing contracts, and for a target-edge enlargement it also requires the
+            // matching authority. A missing enlargement confirmation is a missing product
+            // decision, not a failed Photoshop run, so it is refused here — before the attempt
+            // row exists — rather than surfacing later as a fabricated external failure (§14).
+            if (state.UsablePhotoshopPreparation is null)
             {
                 return WorkflowTransition.Rejected(
                     RejectionCode.PreconditionNotMet,
-                    state.DimensionSemantics == PrintDimensionSemantics.LegacyExactPair
-                        ? "DIMENSION REVIEW REQUIRED: this session's print size was recorded as two exact " +
-                          "dimensions, before maximum bounds existed. The limits must be reconfirmed under the " +
-                          "current contract; nothing infers which edge was intended."
-                        : "Photoshop output requires a maximum-bound preparation plan calculated from the exact " +
-                          "upstream Revision it will consume. A plan calculated from different or since-changed " +
-                          "content does not carry over.");
+                    state.DimensionSemantics switch
+                    {
+                        PrintDimensionSemantics.LegacyExactPair =>
+                            "DIMENSION REVIEW REQUIRED: this session's print size was recorded as two exact " +
+                            "dimensions, before maximum bounds existed. The limits must be reconfirmed under the " +
+                            "current contract; nothing infers which edge was intended.",
+                        _ when state.NeedsEnlargementAuthority =>
+                            "ENLARGEMENT NOT AUTHORISED: the recorded target needs more pixels than the source " +
+                            "holds at 300 ppi. Enlarging is a separate explicit confirmation for this exact " +
+                            "source and this exact target; nothing grants it automatically.",
+                        _ =>
+                            "Photoshop output requires a preparation plan calculated from the exact upstream " +
+                            "Revision it will consume. A plan calculated from different or since-changed " +
+                            "content does not carry over.",
+                    });
             }
 
             if (state.WhiteUnderbaseBranch is null)
@@ -1070,6 +1102,19 @@ public sealed class WorkflowEngine : IWorkflowEngine
                 RejectionCode.InvalidPayload, "Print dimensions must be positive.");
         }
 
+        // A named preset arriving with millimetres attached is a caller having decided what that
+        // preset means, and under v1.11.0 that decision belongs to the configured preset alone.
+        // Refused rather than corrected: silently replacing the supplied pair with the configured
+        // recommendation would accept a command that said something else (Part B1A.2D §3, §19).
+        if (command.Dimensions.Preset != SizePreset.Custom)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                $"{command.Dimensions.Preset} is a named preset, and its executable limit comes from the " +
+                "configured workstation preset rather than from millimetres supplied here. Use " +
+                $"{nameof(WorkflowCommand.SetPresetFitSize)}, or record a custom size.");
+        }
+
         // Bounds mean nothing without something to fit inside them, and a plan calculated from
         // no source would be a plan calculated from a guess (§8). This is the same upstream
         // result the plan binds to and the same one Photoshop output will consume.
@@ -1090,11 +1135,221 @@ public sealed class WorkflowEngine : IWorkflowEngine
             // accepts through this handler was recorded under the current contract, so the
             // reading and the pair are written by the same act (§9).
             DimensionSemantics = PrintDimensionSemantics.MaxBoundsV1,
+
+            // A newly recorded size replaces the previous decision whole. Leaving a target-edge
+            // plan, a selection or an enlargement authority behind a fresh fit box would let an
+            // old confirmation apply to a target nobody asked about (Part B1A.2D §31).
+            SizeSelection = null,
+            TargetEdgePlan = null,
+            EnlargementAuthority = null,
         };
 
         return WorkflowTransition.Accepted(
             newState,
             new WorkflowEffect.PersistPrintDimensions(command.Dimensions));
+    }
+
+    /// <summary>
+    /// Records a named preset, whose executable limits the service resolves from the configured
+    /// preset (Epic 11400 Part B1A.2D §3, §15, §17).
+    /// </summary>
+    /// <remarks>
+    /// The engine decides legality and stamps the reading; it cannot decide the millimetres,
+    /// because a snapshot carries neither the verified preset nor the source's pixels. So the
+    /// state it produces deliberately leaves <see cref="WorkflowSnapshot.Dimensions"/>,
+    /// <see cref="WorkflowSnapshot.SizeSelection"/> and
+    /// <see cref="WorkflowSnapshot.PrintPreparationPlan"/> for <c>SessionService</c> to attach in
+    /// the same act — the arrangement <see cref="SetPrintDimensions"/> already uses for the plan
+    /// (§17).
+    /// <para>
+    /// Ordinary preset use stays exactly what the accepted B1A.1 contract made it: the
+    /// recommendation becomes a fit box and <c>FitWithinBounds</c> selects the single edge.
+    /// <c>ScaleToTargetEdge</c> is never called for it (§17).
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition SetPresetFitSize(
+        WorkflowSnapshot state, WorkflowCommand.SetPresetFitSize command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, StepKind.PrintDimensions, CommandKind.SetPresetFitSize);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        if (command.Preset == SizePreset.Custom)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                "Custom is what typing a size produces, not a named preset with a configured " +
+                "recommendation behind it.");
+        }
+
+        if (state.UpstreamResultOf(StepKind.PhotoshopOutput) is null)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "Photoshop output has no validated upstream result, so there are no source pixels to fit " +
+                "within the preset's recommendation.");
+        }
+
+        SessionStep confirmed = resolved.Step!.WithState(StepState.Approved, context.NowUtc);
+        return WorkflowTransition.Accepted(
+            state.WithStep(confirmed) with
+            {
+                // Ordinary preset use is a maximum-bound decision, so it is recorded under the
+                // reading it is made under. TargetEdgeV1 is what a custom edge produces, and the
+                // two are never interchangeable (§5).
+                DimensionSemantics = PrintDimensionSemantics.MaxBoundsV1,
+                Dimensions = null,
+                SizeSelection = null,
+                PrintPreparationPlan = null,
+                TargetEdgePlan = null,
+                EnlargementAuthority = null,
+            });
+    }
+
+    /// <summary>
+    /// Records one exact operator-chosen physical edge (Epic 11400 Part B1A.2D §6, §15, §31).
+    /// </summary>
+    /// <remarks>
+    /// The projection is the service's to calculate, for the same reason the fit is: it needs the
+    /// upstream Revision's own pixels and its re-verified bytes, neither of which a snapshot
+    /// carries (§16). What the engine settles is that the step may accept a size now, that the
+    /// request is a positive number of millimetres, and that there is a source to project against.
+    /// <para>
+    /// Any previous enlargement authority is cleared here and not conditionally kept. A new target
+    /// is a new question, and an authority granted for the old one names an edge, a request and a
+    /// projection that no longer describe what is on offer — so keeping it would be a permission
+    /// looking for something to apply to (§31).
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition SetCustomTargetEdgeSize(
+        WorkflowSnapshot state, WorkflowCommand.SetCustomTargetEdgeSize command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(
+            state, StepKind.PrintDimensions, CommandKind.SetCustomTargetEdgeSize);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        if (command.Millimetres <= 0)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, "A target edge must be positive millimetres.");
+        }
+
+        if (command.Edge is not (TargetEdge.Width or TargetEdge.Height or TargetEdge.LongEdge))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, $"'{command.Edge}' is not a target edge.");
+        }
+
+        if (command.OverriddenPreset == SizePreset.Custom)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload,
+                "Custom is not a recommendation, so there is nothing for it to override.");
+        }
+
+        if (state.UpstreamResultOf(StepKind.PhotoshopOutput) is null)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "Photoshop output has no validated upstream result, so there are no source pixels to " +
+                "project the requested edge against.");
+        }
+
+        SessionStep confirmed = resolved.Step!.WithState(StepState.Approved, context.NowUtc);
+        return WorkflowTransition.Accepted(
+            state.WithStep(confirmed) with
+            {
+                DimensionSemantics = PrintDimensionSemantics.TargetEdgeV1,
+                Dimensions = null,
+                SizeSelection = null,
+                PrintPreparationPlan = null,
+                TargetEdgePlan = null,
+                EnlargementAuthority = null,
+            });
+    }
+
+    /// <summary>
+    /// Records the operator's explicit permission to enlarge one exact target
+    /// (Epic 11400 Part B1A.2D §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// The second confirmation, and it is accepted only against the plan currently on offer. The
+    /// payload names what the operator was looking at, and every part of it must still be true:
+    /// the Revision, the bytes, the edge and the requested millimetres. A mismatch is refused
+    /// rather than reconciled, so "I agreed to enlarge this" cannot drift into "enlargement is on"
+    /// (§9, §10).
+    /// <para>
+    /// The authority itself is built by <see cref="EnlargementAuthority.For"/> from the plan, not
+    /// from the payload. That is what binds it to the projected scale and pixel pair the operator
+    /// was shown, and it is why nothing outside the Domain can mint one (§35).
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition AuthoriseEnlargement(
+        WorkflowSnapshot state, WorkflowCommand.AuthoriseEnlargement command)
+    {
+        if (!SessionStateRules.AllowsProgress(state.SessionState))
+        {
+            return NotActive(state, nameof(WorkflowCommand.AuthoriseEnlargement));
+        }
+
+        if (!state.Definition.Contains(StepKind.PhotoshopOutput))
+        {
+            return NotInWorkflow(state, StepKind.PhotoshopOutput);
+        }
+
+        if (state.UsableTargetEdgePlan is not { } plan)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "There is no current target-edge plan to authorise. An enlargement is confirmed against " +
+                "the size actually recorded against the content Photoshop will consume.");
+        }
+
+        if (!plan.RequiresEnlargementAuthority)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The recorded target is a {plan.Projection.Direction} and adds no pixels; there is no " +
+                "enlargement to authorise, and recording one would read as permission for a run nobody " +
+                "asked for.");
+        }
+
+        if (plan.SourceRevisionId != command.ReviewedRevisionId)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"Revision {command.ReviewedRevisionId} is not the source this plan was calculated from " +
+                $"({plan.SourceRevisionId}); authority is granted for reviewed content, never transferred.");
+        }
+
+        if (!plan.SourceSha256.Equals(command.DisplayedHash))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The displayed hash {command.DisplayedHash.ShortForm} does not match the plan's source " +
+                $"{plan.SourceSha256.ShortForm}; the content reviewed is no longer the content on offer.");
+        }
+
+        if (plan.Projection.SelectedTargetEdge != command.Edge ||
+            plan.Projection.RequestedMillimetres != command.Millimetres)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The confirmation names {command.Edge} at {command.Millimetres:0.####} mm, and the recorded " +
+                $"target is {plan.Projection.SelectedTargetEdge} at " +
+                $"{plan.Projection.RequestedMillimetres:0.####} mm; an enlargement is authorised for one " +
+                "exact target.");
+        }
+
+        EnlargementAuthority authority = EnlargementAuthority.For(plan);
+        return WorkflowTransition.Accepted(
+            state with { EnlargementAuthority = authority },
+            new WorkflowEffect.PersistEnlargementAuthority(authority));
     }
 
     // ---------------------------------------------------------------------------------
@@ -1479,6 +1734,27 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
             CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
+
+            // Probed with a real configured-preset request only in the sense that the payload is
+            // structurally valid: A4 here is a stand-in, exactly as ProbeDimensions is, and the
+            // millimetres behind it are never read by a probe because nothing is applied. What
+            // varies, and therefore what the answer reports, is whether PrintDimensions is the
+            // current step and whether a source exists to size against (Part B1A.2D §15).
+            CommandKind.SetPresetFitSize => new WorkflowCommand.SetPresetFitSize(ProbeSizePreset),
+            CommandKind.SetCustomTargetEdgeSize =>
+                new WorkflowCommand.SetCustomTargetEdgeSize(ProbeTargetEdge, ProbeTargetMillimetres),
+
+            // Probed with the plan the session actually holds, never an invented target: an
+            // enlargement confirmation is about one exact recorded size, so a stand-in would
+            // answer a question no screen is asking. A session with no plan needing authority
+            // gets no probe at all, which is the honest "there is nothing to confirm" (§10).
+            CommandKind.AuthoriseEnlargement
+                when state.UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } pending =>
+                new WorkflowCommand.AuthoriseEnlargement(
+                    pending.SourceRevisionId,
+                    pending.SourceSha256,
+                    pending.Projection.SelectedTargetEdge,
+                    pending.Projection.RequestedMillimetres),
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
@@ -1541,9 +1817,40 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// <remarks>
     /// A valid size on purpose, so the positivity guard is satisfied and the probe reports the
     /// step question instead. Never persisted and never shown: a probe applies nothing, so no
-    /// session is silently given A4.
+    /// session is silently given a size.
+    /// <para>
+    /// Deliberately <see cref="SizePreset.Custom"/>. <c>SetPrintDimensions</c> is the custom
+    /// fit-box route and refuses a named preset outright, so probing with one would answer "no"
+    /// for a reason that has nothing to do with the session (Part B1A.2D §3).
+    /// </para>
     /// </remarks>
-    private static readonly PrintDimensions ProbeDimensions = PrintDimensions.FromPreset(SizePreset.A4);
+    private static readonly PrintDimensions ProbeDimensions =
+        PrintDimensions.FromMillimetres(100d, 100d, SizePreset.Custom);
+
+    /// <summary>
+    /// The stand-in preset used when probing <see cref="CommandKind.SetPresetFitSize"/>.
+    /// </summary>
+    /// <remarks>
+    /// A named preset is required for the payload guard, and which one is irrelevant: the probed
+    /// transition is discarded and only its accepted/rejected verdict is read, so no session
+    /// acquires A4. The configured millimetres behind the name are never resolved by a probe —
+    /// that is <c>SessionService</c>'s work, and a probe reaches no service (Part B1A.2D §3).
+    /// </remarks>
+    private const SizePreset ProbeSizePreset = SizePreset.A4;
+
+    /// <summary>
+    /// The stand-in target used when probing <see cref="CommandKind.SetCustomTargetEdgeSize"/>.
+    /// </summary>
+    /// <remarks>
+    /// Valid by construction, so the positivity guard is satisfied and the probe reports the step
+    /// question a screen is actually asking. The operator's own edge and millimetres go through
+    /// every guard, and through the exact target-edge calculation, when the real command is
+    /// issued.
+    /// </remarks>
+    private const TargetEdge ProbeTargetEdge = TargetEdge.LongEdge;
+
+    /// <inheritdoc cref="ProbeTargetEdge" />
+    private const decimal ProbeTargetMillimetres = 100m;
 
     /// <summary>
     /// The stand-in branch used when probing

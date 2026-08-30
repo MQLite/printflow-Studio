@@ -444,6 +444,447 @@ public sealed class MigrationTests
             connection, "future", [("DimensionSemantics", "'MAX_BOUNDS_V2'")]));
     }
 
+    // -------------------------------------------------------------------------------------
+    // 0006: the flexible-size selection, the TargetEdgeV1 plan and the enlargement authority
+    // (Epic 11400 Part B1A.2D §20, §21, §22, §34)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A 0005 database upgrades, and every row it already held keeps exactly what it meant
+    /// (§20, §21).
+    /// </summary>
+    /// <remarks>
+    /// This is the test that guards the table rebuild. 0006 has to widen a CHECK constraint, which
+    /// SQLite can only do by recreating <c>ProcessingSession</c> — so the risk is not a missing
+    /// column, it is a column, a value or a constraint silently dropped on the way through. Three
+    /// kinds of row are seeded and read back afterwards: a legacy exact pair, a complete
+    /// MaxBoundsV1 plan, and a session that never chose a size.
+    /// <para>
+    /// None of them gains flexible-size meaning. A valid MaxBoundsV1 session stays a MaxBoundsV1
+    /// session under its original accepted semantics rather than being upgraded to a target edge
+    /// because v1.11.0 is now configured (§18, §21).
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void A_pre_0006_database_upgrades_and_leaves_every_existing_row_as_it_was()
+    {
+        using TempDatabase database = new(migrate: false);
+
+        using (SqliteConnection seeded = database.OpenRaw())
+        {
+            Execute(seeded, ReadMigrationScript("0001_initial_schema.sql"));
+            Execute(seeded, ReadMigrationScript("0002_trim_parameters.sql"));
+            Execute(seeded, ReadMigrationScript("0003_background_removal_decision.sql"));
+            Execute(seeded, ReadMigrationScript("0004_attempt_adapter_notes.sql"));
+            Execute(seeded, ReadMigrationScript("0005_maximum_bound_print_plan.sql"));
+            Execute(
+                seeded,
+                "INSERT INTO SchemaMigration (Version, Name, AppliedAtUtc, ScriptSha256) " +
+                "VALUES (1, 'initial_schema', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (2, 'trim_parameters', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (3, 'background_removal_decision', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (4, 'attempt_adapter_notes', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (5, 'maximum_bound_print_plan', '2026-01-01T00:00:00.000Z', 'SEED');");
+            Execute(seeded, "PRAGMA user_version = 5;");
+
+            InsertSession(seeded, "legacy-session",
+            [
+                ("DimensionsWidthMm", "200.0"),
+                ("DimensionsHeightMm", "150.0"),
+                ("DimensionsPreset", "'CUSTOM'"),
+                ("DimensionSemantics", "'LEGACY_EXACT_PAIR'"),
+                ("TrimMode", "'UNIFORM_MARGIN'"),
+                ("TrimMarginTop", "4"),
+                ("WhiteUnderbaseBranch", "'W1_2PX'"),
+            ]);
+            InsertSession(seeded, "bounded-session", CompletePlanColumns);
+            InsertSession(seeded, "unsized-session", []);
+
+            // A child row, so the rebuild's DROP is proved not to have cascaded it away.
+            Execute(
+                seeded,
+                """
+                INSERT INTO SessionStep
+                    (SessionId, StepKind, Ordinal, State, AttemptCount, EnteredStateAtUtc)
+                VALUES
+                    ('bounded-session', 'PrintDimensions', 2, 'APPROVED', 0,
+                     '2026-01-01T00:00:00.000Z');
+                """);
+        }
+
+        using SqliteConnection upgraded = database.OpenRaw();
+        MigrationRunner.Migrate(upgraded).IsSuccess.ShouldBeTrue();
+        ReadUserVersion(upgraded).ShouldBe(MigrationRunner.NewestKnownVersion);
+
+        // Nothing was lost by the rebuild: every table still holds its rows, and the child row
+        // whose foreign key points at the recreated table is still there.
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM ProcessingSession;").ShouldBe(3L);
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM SessionStep WHERE SessionId = 'bounded-session';")
+            .ShouldBe(1L);
+
+        // Foreign keys are back on for ordinary work. The runner suspends them for the migration
+        // pass — a rebuild's DROP would otherwise cascade the child rows away — and restores them
+        // before the connection is used for anything else, so no application query ever runs
+        // unenforced (§20).
+        ScalarOf(upgraded, "PRAGMA foreign_keys;").ShouldBe(1L);
+
+        IReadOnlyList<string> sessionColumns = ColumnsOf(upgraded, "ProcessingSession");
+        foreach (string column in FlexibleColumns)
+        {
+            sessionColumns.ShouldContain(column, $"ProcessingSession is missing {column}.");
+            ColumnsOf(upgraded, "ProcessingAttempt")
+                .ShouldContain(column, $"ProcessingAttempt is missing {column}.");
+        }
+
+        // Every column the earlier migrations added is still present and still typed.
+        foreach (string column in new[]
+                 {
+                     "DimensionsWidthMm", "DimensionsPreset", "WhiteUnderbaseBranch", "TrimMode",
+                     "TrimMarginTop", "BackgroundRemovalDecision", "DimensionSemantics",
+                     "PrintPlanLimitingEdge", "PrintPlanResizePolicy",
+                 })
+        {
+            sessionColumns.ShouldContain(column, $"the rebuild dropped {column}.");
+        }
+
+        // The legacy row is untouched, and gains nothing flexible.
+        using (SqliteCommand legacy = upgraded.CreateCommand())
+        {
+            legacy.CommandText =
+                "SELECT DimensionSemantics, DimensionsWidthMm, TrimMarginTop, WhiteUnderbaseBranch, " +
+                "       SizingMode, TargetPlanResizePolicy, EnlargementAuthoritySourceRevisionId " +
+                "FROM ProcessingSession WHERE Id = 'legacy-session';";
+            using SqliteDataReader reader = legacy.ExecuteReader();
+            reader.Read().ShouldBeTrue();
+            reader.GetString(0).ShouldBe("LEGACY_EXACT_PAIR");
+            reader.GetDouble(1).ShouldBe(200.0);
+            reader.GetInt32(2).ShouldBe(4);
+            reader.GetString(3).ShouldBe("W1_2PX");
+            reader.IsDBNull(4).ShouldBeTrue("a legacy row acquires no sizing mode");
+            reader.IsDBNull(5).ShouldBeTrue("a legacy row acquires no target-edge plan");
+            reader.IsDBNull(6).ShouldBeTrue("no historical row acquires enlargement authority");
+        }
+
+        // The maximum-bound row keeps its own semantics and its whole plan.
+        using SqliteCommand bounded = upgraded.CreateCommand();
+        bounded.CommandText =
+            "SELECT DimensionSemantics, PrintPlanLimitingEdge, PrintPlanLimitingValueMm, " +
+            "       PrintPlanProjectedPixelWidth, PrintPlanResizePolicy, SizingMode, " +
+            "       TargetPlanResizePolicy " +
+            "FROM ProcessingSession WHERE Id = 'bounded-session';";
+        using SqliteDataReader boundedReader = bounded.ExecuteReader();
+        boundedReader.Read().ShouldBeTrue();
+        boundedReader.GetString(0).ShouldBe("MAX_BOUNDS_V1");
+        boundedReader.GetString(1).ShouldBe("WIDTH");
+        boundedReader.GetDouble(2).ShouldBe(50.0);
+        boundedReader.GetInt32(3).ShouldBe(591);
+        boundedReader.GetString(4).ShouldBe("BICUBIC_SHARPER");
+        boundedReader.IsDBNull(5).ShouldBeTrue("a MaxBoundsV1 row is not upgraded to TargetEdgeV1");
+        boundedReader.IsDBNull(6).ShouldBeTrue();
+    }
+
+    /// <summary>The widened semantics vocabulary accepts exactly three readings (§5).</summary>
+    /// <remarks>
+    /// The rebuild's whole purpose, asserted directly: TARGET_EDGE_V1 is storable and a fourth
+    /// value still is not. A build that widened the CHECK to anything would have lost the
+    /// fail-closed property 0005 established.
+    /// </remarks>
+    [Fact]
+    public void The_target_edge_reading_is_storable_and_a_fourth_reading_is_not()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        InsertSession(connection, "target-edge", CompleteTargetEdgeColumns);
+
+        Should.Throw<SqliteException>(() => InsertSession(
+            connection, "future", [("DimensionSemantics", "'TARGET_EDGE_V2'")]));
+    }
+
+    /// <summary>
+    /// A complete TargetEdgeV1 selection, plan and authority round-trip through their columns
+    /// exactly — the operator's decimal and the reduced ratio included (§7, §34).
+    /// </summary>
+    [Fact]
+    public void A_complete_target_edge_plan_and_authority_round_trip_through_their_columns()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        InsertSession(connection, "flexible",
+            [.. CompleteTargetEdgeColumns, .. CompleteAuthorityColumns]);
+
+        using SqliteCommand read = connection.CreateCommand();
+        read.CommandText =
+            "SELECT SizingMode, SizingPreset, SizingRecommendationKind, " +
+            "       SizingRecommendationMaxWidthMm, SizingPresetOverridden, SizingTargetEdge, " +
+            "       SizingRequestedMm, TargetPlanPhotoshopEdge, TargetPlanProjectedPixelWidth, " +
+            "       TargetPlanScaleNumerator, TargetPlanScaleDenominator, TargetPlanDirection, " +
+            "       TargetPlanResizePolicy, EnlargementAuthorityRequestedMm, " +
+            "       EnlargementAuthorityScaleNumerator " +
+            "FROM ProcessingSession WHERE Id = 'flexible';";
+
+        using SqliteDataReader reader = read.ExecuteReader();
+        reader.Read().ShouldBeTrue();
+        reader.GetString(0).ShouldBe("CUSTOM_TARGET_EDGE");
+        reader.GetString(1).ShouldBe("A5");
+        reader.GetString(2).ShouldBe("MAXIMUM_LONG_EDGE");
+        reader.GetString(3).ShouldBe("135");
+        reader.GetInt32(4).ShouldBe(1);
+        reader.GetString(5).ShouldBe("LONG_EDGE");
+
+        // The exact decimal, character for character. A REAL column would have returned
+        // 200.02499999999999 here, and the projected pixels below turn on the difference (§7).
+        reader.GetString(6).ShouldBe("200.025");
+
+        reader.GetString(7).ShouldBe("WIDTH");
+        reader.GetInt32(8).ShouldBe(2363);
+        reader.GetInt32(9).ShouldBe(2363);
+        reader.GetInt32(10).ShouldBe(2000);
+        reader.GetString(11).ShouldBe("ENLARGE");
+        reader.GetString(12).ShouldBe("PRESERVE_DETAILS");
+        reader.GetString(13).ShouldBe("200.025");
+        reader.GetInt32(14).ShouldBe(2363);
+    }
+
+    /// <summary>A half-written flexible-size row cannot exist (§22).</summary>
+    /// <remarks>
+    /// Each column of the group is removed in turn. Every one of them is a value a reader would
+    /// otherwise have to invent, and a plan with an invented resolved edge or an invented scale is
+    /// a plan that describes an operation nobody calculated.
+    /// </remarks>
+    [Theory]
+    [InlineData("SizingMode")]
+    [InlineData("SizingTargetEdge")]
+    [InlineData("SizingRequestedMm")]
+    [InlineData("TargetPlanSourceRevisionId")]
+    [InlineData("TargetPlanSourceSha256")]
+    [InlineData("TargetPlanSourcePixelWidth")]
+    [InlineData("TargetPlanSourcePixelHeight")]
+    [InlineData("TargetPlanPhotoshopEdge")]
+    [InlineData("TargetPlanProjectedPixelWidth")]
+    [InlineData("TargetPlanProjectedPixelHeight")]
+    [InlineData("TargetPlanScaleNumerator")]
+    [InlineData("TargetPlanScaleDenominator")]
+    [InlineData("TargetPlanProductionDpi")]
+    [InlineData("TargetPlanDirection")]
+    [InlineData("TargetPlanResizePolicy")]
+    public void A_partial_target_edge_row_is_refused(string omitted)
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] partial =
+            [.. CompleteTargetEdgeColumns.Where(c => c.Column != omitted)];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "partial-target", partial))
+            .Message.ShouldContain("CHECK constraint failed");
+    }
+
+    /// <summary>A half-written enlargement authority cannot exist (§9, §22).</summary>
+    [Theory]
+    [InlineData("EnlargementAuthoritySourceRevisionId")]
+    [InlineData("EnlargementAuthoritySourceSha256")]
+    [InlineData("EnlargementAuthoritySizingMode")]
+    [InlineData("EnlargementAuthorityTargetEdge")]
+    [InlineData("EnlargementAuthorityRequestedMm")]
+    [InlineData("EnlargementAuthorityScaleNumerator")]
+    [InlineData("EnlargementAuthorityScaleDenominator")]
+    [InlineData("EnlargementAuthorityProjectedPixelWidth")]
+    [InlineData("EnlargementAuthorityProjectedPixelHeight")]
+    public void A_partial_enlargement_authority_row_is_refused(string omitted)
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] partial =
+        [
+            .. CompleteTargetEdgeColumns,
+            .. CompleteAuthorityColumns.Where(c => c.Column != omitted),
+        ];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "partial-authority", partial))
+            .Message.ShouldContain("CHECK constraint failed");
+    }
+
+    /// <summary>
+    /// The direction and the resampling policy are one decision, and the database says so (§22).
+    /// </summary>
+    /// <remarks>
+    /// The accepted contract fixes exactly one policy per direction, so an enlargement claiming
+    /// BicubicSharper or a shrink claiming PreserveDetails is a row that contradicts itself. It
+    /// is refused here as well as by the mapper: a row that cannot exist needs no reader to guard
+    /// against it.
+    /// </remarks>
+    [Theory]
+    [InlineData("ENLARGE", "BICUBIC_SHARPER")]
+    [InlineData("SHRINK", "PRESERVE_DETAILS")]
+    [InlineData("RESOLUTION_ONLY", "BICUBIC_SHARPER")]
+    [InlineData("SHRINK", "NONE")]
+    public void A_direction_and_policy_that_disagree_are_refused(string direction, string policy)
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] mismatched =
+        [
+            .. CompleteTargetEdgeColumns.Select(c => c.Column switch
+            {
+                "TargetPlanDirection" => (c.Column, $"'{direction}'"),
+                "TargetPlanResizePolicy" => (c.Column, $"'{policy}'"),
+                _ => c,
+            }),
+        ];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "mismatch", mismatched));
+    }
+
+    /// <summary>
+    /// Permission to enlarge cannot be attached to a run that does not enlarge (§9, §22).
+    /// </summary>
+    /// <remarks>
+    /// An authority beside a shrink is not a harmless leftover: it is a record saying a human
+    /// agreed to add pixels to a job that removes them, and no reader could honestly interpret it.
+    /// </remarks>
+    [Fact]
+    public void An_enlargement_authority_beside_a_shrink_is_refused()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] shrinking =
+        [
+            .. CompleteTargetEdgeColumns.Select(c => c.Column switch
+            {
+                "TargetPlanDirection" => (c.Column, "'SHRINK'"),
+                "TargetPlanResizePolicy" => (c.Column, "'BICUBIC_SHARPER'"),
+                "TargetPlanSourcePixelWidth" => (c.Column, "4000"),
+                _ => c,
+            }),
+            .. CompleteAuthorityColumns,
+        ];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "shrink-authority", shrinking));
+    }
+
+    /// <summary>
+    /// A requested edge that is not a positive size cannot be stored (§22).
+    /// </summary>
+    /// <remarks>
+    /// The millimetres are TEXT so the operator's decimal survives exactly, and TEXT is the one
+    /// column type that will happily hold "0", "-5" or "banana". The CAST here is a validity check
+    /// on the stored text and never the arithmetic — the exact calculation reads the decimal
+    /// itself, and a second numeric implementation is precisely what §7 forbids.
+    /// </remarks>
+    [Theory]
+    [InlineData("'0'")]
+    [InlineData("'-5'")]
+    [InlineData("'banana'")]
+    public void A_requested_edge_that_is_not_a_positive_size_is_refused(string stored)
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] invalid =
+        [
+            .. CompleteTargetEdgeColumns.Select(c =>
+                c.Column == "SizingRequestedMm" ? (c.Column, stored) : c),
+        ];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "bad-mm", invalid));
+    }
+
+    /// <summary>A row cannot claim both accepted sizing contracts at once (§5).</summary>
+    [Fact]
+    public void A_row_holding_both_a_fit_box_and_a_target_edge_is_refused()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        (string Column, string Value)[] both =
+        [
+            .. CompletePlanColumns.Where(c => c.Column != "DimensionSemantics"),
+            .. CompleteTargetEdgeColumns,
+        ];
+
+        Should.Throw<SqliteException>(() => InsertSession(connection, "both", both));
+    }
+
+    /// <summary>Every column migration 0006 adds, on both tables.</summary>
+    private static readonly string[] FlexibleColumns =
+    [
+        "SizingMode", "SizingPreset", "SizingRecommendationKind",
+        "SizingRecommendationMaxWidthMm", "SizingRecommendationMaxHeightMm",
+        "SizingPresetOverridden", "SizingTargetEdge", "SizingRequestedMm",
+        "TargetPlanSourceRevisionId", "TargetPlanSourceSha256",
+        "TargetPlanSourcePixelWidth", "TargetPlanSourcePixelHeight",
+        "TargetPlanPhotoshopEdge", "TargetPlanProjectedPixelWidth",
+        "TargetPlanProjectedPixelHeight", "TargetPlanScaleNumerator",
+        "TargetPlanScaleDenominator", "TargetPlanProductionDpi", "TargetPlanDirection",
+        "TargetPlanResizePolicy",
+        "EnlargementAuthoritySourceRevisionId", "EnlargementAuthoritySourceSha256",
+        "EnlargementAuthoritySizingMode", "EnlargementAuthorityTargetEdge",
+        "EnlargementAuthorityRequestedMm", "EnlargementAuthorityScaleNumerator",
+        "EnlargementAuthorityScaleDenominator", "EnlargementAuthorityProjectedPixelWidth",
+        "EnlargementAuthorityProjectedPixelHeight",
+    ];
+
+    /// <summary>
+    /// One complete, self-consistent TargetEdgeV1 decision: a 2000×1500 px source, A5's configured
+    /// 135 mm long edge overridden to a 200.025 mm width.
+    /// </summary>
+    /// <remarks>
+    /// 200.025 mm is an exact midpoint of the accepted conversion — 200.025 × 1500 / 127 is
+    /// 2362.5 px precisely — so it rounds away from zero to 2363 and is the value a binary double
+    /// would get wrong. It is here on purpose: this row is what the exact-decimal round trip is
+    /// asserted against (§7).
+    /// </remarks>
+    private static readonly (string Column, string Value)[] CompleteTargetEdgeColumns =
+    [
+        ("DimensionSemantics", "'TARGET_EDGE_V1'"),
+        ("SizingMode", "'CUSTOM_TARGET_EDGE'"),
+        ("SizingPreset", "'A5'"),
+        ("SizingRecommendationKind", "'MAXIMUM_LONG_EDGE'"),
+        ("SizingRecommendationMaxWidthMm", "'135'"),
+        ("SizingRecommendationMaxHeightMm", "'135'"),
+        ("SizingPresetOverridden", "1"),
+        ("SizingTargetEdge", "'LONG_EDGE'"),
+        ("SizingRequestedMm", "'200.025'"),
+        ("TargetPlanSourceRevisionId", "'22222222-2222-2222-2222-222222222222'"),
+        ("TargetPlanSourceSha256", $"'{new string('b', 64)}'"),
+        ("TargetPlanSourcePixelWidth", "2000"),
+        ("TargetPlanSourcePixelHeight", "1500"),
+        ("TargetPlanPhotoshopEdge", "'WIDTH'"),
+        ("TargetPlanProjectedPixelWidth", "2363"),
+        ("TargetPlanProjectedPixelHeight", "1772"),
+        ("TargetPlanScaleNumerator", "2363"),
+        ("TargetPlanScaleDenominator", "2000"),
+        ("TargetPlanProductionDpi", "300"),
+        ("TargetPlanDirection", "'ENLARGE'"),
+        ("TargetPlanResizePolicy", "'PRESERVE_DETAILS'"),
+    ];
+
+    /// <summary>The exact authority that covers <see cref="CompleteTargetEdgeColumns"/>.</summary>
+    private static readonly (string Column, string Value)[] CompleteAuthorityColumns =
+    [
+        ("EnlargementAuthoritySourceRevisionId", "'22222222-2222-2222-2222-222222222222'"),
+        ("EnlargementAuthoritySourceSha256", $"'{new string('b', 64)}'"),
+        ("EnlargementAuthoritySizingMode", "'CUSTOM_TARGET_EDGE'"),
+        ("EnlargementAuthorityTargetEdge", "'LONG_EDGE'"),
+        ("EnlargementAuthorityRequestedMm", "'200.025'"),
+        ("EnlargementAuthorityScaleNumerator", "2363"),
+        ("EnlargementAuthorityScaleDenominator", "2000"),
+        ("EnlargementAuthorityProjectedPixelWidth", "2363"),
+        ("EnlargementAuthorityProjectedPixelHeight", "1772"),
+    ];
+
+    private static long ScalarOf(SqliteConnection connection, string sql)
+    {
+        using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = sql;
+        return Convert.ToInt64(command.ExecuteScalar());
+    }
+
     /// <summary>
     /// One complete, self-consistent plan: 2000×1000 px fitted to a 50×50 mm box, so width is the
     /// limiting edge and 50 mm is 591 px at 300 ppi.

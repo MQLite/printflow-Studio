@@ -218,7 +218,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
                  PrintPlanMode, PrintPlanLimitingEdge, PrintPlanLimitingValueMm,
                  PrintPlanProjectedPixelWidth, PrintPlanProjectedPixelHeight,
-                 PrintPlanProductionDpi, PrintPlanResizePolicy)
+                 PrintPlanProductionDpi, PrintPlanResizePolicy,
+                 SizingMode, SizingPreset, SizingRecommendationKind,
+                 SizingRecommendationMaxWidthMm, SizingRecommendationMaxHeightMm,
+                 SizingPresetOverridden, SizingTargetEdge, SizingRequestedMm,
+                 TargetPlanSourceRevisionId, TargetPlanSourceSha256,
+                 TargetPlanSourcePixelWidth, TargetPlanSourcePixelHeight,
+                 TargetPlanPhotoshopEdge,
+                 TargetPlanProjectedPixelWidth, TargetPlanProjectedPixelHeight,
+                 TargetPlanScaleNumerator, TargetPlanScaleDenominator,
+                 TargetPlanProductionDpi, TargetPlanDirection, TargetPlanResizePolicy,
+                 EnlargementAuthoritySourceRevisionId, EnlargementAuthoritySourceSha256,
+                 EnlargementAuthoritySizingMode, EnlargementAuthorityTargetEdge,
+                 EnlargementAuthorityRequestedMm,
+                 EnlargementAuthorityScaleNumerator, EnlargementAuthorityScaleDenominator,
+                 EnlargementAuthorityProjectedPixelWidth, EnlargementAuthorityProjectedPixelHeight)
             VALUES
                 (@Id, @WorkflowType, @OutputName, @CurrentStep, @State, @WorkspacePath, @CreatedAtUtc, @UpdatedAtUtc,
                  @CompletedAtUtc, @HandedOffAtUtc, @HandOffReason, @AbandonedAtUtc, @AbandonReason,
@@ -232,7 +246,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
                  @PrintPlanMode, @PrintPlanLimitingEdge, @PrintPlanLimitingValueMm,
                  @PrintPlanProjectedPixelWidth, @PrintPlanProjectedPixelHeight,
-                 @PrintPlanProductionDpi, @PrintPlanResizePolicy)
+                 @PrintPlanProductionDpi, @PrintPlanResizePolicy,
+                 @SizingMode, @SizingPreset, @SizingRecommendationKind,
+                 @SizingRecommendationMaxWidthMm, @SizingRecommendationMaxHeightMm,
+                 @SizingPresetOverridden, @SizingTargetEdge, @SizingRequestedMm,
+                 @TargetPlanSourceRevisionId, @TargetPlanSourceSha256,
+                 @TargetPlanSourcePixelWidth, @TargetPlanSourcePixelHeight,
+                 @TargetPlanPhotoshopEdge,
+                 @TargetPlanProjectedPixelWidth, @TargetPlanProjectedPixelHeight,
+                 @TargetPlanScaleNumerator, @TargetPlanScaleDenominator,
+                 @TargetPlanProductionDpi, @TargetPlanDirection, @TargetPlanResizePolicy,
+                 @EnlargementAuthoritySourceRevisionId, @EnlargementAuthoritySourceSha256,
+                 @EnlargementAuthoritySizingMode, @EnlargementAuthorityTargetEdge,
+                 @EnlargementAuthorityRequestedMm,
+                 @EnlargementAuthorityScaleNumerator, @EnlargementAuthorityScaleDenominator,
+                 @EnlargementAuthorityProjectedPixelWidth, @EnlargementAuthorityProjectedPixelHeight)
             ON CONFLICT(Id) DO UPDATE SET
                 WorkflowType = excluded.WorkflowType,
                 OutputName = excluded.OutputName,
@@ -290,7 +318,48 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 PrintPlanProjectedPixelWidth = excluded.PrintPlanProjectedPixelWidth,
                 PrintPlanProjectedPixelHeight = excluded.PrintPlanProjectedPixelHeight,
                 PrintPlanProductionDpi = excluded.PrintPlanProductionDpi,
-                PrintPlanResizePolicy = excluded.PrintPlanResizePolicy;
+                PrintPlanResizePolicy = excluded.PrintPlanResizePolicy,
+
+                -- The session's *pending* flexible-size decision and its enlargement authority,
+                -- so both update for exactly the same reason: they are what the next run would do
+                -- and what it would be permitted to do, and the operator may record a different
+                -- target or return upstream and clear it. The attempt copies are the ones that
+                -- must never be rewritten (Epic 11400 Part B1A.2D §24, §31).
+                --
+                -- Clearing is a write of NULLs rather than a special case: ReturnToStep and
+                -- AddAnotherSize produce a session with no selection, no plan and no authority,
+                -- and this statement stores exactly that. What is never a write is *invalidation*
+                -- — an authority stops applying because the exact target it names is no longer on
+                -- offer, which is a comparison (§30).
+                SizingMode = excluded.SizingMode,
+                SizingPreset = excluded.SizingPreset,
+                SizingRecommendationKind = excluded.SizingRecommendationKind,
+                SizingRecommendationMaxWidthMm = excluded.SizingRecommendationMaxWidthMm,
+                SizingRecommendationMaxHeightMm = excluded.SizingRecommendationMaxHeightMm,
+                SizingPresetOverridden = excluded.SizingPresetOverridden,
+                SizingTargetEdge = excluded.SizingTargetEdge,
+                SizingRequestedMm = excluded.SizingRequestedMm,
+                TargetPlanSourceRevisionId = excluded.TargetPlanSourceRevisionId,
+                TargetPlanSourceSha256 = excluded.TargetPlanSourceSha256,
+                TargetPlanSourcePixelWidth = excluded.TargetPlanSourcePixelWidth,
+                TargetPlanSourcePixelHeight = excluded.TargetPlanSourcePixelHeight,
+                TargetPlanPhotoshopEdge = excluded.TargetPlanPhotoshopEdge,
+                TargetPlanProjectedPixelWidth = excluded.TargetPlanProjectedPixelWidth,
+                TargetPlanProjectedPixelHeight = excluded.TargetPlanProjectedPixelHeight,
+                TargetPlanScaleNumerator = excluded.TargetPlanScaleNumerator,
+                TargetPlanScaleDenominator = excluded.TargetPlanScaleDenominator,
+                TargetPlanProductionDpi = excluded.TargetPlanProductionDpi,
+                TargetPlanDirection = excluded.TargetPlanDirection,
+                TargetPlanResizePolicy = excluded.TargetPlanResizePolicy,
+                EnlargementAuthoritySourceRevisionId = excluded.EnlargementAuthoritySourceRevisionId,
+                EnlargementAuthoritySourceSha256 = excluded.EnlargementAuthoritySourceSha256,
+                EnlargementAuthoritySizingMode = excluded.EnlargementAuthoritySizingMode,
+                EnlargementAuthorityTargetEdge = excluded.EnlargementAuthorityTargetEdge,
+                EnlargementAuthorityRequestedMm = excluded.EnlargementAuthorityRequestedMm,
+                EnlargementAuthorityScaleNumerator = excluded.EnlargementAuthorityScaleNumerator,
+                EnlargementAuthorityScaleDenominator = excluded.EnlargementAuthorityScaleDenominator,
+                EnlargementAuthorityProjectedPixelWidth = excluded.EnlargementAuthorityProjectedPixelWidth,
+                EnlargementAuthorityProjectedPixelHeight = excluded.EnlargementAuthorityProjectedPixelHeight;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }
@@ -390,14 +459,16 @@ public sealed class SqliteSessionRepository : ISessionRepository
     /// Inserts an attempt, or updates the fields that legitimately change when it ends.
     /// </summary>
     /// <remarks>
-    /// The trim-parameter, background-removal and print-plan columns are deliberately absent from
-    /// the <c>DO UPDATE</c> clause. They are written once, with the attempt's opening transaction,
-    /// and describe what this attempt was asked to do, what authorised it and which fit box
-    /// produced it — so leaving them out is what makes "a retry with a different margin never
-    /// rewrites the first attempt's settings, a later decision never rewrites what an earlier
-    /// cutout was authorised by, and a later change of limits never relabels an earlier output" a
-    /// property of the SQL rather than a promise about the caller (Epic 11200 Part C3 §15;
-    /// Epic 11300 Part C2B1 §11, §18; Epic 11400 Part B1A.2A §12).
+    /// The trim-parameter, background-removal, print-plan, flexible-size and enlargement-authority
+    /// columns are deliberately absent from the <c>DO UPDATE</c> clause. They are written once,
+    /// with the attempt's opening transaction, and describe what this attempt was asked to do,
+    /// what authorised it and which geometry produced it — so leaving them out is what makes "a
+    /// retry with a different margin never rewrites the first attempt's settings, a later decision
+    /// never rewrites what an earlier cutout was authorised by, a later change of size never
+    /// relabels an earlier output, and a later enlargement confirmation never makes an earlier run
+    /// read as authorised" a property of the SQL rather than a promise about the caller
+    /// (Epic 11200 Part C3 §15; Epic 11300 Part C2B1 §11, §18; Epic 11400 Part B1A.2A §12;
+    /// Part B1A.2D §24).
     /// </remarks>
     private static Task UpsertAttemptAsync(SqliteConnection connection, SqliteTransaction transaction, ProcessingAttempt attempt)
     {
@@ -415,7 +486,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
                  PrintPlanMode, PrintPlanLimitingEdge, PrintPlanLimitingValueMm,
                  PrintPlanProjectedPixelWidth, PrintPlanProjectedPixelHeight,
-                 PrintPlanProductionDpi, PrintPlanResizePolicy)
+                 PrintPlanProductionDpi, PrintPlanResizePolicy,
+                 SizingMode, SizingPreset, SizingRecommendationKind,
+                 SizingRecommendationMaxWidthMm, SizingRecommendationMaxHeightMm,
+                 SizingPresetOverridden, SizingTargetEdge, SizingRequestedMm,
+                 TargetPlanSourceRevisionId, TargetPlanSourceSha256,
+                 TargetPlanSourcePixelWidth, TargetPlanSourcePixelHeight,
+                 TargetPlanPhotoshopEdge,
+                 TargetPlanProjectedPixelWidth, TargetPlanProjectedPixelHeight,
+                 TargetPlanScaleNumerator, TargetPlanScaleDenominator,
+                 TargetPlanProductionDpi, TargetPlanDirection, TargetPlanResizePolicy,
+                 EnlargementAuthoritySourceRevisionId, EnlargementAuthoritySourceSha256,
+                 EnlargementAuthoritySizingMode, EnlargementAuthorityTargetEdge,
+                 EnlargementAuthorityRequestedMm,
+                 EnlargementAuthorityScaleNumerator, EnlargementAuthorityScaleDenominator,
+                 EnlargementAuthorityProjectedPixelWidth, EnlargementAuthorityProjectedPixelHeight)
             VALUES
                 (@Id, @SessionId, @StepKind, @InputRevisionId, @Operation, @AdapterId, @StartedAtUtc, @EndedAtUtc,
                  @ResultStatus, @OutputRevisionId, @FailureCode, @FailureDetailJson, @RetryOfAttemptId, @RetrySequence,
@@ -427,7 +512,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
                  @PrintPlanMode, @PrintPlanLimitingEdge, @PrintPlanLimitingValueMm,
                  @PrintPlanProjectedPixelWidth, @PrintPlanProjectedPixelHeight,
-                 @PrintPlanProductionDpi, @PrintPlanResizePolicy)
+                 @PrintPlanProductionDpi, @PrintPlanResizePolicy,
+                 @SizingMode, @SizingPreset, @SizingRecommendationKind,
+                 @SizingRecommendationMaxWidthMm, @SizingRecommendationMaxHeightMm,
+                 @SizingPresetOverridden, @SizingTargetEdge, @SizingRequestedMm,
+                 @TargetPlanSourceRevisionId, @TargetPlanSourceSha256,
+                 @TargetPlanSourcePixelWidth, @TargetPlanSourcePixelHeight,
+                 @TargetPlanPhotoshopEdge,
+                 @TargetPlanProjectedPixelWidth, @TargetPlanProjectedPixelHeight,
+                 @TargetPlanScaleNumerator, @TargetPlanScaleDenominator,
+                 @TargetPlanProductionDpi, @TargetPlanDirection, @TargetPlanResizePolicy,
+                 @EnlargementAuthoritySourceRevisionId, @EnlargementAuthoritySourceSha256,
+                 @EnlargementAuthoritySizingMode, @EnlargementAuthorityTargetEdge,
+                 @EnlargementAuthorityRequestedMm,
+                 @EnlargementAuthorityScaleNumerator, @EnlargementAuthorityScaleDenominator,
+                 @EnlargementAuthorityProjectedPixelWidth, @EnlargementAuthorityProjectedPixelHeight)
             ON CONFLICT(Id) DO UPDATE SET
                 EndedAtUtc = excluded.EndedAtUtc,
                 ResultStatus = excluded.ResultStatus,

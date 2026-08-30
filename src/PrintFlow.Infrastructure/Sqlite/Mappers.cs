@@ -300,6 +300,7 @@ internal static class Mappers
     {
         PrintDimensionSemantics.LegacyExactPair => "LEGACY_EXACT_PAIR",
         PrintDimensionSemantics.MaxBoundsV1 => "MAX_BOUNDS_V1",
+        PrintDimensionSemantics.TargetEdgeV1 => "TARGET_EDGE_V1",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
     };
 
@@ -316,6 +317,7 @@ internal static class Mappers
     {
         "LEGACY_EXACT_PAIR" => PrintDimensionSemantics.LegacyExactPair,
         "MAX_BOUNDS_V1" => PrintDimensionSemantics.MaxBoundsV1,
+        "TARGET_EDGE_V1" => PrintDimensionSemantics.TargetEdgeV1,
         _ => throw new InvalidOperationException(
             $"Unsupported dimension semantics '{text}' in database; this build cannot say what those " +
             "millimetres mean, and will not guess."),
@@ -364,6 +366,7 @@ internal static class Mappers
     {
         PhotoshopResizeMode.None => "NONE",
         PhotoshopResizeMode.BicubicSharper => "BICUBIC_SHARPER",
+        PhotoshopResizeMode.PreserveDetails => "PRESERVE_DETAILS",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
     };
 
@@ -371,6 +374,7 @@ internal static class Mappers
     {
         "NONE" => PhotoshopResizeMode.None,
         "BICUBIC_SHARPER" => PhotoshopResizeMode.BicubicSharper,
+        "PRESERVE_DETAILS" => PhotoshopResizeMode.PreserveDetails,
         _ => throw new InvalidOperationException($"Unknown PhotoshopResizeMode '{text}' in database."),
     };
 
@@ -463,6 +467,350 @@ internal static class Mappers
             ToPhotoshopResizeMode(resizePolicy));
     }
 
+
+    // ---------------------------------------------------------------------------------------
+    // Flexible size, target-edge plan and enlargement authority (Epic 11400 Part B1A.2D §7, §23)
+    // ---------------------------------------------------------------------------------------
+
+    public static string ToText(OperatorSizingMode value) => value switch
+    {
+        OperatorSizingMode.PresetFit => "PRESET_FIT",
+        OperatorSizingMode.CustomTargetEdge => "CUSTOM_TARGET_EDGE",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static OperatorSizingMode ToOperatorSizingMode(string text) => text switch
+    {
+        "PRESET_FIT" => OperatorSizingMode.PresetFit,
+        "CUSTOM_TARGET_EDGE" => OperatorSizingMode.CustomTargetEdge,
+        _ => throw new InvalidOperationException(
+            $"Unsupported sizing mode '{text}' in database; this build cannot say how that size was " +
+            "chosen, and will not guess."),
+    };
+
+    public static string ToText(TargetEdge value) => value switch
+    {
+        TargetEdge.Width => "WIDTH",
+        TargetEdge.Height => "HEIGHT",
+        TargetEdge.LongEdge => "LONG_EDGE",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static TargetEdge ToTargetEdge(string text) => text switch
+    {
+        "WIDTH" => TargetEdge.Width,
+        "HEIGHT" => TargetEdge.Height,
+        "LONG_EDGE" => TargetEdge.LongEdge,
+        _ => throw new InvalidOperationException($"Unknown TargetEdge '{text}' in database."),
+    };
+
+    public static string ToText(ResizeDirection value) => value switch
+    {
+        ResizeDirection.ResolutionOnly => "RESOLUTION_ONLY",
+        ResizeDirection.Shrink => "SHRINK",
+        ResizeDirection.Enlarge => "ENLARGE",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static ResizeDirection ToResizeDirection(string text) => text switch
+    {
+        "RESOLUTION_ONLY" => ResizeDirection.ResolutionOnly,
+        "SHRINK" => ResizeDirection.Shrink,
+        "ENLARGE" => ResizeDirection.Enlarge,
+        _ => throw new InvalidOperationException($"Unknown ResizeDirection '{text}' in database."),
+    };
+
+    public static string ToText(PresetRecommendationKind value) => value switch
+    {
+        PresetRecommendationKind.MaximumBox => "MAXIMUM_BOX",
+        PresetRecommendationKind.MaximumLongEdge => "MAXIMUM_LONG_EDGE",
+        _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
+    public static PresetRecommendationKind ToPresetRecommendationKind(string text) => text switch
+    {
+        "MAXIMUM_BOX" => PresetRecommendationKind.MaximumBox,
+        "MAXIMUM_LONG_EDGE" => PresetRecommendationKind.MaximumLongEdge,
+        _ => throw new InvalidOperationException($"Unknown PresetRecommendationKind '{text}' in database."),
+    };
+
+    /// <summary>
+    /// Writes millimetres as text, exactly (Epic 11400 Part B1A.2D §7).
+    /// </summary>
+    /// <remarks>
+    /// The accepted target-edge calculation is exact: it converts the operator's decimal to a
+    /// rational and rounds on integer remainders. Storing that decimal in a SQLite REAL would put
+    /// it through a binary double on the way out and back, and 137.5 mm returning as
+    /// 137.49999999999999 would decide a midpoint case somewhere other than where the contract
+    /// decides it — and would stop matching the enlargement authority granted for it.
+    /// <para>
+    /// <c>decimal.ToString</c> under the invariant culture round-trips a decimal exactly,
+    /// including its scale, so what comes back is the number the operator typed rather than the
+    /// nearest representable one. No arithmetic happens here; this is transport (§7).
+    /// </para>
+    /// </remarks>
+    public static string ToMillimetreText(decimal millimetres) =>
+        millimetres.ToString(CultureInfo.InvariantCulture);
+
+    /// <inheritdoc cref="ToMillimetreText" />
+    public static decimal ToMillimetres(string text) =>
+        decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)
+            ? value
+            : throw new InvalidOperationException(
+                $"'{text}' is not an exact millimetre value; a stored size that cannot be read back " +
+                "exactly is not a size this build will act on.");
+
+    /// <summary>
+    /// Rebuilds a <see cref="FlexibleSizeSelection"/> from its columns, or null when none was
+    /// stored (Epic 11400 Part B1A.2D §22, §23).
+    /// </summary>
+    /// <remarks>
+    /// The last defence behind the database CHECK, and it refuses rather than repairs. A stored
+    /// preset fit that also carries a requested edge, an override with no recommendation behind
+    /// it, or a custom target with no millimetres are each a row describing a decision no operator
+    /// could have made — and every one of them goes back through
+    /// <see cref="FlexibleSizeSelection.Rehydrate"/>, which is where those rules already live.
+    /// <para>
+    /// Null means no flexible-size decision was recorded — a historical row, or a session whose
+    /// bounds were typed rather than chosen from a named preset. It never means "PresetFit was
+    /// assumed" (§21).
+    /// </para>
+    /// </remarks>
+    public static FlexibleSizeSelection? ToFlexibleSizeSelection(
+        string? sizingMode,
+        string? preset,
+        string? recommendationKind,
+        string? recommendationMaxWidthMm,
+        string? recommendationMaxHeightMm,
+        bool? presetOverridden,
+        string? targetEdge,
+        string? requestedMm)
+    {
+        if (sizingMode is null)
+        {
+            bool anyPresent =
+                preset is not null || recommendationKind is not null ||
+                recommendationMaxWidthMm is not null || recommendationMaxHeightMm is not null ||
+                presetOverridden is not null || targetEdge is not null || requestedMm is not null;
+
+            return anyPresent
+                ? throw new InvalidOperationException(
+                    "A flexible-size row carries a preset, an edge or a request without saying which " +
+                    "sizing mode produced them; nothing here infers the mode from what is beside it.")
+                : null;
+        }
+
+        PresetPrintRecommendation? recommendation = null;
+        if (preset is not null || recommendationKind is not null ||
+            recommendationMaxWidthMm is not null || recommendationMaxHeightMm is not null)
+        {
+            if (preset is null || recommendationKind is null ||
+                recommendationMaxWidthMm is null || recommendationMaxHeightMm is null)
+            {
+                throw new InvalidOperationException(
+                    "A stored preset recommendation is missing part of its content; a named size without " +
+                    "its configured kind and limits is not an executable recommendation.");
+            }
+
+            PresetRecommendationKind kind = ToPresetRecommendationKind(recommendationKind);
+            decimal width = ToMillimetres(recommendationMaxWidthMm);
+            decimal height = ToMillimetres(recommendationMaxHeightMm);
+
+            recommendation = kind == PresetRecommendationKind.MaximumLongEdge
+                ? width == height
+                    ? PresetPrintRecommendation.MaximumLongEdge(ToSizePreset(preset), width)
+                    : throw new InvalidOperationException(
+                        $"A stored long-edge recommendation carries two different limits ({width} and " +
+                        $"{height} mm); a long edge is one number.")
+                : PresetPrintRecommendation.MaximumBox(ToSizePreset(preset), width, height);
+        }
+
+        return FlexibleSizeSelection.Rehydrate(
+            ToOperatorSizingMode(sizingMode),
+            recommendation,
+            presetOverridden ?? false,
+            targetEdge is null ? null : ToTargetEdge(targetEdge),
+            requestedMm is null ? null : ToMillimetres(requestedMm));
+    }
+
+    /// <summary>
+    /// Rebuilds a <see cref="TargetEdgePrintPreparationPlan"/> from its columns, or null when none
+    /// was stored (Epic 11400 Part B1A.2D §8, §23).
+    /// </summary>
+    /// <remarks>
+    /// The same rule the maximum-bound mapper follows, applied to the second contract: the whole
+    /// group is required together, and it goes back through
+    /// <see cref="TargetEdgePrintPreparationPlan.Rehydrate"/> so a self-contradictory row — an
+    /// unresolved long edge, an enlargement claiming BicubicSharper, a scale that is not the ratio
+    /// between the stored pixels — is refused here exactly as the Domain refuses it. It
+    /// deliberately does <b>not</b> recalculate the projection: recomputing on read would repair a
+    /// bad row rather than reject it.
+    /// <para>
+    /// The requested millimetres come from <paramref name="selection"/> rather than from a column
+    /// of their own. They are the operator's decision and they live once; a second copy beside the
+    /// plan would be a second number that could disagree with it (§7).
+    /// </para>
+    /// </remarks>
+    public static TargetEdgePrintPreparationPlan? ToTargetEdgePlan(
+        FlexibleSizeSelection? selection,
+        string? sourceRevisionId,
+        string? sourceSha256,
+        int? sourcePixelWidth,
+        int? sourcePixelHeight,
+        string? photoshopEdge,
+        int? projectedPixelWidth,
+        int? projectedPixelHeight,
+        int? scaleNumerator,
+        int? scaleDenominator,
+        int? productionDpi,
+        string? direction,
+        string? resizePolicy)
+    {
+        bool anyPresent =
+            sourceRevisionId is not null || sourceSha256 is not null ||
+            sourcePixelWidth is not null || sourcePixelHeight is not null ||
+            photoshopEdge is not null ||
+            projectedPixelWidth is not null || projectedPixelHeight is not null ||
+            scaleNumerator is not null || scaleDenominator is not null ||
+            productionDpi is not null || direction is not null || resizePolicy is not null;
+
+        if (!anyPresent)
+        {
+            return null;
+        }
+
+        if (sourceRevisionId is null || sourceSha256 is null ||
+            sourcePixelWidth is null || sourcePixelHeight is null ||
+            photoshopEdge is null ||
+            projectedPixelWidth is null || projectedPixelHeight is null ||
+            scaleNumerator is null || scaleDenominator is null ||
+            productionDpi is null || direction is null || resizePolicy is null)
+        {
+            throw new InvalidOperationException(
+                "A target-edge plan row is missing part of its content; a plan without its source " +
+                "binding, its resolved edge, its projected pixels and its exact scale describes no " +
+                "executable operation, and nothing here fills the gaps in.");
+        }
+
+        if (selection is null)
+        {
+            throw new InvalidOperationException(
+                "A target-edge plan row carries no sizing selection; the requested edge and millimetres " +
+                "are the operator's decision and the plan is meaningless without them.");
+        }
+
+        if (productionDpi.Value != PrintDimensions.ProductionDpi)
+        {
+            throw new InvalidOperationException(
+                $"A target-edge plan row claims {productionDpi.Value} ppi; production resolution is " +
+                $"fixed at {PrintDimensions.ProductionDpi} and is never operator-selected.");
+        }
+
+        return TargetEdgePrintPreparationPlan.Rehydrate(
+            RevisionId.From(Guid.Parse(sourceRevisionId)),
+            Sha256.Parse(sourceSha256),
+            sourcePixelWidth.Value,
+            sourcePixelHeight.Value,
+            selection,
+            ToLimitingEdge(photoshopEdge),
+            projectedPixelWidth.Value,
+            projectedPixelHeight.Value,
+            ResizeScale.FromReduced(scaleNumerator.Value, scaleDenominator.Value),
+            ToResizeDirection(direction),
+            ToPhotoshopResizeMode(resizePolicy));
+    }
+
+    /// <summary>
+    /// Rebuilds an <see cref="EnlargementAuthority"/> from its columns, or null when none was
+    /// stored (Epic 11400 Part B1A.2D §9, §23).
+    /// </summary>
+    /// <remarks>
+    /// Completeness is the whole rule. An authority missing any one of the facts it binds — the
+    /// hash above all — is not a weaker permission but a permission for something unspecified, so
+    /// a partial row is refused rather than read as covering whatever sits beside it.
+    /// </remarks>
+    public static EnlargementAuthority? ToEnlargementAuthority(
+        string? sourceRevisionId,
+        string? sourceSha256,
+        string? sizingMode,
+        string? targetEdge,
+        string? requestedMm,
+        int? scaleNumerator,
+        int? scaleDenominator,
+        int? projectedPixelWidth,
+        int? projectedPixelHeight)
+    {
+        bool anyPresent =
+            sourceRevisionId is not null || sourceSha256 is not null || sizingMode is not null ||
+            targetEdge is not null || requestedMm is not null ||
+            scaleNumerator is not null || scaleDenominator is not null ||
+            projectedPixelWidth is not null || projectedPixelHeight is not null;
+
+        if (!anyPresent)
+        {
+            return null;
+        }
+
+        if (sourceRevisionId is null || sourceSha256 is null || sizingMode is null ||
+            targetEdge is null || requestedMm is null ||
+            scaleNumerator is null || scaleDenominator is null ||
+            projectedPixelWidth is null || projectedPixelHeight is null)
+        {
+            throw new InvalidOperationException(
+                "An enlargement authority row is missing part of its binding; a permission that cannot " +
+                "name the exact source, edge, request and projection it covers permits nothing specific.");
+        }
+
+        return EnlargementAuthority.Rehydrate(
+            RevisionId.From(Guid.Parse(sourceRevisionId)),
+            Sha256.Parse(sourceSha256),
+            ToOperatorSizingMode(sizingMode),
+            ToTargetEdge(targetEdge),
+            ToMillimetres(requestedMm),
+            ResizeScale.FromReduced(scaleNumerator.Value, scaleDenominator.Value),
+            projectedPixelWidth.Value,
+            projectedPixelHeight.Value);
+    }
+
+    /// <summary>
+    /// Rebuilds the immutable preparation one attempt ran under, or null when it was not a
+    /// Photoshop output (Epic 11400 Part B1A.2D §24).
+    /// </summary>
+    /// <remarks>
+    /// Which contract the attempt ran under is stated by which column group is populated, and a
+    /// row holding both is refused — the database says so too, and saying it twice is deliberate:
+    /// an attempt that claimed two different geometries would be an audit row with no single
+    /// answer to "what produced this file".
+    /// <para>
+    /// A target-edge enlargement is rebuilt <i>with</i> its authority, through
+    /// <see cref="TargetEdgePreparation"/>'s constructor, which refuses an enlargement whose
+    /// authority does not match. So a tampered row claiming an unauthorised enlargement fails to
+    /// load rather than loading as permitted.
+    /// </para>
+    /// </remarks>
+    public static PhotoshopPreparation? ToPhotoshopPreparation(
+        PrintPreparationPlan? boundsPlan,
+        TargetEdgePrintPreparationPlan? targetEdgePlan,
+        EnlargementAuthority? authority)
+    {
+        if (boundsPlan is not null && targetEdgePlan is not null)
+        {
+            throw new InvalidOperationException(
+                "An attempt row holds both a maximum-bound plan and a target-edge plan; one run has one " +
+                "geometry, and this build will not choose between them.");
+        }
+
+        if (boundsPlan is not null)
+        {
+            return authority is null
+                ? new FitWithinBoundsPreparation(boundsPlan)
+                : throw new InvalidOperationException(
+                    "An attempt row holds an enlargement authority beside a maximum-bound plan, which " +
+                    "can never enlarge; the row describes a permission for a run nobody asked for.");
+        }
+
+        return targetEdgePlan is null ? null : new TargetEdgePreparation(targetEdgePlan, authority);
+    }
     public static string ToText(WhiteUnderbaseBranch value) => value switch
     {
         WhiteUnderbaseBranch.W1_0px => "W1_0PX",
@@ -576,6 +924,63 @@ internal static class Mappers
         PrintPlanProjectedPixelHeight = session.PrintPreparationPlan?.ProjectedPixelHeight,
         PrintPlanProductionDpi = session.PrintPreparationPlan?.ProductionDpi,
         PrintPlanResizePolicy = session.PrintPreparationPlan is { } sr ? ToText(sr.ResizePolicy) : null,
+
+        // The pending flexible-size decision, written only when one exists. The recommendation is
+        // written beside the override rather than replaced by it, so an override stays readable as
+        // an override of a specific configured limit (Epic 11400 Part B1A.2D §6).
+        SizingMode = session.SizeSelection is { } ss ? ToText(ss.Mode) : null,
+        SizingPreset = session.SizeSelection?.Recommendation is { } sc ? ToText(sc.Preset) : null,
+        SizingRecommendationKind =
+            session.SizeSelection?.Recommendation is { } sk ? ToText(sk.Kind) : null,
+        SizingRecommendationMaxWidthMm = session.SizeSelection?.Recommendation is { } sw
+            ? ToMillimetreText(sw.MaxWidthMm)
+            : null,
+        SizingRecommendationMaxHeightMm = session.SizeSelection?.Recommendation is { } sh
+            ? ToMillimetreText(sh.MaxHeightMm)
+            : null,
+        SizingPresetOverridden = session.SizeSelection?.PresetOverridden,
+        SizingTargetEdge =
+            session.SizeSelection?.SelectedTargetEdge is { } ste ? ToText(ste) : null,
+        SizingRequestedMm = session.SizeSelection?.RequestedMillimetres is { } srm
+            ? ToMillimetreText(srm)
+            : null,
+
+        TargetPlanSourceRevisionId = session.TargetEdgePlan?.SourceRevisionId.ToString(),
+        TargetPlanSourceSha256 = session.TargetEdgePlan?.SourceSha256.Value,
+        TargetPlanSourcePixelWidth = session.TargetEdgePlan?.SourcePixelWidth,
+        TargetPlanSourcePixelHeight = session.TargetEdgePlan?.SourcePixelHeight,
+        TargetPlanPhotoshopEdge = session.TargetEdgePlan is { } tpe
+            ? ToText(tpe.Projection.PhotoshopTargetEdge)
+            : null,
+        TargetPlanProjectedPixelWidth = session.TargetEdgePlan?.Projection.ProjectedPixelWidth,
+        TargetPlanProjectedPixelHeight = session.TargetEdgePlan?.Projection.ProjectedPixelHeight,
+        TargetPlanScaleNumerator = session.TargetEdgePlan?.Projection.ProjectedScale.Numerator,
+        TargetPlanScaleDenominator = session.TargetEdgePlan?.Projection.ProjectedScale.Denominator,
+        TargetPlanProductionDpi = session.TargetEdgePlan?.ProductionDpi,
+        TargetPlanDirection = session.TargetEdgePlan is { } tpd
+            ? ToText(tpd.Projection.Direction)
+            : null,
+        TargetPlanResizePolicy = session.TargetEdgePlan is { } tpp
+            ? ToText(tpp.Projection.ResizePolicy)
+            : null,
+
+        EnlargementAuthoritySourceRevisionId =
+            session.EnlargementAuthority?.SourceRevisionId.ToString(),
+        EnlargementAuthoritySourceSha256 = session.EnlargementAuthority?.SourceSha256.Value,
+        EnlargementAuthoritySizingMode =
+            session.EnlargementAuthority is { } eam ? ToText(eam.SizingMode) : null,
+        EnlargementAuthorityTargetEdge =
+            session.EnlargementAuthority is { } eae ? ToText(eae.SelectedTargetEdge) : null,
+        EnlargementAuthorityRequestedMm = session.EnlargementAuthority is { } ear
+            ? ToMillimetreText(ear.RequestedMillimetres)
+            : null,
+        EnlargementAuthorityScaleNumerator = session.EnlargementAuthority?.ProjectedScale.Numerator,
+        EnlargementAuthorityScaleDenominator =
+            session.EnlargementAuthority?.ProjectedScale.Denominator,
+        EnlargementAuthorityProjectedPixelWidth =
+            session.EnlargementAuthority?.ProjectedTargetPixelWidth,
+        EnlargementAuthorityProjectedPixelHeight =
+            session.EnlargementAuthority?.ProjectedTargetPixelHeight,
     };
 
     public static ProcessingSession ToDomain(SessionRow row)
@@ -584,6 +989,14 @@ internal static class Mappers
             ? PrintDimensions.FromMillimetres(
                 width, row.DimensionsHeightMm!.Value, ToSizePreset(row.DimensionsPreset!))
             : null;
+
+        // Read once and used twice: the target-edge plan is rehydrated with the very selection the
+        // session holds, so the requested edge and millimetres exist in exactly one place and the
+        // plan cannot disagree with the decision it came from (Epic 11400 Part B1A.2D §7).
+        FlexibleSizeSelection? selection = ToFlexibleSizeSelection(
+            row.SizingMode, row.SizingPreset, row.SizingRecommendationKind,
+            row.SizingRecommendationMaxWidthMm, row.SizingRecommendationMaxHeightMm,
+            row.SizingPresetOverridden, row.SizingTargetEdge, row.SizingRequestedMm);
 
         return new ProcessingSession(
             SessionId.From(Guid.Parse(row.Id)),
@@ -635,6 +1048,31 @@ internal static class Mappers
                 row.PrintPlanLimitingEdge, row.PrintPlanLimitingValueMm,
                 row.PrintPlanProjectedPixelWidth, row.PrintPlanProjectedPixelHeight,
                 row.PrintPlanProductionDpi, row.PrintPlanResizePolicy),
+
+            // Null on every row written before migration 0006, and on every session that recorded
+            // maximum bounds rather than a flexible size. That row is not upgraded: a valid
+            // MaxBoundsV1 session stays a MaxBoundsV1 session under its original accepted
+            // semantics, and nothing here invents a target edge it never had (§18, §21).
+            SizeSelection = selection,
+            TargetEdgePlan = ToTargetEdgePlan(
+                selection,
+                row.TargetPlanSourceRevisionId, row.TargetPlanSourceSha256,
+                row.TargetPlanSourcePixelWidth, row.TargetPlanSourcePixelHeight,
+                row.TargetPlanPhotoshopEdge,
+                row.TargetPlanProjectedPixelWidth, row.TargetPlanProjectedPixelHeight,
+                row.TargetPlanScaleNumerator, row.TargetPlanScaleDenominator,
+                row.TargetPlanProductionDpi, row.TargetPlanDirection, row.TargetPlanResizePolicy),
+
+            // Restored as a record, never as permission. Whether it still authorises anything is
+            // an exact match against the plan on offer, which WorkflowSnapshot decides — so
+            // reopening the app is not a way to acquire permission (§30).
+            EnlargementAuthority = ToEnlargementAuthority(
+                row.EnlargementAuthoritySourceRevisionId, row.EnlargementAuthoritySourceSha256,
+                row.EnlargementAuthoritySizingMode, row.EnlargementAuthorityTargetEdge,
+                row.EnlargementAuthorityRequestedMm,
+                row.EnlargementAuthorityScaleNumerator, row.EnlargementAuthorityScaleDenominator,
+                row.EnlargementAuthorityProjectedPixelWidth,
+                row.EnlargementAuthorityProjectedPixelHeight),
         };
     }
 
@@ -796,24 +1234,100 @@ internal static class Mappers
         BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
 
         // What THIS attempt ran under. Written once with the opening transaction and left out of
-        // the upsert's DO UPDATE clause, so a later change of limits cannot relabel it
-        // (Epic 11400 Part B1A.2A §12).
-        PrintPlanSourceRevisionId = attempt.PrintPreparationPlan?.SourceRevisionId.ToString(),
-        PrintPlanSourceSha256 = attempt.PrintPreparationPlan?.SourceSha256.Value,
-        PrintPlanSourcePixelWidth = attempt.PrintPreparationPlan?.SourcePixelWidth,
-        PrintPlanSourcePixelHeight = attempt.PrintPreparationPlan?.SourcePixelHeight,
-        PrintPlanMaxWidthMm = attempt.PrintPreparationPlan?.MaxWidthMm,
-        PrintPlanMaxHeightMm = attempt.PrintPreparationPlan?.MaxHeightMm,
-        PrintPlanLimitKind = attempt.PrintPreparationPlan is { } ap ? ToText(ap.LimitKind) : null,
-        PrintPlanMode = attempt.PrintPreparationPlan is { } am ? ToText(am.Mode) : null,
-        PrintPlanLimitingEdge = attempt.PrintPreparationPlan is { } ae ? ToText(ae.LimitingEdge) : null,
-        PrintPlanLimitingValueMm = attempt.PrintPreparationPlan?.LimitingValueMm,
-        PrintPlanProjectedPixelWidth = attempt.PrintPreparationPlan?.ProjectedPixelWidth,
-        PrintPlanProjectedPixelHeight = attempt.PrintPreparationPlan?.ProjectedPixelHeight,
-        PrintPlanProductionDpi = attempt.PrintPreparationPlan?.ProductionDpi,
-        PrintPlanResizePolicy = attempt.PrintPreparationPlan is { } ar ? ToText(ar.ResizePolicy) : null,
+        // the upsert's DO UPDATE clause, so a later change of size — or a later enlargement
+        // decision — cannot relabel it (Epic 11400 Part B1A.2A §12; Part B1A.2D §24).
+        //
+        // Exactly one of the two plan groups is written, whichever contract the run was made
+        // under. The maximum-bound group is populated only by a FitWithinBoundsPreparation and the
+        // target-edge group only by a TargetEdgePreparation, so an audit row always has one answer
+        // to "what produced this file".
+        PrintPlanSourceRevisionId = BoundsOf(attempt)?.SourceRevisionId.ToString(),
+        PrintPlanSourceSha256 = BoundsOf(attempt)?.SourceSha256.Value,
+        PrintPlanSourcePixelWidth = BoundsOf(attempt)?.SourcePixelWidth,
+        PrintPlanSourcePixelHeight = BoundsOf(attempt)?.SourcePixelHeight,
+        PrintPlanMaxWidthMm = BoundsOf(attempt)?.MaxWidthMm,
+        PrintPlanMaxHeightMm = BoundsOf(attempt)?.MaxHeightMm,
+        PrintPlanLimitKind = BoundsOf(attempt) is { } ap ? ToText(ap.LimitKind) : null,
+        PrintPlanMode = BoundsOf(attempt) is { } am ? ToText(am.Mode) : null,
+        PrintPlanLimitingEdge = BoundsOf(attempt) is { } ae ? ToText(ae.LimitingEdge) : null,
+        PrintPlanLimitingValueMm = BoundsOf(attempt)?.LimitingValueMm,
+        PrintPlanProjectedPixelWidth = BoundsOf(attempt)?.ProjectedPixelWidth,
+        PrintPlanProjectedPixelHeight = BoundsOf(attempt)?.ProjectedPixelHeight,
+        PrintPlanProductionDpi = BoundsOf(attempt)?.ProductionDpi,
+        PrintPlanResizePolicy = BoundsOf(attempt) is { } ar ? ToText(ar.ResizePolicy) : null,
+
+        SizingMode = TargetOf(attempt) is { } ts ? ToText(ts.Plan.Selection.Mode) : null,
+        SizingPreset = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tc
+            ? ToText(tc.Preset)
+            : null,
+        SizingRecommendationKind = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tk
+            ? ToText(tk.Kind)
+            : null,
+        SizingRecommendationMaxWidthMm = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tw
+            ? ToMillimetreText(tw.MaxWidthMm)
+            : null,
+        SizingRecommendationMaxHeightMm = TargetOf(attempt)?.Plan.Selection.Recommendation is { } th
+            ? ToMillimetreText(th.MaxHeightMm)
+            : null,
+        SizingPresetOverridden = TargetOf(attempt)?.Plan.Selection.PresetOverridden,
+        SizingTargetEdge = TargetOf(attempt) is { } te
+            ? ToText(te.Plan.Projection.SelectedTargetEdge)
+            : null,
+        SizingRequestedMm = TargetOf(attempt) is { } tr
+            ? ToMillimetreText(tr.Plan.Projection.RequestedMillimetres)
+            : null,
+
+        TargetPlanSourceRevisionId = TargetOf(attempt)?.Plan.SourceRevisionId.ToString(),
+        TargetPlanSourceSha256 = TargetOf(attempt)?.Plan.SourceSha256.Value,
+        TargetPlanSourcePixelWidth = TargetOf(attempt)?.Plan.SourcePixelWidth,
+        TargetPlanSourcePixelHeight = TargetOf(attempt)?.Plan.SourcePixelHeight,
+        TargetPlanPhotoshopEdge = TargetOf(attempt) is { } tp
+            ? ToText(tp.Plan.Projection.PhotoshopTargetEdge)
+            : null,
+        TargetPlanProjectedPixelWidth = TargetOf(attempt)?.Plan.Projection.ProjectedPixelWidth,
+        TargetPlanProjectedPixelHeight = TargetOf(attempt)?.Plan.Projection.ProjectedPixelHeight,
+        TargetPlanScaleNumerator = TargetOf(attempt)?.Plan.Projection.ProjectedScale.Numerator,
+        TargetPlanScaleDenominator = TargetOf(attempt)?.Plan.Projection.ProjectedScale.Denominator,
+        TargetPlanProductionDpi = TargetOf(attempt)?.Plan.ProductionDpi,
+        TargetPlanDirection = TargetOf(attempt) is { } td
+            ? ToText(td.Plan.Projection.Direction)
+            : null,
+        TargetPlanResizePolicy = TargetOf(attempt) is { } tz
+            ? ToText(tz.Plan.Projection.ResizePolicy)
+            : null,
+
+        // The exact permission this run went ahead under, when it needed one. Written here rather
+        // than left on the session, so a later change of mind cannot make an authorised run read
+        // as unauthorised, or an unauthorised one as permitted (§24).
+        EnlargementAuthoritySourceRevisionId =
+            TargetOf(attempt)?.Authority?.SourceRevisionId.ToString(),
+        EnlargementAuthoritySourceSha256 = TargetOf(attempt)?.Authority?.SourceSha256.Value,
+        EnlargementAuthoritySizingMode = TargetOf(attempt)?.Authority is { } aam
+            ? ToText(aam.SizingMode)
+            : null,
+        EnlargementAuthorityTargetEdge = TargetOf(attempt)?.Authority is { } aae
+            ? ToText(aae.SelectedTargetEdge)
+            : null,
+        EnlargementAuthorityRequestedMm = TargetOf(attempt)?.Authority is { } aar
+            ? ToMillimetreText(aar.RequestedMillimetres)
+            : null,
+        EnlargementAuthorityScaleNumerator =
+            TargetOf(attempt)?.Authority?.ProjectedScale.Numerator,
+        EnlargementAuthorityScaleDenominator =
+            TargetOf(attempt)?.Authority?.ProjectedScale.Denominator,
+        EnlargementAuthorityProjectedPixelWidth =
+            TargetOf(attempt)?.Authority?.ProjectedTargetPixelWidth,
+        EnlargementAuthorityProjectedPixelHeight =
+            TargetOf(attempt)?.Authority?.ProjectedTargetPixelHeight,
+
         AdapterNotes = attempt.AdapterNotes,
     };
+
+    private static PrintPreparationPlan? BoundsOf(ProcessingAttempt attempt) =>
+        (attempt.Preparation as FitWithinBoundsPreparation)?.Plan;
+
+    private static TargetEdgePreparation? TargetOf(ProcessingAttempt attempt) =>
+        attempt.Preparation as TargetEdgePreparation;
 
     public static ProcessingAttempt ToDomain(AttemptRow row)
     {
@@ -823,6 +1337,14 @@ internal static class Mappers
             Domain.Results.FailureCode code = Enum.Parse<Domain.Results.FailureCode>(row.FailureCode);
             failure = ReadFailure(code, row.FailureDetailJson);
         }
+
+        // The attempt's own copy of the selection, self-contained exactly as its plan is. An audit
+        // row that had to be joined back to the session to say what was requested would be an
+        // audit row the session could still change out from under (Part B1A.2D §24).
+        FlexibleSizeSelection? attemptSelection = ToFlexibleSizeSelection(
+            row.SizingMode, row.SizingPreset, row.SizingRecommendationKind,
+            row.SizingRecommendationMaxWidthMm, row.SizingRecommendationMaxHeightMm,
+            row.SizingPresetOverridden, row.SizingTargetEdge, row.SizingRequestedMm);
 
         return new ProcessingAttempt(
             AttemptId.From(Guid.Parse(row.Id)),
@@ -849,15 +1371,39 @@ internal static class Mappers
 
             // Null on every attempt that was not a Photoshop output, and on every attempt written
             // before migration 0005 — which is exactly what those rows were: attempts that had no
-            // preparation plan, never attempts that used a default (Epic 11400 Part B1A.2A §12).
-            PrintPreparationPlan = ToPrintPreparationPlan(
-                row.PrintPlanSourceRevisionId, row.PrintPlanSourceSha256,
-                row.PrintPlanSourcePixelWidth, row.PrintPlanSourcePixelHeight,
-                row.PrintPlanMaxWidthMm, row.PrintPlanMaxHeightMm,
-                row.PrintPlanLimitKind, row.PrintPlanMode,
-                row.PrintPlanLimitingEdge, row.PrintPlanLimitingValueMm,
-                row.PrintPlanProjectedPixelWidth, row.PrintPlanProjectedPixelHeight,
-                row.PrintPlanProductionDpi, row.PrintPlanResizePolicy),
+            // preparation, never attempts that used a default (Epic 11400 Part B1A.2A §12).
+            //
+            // Which contract the run was made under is stated by which column group is populated,
+            // and a row holding both is refused. A target-edge enlargement is rebuilt with its
+            // authority through TargetEdgePreparation, which refuses one that does not match — so
+            // a row claiming an unauthorised enlargement fails to load rather than loading as
+            // permitted (Part B1A.2D §24).
+            Preparation = ToPhotoshopPreparation(
+                ToPrintPreparationPlan(
+                    row.PrintPlanSourceRevisionId, row.PrintPlanSourceSha256,
+                    row.PrintPlanSourcePixelWidth, row.PrintPlanSourcePixelHeight,
+                    row.PrintPlanMaxWidthMm, row.PrintPlanMaxHeightMm,
+                    row.PrintPlanLimitKind, row.PrintPlanMode,
+                    row.PrintPlanLimitingEdge, row.PrintPlanLimitingValueMm,
+                    row.PrintPlanProjectedPixelWidth, row.PrintPlanProjectedPixelHeight,
+                    row.PrintPlanProductionDpi, row.PrintPlanResizePolicy),
+                ToTargetEdgePlan(
+                    attemptSelection,
+                    row.TargetPlanSourceRevisionId, row.TargetPlanSourceSha256,
+                    row.TargetPlanSourcePixelWidth, row.TargetPlanSourcePixelHeight,
+                    row.TargetPlanPhotoshopEdge,
+                    row.TargetPlanProjectedPixelWidth, row.TargetPlanProjectedPixelHeight,
+                    row.TargetPlanScaleNumerator, row.TargetPlanScaleDenominator,
+                    row.TargetPlanProductionDpi, row.TargetPlanDirection,
+                    row.TargetPlanResizePolicy),
+                ToEnlargementAuthority(
+                    row.EnlargementAuthoritySourceRevisionId, row.EnlargementAuthoritySourceSha256,
+                    row.EnlargementAuthoritySizingMode, row.EnlargementAuthorityTargetEdge,
+                    row.EnlargementAuthorityRequestedMm,
+                    row.EnlargementAuthorityScaleNumerator,
+                    row.EnlargementAuthorityScaleDenominator,
+                    row.EnlargementAuthorityProjectedPixelWidth,
+                    row.EnlargementAuthorityProjectedPixelHeight)),
         };
     }
 

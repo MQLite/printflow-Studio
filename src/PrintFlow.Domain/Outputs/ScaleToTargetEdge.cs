@@ -29,6 +29,32 @@ public readonly record struct ResizeScale
             sourceAuthoritativePixels / divisor);
     }
 
+    /// <summary>
+    /// Rebuilds a stored ratio, refusing one that was not already reduced
+    /// (Epic 11400 Part B1A.2D §7, §23).
+    /// </summary>
+    /// <remarks>
+    /// Reducing here instead of refusing would quietly repair a row: <c>3000/2000</c> and
+    /// <c>3/2</c> are the same number but not the same record, and only one of them is what
+    /// <see cref="FromPixels"/> writes. An authority comparison is exact
+    /// (<see cref="EnlargementAuthority.Authorises"/> compares the ratio itself), so a stored
+    /// unreduced pair would stop authorising the plan it was granted for.
+    /// </remarks>
+    public static ResizeScale FromReduced(int numerator, int denominator)
+    {
+        Positive(numerator, nameof(numerator));
+        Positive(denominator, nameof(denominator));
+        if (GreatestCommonDivisor(numerator, denominator) != 1)
+        {
+            throw new ArgumentException(
+                $"The stored scale {numerator}/{denominator} is not reduced; a projected scale is " +
+                "persisted exactly as it was calculated.",
+                nameof(numerator));
+        }
+
+        return new ResizeScale(numerator, denominator);
+    }
+
     private static int GreatestCommonDivisor(int first, int second)
     {
         while (second != 0)

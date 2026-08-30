@@ -74,6 +74,71 @@ internal sealed class SessionRow
     public int? PrintPlanProductionDpi { get; set; }
 
     public string? PrintPlanResizePolicy { get; set; }
+
+    // The flexible-size decision, its TargetEdgeV1 plan and its enlargement authority
+    // (Epic 11400 Part B1A.2D §6, §8, §9). Each of the three is an all-or-nothing group, and
+    // null across all of them is the honest "no flexible-size decision was recorded" -- never
+    // "PresetFit was assumed" and never "enlargement was allowed" (§21).
+    //
+    // Every millimetre value is text, because the accepted target-edge calculation is exact and a
+    // REAL round trip through a binary double would not be (§7).
+    public string? SizingMode { get; set; }
+
+    public string? SizingPreset { get; set; }
+
+    public string? SizingRecommendationKind { get; set; }
+
+    public string? SizingRecommendationMaxWidthMm { get; set; }
+
+    public string? SizingRecommendationMaxHeightMm { get; set; }
+
+    public bool? SizingPresetOverridden { get; set; }
+
+    public string? SizingTargetEdge { get; set; }
+
+    public string? SizingRequestedMm { get; set; }
+
+    public string? TargetPlanSourceRevisionId { get; set; }
+
+    public string? TargetPlanSourceSha256 { get; set; }
+
+    public int? TargetPlanSourcePixelWidth { get; set; }
+
+    public int? TargetPlanSourcePixelHeight { get; set; }
+
+    public string? TargetPlanPhotoshopEdge { get; set; }
+
+    public int? TargetPlanProjectedPixelWidth { get; set; }
+
+    public int? TargetPlanProjectedPixelHeight { get; set; }
+
+    public int? TargetPlanScaleNumerator { get; set; }
+
+    public int? TargetPlanScaleDenominator { get; set; }
+
+    public int? TargetPlanProductionDpi { get; set; }
+
+    public string? TargetPlanDirection { get; set; }
+
+    public string? TargetPlanResizePolicy { get; set; }
+
+    public string? EnlargementAuthoritySourceRevisionId { get; set; }
+
+    public string? EnlargementAuthoritySourceSha256 { get; set; }
+
+    public string? EnlargementAuthoritySizingMode { get; set; }
+
+    public string? EnlargementAuthorityTargetEdge { get; set; }
+
+    public string? EnlargementAuthorityRequestedMm { get; set; }
+
+    public int? EnlargementAuthorityScaleNumerator { get; set; }
+
+    public int? EnlargementAuthorityScaleDenominator { get; set; }
+
+    public int? EnlargementAuthorityProjectedPixelWidth { get; set; }
+
+    public int? EnlargementAuthorityProjectedPixelHeight { get; set; }
 }
 
 internal sealed class StepRow
@@ -189,6 +254,71 @@ internal sealed class AttemptRow
     public int? PrintPlanProductionDpi { get; set; }
 
     public string? PrintPlanResizePolicy { get; set; }
+
+    // The flexible-size decision, its TargetEdgeV1 plan and its enlargement authority
+    // (Epic 11400 Part B1A.2D §6, §8, §9). Each of the three is an all-or-nothing group, and
+    // null across all of them is the honest "no flexible-size decision was recorded" -- never
+    // "PresetFit was assumed" and never "enlargement was allowed" (§21).
+    //
+    // Every millimetre value is text, because the accepted target-edge calculation is exact and a
+    // REAL round trip through a binary double would not be (§7).
+    public string? SizingMode { get; set; }
+
+    public string? SizingPreset { get; set; }
+
+    public string? SizingRecommendationKind { get; set; }
+
+    public string? SizingRecommendationMaxWidthMm { get; set; }
+
+    public string? SizingRecommendationMaxHeightMm { get; set; }
+
+    public bool? SizingPresetOverridden { get; set; }
+
+    public string? SizingTargetEdge { get; set; }
+
+    public string? SizingRequestedMm { get; set; }
+
+    public string? TargetPlanSourceRevisionId { get; set; }
+
+    public string? TargetPlanSourceSha256 { get; set; }
+
+    public int? TargetPlanSourcePixelWidth { get; set; }
+
+    public int? TargetPlanSourcePixelHeight { get; set; }
+
+    public string? TargetPlanPhotoshopEdge { get; set; }
+
+    public int? TargetPlanProjectedPixelWidth { get; set; }
+
+    public int? TargetPlanProjectedPixelHeight { get; set; }
+
+    public int? TargetPlanScaleNumerator { get; set; }
+
+    public int? TargetPlanScaleDenominator { get; set; }
+
+    public int? TargetPlanProductionDpi { get; set; }
+
+    public string? TargetPlanDirection { get; set; }
+
+    public string? TargetPlanResizePolicy { get; set; }
+
+    public string? EnlargementAuthoritySourceRevisionId { get; set; }
+
+    public string? EnlargementAuthoritySourceSha256 { get; set; }
+
+    public string? EnlargementAuthoritySizingMode { get; set; }
+
+    public string? EnlargementAuthorityTargetEdge { get; set; }
+
+    public string? EnlargementAuthorityRequestedMm { get; set; }
+
+    public int? EnlargementAuthorityScaleNumerator { get; set; }
+
+    public int? EnlargementAuthorityScaleDenominator { get; set; }
+
+    public int? EnlargementAuthorityProjectedPixelWidth { get; set; }
+
+    public int? EnlargementAuthorityProjectedPixelHeight { get; set; }
 }
 
 internal sealed class ReviewRow

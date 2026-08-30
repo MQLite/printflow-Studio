@@ -86,6 +86,15 @@ public sealed record SessionAggregate(
             // (Epic 11400 Part B1A.2A §7, §10).
             DimensionSemantics = Session.DimensionSemantics,
             PrintPreparationPlan = Session.PrintPreparationPlan,
+
+            // The flexible-size decision restores on exactly the same terms, and its enlargement
+            // authority most of all. A confirmation that survived a restart is usable only if the
+            // exact source, edge, request and projection it names survived with it, which
+            // WorkflowSnapshot.UsablePhotoshopPreparation decides against these very rows — so
+            // reopening the app is not a way to acquire permission (Part B1A.2D §13, §30).
+            SizeSelection = Session.SizeSelection,
+            TargetEdgePlan = Session.TargetEdgePlan,
+            EnlargementAuthority = Session.EnlargementAuthority,
         };
     }
 }

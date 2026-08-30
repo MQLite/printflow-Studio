@@ -130,18 +130,32 @@ public sealed class MaximumBoundsUiTests
 
         foreach (SizePresetChoice choice in screen.SizePresets)
         {
-            (double WidthMm, double HeightMm) nominal =
-                PrintDimensions.NominalMillimetres(choice.Preset).ShouldNotBeNull();
+            // The configured recommendation, and emphatically not
+            // PrintDimensions.NominalMillimetres: the ISO page a preset is named after and the
+            // limit this shop prints it at are different numbers, and only one of them is
+            // executable (Epic 11400 Part B1A.2D §3, §4).
+            PresetPrintRecommendation configured =
+                PresetFixture.Recommendations.For(choice.Preset).ShouldNotBeNull();
 
-            choice.WidthMm.ShouldBe(nominal.WidthMm);
-            choice.HeightMm.ShouldBe(nominal.HeightMm);
+            choice.WidthMm.ShouldBe((double)configured.MaxWidthMm);
+            choice.HeightMm.ShouldBe((double)configured.MaxHeightMm);
             choice.BoundsLabel.ShouldNotBeNullOrWhiteSpace();
+
+            if (PrintDimensions.NominalMillimetres(choice.Preset) is { } nominal &&
+                (nominal.WidthMm != (double)configured.MaxWidthMm ||
+                 nominal.HeightMm != (double)configured.MaxHeightMm))
+            {
+                choice.BoundsLabel.ShouldNotContain(
+                    nominal.WidthMm.ToString("0.##", CultureInfo.CurrentCulture),
+                    Case.Sensitive,
+                    "a screen showing the paper size would be showing a limit nobody configured.");
+            }
         }
 
         SizePresetChoice a3 = screen.SizePresets.Single(c => c.Preset == SizePreset.A3Landscape);
-        a3.BoundsLabel.ShouldBe(Text.MaxBounds(420, 297));
-        a3.BoundsLabel.ShouldContain("420");
-        a3.BoundsLabel.ShouldContain("297");
+        a3.BoundsLabel.ShouldBe(Text.MaxBounds(360, 280));
+        a3.BoundsLabel.ShouldContain("360");
+        a3.BoundsLabel.ShouldContain("280");
     }
 
     /// <summary>
@@ -660,7 +674,7 @@ public sealed class MaximumBoundsUiTests
         ProcessingAttempt attempt = persisted.Attempts.Single(a => a.Step == StepKind.PhotoshopOutput);
         attempt.Status.ShouldBe(AttemptStatus.Succeeded);
 
-        PrintPreparationPlan ran = attempt.PrintPreparationPlan.ShouldNotBeNull();
+        PrintPreparationPlan ran = attempt.BoundsPlan().ShouldNotBeNull();
 
         screen.HasPreparationAttemptAudit.ShouldBeTrue();
         screen.PreparationAttemptBounds.ShouldBe(Text.AttemptBounds(ran.MaxWidthMm, ran.MaxHeightMm));
@@ -717,7 +731,7 @@ public sealed class MaximumBoundsUiTests
         // ...and the attempt row itself was never rewritten.
         (await open.ReloadAsync()).Attempts
             .Single(a => a.Step == StepKind.PhotoshopOutput)
-            .PrintPreparationPlan!.MaxWidthMm.ShouldBe(200);
+            .BoundsPlan()!.MaxWidthMm.ShouldBe(200);
     }
 
     /// <summary>

@@ -54,6 +54,21 @@ public sealed class ConfiguredPresetProvider : IWorkstationPresetProvider
                 "No workstation preset has been loaded or hash-verified; naming patterns are unavailable.")
             : OperationResult.Ok(NamingPatternSet.DesignDefault);
 
+    /// <inheritdoc />
+    /// <remarks>
+    /// Always a failure, even when a verified reference was supplied. A reference proves the
+    /// manifest's hash was checked somewhere; it carries none of the manifest's <i>contents</i>,
+    /// and the configured print limits are contents. Returning an empty set instead would read as
+    /// "this preset configures no named sizes" rather than "this provider never opened it" — and
+    /// an installation that cannot state its own limits must not be able to record a named size
+    /// at all (Epic 11400 Part B1A.2D §3).
+    /// </remarks>
+    public OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations() =>
+        OperationResult.Fail<PresetPrintRecommendationSet>(
+            FailureCode.EnvironmentNotVerified,
+            "This provider never opens the manifest, so it holds no configured print limits. Named " +
+            "preset sizes come from the verified geometry contract and from nowhere else.");
+
     /// <summary>Builds a reference from configuration values, without touching the manifest.</summary>
     public static OperationResult<ProductionPresetRef> Describe(
         string presetId, string presetVersion, string expectedSha256)

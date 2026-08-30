@@ -214,7 +214,7 @@ public sealed class EnginePurityTests
                 FixedContext)
             .Rejection!.Code.ShouldBe(RejectionCode.InvalidPayload);
 
-        scenario.Apply(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait))
+        scenario.Apply(new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox))
             .IsAccepted.ShouldBeTrue();
     }
 

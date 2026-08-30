@@ -170,7 +170,7 @@ internal sealed class WorkflowScenario
     /// constructs one itself with the id and hash it means.
     /// </para>
     /// <para>
-    /// The default source is 2000×1500 px, comfortably inside <see cref="A4Portrait"/>, so the
+    /// The default source is 2000×1500 px, comfortably inside <see cref="CustomBox"/>, so the
     /// ordinary path is a resolution-only plan and nothing is resampled. Tests about shrinking
     /// pass their own.
     /// </para>
@@ -182,7 +182,7 @@ internal sealed class WorkflowScenario
             ?? throw new InvalidOperationException(
                 "PhotoshopOutput has no upstream result to fit bounds against.");
 
-        PrintDimensions bounds = limits ?? A4Portrait;
+        PrintDimensions bounds = limits ?? CustomBox;
         Must(new WorkflowCommand.SetPrintDimensions(bounds));
 
         State = State with
@@ -209,8 +209,24 @@ internal sealed class WorkflowScenario
     /// <summary>A hash that belongs to no revision, for stale-approval tests.</summary>
     public static Sha256 ForeignHash { get; } = Sha256.Parse(new string('A', 64));
 
-    public static PrintDimensions A4Portrait { get; } =
-        PrintDimensions.FromMillimetres(198, 280, SizePreset.A4);
+    /// <summary>
+    /// A typed custom fit box, used wherever a scenario just needs somewhere to fit inside
+    /// (Epic 11400 Part B1A.2D §3).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately <see cref="SizePreset.Custom"/> rather than a named preset. Under v1.11.0 a
+    /// named size's executable limits come from the configured workstation preset, so
+    /// <c>SetPrintDimensions</c> refuses a named preset arriving with millimetres attached — and a
+    /// fixture that carried one would be a fixture asserting the shape the contract removed. A
+    /// scenario that wants the configured A4 records it with <c>SetPresetFitSize</c>, through the
+    /// service that can resolve it.
+    /// <para>
+    /// The millimetres themselves are arbitrary and mean nothing beyond "a box these source pixels
+    /// fit inside"; nothing here is a production limit.
+    /// </para>
+    /// </remarks>
+    public static PrintDimensions CustomBox { get; } =
+        PrintDimensions.FromMillimetres(198, 280, SizePreset.Custom);
 
     /// <summary>Counts effects of a given type in the last transition.</summary>
     public int EffectCount<T>() where T : WorkflowEffect

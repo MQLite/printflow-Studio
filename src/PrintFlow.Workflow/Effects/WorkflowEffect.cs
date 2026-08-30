@@ -134,6 +134,24 @@ public abstract record WorkflowEffect
     public sealed record PersistBackgroundRemovalDecision(
         BackgroundRemovalAuthority Authority) : WorkflowEffect;
 
+    /// <summary>
+    /// Persist the operator's explicit permission to enlarge one exact target
+    /// (Epic 11400 Part B1A.2D §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// The session-level half of the authority, so a confirmation given before the app closed is
+    /// still there when it reopens. The audit half is separate and lives on the attempt's
+    /// <c>Preparation</c>, written when the run starts — that is the row a later change of mind
+    /// must never rewrite (§24).
+    /// <para>
+    /// There is deliberately no matching "clear the authority" effect. An authority stops
+    /// applying because the exact source, edge, request or projection it names is no longer the
+    /// one on offer, which is a comparison rather than a write (§30).
+    /// </para>
+    /// </remarks>
+    public sealed record PersistEnlargementAuthority(
+        EnlargementAuthority Authority) : WorkflowEffect;
+
     /// <summary>Persist the explicit white-underbase decision and its justification.</summary>
     public sealed record PersistWhiteUnderbaseBranch(
         WhiteUnderbaseBranch Branch,

@@ -25,6 +25,16 @@ public enum CommandKind
     HandOff,
     SubmitManualCrop,
     SetPrintDimensions,
+
+    /// <summary>Take a named preset's configured recommendation (Part B1A.2D §3).</summary>
+    SetPresetFitSize,
+
+    /// <summary>Record one exact operator-chosen physical edge (Part B1A.2D §6).</summary>
+    SetCustomTargetEdgeSize,
+
+    /// <summary>Permit one exact enlargement, explicitly and separately (Part B1A.2D §10).</summary>
+    AuthoriseEnlargement,
+
     SelectWhiteUnderbaseBranch,
     SetTrimParameters,
     SetBackgroundRemovalDecision,
@@ -91,6 +101,13 @@ public static class TransitionTable
         // is the current step and is between attempts is a guard the engine applies, not a row
         // in this table (Epic 11300 Part C2B1 §5, §6).
         CommandKind.SetBackgroundRemovalDecision,
+
+        // And permission to enlarge, for the same reason again — with one difference worth
+        // stating: it is legal *after* the size step is finished, because the operator confirms
+        // the enlargement once they have been shown what the recorded target actually costs. A
+        // row on the PrintDimensions step could not express that, and the engine's own guard is
+        // what checks a plan needing authority is actually on offer (Part B1A.2D §10).
+        CommandKind.AuthoriseEnlargement,
         CommandKind.ReturnToStep,
         CommandKind.Complete,
         CommandKind.AddAnotherSize,
@@ -113,6 +130,13 @@ public static class TransitionTable
             CommandKind.StartStep,
             CommandKind.Skip,
             CommandKind.SetPrintDimensions,
+
+            // The three sizing routes sit in the same row because they are one decision made
+            // three ways, and all three finish the same step. Which of them a session used is
+            // recorded in its semantics and its selection, not in where it was legal
+            // (Part B1A.2D §15).
+            CommandKind.SetPresetFitSize,
+            CommandKind.SetCustomTargetEdgeSize,
         ],
 
         // A running attempt is finished by the system, never by the operator.
@@ -217,6 +241,8 @@ public static class TransitionTable
 
         CommandKind.Skip => StepState.Skipped,
         CommandKind.SetPrintDimensions => StepState.Approved,
+        CommandKind.SetPresetFitSize => StepState.Approved,
+        CommandKind.SetCustomTargetEdgeSize => StepState.Approved,
 
         // A submitted crop starts an attempt, exactly as StartStep does. Its result is a
         // Revision that still has to be reviewed; nothing here approves anything (Part C2 §17).

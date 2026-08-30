@@ -199,7 +199,26 @@ public sealed class TransitionMatrixTests
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, "matrix probe"),
             CommandKind.SetPrintDimensions =>
-                new WorkflowCommand.SetPrintDimensions(WorkflowScenario.A4Portrait),
+                new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox),
+
+            // The three flexible-size commands probe with structurally valid payloads for the same
+            // reason every other row here does: the matrix asserts that each combination has an
+            // explicit outcome, so the payload must never be what decides the answer. Their real
+            // millimetres are resolved by SessionService, which no matrix probe reaches
+            // (Epic 11400 Part B1A.2D §15).
+            CommandKind.SetPresetFitSize => new WorkflowCommand.SetPresetFitSize(
+                global::PrintFlow.Domain.Outputs.SizePreset.A4),
+            CommandKind.SetCustomTargetEdgeSize => new WorkflowCommand.SetCustomTargetEdgeSize(
+                global::PrintFlow.Domain.Outputs.TargetEdge.LongEdge, 320m),
+
+            // Probed with the revision the matrix forced onto the step, exactly as the
+            // background-removal decision beside it is. A confirmation naming content no plan was
+            // calculated from must still be refused rather than fall through (§10).
+            CommandKind.AuthoriseEnlargement => new WorkflowCommand.AuthoriseEnlargement(
+                revision,
+                hash,
+                global::PrintFlow.Domain.Outputs.TargetEdge.LongEdge,
+                320m),
             CommandKind.SelectWhiteUnderbaseBranch => new WorkflowCommand.SelectWhiteUnderbaseBranch(
                 global::PrintFlow.Domain.Outputs.WhiteUnderbaseBranch.W1_1px, "matrix probe"),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(

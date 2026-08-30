@@ -171,8 +171,8 @@ public sealed record ProcessingAttempt(
         this with { BackgroundRemovalAuthority = authority };
 
     /// <summary>
-    /// The source-bound maximum-bound plan this attempt produced its output under
-    /// (Epic 11400 Part B1A.2A §12).
+    /// The exact source-bound geometry this attempt produced its output under
+    /// (Epic 11400 Part B1A.2A §12; Part B1A.2D §24).
     /// </summary>
     /// <remarks>
     /// The answer to "which fit box, which source, and which single edge produced this TIFF?" —
@@ -190,15 +190,22 @@ public sealed record ProcessingAttempt(
     /// output without a currently usable plan (§15).
     /// </para>
     /// <para>
+    /// It is the <see cref="PhotoshopPreparation"/> union rather than one of the two plan types,
+    /// so an attempt made under either accepted sizing contract is audited in the shape it was
+    /// actually made — including, for an enlargement, the exact
+    /// <see cref="EnlargementAuthority"/> it ran under. A later size change or a later
+    /// enlargement decision cannot relabel this row (Part B1A.2D §24).
+    /// </para>
+    /// <para>
     /// An <c>init</c> property rather than a positional parameter, so every existing call site
     /// keeps saying what it meant.
     /// </para>
     /// </remarks>
-    public PrintPreparationPlan? PrintPreparationPlan { get; init; }
+    public PhotoshopPreparation? Preparation { get; init; }
 
-    /// <summary>Records the source-bound plan this attempt is about to run with.</summary>
-    public ProcessingAttempt WithPrintPreparationPlan(PrintPreparationPlan plan) =>
-        this with { PrintPreparationPlan = plan };
+    /// <summary>Records the resolved geometry this attempt is about to run with.</summary>
+    public ProcessingAttempt WithPreparation(PhotoshopPreparation preparation) =>
+        this with { Preparation = preparation };
 
     public ProcessingAttempt Succeed(
         RevisionId outputRevisionId, DateTimeOffset endedAtUtc, string? adapterNotes = null) =>

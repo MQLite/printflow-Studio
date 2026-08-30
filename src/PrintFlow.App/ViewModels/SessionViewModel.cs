@@ -158,20 +158,30 @@ public sealed class TrimModeChoice
 /// from the source pixels, and is not on offer here (§6).
 /// </para>
 /// <para>
-/// Every millimetre comes from <c>PrintDimensions.NominalMillimetres</c>, the one Domain
-/// authority for what a named preset is. Nothing in this file or in XAML states a size (§6).
+/// Every millimetre comes from the <see cref="PresetPrintRecommendation"/> the workflow layer
+/// resolved from the verified workstation preset — the one authority for what a named preset means
+/// as a print size. Emphatically <b>not</b> <c>PrintDimensions.NominalMillimetres</c>, which is the
+/// ISO paper size the preset is named after and is a different number: A4 is 210 × 297 mm of paper
+/// and a 280 mm maximum long edge of print. Nothing in this file or in XAML states a size
+/// (§6; Epic 11400 Part B1A.2D §3, §4).
 /// </para>
 /// </remarks>
 public sealed class SizePresetChoice
 {
-    internal SizePresetChoice(SizePreset preset, double widthMm, double heightMm)
+    internal SizePresetChoice(PresetPrintRecommendation recommendation)
     {
-        Preset = preset;
-        WidthMm = widthMm;
-        HeightMm = heightMm;
-        Label = DisplayNames.SizePreset(preset);
-        BoundsLabel = SizeText.MaximumBounds(widthMm, heightMm);
+        ArgumentNullException.ThrowIfNull(recommendation);
+
+        Recommendation = recommendation;
+        Preset = recommendation.Preset;
+        WidthMm = (double)recommendation.MaxWidthMm;
+        HeightMm = (double)recommendation.MaxHeightMm;
+        Label = DisplayNames.SizePreset(Preset);
+        BoundsLabel = SizeText.MaximumBounds(WidthMm, HeightMm);
     }
+
+    /// <summary>The configured recommendation this row shows. Never derived from a paper size.</summary>
+    public PresetPrintRecommendation Recommendation { get; }
 
     public SizePreset Preset { get; }
 
@@ -561,15 +571,6 @@ public sealed partial class SessionViewModel : ObservableObject
             Enum.GetValues<TrimMode>().Select(mode => new TrimModeChoice(mode)).ToList());
         _selectedTrimMode = TrimModes[0];
 
-        // Only the presets that have a nominal size; Custom is what typing produces.
-        SizePresets = new ReadOnlyCollection<SizePresetChoice>(
-        [
-            .. Enum.GetValues<SizePreset>()
-                .Select(preset => (Preset: preset, Nominal: PrintDimensions.NominalMillimetres(preset)))
-                .Where(candidate => candidate.Nominal is not null)
-                .Select(candidate => new SizePresetChoice(
-                    candidate.Preset, candidate.Nominal!.Value.WidthMm, candidate.Nominal.Value.HeightMm)),
-        ]);
     }
 
     /// <summary>The open session's steps, in workflow order.</summary>
@@ -610,8 +611,21 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public ObservableCollection<ReturnTargetRow> ReturnTargets { get; } = [];
 
-    /// <summary>The named size shortcuts (§5).</summary>
-    public IReadOnlyList<SizePresetChoice> SizePresets { get; }
+    /// <summary>
+    /// The named sizes this installation's verified preset configures (§5;
+    /// Epic 11400 Part B1A.2D §3, §4).
+    /// </summary>
+    /// <remarks>
+    /// Rebuilt from <see cref="FlexibleSizeView.PresetRecommendations"/> on every state change,
+    /// exactly as <see cref="ReturnTargets"/> is, and for a stronger reason than "it might vary":
+    /// what A4 means as a print size is the configured workstation preset's answer, not a paper
+    /// standard's. This list was previously built once from
+    /// <c>PrintDimensions.NominalMillimetres</c>, which is the ISO size the preset is
+    /// <i>named after</i> — 210 × 297 mm for A4, where v1.11.0 configures a 280 mm maximum long
+    /// edge. Nothing here states a millimetre, and an unverified installation gets an empty list
+    /// rather than a fallback.
+    /// </remarks>
+    public ObservableCollection<SizePresetChoice> SizePresets { get; } = [];
 
     // --- Labels --------------------------------------------------------------------------
 
@@ -1494,18 +1508,27 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public bool HasPreparationAttemptAudit => _session?.AttemptPreparation is not null;
 
-    /// <summary>The bounds that run actually used (§19).</summary>
-    public string PreparationAttemptBounds => _session?.AttemptPreparation is { } attempt
-        ? string.Format(
-            CultureInfo.CurrentCulture,
-            Strings.Session_PreparationAttemptBounds,
-            attempt.MaxWidthMm.ToString("0.##", CultureInfo.CurrentCulture),
-            attempt.MaxHeightMm.ToString("0.##", CultureInfo.CurrentCulture))
-        : string.Empty;
+    /// <summary>
+    /// The bounds that run actually used, when it was a maximum-bound run (§19).
+    /// </summary>
+    /// <remarks>
+    /// Empty for a target-edge run, which had no fit box: a run that named one exact edge did not
+    /// have two limits, and printing "0 × 0 mm" or the requested edge twice would be an audit line
+    /// stating something that never happened. The target-edge wording arrives with the
+    /// flexible-size screen (Part B1A.2D §29).
+    /// </remarks>
+    public string PreparationAttemptBounds =>
+        _session?.AttemptPreparation is { MaxWidthMm: { } maxWidth, MaxHeightMm: { } maxHeight }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_PreparationAttemptBounds,
+                maxWidth.ToString("0.##", CultureInfo.CurrentCulture),
+                maxHeight.ToString("0.##", CultureInfo.CurrentCulture))
+            : string.Empty;
 
     /// <summary>What that run was planned to do, in the same behavioural wording (§19).</summary>
-    public string PreparationAttemptMode => _session?.AttemptPreparation is { } attempt
-        ? DisplayNames.PreparationMode(attempt.Mode)
+    public string PreparationAttemptMode => _session?.AttemptPreparation is { Mode: { } mode }
+        ? DisplayNames.PreparationMode(mode)
         : string.Empty;
 
     /// <summary>The edge that run selected, including "None" (§19).</summary>
@@ -2047,6 +2070,16 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private Task SetMaximumBoundsAsync(CancellationToken cancellationToken)
     {
+        // A named preset still standing means the operator took the configured recommendation and
+        // did not edit it, so the decision is recorded as the preset it is — and the millimetres
+        // come from the verified preset rather than from this screen's text boxes. Editing either
+        // box clears the pending preset to Custom through the change handlers below, and a custom
+        // box goes the custom route (Epic 11400 Part B1A.2D §3, §19).
+        if (_pendingPreset != SizePreset.Custom)
+        {
+            return RunAsync(new WorkflowCommand.SetPresetFitSize(_pendingPreset), cancellationToken);
+        }
+
         if (!TryReadTypedDimensions(out PrintDimensions bounds))
         {
             Notice = Strings.Session_MaxBoundsInvalid;
@@ -2403,9 +2436,12 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         dimensions = default;
 
+        // Always Custom. A typed pair is a custom fit box by definition, and a named preset never
+        // reaches this method — SetMaximumBoundsAsync routes it to the command that resolves the
+        // configured recommendation instead (Epic 11400 Part B1A.2D §3).
         return TryReadMillimetres(WidthMmText, out double widthMm)
             && TryReadMillimetres(HeightMmText, out double heightMm)
-            && PrintDimensions.TryFromMillimetres(widthMm, heightMm, _pendingPreset, out dimensions);
+            && PrintDimensions.TryFromMillimetres(widthMm, heightMm, SizePreset.Custom, out dimensions);
     }
 
     private static bool TryReadMillimetres(string? text, out double millimetres) =>
@@ -2683,6 +2719,16 @@ public sealed partial class SessionViewModel : ObservableObject
         foreach (ReturnTargetView target in session.ReturnTargets)
         {
             ReturnTargets.Add(new ReturnTargetRow(target));
+        }
+
+        // The named sizes the verified preset configures, rebuilt wholesale from what the
+        // workflow layer offered. An installation whose preset cannot be verified offers none,
+        // and the shortcut list is empty rather than falling back to paper sizes
+        // (Epic 11400 Part B1A.2D §3, §4).
+        SizePresets.Clear();
+        foreach (PresetPrintRecommendation recommendation in session.Sizing.PresetRecommendations)
+        {
+            SizePresets.Add(new SizePresetChoice(recommendation));
         }
 
         Steps.Clear();

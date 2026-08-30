@@ -86,30 +86,58 @@ public sealed class FakePhotoshopOutputProcessor : IPhotoshopOutputProcessor
     }
 
     /// <summary>
-    /// States the plan this synthetic output was produced under (Epic 11400 Part B1A.2A §18).
+    /// States the preparation this synthetic output was produced under
+    /// (Epic 11400 Part B1A.2A §18; Part B1A.2D §27).
     /// </summary>
     /// <remarks>
-    /// Derived entirely from <see cref="PhotoshopRequest.Preparation"/> — the source-bound plan
-    /// the workflow validated and the attempt row already recorded — so the note is deterministic
-    /// for a given plan and a Fake run demonstrably received one. Nothing here recalculates a
-    /// limiting edge, reinterprets a legacy pair, or reads
+    /// Derived entirely from <see cref="PhotoshopRequest.Preparation"/> — the source-bound
+    /// geometry the workflow validated and the attempt row already recorded — so the note is
+    /// deterministic for a given preparation and a Fake run demonstrably received one. Nothing
+    /// here recalculates a limiting edge, resolves a preset, decides whether an override was
+    /// allowed, reinterprets a legacy pair, or reads
     /// <c>PhotoshopRequest.Dimensions.PixelWidth</c>.
+    /// <para>
+    /// Both accepted forms are reported in their own vocabulary rather than flattened into one,
+    /// because an audit line that called a target-edge enlargement a maximum-bound shrink would be
+    /// worse than no line at all.
+    /// </para>
     /// <para>
     /// It stays prefixed "fake" and says <c>projected</c> rather than naming a result: no
     /// Photoshop ran, nothing was resampled, and the file beside this note is a copy of the input
-    /// rather than a resized image. Claiming a read-back here would put a fabricated production
-    /// fact in the one place a Revision is created from (§20).
+    /// rather than a resized image. In particular a <c>PreserveDetails</c> policy is reported as
+    /// the policy the run <i>would</i> have used — Preserve Details did not execute, and claiming
+    /// it had would put a fabricated production fact in the one place a Revision is created from
+    /// (§20, §27).
     /// </para>
     /// </remarks>
     private static string Notes(PhotoshopRequest request)
     {
-        PrintPreparationPlan plan = request.Preparation;
-        string edge = plan.LimitingValueMm is { } limiting
-            ? $"{plan.LimitingEdge} at {limiting.ToString("0.##", CultureInfo.InvariantCulture)} mm"
-            : plan.LimitingEdge.ToString();
+        PhotoshopPreparation preparation = request.Preparation;
+        string edge = preparation.PhotoshopEdgeValueMm is { } value
+            ? $"{preparation.PhotoshopEdge} at {value.ToString("0.##", CultureInfo.InvariantCulture)} mm"
+            : preparation.PhotoshopEdge.ToString();
 
-        return $"fake; {PrintPreparationPlan.Semantics} {plan.Mode} ({plan.ResizePolicy}), edge {edge}, " +
-            $"projected {plan.ProjectedPixelWidth}x{plan.ProjectedPixelHeight} px @ {plan.ProductionDpi} ppi; " +
-            "no Photoshop ran and nothing was resampled.";
+        string detail = preparation switch
+        {
+            FitWithinBoundsPreparation bounds =>
+                $"{bounds.Plan.Mode} ({bounds.ResizePolicy}), edge {edge}",
+
+            TargetEdgePreparation target =>
+                $"{target.Plan.Projection.Direction} ({target.ResizePolicy}), requested " +
+                $"{target.Plan.Projection.SelectedTargetEdge} at " +
+                $"{target.Plan.Projection.RequestedMillimetres.ToString("0.####", CultureInfo.InvariantCulture)} mm " +
+                $"resolved to {edge}, scale {target.Plan.Projection.ProjectedScale.Numerator}/" +
+                $"{target.Plan.Projection.ProjectedScale.Denominator}, preset limit exceeded " +
+                $"{target.Plan.PresetLimitExceeded}, source capacity exceeded " +
+                $"{target.Plan.SourceCapacityExceeded}, enlargement authority " +
+                $"{(target.Plan.RequiresEnlargementAuthority ? "required" : "not required")} and " +
+                $"{(target.IsAuthorisedEnlargement ? "present" : "absent")}",
+
+            _ => edge,
+        };
+
+        return $"fake; {preparation.Semantics} {detail}, projected " +
+            $"{preparation.ProjectedPixelWidth}x{preparation.ProjectedPixelHeight} px @ " +
+            $"{preparation.ProductionDpi} ppi; no Photoshop ran and nothing was resampled.";
     }
 }

@@ -27,31 +27,40 @@ public enum ResizeDirection
 /// One operator size decision. Its factories make a second independently authoritative custom
 /// dimension and an axis on ordinary preset use structurally unrepresentable.
 /// </summary>
+/// <remarks>
+/// Every named-preset form carries the <see cref="PresetPrintRecommendation"/> it was made
+/// against, rather than a bare <see cref="SizePreset"/> and a number copied out of it. That is
+/// what keeps §3's authority intact through persistence: a stored decision says which
+/// recommendation the operator was actually shown, so an override can still be read as an
+/// override of <i>that</i> recommendation after the configured preset moves on
+/// (Epic 11400 Part B1A.2D §6, §19).
+/// </remarks>
 public sealed record FlexibleSizeSelection
 {
     private FlexibleSizeSelection(
         OperatorSizingMode mode,
-        SizePreset? basedOnPreset,
+        PresetPrintRecommendation? recommendation,
         bool presetOverridden,
-        decimal? configuredPresetLimitMm,
         TargetEdge? selectedTargetEdge,
         decimal? requestedMillimetres)
     {
         Mode = mode;
-        BasedOnPreset = basedOnPreset;
+        Recommendation = recommendation;
         PresetOverridden = presetOverridden;
-        ConfiguredPresetLimitMm = configuredPresetLimitMm;
         SelectedTargetEdge = selectedTargetEdge;
         RequestedMillimetres = requestedMillimetres;
     }
 
     public OperatorSizingMode Mode { get; }
 
-    public SizePreset? BasedOnPreset { get; }
+    /// <summary>The configured recommendation this decision was made against, if any.</summary>
+    public PresetPrintRecommendation? Recommendation { get; }
+
+    public SizePreset? BasedOnPreset => Recommendation?.Preset;
 
     public bool PresetOverridden { get; }
 
-    public decimal? ConfiguredPresetLimitMm { get; }
+    public decimal? ConfiguredPresetLimitMm => Recommendation?.RecommendedLimitMm;
 
     public TargetEdge? SelectedTargetEdge { get; }
 
@@ -62,55 +71,116 @@ public sealed record FlexibleSizeSelection
         PresetOverridden && RequestedMillimetres > ConfiguredPresetLimitMm;
 
     /// <summary>An ordinary named preset; FitWithinBounds remains its sizing authority.</summary>
-    public static FlexibleSizeSelection PresetFit(SizePreset preset)
+    public static FlexibleSizeSelection PresetFit(PresetPrintRecommendation recommendation)
     {
-        RequireNamedPreset(preset);
+        ArgumentNullException.ThrowIfNull(recommendation);
         return new FlexibleSizeSelection(
-            OperatorSizingMode.PresetFit, preset, false, null, null, null);
+            OperatorSizingMode.PresetFit, recommendation, false, null, null);
     }
 
     /// <summary>A custom size with exactly one explicit target edge and millimetre value.</summary>
     public static FlexibleSizeSelection CustomTarget(
         TargetEdge targetEdge, decimal requestedMillimetres)
     {
+        RequireTargetEdge(targetEdge);
         RequireMillimetres(requestedMillimetres, nameof(requestedMillimetres));
         return new FlexibleSizeSelection(
             OperatorSizingMode.CustomTargetEdge,
-            basedOnPreset: null,
+            recommendation: null,
             presetOverridden: false,
-            configuredPresetLimitMm: null,
             targetEdge,
             requestedMillimetres);
     }
 
     /// <summary>
     /// A named preset used as the recommendation, followed by an explicit custom-edge override.
-    /// The configured limit is retained; it is never silently replaced by the requested value.
+    /// The configured recommendation is retained; it is never silently replaced by the request.
     /// </summary>
     public static FlexibleSizeSelection OverridePreset(
-        SizePreset preset,
-        decimal configuredPresetLimitMm,
+        PresetPrintRecommendation recommendation,
         TargetEdge targetEdge,
         decimal requestedMillimetres)
     {
-        RequireNamedPreset(preset);
-        RequireMillimetres(configuredPresetLimitMm, nameof(configuredPresetLimitMm));
+        ArgumentNullException.ThrowIfNull(recommendation);
+        RequireTargetEdge(targetEdge);
         RequireMillimetres(requestedMillimetres, nameof(requestedMillimetres));
         return new FlexibleSizeSelection(
             OperatorSizingMode.CustomTargetEdge,
-            preset,
+            recommendation,
             presetOverridden: true,
-            configuredPresetLimitMm,
             targetEdge,
             requestedMillimetres);
     }
 
-    private static void RequireNamedPreset(SizePreset preset)
+    /// <summary>
+    /// Rebuilds a stored selection, refusing one whose parts do not describe a single decision
+    /// (Epic 11400 Part B1A.2D §23).
+    /// </summary>
+    /// <remarks>
+    /// It routes back through the same three factories rather than assigning fields, so a
+    /// persisted row cannot express a combination the operator could never have made — a preset
+    /// fit that also carries a requested edge, an override with no recommendation behind it, or a
+    /// custom target with no millimetres. Nothing is repaired: a row that does not describe one of
+    /// the three decisions is refused.
+    /// </remarks>
+    public static FlexibleSizeSelection Rehydrate(
+        OperatorSizingMode mode,
+        PresetPrintRecommendation? recommendation,
+        bool presetOverridden,
+        TargetEdge? selectedTargetEdge,
+        decimal? requestedMillimetres)
     {
-        if (preset == SizePreset.Custom)
+        if (mode == OperatorSizingMode.PresetFit)
+        {
+            if (recommendation is null)
+            {
+                throw new ArgumentException(
+                    "A stored PresetFit selection carries no configured recommendation; the executable " +
+                    "limit is never re-derived from a paper standard.",
+                    nameof(recommendation));
+            }
+
+            if (presetOverridden || selectedTargetEdge is not null || requestedMillimetres is not null)
+            {
+                throw new ArgumentException(
+                    "A stored PresetFit selection also carries an override or a custom target edge; " +
+                    "ordinary preset use asks for neither.",
+                    nameof(mode));
+            }
+
+            return PresetFit(recommendation);
+        }
+
+        if (selectedTargetEdge is not { } edge || requestedMillimetres is not { } millimetres)
+        {
+            throw new ArgumentException(
+                "A stored CustomTargetEdge selection needs both a target edge and its millimetres.",
+                nameof(selectedTargetEdge));
+        }
+
+        if (presetOverridden)
+        {
+            return recommendation is null
+                ? throw new ArgumentException(
+                    "A stored preset override carries no recommendation to have overridden.",
+                    nameof(recommendation))
+                : OverridePreset(recommendation, edge, millimetres);
+        }
+
+        return recommendation is null
+            ? CustomTarget(edge, millimetres)
+            : throw new ArgumentException(
+                "A stored custom target carries a recommendation without being marked an override; " +
+                "the two readings differ and neither may be guessed.",
+                nameof(recommendation));
+    }
+
+    private static void RequireTargetEdge(TargetEdge targetEdge)
+    {
+        if (targetEdge is not (TargetEdge.Width or TargetEdge.Height or TargetEdge.LongEdge))
         {
             throw new ArgumentOutOfRangeException(
-                nameof(preset), preset, "PresetFit and preset override require a named preset.");
+                nameof(targetEdge), targetEdge, "Unknown target edge.");
         }
     }
 

@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 
 namespace PrintFlow.Tests.Fixtures;
 
@@ -35,9 +36,46 @@ internal static class PresetFixture
             "cutoutPattern": "{{AcceptedNamingContract.CutoutPattern}}",
             "productionTiffPattern": "{{AcceptedNamingContract.ProductionTiffPattern}}",
             "collisionPattern": "{{AcceptedNamingContract.CollisionPattern}}"
+          },
+          "productionGeometryContract": {
+            "resize": {
+              "resolutionPpi": 300,
+              "limitsMillimetres": {
+                "A3_LANDSCAPE": { "maxWidth": 360, "maxHeight": 280 },
+                "A3_PORTRAIT": { "maxWidth": 280, "maxHeight": 400 },
+                "A4": { "maxLongEdge": 280 },
+                "A5": { "maxLongEdge": 135 }
+              }
+            }
           }
         }
         """;
+
+    /// <summary>
+    /// The recommendations <see cref="Json"/> configures, as the provider reads them back
+    /// (Epic 11400 Part B1A.2D §3).
+    /// </summary>
+    /// <remarks>
+    /// Written out beside the manifest rather than derived from it, so a test asserting "A4 uses
+    /// the configured 280 mm long edge and not the 297 mm ISO page" is comparing against a value
+    /// stated independently of the code that parses it.
+    /// <para>
+    /// Both forms are represented on purpose: A3 is a two-bound box and A4/A5 are single long
+    /// edges, which is the shape of the accepted v1.11.0 contract. A fixture carrying only boxes
+    /// would let a long-edge bug through the whole suite (§4).
+    /// </para>
+    /// <para>
+    /// These are synthetic <i>test</i> values that happen to match the accepted contract's shape.
+    /// They are not a production authority and no product code reads them.
+    /// </para>
+    /// </remarks>
+    public static PresetPrintRecommendationSet Recommendations { get; } = new(
+    [
+        PresetPrintRecommendation.MaximumBox(SizePreset.A3Landscape, 360m, 280m),
+        PresetPrintRecommendation.MaximumBox(SizePreset.A3Portrait, 280m, 400m),
+        PresetPrintRecommendation.MaximumLongEdge(SizePreset.A4, 280m),
+        PresetPrintRecommendation.MaximumLongEdge(SizePreset.A5, 135m),
+    ]);
 
     /// <summary>Writes the synthetic manifest to <paramref name="directory"/> and returns its path and hash.</summary>
     public static (string Path, Sha256 Sha256) Write(string directory, string fileName = "synthetic-preset.json")

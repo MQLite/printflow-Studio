@@ -298,16 +298,18 @@ public sealed class SessionService : ISessionService
         // Calculated before the command is applied, so a session whose source cannot support a
         // plan records no bounds at all rather than bounds with nothing behind them. Its inputs
         // are the bytes EnsureIntegrityAsync has just re-verified (Epic 11400 Part B1A.2A §14).
-        PrintPreparationPlan? plan = null;
-        if (command is WorkflowCommand.SetPrintDimensions setBounds)
+        RecordedSize? recorded = null;
+        if (command is WorkflowCommand.SetPrintDimensions
+            or WorkflowCommand.SetPresetFitSize
+            or WorkflowCommand.SetCustomTargetEdgeSize)
         {
-            OperationResult<PrintPreparationPlan> planned = PlanMaximumBounds(aggregate, snapshot, setBounds.Dimensions);
+            OperationResult<RecordedSize> planned = PlanSize(aggregate, snapshot, command);
             if (planned.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(planned.Failure);
             }
 
-            plan = planned.Value;
+            recorded = planned.Value;
         }
 
         WorkflowTransition transition = _engine.Apply(snapshot, command, context);
@@ -319,13 +321,19 @@ public sealed class SessionService : ISessionService
         ProducingWork? work = ProducingWorkOf(transition.Effects);
         if (work is null)
         {
-            // The engine accepted the bounds and stamped the semantics; the plan it could not
-            // calculate is attached here, to the state it produced. Nothing else in the slice
-            // writes this field, so the accepted bounds and the plan behind them are always the
-            // same act.
-            WorkflowSnapshot state = plan is null
+            // The engine accepted the decision and stamped the semantics; the millimetres, the
+            // selection and the plan it could not calculate are attached here, to the state it
+            // produced. Nothing else writes these fields, so the accepted decision and the
+            // geometry behind it are always the same act (Epic 11400 Part B1A.2D §17).
+            WorkflowSnapshot state = recorded is null
                 ? transition.State
-                : transition.State with { PrintPreparationPlan = plan };
+                : transition.State with
+                {
+                    Dimensions = recorded.Dimensions,
+                    SizeSelection = recorded.Selection,
+                    PrintPreparationPlan = recorded.BoundsPlan,
+                    TargetEdgePlan = recorded.TargetEdgePlan,
+                };
 
             ProcessingSession updatedSession = MergeSession(aggregate.Session, state, transition.Effects, context.NowUtc);
             SessionMutation mutation = BuildMetadataMutation(aggregate, updatedSession, state, transition.Effects, context);
@@ -344,45 +352,215 @@ public sealed class SessionService : ISessionService
     }
 
     /// <summary>
-    /// Calculates the source-bound plan for <paramref name="limits"/>, or reports why it cannot
-    /// (Epic 11400 Part B1A.2A §5, §6, §8).
+    /// One recorded size decision, in every form the session has to keep
+    /// (Epic 11400 Part B1A.2D §6, §17).
     /// </summary>
     /// <remarks>
-    /// Everything the pure engine cannot see, in one place. It reads the source's <b>own</b>
-    /// validated pixel dimensions and hands them to
-    /// <see cref="PrintPreparationPlan.For"/>, which is the only creator of a plan and reaches
-    /// <c>FitWithinBounds</c> — so limiting-edge selection has exactly one implementation and
-    /// this method contains none of it (§6).
+    /// The four values are written together or not at all, which is what stops a session from
+    /// holding millimetres with no plan behind them, or a target-edge plan beside a fit box.
+    /// Exactly one of <paramref name="BoundsPlan"/> and <paramref name="TargetEdgePlan"/> is ever
+    /// set: they are the two accepted sizing contracts, and a row that held both would be a
+    /// session that made two different decisions at once (§5).
+    /// </remarks>
+    /// <param name="Dimensions">
+    /// The operator-facing millimetres, kept for display, naming and the <c>PrintOutput</c> audit.
+    /// Never an executable Photoshop target pair.
+    /// </param>
+    /// <param name="Selection">
+    /// The flexible-size decision, or null for a typed custom fit box — which predates the
+    /// flexible-size vocabulary and is not retrofitted into it (§21).
+    /// </param>
+    /// <param name="BoundsPlan">The FitWithinBoundsV1 plan, or null for a target-edge decision.</param>
+    /// <param name="TargetEdgePlan">The TargetEdgeV1 plan, or null for a maximum-bound decision.</param>
+    private sealed record RecordedSize(
+        PrintDimensions Dimensions,
+        FlexibleSizeSelection? Selection,
+        PrintPreparationPlan? BoundsPlan,
+        TargetEdgePrintPreparationPlan? TargetEdgePlan);
+
+    /// <summary>
+    /// Calculates the source-bound geometry one accepted sizing command asks for, or reports why
+    /// it cannot (Epic 11400 Part B1A.2A §5, §6, §8; Part B1A.2D §16, §17).
+    /// </summary>
+    /// <remarks>
+    /// Everything the pure engine cannot see, in one place: the verified preset's configured
+    /// recommendations, and the source's own validated pixel dimensions.
     /// <para>
-    /// Every refusal below is a "there is nothing to fit" rather than a fallback. Nothing here
-    /// reads a filename, a screen value, a guessed size, or the independently converted
-    /// <c>PrintDimensions.PixelWidth</c> — each of those would produce a plan for a different
-    /// image wearing this one's binding (§8, §17).
+    /// It contains no sizing arithmetic of its own. Ordinary preset use goes to
+    /// <see cref="PrintPreparationPlan.For"/> and therefore to <c>FitWithinBounds</c>; a custom
+    /// edge goes to <see cref="TargetEdgePrintPreparationPlan.For"/> and therefore to
+    /// <c>ScaleToTargetEdge</c>; and neither calculation is ever asked to do the other one's job.
+    /// Each has exactly one implementation, wherever a plan comes from (§17).
+    /// </para>
+    /// <para>
+    /// Every refusal below is a "there is nothing to size against" rather than a fallback. Nothing
+    /// here reads a filename, a screen value, a paper standard, a guessed size, or the
+    /// independently converted <c>PrintDimensions.PixelWidth</c> — each of those would produce a
+    /// plan for a different image, or a different shop, wearing this one's binding (§3, §8).
     /// </para>
     /// </remarks>
-    private static OperationResult<PrintPreparationPlan> PlanMaximumBounds(
-        SessionAggregate aggregate, WorkflowSnapshot snapshot, PrintDimensions limits)
+    private OperationResult<RecordedSize> PlanSize(
+        SessionAggregate aggregate, WorkflowSnapshot snapshot, WorkflowCommand command)
+    {
+        OperationResult<SizingSource> resolved = ResolveSizingSource(aggregate, snapshot);
+        if (resolved.IsFailure)
+        {
+            return OperationResult.Fail<RecordedSize>(resolved.Failure);
+        }
+
+        SizingSource source = resolved.Value;
+
+        try
+        {
+            switch (command)
+            {
+                case WorkflowCommand.SetPrintDimensions typed:
+                    return OperationResult.Ok(new RecordedSize(
+                        typed.Dimensions,
+                        Selection: null,
+                        PrintPreparationPlan.For(
+                            source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
+                            typed.Dimensions),
+                        TargetEdgePlan: null));
+
+                case WorkflowCommand.SetPresetFitSize preset:
+                {
+                    OperationResult<PresetPrintRecommendation> recommendation =
+                        ResolveRecommendation(preset.Preset);
+                    if (recommendation.IsFailure)
+                    {
+                        return OperationResult.Fail<RecordedSize>(recommendation.Failure);
+                    }
+
+                    // The configured recommendation becomes a fit box, and FitWithinBounds owns it
+                    // from there. A maximum long edge is the square box of that side: fitting
+                    // proportionally inside one constrains whichever source edge is longer, which
+                    // is what a long-edge limit means. No second limiting-edge rule exists (§17).
+                    PrintDimensions limits = recommendation.Value.AsFitBounds();
+                    return OperationResult.Ok(new RecordedSize(
+                        limits,
+                        FlexibleSizeSelection.PresetFit(recommendation.Value),
+                        PrintPreparationPlan.For(
+                            source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
+                            limits),
+                        TargetEdgePlan: null));
+                }
+
+                case WorkflowCommand.SetCustomTargetEdgeSize custom:
+                {
+                    FlexibleSizeSelection selection;
+                    if (custom.OverriddenPreset is { } overridden)
+                    {
+                        OperationResult<PresetPrintRecommendation> recommendation =
+                            ResolveRecommendation(overridden);
+                        if (recommendation.IsFailure)
+                        {
+                            return OperationResult.Fail<RecordedSize>(recommendation.Failure);
+                        }
+
+                        // The recommendation is retained beside the override rather than replaced
+                        // by it, so "the operator went past A4's 280 mm" stays readable as exactly
+                        // that afterwards (§6).
+                        selection = FlexibleSizeSelection.OverridePreset(
+                            recommendation.Value, custom.Edge, custom.Millimetres);
+                    }
+                    else
+                    {
+                        selection = FlexibleSizeSelection.CustomTarget(custom.Edge, custom.Millimetres);
+                    }
+
+                    TargetEdgePrintPreparationPlan plan = TargetEdgePrintPreparationPlan.For(
+                        source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
+                        selection);
+
+                    // The millimetres the session records describe the plan; they are never a
+                    // second target. Which single edge Photoshop is given remains the plan's
+                    // answer alone (§6).
+                    return OperationResult.Ok(new RecordedSize(
+                        plan.AsRecordedDimensions(), selection, BoundsPlan: null, plan));
+                }
+
+                default:
+                    return OperationResult.Fail<RecordedSize>(
+                        FailureCode.PreconditionNotMet,
+                        $"'{command.Kind}' is not a sizing command; there is nothing to calculate.");
+            }
+        }
+        catch (Exception ex) when (ex is ArgumentException or ArgumentOutOfRangeException)
+        {
+            // A size the calculation will not produce is an ordinary thing for an operator to
+            // type, so it is reported rather than thrown out of the command path.
+            return OperationResult.Fail<RecordedSize>(
+                FailureCode.PreconditionNotMet,
+                $"No plan fits that size to {source.PixelWidth}×{source.PixelHeight} px: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// The configured recommendation for one named preset, or why it cannot be trusted
+    /// (Epic 11400 Part B1A.2D §3, §4).
+    /// </summary>
+    /// <remarks>
+    /// The only route from a preset name to millimetres in the whole application. A preset the
+    /// verified manifest does not configure is refused rather than filled in from
+    /// <c>PrintDimensions.NominalMillimetres</c>: the ISO paper size a preset is named after and
+    /// the limit this shop prints it at are different numbers, and only one of them is
+    /// executable (§4).
+    /// </remarks>
+    private OperationResult<PresetPrintRecommendation> ResolveRecommendation(SizePreset preset)
+    {
+        OperationResult<PresetPrintRecommendationSet> configured =
+            _presetProvider.GetPrintSizeRecommendations();
+        if (configured.IsFailure)
+        {
+            return OperationResult.Fail<PresetPrintRecommendation>(configured.Failure);
+        }
+
+        return configured.Value.For(preset) is { } recommendation
+            ? OperationResult.Ok(recommendation)
+            : OperationResult.Fail<PresetPrintRecommendation>(
+                FailureCode.EnvironmentNotVerified,
+                $"The verified workstation preset configures no print recommendation for {preset}, so " +
+                "that size cannot be recorded. Nothing substitutes a nominal paper size for a " +
+                "configured production limit.");
+    }
+
+    /// <summary>The exact artefact a size decision may be bound to.</summary>
+    private readonly record struct SizingSource(
+        RevisionId RevisionId, Sha256 Sha256, int PixelWidth, int PixelHeight);
+
+    /// <summary>
+    /// Resolves the upstream artefact a size will be calculated against, or reports why none is
+    /// usable (Epic 11400 Part B1A.2A §8; Part B1A.2D §16).
+    /// </summary>
+    /// <remarks>
+    /// Its inputs are the bytes <c>EnsureIntegrityAsync</c> has just re-verified, and the pixels
+    /// are the Revision's own recorded <c>FileFacts</c> — never a second hashing path, and never
+    /// a dimension read from anywhere else (§16).
+    /// </remarks>
+    private static OperationResult<SizingSource> ResolveSizingSource(
+        SessionAggregate aggregate, WorkflowSnapshot snapshot)
     {
         if (snapshot.UpstreamResultOf(StepKind.PhotoshopOutput) is not { } upstream)
         {
-            return OperationResult.Fail<PrintPreparationPlan>(
+            return OperationResult.Fail<SizingSource>(
                 FailureCode.PreconditionNotMet,
-                "Photoshop output has no validated upstream result, so there are no source pixels to fit " +
-                "within the requested bounds.");
+                "Photoshop output has no validated upstream result, so there are no source pixels to size " +
+                "against.");
         }
 
         if (FindRevision(aggregate, upstream.Id) is not { } source)
         {
-            return OperationResult.Fail<PrintPreparationPlan>(
+            return OperationResult.Fail<SizingSource>(
                 FailureCode.PreconditionNotMet,
-                $"Upstream Revision {upstream.Id} is not loaded on this session; nothing may be fitted to it.");
+                $"Upstream Revision {upstream.Id} is not loaded on this session; nothing may be sized to it.");
         }
 
         if (!source.IsValid)
         {
-            return OperationResult.Fail<PrintPreparationPlan>(
+            return OperationResult.Fail<SizingSource>(
                 FailureCode.PreconditionNotMet,
-                $"Upstream Revision {upstream.Id} has been invalidated; bounds recorded against it would " +
+                $"Upstream Revision {upstream.Id} has been invalidated; a size recorded against it would " +
                 "describe a file the workflow will not consume.");
         }
 
@@ -391,7 +569,7 @@ public sealed class SessionService : ISessionService
         // refused rather than resolved in either direction.
         if (!source.Sha256.Equals(upstream.Sha256))
         {
-            return OperationResult.Fail<PrintPreparationPlan>(
+            return OperationResult.Fail<SizingSource>(
                 FailureCode.RevisionIntegrityMismatch,
                 $"Upstream Revision {upstream.Id} and its step entry disagree about the current hash; " +
                 "no plan may be bound to an artefact whose identity is unsettled.");
@@ -399,30 +577,14 @@ public sealed class SessionService : ISessionService
 
         if (!source.Facts.HasPixelDimensions)
         {
-            return OperationResult.Fail<PrintPreparationPlan>(
+            return OperationResult.Fail<SizingSource>(
                 FailureCode.PreconditionNotMet,
-                $"Upstream Revision {upstream.Id} has no recorded pixel dimensions, so no fit can be " +
+                $"Upstream Revision {upstream.Id} has no recorded pixel dimensions, so no plan can be " +
                 "calculated. Nothing is guessed from the file name or the requested millimetres.");
         }
 
-        try
-        {
-            return OperationResult.Ok(PrintPreparationPlan.For(
-                upstream.Id,
-                upstream.Sha256,
-                source.Facts.PixelWidth!.Value,
-                source.Facts.PixelHeight!.Value,
-                limits));
-        }
-        catch (Exception ex) when (ex is ArgumentException or ArgumentOutOfRangeException)
-        {
-            // A size the fit calculation will not produce is an ordinary thing for an operator to
-            // type, so it is reported rather than thrown out of the command path.
-            return OperationResult.Fail<PrintPreparationPlan>(
-                FailureCode.PreconditionNotMet,
-                $"No maximum-bound plan fits {limits.MaxWidthMm:0.##}×{limits.MaxHeightMm:0.##} mm to " +
-                $"{source.Facts.PixelWidth}×{source.Facts.PixelHeight} px: {ex.Message}");
-        }
+        return OperationResult.Ok(new SizingSource(
+            upstream.Id, upstream.Sha256, source.Facts.PixelWidth!.Value, source.Facts.PixelHeight!.Value));
     }
 
     /// <summary>
@@ -521,7 +683,16 @@ public sealed class SessionService : ISessionService
         IReadOnlyList<ProcessingAttempt> attempts) =>
         OperationResult.Ok(SessionView.From(
             state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode,
-            _engine.AvailableReturnTargets(state)));
+            _engine.AvailableReturnTargets(state),
+
+            // The configured recommendations, resolved here and offered to the screen, so the
+            // named sizes a UI can present are exactly the ones the verified preset configures.
+            // A provider that cannot verify the preset offers none, which is what stops an
+            // unverified installation from showing an A4 button with a paper standard behind it
+            // (Epic 11400 Part B1A.2D §3, §28).
+            _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
+                ? configured.Value.All
+                : []));
 
     /// <summary>
     /// The output rows as they stand after <paramref name="mutation"/> is committed.
@@ -604,7 +775,16 @@ public sealed class SessionService : ISessionService
             //
             // The same Revision StartStep would resolve, through the same guard. No second
             // hashing path exists, and none is added here.
-            WorkflowCommand.SetPrintDimensions =>
+            //
+            // All four sizing and enlargement decisions take the same route, because all four are
+            // decisions about specific pixels. A target edge binds a projected pixel pair to a
+            // hash exactly as a fit box binds a limiting edge to one, and an enlargement
+            // confirmation is a judgement about content the operator was shown — so none of them
+            // may be recorded against bytes that have already moved (Part B1A.2D §16).
+            WorkflowCommand.SetPrintDimensions
+                or WorkflowCommand.SetPresetFitSize
+                or WorkflowCommand.SetCustomTargetEdgeSize
+                or WorkflowCommand.AuthoriseEnlargement =>
                 FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.PhotoshopOutput)),
 
             _ => null,
@@ -731,19 +911,23 @@ public sealed class SessionService : ISessionService
             runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(authority);
         }
 
-        // The maximum-bound plan, written with the same opening transaction and for the same
-        // reason: the row must say which fit box and which source produced this output, not what
-        // the session was later allowed to do. A second attempt against different limits or
+        // The resolved geometry, written with the same opening transaction and for the same
+        // reason: the row must say which size and which source produced this output, not what the
+        // session was later allowed to do. A second attempt against a different target or
         // different content gets its own row; this one is never rewritten, because the attempt
-        // upsert leaves these columns out of its DO UPDATE clause (Epic 11400 Part B1A.2A §12).
+        // upsert leaves these columns out of its DO UPDATE clause (Epic 11400 Part B1A.2A §12;
+        // Part B1A.2D §24).
         //
-        // The *usable* plan rather than the raw one — not a second guard, the same predicate the
-        // engine just applied, so what is snapshotted is exactly what was validated and never a
-        // stale plan that happened to still be sitting on the session (§7).
+        // UsablePhotoshopPreparation rather than any raw field — not a second guard, the same
+        // predicate the engine just applied, so what is snapshotted is exactly what was validated
+        // and never a stale plan that happened to still be sitting on the session (§13). For an
+        // enlargement it carries the exact authority the run went ahead under, so a later change
+        // of mind cannot relabel this attempt as unauthorised, or an unauthorised one as
+        // permitted (§24).
         if (work.Step == StepKind.PhotoshopOutput &&
-            started.State.UsablePrintPreparationPlan is { } preparation)
+            started.State.UsablePhotoshopPreparation is { } preparation)
         {
-            runningAttempt = runningAttempt.WithPrintPreparationPlan(preparation);
+            runningAttempt = runningAttempt.WithPreparation(preparation);
         }
 
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
@@ -1099,12 +1283,13 @@ public sealed class SessionService : ISessionService
                 // usable plan, so the value is one that was bound to the exact bytes about to be
                 // opened; this guard is what makes that a property of this code rather than a
                 // promise about a caller elsewhere (Epic 11400 Part B1A.2A §12, §17).
-                if (attempt.PrintPreparationPlan is not { } preparation)
+                if (attempt.Preparation is not { } preparation)
                 {
                     return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
                         FailureCode.PreconditionNotMet,
-                        "Photoshop output reached the adapter without a recorded maximum-bound preparation plan. " +
-                        "No request is built: the limiting edge is not something to work out here.");
+                        "Photoshop output reached the adapter without a recorded preparation. No request is " +
+                        "built: which edge is written, and whether an enlargement was authorised, are not " +
+                        "things to work out here.");
                 }
 
                 OperationResult<ProductionPresetRef> preset = _presetProvider.GetVerifiedPreset();
@@ -1706,6 +1891,14 @@ public sealed class SessionService : ISessionService
             // plan behind it are always written and cleared together (Epic 11400 Part B1A.2A §4).
             DimensionSemantics = newSnapshot.DimensionSemantics,
             PrintPreparationPlan = newSnapshot.PrintPreparationPlan,
+
+            // And the flexible-size decision with them, enlargement authority included. The
+            // snapshot is the authority for all five: the engine clears them together on
+            // ReturnToStep and AddAnotherSize, and a merge that kept one behind would leave a
+            // confirmation attached to a size nobody chose (Part B1A.2D §31, §32).
+            SizeSelection = newSnapshot.SizeSelection,
+            TargetEdgePlan = newSnapshot.TargetEdgePlan,
+            EnlargementAuthority = newSnapshot.EnlargementAuthority,
         };
 
         foreach (WorkflowEffect effect in effects)

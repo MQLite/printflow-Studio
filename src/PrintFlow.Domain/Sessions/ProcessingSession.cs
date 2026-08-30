@@ -115,6 +115,53 @@ public sealed record ProcessingSession(
     /// </remarks>
     public PrintPreparationPlan? PrintPreparationPlan { get; init; }
 
+    /// <summary>
+    /// The operator's current size decision in the flexible-size vocabulary
+    /// (Epic 11400 Part B1A.2D §6).
+    /// </summary>
+    /// <remarks>
+    /// What was chosen, as opposed to what it works out to. It records the sizing mode, the
+    /// configured recommendation the operator was shown, whether that recommendation was
+    /// explicitly overridden, and the requested edge and millimetres — so a persisted decision can
+    /// be read back as the decision that was made rather than reconstructed from its consequences.
+    /// <para>
+    /// Null on a session recorded before the flexible-size contract, and on one whose maximum
+    /// bounds were typed rather than chosen from a named preset. Null never means "PresetFit was
+    /// assumed" (§21).
+    /// </para>
+    /// </remarks>
+    public FlexibleSizeSelection? SizeSelection { get; init; }
+
+    /// <summary>
+    /// The TargetEdgeV1 plan the next Photoshop attempt would run with
+    /// (Epic 11400 Part B1A.2D §8).
+    /// </summary>
+    /// <remarks>
+    /// The flexible-size sibling of <see cref="PrintPreparationPlan"/>, and deliberately a
+    /// separate field rather than a reinterpretation of it: an existing MaxBoundsV1 record keeps
+    /// its historical semantics and never becomes a target-edge plan because v1.11.0 is now
+    /// configured (§5, §18, §21). At most one of the two is set, and
+    /// <see cref="DimensionSemantics"/> says which.
+    /// </remarks>
+    public TargetEdgePrintPreparationPlan? TargetEdgePlan { get; init; }
+
+    /// <summary>
+    /// The operator's explicit permission to enlarge, when one has been granted
+    /// (Epic 11400 Part B1A.2D §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// A second decision, never a by-product of recording a size: nothing creates one when the
+    /// target is set, because enlarging past what the source holds is a judgement the operator
+    /// makes separately and knowingly (§10).
+    /// <para>
+    /// Retained rather than cleared when it stops applying, exactly as the background-removal
+    /// authority is. It names the exact source, edge, request and projection it covers, so a
+    /// changed source or a changed target simply stops matching — there is nothing to revoke, and
+    /// nothing to hunt down (§30).
+    /// </para>
+    /// </remarks>
+    public EnlargementAuthority? EnlargementAuthority { get; init; }
+
     /// <summary>Creates a new active session positioned at its first step.</summary>
     public static ProcessingSession Start(
         SessionId id,

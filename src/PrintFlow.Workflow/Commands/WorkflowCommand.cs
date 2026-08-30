@@ -113,8 +113,92 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record ReenterAutomation : WorkflowCommand;
 
-    /// <summary>Confirm the target physical dimensions.</summary>
+    /// <summary>
+    /// Confirm typed maximum bounds. The custom fit-box route only
+    /// (Epic 11400 Part B1A.2D §3, §19).
+    /// </summary>
+    /// <remarks>
+    /// A named preset is refused here rather than accepted with whatever millimetres the caller
+    /// supplied. Under v1.11.0 the executable limit for a named size comes from the configured
+    /// preset and from nowhere else, so "A4" arriving with a pair of millimetres attached is a
+    /// caller having decided what A4 means — which is exactly what §3 removes. Named sizes go
+    /// through <see cref="SetPresetFitSize"/>.
+    /// </remarks>
     public sealed record SetPrintDimensions(PrintDimensions Dimensions) : WorkflowCommand;
+
+    /// <summary>
+    /// Choose a named preset and take its configured recommendation
+    /// (Epic 11400 Part B1A.2D §3, §15, §17).
+    /// </summary>
+    /// <remarks>
+    /// It carries the preset and nothing else, and that is the point: the millimetres are not the
+    /// caller's to supply. <c>SessionService</c> resolves the recommendation from
+    /// <see cref="Ports.IWorkstationPresetProvider.GetPrintSizeRecommendations"/> and fits it with
+    /// <c>FitWithinBounds</c>, so a screen cannot record an A4 job at the ISO paper size, and a
+    /// stale build cannot record one at last version's limit (§3, §4).
+    /// <para>
+    /// Ordinary preset use asks for no axis and no resampling method, because neither is the
+    /// operator's under the accepted contract — which is why there is nothing else on this
+    /// command to fill in.
+    /// </para>
+    /// </remarks>
+    public sealed record SetPresetFitSize(SizePreset Preset) : WorkflowCommand;
+
+    /// <summary>
+    /// Record one exact operator-chosen physical edge, optionally as an explicit override of a
+    /// named preset's recommendation (Epic 11400 Part B1A.2D §6, §15).
+    /// </summary>
+    /// <remarks>
+    /// Exactly one edge and exactly one millimetre value: a second authoritative dimension is not
+    /// representable, and Photoshop derives the other edge with proportions constrained.
+    /// <para>
+    /// <paramref name="Millimetres"/> is <see cref="decimal"/> rather than <c>double</c>, and that
+    /// is the operator's number carried intact. The accepted target-edge calculation is exact —
+    /// it converts this decimal to a rational and rounds on integer remainders — so passing it
+    /// through binary floating point on the way in would decide midpoint cases somewhere other
+    /// than where the contract decides them (§7).
+    /// </para>
+    /// <para>
+    /// <paramref name="OverriddenPreset"/> names the recommendation being set aside, or is null
+    /// for an ordinary custom size. It records <i>that</i> the operator went past a recommendation
+    /// and which one; it is emphatically <b>not</b> permission to enlarge. A 320 mm override of a
+    /// 280 mm recommendation over a large enough source exceeds the preset and adds no pixels at
+    /// all — the two decisions stay separate, and only <see cref="AuthoriseEnlargement"/> grants
+    /// the second (§11).
+    /// </para>
+    /// </remarks>
+    public sealed record SetCustomTargetEdgeSize(
+        TargetEdge Edge,
+        decimal Millimetres,
+        SizePreset? OverriddenPreset = null) : WorkflowCommand;
+
+    /// <summary>
+    /// Record the operator's explicit permission to enlarge past what the source holds at the
+    /// production resolution (Epic 11400 Part B1A.2D §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// A <b>second</b> confirmation, never a by-product of recording a size. Recording a target
+    /// that happens to need more pixels than exist is one act; agreeing to synthesise those
+    /// pixels is another, and the accepted contract requires the operator to make it knowingly
+    /// (§10).
+    /// <para>
+    /// The payload is what the operator was looking at when they agreed —
+    /// <paramref name="ReviewedRevisionId"/>, <paramref name="DisplayedHash"/>,
+    /// <paramref name="Edge"/> and <paramref name="Millimetres"/> — and the command is accepted
+    /// only when that is still the plan on offer. So "I agreed to enlarge this photo to 320 mm"
+    /// can never quietly become "enlargement is on for this session", exactly as
+    /// <see cref="SetBackgroundRemovalDecision"/> refuses to become a setting (§9).
+    /// </para>
+    /// <para>
+    /// It is a decision and not an attempt: accepting one starts nothing, produces no file, and
+    /// creates no Revision.
+    /// </para>
+    /// </remarks>
+    public sealed record AuthoriseEnlargement(
+        RevisionId ReviewedRevisionId,
+        Sha256 DisplayedHash,
+        TargetEdge Edge,
+        decimal Millimetres) : WorkflowCommand;
 
     /// <summary>
     /// Record the operator's explicit white-underbase decision. Required before Photoshop
