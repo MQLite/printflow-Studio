@@ -8,11 +8,12 @@ public enum LimitingEdge
     Height,
 }
 
-/// <summary>The only two resize modes accepted by the fit-within-bounds contract.</summary>
+/// <summary>The fixed internal resize policies accepted by the sizing contracts.</summary>
 public enum PhotoshopResizeMode
 {
     None,
     BicubicSharper,
+    PreserveDetails,
 }
 
 /// <summary>

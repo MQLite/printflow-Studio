@@ -36,6 +36,9 @@ public enum PrintDimensionSemantics
 
     /// <summary>Maximum bounds under the accepted B1A.1 fit-within-bounds contract.</summary>
     MaxBoundsV1,
+
+    /// <summary>One exact operator-selected target edge under the flexible-size contract.</summary>
+    TargetEdgeV1,
 }
 
 /// <summary>What a preparation plan asks the future Photoshop operation to do.</summary>
@@ -242,11 +245,14 @@ public sealed record PrintPreparationPlan(
 
         bool shrinks = Mode == PrintPreparationMode.ProportionalShrink;
 
-        if (shrinks != (ResizePolicy == PhotoshopResizeMode.BicubicSharper))
+        PhotoshopResizeMode expectedPolicy = shrinks
+            ? PhotoshopResizeMode.BicubicSharper
+            : PhotoshopResizeMode.None;
+        if (ResizePolicy != expectedPolicy)
         {
             throw new ArgumentException(
                 $"Mode {Mode} and resize policy {ResizePolicy} describe different decisions; " +
-                "a shrink resamples with BicubicSharper and nothing else ever resamples.");
+                "a FitWithinBoundsV1 shrink uses BicubicSharper and its resolution-only plan uses None.");
         }
 
         if (shrinks != (LimitingEdge is LimitingEdge.Width or LimitingEdge.Height))

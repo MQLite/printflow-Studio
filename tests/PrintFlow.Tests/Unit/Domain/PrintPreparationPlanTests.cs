@@ -217,6 +217,14 @@ public sealed class PrintPreparationPlanTests
             limitingValueMm: null,
             policy: PhotoshopResizeMode.BicubicSharper));
 
+    [Fact]
+    public void A_legacy_fit_plan_cannot_gain_the_new_enlargement_policy() =>
+        Should.Throw<ArgumentException>(() => Rehydrate(
+            mode: PrintPreparationMode.ResolutionOnly,
+            edge: LimitingEdge.None,
+            limitingValueMm: null,
+            policy: PhotoshopResizeMode.PreserveDetails));
+
     /// <summary>An enlargement cannot be expressed, however it is assembled (§22.6).</summary>
     [Fact]
     public void A_plan_projecting_more_pixels_than_its_source_is_refused() =>
