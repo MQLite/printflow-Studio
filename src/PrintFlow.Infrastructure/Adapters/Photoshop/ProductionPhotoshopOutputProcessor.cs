@@ -21,10 +21,12 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 ///   <item><see cref="IPhotoshopPreparationAutomation"/> adds B1A.3's closed in-memory size and
 ///         resolution operation plus factual read-back. It produces no file and is not a
 ///         workflow-success surface.</item>
+///   <item><see cref="IPhotoshopTiffAutomation"/> adds C1's separate controlled Save As Copy and
+///         factual independent TIFF validation. Its result is an Infrastructure candidate, not
+///         workflow output success.</item>
 ///   <item><see cref="IPhotoshopOutputProcessor"/> — the workflow seam — remains deliberately
-///         <b>fail-closed</b>. A production TIFF still requires the accepted CMYK + W1 operation
-///         and TIFF Save As/validation. Returning success from resize alone would be a lie that
-///         a Revision would then be built on, so it returns a structured refusal.</item>
+///         <b>fail-closed</b>. C2 still owns the decision to turn a validated candidate into an
+///         <c>AdapterOutput</c> and workflow result.</item>
 /// </list>
 /// <see cref="Mode"/> is <see cref="AdapterExecutionMode.Production"/>, so
 /// <c>IEnvironmentGate</c> remains authoritative over every step this adapter would back. The
@@ -33,7 +35,7 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// </remarks>
 public sealed class ProductionPhotoshopOutputProcessor :
     IPhotoshopOutputProcessor,
-    IPhotoshopW1Automation
+    IPhotoshopTiffAutomation
 {
     private readonly IPhotoshopBaselineProvider _baselines;
     private readonly IExternalAppWindowLocator _locator;
@@ -43,6 +45,7 @@ public sealed class ProductionPhotoshopOutputProcessor :
     private readonly TimeProvider _clock;
     private readonly GuardedPhotoshopDocumentPreparer _preparer;
     private readonly GuardedPhotoshopW1Executor _w1;
+    private readonly GuardedPhotoshopTiffSaver _tiff;
 
     public ProductionPhotoshopOutputProcessor(
         IPhotoshopBaselineProvider baselines,
@@ -59,7 +62,10 @@ public sealed class ProductionPhotoshopOutputProcessor :
             options,
             clock,
             new RotPhotoshopPreparationNativeBridge(),
-            new RotPhotoshopW1NativeBridge())
+            new RotPhotoshopW1NativeBridge(),
+            new RotPhotoshopTiffNativeBridge(),
+            new ProductionTiffInspector(),
+            new FileSystemPhotoshopTiffFileProbe())
     {
     }
 
@@ -72,7 +78,8 @@ public sealed class ProductionPhotoshopOutputProcessor :
         TimeProvider clock,
         IPhotoshopPreparationNativeBridge nativeBridge)
         : this(baselines, locator, driver, workspace, options, clock, nativeBridge,
-            new RotPhotoshopW1NativeBridge())
+            new RotPhotoshopW1NativeBridge(), new RotPhotoshopTiffNativeBridge(),
+            new ProductionTiffInspector(), new FileSystemPhotoshopTiffFileProbe())
     {
     }
 
@@ -85,6 +92,24 @@ public sealed class ProductionPhotoshopOutputProcessor :
         TimeProvider clock,
         IPhotoshopPreparationNativeBridge nativeBridge,
         IPhotoshopW1NativeBridge w1NativeBridge)
+        : this(baselines, locator, driver, workspace, options, clock, nativeBridge, w1NativeBridge,
+            new RotPhotoshopTiffNativeBridge(), new ProductionTiffInspector(),
+            new FileSystemPhotoshopTiffFileProbe())
+    {
+    }
+
+    internal ProductionPhotoshopOutputProcessor(
+        IPhotoshopBaselineProvider baselines,
+        IExternalAppWindowLocator locator,
+        IPhotoshopUiDriver driver,
+        IWorkspace workspace,
+        PhotoshopAutomationOptions options,
+        TimeProvider clock,
+        IPhotoshopPreparationNativeBridge nativeBridge,
+        IPhotoshopW1NativeBridge w1NativeBridge,
+        IPhotoshopTiffNativeBridge tiffNativeBridge,
+        IProductionTiffInspector tiffInspector,
+        IPhotoshopTiffFileProbe tiffProbe)
     {
         ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(locator);
@@ -94,6 +119,9 @@ public sealed class ProductionPhotoshopOutputProcessor :
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(nativeBridge);
         ArgumentNullException.ThrowIfNull(w1NativeBridge);
+        ArgumentNullException.ThrowIfNull(tiffNativeBridge);
+        ArgumentNullException.ThrowIfNull(tiffInspector);
+        ArgumentNullException.ThrowIfNull(tiffProbe);
 
         _baselines = baselines;
         _locator = locator;
@@ -103,6 +131,9 @@ public sealed class ProductionPhotoshopOutputProcessor :
         _clock = clock;
         _preparer = new GuardedPhotoshopDocumentPreparer(baselines, locator, driver, nativeBridge);
         _w1 = new GuardedPhotoshopW1Executor(baselines, _preparer, w1NativeBridge);
+        _tiff = new GuardedPhotoshopTiffSaver(
+            baselines, _preparer, tiffNativeBridge, tiffInspector, tiffProbe,
+            workspace, options, clock);
     }
 
     /// <inheritdoc />
@@ -126,12 +157,20 @@ public sealed class ProductionPhotoshopOutputProcessor :
         CancellationToken cancellationToken) =>
         _w1.ExecuteW1Async(opened, prepared, branch, cancellationToken);
 
+    /// <inheritdoc />
+    public Task<OperationResult<PhotoshopValidatedTiffCandidate>> SaveProductionTiffAsync(
+        PhotoshopOpenedDocument opened,
+        PhotoshopW1PreparedDocument prepared,
+        WorkspaceFileRef expectedOutput,
+        CancellationToken cancellationToken) =>
+        _tiff.SaveProductionTiffAsync(opened, prepared, expectedOutput, cancellationToken);
+
     // -----------------------------------------------------------------------------------
-    // Workflow seam — fail-closed until W1 and TIFF exist
+    // Workflow seam — fail-closed until C2 integrates the validated candidate
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// Refuses to produce a production TIFF, because Part A cannot produce one honestly.
+    /// Refuses to claim workflow output success, because C1 does not own that integration.
     /// </summary>
     /// <remarks>
     /// This is not a stub that someone forgot to finish; it is the §19 boundary written down.
@@ -150,16 +189,15 @@ public sealed class ProductionPhotoshopOutputProcessor :
 
         return Task.FromResult(OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
             FailureCode.PreconditionNotMet,
-            "Production Photoshop output is not implemented. Epic 11400 B1B can prepare an exact " +
-            "managed document as CMYK/8 with one validated W1 spot channel through a separate " +
-            "Infrastructure-only seam, but that in-memory state is not output success: TIFF Save As and " +
-            "output validation remain Part C. No Photoshop window was touched here, no file was produced and no Revision may be " +
-            "created.",
+            "Production Photoshop workflow output is not implemented. Epic 11400 C1 can save and " +
+            "independently validate a TIFF through a separate Infrastructure-only seam, but a factual " +
+            "validated candidate is not AdapterOutput or workflow success. C2 owns that integration. " +
+            "No Photoshop window was touched here, no file was produced and no Revision may be created.",
             isRetryable: false,
             context: new Dictionary<string, string>
             {
                 ["adapterId"] = AdapterId,
-                ["implementedScope"] = "separate identify/open/prepare/CMYK-W1/read-back seam only",
+                ["implementedScope"] = "separate identify/open/prepare/CMYK-W1/save/validate candidate seams only",
                 ["inputSent"] = "false",
                 ["w1ActionInvoked"] = "false",
                 ["tiffWritten"] = "false",

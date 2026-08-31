@@ -43,6 +43,9 @@ public sealed record PhotoshopAutomationOptions
     /// <summary>The interval between observations while polling.</summary>
     public TimeSpan PollInterval { get; init; } = TimeSpan.FromMilliseconds(500);
 
+    /// <summary>Maximum time for the one synchronous TIFF save to become stable and fully readable.</summary>
+    public TimeSpan TiffSettleTimeout { get; init; } = TimeSpan.FromSeconds(60);
+
     /// <summary>How many distinct visible child classes one state observation reads.</summary>
     /// <remarks>
     /// A loaded Photoshop editor showed sixty-four visible children resolving to roughly a dozen

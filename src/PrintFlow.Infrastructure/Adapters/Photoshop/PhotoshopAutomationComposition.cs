@@ -110,6 +110,32 @@ public static class PhotoshopAutomationComposition
             options);
     }
 
+    /// <summary>
+    /// Composes the closed C1 TIFF candidate operation for controlled workstation proof. It does
+    /// not expose or invoke the workflow output seam.
+    /// </summary>
+    public static IPhotoshopTiffAutomation CreateTiffAutomation(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        PhotoshopAutomationOptions? options = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetManifestAbsolutePath);
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        return Create(
+            presetManifestAbsolutePath,
+            expectedPresetSha256,
+            workspace,
+            evidenceDirectory,
+            clock,
+            options);
+    }
+
     private static ProductionPhotoshopOutputProcessor Create(
         string presetManifestAbsolutePath,
         Sha256 expectedPresetSha256,

@@ -40,6 +40,8 @@ public sealed class PhotoshopBoundaryTests
         nameof(PhotoshopOpenDialogSignature),
         nameof(PhotoshopDocumentIdentitySignature),
         nameof(PhotoshopDocumentIdentity),
+        nameof(IPhotoshopTiffAutomation),
+        nameof(PhotoshopValidatedTiffCandidate),
         nameof(IVerifiedControlSink),
         nameof(VerifiedControlRef),
     ];
@@ -209,45 +211,22 @@ public sealed class PhotoshopBoundaryTests
         }
     }
 
-    /// <summary>
-    /// The B1B source may name the closed W1 contract, but it still cannot write a TIFF.
-    /// </summary>
-    /// <remarks>
-    /// The scope statement at its most literal. The accepted action names exist in signed
-    /// evidence and in this epic's report; what must not exist is code that could send one to
-    /// Photoshop.
-    /// </remarks>
-    [Theory]
-    [InlineData(".tif")]
-    [InlineData("TiffSaveOptions")]
-    [InlineData(".saveAs(")]
-    public void The_Photoshop_adapter_source_names_no_TIFF_write_artefact(string bannedToken)
+    /// <summary>The one reviewed TIFF Save As exists only in C1's fixed native bridge.</summary>
+    [Fact]
+    public void The_only_Photoshop_TIFF_save_call_is_the_closed_C1_program()
     {
-        List<string> offenders = [];
+        string directory = Path.Combine(
+            ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Photoshop");
+        List<string> saveCallFiles = Directory.EnumerateFiles(directory, "*.cs")
+            .Where(file => File.ReadAllText(file).Contains(".saveAs(", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .ToList()!;
 
-        foreach ((string file, string[] lines) in PhotoshopAdapterSource())
-        {
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string trimmed = lines[i].TrimStart();
-
-                // Documentation that explains why a thing is absent is the opposite of a
-                // violation, so comment lines are exempt.
-                if (trimmed.StartsWith("//", StringComparison.Ordinal) ||
-                    trimmed.StartsWith("///", StringComparison.Ordinal) ||
-                    trimmed.StartsWith("*", StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                if (lines[i].Contains(bannedToken, StringComparison.OrdinalIgnoreCase))
-                {
-                    offenders.Add($"{Path.GetFileName(file)}:{i + 1}: {trimmed}");
-                }
-            }
-        }
-
-        offenders.ShouldBeEmpty($"B1B must contain no executable TIFF/save reference to '{bannedToken}'.");
+        saveCallFiles.ShouldBe(["PhotoshopTiffNativeBridge.cs"]);
+        string native = File.ReadAllText(Path.Combine(directory, saveCallFiles[0]));
+        Regex.Matches(native, Regex.Escape("doc.saveAs("), RegexOptions.None,
+            TimeSpan.FromSeconds(5)).Count.ShouldBe(1);
+        native.ShouldContain("doc.saveAs(output, options, true, Extension.LOWERCASE);");
     }
 
     // -----------------------------------------------------------------------------------
