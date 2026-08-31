@@ -12,6 +12,7 @@ using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Effects;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
+using System.Collections.Concurrent;
 
 namespace PrintFlow.Workflow.Services;
 
@@ -88,6 +89,15 @@ public sealed class SessionService : ISessionService
     /// machine-wide, and survives this process (§32).
     /// </remarks>
     private readonly AutomationRunRegistry _runs = new();
+
+    /// <summary>
+    /// Opaque, single-use handles for enlargement warnings this service returned to a screen.
+    /// The shell sees only the Guid; the exact Revision/hash/target command stays here.
+    /// </summary>
+    private readonly ConcurrentDictionary<Guid, EnlargementOffer> _enlargementOffers = new();
+
+    private sealed record EnlargementOffer(
+        SessionId SessionId, WorkflowCommand.AuthoriseEnlargement Command);
 
     private readonly int _processId;
     private readonly string _machineName;
@@ -349,6 +359,31 @@ public sealed class SessionService : ISessionService
         }
 
         return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<SessionView>> AuthoriseCurrentEnlargementAsync(
+        SessionId id,
+        Guid enlargementOfferId,
+        string? operatorName,
+        CancellationToken cancellationToken)
+    {
+        if (!_enlargementOffers.TryRemove(enlargementOfferId, out EnlargementOffer? offer) ||
+            offer.SessionId != id)
+        {
+            return OperationResult.Fail<SessionView>(
+                FailureCode.PreconditionNotMet,
+                "That enlargement offer is no longer current. Review the refreshed size before continuing.");
+        }
+
+        // ExecuteAsync loads again, re-verifies the source bytes and asks the engine to match
+        // every hidden binding fact captured when the warning was rendered. If anything changed
+        // since then, this exact command is refused and the caller refreshes persisted truth.
+        return await ExecuteAsync(
+            id,
+            offer.Command,
+            operatorName,
+            cancellationToken);
     }
 
     /// <summary>
@@ -680,8 +715,23 @@ public sealed class SessionService : ISessionService
         WorkflowSnapshot state,
         IReadOnlyList<Revision> revisions,
         IReadOnlyList<PrintOutput> outputs,
-        IReadOnlyList<ProcessingAttempt> attempts) =>
-        OperationResult.Ok(SessionView.From(
+        IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        Guid? enlargementOfferId = null;
+        if (state.UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } offered &&
+            state.NeedsEnlargementAuthority)
+        {
+            enlargementOfferId = Guid.NewGuid();
+            _enlargementOffers[enlargementOfferId.Value] = new EnlargementOffer(
+                state.SessionId,
+                new WorkflowCommand.AuthoriseEnlargement(
+                    offered.SourceRevisionId,
+                    offered.SourceSha256,
+                    offered.Projection.SelectedTargetEdge,
+                    offered.Projection.RequestedMillimetres));
+        }
+
+        return OperationResult.Ok(SessionView.From(
             state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode,
             _engine.AvailableReturnTargets(state),
 
@@ -692,7 +742,9 @@ public sealed class SessionService : ISessionService
             // (Epic 11400 Part B1A.2D §3, §28).
             _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
                 ? configured.Value.All
-                : []));
+                : [],
+            enlargementOfferId));
+    }
 
     /// <summary>
     /// The output rows as they stand after <paramref name="mutation"/> is committed.

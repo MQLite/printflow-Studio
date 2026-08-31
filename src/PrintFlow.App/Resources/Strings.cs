@@ -328,6 +328,39 @@ internal static class Strings
 
     internal static string Session_PresetHint => Get(nameof(Session_PresetHint));
 
+    internal static string Session_SizeHeading => Get(nameof(Session_SizeHeading));
+    internal static string Session_UsePreset => Get(nameof(Session_UsePreset));
+    internal static string Session_CustomSize => Get(nameof(Session_CustomSize));
+    internal static string Session_AdjustSize => Get(nameof(Session_AdjustSize));
+    internal static string Session_RecommendedMaximum => Get(nameof(Session_RecommendedMaximum));
+    internal static string Session_RecommendedLongEdge => Get(nameof(Session_RecommendedLongEdge));
+    internal static string Session_TargetEdge => Get(nameof(Session_TargetEdge));
+    internal static string Session_TargetSizeMm => Get(nameof(Session_TargetSizeMm));
+    internal static string Session_TargetSizeInvalid => Get(nameof(Session_TargetSizeInvalid));
+    internal static string Session_ConfirmCustomSize => Get(nameof(Session_ConfirmCustomSize));
+    internal static string TargetEdge_Width => Get(nameof(TargetEdge_Width));
+    internal static string TargetEdge_Height => Get(nameof(TargetEdge_Height));
+    internal static string TargetEdge_LongEdge => Get(nameof(TargetEdge_LongEdge));
+    internal static string Session_BasedOnPreset => Get(nameof(Session_BasedOnPreset));
+    internal static string Session_PresetExceeded => Get(nameof(Session_PresetExceeded));
+    internal static string Session_CustomResolutionOnly => Get(nameof(Session_CustomResolutionOnly));
+    internal static string Session_CustomShrink => Get(nameof(Session_CustomShrink));
+    internal static string Session_EnlargementWarning => Get(nameof(Session_EnlargementWarning));
+    internal static string Session_ChangeSize => Get(nameof(Session_ChangeSize));
+    internal static string Session_ContinueWithSize => Get(nameof(Session_ContinueWithSize));
+    internal static string Session_EnlargementConfirmed => Get(nameof(Session_EnlargementConfirmed));
+    internal static string Session_CurrentPreset => Get(nameof(Session_CurrentPreset));
+    internal static string Session_CurrentCustomTarget => Get(nameof(Session_CurrentCustomTarget));
+    internal static string Session_PresetOverrideYes => Get(nameof(Session_PresetOverrideYes));
+    internal static string Session_ProjectedResize => Get(nameof(Session_ProjectedResize));
+    internal static string ResizeDirection_ResolutionOnly => Get(nameof(ResizeDirection_ResolutionOnly));
+    internal static string ResizeDirection_Shrink => Get(nameof(ResizeDirection_Shrink));
+    internal static string ResizeDirection_Enlarge => Get(nameof(ResizeDirection_Enlarge));
+    internal static string Session_ProportionalFit => Get(nameof(Session_ProportionalFit));
+    internal static string Session_EnlargementExplicitlyConfirmed => Get(nameof(Session_EnlargementExplicitlyConfirmed));
+    internal static string Session_ProjectedPlan => Get(nameof(Session_ProjectedPlan));
+    internal static string Session_PhotoshopNotRun => Get(nameof(Session_PhotoshopNotRun));
+
     internal static string Preset_A3Landscape => Get(nameof(Preset_A3Landscape));
 
     internal static string Preset_A3Portrait => Get(nameof(Preset_A3Portrait));

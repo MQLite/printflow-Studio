@@ -123,6 +123,35 @@ public sealed class MaximumBoundsBoundaryTests
             "an enlargement is authorised by the engine, against the plan actually on offer.");
     }
 
+    [Fact]
+    public void The_shell_cannot_construct_the_enlargement_command_or_receive_its_binding_facts()
+    {
+        Offenders("PrintFlow.App", subdirectory: null, @"WorkflowCommand\.AuthoriseEnlargement")
+            .ShouldBeEmpty("the shell confirms the service's current offer, not a Revision/hash payload.");
+
+        IEnumerable<string> sizingProperties = typeof(FlexibleSizeView)
+            .GetProperties()
+            .Select(property => property.Name);
+        sizingProperties.ShouldAllBe(name =>
+            !name.Contains("Sha", StringComparison.OrdinalIgnoreCase) &&
+            !name.Contains("Revision", StringComparison.OrdinalIgnoreCase));
+
+        MethodInfo confirmation = typeof(ISessionService)
+            .GetMethod(nameof(ISessionService.AuthoriseCurrentEnlargementAsync))
+            .ShouldNotBeNull();
+        confirmation.GetParameters().Select(parameter => parameter.ParameterType).ShouldBe(
+            [typeof(PrintFlow.Domain.Ids.SessionId), typeof(Guid), typeof(string), typeof(CancellationToken)]);
+    }
+
+    [Fact]
+    public void The_operator_screen_exposes_no_resampling_selector()
+    {
+        string xaml = ShellSource("Views", "SessionScreenView.xaml");
+        xaml.ShouldNotContain("PhotoshopResizeMode", Case.Sensitive);
+        xaml.ShouldNotContain("BicubicSharper", Case.Sensitive);
+        xaml.ShouldNotContain("PreserveDetails", Case.Sensitive);
+    }
+
     /// <summary>
     /// Neither the shell nor Infrastructure constructs a plan (§23).
     /// </summary>

@@ -346,6 +346,38 @@
   <data name="Session_PresetHint" xml:space="preserve">
     <value>预设只是填入其最大尺寸范围，确认之前仍可自行修改毫米数值；具体由哪条边起限制作用，由 PrintFlow 根据图像本身判断。</value>
   </data>
+  <data name="Session_SizeHeading" xml:space="preserve"><value>尺寸</value></data>
+  <data name="Session_UsePreset" xml:space="preserve"><value>使用预设</value></data>
+  <data name="Session_CustomSize" xml:space="preserve"><value>自定义尺寸</value></data>
+  <data name="Session_AdjustSize" xml:space="preserve"><value>调整尺寸</value></data>
+  <data name="Session_RecommendedMaximum" xml:space="preserve"><value>推荐最大尺寸：{0} × {1} mm</value></data>
+  <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>推荐长边：{0} mm</value></data>
+  <data name="Session_TargetEdge" xml:space="preserve"><value>目标边</value></data>
+  <data name="Session_TargetSizeMm" xml:space="preserve"><value>目标尺寸（mm）</value></data>
+  <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，并输入大于零的毫米数值。</value></data>
+  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>确认自定义尺寸</value></data>
+  <data name="TargetEdge_Width" xml:space="preserve"><value>宽度</value></data>
+  <data name="TargetEdge_Height" xml:space="preserve"><value>高度</value></data>
+  <data name="TargetEdge_LongEdge" xml:space="preserve"><value>长边</value></data>
+  <data name="Session_BasedOnPreset" xml:space="preserve"><value>基于 {0}</value></data>
+  <data name="Session_PresetExceeded" xml:space="preserve"><value>此尺寸超过 {0} 推荐尺寸。</value></data>
+  <data name="Session_CustomResolutionOnly" xml:space="preserve"><value>无需改变像素尺寸。</value></data>
+  <data name="Session_CustomShrink" xml:space="preserve"><value>图片将按比例缩小。</value></data>
+  <data name="Session_EnlargementWarning" xml:space="preserve"><value>此尺寸需要在 300 PPI 下将图片放大至约 {0}%。&#10;放大可能降低图片清晰度。</value></data>
+  <data name="Session_ChangeSize" xml:space="preserve"><value>修改尺寸</value></data>
+  <data name="Session_ContinueWithSize" xml:space="preserve"><value>仍按此尺寸处理</value></data>
+  <data name="Session_EnlargementConfirmed" xml:space="preserve"><value>已确认按此图片和尺寸进行放大。</value></data>
+  <data name="Session_CurrentPreset" xml:space="preserve"><value>预设：{0}</value></data>
+  <data name="Session_CurrentCustomTarget" xml:space="preserve"><value>自定义{0}：{1} mm</value></data>
+  <data name="Session_PresetOverrideYes" xml:space="preserve"><value>预设尺寸调整：是</value></data>
+  <data name="Session_ProjectedResize" xml:space="preserve"><value>预计处理：{0}</value></data>
+  <data name="ResizeDirection_ResolutionOnly" xml:space="preserve"><value>无需改变像素尺寸</value></data>
+  <data name="ResizeDirection_Shrink" xml:space="preserve"><value>按比例缩小</value></data>
+  <data name="ResizeDirection_Enlarge" xml:space="preserve"><value>放大</value></data>
+  <data name="Session_ProportionalFit" xml:space="preserve"><value>按比例适应</value></data>
+  <data name="Session_EnlargementExplicitlyConfirmed" xml:space="preserve"><value>已明确确认放大</value></data>
+  <data name="Session_ProjectedPlan" xml:space="preserve"><value>预计处理方案</value></data>
+  <data name="Session_PhotoshopNotRun" xml:space="preserve"><value>未运行 Photoshop。</value></data>
   <data name="Session_PreparationHeading" xml:space="preserve"><value>打印准备</value></data>
   <data name="Session_PreparationResolutionOnly" xml:space="preserve">
     <value>图像已在最大尺寸范围之内，像素尺寸保持不变。</value>
@@ -371,10 +403,10 @@
     <value>此为计划值 — 并未运行 Photoshop。</value>
   </data>
   <data name="Session_RunReady" xml:space="preserve">
-    <value>可以运行此步骤：本图片的最大打印尺寸已确认。</value>
+    <value>可以运行此步骤：本图片的打印尺寸已确认。</value>
   </data>
   <data name="Session_RunNotReady" xml:space="preserve">
-    <value>在确认本图片的最大打印尺寸之前，无法运行此步骤。</value>
+    <value>在确认本图片的打印尺寸及所需放大之前，无法运行此步骤。</value>
   </data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
     <value>此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大打印尺寸。</value>

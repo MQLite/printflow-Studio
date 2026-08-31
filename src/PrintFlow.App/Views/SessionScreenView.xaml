@@ -931,31 +931,15 @@
                         </StackPanel>
                     </Border>
 
-                    <!--
-                        Maximum print size (§3–§5; Epic 11400 Part B1A.2B §5, §6). Visible exactly
-                        while the workflow layer would accept the command, so it appears on the
-                        PrintDimensions step and reappears after Add Another Size without this
-                        file knowing either rule.
-
-                        The two boxes are limits. There is deliberately no axis selector and no
-                        resampling control anywhere in this panel: FitWithinBounds chooses the
-                        governing edge from the source pixels, and the resampling policy is fixed
-                        by the accepted contract (§4, §9).
-                    -->
                     <Border BorderBrush="#22000000"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanSetMaximumBounds, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding CanChooseFlexibleSize, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
-                            <TextBlock Text="{Binding MaximumBoundsHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding MaximumBoundsHint}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.7"
-                                       Margin="0,6,0,0" />
-
-                            <TextBlock Text="{Binding PresetsLabel}" Opacity="0.6" Margin="0,10,0,4" />
+                            <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
                             <ItemsControl ItemsSource="{Binding SizePresets}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -964,19 +948,14 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <!--
-                                            The preset's own limits under its name, so a shortcut
-                                            never reads as an exact width × height output. Both
-                                            lines come from the view model; no size is stated here.
-                                        -->
                                         <Button CommandParameter="{Binding}"
-                                                Command="{Binding DataContext.ApplyPresetCommand,
+                                                Command="{Binding DataContext.UsePresetCommand,
                                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                Padding="10,4"
+                                                Padding="12,7"
                                                 Margin="0,0,6,6">
                                             <StackPanel>
-                                                <TextBlock Text="{Binding Label}" />
-                                                <TextBlock Text="{Binding BoundsLabel}"
+                                                <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding RecommendationLabel}"
                                                            FontSize="11"
                                                            Opacity="0.7" />
                                             </StackPanel>
@@ -984,45 +963,54 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <TextBlock Text="{Binding PresetHint}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.6"
-                                       FontStyle="Italic" />
-
-                            <Grid Margin="0,10,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="12" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding MaxWidthMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="0"
-                                         Text="{Binding WidthMmText, UpdateSourceTrigger=PropertyChanged}" />
-
-                                <TextBlock Grid.Row="0" Grid.Column="2"
-                                           Text="{Binding MaxHeightMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="2"
-                                         Text="{Binding HeightMmText, UpdateSourceTrigger=PropertyChanged}" />
-                            </Grid>
-
-                            <!-- The limits as typed. No pixel figure: what the image becomes is
-                                 FitWithinBounds' answer, and it arrives with the plan (§7). -->
-                            <TextBlock Text="{Binding PendingMaximumBounds}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8"
-                                       Margin="0,8,0,0" />
-
-                            <Button Content="{Binding ConfirmMaximumBoundsLabel}"
-                                    Command="{Binding SetMaximumBoundsCommand}"
+                            <Button Content="{Binding CustomSizeLabel}"
+                                    Command="{Binding ChooseCustomSizeCommand}"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
-                                    Margin="0,10,0,0" />
+                                    Margin="0,4,0,0" />
+
+                            <Border BorderBrush="#22000000"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="10"
+                                    Margin="0,10,0,0"
+                                    Visibility="{Binding IsChoosingCustomSize, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding CustomPresetContext}"
+                                               FontWeight="SemiBold"
+                                               Visibility="{Binding HasCustomPresetContext, Converter={StaticResource BoolToVisibility}}" />
+                                    <TextBlock Text="{Binding CustomPresetRecommendation}"
+                                               Opacity="0.7"
+                                               Margin="0,3,0,0"
+                                               Visibility="{Binding HasCustomPresetContext, Converter={StaticResource BoolToVisibility}}" />
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                                   Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <ComboBox Grid.Row="1" Grid.Column="0"
+                                                  ItemsSource="{Binding TargetEdgeChoices}"
+                                                  SelectedItem="{Binding SelectedTargetEdgeChoice}"
+                                                  DisplayMemberPath="Label" />
+                                        <TextBlock Grid.Row="0" Grid.Column="2"
+                                                   Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBox Grid.Row="1" Grid.Column="2"
+                                                 Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
+                                    </Grid>
+                                    <Button Content="{Binding ConfirmCustomSizeLabel}"
+                                            Command="{Binding ConfirmCustomSizeCommand}"
+                                            HorizontalAlignment="Left"
+                                            Padding="14,6"
+                                            Margin="0,10,0,0" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
 
@@ -1039,13 +1027,31 @@
                             Visibility="{Binding HasPreparationPlan, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding PreparationHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding ConfirmedMaximumBounds}"
+                            <TextBlock Text="{Binding CurrentSizeSummary}"
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
+                            <TextBlock Text="{Binding CurrentPresetContext}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.75"
+                                       Margin="0,3,0,0"
+                                       Visibility="{Binding HasCurrentPresetContext, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="{Binding CurrentRecommendation}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.75"
+                                       Margin="0,3,0,0"
+                                       Visibility="{Binding HasCurrentRecommendation, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="{Binding AdjustSizeLabel}"
+                                    Command="{Binding AdjustSizeCommand}"
+                                    IsEnabled="{Binding CanAdjustSelectedPreset}"
+                                    HorizontalAlignment="Left"
+                                    Padding="10,4"
+                                    Margin="0,6,0,0"
+                                    Visibility="{Binding HasPresetSizeSelection, Converter={StaticResource BoolToVisibility}}" />
                             <TextBlock Text="{Binding PreparationModeText}"
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
-                                       Margin="0,4,0,0" />
+                                       Margin="0,6,0,0"
+                                       Visibility="{Binding HasPreparationModeText, Converter={StaticResource BoolToVisibility}}" />
                             <TextBlock Text="{Binding PreparationLimitingEdge}"
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
@@ -1060,6 +1066,40 @@
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
                                        Margin="0,4,0,0" />
+
+                            <TextBlock Text="{Binding PresetLimitNotice}"
+                                       TextWrapping="Wrap"
+                                       Foreground="#8A5600"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasPresetLimitNotice, Converter={StaticResource BoolToVisibility}}" />
+
+                            <Border BorderBrush="#88B36B00"
+                                    Background="#18B36B00"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="10"
+                                    Margin="0,10,0,0"
+                                    Visibility="{Binding NeedsEnlargementAuthority, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding EnlargementWarning}" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                        <Button Content="{Binding ChangeSizeLabel}"
+                                                Command="{Binding ChangeSizeCommand}"
+                                                Padding="12,5"
+                                                Margin="0,0,8,0" />
+                                        <Button Content="{Binding ContinueWithSizeLabel}"
+                                                Command="{Binding ContinueWithSizeCommand}"
+                                                IsEnabled="{Binding CanAuthoriseEnlargement}"
+                                                Padding="12,5" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="{Binding EnlargementConfirmedNotice}"
+                                       TextWrapping="Wrap"
+                                       Foreground="#2F6B3A"
+                                       Margin="0,8,0,0"
+                                       Visibility="{Binding HasUsableEnlargementAuthority, Converter={StaticResource BoolToVisibility}}" />
 
                             <!-- Readiness from CanRunPhotoshopOutput, never from "a size exists". -->
                             <TextBlock Text="{Binding RunReadinessNotice}"
@@ -1220,13 +1260,25 @@
                                 <TextBlock Text="{Binding PreparationAttemptHeading}"
                                            Opacity="0.6"
                                            FontSize="11" />
+                                <TextBlock Text="{Binding PreparationAttemptSelection}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptPresetContext}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptRecommendation}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
                                 <TextBlock Text="{Binding PreparationAttemptBounds}"
                                            TextWrapping="Wrap"
                                            Opacity="0.8" />
-                                <TextBlock Text="{Binding PreparationAttemptMode}"
+                                <TextBlock Text="{Binding PreparationAttemptPresetOverride}"
                                            TextWrapping="Wrap"
                                            Opacity="0.8" />
-                                <TextBlock Text="{Binding PreparationAttemptLimitingEdge}"
+                                <TextBlock Text="{Binding PreparationAttemptResize}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding PreparationAttemptEnlargementConfirmation}"
                                            TextWrapping="Wrap"
                                            Opacity="0.8" />
                                 <TextBlock Text="{Binding PreparationAttemptProjected}"

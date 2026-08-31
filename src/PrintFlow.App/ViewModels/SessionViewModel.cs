@@ -178,6 +178,7 @@ public sealed class SizePresetChoice
         HeightMm = (double)recommendation.MaxHeightMm;
         Label = DisplayNames.SizePreset(Preset);
         BoundsLabel = SizeText.MaximumBounds(WidthMm, HeightMm);
+        RecommendationLabel = SizeText.Recommendation(recommendation);
     }
 
     /// <summary>The configured recommendation this row shows. Never derived from a paper size.</summary>
@@ -198,6 +199,23 @@ public sealed class SizePresetChoice
     /// two limits are the same (§6).
     /// </summary>
     public string BoundsLabel { get; }
+
+    /// <summary>The configured recommendation in the wording its configured shape requires.</summary>
+    public string RecommendationLabel { get; }
+}
+
+/// <summary>One explicit custom target-edge choice; the label is localised, the enum is persisted.</summary>
+public sealed class TargetEdgeChoice
+{
+    internal TargetEdgeChoice(TargetEdge edge)
+    {
+        Edge = edge;
+        Label = DisplayNames.TargetEdge(edge);
+    }
+
+    public TargetEdge Edge { get; }
+
+    public string Label { get; }
 }
 
 /// <summary>
@@ -230,6 +248,33 @@ internal static class SizeText
                 Strings.Session_MaxBoundsSummary,
                 maxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture),
                 maxHeightMm.ToString(Millimetres, CultureInfo.CurrentCulture));
+
+    public static string Recommendation(PresetPrintRecommendation recommendation) =>
+        Recommendation(
+            recommendation.Kind, recommendation.MaxWidthMm, recommendation.MaxHeightMm);
+
+    public static string Recommendation(
+        PresetRecommendationKind? kind, decimal? maxWidthMm, decimal? maxHeightMm)
+    {
+        if (kind is null || maxWidthMm is null || maxHeightMm is null)
+        {
+            return string.Empty;
+        }
+
+        return kind == PresetRecommendationKind.MaximumLongEdge
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_RecommendedLongEdge,
+                maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture))
+            : string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_RecommendedMaximum,
+                maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture),
+                maxHeightMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture));
+    }
+
+    public static string MillimetresValue(decimal value) =>
+        value.ToString(Millimetres, CultureInfo.CurrentCulture);
 
     /// <summary>
     /// Whether the box states one limit rather than two.
@@ -388,6 +433,21 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <summary>Unconfirmed operator input. Means nothing until a command accepts it.</summary>
     [ObservableProperty]
     private string? _heightMmText;
+
+    /// <summary>The custom edge the operator has explicitly selected but not yet confirmed.</summary>
+    [ObservableProperty]
+    private TargetEdgeChoice? _selectedTargetEdgeChoice;
+
+    /// <summary>Exact decimal text for the single custom target edge.</summary>
+    [ObservableProperty]
+    private string? _customMillimetresText;
+
+    /// <summary>Whether the one-edge custom form is open. Opening it changes no workflow state.</summary>
+    [ObservableProperty]
+    private bool _isChoosingCustomSize;
+
+    /// <summary>The named recommendation a custom target is explicitly adjusting, when any.</summary>
+    private SizePresetChoice? _customPresetContext;
 
     /// <summary>
     /// The branch the operator has picked but not yet confirmed.
@@ -571,10 +631,17 @@ public sealed partial class SessionViewModel : ObservableObject
             Enum.GetValues<TrimMode>().Select(mode => new TrimModeChoice(mode)).ToList());
         _selectedTrimMode = TrimModes[0];
 
+        TargetEdgeChoices = new ReadOnlyCollection<TargetEdgeChoice>(
+            Enum.GetValues<TargetEdge>().Select(edge => new TargetEdgeChoice(edge)).ToList());
+
     }
 
     /// <summary>The open session's steps, in workflow order.</summary>
     public ObservableCollection<SessionStepRow> Steps { get; } = [];
+
+    /// <summary>The open session identity, exposed for coordination and tests; never shown as sizing data.</summary>
+    public SessionId Id => _session?.Id
+        ?? throw new InvalidOperationException("No session is open.");
 
     /// <summary>The production outputs this session already holds, oldest first (§15).</summary>
     public ObservableCollection<PrintOutputRow> Outputs { get; } = [];
@@ -600,6 +667,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>The three trim modes, in enum order (Part C3 §9).</summary>
     public IReadOnlyList<TrimModeChoice> TrimModes { get; }
+
+    /// <summary>Exactly Width, Height and Long edge, in domain order and with no inferred choice.</summary>
+    public IReadOnlyList<TargetEdgeChoice> TargetEdgeChoices { get; }
 
     /// <summary>
     /// The earlier steps the operator may return to, in workflow order (Part C3 §3, §4).
@@ -694,6 +764,16 @@ public sealed partial class SessionViewModel : ObservableObject
     public string PresetsLabel => Strings.Session_PresetsLabel;
 
     public string PresetHint => Strings.Session_PresetHint;
+
+    public string SizeHeading => Strings.Session_SizeHeading;
+    public string UsePresetLabel => Strings.Session_UsePreset;
+    public string CustomSizeLabel => Strings.Session_CustomSize;
+    public string AdjustSizeLabel => Strings.Session_AdjustSize;
+    public string TargetEdgeLabel => Strings.Session_TargetEdge;
+    public string TargetSizeMmLabel => Strings.Session_TargetSizeMm;
+    public string ConfirmCustomSizeLabel => Strings.Session_ConfirmCustomSize;
+    public string ChangeSizeLabel => Strings.Session_ChangeSize;
+    public string ContinueWithSizeLabel => Strings.Session_ContinueWithSize;
 
     public string WhiteUnderbaseHeading => Strings.Session_W1Heading;
 
@@ -1287,6 +1367,28 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public bool CanSetMaximumBounds => _session?.CanSetMaximumBounds == true;
 
+    /// <summary>Whether the workflow currently accepts either flexible-size decision.</summary>
+    public bool CanChooseFlexibleSize =>
+        _session?.Sizing is { CanSetPresetFitSize: true } or { CanSetCustomTargetEdgeSize: true };
+
+    public bool HasPresetSizeSelection =>
+        _session?.Sizing is { SizingMode: OperatorSizingMode.PresetFit, Preset: not null };
+
+    public bool HasCustomSizeSelection =>
+        _session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge;
+
+    public bool CanAdjustSelectedPreset =>
+        HasPresetSizeSelection && ReviewBoundsTarget is not null && !IsBusy;
+
+    public bool HasCustomPresetContext => _customPresetContext is not null;
+
+    public string CustomPresetContext => _customPresetContext is { } preset
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Session_BasedOnPreset, preset.Label)
+        : string.Empty;
+
+    public string CustomPresetRecommendation =>
+        _customPresetContext?.RecommendationLabel ?? string.Empty;
+
     /// <summary>
     /// Whether the W1 selector is shown (§6).
     /// </summary>
@@ -1355,7 +1457,64 @@ public sealed partial class SessionViewModel : ObservableObject
     public string PreparationHeading => Strings.Session_PreparationHeading;
 
     /// <summary>Whether a plan is currently in force and therefore worth summarising (§8).</summary>
-    public bool HasPreparationPlan => _session?.PreparationMode is not null;
+    public bool HasPreparationPlan =>
+        _session?.PreparationMode is not null || _session?.Sizing.ResizeDirection is not null;
+
+    /// <summary>The active preset or custom edge, formatted only from the authoritative read model.</summary>
+    public string CurrentSizeSummary
+    {
+        get
+        {
+            if (_session?.Sizing is not { } sizing)
+            {
+                return string.Empty;
+            }
+
+            if (sizing.SizingMode == OperatorSizingMode.PresetFit && sizing.Preset is { } preset)
+            {
+                return string.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.Session_CurrentPreset,
+                    DisplayNames.SizePreset(preset));
+            }
+
+            return sizing is
+            {
+                SizingMode: OperatorSizingMode.CustomTargetEdge,
+                RequestedTargetEdge: { } edge,
+                RequestedMillimetres: { } millimetres,
+            }
+                ? string.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.Session_CurrentCustomTarget,
+                    DisplayNames.TargetEdge(edge).ToLower(CultureInfo.CurrentCulture),
+                    SizeText.MillimetresValue(millimetres))
+                : string.Empty;
+        }
+    }
+
+    public string CurrentRecommendation => _session?.Sizing is { } sizing
+        ? SizeText.Recommendation(
+            sizing.RecommendationKind,
+            sizing.RecommendationMaxWidthMm,
+            sizing.RecommendationMaxHeightMm)
+        : string.Empty;
+
+    public bool HasCurrentRecommendation => CurrentRecommendation.Length > 0;
+
+    public string CurrentPresetContext =>
+        _session?.Sizing is
+        {
+            SizingMode: OperatorSizingMode.CustomTargetEdge,
+            Preset: { } preset,
+        }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_BasedOnPreset,
+                DisplayNames.SizePreset(preset))
+            : string.Empty;
+
+    public bool HasCurrentPresetContext => CurrentPresetContext.Length > 0;
 
     /// <summary>
     /// What the planned run would do, in a sentence (§8).
@@ -1369,8 +1528,48 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         PrintPreparationMode.ResolutionOnly => Strings.Session_PreparationResolutionOnly,
         PrintPreparationMode.ProportionalShrink => Strings.Session_PreparationProportionalShrink,
-        _ => string.Empty,
+        _ => _session?.Sizing.ResizeDirection switch
+        {
+            ResizeDirection.ResolutionOnly => Strings.Session_CustomResolutionOnly,
+            ResizeDirection.Shrink => Strings.Session_CustomShrink,
+            _ => string.Empty,
+        },
     };
+
+    public bool HasPreparationModeText => PreparationModeText.Length > 0;
+
+    public bool HasPresetLimitNotice => _session?.Sizing.PresetLimitExceeded == true;
+
+    public string PresetLimitNotice =>
+        _session?.Sizing is { PresetLimitExceeded: true, Preset: { } preset }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_PresetExceeded,
+                DisplayNames.SizePreset(preset))
+            : string.Empty;
+
+    public bool NeedsEnlargementAuthority =>
+        _session?.Sizing.NeedsEnlargementAuthority == true;
+
+    public bool CanAuthoriseEnlargement =>
+        _session?.Sizing.CanAuthoriseEnlargement == true && !IsBusy;
+
+    public string EnlargementWarning =>
+        _session?.Sizing is
+        {
+            NeedsEnlargementAuthority: true,
+            ProjectedScalePercent: { } scale,
+        }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_EnlargementWarning,
+                scale.ToString("0.#", CultureInfo.CurrentCulture))
+            : string.Empty;
+
+    public bool HasUsableEnlargementAuthority =>
+        _session?.Sizing.HasUsableEnlargementAuthority == true;
+
+    public string EnlargementConfirmedNotice => Strings.Session_EnlargementConfirmed;
 
     /// <summary>
     /// Which edge the plan selected, shown only when one was (§8).
@@ -1524,6 +1723,73 @@ public sealed partial class SessionViewModel : ObservableObject
                 Strings.Session_PreparationAttemptBounds,
                 maxWidth.ToString("0.##", CultureInfo.CurrentCulture),
                 maxHeight.ToString("0.##", CultureInfo.CurrentCulture))
+            : string.Empty;
+
+    public string PreparationAttemptSelection
+    {
+        get
+        {
+            if (_session?.AttemptPreparation is not { } attempt)
+            {
+                return string.Empty;
+            }
+
+            if (attempt.Semantics == PrintDimensionSemantics.MaxBoundsV1 && attempt.Preset is { } preset)
+            {
+                return string.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.Session_CurrentPreset,
+                    DisplayNames.SizePreset(preset));
+            }
+
+            return attempt is { RequestedTargetEdge: { } edge, RequestedMillimetres: { } millimetres }
+                ? string.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.Session_CurrentCustomTarget,
+                    DisplayNames.TargetEdge(edge).ToLower(CultureInfo.CurrentCulture),
+                    SizeText.MillimetresValue(millimetres))
+                : string.Empty;
+        }
+    }
+
+    public string PreparationAttemptRecommendation =>
+        _session?.AttemptPreparation is { } attempt
+            ? SizeText.Recommendation(
+                attempt.RecommendationKind,
+                attempt.RecommendationMaxWidthMm,
+                attempt.RecommendationMaxHeightMm)
+            : string.Empty;
+
+    public string PreparationAttemptPresetContext =>
+        _session?.AttemptPreparation is
+        {
+            Semantics: PrintDimensionSemantics.TargetEdgeV1,
+            Preset: { } preset,
+        }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_BasedOnPreset,
+                DisplayNames.SizePreset(preset))
+            : string.Empty;
+
+    public string PreparationAttemptPresetOverride =>
+        _session?.AttemptPreparation?.PresetOverride == true
+            ? Strings.Session_PresetOverrideYes
+            : string.Empty;
+
+    public string PreparationAttemptResize =>
+        _session?.AttemptPreparation is { ResizeDirection: { } direction }
+            ? string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_ProjectedResize,
+                DisplayNames.ResizeDirection(direction))
+            : _session?.AttemptPreparation?.Semantics == PrintDimensionSemantics.MaxBoundsV1
+                ? Strings.Session_ProportionalFit
+                : string.Empty;
+
+    public string PreparationAttemptEnlargementConfirmation =>
+        _session?.AttemptPreparation?.WasAuthorisedEnlargement == true
+            ? Strings.Session_EnlargementExplicitlyConfirmed
             : string.Empty;
 
     /// <summary>What that run was planned to do, in the same behavioural wording (§19).</summary>
@@ -2052,6 +2318,163 @@ public sealed partial class SessionViewModel : ObservableObject
         _pendingPreset = preset.Preset;
     }
 
+    /// <summary>Uses one configured named recommendation without asking for millimetres.</summary>
+    [RelayCommand]
+    private async Task UsePresetAsync(
+        SizePresetChoice? preset, CancellationToken cancellationToken)
+    {
+        if (preset is null || _session?.Sizing.CanSetPresetFitSize != true)
+        {
+            return;
+        }
+
+        IsChoosingCustomSize = false;
+        _customPresetContext = null;
+        NotifyCustomSizeStateChanged();
+        await RunAsync(
+            new WorkflowCommand.SetPresetFitSize(preset.Preset), cancellationToken)
+            .ConfigureAwait(true);
+    }
+
+    /// <summary>Opens the one-edge form with no preset context. This records nothing.</summary>
+    [RelayCommand]
+    private void ChooseCustomSize()
+    {
+        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true || IsBusy)
+        {
+            return;
+        }
+
+        _customPresetContext = null;
+        SelectedTargetEdgeChoice = null;
+        CustomMillimetresText = null;
+        IsChoosingCustomSize = true;
+        NotifyCustomSizeStateChanged();
+    }
+
+    /// <summary>Returns to the size step and opens custom sizing in the active preset's context.</summary>
+    [RelayCommand]
+    private async Task AdjustSizeAsync(CancellationToken cancellationToken)
+    {
+        SizePreset? preset = _session?.Sizing.Preset;
+        if (preset is null || ReviewBoundsTarget is null || IsBusy)
+        {
+            return;
+        }
+
+        await ReturnToSizeAndEditAsync(
+            preset, edge: null, millimetres: null, cancellationToken).ConfigureAwait(true);
+    }
+
+    /// <summary>Returns from an enlargement offer to editable controls without authorising it.</summary>
+    [RelayCommand]
+    private async Task ChangeSizeAsync(CancellationToken cancellationToken)
+    {
+        if (_session?.Sizing is not { } sizing || ReviewBoundsTarget is null || IsBusy)
+        {
+            return;
+        }
+
+        await ReturnToSizeAndEditAsync(
+            sizing.Preset,
+            sizing.RequestedTargetEdge,
+            sizing.RequestedMillimetres,
+            cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task ReturnToSizeAndEditAsync(
+        SizePreset? preset,
+        TargetEdge? edge,
+        decimal? millimetres,
+        CancellationToken cancellationToken)
+    {
+        if (ReviewBoundsTarget is not { } target)
+        {
+            return;
+        }
+
+        await RunAsync(
+            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
+
+        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true)
+        {
+            return;
+        }
+
+        _customPresetContext = preset is { } named
+            ? SizePresets.FirstOrDefault(choice => choice.Preset == named)
+            : null;
+        SelectedTargetEdgeChoice = edge is { } selected
+            ? TargetEdgeChoices.Single(choice => choice.Edge == selected)
+            : null;
+        CustomMillimetresText = millimetres is { } value
+            ? SizeText.MillimetresValue(value)
+            : null;
+        IsChoosingCustomSize = true;
+        NotifyCustomSizeStateChanged();
+    }
+
+    /// <summary>Records exactly one operator-selected decimal target through the service path.</summary>
+    [RelayCommand]
+    private async Task ConfirmCustomSizeAsync(CancellationToken cancellationToken)
+    {
+        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true ||
+            SelectedTargetEdgeChoice is not { } edge ||
+            !TryReadCustomMillimetres(out decimal millimetres))
+        {
+            Notice = Strings.Session_TargetSizeInvalid;
+            return;
+        }
+
+        await RunAsync(
+            new WorkflowCommand.SetCustomTargetEdgeSize(
+                edge.Edge, millimetres, _customPresetContext?.Preset),
+            cancellationToken).ConfigureAwait(true);
+
+        if (_session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
+        {
+            IsChoosingCustomSize = false;
+        }
+    }
+
+    /// <summary>Confirms only the exact enlargement the service currently offers.</summary>
+    [RelayCommand]
+    private async Task ContinueWithSizeAsync(CancellationToken cancellationToken)
+    {
+        if (_session is null || IsBusy || !CanAuthoriseEnlargement)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            Notice = null;
+            OperationResult<SessionView> result = await _sessions
+                .AuthoriseCurrentEnlargementAsync(
+                    _session.Id,
+                    _session.Sizing.EnlargementOfferId ?? Guid.Empty,
+                    Environment.UserName,
+                    cancellationToken)
+                .ConfigureAwait(true);
+
+            if (result.IsFailure)
+            {
+                Notice = Describe(result.Failure);
+                await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                await PreviewsLoaded.ConfigureAwait(true);
+                return;
+            }
+
+            Show(result.Value);
+            await PreviewsLoaded.ConfigureAwait(true);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     /// <summary>
     /// Confirms the typed maximum bounds through the ordinary command path
     /// (§3; Epic 11400 Part B1A.2B §7).
@@ -2376,6 +2799,8 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanBeginAutomaticSelection));
         OnPropertyChanged(nameof(CanReviewMaximumBounds));
+        OnPropertyChanged(nameof(CanAdjustSelectedPreset));
+        OnPropertyChanged(nameof(CanAuthoriseEnlargement));
     }
 
     /// <summary>Leaves the return confirmation closed with nothing chosen. Issues no command.</summary>
@@ -2447,6 +2872,13 @@ public sealed partial class SessionViewModel : ObservableObject
     private static bool TryReadMillimetres(string? text, out double millimetres) =>
         double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out millimetres);
 
+    private bool TryReadCustomMillimetres(out decimal millimetres) =>
+        decimal.TryParse(
+            CustomMillimetresText,
+            NumberStyles.Number,
+            CultureInfo.CurrentCulture,
+            out millimetres) && millimetres > 0m;
+
     /// <summary>
     /// Turns the chosen mode and its boxes into a <see cref="TrimMargin"/>, if they are usable.
     /// </summary>
@@ -2511,7 +2943,19 @@ public sealed partial class SessionViewModel : ObservableObject
         WidthMmText = null;
         HeightMmText = null;
         _pendingPreset = SizePreset.Custom;
+        SelectedTargetEdgeChoice = null;
+        CustomMillimetresText = null;
+        IsChoosingCustomSize = false;
+        _customPresetContext = null;
         SelectedWhiteUnderbaseChoice = null;
+        NotifyCustomSizeStateChanged();
+    }
+
+    private void NotifyCustomSizeStateChanged()
+    {
+        OnPropertyChanged(nameof(HasCustomPresetContext));
+        OnPropertyChanged(nameof(CustomPresetContext));
+        OnPropertyChanged(nameof(CustomPresetRecommendation));
     }
 
     /// <summary>Editing either box means the limits are the operator's, not a preset's.</summary>
@@ -2779,6 +3223,15 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanHandOff));
         OnPropertyChanged(nameof(CanSetMaximumBounds));
+        OnPropertyChanged(nameof(CanChooseFlexibleSize));
+        OnPropertyChanged(nameof(HasPresetSizeSelection));
+        OnPropertyChanged(nameof(HasCustomSizeSelection));
+        OnPropertyChanged(nameof(CanAdjustSelectedPreset));
+        OnPropertyChanged(nameof(CurrentSizeSummary));
+        OnPropertyChanged(nameof(CurrentRecommendation));
+        OnPropertyChanged(nameof(HasCurrentRecommendation));
+        OnPropertyChanged(nameof(CurrentPresetContext));
+        OnPropertyChanged(nameof(HasCurrentPresetContext));
         OnPropertyChanged(nameof(CanSelectWhiteUnderbase));
         OnPropertyChanged(nameof(CanConfirmWhiteUnderbase));
         OnPropertyChanged(nameof(CanComplete));
@@ -2808,6 +3261,13 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(PendingMaximumBounds));
         OnPropertyChanged(nameof(HasPreparationPlan));
         OnPropertyChanged(nameof(PreparationModeText));
+        OnPropertyChanged(nameof(HasPreparationModeText));
+        OnPropertyChanged(nameof(HasPresetLimitNotice));
+        OnPropertyChanged(nameof(PresetLimitNotice));
+        OnPropertyChanged(nameof(NeedsEnlargementAuthority));
+        OnPropertyChanged(nameof(CanAuthoriseEnlargement));
+        OnPropertyChanged(nameof(EnlargementWarning));
+        OnPropertyChanged(nameof(HasUsableEnlargementAuthority));
         OnPropertyChanged(nameof(PreparationLimitingEdge));
         OnPropertyChanged(nameof(HasPreparationLimitingEdge));
         OnPropertyChanged(nameof(PreparationProjectedSize));
@@ -2820,6 +3280,12 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanReviewMaximumBounds));
         OnPropertyChanged(nameof(HasPreparationAttemptAudit));
         OnPropertyChanged(nameof(PreparationAttemptBounds));
+        OnPropertyChanged(nameof(PreparationAttemptSelection));
+        OnPropertyChanged(nameof(PreparationAttemptRecommendation));
+        OnPropertyChanged(nameof(PreparationAttemptPresetContext));
+        OnPropertyChanged(nameof(PreparationAttemptPresetOverride));
+        OnPropertyChanged(nameof(PreparationAttemptResize));
+        OnPropertyChanged(nameof(PreparationAttemptEnlargementConfirmation));
         OnPropertyChanged(nameof(PreparationAttemptMode));
         OnPropertyChanged(nameof(PreparationAttemptLimitingEdge));
         OnPropertyChanged(nameof(PreparationAttemptProjected));

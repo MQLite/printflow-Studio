@@ -41,6 +41,20 @@ public interface ISessionService
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Explicitly authorises the enlargement currently offered for this session.
+    /// </summary>
+    /// <remarks>
+    /// This is the App-safe confirmation seam: the caller supplies no Revision, hash, projected
+    /// pixels or scale. The service resolves those hidden binding facts from the current plan and
+    /// the ordinary command path re-verifies them before accepting the authority.
+    /// </remarks>
+    Task<OperationResult<SessionView>> AuthoriseCurrentEnlargementAsync(
+        SessionId id,
+        Guid enlargementOfferId,
+        string? operatorName,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Lists the sessions the Home screen offers as entry points, newest first.
     /// </summary>
     /// <remarks>

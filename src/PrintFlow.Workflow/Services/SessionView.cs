@@ -188,6 +188,10 @@ public sealed record PrintOutputView(
 /// </param>
 public sealed record PrintPreparationAttemptView(
     PrintDimensionSemantics Semantics,
+    SizePreset? Preset,
+    PresetRecommendationKind? RecommendationKind,
+    decimal? RecommendationMaxWidthMm,
+    decimal? RecommendationMaxHeightMm,
     double? MaxWidthMm,
     double? MaxHeightMm,
     PrintPreparationMode? Mode,
@@ -212,9 +216,21 @@ public sealed record PrintPreparationAttemptView(
     {
         FitWithinBoundsPreparation? bounds = preparation as FitWithinBoundsPreparation;
         TargetEdgePreparation? target = preparation as TargetEdgePreparation;
+        PresetPrintRecommendation? recommendation = target?.Plan.Selection.Recommendation;
+        SizePreset? preset = bounds?.Plan.LimitKind is { } limit and not SizePreset.Custom
+            ? limit
+            : recommendation?.Preset;
 
         return new PrintPreparationAttemptView(
             preparation.Semantics,
+            preset,
+            recommendation?.Kind ?? (bounds is null
+                ? null
+                : bounds.Plan.MaxWidthMm == bounds.Plan.MaxHeightMm
+                    ? PresetRecommendationKind.MaximumLongEdge
+                    : PresetRecommendationKind.MaximumBox),
+            recommendation?.MaxWidthMm ?? (preset is null ? null : (decimal)bounds!.Plan.MaxWidthMm),
+            recommendation?.MaxHeightMm ?? (preset is null ? null : (decimal)bounds!.Plan.MaxHeightMm),
             bounds?.Plan.MaxWidthMm,
             bounds?.Plan.MaxHeightMm,
             bounds?.Plan.Mode,
@@ -330,13 +346,15 @@ public sealed record FlexibleSizeView(
     bool NeedsEnlargementAuthority,
     bool HasUsableEnlargementAuthority,
     bool CanAuthoriseEnlargement,
+    Guid? EnlargementOfferId,
     bool CanSetPresetFitSize,
     bool CanSetCustomTargetEdgeSize)
 {
     internal static FlexibleSizeView From(
         WorkflowSnapshot snapshot,
         IReadOnlyList<CommandKind> availableCommands,
-        IReadOnlyList<PresetPrintRecommendation> presetRecommendations)
+        IReadOnlyList<PresetPrintRecommendation> presetRecommendations,
+        Guid? enlargementOfferId)
     {
         // The selection is reported only when the decision behind it is still usable. A session
         // holding a selection whose source has been replaced is a session with no current size,
@@ -370,6 +388,7 @@ public sealed record FlexibleSizeView(
             // command is offered is asking whether it would be accepted — plan, source binding
             // and exact target included (§28).
             availableCommands.Contains(CommandKind.AuthoriseEnlargement),
+            enlargementOfferId,
             availableCommands.Contains(CommandKind.SetPresetFitSize),
             availableCommands.Contains(CommandKind.SetCustomTargetEdgeSize));
     }
@@ -627,7 +646,8 @@ public sealed record SessionView(
         IReadOnlyList<ProcessingAttempt> attempts,
         AdapterExecutionMode processingMode,
         IReadOnlyList<StepKind> returnTargets,
-        IReadOnlyList<PresetPrintRecommendation> presetRecommendations)
+        IReadOnlyList<PresetPrintRecommendation> presetRecommendations,
+        Guid? enlargementOfferId)
     {
         ArgumentNullException.ThrowIfNull(presetRecommendations);
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -754,7 +774,8 @@ public sealed record SessionView(
             // The flexible-size seam, assembled from the same snapshot predicates everything else
             // reads. Nothing here is a second opinion: the UI is told what was decided and what
             // may be decided next, and calculates none of it (Part B1A.2D §28).
-            FlexibleSizeView.From(snapshot, availableCommands, presetRecommendations));
+            FlexibleSizeView.From(
+                snapshot, availableCommands, presetRecommendations, enlargementOfferId));
     }
 
     /// <summary>

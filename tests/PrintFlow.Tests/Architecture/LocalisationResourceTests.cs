@@ -227,6 +227,52 @@ public sealed class LocalisationResourceTests
         required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
     }
 
+    [Fact]
+    public void The_flexible_size_operator_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_UsePreset",
+            "Session_CustomSize",
+            "Session_AdjustSize",
+            "Session_RecommendedMaximum",
+            "Session_RecommendedLongEdge",
+            "Session_TargetEdge",
+            "TargetEdge_Width",
+            "TargetEdge_Height",
+            "TargetEdge_LongEdge",
+            "Session_TargetSizeMm",
+            "Session_PresetExceeded",
+            "Session_CustomResolutionOnly",
+            "Session_CustomShrink",
+            "Session_EnlargementWarning",
+            "Session_ChangeSize",
+            "Session_ContinueWithSize",
+            "Session_EnlargementConfirmed",
+            "Session_PresetOverrideYes",
+            "Session_ProjectedPlan",
+            "Session_PhotoshopNotRun",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+        required.Except(english).ShouldBeEmpty();
+        required.Except(chinese).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Enlargement_wording_requires_a_second_choice_without_promising_clarity()
+    {
+        string warning = ValueOf(NeutralResx, "Session_EnlargementWarning");
+        warning.ShouldContain("enlarg", Case.Insensitive);
+        warning.ShouldContain("300 PPI", Case.Insensitive);
+        warning.ShouldContain("may reduce", Case.Insensitive);
+        warning.ShouldNotContain("sharp", Case.Insensitive);
+
+        ValueOf(NeutralResx, "Session_ContinueWithSize")
+            .ShouldNotBe(ValueOf(NeutralResx, "Session_ChangeSize"));
+    }
+
     /// <summary>
     /// No operator-facing string offers an axis or a resampling method
     /// (Epic 11400 Part B1A.2B §4, §9).

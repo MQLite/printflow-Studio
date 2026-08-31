@@ -346,6 +346,38 @@
   <data name="Session_PresetHint" xml:space="preserve">
     <value>A preset fills in its maximum bounds. You can still change the millimetres before confirming, and PrintFlow works out which edge governs from the image itself.</value>
   </data>
+  <data name="Session_SizeHeading" xml:space="preserve"><value>Size</value></data>
+  <data name="Session_UsePreset" xml:space="preserve"><value>Use preset</value></data>
+  <data name="Session_CustomSize" xml:space="preserve"><value>Custom size</value></data>
+  <data name="Session_AdjustSize" xml:space="preserve"><value>Adjust size</value></data>
+  <data name="Session_RecommendedMaximum" xml:space="preserve"><value>Recommended maximum: {0} × {1} mm</value></data>
+  <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>Recommended long edge: {0} mm</value></data>
+  <data name="Session_TargetEdge" xml:space="preserve"><value>Target edge</value></data>
+  <data name="Session_TargetSizeMm" xml:space="preserve"><value>Target size (mm)</value></data>
+  <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>Choose Width, Height or Long edge and enter a positive size in millimetres.</value></data>
+  <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>Confirm custom size</value></data>
+  <data name="TargetEdge_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="TargetEdge_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="TargetEdge_LongEdge" xml:space="preserve"><value>Long edge</value></data>
+  <data name="Session_BasedOnPreset" xml:space="preserve"><value>Based on {0}</value></data>
+  <data name="Session_PresetExceeded" xml:space="preserve"><value>This size is larger than the {0} recommended size.</value></data>
+  <data name="Session_CustomResolutionOnly" xml:space="preserve"><value>Selected size is supported without changing pixel dimensions.</value></data>
+  <data name="Session_CustomShrink" xml:space="preserve"><value>The image will be reduced proportionally.</value></data>
+  <data name="Session_EnlargementWarning" xml:space="preserve"><value>This size requires enlarging the image to approximately {0}% at 300 PPI.&#10;Enlargement may reduce image clarity.</value></data>
+  <data name="Session_ChangeSize" xml:space="preserve"><value>Change size</value></data>
+  <data name="Session_ContinueWithSize" xml:space="preserve"><value>Continue with this size</value></data>
+  <data name="Session_EnlargementConfirmed" xml:space="preserve"><value>Enlargement confirmed for this image and size.</value></data>
+  <data name="Session_CurrentPreset" xml:space="preserve"><value>Preset: {0}</value></data>
+  <data name="Session_CurrentCustomTarget" xml:space="preserve"><value>Custom {0}: {1} mm</value></data>
+  <data name="Session_PresetOverrideYes" xml:space="preserve"><value>Preset override: Yes</value></data>
+  <data name="Session_ProjectedResize" xml:space="preserve"><value>Projected resize: {0}</value></data>
+  <data name="ResizeDirection_ResolutionOnly" xml:space="preserve"><value>Resolution only</value></data>
+  <data name="ResizeDirection_Shrink" xml:space="preserve"><value>Shrink</value></data>
+  <data name="ResizeDirection_Enlarge" xml:space="preserve"><value>Enlarge</value></data>
+  <data name="Session_ProportionalFit" xml:space="preserve"><value>Proportional fit</value></data>
+  <data name="Session_EnlargementExplicitlyConfirmed" xml:space="preserve"><value>Enlargement explicitly confirmed</value></data>
+  <data name="Session_ProjectedPlan" xml:space="preserve"><value>Projected plan</value></data>
+  <data name="Session_PhotoshopNotRun" xml:space="preserve"><value>Photoshop was not run.</value></data>
   <data name="Session_PreparationHeading" xml:space="preserve"><value>Print preparation</value></data>
   <data name="Session_PreparationResolutionOnly" xml:space="preserve">
     <value>The image already fits within the maximum size. Pixel dimensions will remain unchanged.</value>
@@ -371,10 +403,10 @@
     <value>Projected plan — Photoshop was not run.</value>
   </data>
   <data name="Session_RunReady" xml:space="preserve">
-    <value>Run Step is available: the maximum print size is confirmed for this image.</value>
+    <value>Run Step is available: the print size is confirmed for this image.</value>
   </data>
   <data name="Session_RunNotReady" xml:space="preserve">
-    <value>Run Step stays unavailable until the maximum print size is confirmed for this image.</value>
+    <value>Run Step stays unavailable until the print size and any required enlargement are confirmed for this image.</value>
   </data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
     <value>This size was saved under the previous exact-size rule, or the image it was measured against has changed. Review the maximum print bounds before continuing.</value>

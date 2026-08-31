@@ -170,6 +170,22 @@ internal static class DisplayNames
         _ => preset.ToString(),
     };
 
+    internal static string TargetEdge(TargetEdge edge) => edge switch
+    {
+        Domain.Outputs.TargetEdge.Width => Strings.TargetEdge_Width,
+        Domain.Outputs.TargetEdge.Height => Strings.TargetEdge_Height,
+        Domain.Outputs.TargetEdge.LongEdge => Strings.TargetEdge_LongEdge,
+        _ => edge.ToString(),
+    };
+
+    internal static string ResizeDirection(ResizeDirection direction) => direction switch
+    {
+        Domain.Outputs.ResizeDirection.ResolutionOnly => Strings.ResizeDirection_ResolutionOnly,
+        Domain.Outputs.ResizeDirection.Shrink => Strings.ResizeDirection_Shrink,
+        Domain.Outputs.ResizeDirection.Enlarge => Strings.ResizeDirection_Enlarge,
+        _ => direction.ToString(),
+    };
+
     /// <summary>
     /// The operator label for what a preparation plan asks the Photoshop run to do
     /// (Epic 11400 Part B1A.2B §8).
