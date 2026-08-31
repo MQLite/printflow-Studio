@@ -63,7 +63,8 @@ public abstract record PhotoshopPreparation
     /// <summary>
     /// The neutral resampling policy. Never a Photoshop COM value: mapping <c>None</c>,
     /// <c>BicubicSharper</c> and <c>PreserveDetails</c> onto <c>ResampleMethod</c> is
-    /// Infrastructure's job, and no production resize exists yet (§26).
+    /// Infrastructure's job. B1A.3 performs that mapping only inside its closed production
+    /// preparation seam; no Photoshop-native value enters this assembly (§26).
     /// </summary>
     public abstract PhotoshopResizeMode ResizePolicy { get; }
 

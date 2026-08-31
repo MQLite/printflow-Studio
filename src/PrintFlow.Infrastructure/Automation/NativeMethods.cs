@@ -49,6 +49,22 @@ internal static partial class NativeMethods
     internal const int BI_RGB = 0;
     internal const uint DIB_RGB_COLORS = 0;
 
+    // -- Running Object Table attachment ------------------------------------------------
+    //
+    // These calls only retrieve an object that is already running. They do not activate a COM
+    // LocalServer, which is essential on the accepted workstation: the Photoshop CC 2019
+    // registration names an excluded stale executable, while the exact accepted process is
+    // independently identified before this route is used.
+
+    [DllImport("ole32.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+    internal static extern int CLSIDFromProgID(string progId, out Guid classId);
+
+    [DllImport("oleaut32.dll", PreserveSig = true)]
+    internal static extern int GetActiveObject(
+        ref Guid classId,
+        nint reserved,
+        [MarshalAs(UnmanagedType.IUnknown)] out object? activeObject);
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct RECT
     {

@@ -1,8 +1,7 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Ports;
@@ -19,18 +18,22 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 ///   <item><see cref="IPhotoshopAutomationFoundation"/> is complete for Part A: it verifies the
 ///         accepted binary, attaches or launches, recognises the screen, opens exactly one
 ///         managed Working file, and proves by absolute path which document got loaded.</item>
-///   <item><see cref="IPhotoshopOutputProcessor"/> — the workflow seam — is deliberately
-///         <b>fail-closed</b>. A production TIFF requires proportional sizing, 300 ppi, the W1
-///         Action, CMYK conversion and a TIFF Save As, none of which exists yet. Returning a
-///         success from it would be a lie that a Revision would then be built on, so it returns
-///         a structured refusal and produces no file (§15, §18, §19).</item>
+///   <item><see cref="IPhotoshopPreparationAutomation"/> adds B1A.3's closed in-memory size and
+///         resolution operation plus factual read-back. It produces no file and is not a
+///         workflow-success surface.</item>
+///   <item><see cref="IPhotoshopOutputProcessor"/> — the workflow seam — remains deliberately
+///         <b>fail-closed</b>. A production TIFF still requires the accepted CMYK + W1 operation
+///         and TIFF Save As/validation. Returning success from resize alone would be a lie that
+///         a Revision would then be built on, so it returns a structured refusal.</item>
 /// </list>
 /// <see cref="Mode"/> is <see cref="AdapterExecutionMode.Production"/>, so
 /// <c>IEnvironmentGate</c> remains authoritative over every step this adapter would back. The
 /// adapter neither consults nor bypasses the gate; it declares what it is and lets
 /// <c>SessionService</c> apply the gate before calling.
 /// </remarks>
-public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcessor, IPhotoshopAutomationFoundation
+public sealed class ProductionPhotoshopOutputProcessor :
+    IPhotoshopOutputProcessor,
+    IPhotoshopPreparationAutomation
 {
     private readonly IPhotoshopBaselineProvider _baselines;
     private readonly IExternalAppWindowLocator _locator;
@@ -38,6 +41,7 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
     private readonly IWorkspace _workspace;
     private readonly PhotoshopAutomationOptions _options;
     private readonly TimeProvider _clock;
+    private readonly GuardedPhotoshopDocumentPreparer _preparer;
 
     public ProductionPhotoshopOutputProcessor(
         IPhotoshopBaselineProvider baselines,
@@ -46,6 +50,25 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
         IWorkspace workspace,
         PhotoshopAutomationOptions options,
         TimeProvider clock)
+        : this(
+            baselines,
+            locator,
+            driver,
+            workspace,
+            options,
+            clock,
+            new RotPhotoshopPreparationNativeBridge())
+    {
+    }
+
+    internal ProductionPhotoshopOutputProcessor(
+        IPhotoshopBaselineProvider baselines,
+        IExternalAppWindowLocator locator,
+        IPhotoshopUiDriver driver,
+        IWorkspace workspace,
+        PhotoshopAutomationOptions options,
+        TimeProvider clock,
+        IPhotoshopPreparationNativeBridge nativeBridge)
     {
         ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(locator);
@@ -53,6 +76,7 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
         ArgumentNullException.ThrowIfNull(workspace);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(nativeBridge);
 
         _baselines = baselines;
         _locator = locator;
@@ -60,6 +84,7 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
         _workspace = workspace;
         _options = options;
         _clock = clock;
+        _preparer = new GuardedPhotoshopDocumentPreparer(baselines, locator, driver, nativeBridge);
     }
 
     /// <inheritdoc />
@@ -67,6 +92,13 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
 
     /// <inheritdoc />
     public AdapterExecutionMode Mode => AdapterExecutionMode.Production;
+
+    /// <inheritdoc />
+    public Task<OperationResult<PhotoshopPreparedDocument>> PrepareDocumentAsync(
+        PhotoshopOpenedDocument document,
+        PhotoshopPreparation preparation,
+        CancellationToken cancellationToken) =>
+        _preparer.PrepareDocumentAsync(document, preparation, cancellationToken);
 
     // -----------------------------------------------------------------------------------
     // Workflow seam — fail-closed until W1 and TIFF exist
@@ -92,16 +124,16 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
 
         return Task.FromResult(OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
             FailureCode.PreconditionNotMet,
-            "Production Photoshop output is not implemented. Epic 11400 Part A establishes only that " +
-            "the accepted Photoshop can be identified and handed the exact managed Working file; " +
-            "proportional sizing, 300 ppi, the W1 Action, CMYK conversion and the TIFF Save As are " +
-            "later slices. No Photoshop window was touched, no file was produced and no Revision may " +
-            "be created.",
+            "Production Photoshop output is not implemented. Epic 11400 B1A.3 can prepare an exact " +
+            "managed document in memory through a separate Infrastructure-only seam, but resize alone " +
+            "is not output success: accepted CMYK + W1, TIFF Save As and output validation remain later " +
+            "slices. No Photoshop window was touched here, no file was produced and no Revision may be " +
+            "created.",
             isRetryable: false,
             context: new Dictionary<string, string>
             {
                 ["adapterId"] = AdapterId,
-                ["implementedScope"] = "identify, open and identify document only",
+                ["implementedScope"] = "separate identify/open/prepare/read-back seam only",
                 ["inputSent"] = "false",
                 ["w1ActionInvoked"] = "false",
                 ["tiffWritten"] = "false",
@@ -122,7 +154,7 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
             return OperationResult.Fail<PhotoshopReadiness>(baseline.Failure);
         }
 
-        OperationResult<Unit> identity = VerifyExecutableIdentity(baseline.Value);
+        OperationResult<Unit> identity = PhotoshopExecutableIdentityRule.Verify(baseline.Value);
         if (identity.IsFailure)
         {
             return OperationResult.Fail<PhotoshopReadiness>(identity.Failure);
@@ -530,108 +562,6 @@ public sealed class ProductionPhotoshopOutputProcessor : IPhotoshopOutputProcess
         }
 
         return OperationResult.Ok(new PhotoshopTarget(process, candidates[0]));
-    }
-
-    // -----------------------------------------------------------------------------------
-    // Executable identity
-    // -----------------------------------------------------------------------------------
-
-    /// <summary>
-    /// Confirms the accepted executable is present, is the accepted version, and is the accepted
-    /// binary (Epic 11400 Part A §5).
-    /// </summary>
-    /// <remarks>
-    /// All three, and in that order. A path match alone would accept any binary sitting at the
-    /// accepted location. A version match alone would accept a rebuilt binary reporting the same
-    /// version. Hashing is what makes "this is the Photoshop Epic 11000 signed off" a checked
-    /// fact — and the version is still checked alongside it, because when they disagree the
-    /// version is what tells an operator which upgrade happened.
-    ///
-    /// A local installation that differs is a failure here, never a reason to accept it: the
-    /// accepted baseline is not updated to match whatever is installed.
-    /// </remarks>
-    private static OperationResult<Unit> VerifyExecutableIdentity(PhotoshopBaseline baseline)
-    {
-        if (!File.Exists(baseline.ExecutablePath))
-        {
-            return OperationResult.Fail<Unit>(OperationFailure.Create(
-                FailureCode.PhotoshopNotInstalled,
-                $"The accepted Photoshop executable is not present at '{baseline.ExecutablePath}'.",
-                isRetryable: false,
-                context: new Dictionary<string, string>
-                {
-                    ["expectedPath"] = baseline.ExecutablePath,
-                    ["excludedInstallations"] = baseline.ExcludedInstallations.IsDefaultOrEmpty
-                        ? "(none recorded)"
-                        : string.Join(" | ", baseline.ExcludedInstallations),
-                    ["inputSent"] = "false",
-                }));
-        }
-
-        FileVersionInfo version;
-        try
-        {
-            version = FileVersionInfo.GetVersionInfo(baseline.ExecutablePath);
-        }
-        catch (FileNotFoundException ex)
-        {
-            return OperationResult.Fail<Unit>(
-                FailureCode.PhotoshopNotInstalled,
-                $"The accepted Photoshop executable could not be read: {ex.Message}");
-        }
-
-        string actualProductVersion = version.ProductVersion ?? "(unreadable)";
-        string actualFileVersion = version.FileVersion ?? "(unreadable)";
-
-        if (!string.Equals(actualProductVersion, baseline.AcceptedProductVersion, StringComparison.Ordinal) ||
-            !string.Equals(actualFileVersion, baseline.AcceptedFileVersion, StringComparison.Ordinal))
-        {
-            return OperationResult.Fail<Unit>(OperationFailure.Create(
-                FailureCode.PhotoshopNotInstalled,
-                $"The binary at '{baseline.ExecutablePath}' reports version " +
-                $"'{actualProductVersion}' / '{actualFileVersion}', not the accepted " +
-                $"'{baseline.AcceptedProductVersion}' / '{baseline.AcceptedFileVersion}'. A Photoshop " +
-                "upgrade requires preset revalidation before automation resumes.",
-                isRetryable: false,
-                context: new Dictionary<string, string>
-                {
-                    ["expectedProductVersion"] = baseline.AcceptedProductVersion,
-                    ["actualProductVersion"] = actualProductVersion,
-                    ["expectedFileVersion"] = baseline.AcceptedFileVersion,
-                    ["actualFileVersion"] = actualFileVersion,
-                    ["inputSent"] = "false",
-                }));
-        }
-
-        Sha256 actual;
-        try
-        {
-            using FileStream stream = new(
-                baseline.ExecutablePath, FileMode.Open, FileAccess.Read, FileShare.Read,
-                bufferSize: 1 << 20, useAsync: false);
-            actual = Sha256.FromBytes(SHA256.HashData(stream));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            return OperationResult.Fail<Unit>(
-                FailureCode.PhotoshopNotInstalled,
-                $"The accepted Photoshop executable could not be read: {ex.Message}");
-        }
-
-        return actual.Equals(baseline.ExecutableSha256)
-            ? OperationResult.Ok()
-            : OperationResult.Fail<Unit>(OperationFailure.Create(
-                FailureCode.PhotoshopNotInstalled,
-                $"The binary at '{baseline.ExecutablePath}' hashes to {actual}, not the accepted " +
-                $"{baseline.ExecutableSha256}. A Photoshop upgrade requires preset revalidation before " +
-                "automation resumes.",
-                isRetryable: false,
-                context: new Dictionary<string, string>
-                {
-                    ["expectedSha256"] = baseline.ExecutableSha256.ToString(),
-                    ["actualSha256"] = actual.ToString(),
-                    ["inputSent"] = "false",
-                }));
     }
 
     // -----------------------------------------------------------------------------------

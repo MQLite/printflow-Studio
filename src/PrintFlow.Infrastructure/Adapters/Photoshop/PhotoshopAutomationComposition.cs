@@ -49,6 +49,49 @@ public static class PhotoshopAutomationComposition
         ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
         ArgumentNullException.ThrowIfNull(clock);
 
+        return Create(
+            presetManifestAbsolutePath,
+            expectedPresetSha256,
+            workspace,
+            evidenceDirectory,
+            clock,
+            options);
+    }
+
+    /// <summary>
+    /// Composes the Part A foundation plus the closed B1A.3 in-memory preparation seam for the
+    /// controlled Photoshop smoke. It still exposes no workflow output operation.
+    /// </summary>
+    public static IPhotoshopPreparationAutomation CreatePreparationAutomation(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        PhotoshopAutomationOptions? options = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetManifestAbsolutePath);
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        return Create(
+            presetManifestAbsolutePath,
+            expectedPresetSha256,
+            workspace,
+            evidenceDirectory,
+            clock,
+            options);
+    }
+
+    private static ProductionPhotoshopOutputProcessor Create(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        PhotoshopAutomationOptions? options)
+    {
         PhotoshopAutomationOptions resolved = options ?? new PhotoshopAutomationOptions();
 
         PresetPhotoshopBaselineProvider baselines = new(presetManifestAbsolutePath, expectedPresetSha256);

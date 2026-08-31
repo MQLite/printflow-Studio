@@ -353,7 +353,7 @@ public sealed class MaximumBoundsBoundaryTests
     }
 
     /// <summary>
-    /// No production Photoshop mutation, W1 action, TIFF save or Revision path was enabled (§23).
+    /// B1A.3 adds only resize; no CMYK, W1 action, TIFF save or Revision path is enabled (§23).
     /// </summary>
     /// <remarks>
     /// The scope statement re-checked from this slice's angle. The B1 boundary tests already prove
@@ -369,16 +369,14 @@ public sealed class MaximumBoundsBoundaryTests
     /// </para>
     /// </remarks>
     [Theory]
-    [InlineData(@"\bresizeImage\s*\(")]
-    [InlineData(@"\bResizeImage\s*\(")]
     [InlineData(@"\bchangeMode\s*\(")]
     [InlineData(@"\bConvertProfile\s*\(")]
     [InlineData(@"\.SaveAs\s*\(")]
     [InlineData(@"\bDoAction\s*\(")]
-    public void The_production_photoshop_adapter_gained_no_mutation_capability(string banned)
+    public void The_production_photoshop_adapter_gained_no_post_preparation_mutation(string banned)
     {
         Offenders("PrintFlow.Infrastructure", Path.Combine("Adapters", "Photoshop"), banned)
-            .ShouldBeEmpty("production resizing, colour conversion and the TIFF save are B1A.3.");
+            .ShouldBeEmpty("CMYK, W1 and TIFF save remain B1B/Part C scope.");
     }
 
     // -------------------------------------------------------------------------------------
