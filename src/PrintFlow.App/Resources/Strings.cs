@@ -203,6 +203,22 @@ internal static class Strings
 
     internal static string Session_ReviewHeading => Get(nameof(Session_ReviewHeading));
 
+    internal static string Session_TiffReviewHeading => Get(nameof(Session_TiffReviewHeading));
+
+    internal static string Session_TiffReviewSummary => Get(nameof(Session_TiffReviewSummary));
+
+    internal static string Session_TiffReviewCaveat => Get(nameof(Session_TiffReviewCaveat));
+
+    internal static string Session_ApproveTiff => Get(nameof(Session_ApproveTiff));
+
+    internal static string Session_RejectTiff => Get(nameof(Session_RejectTiff));
+
+    internal static string OutputLocation_Working => Get(nameof(OutputLocation_Working));
+
+    internal static string OutputLocation_Approved => Get(nameof(OutputLocation_Approved));
+
+    internal static string OutputLocation_Recycled => Get(nameof(OutputLocation_Recycled));
+
     internal static string Session_RejectReasonLabel => Get(nameof(Session_RejectReasonLabel));
 
     internal static string Session_RejectNotesLabel => Get(nameof(Session_RejectNotesLabel));

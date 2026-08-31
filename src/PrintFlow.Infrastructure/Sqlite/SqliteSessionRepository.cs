@@ -561,16 +561,27 @@ public sealed class SqliteSessionRepository : ISessionRepository
             INSERT INTO PrintOutput
                 (Id, SessionId, SourceRevisionId, TargetWidthMm, TargetHeightMm, PixelWidth, PixelHeight, Dpi,
                  SizePresetId, WhiteUnderbaseBranch, ProductionPresetId, ProductionPresetSha256, RelativePath,
-                 ByteLength, Sha256, ReviewState, IsValid, InvalidationReason, RecycledAtUtc, CreatedAtUtc)
+                 ByteLength, Sha256, ReviewState, IsValid, InvalidationReason, RecycledAtUtc,
+                 PromotionReservedPath, CreatedAtUtc)
             VALUES
                 (@Id, @SessionId, @SourceRevisionId, @TargetWidthMm, @TargetHeightMm, @PixelWidth, @PixelHeight, @Dpi,
                  @SizePresetId, @WhiteUnderbaseBranch, @ProductionPresetId, @ProductionPresetSha256, @RelativePath,
-                 @ByteLength, @Sha256, @ReviewState, @IsValid, @InvalidationReason, @RecycledAtUtc, @CreatedAtUtc)
+                 @ByteLength, @Sha256, @ReviewState, @IsValid, @InvalidationReason, @RecycledAtUtc,
+                 @PromotionReservedPath, @CreatedAtUtc)
             ON CONFLICT(Id) DO UPDATE SET
                 ReviewState = excluded.ReviewState,
                 IsValid = excluded.IsValid,
                 InvalidationReason = excluded.InvalidationReason,
-                RecycledAtUtc = excluded.RecycledAtUtc;
+                RecycledAtUtc = excluded.RecycledAtUtc,
+
+                -- Where the deliverable now lives. This is the one identity-ish column an update
+                -- may move, and only final approval moves it: Working\ while the TIFF awaits
+                -- review, Approved\ once it has been approved and the promoted bytes have been
+                -- independently re-hashed (Epic 11400 Part C2B §4, §6). The hash, byte length,
+                -- source Revision and creation instant stay put, and PrintOutput_Identity_Immutable
+                -- aborts the write if any of them is moved.
+                RelativePath = excluded.RelativePath,
+                PromotionReservedPath = excluded.PromotionReservedPath;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

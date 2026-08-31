@@ -44,6 +44,7 @@ public sealed class HomeAndWorkflowSelectionTests
             WorkflowEngine.Instance,
             recording,
             harness.FileWorkspace,
+            harness.RecycleBin,
             harness.FileInspector,
             harness.FakeMeitu,
             harness.FakePhotoshop,

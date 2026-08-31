@@ -198,6 +198,14 @@
     <value>自动处理已结束，请手动继续。</value>
   </data>
   <data name="Session_ReviewHeading" xml:space="preserve"><value>待审核</value></data>
+  <data name="Session_TiffReviewHeading" xml:space="preserve"><value>生产 TIFF</value></data>
+  <data name="Session_TiffReviewSummary" xml:space="preserve"><value>已验证 CMYK + W1 · {0}</value></data>
+  <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>系统验证的是文件结构，而非画面或印刷质量。</value></data>
+  <data name="Session_ApproveTiff" xml:space="preserve"><value>批准此 TIFF</value></data>
+  <data name="Session_RejectTiff" xml:space="preserve"><value>拒绝并重新生成 TIFF</value></data>
+  <data name="OutputLocation_Working" xml:space="preserve"><value>待审核（Working）</value></data>
+  <data name="OutputLocation_Approved" xml:space="preserve"><value>已在 Approved</value></data>
+  <data name="OutputLocation_Recycled" xml:space="preserve"><value>已移入回收站</value></data>
   <data name="Session_RejectReasonLabel" xml:space="preserve"><value>驳回原因</value></data>
   <data name="Session_RejectNotesLabel" xml:space="preserve"><value>备注（可选）</value></data>
   <data name="Session_ArtefactHeading" xml:space="preserve"><value>当前文件</value></data>

@@ -99,13 +99,26 @@ public sealed record ArtefactView(
 /// False once an upstream change invalidated this output. Shown rather than hidden: an
 /// operator needs to know a size they produced no longer reflects the design.
 /// </param>
+/// <param name="Area">
+/// Which workspace area this output's file currently lives in: <c>Working</c> while it is still
+/// the candidate an operator is reviewing, <c>Approved</c> once approval has promoted it
+/// (Epic 11400 Part C2B §24). The area, never a path — the screen says where the deliverable is,
+/// and the workspace stays the only thing that knows what that means on disk.
+/// </param>
+/// <param name="IsRecycled">
+/// True once a rejected output's file has been sent to the Windows Recycle Bin. The row itself
+/// stays — the decision, the hash, the size and the branch remain auditable — but the bytes are
+/// no longer available, and the screen must not offer them as though they were (§16, §25).
+/// </param>
 public sealed record PrintOutputView(
     PrintOutputId Id,
     PrintDimensions Dimensions,
     WhiteUnderbaseBranch Branch,
     ReviewState ReviewState,
     bool IsValid,
-    string FileName)
+    string FileName,
+    WorkspaceArea Area,
+    bool IsRecycled)
 {
     internal static PrintOutputView From(PrintOutput output) => new(
         output.Id,
@@ -113,7 +126,9 @@ public sealed record PrintOutputView(
         output.Branch,
         output.ReviewState,
         output.IsValid,
-        output.File.FileName);
+        output.File.FileName,
+        output.File.Area,
+        output.RecycledAtUtc is not null);
 }
 
 /// <summary>

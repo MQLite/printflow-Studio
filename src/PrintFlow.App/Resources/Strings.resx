@@ -198,6 +198,14 @@
     <value>Automated processing has ended. Continue manually.</value>
   </data>
   <data name="Session_ReviewHeading" xml:space="preserve"><value>Review required</value></data>
+  <data name="Session_TiffReviewHeading" xml:space="preserve"><value>Production TIFF</value></data>
+  <data name="Session_TiffReviewSummary" xml:space="preserve"><value>CMYK + W1 validated · {0}</value></data>
+  <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>The file's structure was checked, not its artistic or print quality.</value></data>
+  <data name="Session_ApproveTiff" xml:space="preserve"><value>Approve this TIFF</value></data>
+  <data name="Session_RejectTiff" xml:space="preserve"><value>Reject and make another TIFF</value></data>
+  <data name="OutputLocation_Working" xml:space="preserve"><value>awaiting review in Working</value></data>
+  <data name="OutputLocation_Approved" xml:space="preserve"><value>in Approved</value></data>
+  <data name="OutputLocation_Recycled" xml:space="preserve"><value>sent to the Recycle Bin</value></data>
   <data name="Session_RejectReasonLabel" xml:space="preserve"><value>Reason</value></data>
   <data name="Session_RejectNotesLabel" xml:space="preserve"><value>Notes (optional)</value></data>
   <data name="Session_ArtefactHeading" xml:space="preserve"><value>Current file</value></data>

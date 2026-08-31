@@ -314,6 +314,8 @@ public sealed class PrintOutputRow
             output.Dimensions.Dpi);
         Branch = DisplayNames.WhiteUnderbaseBranch(output.Branch);
         Review = DisplayNames.ReviewState(output.ReviewState);
+        Location = DisplayNames.OutputLocation(output.Area, output.IsRecycled);
+        IsAvailable = !output.IsRecycled;
         IsValid = output.IsValid;
         Validity = output.IsValid ? Strings.Session_OutputValid : Strings.Session_OutputInvalid;
     }
@@ -326,6 +328,21 @@ public sealed class PrintOutputRow
     public string Branch { get; }
 
     public string Review { get; }
+
+    /// <summary>
+    /// Where the file behind this row currently is, in words rather than as a path
+    /// (Epic 11400 Part C2B §24, §25).
+    /// </summary>
+    /// <remarks>
+    /// A production TIFF starts in the attempt's Working directory awaiting review and moves into
+    /// Approved only when it is approved. Showing the Working location as though it were the
+    /// approved deliverable — or continuing to offer a rejected TIFF's bytes after they have gone
+    /// to the Recycle Bin — is exactly what this line exists to prevent.
+    /// </remarks>
+    public string Location { get; }
+
+    /// <summary>False once the file has been recycled; the record survives, the bytes do not.</summary>
+    public bool IsAvailable { get; }
 
     public string Validity { get; }
 
@@ -709,9 +726,52 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string RunStepLabel => Strings.Session_RunStep;
 
-    public string ApproveLabel => Strings.Session_Approve;
+    /// <summary>
+    /// Whether the artefact currently under review is the production TIFF
+    /// (Epic 11400 Part C2B §22, §23).
+    /// </summary>
+    /// <remarks>
+    /// The only thing that varies for a TIFF is the wording. There is no second review screen and
+    /// no Photoshop-specific command: the generic Approve and Reject controls act on the current
+    /// step's Revision exactly as they do for an enhanced PNG or a trim, and a TIFF is not a
+    /// reason to build a parallel one (§22). What generic wording <i>would</i> get wrong is what
+    /// the operator is being asked about — "Approve" beside a production TIFF that is one click
+    /// from being the deliverable reads as smaller than it is.
+    /// </remarks>
+    public bool IsProductionTiffReview =>
+        IsReviewRequired && _session?.CurrentStep is { Step: StepKind.PhotoshopOutput };
 
-    public string RejectLabel => Strings.Session_Reject;
+    public string ApproveLabel =>
+        IsProductionTiffReview ? Strings.Session_ApproveTiff : Strings.Session_Approve;
+
+    public string RejectLabel =>
+        IsProductionTiffReview ? Strings.Session_RejectTiff : Strings.Session_Reject;
+
+    /// <summary>
+    /// What the system established about this TIFF, in one line (§22, §23).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately short, and deliberately only what is already recorded: the validated colour
+    /// and white-underbase shape, and which W1 branch was chosen. The parser's own vocabulary —
+    /// sample layout, byte order, layer compression, spot identity — stays out of the operator's
+    /// way; it lives in the producing attempt's audit note where an investigation can find it.
+    /// </remarks>
+    public string TiffReviewSummary => string.Format(
+        CultureInfo.CurrentCulture,
+        Strings.Session_TiffReviewSummary,
+        _session?.WhiteUnderbaseBranch is { } branch
+            ? DisplayNames.WhiteUnderbaseBranch(branch)
+            : string.Empty);
+
+    /// <summary>
+    /// The limit of that claim, said out loud (§23).
+    /// </summary>
+    /// <remarks>
+    /// PrintFlow validated a file's structure. It did not look at the artwork, and an operator
+    /// who read "validated" as "this will print well" would be trusting a judgement nothing here
+    /// made.
+    /// </remarks>
+    public string TiffReviewCaveat => Strings.Session_TiffReviewCaveat;
 
     public string RetryLabel => Strings.Session_Retry;
 
@@ -719,7 +779,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string HandOffLabel => Strings.Session_HandOff;
 
-    public string ReviewHeading => Strings.Session_ReviewHeading;
+    public string ReviewHeading =>
+        IsProductionTiffReview ? Strings.Session_TiffReviewHeading : Strings.Session_ReviewHeading;
 
     public string RejectReasonLabel => Strings.Session_RejectReasonLabel;
 
@@ -3219,6 +3280,15 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRunStep));
         OnPropertyChanged(nameof(CanApprove));
         OnPropertyChanged(nameof(CanReject));
+
+        // The review wording follows the artefact, so it is refreshed with the review commands
+        // that decide whether the panel is there at all (Epic 11400 Part C2B §23).
+        OnPropertyChanged(nameof(IsProductionTiffReview));
+        OnPropertyChanged(nameof(ReviewHeading));
+        OnPropertyChanged(nameof(ApproveLabel));
+        OnPropertyChanged(nameof(RejectLabel));
+        OnPropertyChanged(nameof(TiffReviewSummary));
+
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanHandOff));

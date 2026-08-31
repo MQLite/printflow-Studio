@@ -1502,6 +1502,7 @@ internal static class Mappers
         IsValid = output.IsValid,
         InvalidationReason = output.InvalidationReason is { } r ? ToText(r) : null,
         RecycledAtUtc = ToTextOrNull(output.RecycledAtUtc),
+        PromotionReservedPath = output.PromotionReservation?.RelativePath,
         CreatedAtUtc = ToText(output.CreatedAtUtc),
     };
 
@@ -1517,13 +1518,20 @@ internal static class Mappers
             dimensions,
             ToWhiteUnderbaseBranch(row.WhiteUnderbaseBranch),
             new ProductionPresetRef(row.ProductionPresetId, "unknown", Sha256.Parse(row.ProductionPresetSha256)),
-            WorkspaceFileRef.Create(row.RelativePath, WorkspaceArea.Approved),
+            // Inferred from the layout, exactly as a Revision's area is, and never assumed to be
+            // Approved. A production TIFF is produced into the attempt's own Working directory and
+            // moves to Approved only when an operator approves it, so a hardcoded area would have
+            // reported every unreviewed TIFF as already approved (Epic 11400 Part C2B §4, §24).
+            WorkspaceFileRef.Create(row.RelativePath, InferArea(row.RelativePath)),
             row.ByteLength,
             Sha256.Parse(row.Sha256),
             ToDateTimeOffset(row.CreatedAtUtc),
             ToReviewState(row.ReviewState),
             row.IsValid,
             row.InvalidationReason is string ir ? ToInvalidationReason(ir) : null,
-            ToDateTimeOffsetOrNull(row.RecycledAtUtc));
+            ToDateTimeOffsetOrNull(row.RecycledAtUtc),
+            row.PromotionReservedPath is string reserved
+                ? WorkspaceFileRef.Create(reserved, InferArea(reserved))
+                : null);
     }
 }

@@ -89,6 +89,7 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
             WorkflowEngine.Instance,
             new SqliteSessionRepository(factory),
             workspace,
+            new RecycleBin(),
             new WicFileInspector(),
             new FakeMeituProcessor(workspace),
             photoshop,

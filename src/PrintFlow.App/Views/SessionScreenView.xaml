@@ -662,6 +662,16 @@
                                         <TextBlock Text="{Binding Branch}" />
                                         <TextBlock Text="  ·  " />
                                         <TextBlock Text="{Binding Review}" />
+                                        <TextBlock Text="  ·  " />
+
+                                        <!--
+                                            Where the file actually is (Epic 11400 Part C2B §24,
+                                            §25). Working until it is approved, Approved once it
+                                            has been, and the Recycle Bin once a rejection has
+                                            disposed of it — so the list never offers bytes that
+                                            are not there.
+                                        -->
+                                        <TextBlock Text="{Binding Location}" />
                                     </StackPanel>
 
                                     <!-- An invalidated output is dimmed, and still says so in words. -->
@@ -1215,6 +1225,24 @@
                             Visibility="{Binding IsReviewRequired, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding ReviewHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                            <!--
+                                What was established about the production TIFF, and the limit of
+                                that claim (Epic 11400 Part C2B §22, §23). Collapsed for every
+                                other artefact: the sentence is about a CMYK + W1 TIFF, and there
+                                is no second review screen — these two lines and the button
+                                wording are the whole of what a TIFF changes.
+                            -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding IsProductionTiffReview, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding TiffReviewSummary}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.8" />
+                                <TextBlock Text="{Binding TiffReviewCaveat}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.65"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
 
                             <!--
                                 How the result being reviewed was produced (Part C3 §18). Comes

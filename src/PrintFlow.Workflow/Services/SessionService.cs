@@ -66,6 +66,19 @@ public sealed class SessionService : ISessionService
     private readonly IWorkflowEngine _engine;
     private readonly ISessionRepository _repository;
     private readonly IWorkspace _workspace;
+
+    /// <summary>
+    /// The only disposal route in the system, used by exactly one caller: final rejection of a
+    /// production TIFF (Epic 11400 Part C2B §14; MVP design §10).
+    /// </summary>
+    /// <remarks>
+    /// A port rather than a concrete type, so nothing in the workflow layer knows how a file is
+    /// recycled — and there is deliberately no <c>File.Delete</c> anywhere near it. A recycle
+    /// that fails is a structured failure that stops the rejection, never a fallback to
+    /// permanent deletion.
+    /// </remarks>
+    private readonly IRecycleBin _recycleBin;
+
     private readonly IFileInspector _fileInspector;
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
@@ -106,6 +119,7 @@ public sealed class SessionService : ISessionService
         IWorkflowEngine engine,
         ISessionRepository repository,
         IWorkspace workspace,
+        IRecycleBin recycleBin,
         IFileInspector fileInspector,
         IMeituProcessor meitu,
         IPhotoshopOutputProcessor photoshop,
@@ -119,6 +133,7 @@ public sealed class SessionService : ISessionService
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentNullException.ThrowIfNull(recycleBin);
         ArgumentNullException.ThrowIfNull(fileInspector);
         ArgumentNullException.ThrowIfNull(meitu);
         ArgumentNullException.ThrowIfNull(photoshop);
@@ -132,6 +147,7 @@ public sealed class SessionService : ISessionService
         _engine = engine;
         _repository = repository;
         _workspace = workspace;
+        _recycleBin = recycleBin;
         _fileInspector = fileInspector;
         _meitu = meitu;
         _photoshop = photoshop;
@@ -345,8 +361,24 @@ public sealed class SessionService : ISessionService
                     TargetEdgePlan = recorded.TargetEdgePlan,
                 };
 
+            // The file lifecycle a final production-TIFF review carries with it: promotion into
+            // Approved\ before an approval may be recorded, disposal through the Recycle Bin
+            // before a rejection may be (Epic 11400 Part C2B §6, §10, §12, §15). It runs here,
+            // after the engine has accepted the decision and before the transaction that records
+            // it, so a promotion or a disposal that did not happen cannot leave a reviewed state
+            // behind. Every other command — and every review of a Revision that is not a
+            // PrintOutput — passes straight through with nothing to do.
+            OperationResult<PrintOutput?> lifecycle =
+                await PerformFinalReviewFileWorkAsync(aggregate, command, context, cancellationToken);
+            if (lifecycle.IsFailure)
+            {
+                return OperationResult.Fail<SessionView>(lifecycle.Failure);
+            }
+
             ProcessingSession updatedSession = MergeSession(aggregate.Session, state, transition.Effects, context.NowUtc);
-            SessionMutation mutation = BuildMetadataMutation(aggregate, updatedSession, state, transition.Effects, context);
+            SessionMutation mutation = BuildMetadataMutation(
+                aggregate, updatedSession, state, transition.Effects, context,
+                upsertOutputs: lifecycle.Value is { } lifecycleOutput ? [lifecycleOutput] : null);
 
             OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
             if (committed.IsFailure)
@@ -864,6 +896,294 @@ public sealed class SessionService : ISessionService
 
     private static Revision? FindRevision(SessionAggregate aggregate, RevisionId? id) =>
         id is null ? null : aggregate.Revisions.FirstOrDefault(r => r.Id == id.Value);
+
+    // -------------------------------------------------------------------------------------
+    // Final production-TIFF review: promotion and disposal (Epic 11400 Part C2B)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Carries out the file lifecycle a final review decision implies, before the transaction
+    /// that records the decision (Part C2B §6, §10, §12, §15).
+    /// </summary>
+    /// <remarks>
+    /// Returns the updated <see cref="PrintOutput"/> for the caller to commit, or <c>null</c> when
+    /// the command is not a decision about a production output and there is no file work to do.
+    /// A failure means nothing was recorded: the step is still <c>ReviewRequired</c>, no approval
+    /// and no rejection exists, and the operator can decide again once the cause is cleared.
+    /// <para>
+    /// Deliberately not adapter-aware. It reaches the output through the step's current Revision
+    /// and the twin <see cref="PrintOutputId"/>, so a TIFF produced by the Fake adapter takes the
+    /// same route as one produced by Photoshop (§36). Nothing here asks which adapter ran.
+    /// </para>
+    /// <para>
+    /// The exact-hash authority is <b>not</b> re-implemented here. Every command that reaches this
+    /// point has already been through <see cref="EnsureIntegrityAsync"/>, which re-read the bytes
+    /// on disk and refused the command unless they still hashed to the Revision's recorded hash —
+    /// the same guard an Approve of any other artefact goes through (§5). What this method adds is
+    /// the independent re-hash of the <i>promoted</i> bytes, which is a different question.
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<PrintOutput?>> PerformFinalReviewFileWorkAsync(
+        SessionAggregate aggregate, WorkflowCommand command, CommandContext context,
+        CancellationToken cancellationToken)
+    {
+        if (command is not (WorkflowCommand.Approve or WorkflowCommand.Reject))
+        {
+            return OperationResult.Ok<PrintOutput?>(null);
+        }
+
+        (StepKind step, bool isApproval) = command switch
+        {
+            WorkflowCommand.Approve approve => (approve.Step, true),
+            WorkflowCommand.Reject reject => (reject.Step, false),
+            _ => throw new InvalidOperationException("Unreachable: the command was checked above."),
+        };
+
+        RevisionId? current = aggregate.Steps.FirstOrDefault(s => s.Step == step)?.CurrentRevisionId;
+        if (current is not RevisionId reviewed ||
+            FindRevision(aggregate, reviewed) is not { } revision ||
+            aggregate.Outputs.FirstOrDefault(o => o.Id.Value == reviewed.Value) is not { } output)
+        {
+            // A reviewed Revision that has no twin PrintOutput is an ordinary intermediate
+            // artefact — an enhanced PNG, a cut-out, a trim. Those have never had a promotion or
+            // a disposal on approval and do not gain one here (§19).
+            return OperationResult.Ok<PrintOutput?>(null);
+        }
+
+        return isApproval
+            ? await PromoteApprovedOutputAsync(aggregate, output, revision, context, cancellationToken)
+            : RecycleRejectedOutput(output, revision, context);
+    }
+
+    /// <summary>
+    /// Copies the exact reviewed TIFF into <c>Approved\</c> and confirms it arrived intact
+    /// (Part C2B §6, §7, §8, §9, §10).
+    /// </summary>
+    /// <remarks>
+    /// <b>The chosen lifecycle is reserve-copy-verify, not move.</b> It is the promotion primitive
+    /// the workspace already has and the one <c>ApprovedPngExport</c> already promotes through:
+    /// <see cref="IWorkspace.ReserveOutput"/> claims a name with <c>FileMode.CreateNew</c>, so the
+    /// established <c>{Name}</c>, <c>{Name}_02</c>, … collision contract is honoured atomically and
+    /// an existing approved file is never overwritten, and
+    /// <see cref="IWorkspace.WriteReservedAsync"/> copies the bytes unchanged. Nothing reopens
+    /// Photoshop, resaves, recompresses or regenerates anything: approval is a lifecycle operation
+    /// over bytes that were already validated (§8).
+    /// <para>
+    /// The Working original is deliberately <i>retained</i> rather than deleted. It is the file the
+    /// producing Revision names, and that Revision is immutable and still has to re-hash against
+    /// real bytes; removing it would break the integrity guard for the sake of tidiness. Clearing
+    /// <c>Working\</c> is a session-completion concern, and the state of that concern is recorded
+    /// in the report rather than quietly changed here (§20).
+    /// </para>
+    /// <para>
+    /// <b>Ordering.</b> The reservation is persisted in its own transaction <i>before</i> any bytes
+    /// are copied. A process that dies after the copy but before the review commit therefore leaves
+    /// behind the destination it had already claimed, and the operator's second approval resumes
+    /// into that same file instead of reserving a second name. That is the whole reason the
+    /// reservation is persisted at all, and it is what makes "no duplicate Approved copy" true
+    /// across a crash rather than merely likely (§10, §11, §33).
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<PrintOutput?>> PromoteApprovedOutputAsync(
+        SessionAggregate aggregate, PrintOutput output, Revision revision, CommandContext context,
+        CancellationToken cancellationToken)
+    {
+        if (output.File.Area == WorkspaceArea.Approved && output.PromotionReservation is null)
+        {
+            // Already promoted, and this approval is a replay of one that completed its file work.
+            // Nothing is copied a second time and no name is reserved (§11).
+            return OperationResult.Ok<PrintOutput?>(null);
+        }
+
+        OperationResult<WorkspaceFileRef> destination =
+            await ReserveApprovedDestinationAsync(aggregate, output, revision, context, cancellationToken);
+        if (destination.IsFailure)
+        {
+            return OperationResult.Fail<PrintOutput?>(destination.Failure);
+        }
+
+        WorkspaceFileRef approved = destination.Value;
+
+        OperationResult<Unit> copied = await _workspace.WriteReservedAsync(approved, revision.File, cancellationToken);
+        if (copied.IsFailure)
+        {
+            // The reservation stays recorded on purpose: the destination is claimed, the operator
+            // can approve again once the cause is cleared, and the retry writes into the same
+            // file rather than claiming a second name.
+            return OperationResult.Fail<PrintOutput?>(copied.Failure);
+        }
+
+        // The promoted bytes are re-read and re-hashed independently of the copy that wrote them.
+        // "WriteReservedAsync returned success" is the copy's own report; this is the only moment
+        // at which the file that is about to be called the approved deliverable can still be
+        // compared with the file that was validated (§6, §8).
+        OperationResult<(WorkspaceFileRef File, FileFacts Facts, string? Notes)> promoted =
+            await InspectAsync(approved, cancellationToken);
+        if (promoted.IsFailure)
+        {
+            return await AbandonPromotionAsync(
+                aggregate, output, approved, context, promoted.Failure, cancellationToken);
+        }
+
+        FileFacts facts = promoted.Value.Facts;
+        if (!facts.Sha256.Equals(revision.Sha256) || facts.ByteLength != revision.Facts.ByteLength)
+        {
+            return await AbandonPromotionAsync(
+                aggregate,
+                output,
+                approved,
+                context,
+                OperationFailure.Create(
+                    FailureCode.OutputValidationFailed,
+                    $"The promoted TIFF at '{approved.RelativePath}' does not match the reviewed file: " +
+                    $"recorded {revision.Sha256.ShortForm}/{revision.Facts.ByteLength} bytes, " +
+                    $"found {facts.Sha256.ShortForm}/{facts.ByteLength} bytes. It was not approved.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["promoted"] = "false",
+                        ["reviewRecorded"] = "false",
+                    }),
+                cancellationToken);
+        }
+
+        return OperationResult.Ok<PrintOutput?>(output.Promoted(approved));
+    }
+
+    /// <summary>
+    /// Claims the <c>Approved</c> destination for this output, resuming an interrupted promotion
+    /// rather than starting a second one (Part C2B §7, §11, §33).
+    /// </summary>
+    /// <remarks>
+    /// The proposed name is the one the workflow's own naming authority already rendered for this
+    /// TIFF — <c>revision.File.FileName</c> — so approval names nothing and Infrastructure names
+    /// nothing. Only the collision suffix is decided here, and it is decided by the workspace
+    /// against what is actually on disk.
+    /// </remarks>
+    private async Task<OperationResult<WorkspaceFileRef>> ReserveApprovedDestinationAsync(
+        SessionAggregate aggregate, PrintOutput output, Revision revision, CommandContext context,
+        CancellationToken cancellationToken)
+    {
+        if (output.PromotionReservation is { } resumed)
+        {
+            return OperationResult.Ok(resumed);
+        }
+
+        OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
+        if (patterns.IsFailure)
+        {
+            return OperationResult.Fail<WorkspaceFileRef>(patterns.Failure);
+        }
+
+        OperationResult<WorkspaceFileRef> reserved = _workspace.ReserveOutput(
+            aggregate.Session.Workspace, WorkspaceArea.Approved, revision.File.FileName, patterns.Value);
+        if (reserved.IsFailure)
+        {
+            return reserved;
+        }
+
+        SessionMutation claim = new(
+            aggregate.Session with { UpdatedAtUtc = context.NowUtc },
+            aggregate.Steps, [], [], [], [], [output.ReservingPromotion(reserved.Value)], null, null);
+
+        OperationResult<Unit> committed = await _repository.CommitAsync(claim, cancellationToken);
+        if (committed.IsSuccess)
+        {
+            return reserved;
+        }
+
+        // The name was claimed on disk but the claim never reached the database, so nothing will
+        // ever resume into it. It is quarantined out of Approved\ — the workspace's existing answer
+        // to a file with no metadata behind it — rather than left as an empty file the next
+        // approval would collide with and number around (§32).
+        //
+        // A hard process death in this same window leaves the empty reservation behind, because no
+        // code runs to clear it. What it cannot leave is a second copy of the approved TIFF: the
+        // residue is a zero-byte name, the bytes are copied only after this commit lands, and no
+        // record points at it.
+        _workspace.Quarantine(
+            _workspace.ResolveAbsolute(reserved.Value),
+            $"Final approval of {output.Id} reserved this name but could not record the reservation.");
+
+        return OperationResult.Fail<WorkspaceFileRef>(committed.Failure);
+    }
+
+    /// <summary>
+    /// Gives up a promotion whose destination could not be established, leaving nothing in
+    /// <c>Approved\</c> that could be mistaken for the deliverable (Part C2B §32).
+    /// </summary>
+    /// <remarks>
+    /// The half-written file is quarantined rather than deleted — the workspace's existing answer
+    /// to "a file exists on disk with no metadata behind it" — and the reservation is released so
+    /// the operator's next approval claims a fresh name instead of writing into a destination that
+    /// has already failed once. The review is not recorded either way.
+    /// </remarks>
+    private async Task<OperationResult<PrintOutput?>> AbandonPromotionAsync(
+        SessionAggregate aggregate, PrintOutput output, WorkspaceFileRef approved, CommandContext context,
+        OperationFailure failure, CancellationToken cancellationToken)
+    {
+        _workspace.Quarantine(
+            _workspace.ResolveAbsolute(approved),
+            $"Final approval of {output.Id} could not establish the promoted TIFF: {failure.TechnicalDetail}");
+
+        SessionMutation release = new(
+            aggregate.Session with { UpdatedAtUtc = context.NowUtc },
+            aggregate.Steps, [], [], [], [], [output.WithoutPromotionReservation()], null, null);
+        await _repository.CommitAsync(release, cancellationToken);
+
+        return OperationResult.Fail<PrintOutput?>(failure);
+    }
+
+    /// <summary>
+    /// Sends the exact rejected TIFF to the Windows Recycle Bin (Part C2B §12, §14, §15).
+    /// </summary>
+    /// <remarks>
+    /// <b>Ordering: disposal first, then the transaction that records the rejection.</b> A recycle
+    /// that fails therefore records no rejection at all — the step is still <c>ReviewRequired</c>,
+    /// the TIFF is still where it was, and the operator can reject again once the cause is cleared.
+    /// The alternative ordering would let the database say a TIFF was disposed of while it sat on
+    /// disk, which is the one claim §14 forbids: a failed disposal must not be dressed up as a
+    /// completed rejection.
+    /// <para>
+    /// A crash in the window between the two leaves the opposite, and it is deterministic: no
+    /// review decision exists, the step is still <c>ReviewRequired</c>, and the file is in the
+    /// Windows Recycle Bin where the operator can restore it. The next decision on that step is
+    /// refused by <see cref="RevisionIntegrityGuard"/> with
+    /// <see cref="FailureCode.RevisionIntegrityMismatch"/> — the artefact cannot be re-read — and
+    /// the Revision is invalidated, so no approval of a disposed TIFF is reachable (§34).
+    /// </para>
+    /// <para>
+    /// There is no hard-delete path here, and none anywhere behind it: <see cref="IRecycleBin"/>
+    /// has no fallback, so an unrecyclable file is retained rather than erased (§14).
+    /// </para>
+    /// </remarks>
+    private OperationResult<PrintOutput?> RecycleRejectedOutput(
+        PrintOutput output, Revision revision, CommandContext context)
+    {
+        if (output.RecycledAtUtc is not null)
+        {
+            // A replayed rejection disposes of nothing a second time.
+            return OperationResult.Ok<PrintOutput?>(null);
+        }
+
+        OperationResult<Unit> recycled = _recycleBin.SendToRecycleBin(_workspace.ResolveAbsolute(revision.File));
+        if (recycled.IsFailure)
+        {
+            return OperationResult.Fail<PrintOutput?>(OperationFailure.Create(
+                recycled.Failure.Code,
+                "The generated TIFF could not be sent to the Recycle Bin, so the rejection was not " +
+                $"recorded and the file was left where it is: {recycled.Failure.TechnicalDetail}",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["recycled"] = "false",
+                    ["reviewRecorded"] = "false",
+                    ["hardDeleted"] = "false",
+                }));
+        }
+
+        return OperationResult.Ok<PrintOutput?>(output.Recycled(context.NowUtc));
+    }
 
     // -------------------------------------------------------------------------------------
     // Producing steps: two metadata transactions around the file work

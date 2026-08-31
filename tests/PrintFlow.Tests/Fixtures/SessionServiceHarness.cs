@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Extensions.Time.Testing;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -46,6 +47,13 @@ internal sealed class SessionServiceHarness : IDisposable
     public IEnvironmentGate EnvironmentGate { get; } = new FoundationEnvironmentGate();
 
     /// <summary>
+    /// The recording stand-in for the Windows Recycle Bin every service built here uses
+    /// (Epic 11400 Part C2B §30). A test asserts on <see cref="FakeRecycleBin.Recycled"/>, or sets
+    /// <see cref="FakeRecycleBin.FailsWith"/> to prove a failed disposal records no rejection.
+    /// </summary>
+    public FakeRecycleBin RecycleBin { get; }
+
+    /// <summary>
     /// The scriptable fake adapters used by <see cref="CreateService"/>, exposed as their
     /// concrete type so a test can call <c>SetScenario</c> (Epic 11100 Part 3A §3) before
     /// issuing a command.
@@ -81,6 +89,7 @@ internal sealed class SessionServiceHarness : IDisposable
         Database = new TempDatabase();
         Clock = new FakeTimeProvider(new DateTimeOffset(2026, 8, 19, 9, 0, 0, TimeSpan.Zero));
         FileWorkspace = new FileWorkspace(Workspace.Root);
+        RecycleBin = new FakeRecycleBin(Path.Combine(Workspace.Root, "RecycleBin"));
 
         (string presetPath, Sha256 hash) = PresetFixture.Write(Workspace.Root);
         Preset = new WorkstationPresetProvider(presetPath, PresetFixture.PresetId, PresetFixture.PresetVersion, hash);
@@ -109,10 +118,23 @@ internal sealed class SessionServiceHarness : IDisposable
     /// A preset provider in place of the fixture-backed one, for tests about what the workflow
     /// does with naming patterns it cannot render (naming-contract fix §6).
     /// </param>
-    public ISessionService CreateService(IWorkstationPresetProvider? preset = null) => new SessionService(
+    /// <param name="workspace">
+    /// A workspace in place of the real one, for the deterministic promotion-failure and
+    /// crash-point tests (Epic 11400 Part C2B §32, §33). Every other test keeps the real
+    /// <see cref="Infrastructure.Workspace.FileWorkspace"/>.
+    /// </param>
+    /// <param name="repository">
+    /// A repository in place of the real one, so a test can fail exactly the commit an approval
+    /// or a rejection would have crashed before (§33, §34).
+    /// </param>
+    public ISessionService CreateService(
+        IWorkstationPresetProvider? preset = null,
+        IWorkspace? workspace = null,
+        ISessionRepository? repository = null) => new SessionService(
         WorkflowEngine.Instance,
-        Repository,
-        FileWorkspace,
+        repository ?? Repository,
+        workspace ?? FileWorkspace,
+        RecycleBin,
         FileInspector,
         FakeMeitu,
         FakePhotoshop,
@@ -152,6 +174,7 @@ internal sealed class SessionServiceHarness : IDisposable
         WorkflowEngine.Instance,
         Repository,
         FileWorkspace,
+        RecycleBin,
         FileInspector,
         meitu,
         FakePhotoshop,
@@ -180,6 +203,7 @@ internal sealed class SessionServiceHarness : IDisposable
         WorkflowEngine.Instance,
         Repository,
         FileWorkspace,
+        RecycleBin,
         FileInspector,
         FakeMeitu,
         photoshop,

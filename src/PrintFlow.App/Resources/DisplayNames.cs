@@ -268,6 +268,27 @@ internal static class DisplayNames
         _ => state.ToString(),
     };
 
+    /// <summary>
+    /// Where an output's file currently is, in words (Epic 11400 Part C2B §24, §25).
+    /// </summary>
+    /// <remarks>
+    /// Recycled wins over the area, because it is the more important truth: the row still names a
+    /// file, and after a rejection those bytes are in the Windows Recycle Bin rather than in the
+    /// workspace. Saying only where the record points would offer an artefact that is not there.
+    /// <para>
+    /// An area, never a path. The workspace is the only thing that resolves a reference to
+    /// somewhere on disk, and a screen that printed a path would be a second opinion about the
+    /// layout (MVP design invariant 12).
+    /// </para>
+    /// </remarks>
+    internal static string OutputLocation(WorkspaceArea area, bool isRecycled) => isRecycled
+        ? Strings.OutputLocation_Recycled
+        : area switch
+        {
+            WorkspaceArea.Approved => Strings.OutputLocation_Approved,
+            _ => Strings.OutputLocation_Working,
+        };
+
     internal static string StepState(StepState state) => state switch
     {
         Domain.Sessions.StepState.Waiting => Strings.StepState_Waiting,

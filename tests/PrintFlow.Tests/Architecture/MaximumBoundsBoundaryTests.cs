@@ -560,9 +560,17 @@ public sealed class MaximumBoundsBoundaryTests
     /// order against a database in the field, so the newest name is checked rather than merely
     /// counted.
     /// </para>
+    /// <para>
+    /// The expected newest script moved to 0007 in Epic 11400 Part C2B, which persists the
+    /// <c>Approved</c> destination reserved for a TIFF being approved. That is a crash-safety
+    /// contract rather than a convenience: without it, a process that died between the promoted
+    /// copy and the review commit would reserve a second name on the operator's next approval and
+    /// leave two Approved copies of one TIFF (Part C2B §10, §33, §35). C2B added exactly one
+    /// script, and the number moving is what this assertion is for.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_flexible_size_migration()
+    public void The_migration_set_ends_at_the_print_output_promotion_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -573,7 +581,7 @@ public sealed class MaximumBoundsBoundaryTests
             .Select(name => name!)
             .OrderBy(name => name, StringComparer.Ordinal);
 
-        scripts.Last().ShouldStartWith("0006", Case.Sensitive);
+        scripts.Last().ShouldStartWith("0007", Case.Sensitive);
     }
 
     // -------------------------------------------------------------------------------------

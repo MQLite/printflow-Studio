@@ -357,6 +357,9 @@ internal sealed class OutputRow
     public bool IsValid { get; set; }
     public string? InvalidationReason { get; set; }
     public string? RecycledAtUtc { get; set; }
+
+    public string? PromotionReservedPath { get; set; }
+
     public string CreatedAtUtc { get; set; } = "";
 }
 
