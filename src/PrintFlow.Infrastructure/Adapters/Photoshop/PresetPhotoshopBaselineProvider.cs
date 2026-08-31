@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Preset;
 
@@ -35,6 +36,7 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
     private const string OpenDialogEvidence = @"apps\photoshop-2019\open-file-dialog.json";
     private const string WindowStateEvidence = @"apps\photoshop-2019\window-states.json";
     private const string DocumentIdentityEvidence = @"apps\photoshop-2019\document-identity.json";
+    private const string W1ActionEvidence = @"apps\photoshop-2019\cmyk-w1-action-runtime.json";
 
     private readonly string _manifestAbsolutePath;
     private readonly Sha256 _expectedManifestSha256;
@@ -135,6 +137,22 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             return OperationResult.Fail<PhotoshopBaseline>(identity.Failure);
         }
 
+        OperationResult<PhotoshopW1ActionContract?> w1 = ReadOptional(
+            root, W1ActionEvidence, "Photoshop CMYK + W1 Action runtime evidence", ReadW1Action);
+        if (w1.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopBaseline>(w1.Failure);
+        }
+
+        if (w1.Value is { } w1Contract)
+        {
+            OperationResult<Unit> agreement = VerifyManifestActionAgreement(root, w1Contract);
+            if (agreement.IsFailure)
+            {
+                return OperationResult.Fail<PhotoshopBaseline>(agreement.Failure);
+            }
+        }
+
         return OperationResult.Ok(new PhotoshopBaseline(
             executablePath,
             digest,
@@ -146,7 +164,8 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             StringArray(contract, "excludedInstallations"),
             states.Value,
             openDialog.Value,
-            identity.Value));
+            identity.Value,
+            w1.Value));
     }
 
     /// <summary>
@@ -270,6 +289,94 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             separator, dialogClass, dialogTitle, fileNameId, fileNameClass,
             addressId, addressClass, addressPrefix, cancelId, cancelClass));
     }
+
+    private static OperationResult<PhotoshopW1ActionContract> ReadW1Action(JsonElement root)
+    {
+        JsonElement artifact = root.TryGetProperty("actionArtifact", out JsonElement a) ? a : default;
+        JsonElement runtime = root.TryGetProperty("runtimeActionContract", out JsonElement r) ? r : default;
+        string artifactPath = StringOrNull(artifact, "path") ?? string.Empty;
+        string artifactHash = StringOrNull(artifact, "sha256") ?? string.Empty;
+        string setName = StringOrNull(runtime, "setName") ?? string.Empty;
+
+        if (artifactPath.Length == 0 || !Sha256.TryParse(artifactHash, out Sha256 sha256) ||
+            setName.Length == 0 || !runtime.TryGetProperty("actions", out JsonElement actions) ||
+            actions.ValueKind != JsonValueKind.Array)
+        {
+            return InvalidW1Evidence("artifact path/hash, exact set name or action array is missing");
+        }
+
+        ImmutableArray<PhotoshopW1BranchContract>.Builder branches =
+            ImmutableArray.CreateBuilder<PhotoshopW1BranchContract>();
+        foreach (JsonElement action in actions.EnumerateArray())
+        {
+            string branchText = StringOrNull(action, "branch") ?? string.Empty;
+            WhiteUnderbaseBranch branch = branchText switch
+            {
+                "W1_0px" => WhiteUnderbaseBranch.W1_0px,
+                "W1_1px" => WhiteUnderbaseBranch.W1_1px,
+                "W1_2px" => WhiteUnderbaseBranch.W1_2px,
+                _ => (WhiteUnderbaseBranch)(-1),
+            };
+            string actionName = StringOrNull(action, "actionName") ?? string.Empty;
+            ImmutableArray<string> commands = StringArray(action, "runtimeCommands");
+            if (!Enum.IsDefined(branch) || actionName.Length == 0 || commands.IsDefaultOrEmpty)
+            {
+                return InvalidW1Evidence($"branch '{branchText}' has no exact action name or command transcript");
+            }
+
+            branches.Add(new PhotoshopW1BranchContract(branch, actionName, commands));
+        }
+
+        if (branches.Count != 3 || branches.Select(b => b.Branch).Distinct().Count() != 3 ||
+            branches.Select(b => b.ActionName).Distinct(StringComparer.Ordinal).Count() != 3)
+        {
+            return InvalidW1Evidence("the closed three-branch mapping is missing or duplicated");
+        }
+
+        foreach (WhiteUnderbaseBranch branch in Enum.GetValues<WhiteUnderbaseBranch>())
+        {
+            if (branches.Count(b => b.Branch == branch) != 1)
+            {
+                return InvalidW1Evidence($"branch '{branch}' does not occur exactly once");
+            }
+        }
+
+        return OperationResult.Ok(new PhotoshopW1ActionContract(
+            artifactPath, sha256, setName, branches.ToImmutable()));
+    }
+
+    private static OperationResult<Unit> VerifyManifestActionAgreement(
+        JsonElement root, PhotoshopW1ActionContract contract)
+    {
+        JsonElement action = root.TryGetProperty("photoshopActionContract", out JsonElement value)
+            ? value
+            : default;
+        string path = StringOrNull(action, "artifactPath") ?? string.Empty;
+        string hash = StringOrNull(action, "artifactSha256") ?? string.Empty;
+        string setName = StringOrNull(action, "setName") ?? string.Empty;
+        if (!string.Equals(path, contract.ArtifactPath, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(hash, contract.ArtifactSha256.ToString(), StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(setName, contract.SetName, StringComparison.Ordinal))
+        {
+            return OperationResult.Fail<Unit>(FailureCode.EnvironmentNotVerified,
+                "The verified runtime W1 evidence disagrees with the preset's canonical Action artifact, " +
+                "hash or exact set name.");
+        }
+
+        if (!action.TryGetProperty("actions", out JsonElement actions) ||
+            actions.ValueKind != JsonValueKind.Object ||
+            contract.Branches.Any(branch => !actions.TryGetProperty(branch.ActionName, out _)))
+        {
+            return OperationResult.Fail<Unit>(FailureCode.EnvironmentNotVerified,
+                "The verified runtime W1 evidence names an Action not present in the preset contract.");
+        }
+
+        return OperationResult.Ok();
+    }
+
+    private static OperationResult<PhotoshopW1ActionContract> InvalidW1Evidence(string detail) =>
+        OperationResult.Fail<PhotoshopW1ActionContract>(FailureCode.EnvironmentNotVerified,
+            $"The Photoshop CMYK + W1 Action runtime evidence is incomplete: {detail}.");
 
     private static string? StringOrNull(JsonElement element, string propertyName) =>
         element.ValueKind == JsonValueKind.Object &&

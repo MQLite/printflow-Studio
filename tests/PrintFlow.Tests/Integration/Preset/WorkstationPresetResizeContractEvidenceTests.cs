@@ -13,7 +13,7 @@ namespace PrintFlow.Tests.Integration.Preset;
 public sealed class WorkstationPresetResizeContractEvidenceTests
 {
     [Fact]
-    public void Configured_workstation_preset_is_the_immutable_v1_12_contract()
+    public void Configured_workstation_preset_is_the_immutable_v1_13_contract()
     {
         (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
         if (configured is null)
@@ -21,9 +21,9 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             return;
         }
 
-        configured.Value.configuration.Preset.Version.ShouldBe("1.12.0");
+        configured.Value.configuration.Preset.Version.ShouldBe("1.13.0");
         configured.Value.configuration.Preset.Path.ShouldEndWith(
-            @"Baseline\workstation-v1\preset\printflow-workstation-v1.12.0.json");
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.13.0.json");
         configured.Value.configuration.Adapters.Mode.ShouldBe("Fake");
 
         Hash(configured.Value.manifestPath).ShouldBe(
@@ -44,17 +44,18 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
 
         using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
         JsonElement root = manifest.RootElement;
-        root.GetProperty("presetVersion").GetString().ShouldBe("1.12.0");
-        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.11.0");
+        root.GetProperty("presetVersion").GetString().ShouldBe("1.13.0");
+        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.12.0");
         root.GetProperty("supersedes").GetProperty("manifestSha256").GetString().ShouldBe(
-            "A6E5DC172817F2F992114A1FDE0DCBAACC80D9CADD148C37D25CA3F816AC8AD1");
+            "7EAC531AC3464DEBBB447CC68D8226CB43CA653FD1345174E885396B6C83D20F");
 
         JsonElement integrity = root.GetProperty("sourceManifestIntegrity");
-        integrity.GetArrayLength().ShouldBe(24);
+        integrity.GetArrayLength().ShouldBe(25);
 
         bool foundResizeEvidence = false;
         bool foundFlexibleSizeEvidence = false;
         bool foundRuntimeEvidence = false;
+        bool foundW1Evidence = false;
         foreach (JsonElement entry in integrity.EnumerateArray())
         {
             string path = entry.GetProperty("path").GetString().ShouldNotBeNull();
@@ -83,11 +84,20 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
                 foundRuntimeEvidence = true;
                 File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
             }
+
+            if (path.EndsWith(
+                @"apps\photoshop-2019\cmyk-w1-action-runtime.json",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                foundW1Evidence = true;
+                File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+            }
         }
 
         foundResizeEvidence.ShouldBeTrue();
         foundFlexibleSizeEvidence.ShouldBeTrue();
         foundRuntimeEvidence.ShouldBeTrue();
+        foundW1Evidence.ShouldBeTrue();
     }
 
     [Fact]
@@ -244,6 +254,59 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         midpoint.GetProperty("actualPixels")[1].GetInt32().ShouldBe(501);
         root.GetProperty("acceptance").GetProperty("productionPreparationRuntimeAccepted")
             .GetBoolean().ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Cmyk_W1_runtime_evidence_records_all_three_exact_live_branches()
+    {
+        (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
+        string relative = manifest.RootElement.GetProperty("photoshopContract")
+            .GetProperty("cmykW1ActionRuntimeEvidence").GetString().ShouldNotBeNull();
+        string path = Path.Combine(configured.Value.configuration.Workspace.Root,
+            "Baseline", "workstation-v1", relative.Replace('/', Path.DirectorySeparatorChar));
+        using JsonDocument evidence = ReadJson(path);
+        JsonElement root = evidence.RootElement;
+
+        root.GetProperty("status").GetString().ShouldBe("ACCEPTED_IMMUTABLE");
+        root.GetProperty("actionArtifact").GetProperty("sha256").GetString().ShouldBe(
+            "A04203EDEA623C0737D911601A3A005033789BD095130F02A5F8C04CBFCD83EE");
+        root.GetProperty("runtimeActionContract").GetProperty("setName")
+            .GetString().ShouldBe("PrintFlow DTF");
+        root.GetProperty("runtimeActionContract").GetProperty("actions")
+            .GetArrayLength().ShouldBe(3);
+        root.GetProperty("channelRepresentation").GetProperty("componentChannelCount")
+            .GetInt32().ShouldBe(4);
+        root.GetProperty("channelRepresentation").GetProperty("w1")
+            .GetProperty("domKind").GetString().ShouldBe("ChannelType.SPOTCOLOR");
+        root.GetProperty("liveMatrix").GetArrayLength().ShouldBe(3);
+        foreach (JsonElement live in root.GetProperty("liveMatrix").EnumerateArray())
+        {
+            live.GetProperty("actionInvocationCount").GetInt32().ShouldBe(1);
+            live.GetProperty("before").GetProperty("mode").GetString().ShouldBe("DocumentMode.RGB");
+            live.GetProperty("after").GetProperty("mode").GetString().ShouldBe("DocumentMode.CMYK");
+            live.GetProperty("after").GetProperty("resolutionPpi").GetInt32().ShouldBe(300);
+            live.GetProperty("after").GetProperty("w1Count").GetInt32().ShouldBe(1);
+            live.GetProperty("backingSha256After").GetString().ShouldBe(
+                live.GetProperty("backingSha256Before").GetString());
+            live.GetProperty("saved").GetBoolean().ShouldBeFalse();
+        }
+    }
+
+    [Fact]
+    public void Superseded_v1_12_remains_immutable_and_exact()
+    {
+        (PrintFlowConfiguration configuration, string _)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        string path = Path.Combine(configured.Value.configuration.Workspace.Root,
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.12.0.json");
+        Hash(path).ShouldBe(
+            "7EAC531AC3464DEBBB447CC68D8226CB43CA653FD1345174E885396B6C83D20F",
+            StringCompareShould.IgnoreCase);
+        File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
     }
 
     [Fact]

@@ -33,7 +33,7 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// </remarks>
 public sealed class ProductionPhotoshopOutputProcessor :
     IPhotoshopOutputProcessor,
-    IPhotoshopPreparationAutomation
+    IPhotoshopW1Automation
 {
     private readonly IPhotoshopBaselineProvider _baselines;
     private readonly IExternalAppWindowLocator _locator;
@@ -42,6 +42,7 @@ public sealed class ProductionPhotoshopOutputProcessor :
     private readonly PhotoshopAutomationOptions _options;
     private readonly TimeProvider _clock;
     private readonly GuardedPhotoshopDocumentPreparer _preparer;
+    private readonly GuardedPhotoshopW1Executor _w1;
 
     public ProductionPhotoshopOutputProcessor(
         IPhotoshopBaselineProvider baselines,
@@ -57,7 +58,8 @@ public sealed class ProductionPhotoshopOutputProcessor :
             workspace,
             options,
             clock,
-            new RotPhotoshopPreparationNativeBridge())
+            new RotPhotoshopPreparationNativeBridge(),
+            new RotPhotoshopW1NativeBridge())
     {
     }
 
@@ -69,6 +71,20 @@ public sealed class ProductionPhotoshopOutputProcessor :
         PhotoshopAutomationOptions options,
         TimeProvider clock,
         IPhotoshopPreparationNativeBridge nativeBridge)
+        : this(baselines, locator, driver, workspace, options, clock, nativeBridge,
+            new RotPhotoshopW1NativeBridge())
+    {
+    }
+
+    internal ProductionPhotoshopOutputProcessor(
+        IPhotoshopBaselineProvider baselines,
+        IExternalAppWindowLocator locator,
+        IPhotoshopUiDriver driver,
+        IWorkspace workspace,
+        PhotoshopAutomationOptions options,
+        TimeProvider clock,
+        IPhotoshopPreparationNativeBridge nativeBridge,
+        IPhotoshopW1NativeBridge w1NativeBridge)
     {
         ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(locator);
@@ -77,6 +93,7 @@ public sealed class ProductionPhotoshopOutputProcessor :
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(nativeBridge);
+        ArgumentNullException.ThrowIfNull(w1NativeBridge);
 
         _baselines = baselines;
         _locator = locator;
@@ -85,6 +102,7 @@ public sealed class ProductionPhotoshopOutputProcessor :
         _options = options;
         _clock = clock;
         _preparer = new GuardedPhotoshopDocumentPreparer(baselines, locator, driver, nativeBridge);
+        _w1 = new GuardedPhotoshopW1Executor(baselines, _preparer, w1NativeBridge);
     }
 
     /// <inheritdoc />
@@ -99,6 +117,14 @@ public sealed class ProductionPhotoshopOutputProcessor :
         PhotoshopPreparation preparation,
         CancellationToken cancellationToken) =>
         _preparer.PrepareDocumentAsync(document, preparation, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<OperationResult<PhotoshopW1PreparedDocument>> ExecuteW1Async(
+        PhotoshopOpenedDocument opened,
+        PhotoshopPreparedDocument prepared,
+        WhiteUnderbaseBranch branch,
+        CancellationToken cancellationToken) =>
+        _w1.ExecuteW1Async(opened, prepared, branch, cancellationToken);
 
     // -----------------------------------------------------------------------------------
     // Workflow seam — fail-closed until W1 and TIFF exist
@@ -124,16 +150,16 @@ public sealed class ProductionPhotoshopOutputProcessor :
 
         return Task.FromResult(OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
             FailureCode.PreconditionNotMet,
-            "Production Photoshop output is not implemented. Epic 11400 B1A.3 can prepare an exact " +
-            "managed document in memory through a separate Infrastructure-only seam, but resize alone " +
-            "is not output success: accepted CMYK + W1, TIFF Save As and output validation remain later " +
-            "slices. No Photoshop window was touched here, no file was produced and no Revision may be " +
+            "Production Photoshop output is not implemented. Epic 11400 B1B can prepare an exact " +
+            "managed document as CMYK/8 with one validated W1 spot channel through a separate " +
+            "Infrastructure-only seam, but that in-memory state is not output success: TIFF Save As and " +
+            "output validation remain Part C. No Photoshop window was touched here, no file was produced and no Revision may be " +
             "created.",
             isRetryable: false,
             context: new Dictionary<string, string>
             {
                 ["adapterId"] = AdapterId,
-                ["implementedScope"] = "separate identify/open/prepare/read-back seam only",
+                ["implementedScope"] = "separate identify/open/prepare/CMYK-W1/read-back seam only",
                 ["inputSent"] = "false",
                 ["w1ActionInvoked"] = "false",
                 ["tiffWritten"] = "false",

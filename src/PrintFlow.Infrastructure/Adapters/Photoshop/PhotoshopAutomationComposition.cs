@@ -84,6 +84,32 @@ public static class PhotoshopAutomationComposition
             options);
     }
 
+    /// <summary>
+    /// Composes the closed B1B CMYK + W1 operation for controlled workstation proof. It exposes
+    /// no workflow output, TIFF, save, arbitrary Action or generic scripting surface.
+    /// </summary>
+    public static IPhotoshopW1Automation CreateW1Automation(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        PhotoshopAutomationOptions? options = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetManifestAbsolutePath);
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        return Create(
+            presetManifestAbsolutePath,
+            expectedPresetSha256,
+            workspace,
+            evidenceDirectory,
+            clock,
+            options);
+    }
+
     private static ProductionPhotoshopOutputProcessor Create(
         string presetManifestAbsolutePath,
         Sha256 expectedPresetSha256,

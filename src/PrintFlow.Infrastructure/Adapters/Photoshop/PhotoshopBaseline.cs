@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Infrastructure.Adapters.Photoshop;
@@ -124,6 +125,21 @@ public sealed record PhotoshopDocumentIdentitySignature(
     int CancelControlId,
     string CancelControlClass);
 
+/// <summary>One exact runtime Action and the command names Photoshop reports for it.</summary>
+public sealed record PhotoshopW1BranchContract(
+    WhiteUnderbaseBranch Branch,
+    string ActionName,
+    ImmutableArray<string> RuntimeCommands);
+
+/// <summary>
+/// The verified, closed CMYK + W1 Action contract. Callers never supply any of these strings.
+/// </summary>
+public sealed record PhotoshopW1ActionContract(
+    string ArtifactPath,
+    Sha256 ArtifactSha256,
+    string SetName,
+    ImmutableArray<PhotoshopW1BranchContract> Branches);
+
 /// <summary>
 /// The accepted identity and recognition signals for Photoshop on this workstation, as read
 /// from the signed Epic 11000 preset chain (Epic 11400 Part A §5).
@@ -176,7 +192,8 @@ public sealed record PhotoshopBaseline(
     ImmutableArray<string> ExcludedInstallations,
     PhotoshopWindowStateSignature? WindowStates = null,
     PhotoshopOpenDialogSignature? OpenDialog = null,
-    PhotoshopDocumentIdentitySignature? DocumentIdentity = null);
+    PhotoshopDocumentIdentitySignature? DocumentIdentity = null,
+    PhotoshopW1ActionContract? W1Action = null);
 
 /// <summary>Supplies the verified Photoshop baseline.</summary>
 public interface IPhotoshopBaselineProvider

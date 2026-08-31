@@ -236,10 +236,11 @@ internal sealed class GuardedPhotoshopDocumentPreparer
         }
     }
 
-    private async Task<OperationResult<PhotoshopTarget>> VerifyExactMutationTargetAsync(
+    internal async Task<OperationResult<PhotoshopTarget>> VerifyExactMutationTargetAsync(
         PhotoshopOpenedDocument opened,
         PhotoshopBaseline baseline,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool probeDocumentIdentity = true)
     {
         OperationResult<Unit> executable = PhotoshopExecutableIdentityRule.Verify(baseline);
         if (executable.IsFailure)
@@ -356,6 +357,15 @@ internal sealed class GuardedPhotoshopDocumentPreparer
                     ["state"] = state.Value.State.ToString(),
                     ["mutationInvoked"] = "false",
                 }));
+        }
+
+        if (!probeDocumentIdentity)
+        {
+            // After CMYK + spot-channel creation Photoshop's Save As surface may propose PSD
+            // instead of the original PNG, so that Part A UI probe no longer represents the
+            // loaded document's original fullName. The fixed native W1 result supplies and the
+            // caller validates app.activeDocument.fullName.fsName instead.
+            return OperationResult.Ok(refreshed);
         }
 
         OperationResult<PhotoshopDocumentIdentity> identity = await _driver

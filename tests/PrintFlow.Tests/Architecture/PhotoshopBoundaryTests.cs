@@ -210,7 +210,7 @@ public sealed class PhotoshopBoundaryTests
     }
 
     /// <summary>
-    /// No Photoshop source file names a W1 action, and none writes a TIFF.
+    /// The B1B source may name the closed W1 contract, but it still cannot write a TIFF.
     /// </summary>
     /// <remarks>
     /// The scope statement at its most literal. The accepted action names exist in signed
@@ -218,13 +218,10 @@ public sealed class PhotoshopBoundaryTests
     /// Photoshop.
     /// </remarks>
     [Theory]
-    [InlineData("W1_0px")]
-    [InlineData("W1_1px")]
-    [InlineData("W1_2px")]
-    [InlineData("PrintFlow DTF")]
-    [InlineData(".atn")]
     [InlineData(".tif")]
-    public void The_Photoshop_adapter_source_names_no_action_or_TIFF_artefact(string bannedToken)
+    [InlineData("TiffSaveOptions")]
+    [InlineData(".saveAs(")]
+    public void The_Photoshop_adapter_source_names_no_TIFF_write_artefact(string bannedToken)
     {
         List<string> offenders = [];
 
@@ -250,7 +247,7 @@ public sealed class PhotoshopBoundaryTests
             }
         }
 
-        offenders.ShouldBeEmpty($"Part A must contain no executable reference to '{bannedToken}'.");
+        offenders.ShouldBeEmpty($"B1B must contain no executable TIFF/save reference to '{bannedToken}'.");
     }
 
     // -----------------------------------------------------------------------------------
