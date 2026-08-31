@@ -811,6 +811,179 @@ public sealed class MigrationTests
     }
 
     /// <summary>Every column migration 0006 adds, on both tables.</summary>
+    // -------------------------------------------------------------------------------------
+    // 0007 — the approved-TIFF promotion columns (Epic 11400 Final Gate §25)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A database written before 0007 upgrades to the newest schema and keeps every session,
+    /// revision, attempt and output it already held (Final Gate §25).
+    /// </summary>
+    /// <remarks>
+    /// The pre-0006 case above proves the twelve-step table rebuild does not lose rows. This one
+    /// covers the step after it, and covers the table the earlier cases never populated: 0007 is
+    /// the first migration to touch <c>PrintOutput</c>, and a production database reaching it will
+    /// already hold approved outputs from before the promotion columns existed. Those rows must
+    /// arrive with no promotion in flight rather than with an empty string or a default path.
+    /// </remarks>
+    [Fact]
+    public void A_pre_0007_database_upgrades_and_keeps_its_outputs()
+    {
+        using TempDatabase database = new(migrate: false);
+
+        using (SqliteConnection seeded = database.OpenRaw())
+        {
+            foreach (string script in new[]
+                     {
+                         "0001_initial_schema.sql", "0002_trim_parameters.sql",
+                         "0003_background_removal_decision.sql", "0004_attempt_adapter_notes.sql",
+                         "0005_maximum_bound_print_plan.sql",
+                         "0006_flexible_size_and_enlargement_authority.sql",
+                     })
+            {
+                Execute(seeded, ReadMigrationScript(script));
+            }
+
+            Execute(
+                seeded,
+                "INSERT INTO SchemaMigration (Version, Name, AppliedAtUtc, ScriptSha256) " +
+                "VALUES (1, 'initial_schema', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (2, 'trim_parameters', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (3, 'background_removal_decision', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (4, 'attempt_adapter_notes', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (5, 'maximum_bound_print_plan', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "       (6, 'flexible_size_and_enlargement_authority', '2026-01-01T00:00:00.000Z', 'SEED');");
+            Execute(seeded, "PRAGMA user_version = 6;");
+
+            SeedApprovedOutput(seeded, "legacy-output-session");
+        }
+
+        using SqliteConnection upgraded = database.OpenRaw();
+        MigrationRunner.Migrate(upgraded).IsSuccess.ShouldBeTrue();
+        ReadUserVersion(upgraded).ShouldBe(MigrationRunner.NewestKnownVersion);
+
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM ProcessingSession;").ShouldBe(1L);
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM Revision;").ShouldBe(2L);
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM ProcessingAttempt;").ShouldBe(1L);
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM PrintOutput;").ShouldBe(1L);
+
+        ColumnsOf(upgraded, "PrintOutput").ShouldContain("PromotionReservedPath");
+
+        // The pre-existing output arrives with no promotion in flight, and everything it already
+        // recorded is untouched.
+        using SqliteCommand read = upgraded.CreateCommand();
+        read.CommandText =
+            "SELECT RelativePath, Sha256, ByteLength, ReviewState, PromotionReservedPath " +
+            "FROM PrintOutput WHERE Id = '33333333-3333-3333-3333-333333333333';";
+        using SqliteDataReader reader = read.ExecuteReader();
+        reader.Read().ShouldBeTrue();
+        reader.GetString(0).ShouldBe("Sessions/legacy-output-session/Approved/legacy.tif");
+        reader.GetString(1).ShouldBe(new string('b', 64));
+        reader.GetInt64(2).ShouldBe(4096L);
+        reader.GetString(3).ShouldBe("APPROVED");
+        reader.IsDBNull(4).ShouldBeTrue("a historical output acquires no promotion reservation");
+    }
+
+    /// <summary>
+    /// 0007's trigger lets an output's location move and refuses every other identity column
+    /// (Final Gate §25; Part C2B §4, §8).
+    /// </summary>
+    /// <remarks>
+    /// The file-location model stated as a database rule rather than a convention. A Revision's
+    /// path may never change (<c>Revision_Immutable_Update</c>, asserted in <c>DbInvariantTests</c>);
+    /// a PrintOutput's may, because approval promotes the deliverable — but its hash, byte length,
+    /// source Revision and creation instant may not, because approval copies bytes that were
+    /// already validated and never produces different ones.
+    /// </remarks>
+    [Fact]
+    public void A_PrintOutputs_location_may_move_but_its_identity_columns_may_not()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        SeedApprovedOutput(connection, "promotion-session");
+        const string id = "'33333333-3333-3333-3333-333333333333'";
+
+        // The move approval performs, and the reservation that precedes it, both round-trip.
+        Execute(connection,
+            $"UPDATE PrintOutput SET PromotionReservedPath = 'Sessions/promotion-session/Approved/moved.tif' WHERE Id = {id};");
+        ScalarStringOf(connection, $"SELECT PromotionReservedPath FROM PrintOutput WHERE Id = {id};")
+            .ShouldBe("Sessions/promotion-session/Approved/moved.tif");
+
+        Execute(connection,
+            $"UPDATE PrintOutput SET RelativePath = 'Sessions/promotion-session/Approved/moved.tif', " +
+            $"PromotionReservedPath = NULL WHERE Id = {id};");
+        ScalarStringOf(connection, $"SELECT RelativePath FROM PrintOutput WHERE Id = {id};")
+            .ShouldBe("Sessions/promotion-session/Approved/moved.tif");
+        ScalarOf(connection, $"SELECT COUNT(*) FROM PrintOutput WHERE Id = {id} AND PromotionReservedPath IS NULL;")
+            .ShouldBe(1L);
+
+        // And every column that says *which file this is* is refused.
+        foreach (string forbidden in new[]
+                 {
+                     $"UPDATE PrintOutput SET Sha256 = '{new string('c', 64)}' WHERE Id = {id};",
+                     $"UPDATE PrintOutput SET ByteLength = 1 WHERE Id = {id};",
+                     $"UPDATE PrintOutput SET SourceRevisionId = '55555555-5555-5555-5555-555555555555' WHERE Id = {id};",
+                     $"UPDATE PrintOutput SET CreatedAtUtc = '2027-01-01T00:00:00.000Z' WHERE Id = {id};",
+                 })
+        {
+            Should.Throw<SqliteException>(() => Execute(connection, forbidden))
+                .Message.ShouldContain("PrintOutput identity columns are immutable");
+        }
+
+        // Review state and validity still move, because those are what a review changes.
+        Execute(connection, $"UPDATE PrintOutput SET ReviewState = 'REJECTED', IsValid = 0 WHERE Id = {id};");
+        ScalarStringOf(connection, $"SELECT ReviewState FROM PrintOutput WHERE Id = {id};").ShouldBe("REJECTED");
+    }
+
+    /// <summary>Seeds a session, its root Revision, one attempt and one approved PrintOutput.</summary>
+    private static void SeedApprovedOutput(SqliteConnection connection, string sessionId)
+    {
+        InsertSession(connection, sessionId, []);
+
+        Execute(
+            connection,
+            $"""
+             INSERT INTO Revision
+                 (Id, SessionId, SourceRevisionId, Operation, RelativePath, Format, ByteLength,
+                  Sha256, ColourMode, CreatedAtUtc)
+             VALUES
+                 ('22222222-2222-2222-2222-222222222222', '{sessionId}', NULL, 'IMPORT',
+                  'Sessions/{sessionId}/Source/design.png', 'PNG', 2048, '{new string('a', 64)}',
+                  'RGB', '2026-01-01T00:00:00.000Z'),
+                 ('55555555-5555-5555-5555-555555555555', '{sessionId}', NULL, 'IMPORT',
+                  'Sessions/{sessionId}/Source/other.png', 'PNG', 1024, '{new string('e', 64)}',
+                  'RGB', '2026-01-01T00:00:00.000Z');
+
+             INSERT INTO ProcessingAttempt
+                 (Id, SessionId, StepKind, InputRevisionId, OutputRevisionId, Operation, AdapterId,
+                  ResultStatus, RetrySequence, StartedAtUtc)
+             VALUES
+                 ('44444444-4444-4444-4444-444444444444', '{sessionId}', 'PhotoshopOutput',
+                  '22222222-2222-2222-2222-222222222222', NULL, 'PHOTOSHOP_OUTPUT',
+                  'fake-photoshop-v1', 'FAILED', 0, '2026-01-01T00:00:00.000Z');
+
+             INSERT INTO PrintOutput
+                 (Id, SessionId, SourceRevisionId, TargetWidthMm, TargetHeightMm, PixelWidth,
+                  PixelHeight, Dpi, SizePresetId, WhiteUnderbaseBranch, ProductionPresetId,
+                  ProductionPresetSha256, RelativePath, ByteLength, Sha256, ReviewState, IsValid,
+                  CreatedAtUtc)
+             VALUES
+                 ('33333333-3333-3333-3333-333333333333', '{sessionId}',
+                  '22222222-2222-2222-2222-222222222222', 200.0, 150.0, 2362, 1772, 300, 'CUSTOM',
+                  'W1_1PX', 'printflow-workstation-v1', '{new string('d', 64)}',
+                  'Sessions/{sessionId}/Approved/legacy.tif', 4096, '{new string('b', 64)}',
+                  'APPROVED', 1, '2026-01-01T00:00:00.000Z');
+             """);
+    }
+
+    private static string ScalarStringOf(SqliteConnection connection, string sql)
+    {
+        using SqliteCommand command = connection.CreateCommand();
+        command.CommandText = sql;
+        return command.ExecuteScalar()!.ToString()!;
+    }
+
     private static readonly string[] FlexibleColumns =
     [
         "SizingMode", "SizingPreset", "SizingRecommendationKind",
