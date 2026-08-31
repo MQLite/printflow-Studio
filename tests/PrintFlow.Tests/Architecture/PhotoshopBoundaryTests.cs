@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Architecture;
 
@@ -319,22 +320,49 @@ public sealed class PhotoshopBoundaryTests
     }
 
     /// <summary>
-    /// The workflow seam's Photoshop implementation cannot succeed in Part A.
+    /// The Photoshop adapter constructs workflow output in exactly one place, and that place
+    /// cannot be reached without a validated TIFF candidate (Epic 11400 Part C2A §8).
     /// </summary>
     /// <remarks>
-    /// A source-level assertion, because it is the property that cannot be recovered if it is
-    /// broken quietly: the only way <c>GenerateAsync</c> could return a success is by
-    /// constructing an <c>AdapterOutput</c>, and this proves it never does (§19).
+    /// Part A and C1 asserted that <c>new AdapterOutput</c> appeared nowhere in this adapter,
+    /// because the seam was fail-closed and any construction at all would have been a fabricated
+    /// success. C2A opens the seam, so the property that replaces it is not "never" but "once,
+    /// and only from a candidate": the hazard is now a second construction site — a shortcut
+    /// path built from a save return or a file path — appearing later without anyone noticing.
+    /// <para>
+    /// Asserted at source level for the same reason the old one was: the boundary is exactly the
+    /// kind of thing that gets broken quietly by a helpful edit, and a compile error is a much
+    /// better outcome than a review that has to spot it.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_production_Photoshop_workflow_seam_constructs_no_AdapterOutput()
+    public void The_production_Photoshop_workflow_seam_constructs_AdapterOutput_only_from_a_validated_candidate()
     {
-        string source = File.ReadAllText(Path.Combine(
-            ProjectDirectory("PrintFlow.Infrastructure"),
-            "Adapters", "Photoshop", "ProductionPhotoshopOutputProcessor.cs"));
+        string directory = Path.Combine(
+            ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Photoshop");
 
-        source.ShouldNotContain("new AdapterOutput", Case.Sensitive);
-        source.ShouldNotContain("OperationResult.Ok(new AdapterOutput", Case.Sensitive);
+        List<string> constructingFiles = [.. Directory
+            .EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories)
+            .Where(file => File.ReadAllText(file).Contains("new AdapterOutput", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .Select(name => name!)];
+
+        constructingFiles.ShouldBe(["PhotoshopAdapterOutputFactory.cs"]);
+
+        // The processor composes the stages; it does not build the result itself.
+        File.ReadAllText(Path.Combine(directory, "ProductionPhotoshopOutputProcessor.cs"))
+            .ShouldNotContain("new AdapterOutput", Case.Sensitive);
+
+        // And every way through that construction site takes the validated candidate, not a
+        // path, a save return or an in-memory W1 result. There is no overload — success or
+        // refusal — that could be reached with anything weaker.
+        MethodInfo[] creators = [.. typeof(PhotoshopAdapterOutputFactory)
+            .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+            .Where(method => method.ReturnType == typeof(OperationResult<AdapterOutput>))];
+
+        creators.ShouldNotBeEmpty();
+        creators.ShouldAllBe(method => method.GetParameters()
+            .Any(parameter => parameter.ParameterType == typeof(PhotoshopValidatedTiffCandidate)));
     }
 
     // -----------------------------------------------------------------------------------

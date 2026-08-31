@@ -24,9 +24,11 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 ///   <item><see cref="IPhotoshopTiffAutomation"/> adds C1's separate controlled Save As Copy and
 ///         factual independent TIFF validation. Its result is an Infrastructure candidate, not
 ///         workflow output success.</item>
-///   <item><see cref="IPhotoshopOutputProcessor"/> — the workflow seam — remains deliberately
-///         <b>fail-closed</b>. C2 still owns the decision to turn a validated candidate into an
-///         <c>AdapterOutput</c> and workflow result.</item>
+///   <item><see cref="IPhotoshopOutputProcessor"/> — the workflow seam — is C2A's addition. It
+///         <b>composes</b> the seams above in one fixed order and returns an
+///         <c>AdapterOutput</c> built from the validated candidate and nothing else. It creates
+///         no Revision, PrintOutput or review decision: <c>SessionService</c> remains the sole
+///         Workflow authority over all three (§10).</item>
 /// </list>
 /// <see cref="Mode"/> is <see cref="AdapterExecutionMode.Production"/>, so
 /// <c>IEnvironmentGate</c> remains authoritative over every step this adapter would back. The
@@ -166,43 +168,108 @@ public sealed class ProductionPhotoshopOutputProcessor :
         _tiff.SaveProductionTiffAsync(opened, prepared, expectedOutput, cancellationToken);
 
     // -----------------------------------------------------------------------------------
-    // Workflow seam — fail-closed until C2 integrates the validated candidate
+    // Workflow seam — C2A composes the accepted stages into one workflow operation
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// Refuses to claim workflow output success, because C1 does not own that integration.
+    /// Runs the whole production operation and returns workflow output only for a TIFF that
+    /// independently validated (Epic 11400 Part C2A §4, §5).
     /// </summary>
     /// <remarks>
-    /// This is not a stub that someone forgot to finish; it is the §19 boundary written down.
-    /// The foundation below can do real, useful work — and precisely because it can, the
-    /// tempting shortcut would be to open the file, return an <c>AdapterOutput</c> naming the
-    /// expected output path, and let the validation pipeline discover the file is missing. That
-    /// would put a fabricated success into the one place a Revision is created from.
-    ///
-    /// So the refusal happens first, before the request is examined and before Photoshop is
-    /// touched at all: no window is activated, no keystroke is sent, and no file is created.
+    /// This method is deliberately a <i>composition</i> and contains no automation of its own.
+    /// Every stage below is an already accepted seam with its own guards and its own tests, and
+    /// re-implementing any of them here — a second resize, a second Action invocation, a second
+    /// TIFF writer — would create a production path nothing had reviewed. What C2A adds is the
+    /// order and the refusal to skip ahead in it.
+    /// <para>
+    /// The order is the safety property. Each stage consumes the previous stage's factual result
+    /// rather than re-deriving it, so a failure cannot be stepped over: a resize that did not
+    /// happen produces no <c>PhotoshopPreparedDocument</c>, which means no Action can be run
+    /// against it, which means there is nothing to save. The last stage is the important one —
+    /// Photoshop's own report that it saved successfully is <b>not</b> an accepted result, and
+    /// the only value that can become an <c>AdapterOutput</c> is a
+    /// <see cref="PhotoshopValidatedTiffCandidate"/> that survived C1's independent read of the
+    /// bytes on disk (§5, §8).
+    /// </para>
+    /// <para>
+    /// Nothing here consults session state, resolves a preset, decides an override, authorises an
+    /// enlargement, recalculates geometry or chooses a W1 branch. All of that arrives already
+    /// resolved on <paramref name="request"/>, which was built from the producing Attempt (§6).
+    /// Nor does anything here create a Revision, a PrintOutput or a review decision — on success
+    /// this returns an <c>AdapterOutput</c> and stops, exactly as the Meitu adapter does (§10).
+    /// </para>
     /// </remarks>
-    public Task<OperationResult<AdapterOutput>> GenerateAsync(
+    public async Task<OperationResult<AdapterOutput>> GenerateAsync(
         PhotoshopRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return Task.FromResult(OperationResult.Fail<AdapterOutput>(OperationFailure.Create(
-            FailureCode.PreconditionNotMet,
-            "Production Photoshop workflow output is not implemented. Epic 11400 C1 can save and " +
-            "independently validate a TIFF through a separate Infrastructure-only seam, but a factual " +
-            "validated candidate is not AdapterOutput or workflow success. C2 owns that integration. " +
-            "No Photoshop window was touched here, no file was produced and no Revision may be created.",
-            isRetryable: false,
-            context: new Dictionary<string, string>
-            {
-                ["adapterId"] = AdapterId,
-                ["implementedScope"] = "separate identify/open/prepare/CMYK-W1/save/validate candidate seams only",
-                ["inputSent"] = "false",
-                ["w1ActionInvoked"] = "false",
-                ["tiffWritten"] = "false",
-            })));
+        DateTimeOffset started = _clock.GetUtcNow();
+
+        // A. The exact managed Working document, proved by absolute path.
+        OperationResult<PhotoshopReadiness> ready = await EnsureReadyAsync(cancellationToken)
+            .ConfigureAwait(false);
+        if (ready.IsFailure)
+        {
+            return Refused(ready.Failure);
+        }
+
+        OperationResult<PhotoshopOpenedDocument> opened =
+            await OpenManagedWorkingFileAsync(request.ApprovedInput, cancellationToken)
+                .ConfigureAwait(false);
+        if (opened.IsFailure)
+        {
+            return Refused(opened.Failure);
+        }
+
+        // B. B1A.3 size and resolution preparation, with factual read-back. A failure here ends
+        //    the run: no Action is invoked and no TIFF destination is touched.
+        OperationResult<PhotoshopPreparedDocument> prepared = await _preparer
+            .PrepareDocumentAsync(opened.Value, request.Preparation, cancellationToken)
+            .ConfigureAwait(false);
+        if (prepared.IsFailure)
+        {
+            return Refused(prepared.Failure);
+        }
+
+        // C. B1B's exact selected W1 Action, invoked once, with factual CMYK/W1 validation.
+        OperationResult<PhotoshopW1PreparedDocument> w1 = await _w1
+            .ExecuteW1Async(opened.Value, prepared.Value, request.Branch, cancellationToken)
+            .ConfigureAwait(false);
+        if (w1.IsFailure)
+        {
+            return Refused(w1.Failure);
+        }
+
+        // D/E. C1's one Save As Copy into the reserved Working destination, the settle wait, and
+        //      the independent read of the resulting bytes. Cancellation, an unreadable file and
+        //      a structurally wrong TIFF all end here, with the file retained for audit (§17).
+        OperationResult<PhotoshopValidatedTiffCandidate> candidate = await _tiff
+            .SaveProductionTiffAsync(opened.Value, w1.Value, request.ExpectedOutput, cancellationToken)
+            .ConfigureAwait(false);
+        if (candidate.IsFailure)
+        {
+            return Refused(candidate.Failure);
+        }
+
+        // F. Workflow output, from the validated candidate and nothing else.
+        return PhotoshopAdapterOutputFactory.Create(
+            request, candidate.Value, _workspace, _clock.GetUtcNow() - started);
     }
+
+    /// <summary>
+    /// Passes a stage failure through unchanged apart from one added fact: no workflow output
+    /// was constructed, so no Revision can exist for this attempt (§17).
+    /// </summary>
+    private static OperationResult<AdapterOutput> Refused(OperationFailure failure) =>
+        OperationResult.Fail<AdapterOutput>(failure with
+        {
+            Context = new Dictionary<string, string>(failure.Context)
+            {
+                ["adapterOutputConstructed"] = "false",
+                ["revisionCreated"] = "false",
+            },
+        });
 
     // -----------------------------------------------------------------------------------
     // Part A foundation

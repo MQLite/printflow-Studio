@@ -447,21 +447,31 @@ public sealed class PhotoshopFoundationTests : IDisposable
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// The workflow seam refuses without touching Photoshop and without writing a file.
+    /// The workflow seam stops at its first stage and produces no output when the exact managed
+    /// document cannot be established (Epic 11400 Part C2A §5, §17).
     /// </summary>
     /// <remarks>
-    /// The §19 boundary. A success here would be fabricated — no W1 has run and no TIFF exists —
-    /// and it would be fabricated in the one place a Revision is created from.
+    /// Part A asserted this seam refused unconditionally, before examining the request. C2A opens
+    /// it, so what is worth asserting changes: the seam now runs, and the property that has to
+    /// hold is that stage A's failure ends the run rather than being stepped over. The input file
+    /// named below does not exist, so identity cannot be established — and the observable
+    /// consequence is that no Action is invoked, no TIFF is written anywhere under the managed
+    /// root, and the failure says in as many words that no workflow output was constructed.
+    /// <para>
+    /// A success here would still be fabricated, and it would still be fabricated in the one
+    /// place a Revision is created from. What has changed is only that the refusal is now earned
+    /// by a real run rather than granted by an unconditional return.
+    /// </para>
     /// </remarks>
     [Fact]
-    public async Task The_workflow_seam_refuses_and_produces_no_output()
+    public async Task The_workflow_seam_stops_at_identity_and_produces_no_output()
     {
         Harness h = Build(BaselineForRealFile());
 
         WorkspaceFileRef input = WorkspaceFileRef.Create(
             "Sessions/S1/Working/A_WORKING.png", WorkspaceArea.Working);
         WorkspaceFileRef output = WorkspaceFileRef.Create(
-            "Sessions/S1/Approved/A_W1-1PX.tif", WorkspaceArea.Approved);
+            "Sessions/S1/Working/A_1/A_W1-1PX.tif", WorkspaceArea.Working);
 
         OperationResult<AdapterOutput> generated = await h.Adapter.GenerateAsync(
             new PhotoshopRequest(
@@ -469,8 +479,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
                 PrintDimensions.FromMillimetres(200, 100, SizePreset.Custom),
 
                 // A real plan, calculated by the one domain authority rather than assembled by
-                // hand: the refusal below must be the §19 boundary refusing a fully-formed
-                // request, not the request failing to be constructible (Epic 11400 B1A.2A §17).
+                // hand: the refusal below must be a fully-formed request stopping at stage A,
+                // not the request failing to be constructible (Epic 11400 B1A.2A §17).
                 new FitWithinBoundsPreparation(PrintPreparationPlan.For(
                     RevisionId.From(Guid.Parse("11111111-1111-1111-1111-111111111111")),
                     Sha256.Parse(new string('a', 64)),
@@ -485,16 +495,14 @@ public sealed class PhotoshopFoundationTests : IDisposable
             CancellationToken.None);
 
         generated.IsFailure.ShouldBeTrue();
-        generated.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
-        generated.Failure.Context["w1ActionInvoked"].ShouldBe("false");
-        generated.Failure.Context["tiffWritten"].ShouldBe("false");
-        generated.Failure.Context["inputSent"].ShouldBe("false");
+        generated.Failure.Context["adapterOutputConstructed"].ShouldBe("false");
+        generated.Failure.Context["revisionCreated"].ShouldBe("false");
 
-        // Nothing was touched, and no file appeared anywhere under the temp root.
+        // The run never reached a document, so it never reached an Action or a save: no
+        // keystroke was sent, and no file appeared anywhere under the managed root.
         h.Input.Sends.ShouldBeEmpty();
         h.Controls.Writes.ShouldBeEmpty();
         h.Controls.Presses.ShouldBeEmpty();
-        h.Locator.LaunchCount.ShouldBe(0);
         Directory.GetFiles(h.ManagedDirectory, "*.tif", SearchOption.AllDirectories).ShouldBeEmpty();
     }
 

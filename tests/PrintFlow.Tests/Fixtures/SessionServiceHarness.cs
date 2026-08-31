@@ -163,6 +163,34 @@ internal sealed class SessionServiceHarness : IDisposable
         Clock);
 
     /// <summary>
+    /// Builds a service with a caller-supplied Photoshop adapter, and optionally a caller-supplied
+    /// gate (Epic 11400 Part C2A §26).
+    /// </summary>
+    /// <remarks>
+    /// The gate parameter is what makes the controlled production seam possible without touching
+    /// the application's own composition, and it is deliberately a parameter rather than a
+    /// mutable property on the harness: a caller has to state, at the call site, that it is
+    /// supplying its own gate. Every other test keeps the real
+    /// <see cref="FoundationEnvironmentGate"/>, which still refuses every Production adapter.
+    /// </remarks>
+    public ISessionService CreateServiceWithPhotoshop(
+        IPhotoshopOutputProcessor photoshop,
+        IEnvironmentGate? environmentGate = null,
+        IWorkstationPresetProvider? preset = null) => new SessionService(
+        WorkflowEngine.Instance,
+        Repository,
+        FileWorkspace,
+        FileInspector,
+        FakeMeitu,
+        photoshop,
+        Trim,
+        ManualCrop,
+        preset ?? Preset,
+        environmentGate ?? EnvironmentGate,
+        SystemIdGenerator.Instance,
+        Clock);
+
+    /// <summary>
     /// Records the reviewed-content authority for whatever Background Removal is currently about
     /// to consume (Epic 11300 Part C2B1 §5).
     /// </summary>

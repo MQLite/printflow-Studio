@@ -63,14 +63,26 @@ public sealed class PhotoshopTiffBoundaryTests
         }
     }
 
+    /// <summary>
+    /// C2A lets the adapter return an <c>AdapterOutput</c> and nothing further
+    /// (Epic 11400 Part C2A §10, §30).
+    /// </summary>
+    /// <remarks>
+    /// The <c>new AdapterOutput</c> assertion this test used to carry moved to
+    /// <c>PhotoshopBoundaryTests</c>, where it now says "exactly once, from a validated
+    /// candidate" rather than "never" — C2A is the slice that opens that seam. Everything else
+    /// here is unchanged and matters more than it did before: now that the adapter can succeed,
+    /// the tempting next step is for it to finish the job, and a Revision or a review decision
+    /// written from Infrastructure would take Workflow's sole authority away without any single
+    /// change looking like it did.
+    /// </remarks>
     [Fact]
-    public void Workflow_processor_still_constructs_no_output_revision_or_review_success()
+    public void Workflow_processor_still_constructs_no_revision_output_or_review_success()
     {
         string source = File.ReadAllText(Path.Combine(
             ProjectDirectory("PrintFlow.Infrastructure"), "Adapters", "Photoshop",
             "ProductionPhotoshopOutputProcessor.cs"));
 
-        source.ShouldNotContain("new AdapterOutput", Case.Sensitive);
         source.ShouldNotContain("new PrintOutput", Case.Sensitive);
         source.ShouldNotContain("new Revision", Case.Sensitive);
         source.ShouldNotContain("new ReviewRequired", Case.Sensitive);

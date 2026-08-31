@@ -22,10 +22,12 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// record an attempt or create a Revision — the gate stays authoritative over everything it was
 /// authoritative over before, because none of that is reachable from this graph at all.
 ///
-/// There is deliberately no <c>CreateProductionProcessor</c> counterpart to the Meitu
-/// composition's. That method exists over there because the Meitu adapter can genuinely
-/// complete a workflow operation; the Photoshop one cannot yet, and offering a way to reach its
-/// workflow seam would only offer a way to reach a refusal (§19).
+/// <see cref="CreateProductionProcessor"/> is Part C2A's addition, and it is the counterpart to
+/// the Meitu composition's method of the same name. It exists now for the reason that one does:
+/// C2A is the first slice in which the Photoshop workflow seam can genuinely complete an
+/// operation, and §26 asks for that to be proved through the seam <c>SessionService</c> actually
+/// uses. It composes the same object graph, reached through <c>IPhotoshopOutputProcessor</c>, and
+/// changes nothing about registration or <c>Adapters.Mode</c>.
 /// </remarks>
 public static class PhotoshopAutomationComposition
 {
@@ -115,6 +117,45 @@ public static class PhotoshopAutomationComposition
     /// not expose or invoke the workflow output seam.
     /// </summary>
     public static IPhotoshopTiffAutomation CreateTiffAutomation(
+        string presetManifestAbsolutePath,
+        Sha256 expectedPresetSha256,
+        IWorkspace workspace,
+        string evidenceDirectory,
+        TimeProvider clock,
+        PhotoshopAutomationOptions? options = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(presetManifestAbsolutePath);
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        return Create(
+            presetManifestAbsolutePath,
+            expectedPresetSha256,
+            workspace,
+            evidenceDirectory,
+            clock,
+            options);
+    }
+
+    /// <summary>
+    /// The same object graph, reached through the workflow seam instead
+    /// (Epic 11400 Part C2A §26).
+    /// </summary>
+    /// <remarks>
+    /// A caller here can run the whole real operation — open, prepare, W1, save, validate — and
+    /// get a real <c>AdapterOutput</c> back. What it cannot do is anything downstream of that on
+    /// its own: no session, repository or workflow engine is composed here, so this graph creates
+    /// no attempt row, no Revision and no ReviewRequired step. A controlled test that wants those
+    /// must supply a real <c>SessionService</c> and its own gate, which is exactly what makes the
+    /// bypass visible and confined to the test seam.
+    /// <para>
+    /// <c>Adapters.Mode</c> and the application's registration are untouched. The normal
+    /// composition still wires the Fake adapter, and <c>FoundationEnvironmentGate</c> still
+    /// refuses every <c>Production</c> adapter it is asked about, until Epic 11500 (§27).
+    /// </para>
+    /// </remarks>
+    public static IPhotoshopOutputProcessor CreateProductionProcessor(
         string presetManifestAbsolutePath,
         Sha256 expectedPresetSha256,
         IWorkspace workspace,

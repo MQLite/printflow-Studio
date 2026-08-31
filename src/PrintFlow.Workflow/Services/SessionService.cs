@@ -1363,17 +1363,27 @@ public sealed class SessionService : ISessionService
                     return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(tiffName.Failure);
                 }
 
-                OperationResult<WorkspaceFileRef> reserved =
-                    _workspace.ReserveOutput(session, WorkspaceArea.Approved, tiffName.Value, patterns.Value);
-                if (reserved.IsFailure)
-                {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(reserved.Failure);
-                }
+                // The destination this attempt's TIFF may occupy: the workflow's rendered name,
+                // in this attempt's own Working directory, exactly as every other producing step
+                // places its result (Epic 11400 Part C2A §7).
+                //
+                // Working rather than Approved, and that is the whole point of the placement. The
+                // file does not exist yet and will not be reviewed until it does, so promoting it
+                // into Approved\ before an operator has seen it would put an unreviewed artefact
+                // in the one area that is supposed to mean "reviewed" — and would put a live
+                // Photoshop save inside it. Promotion into Approved\ on approval, and into
+                // Rejected\ on rejection, is Part C2B's (§28).
+                //
+                // Not a ReserveOutput call either: the attempt directory is named by an attempt
+                // id, so the name cannot collide, and a reservation writes a zero-byte placeholder
+                // that C1's saver would correctly refuse to overwrite. A retry gets a new attempt
+                // directory and therefore a new destination, leaving the old file untouched (§21).
+                WorkspaceFileRef reserved = SiblingOf(workingCopy.Value, tiffName.Value);
 
                 OperationResult<AdapterOutput> result = await _photoshop.GenerateAsync(
                     new PhotoshopRequest(
                         workingCopy.Value, dimensions, preparation, preset.Value, branch,
-                        reserved.Value.FileName, ParentDirOf(workingCopy.Value), reserved.Value),
+                        reserved.FileName, ParentDirOf(workingCopy.Value), reserved),
                     cancellationToken);
                 if (result.IsFailure)
                 {
