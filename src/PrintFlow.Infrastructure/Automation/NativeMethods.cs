@@ -242,4 +242,84 @@ internal static partial class NativeMethods
     internal static partial int GetDIBits(
         nint hdc, nint bitmap, uint startScan, uint scanLines,
         [Out] byte[] bits, ref BITMAPINFOHEADER info, uint usage);
+
+    // -- workstation verification (Epic 11500 Part A §18) --------------------------------
+    //
+    // Narrow, named readers for exactly the facts the accepted preset states: the user's UI
+    // language, whether this is a local console session at an ordinary desktop, and the display
+    // topology and system DPI. Each answers one closed question.
+    //
+    // Note what is absent and must stay absent from this group: no arbitrary registry read, no
+    // command or script execution, and no process start. Verification inspects signed machine
+    // facts; it never runs anything.
+
+    internal const int SM_REMOTESESSION = 0x1000;
+
+    internal const int UOI_NAME = 2;
+    internal const uint DESKTOP_READOBJECTS = 0x0001;
+
+    internal const uint MONITORINFOF_PRIMARY = 0x00000001;
+
+    /// <summary>The signed-in user's UI language — what Meitu's and Photoshop's chrome follow.</summary>
+    [LibraryImport("kernel32.dll")]
+    internal static partial ushort GetUserDefaultUILanguage();
+
+    /// <summary>The language Windows was installed in. Reported for context, never verified against.</summary>
+    [LibraryImport("kernel32.dll")]
+    internal static partial ushort GetSystemDefaultUILanguage();
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool ProcessIdToSessionId(uint processId, out uint sessionId);
+
+    [LibraryImport("user32.dll")]
+    internal static partial int GetSystemMetrics(int index);
+
+    [LibraryImport("user32.dll")]
+    internal static partial uint GetDpiForSystem();
+
+    /// <summary>Opens the desktop currently receiving input, to learn its name and nothing else.</summary>
+    [LibraryImport("user32.dll", SetLastError = true)]
+    internal static partial nint OpenInputDesktop(
+        uint flags, [MarshalAs(UnmanagedType.Bool)] bool inherit, uint desiredAccess);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetUserObjectInformationW", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetUserObjectInformation(
+        nint handle, int index, [Out] ushort[] buffer, uint byteCount, out uint required);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool CloseDesktop(nint desktop);
+
+    /// <summary>
+    /// One monitor's bounds, work area and device name.
+    /// </summary>
+    /// <remarks>
+    /// Non-blittable because of the inline device-name buffer, so its two entry points use
+    /// <c>DllImport</c> rather than the source-generated <c>LibraryImport</c>. The buffer is
+    /// marshalled by the runtime; no pointer arithmetic is written here.
+    /// </remarks>
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct MONITORINFOEX
+    {
+        internal uint Size;
+        internal RECT Monitor;
+        internal RECT WorkArea;
+        internal uint Flags;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        internal string Device;
+    }
+
+    internal delegate bool MonitorEnumProc(nint monitor, nint hdc, ref RECT clip, nint data);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool EnumDisplayMonitors(
+        nint hdc, nint clip, MonitorEnumProc callback, nint data);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "GetMonitorInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetMonitorInfo(nint monitor, ref MONITORINFOEX info);
 }
