@@ -11,10 +11,10 @@ namespace PrintFlow.Infrastructure.Verification;
 /// </summary>
 /// <remarks>
 /// <b>This interface authorises nothing.</b> It answers a question; it does not open a gate.
-/// <c>FoundationEnvironmentGate</c> continues to refuse every Production adapter with
-/// <see cref="FailureCode.EnvironmentNotVerified"/> whatever this returns, and no adapter can
-/// reach this type to vouch for itself. Wiring a verified result into the gate is the next
-/// Epic 11500 slice, and only after this foundation passes.
+/// Epic 11500 Part B wired the answer to <c>VerifiedEnvironmentGate</c>, which is the only thing
+/// in the process that consults it and the only thing that turns a result into permission. No
+/// adapter can reach this type to vouch for itself, and no caller can hold a result and treat it
+/// as authorisation later: the gate re-asks on every Production request.
 /// </remarks>
 public interface IProductionWorkstationVerifier
 {

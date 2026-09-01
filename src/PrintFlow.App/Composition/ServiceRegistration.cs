@@ -11,6 +11,7 @@ using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
 using PrintFlow.Infrastructure.Sqlite;
+using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
@@ -79,7 +80,7 @@ public static class ServiceRegistration
         services.AddSingleton<IManualCropProcessor, WicManualCropProcessor>();
 
         services.AddSingleton<IRecycleBin, RecycleBin>();
-        services.AddSingleton<IEnvironmentGate, FoundationEnvironmentGate>();
+        RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath, expectedPresetHash);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
 
         RegisterAdapters(services, configuration.Adapters.Mode);
@@ -112,6 +113,60 @@ public static class ServiceRegistration
         overrides?.Invoke(services);
 
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Wires the workstation verifier and the one gate that consults it (Epic 11500 Part B §14).
+    /// </summary>
+    /// <remarks>
+    /// Every accepted value comes from the configuration this method was handed — the already
+    /// resolved workspace root, and the preset id, version, path and expected digest that
+    /// <see cref="BuildServiceProvider"/> parsed once for
+    /// <see cref="IWorkstationPresetProvider"/>. Nothing here re-reads <c>appsettings.json</c> or
+    /// re-parses a hash, so a configured installation cannot end up with a preset provider and a
+    /// verifier that disagree about which preset it is running.
+    /// <para>
+    /// <b>Registration only, and nothing is verified here.</b> Constructing the verifier reads no
+    /// file; the manifest, the evidence chain, the binaries and the session are read on the first
+    /// <c>Verify</c>, which happens when something asks for Production authorisation. That is what
+    /// keeps a workstation that fails verification from turning into "PrintFlow cannot start"
+    /// (§15) — the shell opens, Fake work proceeds, and only Production is closed.
+    /// </para>
+    /// <para>
+    /// <b>Exactly one gate, and no permissive fallback.</b> There is no branch here on
+    /// <c>Adapters:Mode</c>, no development gate, and no path that registers an
+    /// <see cref="IEnvironmentGate"/> which authorises Production without asking the verifier
+    /// (§14, §24). <see cref="VerifiedEnvironmentGate"/> is registered as a concrete singleton and
+    /// both interfaces resolve to that same instance, so the object that authorises and the object
+    /// that reports are one — and so no second consumer of the verifier exists.
+    /// </para>
+    /// </remarks>
+    private static void RegisterEnvironmentGate(
+        ServiceCollection services,
+        PrintFlowConfiguration configuration,
+        string workspaceRootAbsolute,
+        string presetManifestPath,
+        Sha256 expectedPresetHash)
+    {
+        // The narrow fact readers are composed by ProductionWorkstationVerifier.ForWorkstation
+        // rather than registered here, because Part A §18 keeps them internal to Infrastructure
+        // on purpose: between them they expose exactly the machine facts the preset names, and
+        // publishing them so the composition root could name them would widen that surface for
+        // no gain the graph does not already have. What matters — that the verifier reads the
+        // machine through those two readers and through no shell, script or caller-chosen
+        // registry path — is asserted by the verification boundary tests.
+        services.AddSingleton<IProductionWorkstationVerifier>(provider =>
+            ProductionWorkstationVerifier.ForWorkstation(
+                presetManifestPath,
+                configuration.Preset.Id,
+                configuration.Preset.Version,
+                expectedPresetHash,
+                workspaceRootAbsolute,
+                provider.GetRequiredService<TimeProvider>()));
+
+        services.AddSingleton<VerifiedEnvironmentGate>();
+        services.AddSingleton<IEnvironmentGate>(p => p.GetRequiredService<VerifiedEnvironmentGate>());
+        services.AddSingleton<IEnvironmentDiagnostics>(p => p.GetRequiredService<VerifiedEnvironmentGate>());
     }
 
     private static void RegisterAdapters(ServiceCollection services, string adapterMode)

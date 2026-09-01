@@ -44,7 +44,7 @@ internal sealed class SessionServiceHarness : IDisposable
 
     public ISessionRepository Repository { get; }
 
-    public IEnvironmentGate EnvironmentGate { get; } = new FoundationEnvironmentGate();
+    public IEnvironmentGate EnvironmentGate { get; } = new UnverifiedEnvironmentGate();
 
     /// <summary>
     /// The recording stand-in for the Windows Recycle Bin every service built here uses
@@ -170,7 +170,9 @@ internal sealed class SessionServiceHarness : IDisposable
     /// (Epic 11100 Part 3A §8: <see cref="IEnvironmentGate"/> blocking a production adapter).
     /// </summary>
     public ISessionService CreateServiceWithMeitu(
-        IMeituProcessor meitu, IWorkstationPresetProvider? preset = null) => new SessionService(
+        IMeituProcessor meitu,
+        IWorkstationPresetProvider? preset = null,
+        IEnvironmentGate? environmentGate = null) => new SessionService(
         WorkflowEngine.Instance,
         Repository,
         FileWorkspace,
@@ -181,7 +183,7 @@ internal sealed class SessionServiceHarness : IDisposable
         Trim,
         ManualCrop,
         preset ?? Preset,
-        EnvironmentGate,
+        environmentGate ?? EnvironmentGate,
         SystemIdGenerator.Instance,
         Clock);
 
@@ -194,7 +196,7 @@ internal sealed class SessionServiceHarness : IDisposable
     /// the application's own composition, and it is deliberately a parameter rather than a
     /// mutable property on the harness: a caller has to state, at the call site, that it is
     /// supplying its own gate. Every other test keeps the real
-    /// <see cref="FoundationEnvironmentGate"/>, which still refuses every Production adapter.
+    /// <see cref="UnverifiedEnvironmentGate"/>, which refuses every Production adapter.
     /// </remarks>
     public ISessionService CreateServiceWithPhotoshop(
         IPhotoshopOutputProcessor photoshop,

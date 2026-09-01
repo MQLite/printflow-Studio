@@ -619,7 +619,7 @@ public sealed class ProductionWorkstationVerifierTests
         using WorkstationVerificationFixture fixture = new();
         fixture.CreateVerifier().Verify().Verified.ShouldBeTrue();
 
-        IEnvironmentGate gate = new FoundationEnvironmentGate();
+        IEnvironmentGate gate = new UnverifiedEnvironmentGate();
 
         gate.Verify(AdapterExecutionMode.Fake).IsSuccess.ShouldBeTrue();
 

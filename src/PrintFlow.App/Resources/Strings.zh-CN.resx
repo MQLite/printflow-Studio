@@ -586,4 +586,52 @@
   <data name="Failure_AutomationHandedOff" xml:space="preserve">
     <value>你已在美图秀秀中手动接管。PrintFlow 已停止本次尝试，未再向美图秀秀发送任何指令，也未创建版本记录。</value>
   </data>
+  <data name="EnvironmentCheck_PresetIntegrity" xml:space="preserve">
+    <value>工作站预设与已认可的签名不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_EvidenceIntegrity" xml:space="preserve">
+    <value>已认可的工作站记录与其登记的签名不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_WorkspaceRoot" xml:space="preserve">
+    <value>当前工作文件夹不是本工作站校验时使用的那一个。</value>
+  </data>
+  <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
+    <value>本机的 Windows 版本与已校验的工作站不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_InteractiveSession" xml:space="preserve">
+    <value>当前没有可用的受支持交互式桌面会话。</value>
+  </data>
+  <data name="EnvironmentCheck_DisplayConfiguration" xml:space="preserve">
+    <value>显示器配置与已校验的工作站不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_UiCulture" xml:space="preserve">
+    <value>Windows 显示语言与已校验的工作站不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>预设中登记的美图秀秀或 Photoshop 界面语言，仅供参考。</value>
+  </data>
+  <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
+    <value>美图秀秀与已认可的生产基线不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop 与已认可的生产基线不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopActionArtifact" xml:space="preserve">
+    <value>Photoshop 动作文件与已认可的生产基线不一致。</value>
+  </data>
+  <data name="EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>部分已认可的文件不再标记为只读。其签名仍然一致，因此不会影响生产处理。</value>
+  </data>
+  <data name="Environment_Verified" xml:space="preserve">
+    <value>本工作站已通过生产环境校验。</value>
+  </data>
+  <data name="Environment_NotVerified" xml:space="preserve">
+    <value>生产工作站环境校验未通过。</value>
+  </data>
+  <data name="Environment_Advisories" xml:space="preserve">
+    <value>提示（不影响生产处理）</value>
+  </data>
+  <data name="Environment_ObservedAt" xml:space="preserve">
+    <value>检查时间</value>
+  </data>
 </root>

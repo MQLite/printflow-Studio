@@ -18,8 +18,9 @@ namespace PrintFlow.Tests.Smoke;
 /// configured manifest, the evidence it vouches for, the two accepted binaries and the canonical
 /// Action file, and it reads the current session, display and user UI language. It starts no
 /// application, sends no input, writes nothing, and changes no file attribute. It also enables
-/// nothing — <c>FoundationEnvironmentGate</c> refuses Production regardless of what it reports,
-/// and this observation is not wired to anything that could change that (§20, §24).
+/// nothing: Part B's <c>VerifiedEnvironmentGate</c> is what turns a result like this into
+/// permission, it re-asks the verifier itself on every Production request, and nothing this
+/// observation does could change what it would find (§20, §24).
 /// </para>
 /// </remarks>
 public sealed class WorkstationVerificationSmoke(ITestOutputHelper output)

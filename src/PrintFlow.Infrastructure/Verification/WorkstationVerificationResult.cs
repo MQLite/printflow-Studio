@@ -57,9 +57,9 @@ public sealed record WorkstationCheckResult(
 /// (Part A §5).
 /// </summary>
 /// <param name="Verified">
-/// True only when every non-advisory check passed. This is a <i>candidate</i> answer in Part A:
-/// nothing consumes it, and <c>FoundationEnvironmentGate</c> still refuses Production regardless
-/// (§20).
+/// True only when every non-advisory check passed. Part A left this a candidate answer that
+/// nothing consumed; Part B made <c>VerifiedEnvironmentGate</c> its one consumer, so Production
+/// authorisation is now exactly this flag, re-derived on every request.
 /// </param>
 /// <param name="Preset">The preset identity that was verified, or <c>null</c> if it was not.</param>
 /// <param name="Checks">Every check that ran, in evaluation order.</param>

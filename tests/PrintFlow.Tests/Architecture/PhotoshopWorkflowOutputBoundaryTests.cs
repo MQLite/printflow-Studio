@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Gate;
+using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Architecture;
@@ -200,7 +201,7 @@ public sealed class PhotoshopWorkflowOutputBoundaryTests
     [Fact]
     public void The_foundation_gate_still_refuses_production_and_no_adapter_consults_it()
     {
-        FoundationEnvironmentGate gate = new();
+        UnverifiedEnvironmentGate gate = new();
 
         OperationResult<PrintFlow.Domain.Results.Unit> production = gate.Verify(AdapterExecutionMode.Production);
         production.IsFailure.ShouldBeTrue();

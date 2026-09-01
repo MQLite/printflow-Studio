@@ -39,14 +39,20 @@ public sealed class WorkstationVerificationBoundaryTests
     }
 
     /// <summary>
-    /// Nothing above Infrastructure may name a verification type (§23).
+    /// Nothing above Infrastructure may name a verification type (§23; Part B §3).
     /// </summary>
     /// <remarks>
     /// Domain and Workflow stating environment facts would put registry, Win32 and file-system
-    /// concepts inside the layers that are supposed to be portable and deterministic. The App
-    /// shell is included because Part A adds no operator surface at all: if a read-model seam is
-    /// wanted later, it is a deliberate slice, not something that appears by a view model
-    /// happening to reference a verifier (§21).
+    /// concepts inside the layers that are supposed to be portable and deterministic.
+    /// <para>
+    /// The App shell is checked too, and Part B narrows the exemption rather than dropping it:
+    /// <c>PrintFlow.App.Composition</c> now names the verifier, because §14 requires the
+    /// composition root to build and register it, and the composition root is the one place in
+    /// App already permitted to see Infrastructure. Everything else in the shell — every view
+    /// model, every screen — still may not, so an operator surface onto verification remains a
+    /// deliberate slice through <c>IEnvironmentDiagnostics</c> rather than something that appears
+    /// by a view model happening to reference a verifier (§21).
+    /// </para>
     /// </remarks>
     [Theory]
     [InlineData("PrintFlow.Domain")]
@@ -64,7 +70,11 @@ public sealed class WorkstationVerificationBoundaryTests
             nameof(WorkstationVerificationResult),
         ];
 
-        AssertAbsent(project, tokens, "verification types belong to PrintFlow.Infrastructure.");
+        AssertAbsentUnder(
+            ProjectDirectory(project),
+            tokens,
+            "verification types belong to PrintFlow.Infrastructure.",
+            excludedDirectory: project == "PrintFlow.App" ? "Composition" : null);
     }
 
     /// <summary>
@@ -235,23 +245,143 @@ public sealed class WorkstationVerificationBoundaryTests
     }
 
     /// <summary>
-    /// The foundation gate is exactly what Epic 11100 wrote, and still refuses Production (§20).
+    /// Epic 11100's foundation gate is gone, superseded rather than left beside its replacement
+    /// (Part B §5).
     /// </summary>
+    /// <remarks>
+    /// Part A asserted the foundation gate was <i>unchanged</i>, because nothing had yet verified
+    /// a workstation and "Production is always denied" was the whole of the contract. Part B
+    /// replaces that with a gate that denies on evidence, and the risk the assertion now has to
+    /// cover is the opposite one: two <see cref="IEnvironmentGate"/> implementations shipping side
+    /// by side, one of which authorises nothing and the other of which nobody is quite sure is
+    /// registered.
+    /// </remarks>
     [Fact]
-    public void The_foundation_environment_gate_is_unchanged_and_still_refuses_production()
+    public void The_temporary_foundation_gate_no_longer_ships()
     {
-        MethodInfo[] methods = typeof(FoundationEnvironmentGate)
-            .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        typeof(VerifiedEnvironmentGate).Assembly.GetTypes()
+            .Where(t => typeof(IEnvironmentGate).IsAssignableFrom(t) && t is { IsAbstract: false, IsInterface: false })
+            .ShouldHaveSingleItem()
+            .ShouldBe(typeof(VerifiedEnvironmentGate),
+                "exactly one production gate exists, and it is the verified one (§5).");
 
-        methods.ShouldHaveSingleItem();
-        methods[0].Name.ShouldBe(nameof(IEnvironmentGate.Verify));
+        File.Exists(Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"), "Gate", "FoundationEnvironmentGate.cs"))
+            .ShouldBeFalse("the superseded foundation gate is removed, not left dormant.");
+    }
 
-        // No dependency of any kind: the gate cannot have quietly acquired a verifier.
-        typeof(FoundationEnvironmentGate).GetConstructors().ShouldHaveSingleItem();
-        typeof(FoundationEnvironmentGate).GetConstructors()[0].GetParameters().ShouldBeEmpty();
-        typeof(FoundationEnvironmentGate)
+    /// <summary>
+    /// The verified gate consults the verifier and nothing else about the machine (Part B §3).
+    /// </summary>
+    /// <remarks>
+    /// The dependency direction the whole slice rests on, asserted rather than intended: the gate
+    /// holds a verifier, and it holds no fact reader, no artefact reader and no configuration it
+    /// could use to reach the machine around the verifier's back.
+    /// </remarks>
+    [Fact]
+    public void The_verified_gate_holds_a_verifier_and_no_other_machine_seam()
+    {
+        ConstructorInfo constructor = typeof(VerifiedEnvironmentGate).GetConstructors().ShouldHaveSingleItem();
+        constructor.GetParameters().ShouldHaveSingleItem()
+            .ParameterType.ShouldBe(typeof(IProductionWorkstationVerifier));
+
+        typeof(VerifiedEnvironmentGate)
             .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-            .ShouldBeEmpty("the foundation gate holds no state and consults nothing.");
+            .Select(f => f.FieldType)
+            .ShouldBe([typeof(IProductionWorkstationVerifier)]);
+    }
+
+    /// <summary>
+    /// Only the gate implementation consumes the verifier (Part B §3, §29).
+    /// </summary>
+    /// <remarks>
+    /// The companion to <see cref="No_adapter_source_file_names_the_verifier"/>, widened to the
+    /// whole of Infrastructure: an adapter cannot self-authorise, and neither can anything else
+    /// that might later be tempted to ask the workstation directly instead of asking the gate.
+    /// The composition root names the verifier to construct it, which is registration rather than
+    /// consumption and lives in App.
+    /// </remarks>
+    [Fact]
+    public void Only_the_gate_implementation_consumes_the_verifier()
+    {
+        string infrastructure = ProjectDirectory("PrintFlow.Infrastructure");
+        List<string> offenders = [];
+
+        foreach ((string file, string[] lines) in SourceUnder(infrastructure))
+        {
+            if (Path.GetFileName(file) is "VerifiedEnvironmentGate.cs" or "ProductionWorkstationVerifier.cs")
+            {
+                continue;
+            }
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!IsComment(lines[i]) &&
+                    lines[i].Contains(nameof(IProductionWorkstationVerifier), StringComparison.Ordinal))
+                {
+                    offenders.Add($"{Path.GetFileName(file)}:{i + 1}: {lines[i].Trim()}");
+                }
+            }
+        }
+
+        offenders.ShouldBeEmpty("the gate is the only consumer of workstation verification.");
+    }
+
+    /// <summary>
+    /// No adapter takes a dependency on environment permission either (Part B §29).
+    /// </summary>
+    /// <remarks>
+    /// The companion rule to "no adapter names the verifier". An adapter that held an
+    /// <see cref="IEnvironmentGate"/> could ask it and act on the answer, which sounds harmless
+    /// and is not: authorisation would then be checked in two places, and the day they disagree
+    /// is the day a production adapter runs on an unverified workstation because the copy it
+    /// consulted said yes. The gate is asked <i>about</i> the adapter, by the workflow, before
+    /// the adapter exists in the call stack. Doc comments may name it; code may not.
+    /// </remarks>
+    [Fact]
+    public void No_adapter_holds_an_environment_gate()
+    {
+        string adapters = Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"), "Adapters");
+        List<string> offenders = [];
+
+        foreach ((string file, string[] lines) in SourceUnder(adapters))
+        {
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!IsComment(lines[i]) &&
+                    (lines[i].Contains(nameof(IEnvironmentGate), StringComparison.Ordinal) ||
+                     lines[i].Contains(nameof(IEnvironmentDiagnostics), StringComparison.Ordinal)))
+                {
+                    offenders.Add($"{Path.GetFileName(file)}:{i + 1}: {lines[i].Trim()}");
+                }
+            }
+        }
+
+        offenders.ShouldBeEmpty("an adapter that held the gate could authorise the step it is running.");
+    }
+
+    /// <summary>
+    /// No product bypass of workstation verification exists anywhere in <c>src</c> (Part B §24).
+    /// </summary>
+    /// <remarks>
+    /// Structural, and deliberately by name. Each of these is a plausible thing to add in a hurry
+    /// on the day the workstation fails verification and a job is due, and each would permanently
+    /// convert the gate from an authority into a suggestion. A controlled test may substitute an
+    /// explicitly test-only gate; nothing that ships may offer one.
+    /// </remarks>
+    [Theory]
+    [InlineData("SkipEnvironmentCheck")]
+    [InlineData("IgnoreWorkstationVerification")]
+    [InlineData("ForceProduction")]
+    [InlineData("AllowUnsafeProduction")]
+    [InlineData("BypassEnvironmentGate")]
+    [InlineData("SkipVerification")]
+    [InlineData("OverrideEnvironment")]
+    public void No_product_source_offers_a_verification_bypass(string bannedToken)
+    {
+        foreach (string project in AllProjects)
+        {
+            AssertAbsent(project, [bannedToken], $"'{bannedToken}' would make the gate optional.");
+        }
     }
 
     /// <summary>Part A adds no view model, and none may touch the file system (§21, §23).</summary>
@@ -286,11 +416,20 @@ public sealed class WorkstationVerificationBoundaryTests
     private static void AssertAbsent(string project, string[] tokens, string because) =>
         AssertAbsentUnder(ProjectDirectory(project), tokens, because);
 
-    private static void AssertAbsentUnder(string directory, string[] tokens, string because)
+    private static void AssertAbsentUnder(
+        string directory, string[] tokens, string because, string? excludedDirectory = null)
     {
         List<string> offenders = [];
         foreach ((string file, string[] lines) in SourceUnder(directory))
         {
+            if (excludedDirectory is not null &&
+                file.Contains(
+                    $"{Path.DirectorySeparatorChar}{excludedDirectory}{Path.DirectorySeparatorChar}",
+                    StringComparison.Ordinal))
+            {
+                continue;
+            }
+
             for (int i = 0; i < lines.Length; i++)
             {
                 if (IsComment(lines[i]))

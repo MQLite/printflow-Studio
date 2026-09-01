@@ -10,9 +10,9 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// (Epic 11300 Part A §22).
 /// </summary>
 /// <remarks>
-/// This exists because the alternative was worse. Epic 11500 has not implemented real
-/// workstation verification, so <c>FoundationEnvironmentGate</c> still refuses every
-/// <c>Production</c> adapter — correctly. The tempting shortcut is to relax the gate so the
+/// This exists because the alternative was worse. The registered environment gate refuses every
+/// <c>Production</c> adapter on a workstation that has not verified — correctly, and since Epic
+/// 11500 Part B on evidence rather than unconditionally. The tempting shortcut is to relax the gate so the
 /// smoke can run; that would weaken the one control standing between a half-built adapter and a
 /// live session, and §22 rules it out.
 ///

@@ -9,9 +9,9 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// (Epic 11400 Part A §19, §20).
 /// </summary>
 /// <remarks>
-/// This exists because the alternative was worse. Epic 11500 has not implemented real
-/// workstation verification, so <c>FoundationEnvironmentGate</c> still refuses every
-/// <c>Production</c> adapter — correctly. The tempting shortcut is to relax the gate so the
+/// This exists because the alternative was worse. The registered environment gate refuses every
+/// <c>Production</c> adapter on a workstation that has not verified — correctly, and since Epic
+/// 11500 Part B on evidence rather than unconditionally. The tempting shortcut is to relax the gate so the
 /// smoke can run; that would weaken the one control standing between a half-built adapter and a
 /// live session, and §19 rules it out.
 ///
@@ -151,8 +151,9 @@ public static class PhotoshopAutomationComposition
     /// bypass visible and confined to the test seam.
     /// <para>
     /// <c>Adapters.Mode</c> and the application's registration are untouched. The normal
-    /// composition still wires the Fake adapter, and <c>FoundationEnvironmentGate</c> still
-    /// refuses every <c>Production</c> adapter it is asked about, until Epic 11500 (§27).
+    /// composition still wires the Fake adapter, and the registered
+    /// <c>VerifiedEnvironmentGate</c> still decides every <c>Production</c> adapter it is asked
+    /// about from the workstation verifier, never from this seam (§27).
     /// </para>
     /// </remarks>
     public static IPhotoshopOutputProcessor CreateProductionProcessor(

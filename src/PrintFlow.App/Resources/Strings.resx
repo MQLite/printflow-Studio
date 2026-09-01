@@ -586,4 +586,52 @@
   <data name="Failure_AutomationHandedOff" xml:space="preserve">
     <value>You took over in Meitu. PrintFlow stopped this attempt and sent Meitu nothing further; no Revision was created.</value>
   </data>
+  <data name="EnvironmentCheck_PresetIntegrity" xml:space="preserve">
+    <value>The workstation preset does not match its accepted signature.</value>
+  </data>
+  <data name="EnvironmentCheck_EvidenceIntegrity" xml:space="preserve">
+    <value>The accepted workstation records do not match their recorded signatures.</value>
+  </data>
+  <data name="EnvironmentCheck_WorkspaceRoot" xml:space="preserve">
+    <value>The working folder is not the one this workstation was verified with.</value>
+  </data>
+  <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
+    <value>This computer's Windows version does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_InteractiveSession" xml:space="preserve">
+    <value>A supported interactive desktop session is not available.</value>
+  </data>
+  <data name="EnvironmentCheck_DisplayConfiguration" xml:space="preserve">
+    <value>Display configuration does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_UiCulture" xml:space="preserve">
+    <value>The Windows display language does not match the verified workstation.</value>
+  </data>
+  <data name="EnvironmentCheck_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>The recorded interface language of Meitu or Photoshop, for reference.</value>
+  </data>
+  <data name="EnvironmentCheck_MeituExecutable" xml:space="preserve">
+    <value>Meitu does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_PhotoshopActionArtifact" xml:space="preserve">
+    <value>The Photoshop action file does not match the accepted production baseline.</value>
+  </data>
+  <data name="EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>Some accepted files are no longer marked read-only. Their signatures still match, so this does not stop production work.</value>
+  </data>
+  <data name="Environment_Verified" xml:space="preserve">
+    <value>Workstation verified for production work.</value>
+  </data>
+  <data name="Environment_NotVerified" xml:space="preserve">
+    <value>Production workstation verification failed.</value>
+  </data>
+  <data name="Environment_Advisories" xml:space="preserve">
+    <value>Notes (these do not stop production work)</value>
+  </data>
+  <data name="Environment_ObservedAt" xml:space="preserve">
+    <value>Checked at</value>
+  </data>
 </root>

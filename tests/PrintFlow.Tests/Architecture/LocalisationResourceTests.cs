@@ -526,6 +526,83 @@ public sealed class LocalisationResourceTests
         }
     }
 
+    /// <summary>
+    /// Every workstation check an operator can be refused on has wording in both languages
+    /// (Epic 11500 Part B §22).
+    /// </summary>
+    /// <remarks>
+    /// Driven off the verification enum rather than a hand-written list, so a check added to the
+    /// accepted contract cannot reach an operator as <c>DisplayConfiguration</c> on an English
+    /// workstation or a bare resource key on a Chinese one. The gate resolves its
+    /// <c>MessageKey</c> at display time exactly the way any other failure does, and that
+    /// resolution falls back to the key itself — silently — when nothing is there.
+    /// </remarks>
+    [Fact]
+    public void Every_workstation_check_has_operator_wording_in_both_languages()
+    {
+        string[] required =
+        [
+            .. Enum.GetValues<PrintFlow.Infrastructure.Verification.WorkstationVerificationCheck>()
+                .Select(PrintFlow.Infrastructure.Gate.VerifiedEnvironmentGate.MessageKeyFor),
+            "Environment_Verified",
+            "Environment_NotVerified",
+            "Environment_Advisories",
+            "Environment_ObservedAt",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("a refused operator needs English wording.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// No gate message offers a way past the gate (Epic 11500 Part B §24).
+    /// </summary>
+    /// <remarks>
+    /// A wording test with the same teeth as the cutout-quality one: the resource files are where
+    /// an "Enable production anyway" button would first become visible, and a label is easier to
+    /// add than a code path. Scanned in both languages, because a Chinese-only override would be
+    /// invisible to everyone reading the English.
+    /// </remarks>
+    [Theory]
+    [InlineData("Enable production")]
+    [InlineData("Continue anyway")]
+    [InlineData("Ignore verification")]
+    [InlineData("Override")]
+    [InlineData("忽略校验")]
+    [InlineData("仍然继续")]
+    [InlineData("强制启用")]
+    public void No_environment_string_offers_a_way_past_the_gate(string forbidden)
+    {
+        foreach (string relativePath in new[] { NeutralResx, ChineseResx })
+        {
+            XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));
+
+            IEnumerable<string> offenders = document.Root!.Elements("data")
+                .Where(data => data.Attribute("name")!.Value.StartsWith("Environment", StringComparison.Ordinal))
+                .Where(data => (data.Element("value")?.Value ?? string.Empty)
+                    .Contains(forbidden, StringComparison.OrdinalIgnoreCase))
+                .Select(data => $"{relativePath}: {data.Attribute("name")!.Value}");
+
+            offenders.ShouldBeEmpty("workstation verification has no bypass, and offers none in words.");
+        }
+    }
+
+    /// <summary>
+    /// The advisory wording says plainly that it does not stop production work (§8, §22).
+    /// </summary>
+    [Fact]
+    public void The_read_only_advisory_says_it_does_not_block()
+    {
+        string key = PrintFlow.Infrastructure.Gate.VerifiedEnvironmentGate.MessageKeyFor(
+            PrintFlow.Infrastructure.Verification.WorkstationVerificationCheck.FilesystemReadOnlyPolicyAdvisory);
+
+        ValueOf(NeutralResx, key).ShouldContain("does not stop", Case.Insensitive);
+        ValueOf(ChineseResx, key).ShouldContain("不会影响", Case.Sensitive);
+    }
+
     private static string ValueOf(string relativePath, string key)
     {
         XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));

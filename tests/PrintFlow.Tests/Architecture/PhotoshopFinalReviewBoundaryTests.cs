@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Infrastructure.Gate;
+using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Architecture;
@@ -104,7 +105,7 @@ public sealed class PhotoshopFinalReviewBoundaryTests
         List<string> implementations = [];
         foreach (Assembly assembly in new[]
         {
-            typeof(FoundationEnvironmentGate).Assembly,
+            typeof(VerifiedEnvironmentGate).Assembly,
             typeof(IRecycleBin).Assembly,
             typeof(PrintOutput).Assembly,
         })
@@ -263,7 +264,13 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                     continue;
                 }
 
-                if (File.ReadAllText(file).Contains("CleanupWorking", StringComparison.Ordinal))
+                // Comment lines are skipped, the way every other boundary scan in this suite
+                // does it. A doc comment saying "CleanupWorking is not reachable from here" —
+                // which is what Epic 11500's workspace-root check says, and says truthfully —
+                // is the opposite of an interpreter, and reading it as one would push the next
+                // author to delete the sentence rather than keep the promise.
+                if (File.ReadAllLines(file).Any(line =>
+                        !IsCommentLine(line) && line.Contains("CleanupWorking", StringComparison.Ordinal)))
                 {
                     callers.Add(name);
                 }
@@ -285,7 +292,7 @@ public sealed class PhotoshopFinalReviewBoundaryTests
     [Fact]
     public void The_environment_gate_still_refuses_every_production_adapter()
     {
-        IEnvironmentGate gate = new FoundationEnvironmentGate();
+        IEnvironmentGate gate = new UnverifiedEnvironmentGate();
 
         gate.Verify(AdapterExecutionMode.Fake).IsSuccess.ShouldBeTrue();
         gate.Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
@@ -324,6 +331,14 @@ public sealed class PhotoshopFinalReviewBoundaryTests
 
         int end = source.IndexOf("\n    private ", start, StringComparison.Ordinal);
         return end < 0 ? source[start..] : source[start..end];
+    }
+
+    /// <summary>Whether a line is a comment, so a scan can assert about code rather than prose.</summary>
+    private static bool IsCommentLine(string line)
+    {
+        string trimmed = line.TrimStart();
+        return trimmed.StartsWith("//", StringComparison.Ordinal) ||
+               trimmed.StartsWith("*", StringComparison.Ordinal);
     }
 
     private static IEnumerable<string> SourceFiles(string project) =>

@@ -35,7 +35,7 @@ namespace PrintFlow.Tests.Smoke;
 /// <para>
 /// The gate is bypassed <b>here and only here</b>, by handing this one
 /// <c>SessionService</c> a <see cref="ControlledSeamEnvironmentGate"/>. That bypass is a
-/// parameter at this call site rather than a change to <c>FoundationEnvironmentGate</c> or to
+/// parameter at this call site rather than a change to the registered environment gate or to
 /// adapter registration: <c>Adapters.Mode</c> stays <c>Fake</c>, the application composition is
 /// untouched, and every other caller of the gate still gets the refusal (§27). Weakening the
 /// real gate to let a smoke run would trade the one control standing between a half-built
