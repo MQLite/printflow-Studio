@@ -131,6 +131,131 @@ public sealed class VerifiedEnvironmentGateWorkstationSmoke(ITestOutputHelper ou
         }
     }
 
+    /// <summary>
+    /// The controlled live readiness-screen proof: what an operator on this workstation would
+    /// actually read (Epic 11500 Part C §14).
+    /// </summary>
+    /// <remarks>
+    /// Same opt-in, same real graph, same throwaway database. What this adds to the gate proof
+    /// above is the operator's own view of it — the composed
+    /// <see cref="IEnvironmentDiagnostics"/>, resolved into the real screen, rendered into the
+    /// strings a person reads, and refreshed once to show the reading really is repeatable.
+    /// <para>
+    /// <b>It touches no external application.</b> Nothing here launches Photoshop or Meitu, sends
+    /// automation input, runs a production workflow, modifies a workstation setting or closes a
+    /// document. Reading readiness is a file-and-Win32 question, which is the whole reason the
+    /// gate was built to answer it without bringing an application onto the screen.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Read_the_production_readiness_screen_on_this_workstation()
+    {
+        if (Environment.GetEnvironmentVariable(EnableVariable) != "1")
+        {
+            // Inert by design; see the class remarks.
+            return;
+        }
+
+        string repositoryRoot = RepositoryRoot();
+        PrintFlowConfiguration configuration =
+            PrintFlowConfiguration.LoadFromFile(Path.Combine(repositoryRoot, "appsettings.json"));
+
+        string scratchDatabase = Path.Combine(
+            Path.GetTempPath(), "printflow-readiness-smoke-" + Guid.NewGuid().ToString("N"), "smoke.db");
+        Directory.CreateDirectory(Path.GetDirectoryName(scratchDatabase)!);
+
+        try
+        {
+            SqliteConnectionFactory factory = new(scratchDatabase);
+            using (SqliteConnection connection = factory.Open())
+            {
+                MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+            }
+
+            using ServiceProvider services = ServiceRegistration.BuildServiceProvider(
+                configuration, Path.GetFullPath(configuration.Workspace.Root), factory);
+
+            PrintFlow.App.ViewModels.EnvironmentReadinessViewModel screen =
+                services.GetRequiredService<PrintFlow.App.ViewModels.EnvironmentReadinessViewModel>();
+
+            await screen.OpenAsync(CancellationToken.None);
+
+            output.WriteLine($"{screen.Heading}");
+            output.WriteLine($"{screen.StatusText}");
+            output.WriteLine($"{screen.AdvisorySummary}");
+            output.WriteLine($"{screen.PresetLabel}: {screen.PresetIdentity}");
+            output.WriteLine($"{screen.ObservedAtLabel}: {screen.ObservedAt}");
+            output.WriteLine(string.Empty);
+
+            output.WriteLine($"{screen.BlockingHeading}");
+            if (screen.HasBlockingFailures)
+            {
+                foreach (PrintFlow.App.ViewModels.EnvironmentCheckRow row in screen.BlockingFailures)
+                {
+                    output.WriteLine($"  {row.Name} [{row.SupportKey}] — {row.Status}");
+                    output.WriteLine($"    {row.Explanation}");
+                }
+            }
+            else
+            {
+                output.WriteLine($"  {screen.NoBlockingFailuresText}");
+            }
+
+            output.WriteLine(string.Empty);
+            output.WriteLine($"{screen.AdvisoriesHeading}");
+            foreach (PrintFlow.App.ViewModels.EnvironmentCheckRow row in screen.Advisories)
+            {
+                output.WriteLine($"  {row.Name} [{row.SupportKey}] — {row.Status}");
+                output.WriteLine($"    {row.Explanation}");
+            }
+
+            output.WriteLine(string.Empty);
+            output.WriteLine($"{screen.ChecksHeading}");
+            foreach (PrintFlow.App.ViewModels.EnvironmentCheckRow row in screen.Checks)
+            {
+                output.WriteLine(
+                    $"  [{row.Status,-8}] {row.Classification,-9} {row.Name} [{row.SupportKey}]");
+                output.WriteLine($"      {row.Detail}");
+            }
+
+            output.WriteLine(string.Empty);
+            output.WriteLine(screen.RefreshScope);
+            output.WriteLine(screen.RestartRequirement);
+
+            // Looking again is the only thing the screen can do, and it must be repeatable.
+            string firstReading = screen.ObservedAt;
+            await screen.RefreshCommand.ExecuteAsync(null);
+            output.WriteLine(string.Empty);
+            output.WriteLine($"after refresh     : {screen.StatusText} / {screen.ObservedAt} (was {firstReading})");
+
+            // Asserted rather than reported: the screen resolved real wording rather than raw
+            // resource keys, and it produced a reading at all.
+            screen.HasReport.ShouldBeTrue();
+            screen.Heading.ShouldNotBe("Environment_Heading");
+            screen.RestartRequirement.ShouldNotBe("Environment_RestartRequired");
+            screen.Checks.ShouldNotBeEmpty();
+            screen.Checks.ShouldAllBe(
+                row => !row.Name.StartsWith("EnvironmentCheckName_", StringComparison.Ordinal));
+
+            // And reading it enabled nothing.
+            configuration.Adapters.Mode.ShouldBe("Fake");
+            services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
+            services.GetRequiredService<IPhotoshopOutputProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            try
+            {
+                Directory.Delete(Path.GetDirectoryName(scratchDatabase)!, recursive: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // A temp database that outlives one smoke run is not worth failing it over.
+            }
+        }
+    }
+
     private static string RepositoryRoot()
     {
         DirectoryInfo? current = new(AppContext.BaseDirectory);

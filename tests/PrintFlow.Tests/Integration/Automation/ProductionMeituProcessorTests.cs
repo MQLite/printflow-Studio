@@ -271,6 +271,39 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         h.Locator.LaunchCount.ShouldBe(0);
     }
 
+    /// <summary>
+    /// A binary replaced <i>after</i> a passing run is refused on the next one, in the same
+    /// process (Epic 11500 Part C §7).
+    /// </summary>
+    /// <remarks>
+    /// The operation-time half of Part C's immutable-baseline decision. Epic 11500's environment
+    /// gate reads the signed baseline once per process and therefore keeps authorising until
+    /// PrintFlow restarts; this rule re-hashes the accepted path on every run, so a Meitu binary
+    /// replaced between two steps is refused before anything is launched or driven — whatever
+    /// the gate still believes.
+    /// </remarks>
+    [Fact]
+    public async Task A_binary_replaced_after_a_passing_run_is_refused_on_the_next_run()
+    {
+        Harness h = Build();
+        ExternalProcessRef process = Process();
+        ExternalWindowRef window = MeituFakes.Window(owningProcessId: process.ProcessId);
+        h.Locator.Register(process, window);
+        ShowWelcomePage(h.Elements, window);
+
+        (await h.Adapter.EnsureReadyAsync(CancellationToken.None)).IsSuccess.ShouldBeTrue();
+
+        File.WriteAllBytes(_executablePath, [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x02, 0xFF]);
+
+        OperationResult<MeituReadiness> after = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        after.IsFailure.ShouldBeTrue();
+        after.Failure.Code.ShouldBe(FailureCode.MeituNotInstalled);
+        after.Failure.Context.ShouldContainKey("actualSha256");
+        h.Locator.LaunchCount.ShouldBe(0);
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     // -----------------------------------------------------------------------------
     // Existing instance (§15)
     // -----------------------------------------------------------------------------

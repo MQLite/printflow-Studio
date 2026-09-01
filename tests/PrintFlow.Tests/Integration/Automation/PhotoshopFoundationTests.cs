@@ -223,6 +223,43 @@ public sealed class PhotoshopFoundationTests : IDisposable
         h.Input.Sends.ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// A binary replaced <i>after</i> a passing run is refused on the next one, in the same
+    /// process (Epic 11500 Part C §7).
+    /// </summary>
+    /// <remarks>
+    /// The operation-time half of Part C's immutable-baseline decision, and the reason the
+    /// restart-bound environment gate is safe enough to keep. The gate reads the signed baseline
+    /// once per process; this rule does not. Whatever the gate concluded when PrintFlow started,
+    /// the bytes at the accepted path are hashed again before every run, so an executable
+    /// replaced mid-session cannot be launched or driven by the adapter that would use it.
+    /// <para>
+    /// Same adapter, same baseline provider, same process — only the file on disk changed.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task A_binary_replaced_after_a_passing_run_is_refused_on_the_next_run()
+    {
+        Harness h = Build(BaselineForRealFile(), registerProcess: false);
+
+        // It got past identity: the failure is about the window, not the binary.
+        OperationResult<PhotoshopReadiness> first =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+        first.Failure.Code.ShouldNotBe(FailureCode.PhotoshopNotInstalled);
+        h.Locator.LaunchCount.ShouldBe(1);
+
+        File.WriteAllBytes(_executable, [0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0xFF]);
+
+        OperationResult<PhotoshopReadiness> second =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        second.IsFailure.ShouldBeTrue();
+        second.Failure.Code.ShouldBe(FailureCode.PhotoshopNotInstalled);
+        second.Failure.Context["inputSent"].ShouldBe("false");
+        h.Locator.LaunchCount.ShouldBe(1, "the replaced binary was never launched.");
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     // -----------------------------------------------------------------------------------
     // §22.3 — process and window ownership
     // -----------------------------------------------------------------------------------

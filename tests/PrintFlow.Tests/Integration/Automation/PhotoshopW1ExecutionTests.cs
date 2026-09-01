@@ -60,6 +60,35 @@ public sealed class PhotoshopW1ExecutionTests : IDisposable
         h.Native.ExecuteCount.ShouldBe(0);
     }
 
+    /// <summary>
+    /// An Action file replaced <i>after</i> a successful run is refused on the next one, in the
+    /// same process (Epic 11500 Part C §7).
+    /// </summary>
+    /// <remarks>
+    /// The third operation-time proof behind Part C's decision to keep the restart-bound
+    /// environment gate. The canonical artefact is hashed immediately before every invocation, so
+    /// a replaced <c>.atn</c> stops the run that would have used it — the gate's process-lifetime
+    /// cache is not what is standing between a changed Action and a production output.
+    /// </remarks>
+    [Fact]
+    public async Task An_atn_replaced_after_a_successful_run_refuses_the_next_run()
+    {
+        Harness h = CreateHarness();
+        h.Native.OutcomeFactory = command => Success(command, h.Prepared.Actual, h.DocumentCount);
+
+        (await Execute(h)).IsSuccess.ShouldBeTrue();
+        h.Native.ExecuteCount.ShouldBe(1);
+
+        File.WriteAllBytes(h.ArtifactPath, [.. File.ReadAllBytes(h.ArtifactPath), 0xFF]);
+
+        OperationResult<PhotoshopW1PreparedDocument> after = await Execute(h);
+
+        after.IsFailure.ShouldBeTrue();
+        after.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
+        after.Failure.Context["actionInvocationCount"].ShouldBe("0");
+        h.Native.ExecuteCount.ShouldBe(1, "the replaced Action was never invoked.");
+    }
+
     [Fact]
     public async Task Wrong_canonical_atn_hash_refuses_without_repair_or_reload()
     {
