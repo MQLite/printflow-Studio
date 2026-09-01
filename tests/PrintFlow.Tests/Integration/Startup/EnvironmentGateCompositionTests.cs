@@ -142,6 +142,106 @@ public sealed class EnvironmentGateCompositionTests
         configuration.Preset.Version.ShouldBe("1.15.0");
     }
 
+    /// <summary>
+    /// The readiness screen resolves, and reads the same object the gate is
+    /// (Epic 11500 Part C §2, §11.1).
+    /// </summary>
+    /// <remarks>
+    /// Reference equality is the whole point. Two objects reading the workstation would be two
+    /// answers about it, and the failure mode is the quiet one: a screen that says Ready beside
+    /// a workflow that refuses, with nobody able to say which is right.
+    /// </remarks>
+    [Fact]
+    public void The_readiness_screen_resolves_and_reads_the_gate_itself()
+    {
+        using TempApplication application = new();
+        using ServiceProvider services = Compose(application);
+
+        services.GetRequiredService<EnvironmentReadinessViewModel>().ShouldNotBeNull();
+        services.GetRequiredService<IEnvironmentDiagnostics>()
+            .ShouldBeSameAs(services.GetRequiredService<IEnvironmentGate>());
+    }
+
+    /// <summary>
+    /// Opening the readiness screen changes no adapter (Epic 11500 Part C §12).
+    /// </summary>
+    /// <remarks>
+    /// The composed application's adapters are Fake before a reading and Fake after one, and the
+    /// same instances: reading readiness is observation, and nothing about it re-composes the
+    /// graph, re-registers a port or promotes anything to production.
+    /// </remarks>
+    [Fact]
+    public async Task Reading_readiness_changes_no_adapter()
+    {
+        using TempApplication application = new();
+        using ServiceProvider services = Compose(application);
+
+        IMeituProcessor meitu = services.GetRequiredService<IMeituProcessor>();
+        IPhotoshopOutputProcessor photoshop = services.GetRequiredService<IPhotoshopOutputProcessor>();
+        meitu.Mode.ShouldBe(AdapterExecutionMode.Fake);
+        photoshop.Mode.ShouldBe(AdapterExecutionMode.Fake);
+
+        EnvironmentReadinessViewModel screen =
+            services.GetRequiredService<EnvironmentReadinessViewModel>();
+        await screen.OpenAsync(CancellationToken.None);
+        await screen.RefreshCommand.ExecuteAsync(null);
+
+        screen.IsReady.ShouldBeFalse("the synthetic layout is not the accepted workstation.");
+
+        services.GetRequiredService<IMeituProcessor>().ShouldBeSameAs(meitu);
+        services.GetRequiredService<IPhotoshopOutputProcessor>().ShouldBeSameAs(photoshop);
+        meitu.Mode.ShouldBe(AdapterExecutionMode.Fake);
+        photoshop.Mode.ShouldBe(AdapterExecutionMode.Fake);
+    }
+
+    /// <summary>
+    /// Fake work stays usable on a workstation that is not production-ready
+    /// (Epic 11500 Part C §12).
+    /// </summary>
+    [Fact]
+    public void Fake_adapters_stay_usable_when_readiness_fails()
+    {
+        using TempApplication application = new();
+        using ServiceProvider services = Compose(application);
+
+        services.GetRequiredService<IEnvironmentDiagnostics>().Read().Verified.ShouldBeFalse();
+
+        services.GetRequiredService<IEnvironmentGate>()
+            .Verify(AdapterExecutionMode.Fake).IsSuccess.ShouldBeTrue();
+        services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
+    }
+
+    /// <summary>
+    /// Composing with <c>Adapters.Mode = "Production"</c> still refuses to start
+    /// (Epic 11500 Part C §9, §11.9).
+    /// </summary>
+    /// <remarks>
+    /// Behaviour, not a source scan: the real composition root, the real configuration record,
+    /// the one field changed. Part C is readiness work — an operator diagnostics surface and a
+    /// documented trust model — and it must leave the activation decision exactly where it found
+    /// it, which is closed.
+    /// </remarks>
+    [Fact]
+    public void Composing_for_production_still_refuses_rather_than_substituting_a_fake()
+    {
+        using TempApplication application = new();
+
+        PrintFlowConfiguration configuration =
+            PrintFlowConfiguration.LoadFromFile(application.ConfigurationFilePath) with
+            {
+                Adapters = new AdaptersConfiguration("Production"),
+            };
+
+        SqliteConnectionFactory factory = new(application.DatabasePath);
+        using SqliteConnection connection = factory.Open();
+        MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+
+        NotSupportedException refused = Should.Throw<NotSupportedException>(() =>
+            ServiceRegistration.BuildServiceProvider(configuration, application.WorkspaceRoot, factory));
+
+        refused.Message.ShouldContain("production");
+    }
+
     private static ServiceProvider Compose(TempApplication application)
     {
         PrintFlowConfiguration configuration =

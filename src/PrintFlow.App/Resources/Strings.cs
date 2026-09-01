@@ -677,6 +677,57 @@ internal static class Strings
     internal static string Session_BackgroundRemovalAttemptAudit =>
         Get(nameof(Session_BackgroundRemovalAttemptAudit));
 
+    // --- Production readiness diagnostics (Epic 11500 Part C §3, §5, §8) ----------------
+
+    internal static string Environment_Heading => Get(nameof(Environment_Heading));
+
+    internal static string Environment_Hint => Get(nameof(Environment_Hint));
+
+    /// <summary>The Home entry point onto the readiness screen.</summary>
+    internal static string Environment_Open => Get(nameof(Environment_Open));
+
+    /// <summary>Re-observes the dynamic workstation facts. It never re-reads a cached file (§8).</summary>
+    internal static string Environment_Refresh => Get(nameof(Environment_Refresh));
+
+    internal static string Environment_Preset => Get(nameof(Environment_Preset));
+
+    internal static string Environment_PresetUnavailable => Get(nameof(Environment_PresetUnavailable));
+
+    internal static string Environment_ChecksHeading => Get(nameof(Environment_ChecksHeading));
+
+    internal static string Environment_BlockingHeading => Get(nameof(Environment_BlockingHeading));
+
+    internal static string Environment_NoBlockingFailures => Get(nameof(Environment_NoBlockingFailures));
+
+    /// <summary>Shown beside a Ready state, so an advisory reads as a note and not as a refusal (§5).</summary>
+    internal static string Environment_AdvisoriesPresent => Get(nameof(Environment_AdvisoriesPresent));
+
+    internal static string Environment_AdvisoriesNone => Get(nameof(Environment_AdvisoriesNone));
+
+    internal static string Environment_StatusPassed => Get(nameof(Environment_StatusPassed));
+
+    internal static string Environment_StatusFailed => Get(nameof(Environment_StatusFailed));
+
+    internal static string Environment_StatusAdvisory => Get(nameof(Environment_StatusAdvisory));
+
+    internal static string Environment_Blocking => Get(nameof(Environment_Blocking));
+
+    internal static string Environment_Advisory => Get(nameof(Environment_Advisory));
+
+    /// <summary>The restart boundary the retained trust model obliges the shell to state (§8).</summary>
+    internal static string Environment_RestartRequired => Get(nameof(Environment_RestartRequired));
+
+    /// <summary>What Check again actually re-reads, so it never implies more than it does (§8).</summary>
+    internal static string Environment_RefreshScope => Get(nameof(Environment_RefreshScope));
+
+    internal static string Environment_Verified => Get(nameof(Environment_Verified));
+
+    internal static string Environment_NotVerified => Get(nameof(Environment_NotVerified));
+
+    internal static string Environment_Advisories => Get(nameof(Environment_Advisories));
+
+    internal static string Environment_ObservedAt => Get(nameof(Environment_ObservedAt));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>

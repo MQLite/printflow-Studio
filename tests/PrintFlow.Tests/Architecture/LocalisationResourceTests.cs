@@ -558,6 +558,100 @@ public sealed class LocalisationResourceTests
     }
 
     /// <summary>
+    /// Every check also has a neutral subject the readiness screen can show beside "Passed"
+    /// (Epic 11500 Part C §3).
+    /// </summary>
+    /// <remarks>
+    /// The <c>EnvironmentCheck_*</c> family is written as the problem — "Display configuration
+    /// does not match the verified workstation" — because it is what a refused operator reads.
+    /// A screen that listed every check needs the other half: the subject, which reads correctly
+    /// whatever the outcome. Driven off the enum for the same reason as the family above.
+    /// </remarks>
+    [Fact]
+    public void Every_workstation_check_has_a_neutral_subject_in_both_languages()
+    {
+        string[] required =
+        [
+            .. Enum.GetValues<PrintFlow.Infrastructure.Verification.WorkstationVerificationCheck>()
+                .Select(check => $"EnvironmentCheckName_{check}"),
+        ];
+
+        required.Except(KeysOf(NeutralResx)).ShouldBeEmpty(
+            "a listed check needs an English subject, not a bare enum name.");
+        required.Except(KeysOf(ChineseResx)).ShouldBeEmpty(
+            "...and a zh-CN subject, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// The readiness screen's own wording exists in both languages (Epic 11500 Part C §3, §8).
+    /// </summary>
+    [Fact]
+    public void The_readiness_screen_has_wording_in_both_languages()
+    {
+        string[] required =
+        [
+            "Environment_Heading", "Environment_Hint", "Environment_Open", "Environment_Refresh",
+            "Environment_Preset", "Environment_PresetUnavailable", "Environment_ChecksHeading",
+            "Environment_BlockingHeading", "Environment_NoBlockingFailures",
+            "Environment_AdvisoriesPresent", "Environment_AdvisoriesNone",
+            "Environment_StatusPassed", "Environment_StatusFailed", "Environment_StatusAdvisory",
+            "Environment_Blocking", "Environment_Advisory",
+            "Environment_RestartRequired", "Environment_RefreshScope",
+        ];
+
+        required.Except(KeysOf(NeutralResx)).ShouldBeEmpty();
+        required.Except(KeysOf(ChineseResx)).ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// The restart requirement names the artefacts it is about, in both languages
+    /// (Epic 11500 Part C §8).
+    /// </summary>
+    /// <remarks>
+    /// The retained restart-bound trust model is only honest if the operator is told what it
+    /// obliges them to do. A vague "restart if something changes" would be a sentence nobody
+    /// acts on, so the wording is asserted to name the two installations and the action file —
+    /// the things somebody actually updates — and to say the word restart.
+    /// </remarks>
+    [Fact]
+    public void The_restart_requirement_names_what_it_is_about()
+    {
+        string english = ValueOf(NeutralResx, "Environment_RestartRequired");
+        english.ShouldContain("restart PrintFlow", Case.Insensitive);
+        english.ShouldContain("Photoshop", Case.Insensitive);
+        english.ShouldContain("Meitu", Case.Insensitive);
+        english.ShouldContain("action file", Case.Insensitive);
+
+        string chinese = ValueOf(ChineseResx, "Environment_RestartRequired");
+        chinese.ShouldContain("重启");
+        chinese.ShouldContain("PrintFlow");
+        chinese.ShouldContain("Photoshop");
+        chinese.ShouldContain("美图秀秀");
+        chinese.ShouldContain("动作文件");
+    }
+
+    /// <summary>
+    /// Refresh wording never claims to have re-read the accepted files (Epic 11500 Part C §8).
+    /// </summary>
+    /// <remarks>
+    /// The precise wording risk the restart-bound model creates. "Check again" re-observes the
+    /// desktop session, the display, the language and the working folder; it does not re-hash a
+    /// binary. A sentence promising a full re-check would make the restart requirement look
+    /// optional, which is the one misunderstanding that could put a replaced installation into a
+    /// production run.
+    /// </remarks>
+    [Fact]
+    public void The_refresh_wording_distinguishes_re_observing_from_re_reading()
+    {
+        string english = ValueOf(NeutralResx, "Environment_RefreshScope");
+        english.ShouldContain("not", Case.Insensitive);
+        english.ShouldNotContain("re-checks everything", Case.Insensitive);
+        english.ShouldNotContain("verifies everything", Case.Insensitive);
+
+        ValueOf(ChineseResx, "Environment_RefreshScope").ShouldContain("不会重新读取");
+    }
+
+    /// <summary>
     /// No gate message offers a way past the gate (Epic 11500 Part B §24).
     /// </summary>
     /// <remarks>

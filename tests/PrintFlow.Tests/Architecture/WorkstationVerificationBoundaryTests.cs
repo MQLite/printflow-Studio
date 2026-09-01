@@ -384,7 +384,18 @@ public sealed class WorkstationVerificationBoundaryTests
         }
     }
 
-    /// <summary>Part A adds no view model, and none may touch the file system (§21, §23).</summary>
+    /// <summary>
+    /// No view model names verification or touches the file system (§21, §23; Part C §11.1).
+    /// </summary>
+    /// <remarks>
+    /// Part A asserted this while there was no operator surface at all. Part C adds one — the
+    /// Production Readiness screen — and the rule is unchanged and now load-bearing: the screen
+    /// that exists to explain verification reads the App-safe
+    /// <c>IEnvironmentDiagnostics</c> report, and names no verification type to do it. The scan
+    /// covers comments too, deliberately: this one is about vocabulary rather than about calls,
+    /// and a view model discussing <c>WorkstationVerificationResult</c> in prose is a view model
+    /// whose author was thinking about reaching for it.
+    /// </remarks>
     [Fact]
     public void Shell_view_models_reference_neither_verification_nor_System_IO()
     {
@@ -404,7 +415,9 @@ public sealed class WorkstationVerificationBoundaryTests
             }
         }
 
-        offenders.ShouldBeEmpty("Part A adds no operator surface and view models do no file I/O.");
+        offenders.ShouldBeEmpty(
+            "the readiness screen reads the App-safe report; no view model names a verification " +
+            "type or does file I/O.");
     }
 
     private static readonly string[] AllProjects =

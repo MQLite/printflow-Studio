@@ -634,4 +634,94 @@
   <data name="Environment_ObservedAt" xml:space="preserve">
     <value>Checked at</value>
   </data>
+  <data name="EnvironmentCheckName_PresetIntegrity" xml:space="preserve">
+    <value>Workstation preset integrity</value>
+  </data>
+  <data name="EnvironmentCheckName_EvidenceIntegrity" xml:space="preserve">
+    <value>Accepted workstation records</value>
+  </data>
+  <data name="EnvironmentCheckName_WorkspaceRoot" xml:space="preserve">
+    <value>Working folder</value>
+  </data>
+  <data name="EnvironmentCheckName_OperatingSystem" xml:space="preserve">
+    <value>Windows version</value>
+  </data>
+  <data name="EnvironmentCheckName_InteractiveSession" xml:space="preserve">
+    <value>Desktop session</value>
+  </data>
+  <data name="EnvironmentCheckName_DisplayConfiguration" xml:space="preserve">
+    <value>Display configuration</value>
+  </data>
+  <data name="EnvironmentCheckName_UiCulture" xml:space="preserve">
+    <value>Windows display language</value>
+  </data>
+  <data name="EnvironmentCheckName_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>Meitu and Photoshop interface language</value>
+  </data>
+  <data name="EnvironmentCheckName_MeituExecutable" xml:space="preserve">
+    <value>Meitu installation</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop installation</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopActionArtifact" xml:space="preserve">
+    <value>Photoshop action file</value>
+  </data>
+  <data name="EnvironmentCheckName_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>Read-only marking of accepted files</value>
+  </data>
+  <data name="Environment_Heading" xml:space="preserve">
+    <value>Production readiness</value>
+  </data>
+  <data name="Environment_Hint" xml:space="preserve">
+    <value>What this workstation was checked for, and what production work still needs. This screen only reports what the checks found; it changes nothing on the workstation.</value>
+  </data>
+  <data name="Environment_Open" xml:space="preserve">
+    <value>Production readiness</value>
+  </data>
+  <data name="Environment_Refresh" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="Environment_Preset" xml:space="preserve">
+    <value>Verified workstation preset</value>
+  </data>
+  <data name="Environment_PresetUnavailable" xml:space="preserve">
+    <value>None — the workstation preset itself did not pass, so it states nothing.</value>
+  </data>
+  <data name="Environment_ChecksHeading" xml:space="preserve">
+    <value>Checks</value>
+  </data>
+  <data name="Environment_BlockingHeading" xml:space="preserve">
+    <value>Stopping production work</value>
+  </data>
+  <data name="Environment_NoBlockingFailures" xml:space="preserve">
+    <value>Nothing is stopping production work.</value>
+  </data>
+  <data name="Environment_AdvisoriesPresent" xml:space="preserve">
+    <value>Advisories: present</value>
+  </data>
+  <data name="Environment_AdvisoriesNone" xml:space="preserve">
+    <value>Advisories: none</value>
+  </data>
+  <data name="Environment_StatusPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Environment_StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Environment_StatusAdvisory" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Environment_Blocking" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="Environment_Advisory" xml:space="preserve">
+    <value>Advisory</value>
+  </data>
+  <data name="Environment_RestartRequired" xml:space="preserve">
+    <value>If an accepted PrintFlow workstation record, the Photoshop installation, the Meitu installation or the verified action file is replaced or updated, restart PrintFlow before using production mode.</value>
+  </data>
+  <data name="Environment_RefreshScope" xml:space="preserve">
+    <value>Check again re-reads what can change while PrintFlow runs: the desktop session, the display configuration, the Windows display language and the working folder. The accepted files listed above are read once per run and are not re-read here.</value>
+  </data>
 </root>

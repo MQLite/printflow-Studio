@@ -27,6 +27,10 @@
         <DataTemplate DataType="{x:Type vm:SessionViewModel}">
             <views:SessionScreenView />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:EnvironmentReadinessViewModel}">
+            <views:EnvironmentReadinessView />
+        </DataTemplate>
     </Window.Resources>
 
     <ContentControl Content="{Binding Current}" />

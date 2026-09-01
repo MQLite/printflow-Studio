@@ -110,6 +110,12 @@ public static class ServiceRegistration
         services.AddTransient<WorkflowSelectionViewModel>();
         services.AddTransient<SessionViewModel>();
 
+        // The read-only operator surface onto workstation readiness (Epic 11500 Part C §3). It
+        // resolves IEnvironmentDiagnostics — the same object the gate is — and nothing else that
+        // could reach the workstation: the shell has no second route to verification and no
+        // route at all to authorisation.
+        services.AddTransient<EnvironmentReadinessViewModel>();
+
         overrides?.Invoke(services);
 
         return services.BuildServiceProvider();

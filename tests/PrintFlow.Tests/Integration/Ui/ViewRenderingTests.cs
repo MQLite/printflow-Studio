@@ -811,6 +811,99 @@ public sealed class ViewRenderingTests
 
     // -------------------------------------------------------------------------------------
 
+    // -------------------------------------------------------------------------------------
+    // Production readiness (Epic 11500 Part C §3, §5)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The readiness screen renders in both states, with no binding errors
+    /// (Epic 11500 Part C §3).
+    /// </summary>
+    /// <remarks>
+    /// Ready and not-ready are one test because they are one screen with different lists in it:
+    /// the blocking list is empty in the first and populated in the second, and rendering only
+    /// the empty one would never build the row template at all.
+    /// <para>
+    /// A separate screen is opened for each render. A rendered <c>ItemsControl</c> leaves a WPF
+    /// <c>CollectionView</c> bound to the view model's collections on the STA thread that built
+    /// it, so the one that was rendered is never refreshed again.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_readiness_screen_renders_in_both_states_with_no_binding_errors()
+    {
+        using WorkstationVerificationFixture verified = new();
+        EnvironmentReadinessViewModel ready = ReadinessScreen(verified);
+        await ready.OpenAsync(CancellationToken.None);
+        ready.IsReady.ShouldBeTrue();
+        ready.Advisories.ShouldNotBeEmpty();
+
+        RenderOnStaThread(() => new EnvironmentReadinessView { DataContext = ready });
+
+        using WorkstationVerificationFixture broken = new();
+        WorkstationVerificationFixture.Corrupt(broken.PhotoshopPath);
+        broken.Facts.Display = broken.Facts.Display with { ActiveDisplayCount = 2 };
+
+        EnvironmentReadinessViewModel refused = ReadinessScreen(broken);
+        await refused.OpenAsync(CancellationToken.None);
+        refused.IsReady.ShouldBeFalse();
+        refused.BlockingFailures.Count.ShouldBeGreaterThan(1);
+
+        RenderOnStaThread(() => new EnvironmentReadinessView { DataContext = refused });
+    }
+
+    /// <summary>
+    /// The readiness screen fits the operator's window with the Chinese resources
+    /// (Epic 11500 Part C §3).
+    /// </summary>
+    /// <remarks>
+    /// The screen carries the longest sentences in the shell — the restart requirement and what
+    /// Refresh does — and they are the two an operator must actually read. Asserted at the size
+    /// the operator screens are signed off against; whether the Chinese wording reads well
+    /// remains a human judgement, and nobody has made it.
+    /// </remarks>
+    [Fact]
+    public async Task The_readiness_screen_fits_the_window_with_the_Chinese_resources()
+    {
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo chinese = CultureInfo.GetCultureInfo("zh-CN");
+            CultureInfo.CurrentUICulture = chinese;
+            CultureInfo.CurrentCulture = chinese;
+
+            using WorkstationVerificationFixture fixture = new();
+            WorkstationVerificationFixture.Corrupt(fixture.PhotoshopPath);
+
+            EnvironmentReadinessViewModel screen = ReadinessScreen(fixture);
+            await screen.OpenAsync(CancellationToken.None);
+
+            // The satellite really is what the screen is showing.
+            screen.Heading.ShouldNotBe("Environment_Heading");
+            screen.RestartRequirement.ShouldNotBe("Environment_RestartRequired");
+            screen.Checks.ShouldAllBe(
+                row => !row.Name.StartsWith("EnvironmentCheckName_", StringComparison.Ordinal));
+
+            RenderResult<int> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+                () => new EnvironmentReadinessView { DataContext = screen },
+                WpfRendering.ReviewViewport,
+                _ => 0);
+
+            rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    private static EnvironmentReadinessViewModel ReadinessScreen(WorkstationVerificationFixture fixture) =>
+        new(new PrintFlow.Infrastructure.Gate.VerifiedEnvironmentGate(fixture.CreateVerifier()),
+            new RecordingNavigation());
+
     private static readonly Size Viewport = new(1200, 900);
 
 

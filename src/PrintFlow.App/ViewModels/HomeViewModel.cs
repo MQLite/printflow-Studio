@@ -95,6 +95,9 @@ public sealed partial class HomeViewModel : ObservableObject
 
     public string EmptyRecentText => Strings.Home_NoRecentSessions;
 
+    /// <summary>The way to the Production Readiness screen (Epic 11500 Part C §3).</summary>
+    public string EnvironmentLabel => Strings.Environment_Open;
+
     /// <summary>True while the list is empty, so the view can say so rather than show nothing.</summary>
     public bool HasNoRecentSessions => RecentSessions.Count == 0;
 
@@ -131,11 +134,23 @@ public sealed partial class HomeViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Opens Production Readiness (Epic 11500 Part C §3).
+    /// </summary>
+    /// <remarks>
+    /// Navigation and nothing else. Home neither reads readiness nor decides anything from it —
+    /// the screen it opens is the only thing that consults the diagnostics seam, and even that
+    /// one can only look.
+    /// </remarks>
+    [RelayCommand]
+    private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
+        await _navigation.GoToEnvironmentReadinessAsync(cancellationToken).ConfigureAwait(true);
+
+    /// <summary>
     /// Whether the signed workstation preset verified, in one line (Part 3C2 §13).
     /// </summary>
     /// <remarks>
-    /// Deliberately a yes/no. The manifest's contents are not operator information, and the
-    /// environment validation that acts on this answer is Epic 11500.
+    /// Deliberately a yes/no, and about startup's own preset check rather than about production
+    /// readiness — which has its own screen, one click away (Epic 11500 Part C §3).
     /// </remarks>
     public string PresetStatus =>
         _startupStatus.Status?.PresetVerified == true

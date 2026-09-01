@@ -59,6 +59,15 @@ public sealed class NavigationService : INavigationService
         Show(view);
     }
 
+    /// <inheritdoc />
+    public async Task GoToEnvironmentReadinessAsync(CancellationToken cancellationToken)
+    {
+        EnvironmentReadinessViewModel readiness =
+            _services.GetRequiredService<EnvironmentReadinessViewModel>();
+        Show(readiness);
+        await readiness.OpenAsync(cancellationToken).ConfigureAwait(true);
+    }
+
     private void Show(object viewModel)
     {
         Current = viewModel;

@@ -634,4 +634,94 @@
   <data name="Environment_ObservedAt" xml:space="preserve">
     <value>检查时间</value>
   </data>
+  <data name="EnvironmentCheckName_PresetIntegrity" xml:space="preserve">
+    <value>工作站预设完整性</value>
+  </data>
+  <data name="EnvironmentCheckName_EvidenceIntegrity" xml:space="preserve">
+    <value>已认可的工作站记录</value>
+  </data>
+  <data name="EnvironmentCheckName_WorkspaceRoot" xml:space="preserve">
+    <value>工作文件夹</value>
+  </data>
+  <data name="EnvironmentCheckName_OperatingSystem" xml:space="preserve">
+    <value>Windows 版本</value>
+  </data>
+  <data name="EnvironmentCheckName_InteractiveSession" xml:space="preserve">
+    <value>桌面会话</value>
+  </data>
+  <data name="EnvironmentCheckName_DisplayConfiguration" xml:space="preserve">
+    <value>显示器配置</value>
+  </data>
+  <data name="EnvironmentCheckName_UiCulture" xml:space="preserve">
+    <value>Windows 显示语言</value>
+  </data>
+  <data name="EnvironmentCheckName_ExternalApplicationUiLanguage" xml:space="preserve">
+    <value>美图秀秀与 Photoshop 界面语言</value>
+  </data>
+  <data name="EnvironmentCheckName_MeituExecutable" xml:space="preserve">
+    <value>美图秀秀安装</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopExecutable" xml:space="preserve">
+    <value>Photoshop 安装</value>
+  </data>
+  <data name="EnvironmentCheckName_PhotoshopActionArtifact" xml:space="preserve">
+    <value>Photoshop 动作文件</value>
+  </data>
+  <data name="EnvironmentCheckName_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
+    <value>已认可文件的只读标记</value>
+  </data>
+  <data name="Environment_Heading" xml:space="preserve">
+    <value>生产就绪状态</value>
+  </data>
+  <data name="Environment_Hint" xml:space="preserve">
+    <value>本工作站已检查的内容，以及生产处理还缺少什么。本页面只报告检查结果，不会更改工作站的任何设置。</value>
+  </data>
+  <data name="Environment_Open" xml:space="preserve">
+    <value>生产就绪状态</value>
+  </data>
+  <data name="Environment_Refresh" xml:space="preserve">
+    <value>重新检查</value>
+  </data>
+  <data name="Environment_Preset" xml:space="preserve">
+    <value>已校验的工作站预设</value>
+  </data>
+  <data name="Environment_PresetUnavailable" xml:space="preserve">
+    <value>无——工作站预设本身未通过校验，因此它不能说明任何内容。</value>
+  </data>
+  <data name="Environment_ChecksHeading" xml:space="preserve">
+    <value>检查项</value>
+  </data>
+  <data name="Environment_BlockingHeading" xml:space="preserve">
+    <value>正在阻止生产处理</value>
+  </data>
+  <data name="Environment_NoBlockingFailures" xml:space="preserve">
+    <value>没有任何项目阻止生产处理。</value>
+  </data>
+  <data name="Environment_AdvisoriesPresent" xml:space="preserve">
+    <value>提示：有</value>
+  </data>
+  <data name="Environment_AdvisoriesNone" xml:space="preserve">
+    <value>提示：无</value>
+  </data>
+  <data name="Environment_StatusPassed" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="Environment_StatusFailed" xml:space="preserve">
+    <value>未通过</value>
+  </data>
+  <data name="Environment_StatusAdvisory" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Environment_Blocking" xml:space="preserve">
+    <value>必须满足</value>
+  </data>
+  <data name="Environment_Advisory" xml:space="preserve">
+    <value>仅供参考</value>
+  </data>
+  <data name="Environment_RestartRequired" xml:space="preserve">
+    <value>如果已认可的 PrintFlow 工作站记录、Photoshop 安装、美图秀秀安装或已校验的动作文件被替换或更新，请先重启 PrintFlow，然后再使用生产模式。</value>
+  </data>
+  <data name="Environment_RefreshScope" xml:space="preserve">
+    <value>“重新检查”会重新读取 PrintFlow 运行期间可能变化的项目：桌面会话、显示器配置、Windows 显示语言和工作文件夹。上面列出的已认可文件每次运行只读取一次，此处不会重新读取。</value>
+  </data>
 </root>

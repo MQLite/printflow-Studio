@@ -28,10 +28,16 @@
                    FontSize="26"
                    FontWeight="SemiBold" />
 
-        <!-- Startup recovery and preset status: one line each, no diagnostics UI (§12, §13). -->
+        <!-- Startup recovery and preset status: one line each. The one link out is to the
+             read-only Production Readiness screen (Epic 11500 Part C §3). -->
         <StackPanel Grid.Row="1" Margin="0,6,0,16">
             <TextBlock Text="{Binding StartupSummary}" TextWrapping="Wrap" Opacity="0.85" />
             <TextBlock Text="{Binding PresetStatus}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0" />
+            <Button Content="{Binding EnvironmentLabel}"
+                    Command="{Binding ShowEnvironmentCommand}"
+                    Padding="10,4"
+                    Margin="0,8,0,0"
+                    HorizontalAlignment="Left" />
         </StackPanel>
 
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can

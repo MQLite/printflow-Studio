@@ -12,6 +12,7 @@ using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Ui;
@@ -446,6 +447,64 @@ public sealed class HomeAndWorkflowSelectionTests
         await session.BackToHomeCommand.ExecuteAsync(null);
         HomeViewModel returned = shell.Current.ShouldBeOfType<HomeViewModel>();
         returned.RecentSessions.Single().DisplayName.ShouldBe("smoke-source");
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Production readiness, in the real composed shell (Epic 11500 Part C §3, §4, §12)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Home reaches Production Readiness and back, in the real graph, with the adapters
+    /// unchanged (Epic 11500 Part C §3, §12).
+    /// </summary>
+    /// <remarks>
+    /// The end-to-end version of the screen's own tests: the real <c>ServiceRegistration</c>, the
+    /// real navigation service, the real diagnostics seam. What it establishes beyond the unit
+    /// cases is that the route exists at all — a screen nobody can reach is not a diagnostics
+    /// surface — and that walking it composed nothing, promoted nothing and changed no adapter.
+    /// <para>
+    /// The synthetic layout is not the accepted production workstation, so the screen honestly
+    /// reports not ready. That is the state an operator with a broken workstation would see, and
+    /// the point is that they can see it while the application keeps working.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_real_graph_reaches_production_readiness_from_home_and_back()
+    {
+        using TempApplication application = new();
+        using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
+
+        using StartupResult started = await new ApplicationStartup(
+                guard, application.ConfigurationFilePath)
+            .RunAsync(CancellationToken.None);
+
+        started.Status.CanShowShell.ShouldBeTrue();
+
+        ShellViewModel shell = started.Services!.GetRequiredService<ShellViewModel>();
+        INavigationService navigation = started.Services!.GetRequiredService<INavigationService>();
+        IMeituProcessor meitu = started.Services!.GetRequiredService<IMeituProcessor>();
+
+        await navigation.GoHomeAsync(CancellationToken.None);
+        HomeViewModel home = shell.Current.ShouldBeOfType<HomeViewModel>();
+
+        await home.ShowEnvironmentCommand.ExecuteAsync(null);
+
+        EnvironmentReadinessViewModel readiness =
+            shell.Current.ShouldBeOfType<EnvironmentReadinessViewModel>();
+        readiness.HasReport.ShouldBeTrue("opening the screen takes a reading.");
+        readiness.IsReady.ShouldBeFalse("this synthetic layout is not the accepted workstation.");
+        readiness.BlockingFailures.ShouldNotBeEmpty();
+        readiness.RestartRequirement.ShouldNotBeNullOrWhiteSpace();
+
+        // Looking again is the only thing the screen can do, and it changes nothing else.
+        await readiness.RefreshCommand.ExecuteAsync(null);
+        readiness.IsReady.ShouldBeFalse();
+
+        started.Services!.GetRequiredService<IMeituProcessor>().ShouldBeSameAs(meitu);
+        meitu.Mode.ShouldBe(AdapterExecutionMode.Fake);
+
+        await readiness.BackToHomeCommand.ExecuteAsync(null);
+        shell.Current.ShouldBeOfType<HomeViewModel>();
     }
 
     // -------------------------------------------------------------------------------------
