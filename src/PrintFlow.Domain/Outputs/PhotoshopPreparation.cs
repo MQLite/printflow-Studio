@@ -93,13 +93,43 @@ public abstract record PhotoshopPreparation
 /// </summary>
 public sealed record FitWithinBoundsPreparation : PhotoshopPreparation
 {
-    public FitWithinBoundsPreparation(PrintPreparationPlan plan)
+    public FitWithinBoundsPreparation(
+        PrintPreparationPlan plan, FlexibleSizeSelection? selection = null)
     {
         ArgumentNullException.ThrowIfNull(plan);
+
+        if (selection is not null && selection.Mode != OperatorSizingMode.PresetFit)
+        {
+            throw new ArgumentException(
+                "A maximum-bound preparation carries an ordinary preset fit or nothing at all; a " +
+                "custom target edge is a TargetEdgePreparation and never this shape.",
+                nameof(selection));
+        }
+
         Plan = plan;
+        Selection = selection;
     }
 
     public PrintPreparationPlan Plan { get; }
+
+    /// <summary>
+    /// The ordinary preset fit this run was made under, or null when the bounds were typed
+    /// directly or the row predates the flexible-size contract
+    /// (post-final A5 correction §18, §19).
+    /// </summary>
+    /// <remarks>
+    /// Carried so an attempt's immutable audit can state the configured recommendation it actually
+    /// ran under — <i>which form</i> and <i>which millimetres</i> — rather than leaving a reader to
+    /// infer it from the stored bounds. That inference used to be safe, because the only two
+    /// configured forms both produced a square box for a single-edge limit; a maximum short edge
+    /// does not, and an A5 run inferred from its bounds would now be read as a box (§19).
+    /// <para>
+    /// Null on every attempt written before this correction, and that stays truthful: those runs
+    /// really did record no selection, and a historical A5 long-edge attempt is still read as the
+    /// long-edge attempt it was (§12).
+    /// </para>
+    /// </remarks>
+    public FlexibleSizeSelection? Selection { get; }
 
     public override PrintDimensionSemantics Semantics => PrintPreparationPlan.Semantics;
 

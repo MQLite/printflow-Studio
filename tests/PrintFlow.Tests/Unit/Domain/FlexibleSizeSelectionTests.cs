@@ -19,6 +19,9 @@ public sealed class FlexibleSizeSelectionTests
     private static readonly PresetPrintRecommendation A4Recommendation =
         PresetPrintRecommendation.MaximumLongEdge(SizePreset.A4, 280m);
 
+    private static readonly PresetPrintRecommendation A5Recommendation =
+        PresetPrintRecommendation.MaximumShortEdge(SizePreset.A5, 135m);
+
     [Fact]
     public void Named_preset_without_override_uses_preset_authority_and_exposes_no_axis()
     {
@@ -34,8 +37,7 @@ public sealed class FlexibleSizeSelectionTests
         // so a persisted preset decision says which configured limit it was made against and is
         // never re-derived from a paper standard afterwards (Part B1A.2D §3, §6).
         selection.Recommendation.ShouldBe(A4Recommendation);
-        selection.ConfiguredPresetLimitMm.ShouldBe(280m);
-        selection.PresetLimitExceeded.ShouldBeFalse();
+        selection.Recommendation!.MaxLongEdgeMm.ShouldBe(280m);
     }
 
     [Fact]
@@ -47,10 +49,9 @@ public sealed class FlexibleSizeSelectionTests
         selection.Mode.ShouldBe(OperatorSizingMode.CustomTargetEdge);
         selection.BasedOnPreset.ShouldBe(SizePreset.A4);
         selection.PresetOverridden.ShouldBeTrue();
-        selection.ConfiguredPresetLimitMm.ShouldBe(280m);
+        selection.Recommendation!.MaxLongEdgeMm.ShouldBe(280m);
         selection.SelectedTargetEdge.ShouldBe(TargetEdge.LongEdge);
         selection.RequestedMillimetres.ShouldBe(320m);
-        selection.PresetLimitExceeded.ShouldBeTrue();
     }
 
     [Fact]
@@ -83,6 +84,38 @@ public sealed class FlexibleSizeSelectionTests
         plan.PresetLimitExceeded.ShouldBeTrue();
         plan.SourceCapacityExceeded.ShouldBeTrue();
         plan.RequiresEnlargementAuthority.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void An_A5_scalar_over_135_can_project_inside_the_short_edge_recommendation()
+    {
+        TargetEdgePrintPreparationPlan plan = TargetEdgePrintPreparationPlan.For(
+            Revision,
+            Bytes,
+            6000,
+            1500,
+            FlexibleSizeSelection.OverridePreset(A5Recommendation, TargetEdge.Width, 160m));
+
+        plan.Projection.ProjectedPixelWidth.ShouldBe(1890);
+        plan.Projection.ProjectedPixelHeight.ShouldBe(473);
+        plan.PresetLimitExceeded.ShouldBeFalse();
+        plan.SourceCapacityExceeded.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void An_A5_projection_over_135_on_its_short_edge_exceeds_the_recommendation()
+    {
+        TargetEdgePrintPreparationPlan plan = TargetEdgePrintPreparationPlan.For(
+            Revision,
+            Bytes,
+            4000,
+            8000,
+            FlexibleSizeSelection.OverridePreset(A5Recommendation, TargetEdge.Width, 160m));
+
+        plan.Projection.ProjectedPixelWidth.ShouldBe(1890);
+        plan.Projection.ProjectedPixelHeight.ShouldBe(3780);
+        plan.PresetLimitExceeded.ShouldBeTrue();
+        plan.SourceCapacityExceeded.ShouldBeFalse();
     }
 
     [Fact]

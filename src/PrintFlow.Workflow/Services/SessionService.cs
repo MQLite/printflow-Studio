@@ -299,7 +299,7 @@ public sealed class SessionService : ISessionService
         }
 
         SessionAggregate aggregate = loaded.Value;
-        WorkflowSnapshot snapshot = aggregate.ToSnapshot();
+        WorkflowSnapshot snapshot = aggregate.ToSnapshot(ConfiguredRecommendations());
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
         // The half of manual-crop eligibility the pure engine cannot see, checked before the
@@ -499,17 +499,22 @@ public sealed class SessionService : ISessionService
                         return OperationResult.Fail<RecordedSize>(recommendation.Failure);
                     }
 
-                    // The configured recommendation becomes a fit box, and FitWithinBounds owns it
-                    // from there. A maximum long edge is the square box of that side: fitting
-                    // proportionally inside one constrains whichever source edge is longer, which
-                    // is what a long-edge limit means. No second limiting-edge rule exists (§17).
-                    PrintDimensions limits = recommendation.Value.AsFitBounds();
+                    // The configured recommendation is handed to the Domain whole, and the Domain
+                    // decides. PresetPrintRecommendation.Fit is the single sizing authority for
+                    // every configured form — a box, a maximum long edge, and from v1.15.0 a
+                    // maximum short edge — so no service, screen or adapter has an opinion about
+                    // which edge A5 limits or whether it caps the other one. Nothing here reads a
+                    // millimetre, an ISO paper size or PrintDimensions.NominalMillimetres
+                    // (post-final A5 correction §10, §11).
+                    PrintPreparationPlan plan = PrintPreparationPlan.For(
+                        source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
+                        recommendation.Value);
+
                     return OperationResult.Ok(new RecordedSize(
-                        limits,
+                        PrintDimensions.FromMillimetres(
+                            plan.MaxWidthMm, plan.MaxHeightMm, recommendation.Value.Preset),
                         FlexibleSizeSelection.PresetFit(recommendation.Value),
-                        PrintPreparationPlan.For(
-                            source.RevisionId, source.Sha256, source.PixelWidth, source.PixelHeight,
-                            limits),
+                        plan,
                         TargetEdgePlan: null));
                 }
 
@@ -574,6 +579,22 @@ public sealed class SessionService : ISessionService
     /// the limit this shop prints it at are different numbers, and only one of them is
     /// executable (§4).
     /// </remarks>
+    /// <summary>
+    /// What the verified preset recommends for named sizes right now, or null when it cannot be
+    /// verified (post-final A5 correction §14).
+    /// </summary>
+    /// <remarks>
+    /// Read once per snapshot and handed to it, so "is this pending preset fit still the
+    /// recommendation the shop configures" is answered against the same authority
+    /// <see cref="ResolveRecommendation"/> records a new decision from. Null when the preset
+    /// cannot be verified, which fails a pending preset fit closed rather than letting an
+    /// unverifiable installation run one.
+    /// </remarks>
+    private PresetPrintRecommendationSet? ConfiguredRecommendations() =>
+        _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
+            ? configured.Value
+            : null;
+
     private OperationResult<PresetPrintRecommendation> ResolveRecommendation(SizePreset preset)
     {
         OperationResult<PresetPrintRecommendationSet> configured =
@@ -716,7 +737,7 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet, $"No session {id} exists.");
         }
 
-        WorkflowSnapshot snapshot = loaded.Value.ToSnapshot();
+        WorkflowSnapshot snapshot = loaded.Value.ToSnapshot(ConfiguredRecommendations());
         return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs, loaded.Value.Attempts);
     }
 

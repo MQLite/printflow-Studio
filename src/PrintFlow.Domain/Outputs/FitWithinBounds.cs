@@ -33,7 +33,9 @@ public readonly record struct FitWithinBoundsResult(
     double SourceWidthMm,
     double SourceHeightMm,
     double ProjectedWidthMm,
-    double ProjectedHeightMm)
+    double ProjectedHeightMm,
+    int SourcePixelWidth,
+    int SourcePixelHeight)
 {
     public int ResolutionPpi => PrintDimensions.ProductionDpi;
 
@@ -53,10 +55,50 @@ public readonly record struct FitWithinBoundsResult(
     /// millimetre-to-pixel conversion in the codebase does.
     /// </para>
     /// </remarks>
-    public int ProjectedPixelWidth => PrintDimensions.PixelsFromMillimetres(ProjectedWidthMm);
+    public int ProjectedPixelWidth => ProjectedPixels().Width;
 
     /// <summary>The projected height in whole pixels at the fixed production resolution.</summary>
-    public int ProjectedPixelHeight => PrintDimensions.PixelsFromMillimetres(ProjectedHeightMm);
+    public int ProjectedPixelHeight => ProjectedPixels().Height;
+
+    /// <summary>
+    /// Predicts Photoshop's one-edge constrained resize in the same order Photoshop performs it:
+    /// first resolve the commanded millimetre edge to an integer pixel count, then derive the
+    /// uncommanded edge proportionally from that integer and the immutable source ratio.
+    /// </summary>
+    /// <remarks>
+    /// Converting both projected millimetre values independently is subtly different. For example,
+    /// 2400 × 1800 constrained to a 135 mm Height at 300 ppi becomes 1594 px on the commanded edge,
+    /// then 2125 px on the proportional edge. Independently converting 180 × 135 mm predicts 2126 ×
+    /// 1594, a pair Photoshop cannot return from the single-edge command. The live B1A.3 seam caught
+    /// that one-pixel disagreement; keeping the projection here preserves one Domain authority while
+    /// still sending only the concrete edge to Infrastructure.
+    /// </remarks>
+    private (int Width, int Height) ProjectedPixels()
+    {
+        if (!RequiresShrink)
+        {
+            return (SourcePixelWidth, SourcePixelHeight);
+        }
+
+        int constrainedPixels = PrintDimensions.PixelsFromMillimetres(LimitingValueMm!.Value);
+        return LimitingEdge switch
+        {
+            LimitingEdge.Width =>
+                (constrainedPixels, ScaleProportionally(
+                    constrainedPixels, SourcePixelHeight, SourcePixelWidth)),
+            LimitingEdge.Height =>
+                (ScaleProportionally(constrainedPixels, SourcePixelWidth, SourcePixelHeight),
+                    constrainedPixels),
+            _ => throw new InvalidOperationException(
+                "A shrinking fit must identify the one edge sent to Photoshop."),
+        };
+    }
+
+    private static int ScaleProportionally(
+        int constrainedPixels, int otherSourcePixels, int constrainedSourcePixels) =>
+        checked((int)Math.Round(
+            constrainedPixels * (double)otherSourcePixels / constrainedSourcePixels,
+            MidpointRounding.AwayFromZero));
 }
 
 /// <summary>
@@ -83,7 +125,8 @@ public static class FitWithinBounds
 
         if (sourceWidthMm <= maxWidthMm && sourceHeightMm <= maxHeightMm)
         {
-            return NoResize(sourceWidthMm, sourceHeightMm);
+            return NoResize(
+                sourceWidthPixels, sourceHeightPixels, sourceWidthMm, sourceHeightMm);
         }
 
         // sourceWidth/sourceHeight >= maxWidth/maxHeight without dividing either ratio.
@@ -98,7 +141,9 @@ public static class FitWithinBounds
                 sourceWidthMm,
                 sourceHeightMm,
                 maxWidthMm,
-                projectedHeightMm);
+                projectedHeightMm,
+                sourceWidthPixels,
+                sourceHeightPixels);
         }
 
         double projectedWidthMm = maxHeightMm * sourceWidthPixels / sourceHeightPixels;
@@ -108,7 +153,9 @@ public static class FitWithinBounds
             sourceWidthMm,
             sourceHeightMm,
             projectedWidthMm,
-            maxHeightMm);
+            maxHeightMm,
+            sourceWidthPixels,
+            sourceHeightPixels);
     }
 
     /// <summary>
@@ -127,7 +174,8 @@ public static class FitWithinBounds
             SourceMillimetres(sourceWidthPixels, sourceHeightPixels);
         if (Math.Max(sourceWidthMm, sourceHeightMm) <= maxLongEdgeMm)
         {
-            return NoResize(sourceWidthMm, sourceHeightMm);
+            return NoResize(
+                sourceWidthPixels, sourceHeightPixels, sourceWidthMm, sourceHeightMm);
         }
 
         if (sourceWidthPixels >= sourceHeightPixels)
@@ -138,7 +186,9 @@ public static class FitWithinBounds
                 sourceWidthMm,
                 sourceHeightMm,
                 maxLongEdgeMm,
-                maxLongEdgeMm * sourceHeightPixels / sourceWidthPixels);
+                maxLongEdgeMm * sourceHeightPixels / sourceWidthPixels,
+                sourceWidthPixels,
+                sourceHeightPixels);
         }
 
         return Shrink(
@@ -147,7 +197,102 @@ public static class FitWithinBounds
             sourceWidthMm,
             sourceHeightMm,
             maxLongEdgeMm * sourceWidthPixels / sourceHeightPixels,
-            maxLongEdgeMm);
+            maxLongEdgeMm,
+            sourceWidthPixels,
+            sourceHeightPixels);
+    }
+
+    /// <summary>
+    /// Calculates a short-edge-only fit: whichever source edge is shorter is held at
+    /// <paramref name="maxShortEdgeMm"/>, and the longer edge runs on proportionally
+    /// (Epic 11400 post-final A5 correction §6, §7, §8).
+    /// </summary>
+    /// <remarks>
+    /// The mirror of <see cref="CalculateLongEdge"/>, and deliberately not expressible through it:
+    /// a landscape source is limited on its <b>Height</b> and a portrait one on its
+    /// <b>Width</b> — the opposite selection — and the resulting long edge is never clamped. A
+    /// 2:1 landscape source under a 135 mm short edge projects to roughly 270 × 135 mm, and that
+    /// is the correct answer rather than an escape from a second limit (§8).
+    /// <para>
+    /// Width wins a square-source tie, matching <see cref="CalculateLongEdge"/> and the accepted
+    /// <c>longEdgeSquareTie</c> rule, so a square source has one deterministic concrete edge
+    /// rather than an arbitrary one (§7).
+    /// </para>
+    /// <para>
+    /// A source already inside the limit is left alone. Enlarging to reach the recommendation is
+    /// never ordinary preset behaviour: adding pixels the source does not hold is a separate
+    /// judgement with its own explicit authority, and nothing here grants one (§6).
+    /// </para>
+    /// </remarks>
+    public static FitWithinBoundsResult CalculateShortEdge(
+        int sourceWidthPixels,
+        int sourceHeightPixels,
+        double maxShortEdgeMm)
+    {
+        ValidateSource(sourceWidthPixels, sourceHeightPixels);
+        ValidateLimit(maxShortEdgeMm, nameof(maxShortEdgeMm));
+
+        (double sourceWidthMm, double sourceHeightMm) =
+            SourceMillimetres(sourceWidthPixels, sourceHeightPixels);
+        if (Math.Min(sourceWidthMm, sourceHeightMm) <= maxShortEdgeMm)
+        {
+            return NoResize(
+                sourceWidthPixels, sourceHeightPixels, sourceWidthMm, sourceHeightMm);
+        }
+
+        // Landscape is limited on Height, portrait on Width, and a square tie goes to Width.
+        if (sourceWidthPixels > sourceHeightPixels)
+        {
+            return Shrink(
+                LimitingEdge.Height,
+                maxShortEdgeMm,
+                sourceWidthMm,
+                sourceHeightMm,
+                maxShortEdgeMm * sourceWidthPixels / sourceHeightPixels,
+                maxShortEdgeMm,
+                sourceWidthPixels,
+                sourceHeightPixels);
+        }
+
+        return Shrink(
+            LimitingEdge.Width,
+            maxShortEdgeMm,
+            sourceWidthMm,
+            sourceHeightMm,
+            maxShortEdgeMm,
+            maxShortEdgeMm * sourceHeightPixels / sourceWidthPixels,
+            sourceWidthPixels,
+            sourceHeightPixels);
+    }
+
+    /// <summary>
+    /// The fit box that reproduces <see cref="CalculateShortEdge"/>'s decision for one exact
+    /// source (post-final A5 correction §8).
+    /// </summary>
+    /// <remarks>
+    /// The short-edge limit goes on the axis the source makes shorter; the other axis is bounded
+    /// by the source's own millimetres, which is a bound that can never bind and is therefore the
+    /// honest way to write "unbounded" into a plan whose stored limits are two positive numbers.
+    /// <para>
+    /// It lives here, beside the calculation and over the same
+    /// <see cref="SourceMillimetres"/> conversion, so the bounds a plan records and the decision
+    /// it records cannot be computed from two different roundings of the same source.
+    /// </para>
+    /// </remarks>
+    public static (double MaxWidthMm, double MaxHeightMm) ShortEdgeBounds(
+        int sourceWidthPixels,
+        int sourceHeightPixels,
+        double maxShortEdgeMm)
+    {
+        ValidateSource(sourceWidthPixels, sourceHeightPixels);
+        ValidateLimit(maxShortEdgeMm, nameof(maxShortEdgeMm));
+
+        (double sourceWidthMm, double sourceHeightMm) =
+            SourceMillimetres(sourceWidthPixels, sourceHeightPixels);
+
+        return sourceWidthPixels > sourceHeightPixels
+            ? (Math.Max(sourceWidthMm, maxShortEdgeMm), maxShortEdgeMm)
+            : (maxShortEdgeMm, Math.Max(sourceHeightMm, maxShortEdgeMm));
     }
 
     /// <summary>
@@ -165,7 +310,11 @@ public static class FitWithinBounds
             widthPixels * MillimetresPerInch / PrintDimensions.ProductionDpi,
             heightPixels * MillimetresPerInch / PrintDimensions.ProductionDpi);
 
-    private static FitWithinBoundsResult NoResize(double sourceWidthMm, double sourceHeightMm) =>
+    private static FitWithinBoundsResult NoResize(
+        int sourceWidthPixels,
+        int sourceHeightPixels,
+        double sourceWidthMm,
+        double sourceHeightMm) =>
         new(
             LimitingEdge.None,
             null,
@@ -173,7 +322,9 @@ public static class FitWithinBounds
             sourceWidthMm,
             sourceHeightMm,
             sourceWidthMm,
-            sourceHeightMm);
+            sourceHeightMm,
+            sourceWidthPixels,
+            sourceHeightPixels);
 
     private static FitWithinBoundsResult Shrink(
         LimitingEdge limitingEdge,
@@ -181,7 +332,9 @@ public static class FitWithinBounds
         double sourceWidthMm,
         double sourceHeightMm,
         double projectedWidthMm,
-        double projectedHeightMm) =>
+        double projectedHeightMm,
+        int sourceWidthPixels,
+        int sourceHeightPixels) =>
         new(
             limitingEdge,
             limitingValueMm,
@@ -189,7 +342,9 @@ public static class FitWithinBounds
             sourceWidthMm,
             sourceHeightMm,
             projectedWidthMm,
-            projectedHeightMm);
+            projectedHeightMm,
+            sourceWidthPixels,
+            sourceHeightPixels);
 
     private static void ValidateSource(int widthPixels, int heightPixels)
     {

@@ -231,7 +231,12 @@ public sealed record PrintPreparationAttemptView(
     {
         FitWithinBoundsPreparation? bounds = preparation as FitWithinBoundsPreparation;
         TargetEdgePreparation? target = preparation as TargetEdgePreparation;
-        PresetPrintRecommendation? recommendation = target?.Plan.Selection.Recommendation;
+
+        // The recommendation the run actually recorded, from whichever form it was made in. An
+        // attempt written before the post-final A5 correction recorded none for an ordinary preset
+        // fit, and falls through to the historical reading below (§19).
+        PresetPrintRecommendation? recommendation =
+            target?.Plan.Selection.Recommendation ?? bounds?.Selection?.Recommendation;
         SizePreset? preset = bounds?.Plan.LimitKind is { } limit and not SizePreset.Custom
             ? limit
             : recommendation?.Preset;
@@ -239,6 +244,13 @@ public sealed record PrintPreparationAttemptView(
         return new PrintPreparationAttemptView(
             preparation.Semantics,
             preset,
+
+            // The historical reading, and only for a run that stored no recommendation of its own.
+            // Before v1.15.0 the two configured forms were a box and a long edge, and a long edge
+            // was written as the square box of that side — so equal bounds meant a long edge, and
+            // for those rows it still does. That is what a v1.14 A5 attempt recorded and what it
+            // must keep saying: "recommended long edge 135 mm", never relabelled as a short edge
+            // by a later preset change (§12, §19).
             recommendation?.Kind ?? (bounds is null
                 ? null
                 : bounds.Plan.MaxWidthMm == bounds.Plan.MaxHeightMm

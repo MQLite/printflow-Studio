@@ -275,6 +275,8 @@ internal static class Strings
     /// <summary>Composite format: the one long-edge limit, in millimetres.</summary>
     internal static string Session_MaxLongEdgeSummary => Get(nameof(Session_MaxLongEdgeSummary));
 
+    internal static string Session_MaxShortEdgeSummary => Get(nameof(Session_MaxShortEdgeSummary));
+
     /// <summary>Composite format: width mm, height mm, pixel width, pixel height, DPI.</summary>
     internal static string Session_DimensionsSummary => Get(nameof(Session_DimensionsSummary));
 
@@ -350,6 +352,8 @@ internal static class Strings
     internal static string Session_AdjustSize => Get(nameof(Session_AdjustSize));
     internal static string Session_RecommendedMaximum => Get(nameof(Session_RecommendedMaximum));
     internal static string Session_RecommendedLongEdge => Get(nameof(Session_RecommendedLongEdge));
+
+    internal static string Session_RecommendedShortEdge => Get(nameof(Session_RecommendedShortEdge));
     internal static string Session_TargetEdge => Get(nameof(Session_TargetEdge));
     internal static string Session_TargetSizeMm => Get(nameof(Session_TargetSizeMm));
     internal static string Session_TargetSizeInvalid => Get(nameof(Session_TargetSizeInvalid));

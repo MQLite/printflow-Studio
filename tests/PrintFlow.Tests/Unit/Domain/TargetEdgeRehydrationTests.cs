@@ -256,6 +256,6 @@ public sealed class TargetEdgeRehydrationTests
             selectedTargetEdge: null, requestedMillimetres: null);
 
         restored.Recommendation.ShouldBe(asRecorded);
-        restored.ConfiguredPresetLimitMm.ShouldBe(280m);
+        restored.Recommendation!.MaxLongEdgeMm.ShouldBe(280m);
     }
 }

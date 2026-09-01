@@ -524,6 +524,7 @@ internal static class Mappers
     {
         PresetRecommendationKind.MaximumBox => "MAXIMUM_BOX",
         PresetRecommendationKind.MaximumLongEdge => "MAXIMUM_LONG_EDGE",
+        PresetRecommendationKind.MaximumShortEdge => "MAXIMUM_SHORT_EDGE",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
     };
 
@@ -531,6 +532,7 @@ internal static class Mappers
     {
         "MAXIMUM_BOX" => PresetRecommendationKind.MaximumBox,
         "MAXIMUM_LONG_EDGE" => PresetRecommendationKind.MaximumLongEdge,
+        "MAXIMUM_SHORT_EDGE" => PresetRecommendationKind.MaximumShortEdge,
         _ => throw new InvalidOperationException($"Unknown PresetRecommendationKind '{text}' in database."),
     };
 
@@ -616,13 +618,20 @@ internal static class Mappers
             decimal width = ToMillimetres(recommendationMaxWidthMm);
             decimal height = ToMillimetres(recommendationMaxHeightMm);
 
-            recommendation = kind == PresetRecommendationKind.MaximumLongEdge
-                ? width == height
+            recommendation = kind switch
+            {
+                PresetRecommendationKind.MaximumLongEdge => width == height
                     ? PresetPrintRecommendation.MaximumLongEdge(ToSizePreset(preset), width)
                     : throw new InvalidOperationException(
                         $"A stored long-edge recommendation carries two different limits ({width} and " +
-                        $"{height} mm); a long edge is one number.")
-                : PresetPrintRecommendation.MaximumBox(ToSizePreset(preset), width, height);
+                        $"{height} mm); a long edge is one number."),
+                PresetRecommendationKind.MaximumShortEdge => width == height
+                    ? PresetPrintRecommendation.MaximumShortEdge(ToSizePreset(preset), width)
+                    : throw new InvalidOperationException(
+                        $"A stored short-edge recommendation carries two different limits ({width} and " +
+                        $"{height} mm); a short edge is one number."),
+                _ => PresetPrintRecommendation.MaximumBox(ToSizePreset(preset), width, height),
+            };
         }
 
         return FlexibleSizeSelection.Rehydrate(
@@ -791,7 +800,8 @@ internal static class Mappers
     public static PhotoshopPreparation? ToPhotoshopPreparation(
         PrintPreparationPlan? boundsPlan,
         TargetEdgePrintPreparationPlan? targetEdgePlan,
-        EnlargementAuthority? authority)
+        EnlargementAuthority? authority,
+        FlexibleSizeSelection? selection = null)
     {
         if (boundsPlan is not null && targetEdgePlan is not null)
         {
@@ -803,7 +813,12 @@ internal static class Mappers
         if (boundsPlan is not null)
         {
             return authority is null
-                ? new FitWithinBoundsPreparation(boundsPlan)
+                // The ordinary preset fit the run recorded, when it recorded one. A row written
+                // before the post-final A5 correction carries none, and stays a plan with no
+                // selection rather than acquiring an invented one (§12, §18).
+                ? new FitWithinBoundsPreparation(
+                    boundsPlan,
+                    selection is { Mode: OperatorSizingMode.PresetFit } fit ? fit : null)
                 : throw new InvalidOperationException(
                     "An attempt row holds an enlargement authority beside a maximum-bound plan, which " +
                     "can never enlarge; the row describes a permission for a run nobody asked for.");
@@ -1256,20 +1271,20 @@ internal static class Mappers
         PrintPlanProductionDpi = BoundsOf(attempt)?.ProductionDpi,
         PrintPlanResizePolicy = BoundsOf(attempt) is { } ar ? ToText(ar.ResizePolicy) : null,
 
-        SizingMode = TargetOf(attempt) is { } ts ? ToText(ts.Plan.Selection.Mode) : null,
-        SizingPreset = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tc
+        SizingMode = SelectionOf(attempt) is { } ts ? ToText(ts.Mode) : null,
+        SizingPreset = SelectionOf(attempt)?.Recommendation is { } tc
             ? ToText(tc.Preset)
             : null,
-        SizingRecommendationKind = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tk
+        SizingRecommendationKind = SelectionOf(attempt)?.Recommendation is { } tk
             ? ToText(tk.Kind)
             : null,
-        SizingRecommendationMaxWidthMm = TargetOf(attempt)?.Plan.Selection.Recommendation is { } tw
+        SizingRecommendationMaxWidthMm = SelectionOf(attempt)?.Recommendation is { } tw
             ? ToMillimetreText(tw.MaxWidthMm)
             : null,
-        SizingRecommendationMaxHeightMm = TargetOf(attempt)?.Plan.Selection.Recommendation is { } th
+        SizingRecommendationMaxHeightMm = SelectionOf(attempt)?.Recommendation is { } th
             ? ToMillimetreText(th.MaxHeightMm)
             : null,
-        SizingPresetOverridden = TargetOf(attempt)?.Plan.Selection.PresetOverridden,
+        SizingPresetOverridden = SelectionOf(attempt)?.PresetOverridden,
         SizingTargetEdge = TargetOf(attempt) is { } te
             ? ToText(te.Plan.Projection.SelectedTargetEdge)
             : null,
@@ -1328,6 +1343,25 @@ internal static class Mappers
 
     private static TargetEdgePreparation? TargetOf(ProcessingAttempt attempt) =>
         attempt.Preparation as TargetEdgePreparation;
+
+    /// <summary>
+    /// The flexible-size selection the run recorded, from whichever preparation form it took
+    /// (post-final A5 correction §18).
+    /// </summary>
+    /// <remarks>
+    /// The <c>Sizing*</c> columns are one group describing one decision, so they are written from
+    /// one place regardless of which plan group sits beside them. Before this correction they were
+    /// written only for a target-edge run, which left an ordinary preset fit's audit row silent
+    /// about the recommendation it ran under — readable only by inferring a kind from the stored
+    /// bounds, which a maximum short edge makes impossible (§19).
+    /// </remarks>
+    private static FlexibleSizeSelection? SelectionOf(ProcessingAttempt attempt) =>
+        attempt.Preparation switch
+        {
+            TargetEdgePreparation target => target.Plan.Selection,
+            FitWithinBoundsPreparation bounds => bounds.Selection,
+            _ => null,
+        };
 
     public static ProcessingAttempt ToDomain(AttemptRow row)
     {
@@ -1403,7 +1437,8 @@ internal static class Mappers
                     row.EnlargementAuthorityScaleNumerator,
                     row.EnlargementAuthorityScaleDenominator,
                     row.EnlargementAuthorityProjectedPixelWidth,
-                    row.EnlargementAuthorityProjectedPixelHeight)),
+                    row.EnlargementAuthorityProjectedPixelHeight),
+                attemptSelection),
         };
     }
 

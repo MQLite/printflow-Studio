@@ -44,7 +44,7 @@ internal static class PresetFixture
                 "A3_LANDSCAPE": { "maxWidth": 360, "maxHeight": 280 },
                 "A3_PORTRAIT": { "maxWidth": 280, "maxHeight": 400 },
                 "A4": { "maxLongEdge": 280 },
-                "A5": { "maxLongEdge": 135 }
+                "A5": { "maxShortEdge": 135 }
               }
             }
           }
@@ -60,9 +60,11 @@ internal static class PresetFixture
     /// the configured 280 mm long edge and not the 297 mm ISO page" is comparing against a value
     /// stated independently of the code that parses it.
     /// <para>
-    /// Both forms are represented on purpose: A3 is a two-bound box and A4/A5 are single long
-    /// edges, which is the shape of the accepted v1.11.0 contract. A fixture carrying only boxes
-    /// would let a long-edge bug through the whole suite (§4).
+    /// All three forms are represented on purpose, matching the accepted v1.15.0 contract: A3 is a
+    /// two-bound box, A4 is a single long edge and A5 is a single <b>short</b> edge. A fixture
+    /// carrying only boxes would let a long-edge bug through the whole suite (§4), and one in
+    /// which every single-edge preset was a long edge would let a short-edge bug through the same
+    /// way — the failure the post-final A5 correction exists to prevent.
     /// </para>
     /// <para>
     /// These are synthetic <i>test</i> values that happen to match the accepted contract's shape.
@@ -74,8 +76,20 @@ internal static class PresetFixture
         PresetPrintRecommendation.MaximumBox(SizePreset.A3Landscape, 360m, 280m),
         PresetPrintRecommendation.MaximumBox(SizePreset.A3Portrait, 280m, 400m),
         PresetPrintRecommendation.MaximumLongEdge(SizePreset.A4, 280m),
-        PresetPrintRecommendation.MaximumLongEdge(SizePreset.A5, 135m),
+        PresetPrintRecommendation.MaximumShortEdge(SizePreset.A5, 135m),
     ]);
+
+    /// <summary>
+    /// The A5 recommendation exactly as v1.14.0 configured it, before the post-final correction.
+    /// </summary>
+    /// <remarks>
+    /// Kept so a test can build the pending plan a v1.14 session really held and prove that it
+    /// stops being executable under the current contract without its rows being rewritten
+    /// (post-final A5 correction §12, §13, §14). It is history, never an alternative authority:
+    /// nothing offers it as a choice and no product code reads it.
+    /// </remarks>
+    public static PresetPrintRecommendation SupersededA5LongEdge { get; } =
+        PresetPrintRecommendation.MaximumLongEdge(SizePreset.A5, 135m);
 
     /// <summary>Writes the synthetic manifest to <paramref name="directory"/> and returns its path and hash.</summary>
     public static (string Path, Sha256 Sha256) Write(string directory, string fileName = "synthetic-preset.json")

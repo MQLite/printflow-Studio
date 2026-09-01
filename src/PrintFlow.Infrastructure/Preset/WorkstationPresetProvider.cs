@@ -186,6 +186,16 @@ public sealed class WorkstationPresetProvider : IWorkstationPresetProvider
                 continue;
             }
 
+            // The manifest's own spelling for the third configured form, added by v1.15.0 for A5.
+            // It is read as its own kind rather than folded into either of the others, because a
+            // maximum short edge is neither a long edge nor a square box and encoding it as one
+            // would lose the product meaning the shop wrote down (post-final A5 correction §4, §5).
+            if (DecimalOrNull(entry.Value, "maxShortEdge") is { } shortEdge)
+            {
+                recommendations.Add(PresetPrintRecommendation.MaximumShortEdge(preset, shortEdge));
+                continue;
+            }
+
             if (DecimalOrNull(entry.Value, "maxWidth") is { } width &&
                 DecimalOrNull(entry.Value, "maxHeight") is { } height)
             {

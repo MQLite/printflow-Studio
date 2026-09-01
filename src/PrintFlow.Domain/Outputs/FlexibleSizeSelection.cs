@@ -60,15 +60,25 @@ public sealed record FlexibleSizeSelection
 
     public bool PresetOverridden { get; }
 
-    public decimal? ConfiguredPresetLimitMm => Recommendation?.RecommendedLimitMm;
-
     public TargetEdge? SelectedTargetEdge { get; }
 
     public decimal? RequestedMillimetres { get; }
 
-    /// <summary>True only when an explicitly overridden request exceeds its preset recommendation.</summary>
-    public bool PresetLimitExceeded =>
-        PresetOverridden && RequestedMillimetres > ConfiguredPresetLimitMm;
+    // There is deliberately no PresetLimitExceeded here, and no single "configured limit"
+    // millimetre value for it to compare against (post-final A5 correction §9, §10).
+    //
+    // Whether a request went past its recommendation is not a fact about the request. It is a
+    // fact about what the request PROJECTS TO against a particular source, and the three
+    // configured forms ask different questions of that projection — a box measures both edges, a
+    // long edge measures the longer, a short edge measures the shorter and ignores the longer
+    // entirely. A selection holds no source pixels, so it cannot answer, and the scalar
+    // comparison it used to make (`requested > 135`) gave the wrong answer in both directions
+    // once A5 became a short-edge recommendation: 160 mm of width on a wide source stays inside
+    // A5's 135 mm short edge, and 100 mm of width on a tall one does not.
+    //
+    // TargetEdgePrintPreparationPlan.PresetLimitExceeded is where the question is asked, because
+    // that is where the projection is, and PresetPrintRecommendation.Covers is the only thing
+    // that answers it.
 
     /// <summary>An ordinary named preset; FitWithinBounds remains its sizing authority.</summary>
     public static FlexibleSizeSelection PresetFit(PresetPrintRecommendation recommendation)

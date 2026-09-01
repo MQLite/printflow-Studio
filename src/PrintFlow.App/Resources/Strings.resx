@@ -346,6 +346,9 @@
   <data name="Session_MaxLongEdgeSummary" xml:space="preserve">
     <value>Maximum long edge: {0} mm</value>
   </data>
+  <data name="Session_MaxShortEdgeSummary" xml:space="preserve">
+    <value>Maximum short edge: {0} mm</value>
+  </data>
   <data name="Session_DimensionsSummary" xml:space="preserve">
     <value>{0} × {1} mm ({2} × {3} px at {4} dpi)</value>
   </data>
@@ -360,6 +363,7 @@
   <data name="Session_AdjustSize" xml:space="preserve"><value>Adjust size</value></data>
   <data name="Session_RecommendedMaximum" xml:space="preserve"><value>Recommended maximum: {0} × {1} mm</value></data>
   <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>Recommended long edge: {0} mm</value></data>
+  <data name="Session_RecommendedShortEdge" xml:space="preserve"><value>Recommended short edge: {0} mm</value></data>
   <data name="Session_TargetEdge" xml:space="preserve"><value>Target edge</value></data>
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>Target size (mm)</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>Choose Width, Height or Long edge and enter a positive size in millimetres.</value></data>

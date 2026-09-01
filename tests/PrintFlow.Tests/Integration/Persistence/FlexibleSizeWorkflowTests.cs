@@ -7,6 +7,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Persistence;
@@ -48,10 +49,10 @@ public sealed class FlexibleSizeWorkflowTests
     /// on a screen and every customer would receive.
     /// </remarks>
     [Theory]
-    [InlineData(SizePreset.A4, 280.0)]
-    [InlineData(SizePreset.A5, 135.0)]
+    [InlineData(SizePreset.A4, 280.0, PresetRecommendationKind.MaximumLongEdge)]
+    [InlineData(SizePreset.A5, 135.0, PresetRecommendationKind.MaximumShortEdge)]
     public async Task A_named_preset_uses_the_configured_recommendation_and_not_the_nominal_page(
-        SizePreset preset, double configuredLongEdgeMm)
+        SizePreset preset, double configuredEdgeMm, PresetRecommendationKind configuredKind)
     {
         using SessionServiceHarness harness = new();
         ISessionService service = harness.CreateService();
@@ -68,15 +69,22 @@ public sealed class FlexibleSizeWorkflowTests
 
         PrintPreparationPlan plan = after.Session.PrintPreparationPlan.ShouldNotBeNull();
         plan.LimitKind.ShouldBe(preset);
-        plan.MaxWidthMm.ShouldBe(configuredLongEdgeMm);
-        plan.MaxHeightMm.ShouldBe(configuredLongEdgeMm);
+
+        // 169.3 × 84.7 mm is inside both configured recommendations — under A4's 280 mm long edge
+        // and under A5's 135 mm short edge — so neither resamples, and neither is stretched up to
+        // its recommendation (post-final A5 correction §6).
+        plan.Mode.ShouldBe(PrintPreparationMode.ResolutionOnly);
+        plan.ProjectedPixelWidth.ShouldBe(2000);
+        plan.ProjectedPixelHeight.ShouldBe(1000);
 
         (double WidthMm, double HeightMm) nominal =
             PrintDimensions.NominalMillimetres(preset).ShouldNotBeNull();
         plan.MaxHeightMm.ShouldNotBe(nominal.HeightMm);
+        plan.MaxWidthMm.ShouldNotBe(nominal.WidthMm);
 
-        // And the decision records which configured recommendation it was made against, so it
-        // stays readable as that decision after the preset moves on (§6, §19).
+        // And the decision records which configured recommendation it was made against — the form
+        // as well as the number — so it stays readable as that decision after the preset moves on
+        // (§6, §19; correction §4, §18).
         FlexibleSizeSelection selection = after.Session.SizeSelection.ShouldNotBeNull();
         selection.Mode.ShouldBe(OperatorSizingMode.PresetFit);
         selection.PresetOverridden.ShouldBeFalse();
@@ -84,8 +92,12 @@ public sealed class FlexibleSizeWorkflowTests
 
         PresetPrintRecommendation recommendation = selection.Recommendation.ShouldNotBeNull();
         recommendation.Preset.ShouldBe(preset);
-        recommendation.Kind.ShouldBe(PresetRecommendationKind.MaximumLongEdge);
-        recommendation.MaxLongEdgeMm.ShouldBe((decimal)configuredLongEdgeMm);
+        recommendation.Kind.ShouldBe(configuredKind);
+        recommendation.MaxWidthMm.ShouldBe((decimal)configuredEdgeMm);
+        (configuredKind == PresetRecommendationKind.MaximumShortEdge
+                ? recommendation.MaxShortEdgeMm
+                : recommendation.MaxLongEdgeMm)
+            .ShouldBe((decimal)configuredEdgeMm);
     }
 
     /// <summary>
@@ -135,6 +147,132 @@ public sealed class FlexibleSizeWorkflowTests
         refused.IsFailure.ShouldBeTrue();
         refused.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
         (await LoadAsync(harness, id)).Session.Dimensions.ShouldBeNull();
+    }
+
+    /// <summary>
+    /// A pending A5 plan made under v1.14's long-edge contract is retained as history but cannot
+    /// start Photoshop under the current short-edge contract (§13, §14).
+    /// </summary>
+    [Fact]
+    public async Task A_pending_old_A5_plan_requires_reconfirmation_before_any_work_starts()
+    {
+        using SessionServiceHarness harness = new();
+        CountingPhotoshop photoshop = new(harness.FakePhotoshop);
+        ISessionService oldService = harness.CreateServiceWithPhotoshop(
+            photoshop, preset: new SupersededA5PresetProvider(harness.Preset));
+        SessionId id = await AtDimensionsAsync(harness, oldService, Source(harness, 2000, 1800));
+
+        await Must(oldService.ExecuteAsync(
+            id, new WorkflowCommand.SetPresetFitSize(SizePreset.A5), "tester", CancellationToken.None));
+        await Must(oldService.ExecuteAsync(
+            id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(
+                WhiteUnderbaseBranch.W1_1px, "ordinary design"),
+            "tester",
+            CancellationToken.None));
+
+        SessionAggregate historical = await LoadAsync(harness, id);
+        historical.Session.SizeSelection!.Recommendation.ShouldBe(PresetFixture.SupersededA5LongEdge);
+        PrintPreparationPlan oldPlan = historical.Session.PrintPreparationPlan.ShouldNotBeNull();
+        oldPlan.LimitingEdge.ShouldBe(LimitingEdge.Width);
+
+        // A restarted current installation sees the same raw rows and a different configured
+        // contract. It does not mutate the old recommendation merely by reading it.
+        ISessionService currentService = harness.CreateServiceWithPhotoshop(photoshop);
+        SessionView blocked = (await currentService.LoadAsync(id, CancellationToken.None)).Value;
+        blocked.NeedsDimensionReview.ShouldBeTrue();
+        blocked.CanRunPhotoshopOutput.ShouldBeFalse();
+
+        OperationResult<SessionView> refused = await currentService.ExecuteAsync(
+            id,
+            new WorkflowCommand.StartStep(StepKind.PhotoshopOutput),
+            "tester",
+            CancellationToken.None);
+
+        refused.IsFailure.ShouldBeTrue();
+        refused.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        photoshop.CallCount.ShouldBe(0);
+
+        SessionAggregate unchanged = await LoadAsync(harness, id);
+        unchanged.Session.SizeSelection!.Recommendation.ShouldBe(PresetFixture.SupersededA5LongEdge);
+        unchanged.Session.PrintPreparationPlan.ShouldBe(oldPlan);
+        unchanged.Attempts.Count(attempt => attempt.Step == StepKind.PhotoshopOutput).ShouldBe(0);
+        harness.FileWorkspace.ListWorkingFiles(unchanged.Session.Workspace).Value.ShouldBeEmpty();
+        (await harness.Repository.GetAutomationLockAsync(CancellationToken.None)).Value.IsHeld
+            .ShouldBeFalse();
+
+        // The established review route replaces the pending decision; it never rewrites the old
+        // one in place. The reconfirmed plan is the current short-edge plan and can run normally.
+        await Must(currentService.ExecuteAsync(
+            id,
+            new WorkflowCommand.ReturnToStep(StepKind.PrintDimensions),
+            "tester",
+            CancellationToken.None));
+        await Must(currentService.ExecuteAsync(
+            id, new WorkflowCommand.SetPresetFitSize(SizePreset.A5), "tester", CancellationToken.None));
+        await Must(currentService.ExecuteAsync(
+            id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(
+                WhiteUnderbaseBranch.W1_1px, "ordinary design"),
+            "tester",
+            CancellationToken.None));
+
+        SessionAggregate reconfirmed = await LoadAsync(harness, id);
+        PresetPrintRecommendation current = reconfirmed.Session.SizeSelection!.Recommendation!;
+        current.Kind.ShouldBe(PresetRecommendationKind.MaximumShortEdge);
+        current.MaxShortEdgeMm.ShouldBe(135m);
+        reconfirmed.Session.PrintPreparationPlan!.LimitingEdge.ShouldBe(LimitingEdge.Height);
+
+        await Must(currentService.ExecuteAsync(
+            id,
+            new WorkflowCommand.StartStep(StepKind.PhotoshopOutput),
+            "tester",
+            CancellationToken.None));
+
+        photoshop.CallCount.ShouldBe(1);
+        SessionAggregate produced = await LoadAsync(harness, id);
+        ProcessingAttempt attempt = produced.Attempts
+            .Single(item => item.Step == StepKind.PhotoshopOutput);
+        FitWithinBoundsPreparation preparation =
+            attempt.Preparation.ShouldBeOfType<FitWithinBoundsPreparation>();
+        preparation.Selection!.Recommendation!.Kind
+            .ShouldBe(PresetRecommendationKind.MaximumShortEdge);
+        preparation.Selection.Recommendation.MaxShortEdgeMm.ShouldBe(135m);
+    }
+
+    /// <summary>
+    /// A completed attempt remains a long-edge attempt after the installation moves to v1.15
+    /// (§12, §18, §19).
+    /// </summary>
+    [Fact]
+    public async Task A_historical_A5_attempt_keeps_its_long_edge_audit_wording()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService oldService = harness.CreateService(
+            new SupersededA5PresetProvider(harness.Preset));
+        SessionId id = await AtDimensionsAsync(harness, oldService, Source(harness, 2000, 1800));
+
+        await Must(oldService.ExecuteAsync(
+            id, new WorkflowCommand.SetPresetFitSize(SizePreset.A5), "tester", CancellationToken.None));
+        await Must(oldService.ExecuteAsync(
+            id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(
+                WhiteUnderbaseBranch.W1_1px, "ordinary design"),
+            "tester",
+            CancellationToken.None));
+        await Must(oldService.ExecuteAsync(
+            id,
+            new WorkflowCommand.StartStep(StepKind.PhotoshopOutput),
+            "tester",
+            CancellationToken.None));
+
+        SessionView currentReading = (await harness.CreateService().LoadAsync(
+            id, CancellationToken.None)).Value;
+        PrintPreparationAttemptView audit = currentReading.AttemptPreparation.ShouldNotBeNull();
+        audit.Preset.ShouldBe(SizePreset.A5);
+        audit.RecommendationKind.ShouldBe(PresetRecommendationKind.MaximumLongEdge);
+        audit.RecommendationMaxWidthMm.ShouldBe(135m);
+        audit.RecommendationMaxHeightMm.ShouldBe(135m);
     }
 
     // -------------------------------------------------------------------------------------
@@ -227,10 +365,13 @@ public sealed class FlexibleSizeWorkflowTests
     /// Going past the recommendation is not the same as running out of pixels (§11, §33.8).
     /// </summary>
     /// <remarks>
-    /// A5 recommends a 135 mm long edge; 160 mm exceeds it. The 2000 px source holds 160 mm at
-    /// 300 ppi comfortably, so the job shrinks — and needs no enlargement authority at all. A
-    /// build that treated "past the preset" as "needs permission to enlarge" would ask the
-    /// operator to authorise adding pixels to a job that removes them.
+    /// A5 recommends a 135 mm <b>short</b> edge from v1.15.0. A 160 mm long edge on this 2:1
+    /// source projects to 160 × 80 mm, whose short edge is 80 mm — comfortably inside the
+    /// recommendation, so this is not an excess at all, and the scalar comparison the old build
+    /// made (160 &gt; 135) was simply the wrong question (correction §9, §26.A). The 2000 px
+    /// source holds 160 mm at 300 ppi comfortably, so the job shrinks and needs no enlargement
+    /// authority either. A build that treated "past the preset" as "needs permission to enlarge"
+    /// would ask the operator to authorise adding pixels to a job that removes them.
     /// </remarks>
     [Fact]
     public async Task A_preset_override_within_source_capacity_needs_no_enlargement_authority()
@@ -248,7 +389,9 @@ public sealed class FlexibleSizeWorkflowTests
         SessionAggregate after = await LoadAsync(harness, id);
         TargetEdgePrintPreparationPlan plan = after.Session.TargetEdgePlan.ShouldNotBeNull();
 
-        plan.PresetLimitExceeded.ShouldBeTrue();
+        plan.Projection.ProjectedPixelWidth.ShouldBe(1890);
+        plan.Projection.ProjectedPixelHeight.ShouldBe(945);
+        plan.PresetLimitExceeded.ShouldBeFalse();
         plan.SourceCapacityExceeded.ShouldBeFalse();
         plan.RequiresEnlargementAuthority.ShouldBeFalse();
         plan.Projection.Direction.ShouldBe(ResizeDirection.Shrink);
@@ -257,7 +400,7 @@ public sealed class FlexibleSizeWorkflowTests
         FlexibleSizeSelection selection = after.Session.SizeSelection.ShouldNotBeNull();
         selection.PresetOverridden.ShouldBeTrue();
         selection.BasedOnPreset.ShouldBe(SizePreset.A5);
-        selection.ConfiguredPresetLimitMm.ShouldBe(135m);
+        selection.Recommendation!.MaxShortEdgeMm.ShouldBe(135m);
         selection.RequestedMillimetres.ShouldBe(160m);
 
         after.ToSnapshot().NeedsEnlargementAuthority.ShouldBeFalse();
@@ -267,6 +410,14 @@ public sealed class FlexibleSizeWorkflowTests
     /// <summary>
     /// The same override past what the source holds is a separate, second problem (§11, §33.9).
     /// </summary>
+    /// <remarks>
+    /// And under the corrected A5 contract the two now genuinely come apart in this very case:
+    /// 200 mm on a 2:1 source projects to 200 × 100 mm, whose 100 mm short edge is still inside
+    /// A5's recommendation, while 200 mm is more than the 169 mm of width the source actually
+    /// holds at 300 ppi. So the run needs an enlargement authority and is <i>not</i> a preset
+    /// override — which is exactly the independence §11 asserts, now demonstrated rather than
+    /// merely stated (correction §26.C).
+    /// </remarks>
     [Fact]
     public async Task A_preset_override_beyond_source_capacity_requires_enlargement_authority()
     {
@@ -283,7 +434,7 @@ public sealed class FlexibleSizeWorkflowTests
         SessionAggregate after = await LoadAsync(harness, id);
         TargetEdgePrintPreparationPlan plan = after.Session.TargetEdgePlan.ShouldNotBeNull();
 
-        plan.PresetLimitExceeded.ShouldBeTrue();
+        plan.PresetLimitExceeded.ShouldBeFalse();
         plan.SourceCapacityExceeded.ShouldBeTrue();
         plan.RequiresEnlargementAuthority.ShouldBeTrue();
         plan.Projection.ResizePolicy.ShouldBe(PhotoshopResizeMode.PreserveDetails);
@@ -855,7 +1006,7 @@ public sealed class FlexibleSizeWorkflowTests
 
         sizing.SizingMode.ShouldBe(OperatorSizingMode.CustomTargetEdge);
         sizing.Preset.ShouldBe(SizePreset.A5);
-        sizing.RecommendationKind.ShouldBe(PresetRecommendationKind.MaximumLongEdge);
+        sizing.RecommendationKind.ShouldBe(PresetRecommendationKind.MaximumShortEdge);
         sizing.RecommendationMaxWidthMm.ShouldBe(135m);
         sizing.PresetOverride.ShouldBeTrue();
         sizing.RequestedTargetEdge.ShouldBe(TargetEdge.LongEdge);
@@ -863,7 +1014,12 @@ public sealed class FlexibleSizeWorkflowTests
         sizing.ResolvedLimitingEdge.ShouldBe(LimitingEdge.Width);
         sizing.ResizeDirection.ShouldBe(Domain.Outputs.ResizeDirection.Enlarge);
         sizing.ProjectedScalePercent.ShouldNotBeNull();
-        sizing.PresetLimitExceeded.ShouldBeTrue();
+
+        // 200 mm of long edge on a 2:1 source is 200 x 100 mm, and 100 mm of short edge is inside
+        // A5's recommendation -- so this run needs pixels the source does not hold without going
+        // past what the shop recommends. The two classifications are reported separately because
+        // they are separate facts, and here they genuinely disagree (correction §9, §26.C).
+        sizing.PresetLimitExceeded.ShouldBeFalse();
         sizing.SourceCapacityExceeded.ShouldBeTrue();
         sizing.NeedsEnlargementAuthority.ShouldBeTrue();
         sizing.HasUsableEnlargementAuthority.ShouldBeFalse();
@@ -906,6 +1062,40 @@ public sealed class FlexibleSizeWorkflowTests
 
         public OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations() =>
             OperationResult.Ok(new PresetPrintRecommendationSet([]));
+    }
+
+    /// <summary>The v1.14 recommendation set, used only to seed truthful historical state.</summary>
+    private sealed class SupersededA5PresetProvider(IWorkstationPresetProvider inner)
+        : IWorkstationPresetProvider
+    {
+        public OperationResult<ProductionPresetRef> GetVerifiedPreset() => inner.GetVerifiedPreset();
+
+        public OperationResult<NamingPatternSet> GetNamingPatterns() => inner.GetNamingPatterns();
+
+        public OperationResult<PresetPrintRecommendationSet> GetPrintSizeRecommendations() =>
+            OperationResult.Ok(new PresetPrintRecommendationSet(
+            [
+                .. PresetFixture.Recommendations.All.Where(item => item.Preset != SizePreset.A5),
+                PresetFixture.SupersededA5LongEdge,
+            ]));
+    }
+
+    /// <summary>Counts calls while preserving the deterministic Fake processor's behaviour.</summary>
+    private sealed class CountingPhotoshop(IPhotoshopOutputProcessor inner)
+        : IPhotoshopOutputProcessor
+    {
+        public int CallCount { get; private set; }
+
+        public string AdapterId => inner.AdapterId;
+
+        public AdapterExecutionMode Mode => inner.Mode;
+
+        public Task<OperationResult<AdapterOutput>> GenerateAsync(
+            PhotoshopRequest request, CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return inner.GenerateAsync(request, cancellationToken);
+        }
     }
 
     private static string Source(SessionServiceHarness harness, int width, int height) =>

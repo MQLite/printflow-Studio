@@ -53,7 +53,28 @@ public sealed record TargetEdgePrintPreparationPlan
     /// <summary>The fixed production resolution. Never operator-selected (MVP design §8.3).</summary>
     public int ProductionDpi => PrintDimensions.ProductionDpi;
 
-    public bool PresetLimitExceeded => Selection.PresetLimitExceeded;
+    /// <summary>
+    /// Whether an explicit override actually goes past the recommendation it overrode
+    /// (post-final A5 correction §9, §10, §21).
+    /// </summary>
+    /// <remarks>
+    /// Asked here because this is where the projection lives, and answered by
+    /// <see cref="PresetPrintRecommendation.Covers"/> because that is the only thing that knows
+    /// what the configured form actually constrains. The comparison is against the <b>projected
+    /// geometry</b>, never against the operator's typed scalar: under A5's maximum short edge a
+    /// requested 160 mm width on a wide enough source still projects to under 135 mm of height
+    /// and is honestly not an excess, while a smaller request on a tall source can be (§9).
+    /// <para>
+    /// It stays entirely separate from <see cref="SourceCapacityExceeded"/>. One says the
+    /// operator went past what the shop recommends; the other says the source does not hold the
+    /// pixels. A run can be either, both, or neither (Part B1A.2D §11).
+    /// </para>
+    /// </remarks>
+    public bool PresetLimitExceeded =>
+        Selection.PresetOverridden &&
+        Selection.Recommendation is { } recommendation &&
+        !recommendation.Covers(
+            Projection.ProjectedPixelWidth, Projection.ProjectedPixelHeight);
 
     public bool SourceCapacityExceeded => Projection.SourceCapacityExceeded;
 

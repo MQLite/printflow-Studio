@@ -565,12 +565,18 @@ public sealed class MaximumBoundsBoundaryTests
     /// <c>Approved</c> destination reserved for a TIFF being approved. That is a crash-safety
     /// contract rather than a convenience: without it, a process that died between the promoted
     /// copy and the review commit would reserve a second name on the operator's next approval and
-    /// leave two Approved copies of one TIFF (Part C2B §10, §33, §35). C2B added exactly one
-    /// script, and the number moving is what this assertion is for.
+    /// leave two Approved copies of one TIFF (Part C2B §10, §33, §35).
+    /// </para>
+    /// <para>
+    /// It moved again to 0008 for the post-final A5 correction, which widens the persisted
+    /// recommendation-kind vocabulary to admit <c>MAXIMUM_SHORT_EDGE</c>. That one rebuilds two
+    /// tables to widen two CHECK constraints and rewrites no stored value, which is exactly the
+    /// kind of change this assertion exists to make somebody state out loud (correction §15,
+    /// §16, §17). Each slice added exactly one script, and the number moving is the point.
     /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_print_output_promotion_migration()
+    public void The_migration_set_ends_at_the_maximum_short_edge_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -581,7 +587,7 @@ public sealed class MaximumBoundsBoundaryTests
             .Select(name => name!)
             .OrderBy(name => name, StringComparer.Ordinal);
 
-        scripts.Last().ShouldStartWith("0007", Case.Sensitive);
+        scripts.Last().ShouldStartWith("0008", Case.Sensitive);
     }
 
     // -------------------------------------------------------------------------------------

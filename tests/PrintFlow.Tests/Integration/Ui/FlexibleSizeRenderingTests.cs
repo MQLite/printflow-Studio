@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using PrintFlow.App.ViewModels;
@@ -37,6 +38,18 @@ public sealed class FlexibleSizeRenderingTests
             // A. normal preset selection.
             SessionViewModel presetSelection = await AtDimensionsAsync(
                 harness, Source(harness, $"a-{culture.Name}.png", 2000, 1000));
+            SizePresetChoice a4Card = presetSelection.SizePresets
+                .Single(choice => choice.Preset == SizePreset.A4);
+            SizePresetChoice a5Card = presetSelection.SizePresets
+                .Single(choice => choice.Preset == SizePreset.A5);
+            a4Card.RecommendationLabel.ShouldBe(culture.Name == "zh-CN"
+                ? "推荐长边：280 mm"
+                : "Recommended long edge: 280 mm");
+            a5Card.RecommendationLabel.ShouldBe(culture.Name == "zh-CN"
+                ? "推荐短边：135 mm"
+                : "Recommended short edge: 135 mm");
+            a5Card.RecommendationLabel.ShouldNotContain(nameof(PresetRecommendationKind.MaximumShortEdge));
+            CaptureAffectedState(presetSelection, culture, "preset-cards");
             Render(presetSelection);
 
             // B. selected A4 configured recommendation.
@@ -59,6 +72,19 @@ public sealed class FlexibleSizeRenderingTests
             await adjustPreset.AdjustSizeCommand.ExecuteAsync(null);
             adjustPreset.HasCustomPresetContext.ShouldBeTrue();
             Render(adjustPreset);
+
+            // D2. A5 adjustment retains the corrected short-edge context in the same locale.
+            SessionViewModel adjustA5 = await AtDimensionsAsync(
+                harness, Source(harness, $"d2-{culture.Name}.png", 2000, 1800));
+            await UseA5Async(adjustA5);
+            await adjustA5.AdjustSizeCommand.ExecuteAsync(null);
+            adjustA5.HasCustomPresetContext.ShouldBeTrue();
+            adjustA5.CustomPresetContext.ShouldContain("A5");
+            adjustA5.CustomPresetRecommendation.ShouldBe(culture.Name == "zh-CN"
+                ? "推荐短边：135 mm"
+                : "Recommended short edge: 135 mm");
+            CaptureAffectedState(adjustA5, culture, "adjust-a5");
+            Render(adjustA5);
 
             // E. custom shrink.
             SessionViewModel shrink = await AtDimensionsAsync(
@@ -140,6 +166,25 @@ public sealed class FlexibleSizeRenderingTests
         rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
     }
 
+    private static void CaptureAffectedState(
+        SessionViewModel screen, CultureInfo culture, string stateName)
+    {
+        string? outputDirectory = Environment.GetEnvironmentVariable("PRINTFLOW_A5_VISUAL_OUTPUT");
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            return;
+        }
+
+        int offset = stateName == "preset-cards" ? 120 : 240;
+        WpfRendering.CapturePng(
+            () => new SessionScreenView { DataContext = screen },
+            WpfRendering.ReviewViewport,
+            Path.Combine(outputDirectory, $"{culture.Name}-{stateName}.png"),
+            tree => tree.OfType<ScrollViewer>()
+                .Single(scroll => Grid.GetColumn(scroll) == 1 && scroll.Parent is Grid)
+                .ScrollToVerticalOffset(offset));
+    }
+
     private static void RenderWarning(SessionViewModel screen)
     {
         RenderResult<List<string>> rendered = WpfRendering.RenderExpectingNoBindingErrors(
@@ -177,6 +222,10 @@ public sealed class FlexibleSizeRenderingTests
     private static async Task UseA4Async(SessionViewModel screen) =>
         await screen.UsePresetCommand.ExecuteAsync(
             screen.SizePresets.Single(choice => choice.Preset == SizePreset.A4));
+
+    private static async Task UseA5Async(SessionViewModel screen) =>
+        await screen.UsePresetCommand.ExecuteAsync(
+            screen.SizePresets.Single(choice => choice.Preset == SizePreset.A5));
 
     private static async Task CustomAsync(
         SessionViewModel screen, TargetEdge edge, string millimetres)

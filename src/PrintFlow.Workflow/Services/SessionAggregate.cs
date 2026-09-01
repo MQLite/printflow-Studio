@@ -39,7 +39,14 @@ public sealed record SessionAggregate(
     /// recomputing <c>LatestApprovedRevisionId</c> from the step list). Recomputing here keeps
     /// there being exactly one definition of each rule instead of two that could drift apart.
     /// </remarks>
-    public WorkflowSnapshot ToSnapshot()
+    /// <param name="configuredRecommendations">
+    /// The named-size recommendations this installation's verified preset configures right now, so
+    /// a restored preset fit can be checked against the authority currently in force. Null means
+    /// this caller could not ask, and a pending preset fit then fails closed
+    /// (post-final A5 correction §13, §14).
+    /// </param>
+    public WorkflowSnapshot ToSnapshot(
+        PresetPrintRecommendationSet? configuredRecommendations = null)
     {
         bool hasDerivedRevision = Steps.Any(s => s.Step != StepKind.Import && s.CurrentRevisionId is not null);
 
@@ -95,6 +102,13 @@ public sealed record SessionAggregate(
             SizeSelection = Session.SizeSelection,
             TargetEdgePlan = Session.TargetEdgePlan,
             EnlargementAuthority = Session.EnlargementAuthority,
+
+            // Not restored from the session — it is not the session's to state. What the shop
+            // currently recommends for a named size is the verified preset's answer, and carrying
+            // it here is what lets WorkflowSnapshot.UsablePrintPreparationPlan notice that a
+            // pending A5 plan was made under a recommendation this installation has since replaced
+            // (post-final A5 correction §13, §14).
+            ConfiguredRecommendations = configuredRecommendations,
         };
     }
 }

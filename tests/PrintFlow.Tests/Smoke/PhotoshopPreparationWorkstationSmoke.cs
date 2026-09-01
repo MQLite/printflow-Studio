@@ -6,6 +6,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Preset;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
@@ -33,6 +34,12 @@ public sealed class PhotoshopPreparationWorkstationSmoke
         PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
         string manifest = Path.Combine(configuration.Workspace.Root, configuration.Preset.Path);
         Sha256 expectedPreset = Sha256.Parse(configuration.Preset.ExpectedSha256);
+        WorkstationPresetProvider presetProvider = new(
+            manifest, configuration.Preset.Id, configuration.Preset.Version, expectedPreset);
+        PresetPrintRecommendation a5 = presetProvider.GetPrintSizeRecommendations().Value
+            .For(SizePreset.A5).ShouldNotBeNull();
+        a5.Kind.ShouldBe(PresetRecommendationKind.MaximumShortEdge);
+        a5.MaxShortEdgeMm.ShouldBe(135m);
         IPhotoshopPreparationAutomation automation = PhotoshopAutomationComposition
             .CreatePreparationAutomation(manifest, expectedPreset, workspace, evidence, TimeProvider.System);
 
@@ -55,6 +62,10 @@ public sealed class PhotoshopPreparationWorkstationSmoke
             new("Midpoint-Width-84.709mm", 2000, 1000,
                 (revision, hash) => Target(revision, hash, 2000, 1000,
                     TargetEdge.Width, 84.709m)),
+            new("A5-MaximumShortEdge-Landscape", 2400, 1800,
+                (revision, hash) => new FitWithinBoundsPreparation(
+                    PrintPreparationPlan.For(revision, hash, 2400, 1800, a5),
+                    FlexibleSizeSelection.PresetFit(a5))),
         ];
 
         string? selectedCase = Environment.GetEnvironmentVariable(CaseVariable);

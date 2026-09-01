@@ -177,7 +177,7 @@ public sealed class SizePresetChoice
         WidthMm = (double)recommendation.MaxWidthMm;
         HeightMm = (double)recommendation.MaxHeightMm;
         Label = DisplayNames.SizePreset(Preset);
-        BoundsLabel = SizeText.MaximumBounds(WidthMm, HeightMm);
+        BoundsLabel = SizeText.MaximumBounds(recommendation);
         RecommendationLabel = SizeText.Recommendation(recommendation);
     }
 
@@ -253,6 +253,16 @@ internal static class SizeText
         Recommendation(
             recommendation.Kind, recommendation.MaxWidthMm, recommendation.MaxHeightMm);
 
+    /// <summary>
+    /// The configured recommendation in the wording its configured shape requires
+    /// (post-final A5 correction §20, §21).
+    /// </summary>
+    /// <remarks>
+    /// The kind is reported by the workflow layer and merely rendered here. The screen holds no
+    /// opinion about which presets are which and states no millimetre: A5 says "short edge" only
+    /// because the verified preset configures a maximum short edge, and would say "long edge"
+    /// again the moment it did not. The technical enum name never reaches an operator.
+    /// </remarks>
     public static string Recommendation(
         PresetRecommendationKind? kind, decimal? maxWidthMm, decimal? maxHeightMm)
     {
@@ -261,17 +271,51 @@ internal static class SizeText
             return string.Empty;
         }
 
-        return kind == PresetRecommendationKind.MaximumLongEdge
-            ? string.Format(
+        return kind switch
+        {
+            PresetRecommendationKind.MaximumLongEdge => string.Format(
                 CultureInfo.CurrentCulture,
                 Strings.Session_RecommendedLongEdge,
-                maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture))
-            : string.Format(
+                maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture)),
+            PresetRecommendationKind.MaximumShortEdge => string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_RecommendedShortEdge,
+                maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture)),
+            _ => string.Format(
                 CultureInfo.CurrentCulture,
                 Strings.Session_RecommendedMaximum,
                 maxWidthMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture),
-                maxHeightMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture));
+                maxHeightMm.Value.ToString(Millimetres, CultureInfo.CurrentCulture)),
+        };
     }
+
+    /// <summary>
+    /// One configured recommendation's own limits in operator wording, in the form it was
+    /// configured in (post-final A5 correction §20).
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="MaximumBounds(double, double)"/>, which describes a fit box and
+    /// can only guess at the form from whether the two numbers happen to match. That guess was
+    /// right while a single-edge limit was always a square box; it is wrong for a maximum short
+    /// edge, whose box depends on the source. A recommendation knows its own kind, so it is asked.
+    /// </remarks>
+    public static string MaximumBounds(PresetPrintRecommendation recommendation) =>
+        recommendation.Kind switch
+        {
+            PresetRecommendationKind.MaximumLongEdge => string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_MaxLongEdgeSummary,
+                recommendation.MaxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture)),
+            PresetRecommendationKind.MaximumShortEdge => string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_MaxShortEdgeSummary,
+                recommendation.MaxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture)),
+            _ => string.Format(
+                CultureInfo.CurrentCulture,
+                Strings.Session_MaxBoundsSummary,
+                recommendation.MaxWidthMm.ToString(Millimetres, CultureInfo.CurrentCulture),
+                recommendation.MaxHeightMm.ToString(Millimetres, CultureInfo.CurrentCulture)),
+        };
 
     public static string MillimetresValue(decimal value) =>
         value.ToString(Millimetres, CultureInfo.CurrentCulture);

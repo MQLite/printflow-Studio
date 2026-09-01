@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PrintFlow.Tests.Fixtures;
 
@@ -136,6 +138,60 @@ internal static class WpfRendering
     /// <inheritdoc cref="RenderExpectingNoBindingErrors{T}" />
     public static void RenderExpectingNoBindingErrors(Func<UserControl> create, Size viewport) =>
         Render(create, viewport).ShouldBeEmpty();
+
+    /// <summary>
+    /// Captures one already-testable operator state for the narrow human visual check required by
+    /// a correction. This is opt-in evidence generation, not a golden-image assertion.
+    /// </summary>
+    public static void CapturePng(
+        Func<UserControl> create,
+        Size viewport,
+        string absolutePath,
+        Action<RenderedTree>? prepare = null)
+    {
+        ArgumentNullException.ThrowIfNull(create);
+        ArgumentException.ThrowIfNullOrWhiteSpace(absolutePath);
+
+        string path = Path.GetFullPath(absolutePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+        OnStaThread(() =>
+        {
+            UserControl view = create();
+            // A UserControl normally inherits the Window's opaque surface. RenderTargetBitmap has
+            // no Window, so provide that surface explicitly instead of turning transparent pixels
+            // black in the review PNG.
+            view.Background = Brushes.White;
+            view.Measure(viewport);
+            view.Arrange(new Rect(0, 0, viewport.Width, viewport.Height));
+            view.UpdateLayout();
+
+            if (prepare is not null)
+            {
+                List<DependencyObject> elements = [];
+                Collect(view, elements);
+                prepare(new RenderedTree(view, elements));
+                view.UpdateLayout();
+            }
+
+            RenderTargetBitmap bitmap = new(
+                checked((int)viewport.Width),
+                checked((int)viewport.Height),
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            bitmap.Render(view);
+
+            PngBitmapEncoder encoder = new();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using FileStream output = File.Create(path);
+            encoder.Save(output);
+
+            // Match Render's command-unsubscription discipline before the STA thread ends.
+            view.DataContext = null;
+            view.UpdateLayout();
+        });
+    }
 
     /// <summary>Runs <paramref name="action"/> on a fresh STA thread and rethrows what it threw.</summary>
     public static void OnStaThread(Action action)

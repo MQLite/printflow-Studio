@@ -13,7 +13,7 @@ namespace PrintFlow.Tests.Integration.Preset;
 public sealed class WorkstationPresetResizeContractEvidenceTests
 {
     [Fact]
-    public void Configured_workstation_preset_is_the_immutable_v1_14_contract()
+    public void Configured_workstation_preset_is_the_immutable_v1_15_contract()
     {
         (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
         if (configured is null)
@@ -21,9 +21,9 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             return;
         }
 
-        configured.Value.configuration.Preset.Version.ShouldBe("1.14.0");
+        configured.Value.configuration.Preset.Version.ShouldBe("1.15.0");
         configured.Value.configuration.Preset.Path.ShouldEndWith(
-            @"Baseline\workstation-v1\preset\printflow-workstation-v1.14.0.json");
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.15.0.json");
         configured.Value.configuration.Adapters.Mode.ShouldBe("Fake");
 
         Hash(configured.Value.manifestPath).ShouldBe(
@@ -44,19 +44,20 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
 
         using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
         JsonElement root = manifest.RootElement;
-        root.GetProperty("presetVersion").GetString().ShouldBe("1.14.0");
-        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.13.0");
+        root.GetProperty("presetVersion").GetString().ShouldBe("1.15.0");
+        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.14.0");
         root.GetProperty("supersedes").GetProperty("manifestSha256").GetString().ShouldBe(
-            "67525D6E9BF6A60438BC530B9E41FDFE65919473061A5D28772377211923A7CD");
+            "F74792276C0B264C9F064D1C82CB26806F7B836A543E0AF5FC8B4E7FB1738C62");
 
         JsonElement integrity = root.GetProperty("sourceManifestIntegrity");
-        integrity.GetArrayLength().ShouldBe(26);
+        integrity.GetArrayLength().ShouldBe(27);
 
         bool foundResizeEvidence = false;
         bool foundFlexibleSizeEvidence = false;
         bool foundRuntimeEvidence = false;
         bool foundW1Evidence = false;
         bool foundTiffEvidence = false;
+        bool foundA5ShortEdgeEvidence = false;
         foreach (JsonElement entry in integrity.EnumerateArray())
         {
             string path = entry.GetProperty("path").GetString().ShouldNotBeNull();
@@ -101,6 +102,14 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
                 foundTiffEvidence = true;
                 File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
             }
+
+            if (path.EndsWith(
+                @"apps\photoshop-2019\a5-short-edge-contract.json",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                foundA5ShortEdgeEvidence = true;
+                File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+            }
         }
 
         foundResizeEvidence.ShouldBeTrue();
@@ -108,6 +117,7 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         foundRuntimeEvidence.ShouldBeTrue();
         foundW1Evidence.ShouldBeTrue();
         foundTiffEvidence.ShouldBeTrue();
+        foundA5ShortEdgeEvidence.ShouldBeTrue();
     }
 
     [Fact]
@@ -143,7 +153,9 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         resize.GetProperty("limitsMillimetres")
             .GetProperty("A4").GetProperty("maxLongEdge").GetInt32().ShouldBe(280);
         resize.GetProperty("limitsMillimetres")
-            .GetProperty("A5").GetProperty("maxLongEdge").GetInt32().ShouldBe(135);
+            .GetProperty("A5").GetProperty("maxShortEdge").GetInt32().ShouldBe(135);
+        resize.GetProperty("limitsMillimetres")
+            .GetProperty("A5").TryGetProperty("maxLongEdge", out _).ShouldBeFalse();
 
         string evidenceRelativePath = resize.GetProperty("evidence")[0].GetString().ShouldNotBeNull();
         string evidencePath = Path.Combine(
@@ -229,6 +241,47 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
                     .GetProperty("sha256After").GetString());
         root.GetProperty("futureImplementationBoundary")
             .GetProperty("productionPhotoshopResizeIncluded").GetBoolean().ShouldBeFalse();
+    }
+
+    [Fact]
+    public void A5_correction_evidence_records_short_edge_history_and_boundaries()
+    {
+        (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
+        string relative = manifest.RootElement.GetProperty("photoshopContract")
+            .GetProperty("a5ShortEdgeContractEvidence").GetString().ShouldNotBeNull();
+        string path = Path.Combine(
+            configured.Value.configuration.Workspace.Root,
+            "Baseline", "workstation-v1",
+            relative.Replace('/', Path.DirectorySeparatorChar));
+        using JsonDocument evidence = ReadJson(path);
+        JsonElement root = evidence.RootElement;
+
+        root.GetProperty("status").GetString().ShouldBe("ACCEPTED_IMMUTABLE");
+        root.GetProperty("supersededRecommendation").GetProperty("kind")
+            .GetString().ShouldBe("MAXIMUM_LONG_EDGE");
+        root.GetProperty("supersededRecommendation").GetProperty("millimetres")
+            .GetInt32().ShouldBe(135);
+        root.GetProperty("acceptedRecommendation").GetProperty("kind")
+            .GetString().ShouldBe("MAXIMUM_SHORT_EDGE");
+        root.GetProperty("acceptedRecommendation").GetProperty("hiddenLongEdgeLimit")
+            .GetBoolean().ShouldBeFalse();
+        root.GetProperty("presetFit").GetProperty("ordinaryPresetFitMayEnlarge")
+            .GetBoolean().ShouldBeFalse();
+        root.GetProperty("presetFit").GetProperty("concreteEdgeResolution")
+            .GetProperty("LANDSCAPE").GetString().ShouldBe("HEIGHT");
+        root.GetProperty("presetFit").GetProperty("concreteEdgeResolution")
+            .GetProperty("PORTRAIT").GetString().ShouldBe("WIDTH");
+        root.GetProperty("presetFit").GetProperty("concreteEdgeResolution")
+            .GetProperty("SQUARE").GetString().ShouldBe("WIDTH");
+        root.GetProperty("currentSessionContract")
+            .GetProperty("historicalAttemptReinterpreted").GetBoolean().ShouldBeFalse();
+        root.GetProperty("operatorWording").GetProperty("en-US")
+            .GetString().ShouldBe("Recommended short edge: 135 mm");
+        root.GetProperty("operatorWording").GetProperty("zh-CN")
+            .GetString().ShouldBe("推荐短边：135 mm");
     }
 
     [Fact]
@@ -336,6 +389,20 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             live.GetProperty("backingWorkingSha256Before").GetString());
         live.GetProperty("adapterOutputCreated").GetBoolean().ShouldBeFalse();
         live.GetProperty("revisionCreated").GetBoolean().ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Superseded_v1_14_remains_immutable_and_exact()
+    {
+        (PrintFlowConfiguration configuration, string _)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        string path = Path.Combine(configured.Value.configuration.Workspace.Root,
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.14.0.json");
+        Hash(path).ShouldBe(
+            "F74792276C0B264C9F064D1C82CB26806F7B836A543E0AF5FC8B4E7FB1738C62",
+            StringCompareShould.IgnoreCase);
+        File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
     }
 
     [Fact]

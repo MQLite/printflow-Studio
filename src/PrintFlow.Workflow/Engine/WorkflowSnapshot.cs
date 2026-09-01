@@ -191,9 +191,54 @@ public sealed record WorkflowSnapshot(
                 return null;
             }
 
-            return plan.Covers(upstream.Id, upstream.Sha256) ? plan : null;
+            return plan.Covers(upstream.Id, upstream.Sha256) && MatchesConfiguredRecommendation
+                ? plan
+                : null;
         }
     }
+
+    /// <summary>
+    /// The named-size recommendations this installation's verified preset configures right now,
+    /// or null when this build could not ask (post-final A5 correction §14).
+    /// </summary>
+    /// <remarks>
+    /// Supplied by whoever reconstructs the snapshot, because it is a fact about the current
+    /// installation rather than about the session — the session's own rows say what the operator
+    /// was shown when they decided, and those two can now differ.
+    /// </remarks>
+    public PresetPrintRecommendationSet? ConfiguredRecommendations { get; init; }
+
+    /// <summary>
+    /// Whether an ordinary preset fit was made against the recommendation this installation
+    /// configures today (post-final A5 correction §13, §14).
+    /// </summary>
+    /// <remarks>
+    /// A pending preset decision is a decision to print "what A5 means here", and what A5 means
+    /// here is versioned. When v1.15.0 changed A5 from a 135 mm maximum long edge to a 135 mm
+    /// maximum <i>short</i> edge, every pending A5 plan in the database became a plan for a
+    /// geometry the shop no longer recommends — so it stops being usable and the operator
+    /// reconfirms the size through the ordinary <c>ReturnToStep(PrintDimensions)</c> route. The
+    /// stored rows are not touched, exactly as a stale plan's rows are not: it simply stops being
+    /// returned, and <see cref="NeedsDimensionReview"/> becomes true (§13).
+    /// <para>
+    /// The whole recommendation is compared, not just the preset name — kind and both millimetre
+    /// values — because "A5 at 135" was true before the correction and after it, and only the kind
+    /// says which 135 mm was meant (§14).
+    /// </para>
+    /// <para>
+    /// It gates <see cref="UsablePrintPreparationPlan"/> and nothing else. A custom target edge is
+    /// the operator's own explicit millimetres and stays executable across a preset change; the
+    /// recommendation it carries is context for the override notice, not the thing being run (§14).
+    /// </para>
+    /// <para>
+    /// A null <see cref="ConfiguredRecommendations"/> fails closed for a preset fit. An
+    /// installation that cannot say what A5 currently means cannot confirm that this plan is still
+    /// what A5 means, and guessing that it is would be the silent execution §13 forbids.
+    /// </para>
+    /// </remarks>
+    private bool MatchesConfiguredRecommendation =>
+        SizeSelection is not { Mode: OperatorSizingMode.PresetFit, Recommendation: { } held } ||
+        ConfiguredRecommendations?.For(held.Preset) == held;
 
     /// <summary>
     /// The operator's current size decision in the flexible-size vocabulary
@@ -294,7 +339,13 @@ public sealed record WorkflowSnapshot(
         {
             if (UsablePrintPreparationPlan is { } bounds)
             {
-                return new FitWithinBoundsPreparation(bounds);
+                // The ordinary preset fit behind those bounds travels with them, so the attempt
+                // this preparation is snapshotted onto can state the configured recommendation it
+                // ran under rather than leaving a reader to infer one from the bounds
+                // (post-final A5 correction §18).
+                return new FitWithinBoundsPreparation(
+                    bounds,
+                    SizeSelection is { Mode: OperatorSizingMode.PresetFit } fit ? fit : null);
             }
 
             if (UsableTargetEdgePlan is not { } plan)

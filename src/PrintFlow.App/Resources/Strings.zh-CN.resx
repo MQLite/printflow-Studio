@@ -346,6 +346,9 @@
   <data name="Session_MaxLongEdgeSummary" xml:space="preserve">
     <value>最大长边：{0} mm</value>
   </data>
+  <data name="Session_MaxShortEdgeSummary" xml:space="preserve">
+    <value>最大短边：{0} mm</value>
+  </data>
   <data name="Session_DimensionsSummary" xml:space="preserve">
     <value>{0} × {1} 毫米（{2} × {3} 像素，{4} dpi）</value>
   </data>
@@ -360,6 +363,7 @@
   <data name="Session_AdjustSize" xml:space="preserve"><value>调整尺寸</value></data>
   <data name="Session_RecommendedMaximum" xml:space="preserve"><value>推荐最大尺寸：{0} × {1} mm</value></data>
   <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>推荐长边：{0} mm</value></data>
+  <data name="Session_RecommendedShortEdge" xml:space="preserve"><value>推荐短边：{0} mm</value></data>
   <data name="Session_TargetEdge" xml:space="preserve"><value>目标边</value></data>
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>目标尺寸（mm）</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，并输入大于零的毫米数值。</value></data>

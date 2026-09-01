@@ -30,6 +30,16 @@ public sealed class WorkstationPresetProviderTests
         patterns.IsSuccess.ShouldBeTrue();
         patterns.Value.EnhancedPattern.ShouldBe(AcceptedNamingContract.EnhancedPattern);
         patterns.Value.ProductionTiffPattern.ShouldBe(AcceptedNamingContract.ProductionTiffPattern);
+
+        PresetPrintRecommendationSet recommendations = provider.GetPrintSizeRecommendations().Value;
+        recommendations.For(SizePreset.A3Landscape)!.Kind
+            .ShouldBe(PresetRecommendationKind.MaximumBox);
+        recommendations.For(SizePreset.A3Portrait)!.Kind
+            .ShouldBe(PresetRecommendationKind.MaximumBox);
+        recommendations.For(SizePreset.A4)!.MaxLongEdgeMm.ShouldBe(280m);
+        recommendations.For(SizePreset.A5)!.Kind
+            .ShouldBe(PresetRecommendationKind.MaximumShortEdge);
+        recommendations.For(SizePreset.A5)!.MaxShortEdgeMm.ShouldBe(135m);
     }
 
     [Fact]

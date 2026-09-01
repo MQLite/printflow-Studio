@@ -141,11 +141,58 @@ public sealed record PrintPreparationPlan(
         Sha256 sourceSha256,
         int sourcePixelWidth,
         int sourcePixelHeight,
-        PrintDimensions limits)
-    {
-        FitWithinBoundsResult fit =
-            FitWithinBounds.Calculate(sourcePixelWidth, sourcePixelHeight, limits);
+        PrintDimensions limits) =>
+        From(
+            sourceRevisionId,
+            sourceSha256,
+            sourcePixelWidth,
+            sourcePixelHeight,
+            limits,
+            FitWithinBounds.Calculate(sourcePixelWidth, sourcePixelHeight, limits));
 
+    /// <summary>
+    /// Calculates a plan for one configured named-preset recommendation against one exact upstream
+    /// artefact (post-final A5 correction §11).
+    /// </summary>
+    /// <remarks>
+    /// The route ordinary preset use takes, and the reason it exists separately is the
+    /// short-edge form: <see cref="PresetPrintRecommendation.Fit"/> decides, and
+    /// <see cref="PresetPrintRecommendation.AsFitBoundsFor"/> supplies the bounds that decision
+    /// was made within — which for a maximum short edge depend on the source's orientation and
+    /// cannot be read off the recommendation alone. Every other form gives the same answer it
+    /// always did (§6, §8).
+    /// <para>
+    /// The two are asked of the same recommendation and the same source rather than being derived
+    /// from each other, and they are built to agree: fitting this source into the bounds returned
+    /// reproduces the decision recorded. Only <see cref="PresetPrintRecommendation.Fit"/> decides,
+    /// so there is still exactly one sizing authority (§10).
+    /// </para>
+    /// </remarks>
+    public static PrintPreparationPlan For(
+        RevisionId sourceRevisionId,
+        Sha256 sourceSha256,
+        int sourcePixelWidth,
+        int sourcePixelHeight,
+        PresetPrintRecommendation recommendation)
+    {
+        ArgumentNullException.ThrowIfNull(recommendation);
+        return From(
+            sourceRevisionId,
+            sourceSha256,
+            sourcePixelWidth,
+            sourcePixelHeight,
+            recommendation.AsFitBoundsFor(sourcePixelWidth, sourcePixelHeight),
+            recommendation.Fit(sourcePixelWidth, sourcePixelHeight));
+    }
+
+    private static PrintPreparationPlan From(
+        RevisionId sourceRevisionId,
+        Sha256 sourceSha256,
+        int sourcePixelWidth,
+        int sourcePixelHeight,
+        PrintDimensions limits,
+        FitWithinBoundsResult fit)
+    {
         // The already-within-bounds case keeps the source's own pixels verbatim rather than
         // round-tripping them through millimetres. The two agree to well under half a pixel, but
         // "nothing is resampled" deserves to be exactly true rather than arithmetically close.

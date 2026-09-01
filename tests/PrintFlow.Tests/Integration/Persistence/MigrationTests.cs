@@ -936,6 +936,180 @@ public sealed class MigrationTests
         ScalarStringOf(connection, $"SELECT ReviewState FROM PrintOutput WHERE Id = {id};").ShouldBe("REJECTED");
     }
 
+    // -------------------------------------------------------------------------------------
+    // 0008 — maximum-short-edge recommendation vocabulary (post-final A5 correction §15-17)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A populated v7 database keeps the complete session decision, immutable attempt audit and
+    /// every table that points at the rebuilt parent when 0008 widens the recommendation CHECK.
+    /// </summary>
+    [Fact]
+    public void A_pre_0008_database_upgrades_without_rewriting_A5_or_losing_child_rows()
+    {
+        using TempDatabase database = new(migrate: false);
+
+        using (SqliteConnection seeded = database.OpenRaw())
+        {
+            foreach (string script in new[]
+                     {
+                         "0001_initial_schema.sql", "0002_trim_parameters.sql",
+                         "0003_background_removal_decision.sql", "0004_attempt_adapter_notes.sql",
+                         "0005_maximum_bound_print_plan.sql",
+                         "0006_flexible_size_and_enlargement_authority.sql",
+                         "0007_print_output_promotion.sql",
+                     })
+            {
+                Execute(seeded, ReadMigrationScript(script));
+            }
+
+            Execute(
+                seeded,
+                "INSERT INTO SchemaMigration (Version, Name, AppliedAtUtc, ScriptSha256) VALUES " +
+                "(1, 'initial_schema', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(2, 'trim_parameters', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(3, 'background_removal_decision', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(4, 'attempt_adapter_notes', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(5, 'maximum_bound_print_plan', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(6, 'flexible_size_and_enlargement_authority', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(7, 'print_output_promotion', '2026-01-01T00:00:00.000Z', 'SEED');");
+            Execute(seeded, "PRAGMA user_version = 7;");
+
+            const string session = "pre-0008-a5";
+            InsertSession(
+                seeded,
+                session,
+                [.. CompleteTargetEdgeColumns, .. CompleteAuthorityColumns]);
+
+            Execute(
+                seeded,
+                $$"""
+                  INSERT INTO SessionStep
+                      (SessionId, StepKind, Ordinal, State, AttemptCount, EnteredStateAtUtc)
+                  VALUES
+                      ('{{session}}', 'PrintDimensions', 1, 'APPROVED', 1,
+                       '2026-01-01T00:00:00.000Z');
+
+                  INSERT INTO Revision
+                      (Id, SessionId, SourceRevisionId, Operation, RelativePath, Format, ByteLength,
+                       Sha256, PixelWidth, PixelHeight, DpiX, DpiY, ColourMode, CreatedAtUtc)
+                  VALUES
+                      ('22222222-2222-2222-2222-222222222222', '{{session}}', NULL, 'IMPORT',
+                       'Sessions/{{session}}/Source/design.png', 'PNG', 2048,
+                       '{{new string('a', 64)}}', 2000, 1500, 300, 300, 'RGB',
+                       '2026-01-01T00:00:00.000Z');
+
+                  INSERT INTO InputSnapshot
+                      (Id, SessionId, RootRevisionId, OriginalSourcePath, OriginalFileName, ImportedAtUtc)
+                  VALUES
+                      ('11111111-1111-1111-1111-111111111111', '{{session}}',
+                       '22222222-2222-2222-2222-222222222222', 'D:/input/design.png', 'design.png',
+                       '2026-01-01T00:00:00.000Z');
+
+                  INSERT INTO ProcessingAttempt
+                      (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc,
+                       ResultStatus, RetrySequence,
+                       PrintPlanSourceRevisionId, PrintPlanSourceSha256, PrintPlanSourcePixelWidth,
+                       PrintPlanSourcePixelHeight, PrintPlanMaxWidthMm, PrintPlanMaxHeightMm,
+                       PrintPlanLimitKind, PrintPlanMode, PrintPlanLimitingEdge,
+                       PrintPlanLimitingValueMm, PrintPlanProjectedPixelWidth,
+                       PrintPlanProjectedPixelHeight, PrintPlanProductionDpi, PrintPlanResizePolicy,
+                       SizingMode, SizingPreset, SizingRecommendationKind,
+                       SizingRecommendationMaxWidthMm, SizingRecommendationMaxHeightMm,
+                       SizingPresetOverridden)
+                  VALUES
+                      ('44444444-4444-4444-4444-444444444444', '{{session}}', 'PhotoshopOutput',
+                       '22222222-2222-2222-2222-222222222222', 'PHOTOSHOP_OUTPUT',
+                       'fake-photoshop-v1', '2026-01-01T00:00:00.000Z', 'FAILED', 0,
+                       '22222222-2222-2222-2222-222222222222', '{{new string('a', 64)}}', 2000, 1500,
+                       135, 135, 'A5', 'PROPORTIONAL_SHRINK', 'WIDTH', 135, 1594, 1196, 300,
+                       'BICUBIC_SHARPER', 'PRESET_FIT', 'A5', 'MAXIMUM_LONG_EDGE', '135', '135', 0);
+
+                  INSERT INTO ProcessingAttempt
+                      (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc,
+                       ResultStatus, RetryOfAttemptId, RetrySequence)
+                  VALUES
+                      ('55555555-5555-5555-5555-555555555555', '{{session}}', 'PhotoshopOutput',
+                       '22222222-2222-2222-2222-222222222222', 'PHOTOSHOP_OUTPUT',
+                       'fake-photoshop-v1', '2026-01-01T00:01:00.000Z', 'FAILED',
+                       '44444444-4444-4444-4444-444444444444', 1);
+
+                  INSERT INTO ReviewDecision
+                      (Id, SessionId, StepKind, SubjectKind, SubjectId, ReviewedSha256, Operator,
+                       DecidedAtUtc, Decision)
+                  VALUES
+                      ('66666666-6666-6666-6666-666666666666', '{{session}}', 'PhotoshopOutput',
+                       'REVISION', '22222222-2222-2222-2222-222222222222', '{{new string('a', 64)}}',
+                       'operator', '2026-01-01T00:02:00.000Z', 'APPROVED');
+
+                  INSERT INTO PrintOutput
+                      (Id, SessionId, SourceRevisionId, TargetWidthMm, TargetHeightMm, PixelWidth,
+                       PixelHeight, Dpi, SizePresetId, WhiteUnderbaseBranch, ProductionPresetId,
+                       ProductionPresetSha256, RelativePath, ByteLength, Sha256, ReviewState,
+                       IsValid, CreatedAtUtc, PromotionReservedPath)
+                  VALUES
+                      ('77777777-7777-7777-7777-777777777777', '{{session}}',
+                       '22222222-2222-2222-2222-222222222222', 135, 101.25, 1594, 1196, 300,
+                       'A5', 'W1_1PX', 'printflow-workstation-v1', '{{new string('d', 64)}}',
+                       'Sessions/{{session}}/Review/design.tif', 4096, '{{new string('b', 64)}}',
+                       'NOT_REVIEWED', 1, '2026-01-01T00:03:00.000Z',
+                       'Sessions/{{session}}/Approved/design.tif');
+
+                  UPDATE AutomationLock
+                  SET SessionId = '{{session}}', AcquiredAtUtc = '2026-01-01T00:04:00.000Z',
+                      ProcessId = 123, MachineName = 'TEST';
+
+                  INSERT INTO AutomationLogEntry
+                      (Id, SessionId, StepKind, AtUtc, FailureCode, MessageKey, TechnicalDetail)
+                  VALUES
+                      ('88888888-8888-8888-8888-888888888888', '{{session}}', 'PhotoshopOutput',
+                       '2026-01-01T00:05:00.000Z', 'ADAPTER_FAILURE', 'failure', 'detail');
+                  """);
+        }
+
+        using SqliteConnection upgraded = database.OpenRaw();
+        MigrationRunner.Migrate(upgraded).IsSuccess.ShouldBeTrue();
+        ReadUserVersion(upgraded).ShouldBe(MigrationRunner.NewestKnownVersion);
+
+        ScalarStringOf(upgraded,
+            "SELECT SizingRecommendationKind FROM ProcessingSession WHERE Id = 'pre-0008-a5';")
+            .ShouldBe("MAXIMUM_LONG_EDGE", "0008 must not reinterpret a historical A5 decision");
+        ScalarStringOf(upgraded,
+            "SELECT SizingRequestedMm FROM ProcessingSession WHERE Id = 'pre-0008-a5';")
+            .ShouldBe("200.025");
+        ScalarOf(upgraded,
+            "SELECT EnlargementAuthorityProjectedPixelWidth FROM ProcessingSession " +
+            "WHERE Id = 'pre-0008-a5';").ShouldBe(2363L);
+
+        ScalarStringOf(upgraded,
+            "SELECT SizingRecommendationKind FROM ProcessingAttempt " +
+            "WHERE Id = '44444444-4444-4444-4444-444444444444';")
+            .ShouldBe("MAXIMUM_LONG_EDGE", "an immutable v1.14 attempt stays a long-edge attempt");
+        ScalarOf(upgraded,
+            "SELECT COUNT(*) FROM ProcessingAttempt WHERE RetryOfAttemptId = " +
+            "'44444444-4444-4444-4444-444444444444';").ShouldBe(1L);
+
+        foreach (string table in new[]
+                 {
+                     "SessionStep", "InputSnapshot", "Revision", "ProcessingAttempt",
+                     "ReviewDecision", "PrintOutput", "AutomationLogEntry",
+                 })
+        {
+            ScalarOf(upgraded, $"SELECT COUNT(*) FROM {table};").ShouldBeGreaterThan(0L);
+        }
+
+        ScalarStringOf(upgraded, "SELECT SessionId FROM AutomationLock WHERE Id = 1;")
+            .ShouldBe("pre-0008-a5");
+
+        Execute(
+            upgraded,
+            "UPDATE ProcessingSession SET SizingRecommendationKind = 'MAXIMUM_SHORT_EDGE' " +
+            "WHERE Id = 'pre-0008-a5';");
+        ScalarStringOf(upgraded,
+            "SELECT SizingRecommendationKind FROM ProcessingSession WHERE Id = 'pre-0008-a5';")
+            .ShouldBe("MAXIMUM_SHORT_EDGE", "the widened vocabulary must accept new decisions");
+    }
+
     /// <summary>Seeds a session, its root Revision, one attempt and one approved PrintOutput.</summary>
     private static void SeedApprovedOutput(SqliteConnection connection, string sessionId)
     {
