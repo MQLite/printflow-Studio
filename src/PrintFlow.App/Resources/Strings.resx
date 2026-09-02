@@ -245,6 +245,9 @@
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>The required application is unavailable or already in use.</value>
   </data>
+  <data name="Failure_OperationFaulted" xml:space="preserve">
+    <value>The operation ended unexpectedly. Nothing was produced and no result was recorded. PrintFlow changed nothing in the external application; what it is showing now is unknown, so check it before retrying.</value>
+  </data>
   <data name="Failure_PresetHashMismatch" xml:space="preserve">
     <value>The workstation preset did not match its expected signature.</value>
   </data>

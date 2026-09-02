@@ -245,6 +245,9 @@
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
     <value>所需的应用程序不可用或正被占用。</value>
   </data>
+  <data name="Failure_OperationFaulted" xml:space="preserve">
+    <value>操作意外结束，未生成任何结果，也未记录任何结果。PrintFlow 未对外部应用程序做任何更改；它当前的状态未知，请先检查后再重试。</value>
+  </data>
   <data name="Failure_PresetHashMismatch" xml:space="preserve">
     <value>工作站预设与预期签名不一致。</value>
   </data>

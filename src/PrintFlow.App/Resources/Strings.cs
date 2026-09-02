@@ -447,6 +447,19 @@ internal static class Strings
 
     internal static string Failure_AdapterUnavailable => Get(nameof(Failure_AdapterUnavailable));
 
+    /// <summary>
+    /// What an operator is told when a producing step ended with an unhandled fault
+    /// (Epic 11600 Part A §9).
+    /// </summary>
+    /// <remarks>
+    /// Separate wording from <see cref="Failure_AdapterUnavailable"/>, which the fault shares a
+    /// <c>FailureCode</c> with. "The required application is unavailable or already in use" is a
+    /// statement about the environment and would send the operator to check an installation
+    /// that is perfectly fine. What actually happened is that PrintFlow's own run broke, and the
+    /// operator's next move is to look at what Photoshop or Meitu is showing.
+    /// </remarks>
+    internal static string Failure_OperationFaulted => Get(nameof(Failure_OperationFaulted));
+
     internal static string Failure_PresetHashMismatch => Get(nameof(Failure_PresetHashMismatch));
 
     internal static string Failure_UnknownDialog => Get(nameof(Failure_UnknownDialog));

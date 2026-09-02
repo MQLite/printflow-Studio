@@ -1370,6 +1370,45 @@ public sealed class SessionService : ISessionService
                         ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
                     }));
         }
+        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            // Everything else a step's work can throw (Epic 11600 Part A §9, §10). Without this
+            // the exception unwinds past the closing transaction, and the two things it leaves
+            // behind are exactly the two §9 forbids: an attempt frozen at Running with its step
+            // frozen at Processing, and the automation lock still held — by a process that is
+            // still alive, so startup recovery's liveness check would refuse to release it even
+            // if the operator restarted. Every later adapter-backed step in every session is
+            // then blocked by a run that ended long ago.
+            //
+            // Containment rather than a rethrow, following the containment ImportAsync already
+            // gives the one other producing path: an escape from here is an escape out of the
+            // view model, which is a terminated shell rather than a reported failure. The
+            // exception is not swallowed — its type and message go into the attempt's failure
+            // record, which is immutable history.
+            //
+            // The filter deliberately also takes an OperationCanceledException raised while the
+            // caller's token is *not* cancelled. That is a step throwing cancellation nobody
+            // asked for, which is a fault like any other and must not be reported to the
+            // operator as though they had stopped the run.
+            produced = OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                OperationFailure.Create(
+                    FailureCode.AdapterUnavailable,
+                    $"The {work.Step} operation ended with an unhandled {ex.GetType().Name}: {ex.Message} " +
+                    "No output was validated and no Revision was created. " +
+                    (definition.IsAdapterBacked
+                        ? "The external application was left untouched; what it retains is unknown."
+                        : "No external application was involved."),
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["attemptId"] = runningAttempt.Id.ToString(),
+                        ["step"] = work.Step.ToString(),
+                        ["faultType"] = ex.GetType().FullName ?? ex.GetType().Name,
+                        ["revisionCreated"] = "false",
+                        ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
+                    },
+                    messageKey: "Failure_OperationFaulted"));
+        }
         finally
         {
             // Unregistered whatever happened, so a later Stop against a finished run is refused
@@ -1405,9 +1444,17 @@ public sealed class SessionService : ISessionService
         // this short metadata transaction truthfully ends the attempt and releases the
         // global automation lock. A process crash before this commit is still covered by
         // startup Running -> Interrupted recovery.
-        CancellationToken closingToken = produced.Failure.Code == FailureCode.Cancelled
-            ? CancellationToken.None
-            : cancellationToken;
+        //
+        // A contained fault is closed the same way and for the same reason (Epic 11600 Part A
+        // §9). Nothing is known about why the step threw, including whether it threw on its way
+        // out of a cancellation the caller had already requested, and a closing transaction
+        // that gave up on the caller's token would leave behind the held lock this containment
+        // exists to prevent.
+        CancellationToken closingToken =
+            produced.Failure.Code == FailureCode.Cancelled ||
+            produced.Failure.Context.ContainsKey("faultType")
+                ? CancellationToken.None
+                : cancellationToken;
         return await FailAttemptAsync(
             afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, closingToken);
     }
