@@ -212,17 +212,19 @@ public sealed class EnvironmentGateCompositionTests
     }
 
     /// <summary>
-    /// Composing with <c>Adapters.Mode = "Production"</c> still refuses to start
-    /// (Epic 11500 Part C §9, §11.9).
+    /// Composing with <c>Adapters.Mode = "Production"</c> does not authorise Production
+    /// (Epic 11500 Part D §3, §5).
     /// </summary>
     /// <remarks>
-    /// Behaviour, not a source scan: the real composition root, the real configuration record,
-    /// the one field changed. Part C is readiness work — an operator diagnostics surface and a
-    /// documented trust model — and it must leave the activation decision exactly where it found
-    /// it, which is closed.
+    /// Part C asserted here that Production refused to compose at all, because that is what it
+    /// did. Part D opened composition, and this is what has to remain true instead — the
+    /// distinction the whole epic rests on. The adapters now exist in the graph; the gate is
+    /// asked anyway, and on a workstation that cannot verify it says no. Composition is not
+    /// permission, and <see cref="ServiceRegistration"/> pre-authorises nothing merely by having
+    /// constructed something.
     /// </remarks>
     [Fact]
-    public void Composing_for_production_still_refuses_rather_than_substituting_a_fake()
+    public void Composing_for_production_does_not_authorise_production()
     {
         using TempApplication application = new();
 
@@ -236,10 +238,19 @@ public sealed class EnvironmentGateCompositionTests
         using SqliteConnection connection = factory.Open();
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
 
-        NotSupportedException refused = Should.Throw<NotSupportedException>(() =>
-            ServiceRegistration.BuildServiceProvider(configuration, application.WorkspaceRoot, factory));
+        using ServiceProvider services =
+            ServiceRegistration.BuildServiceProvider(configuration, application.WorkspaceRoot, factory);
 
-        refused.Message.ShouldContain("production");
+        services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Production);
+        services.GetRequiredService<IPhotoshopOutputProcessor>().Mode
+            .ShouldBe(AdapterExecutionMode.Production);
+
+        OperationResult<PrintFlow.Domain.Results.Unit> production = services
+            .GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production);
+
+        production.IsFailure.ShouldBeTrue(
+            "having composed the adapters must never mean they may run.");
+        production.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
     }
 
     private static ServiceProvider Compose(TempApplication application)

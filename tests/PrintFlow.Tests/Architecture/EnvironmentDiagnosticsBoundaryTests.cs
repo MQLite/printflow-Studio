@@ -285,16 +285,20 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
     // ---------------------------------------------------------------- §11.9
 
     /// <summary>
-    /// The production adapter registration is still closed (§11.9, §9).
+    /// The adapter registration is still the one place a mode is decided, and it still fails
+    /// closed on an unrecognised one (§11.9; Epic 11500 Part D §2).
     /// </summary>
     /// <remarks>
-    /// Asserted by behaviour rather than by reading the source: composing the real graph with
-    /// <c>Adapters.Mode = "Production"</c> throws. Failing closed rather than falling back to the
-    /// fake remains the point — a workstation configured for Production must never quietly run
-    /// against fakes — and this slice is readiness work, not activation.
+    /// Part C asserted that the Production case was a <c>throw</c>, because in Part C it was.
+    /// Part D opened it deliberately, and what survives that change is the rule the assertion was
+    /// really about: there is exactly one method that chooses adapters, it lives in the
+    /// composition root, and a mode it does not recognise stops the application rather than
+    /// defaulting to something. What replaced the closed branch — which adapters Production
+    /// composes, and that it has no fallback to a fake — is asserted by
+    /// <c>ProductionActivationBoundaryTests</c>.
     /// </remarks>
     [Fact]
-    public void The_production_adapter_registration_still_fails_closed()
+    public void The_adapter_registration_lives_in_the_composition_root_and_fails_closed()
     {
         string source = File.ReadAllText(Path.Combine(
             ProjectDirectory("PrintFlow.App"), "Composition", "ServiceRegistration.cs"));
@@ -305,7 +309,7 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
         // And the type really is the one the application composes through.
         typeof(ServiceRegistration).GetMethod(
                 "RegisterAdapters", BindingFlags.NonPublic | BindingFlags.Static)
-            .ShouldNotBeNull("the fail-closed branch lives in the composition root.");
+            .ShouldNotBeNull("the one adapter-mode decision lives in the composition root.");
     }
 
     // ---------------------------------------------------------------- §11.10

@@ -5,6 +5,8 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
+using PrintFlow.Infrastructure.Adapters.Meitu;
+using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Diagnostics;
 using PrintFlow.Infrastructure.Gate;
@@ -83,7 +85,12 @@ public static class ServiceRegistration
         RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath, expectedPresetHash);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
 
-        RegisterAdapters(services, configuration.Adapters.Mode);
+        RegisterAdapters(
+            services,
+            configuration.Adapters is { } adapters ? adapters.Mode : null,
+            workspaceRootAbsolute,
+            presetManifestPath,
+            expectedPresetHash);
 
         services.AddSingleton<ISessionService, SessionService>();
 
@@ -175,7 +182,47 @@ public static class ServiceRegistration
         services.AddSingleton<IEnvironmentDiagnostics>(p => p.GetRequiredService<VerifiedEnvironmentGate>());
     }
 
-    private static void RegisterAdapters(ServiceCollection services, string adapterMode)
+    /// <summary>
+    /// Chooses, from the one configured mode, which pair of adapters the workflow will drive
+    /// (Epic 11500 Part D §2).
+    /// </summary>
+    /// <remarks>
+    /// <b>One mode decides both processors.</b> There is no per-adapter selection and no hybrid:
+    /// the accepted preset describes one production workstation, the gate asks one question about
+    /// it (Part B §13), and a composition that could run a real Photoshop against a fake Meitu
+    /// would make that single answer a lie. Both branches therefore register both ports, and
+    /// there is no arrangement of configuration that registers one of each.
+    /// <para>
+    /// <b>Composition is not authorisation.</b> Constructing the Production adapters means only
+    /// that the objects exist; whether they may run is decided later and elsewhere, by
+    /// <see cref="IEnvironmentGate"/>, on every adapter-backed step. Nothing here consults the
+    /// verifier, and nothing here pre-authorises a workflow — which is why
+    /// <c>Adapters.Mode = Production</c> on a workstation that fails verification produces an
+    /// application that starts normally and refuses Production work, rather than one that cannot
+    /// start (§5).
+    /// </para>
+    /// <para>
+    /// <b>Nothing is launched, read or hashed here.</b> Both compositions assemble Win32 locators,
+    /// input sinks and preset-backed baseline providers, and every one of them is inert until an
+    /// operation runs: the baseline providers read the signed manifest lazily, the evidence sink
+    /// creates its directory only when it captures, and no constructor starts a process or sends
+    /// an input. The accepted executables and the canonical Action are re-verified by the adapters
+    /// at operation time, immediately before they are used, and not by this method (§8).
+    /// </para>
+    /// <para>
+    /// <b>No fallback, in either direction.</b> An unknown, absent or empty mode throws rather
+    /// than defaulting, and the Production branch has no path that substitutes a fake — including
+    /// when Production initialisation fails. A workstation configured for Production must never
+    /// quietly run against doubles, and one configured for Fake must never reach a real
+    /// application.
+    /// </para>
+    /// </remarks>
+    private static void RegisterAdapters(
+        ServiceCollection services,
+        string? adapterMode,
+        string workspaceRootAbsolute,
+        string presetManifestPath,
+        Sha256 expectedPresetHash)
     {
         switch (adapterMode)
         {
@@ -185,26 +232,41 @@ public static class ServiceRegistration
                 break;
 
             case "Production":
-                // The controlled Epic 11300 seam can now produce validated Enhancement and
-                // reviewed-content Background Removal outputs. Global Production composition
-                // nevertheless remains closed.
-                //
-                // Failing closed rather than falling back to the fake remains the point: a
-                // workstation configured for Production must never quietly run against fakes.
-                // The Part A foundation is exercised through
-                // MeituAutomationComposition.CreateFoundation, which is reachable from the
-                // controlled smoke and from tests but not from the normal Production
-                // composition. Epic 11300's Meitu workflow authority is complete, but global
-                // Production still waits for the Epic 11400 Photoshop adapter and Epic 11500's
-                // authoritative workstation EnvironmentGate.
-                throw new NotSupportedException(
-                    "Adapters:Mode is 'Production', but global production automation remains closed: " +
-                    "the production Photoshop adapter is owned by Epic 11400 and workstation verification " +
-                    "is owned by Epic 11500. Refusing to start rather than silently substituting a fake.");
+                // Failure captures live beside the workspace rather than inside a session: they
+                // are diagnostic material about this workstation, and keeping them out of
+                // Sessions\ is what stops one being promoted, hashed into a Revision, or deleted
+                // with the session that happened to be running. The directory is created on first
+                // capture, so a Production installation that never fails never grows one.
+                string evidenceDirectory =
+                    System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName);
+
+                // The accepted adapters from Epics 11300 and 11400, composed through the same
+                // factories the controlled workstation smokes have used since those epics — so
+                // what the application now registers is the object graph that was accepted there,
+                // not a second implementation assembled here to look like it.
+                services.AddSingleton<IMeituProcessor>(provider =>
+                    MeituAutomationComposition.CreateProductionProcessor(
+                        presetManifestPath,
+                        expectedPresetHash,
+                        provider.GetRequiredService<IWorkspace>(),
+                        evidenceDirectory,
+                        provider.GetRequiredService<TimeProvider>()));
+
+                services.AddSingleton<IPhotoshopOutputProcessor>(provider =>
+                    PhotoshopAutomationComposition.CreateProductionProcessor(
+                        presetManifestPath,
+                        expectedPresetHash,
+                        provider.GetRequiredService<IWorkspace>(),
+                        evidenceDirectory,
+                        provider.GetRequiredService<TimeProvider>()));
+                break;
 
             default:
                 throw new NotSupportedException(
-                    $"Unknown Adapters:Mode '{adapterMode}'. Expected 'Fake' or 'Production'.");
+                    $"Unknown Adapters:Mode '{adapterMode ?? "(absent)"}'. Expected 'Fake' or 'Production'.");
         }
     }
+
+    /// <summary>Where a Production adapter writes a failure capture, beside the workspace areas.</summary>
+    private const string EvidenceFolderName = "Evidence";
 }
