@@ -317,7 +317,13 @@ One did, exactly:
 Nine consecutive observations, +1 per Photoshop job, never −1. Note job 3: a job that **failed**
 still left its document open, because the document is opened before the stage that failed.
 
-This is a measurement, not an inference, and it is the number §9 asked for.
+**What is measured here is the delta, not the absolute count.** Both classes carry a fixed offset
+that this run did not establish — Photoshop draws other document-shaped child windows — so
+`OWL.Document 14` is not "fourteen documents". The count of *PrintFlow* documents is read off the
+job record instead, where every one is accounted for: Part A's residual document, run 1's single
+Photoshop job, and run 2's six (jobs 1, 3, 3r, 5, 7 and 9) — **eight open documents, none ever
+closed**. The two agree on the only thing that matters, which is that the population grows by one
+per Photoshop job and never shrinks.
 
 ### 4.2 What accumulation cost
 
@@ -326,7 +332,7 @@ This is a measurement, not an inference, and it is the number §9 asked for.
   every successful job proved its own document through the signed identity probe. Policy A's safety
   argument held completely — what failed was not safety.
 * **Latency of successful jobs:** flat (§3.3). Accumulation did not make successful work slower.
-* **Job 9, at fourteen accumulated documents:** the signed `另存为` surface did not appear within
+* **Job 9, with eight PrintFlow documents open (class count 14):** the signed `另存为` surface did not appear within
   its 20-second timeout. The retry, one second later, found a modal standing that PrintFlow had not
   raised — a `PSExport_WindowClass` window titled `存储为 Web 所用格式 (100%)`, Photoshop's
   Save-for-Web dialog, with the main window disabled behind it.
@@ -371,7 +377,7 @@ already been read back and hashed.
 its own, established two things.
 
 **First, a defect in the seam itself** (§6 below): nine consecutive `CloseExactDocumentAsync` calls
-returned **success** while the open-document count stayed at 15 and the window title still named
+returned **success** while the `OWL.Document` census stayed at 15 and the window title still named
 the document each call claimed to have closed.
 
 **Second, and decisive: the close raises Photoshop's unsaved-changes prompt.** With the seam fixed,
@@ -506,10 +512,22 @@ policy test changed with it.
 
 Before run 2: 35 sessions, 70 Comparison files, 2 Quarantine files, 9 QA directories.
 
-Runs 1 and 2 created new session directories under `Sessions\`, plus two QA directories under
-`D:\PrintFlowStudio\QA\Epic11600B\`, each holding its own throwaway SQLite database. **No row was
-written to the operator's installation database.** No session directory was lost. Comparison and
-Quarantine were not touched by either run.
+Read directly from the workstation afterwards:
+
+```text
+sessions        : 46   (13 created by this slice)
+Comparison files: 70   (unchanged)
+Quarantine files:  2   (unchanged)
+```
+
+The thirteen break down exactly as the job record predicts — 2 from Phase 0 (the cold-start
+attempt at 09:56:54 and the gate at 10:08:35), 2 from run 1 (jobs 1 and 2), and 9 from run 2
+(jobs 1 through 9, a retry sharing its original's session). Every one carries the `PF_11600B_`
+prefix. Alongside them are QA directories under `D:\PrintFlowStudio\QA\Epic11600B\`, each holding
+its own throwaway SQLite database: **no row was written to the operator's installation database.**
+
+No session directory was lost, and Comparison and Quarantine are byte-for-byte the counts they
+were before the slice began.
 
 The soak's own census assertions — 0 sessions lost, Comparison and Quarantine unchanged, only this
 run's own directories added, and a metadata fingerprint of five pre-existing sessions unchanged —
@@ -537,7 +555,7 @@ Stated plainly, because the Definition of Done turns on it:
 
 ## 11. Workstation state, and what it needs
 
-**Photoshop needs operator attention before the next production run.** It is left holding fourteen
+**Photoshop needs operator attention before the next production run.** It is left holding eight
 accumulated PrintFlow synthetic working documents, and its main window is currently **disabled**:
 the Save-for-Web modal and the later discard prompt were each dismissed with a `WM_CLOSE` message —
 the safe, non-destructive route, which on a save-changes prompt means Cancel — but Photoshop did
@@ -545,7 +563,7 @@ not re-enable its main window afterwards, and it cannot be re-enabled from here.
 keystrokes were not available to this session, so the remaining recovery is an operator's:
 
 1. click Photoshop, or restart it;
-2. discard the fourteen `PF_11600*` working documents — every one of them has a validated TIFF
+2. discard the eight `PF_11600*` working documents — every one of them has a validated TIFF
    already written as a separate file, so discarding is always correct;
 3. no customer document is among them (see §12).
 
