@@ -382,9 +382,13 @@ public sealed class PhotoshopFinalGateWorkstationSmoke
             PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(
                 RepositoryFile("appsettings.json"));
 
-            // Stated rather than assumed: the controlled seam proves the production path without
-            // the installation being switched to it (§27).
-            configuration.Adapters.Mode.ShouldBe("Fake");
+            // Reported rather than asserted since Epic 11500 Part D. This smoke composes its own
+            // adapter and its own gate, so what the installation ships is irrelevant to it — and
+            // that independence is the property worth keeping. It read `ShouldBe("Fake")` while
+            // Production composition was closed and the seam was the only way to reach the
+            // production path; the installation has since been activated, and this run is
+            // unaffected either way.
+            Console.WriteLine($"committed Adapters.Mode: {configuration.Adapters.Mode} (this seam composes its own)");
 
             string token = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss") + "-" +
                            Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();

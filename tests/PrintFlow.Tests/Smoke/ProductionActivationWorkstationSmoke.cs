@@ -8,6 +8,7 @@ using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
@@ -346,6 +347,74 @@ public sealed class ProductionActivationWorkstationSmoke(ITestOutputHelper outpu
             produced.IsFailure ? produced.Failure.ToString() : string.Empty);
         enhanced.IsSuccess.ShouldBeTrue(
             enhanced.IsFailure ? enhanced.Failure.ToString() : string.Empty);
+    }
+
+    /// <summary>
+    /// The rollback, performed against the real installation (Epic 11500 Part D §14).
+    /// </summary>
+    /// <remarks>
+    /// The same committed configuration with the one value an operator would edit, composed by
+    /// the real <see cref="ServiceRegistration"/> against the real accepted preset and the real
+    /// workspace root. What it establishes is what the runbook promises: both adapters come back
+    /// as the deterministic doubles, no external application is touched merely by composing, and
+    /// nothing in the managed workspace moves.
+    /// <para>
+    /// The committed file itself is not edited here. Rollback is a configuration change and a
+    /// restart, and a test that rewrote the shipped file to prove that would be doing something
+    /// considerably more dangerous than the thing it was checking.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void Rolling_the_committed_mode_back_to_fake_restores_the_fake_adapters()
+    {
+        if (Environment.GetEnvironmentVariable(EnableVariable) != "1")
+        {
+            return;
+        }
+
+        PrintFlowConfiguration committed =
+            PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+        PrintFlowConfiguration rolledBack =
+            committed with { Adapters = new AdaptersConfiguration("Fake") };
+
+        string workspaceRoot = Path.GetFullPath(committed.Workspace.Root);
+        string qaRoot = Path.Combine(
+            workspaceRoot, "QA", "Epic11500D",
+            "rollback-" + DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss"));
+        Directory.CreateDirectory(qaRoot);
+
+        WorkspaceCensus before = WorkspaceCensus.Take(workspaceRoot);
+        int externalBefore = ExternalApplicationProbe.RunningCount();
+
+        SqliteConnectionFactory factory = new(Path.Combine(qaRoot, "printflow-rollback.db"));
+        using (SqliteConnection connection = factory.Open())
+        {
+            MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        }
+
+        using ServiceProvider services =
+            ServiceRegistration.BuildServiceProvider(rolledBack, workspaceRoot, factory);
+
+        IMeituProcessor meitu = services.GetRequiredService<IMeituProcessor>();
+        IPhotoshopOutputProcessor photoshop = services.GetRequiredService<IPhotoshopOutputProcessor>();
+
+        output.WriteLine("=== rollback ===");
+        output.WriteLine($"committed Adapters.Mode : {committed.Adapters.Mode}");
+        output.WriteLine($"composed  Adapters.Mode : {rolledBack.Adapters.Mode}");
+        output.WriteLine($"Meitu adapter           : {meitu.GetType().Name} / {meitu.AdapterId} / {meitu.Mode}");
+        output.WriteLine($"Photoshop adapter       : {photoshop.GetType().Name} / {photoshop.AdapterId} / {photoshop.Mode}");
+        output.WriteLine($"external apps running   : {ExternalApplicationProbe.RunningCount()} (was {externalBefore})");
+
+        meitu.ShouldBeOfType<FakeMeituProcessor>();
+        photoshop.ShouldBeOfType<FakePhotoshopOutputProcessor>();
+        meitu.Mode.ShouldBe(AdapterExecutionMode.Fake);
+        photoshop.Mode.ShouldBe(AdapterExecutionMode.Fake);
+
+        ExternalApplicationProbe.RunningCount().ShouldBe(externalBefore,
+            "rolling back composes a graph; it interacts with no external application.");
+
+        // No session was created, so persisted workflow data is untouched in both directions.
+        before.ReportAndAssert(workspaceRoot, [], output);
     }
 
     // -----------------------------------------------------------------------------------

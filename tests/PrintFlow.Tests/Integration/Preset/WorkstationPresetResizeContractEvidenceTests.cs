@@ -24,7 +24,11 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         configured.Value.configuration.Preset.Version.ShouldBe("1.15.0");
         configured.Value.configuration.Preset.Path.ShouldEndWith(
             @"Baseline\workstation-v1\preset\printflow-workstation-v1.15.0.json");
-        configured.Value.configuration.Adapters.Mode.ShouldBe("Fake");
+
+        // Production since Epic 11500 Part D. The mode is asserted here because this file is
+        // about what the configured installation actually points at, and a preset contract that
+        // no longer matched the mode it ships with would be the wrong kind of surprise.
+        configured.Value.configuration.Adapters.Mode.ShouldBe("Production");
 
         Hash(configured.Value.manifestPath).ShouldBe(
             configured.Value.configuration.Preset.ExpectedSha256,

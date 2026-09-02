@@ -111,11 +111,14 @@ public sealed class VerifiedEnvironmentGateWorkstationSmoke(ITestOutputHelper ou
             // accepted workstation is a fact to investigate, not a suite to fail — and asserting
             // it here would make the suite unrunnable anywhere else.
             //
-            // What is asserted is that observing the gate enabled nothing: the configured
-            // application still composes fake adapters, whatever the answer above was.
-            configuration.Adapters.Mode.ShouldBe("Fake");
-            services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
-            services.GetRequiredService<IPhotoshopOutputProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
+            // What is asserted is that asking the gate changed nothing: the application composes
+            // the adapters the committed configuration named, whatever the answer above was. This
+            // read "still Fake" until Epic 11500 Part D activated Production, and it is the same
+            // claim in the stronger direction now — the gate reports on the composition, it does
+            // not decide it.
+            services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(ComposedMode(configuration));
+            services.GetRequiredService<IPhotoshopOutputProcessor>().Mode
+                .ShouldBe(ComposedMode(configuration));
         }
         finally
         {
@@ -237,10 +240,11 @@ public sealed class VerifiedEnvironmentGateWorkstationSmoke(ITestOutputHelper ou
             screen.Checks.ShouldAllBe(
                 row => !row.Name.StartsWith("EnvironmentCheckName_", StringComparison.Ordinal));
 
-            // And reading it enabled nothing.
-            configuration.Adapters.Mode.ShouldBe("Fake");
-            services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
-            services.GetRequiredService<IPhotoshopOutputProcessor>().Mode.ShouldBe(AdapterExecutionMode.Fake);
+            // And reading it changed nothing: the same adapters the committed configuration
+            // composed, before the reading and after it.
+            services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(ComposedMode(configuration));
+            services.GetRequiredService<IPhotoshopOutputProcessor>().Mode
+                .ShouldBe(ComposedMode(configuration));
         }
         finally
         {
@@ -255,6 +259,19 @@ public sealed class VerifiedEnvironmentGateWorkstationSmoke(ITestOutputHelper ou
             }
         }
     }
+
+    /// <summary>
+    /// The execution mode the committed configuration composes, whatever it currently says.
+    /// </summary>
+    /// <remarks>
+    /// Derived rather than hard-coded so this smoke states a claim about the shipped
+    /// configuration instead of a claim about one particular value of it: whether the
+    /// installation ships Fake or Production, observing readiness must leave it exactly there.
+    /// </remarks>
+    private static AdapterExecutionMode ComposedMode(PrintFlowConfiguration configuration) =>
+        configuration.Adapters.Mode == "Production"
+            ? AdapterExecutionMode.Production
+            : AdapterExecutionMode.Fake;
 
     private static string RepositoryRoot()
     {

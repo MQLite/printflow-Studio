@@ -628,13 +628,22 @@ public sealed class ProductionWorkstationVerifierTests
         production.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
     }
 
+    /// <summary>
+    /// The configured adapter mode is Production, against the preset Part A accepted
+    /// (Epic 11500 Part D §13).
+    /// </summary>
+    /// <remarks>
+    /// This read <c>Fake</c> from Part A until Part D activated Production. The half that has
+    /// not moved is the one this file is about: verification still answers to preset 1.15.0, and
+    /// activation was not permitted to mint a new identity to make anything pass.
+    /// </remarks>
     [Fact]
-    public void The_configured_adapter_mode_is_still_Fake()
+    public void The_configured_adapter_mode_is_production_against_the_accepted_preset()
     {
         PrintFlowConfiguration configuration =
             PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
 
-        configuration.Adapters.Mode.ShouldBe("Fake");
+        configuration.Adapters.Mode.ShouldBe("Production");
         configuration.Preset.Version.ShouldBe("1.15.0");
     }
 

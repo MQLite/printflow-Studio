@@ -125,20 +125,23 @@ public sealed class EnvironmentGateCompositionTests
     }
 
     /// <summary>
-    /// The shipped configuration still selects Fake and the accepted preset (§27, §28.22, §33).
+    /// The shipped configuration selects Production against the accepted preset
+    /// (Epic 11500 Part D §13).
     /// </summary>
     /// <remarks>
-    /// A hard PASS condition of this slice, asserted against the committed
-    /// <c>appsettings.json</c> rather than against a fixture: nothing in Part B enables Production,
-    /// and nothing in it mints a new preset for gate wiring.
+    /// Asserted against the committed <c>appsettings.json</c> rather than a fixture, and it was
+    /// <c>Fake</c> here until Part D. That is the whole content of the activation: one value in
+    /// one file, changed once every preceding gate had passed. The preset assertion is beside it
+    /// on purpose — activation is not permitted to mint a new preset identity, so the version
+    /// this installation is verified against is the version Part A accepted.
     /// </remarks>
     [Fact]
-    public void The_shipped_configuration_still_runs_fake_against_the_accepted_preset()
+    public void The_shipped_configuration_runs_production_against_the_accepted_preset()
     {
         PrintFlowConfiguration configuration =
             PrintFlowConfiguration.LoadFromFile(Path.Combine(RepositoryRoot(), "appsettings.json"));
 
-        configuration.Adapters.Mode.ShouldBe("Fake");
+        configuration.Adapters.Mode.ShouldBe("Production");
         configuration.Preset.Version.ShouldBe("1.15.0");
     }
 

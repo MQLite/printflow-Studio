@@ -9,6 +9,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Tests.Integration.Startup;
@@ -277,13 +278,57 @@ public sealed class ApplicationStartupTests
     }
 
     // -------------------------------------------------------------------------------------
-    // §8: production remains fail-closed through the new sequence
+    // §8: an unrecognised adapter mode remains fail-closed through the sequence
     // -------------------------------------------------------------------------------------
 
+    /// <summary>
+    /// A workstation configured for Production starts normally (Epic 11500 Part D §5).
+    /// </summary>
+    /// <remarks>
+    /// This test asserted the opposite until Part D, and correctly: composing Production was a
+    /// deliberate <c>throw</c>, so a Production configuration could not start. Now that the
+    /// adapters compose, the rule that replaces it is the one Part D §5 insists on — a
+    /// Production installation must open even when its workstation cannot pass verification, so
+    /// that the operator has the application in which to see why. What closes is Production
+    /// work, decided per step by the environment gate; what must not close is PrintFlow.
+    /// <para>
+    /// The synthetic layout can never verify, which makes this the honest version of the case.
+    /// </para>
+    /// </remarks>
     [Fact]
-    public async Task A_workstation_configured_for_production_adapters_refuses_to_start()
+    public async Task A_workstation_configured_for_production_adapters_still_starts()
     {
         using TempApplication application = new(adapterMode: "Production");
+        using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
+        RecordingStartupRecoveryService recovery = new();
+
+        using StartupResult result = await RunAsync(application, guard, Substitute(recovery));
+
+        result.Status.CanShowShell.ShouldBeTrue();
+        result.Status.Failure.ShouldBeNull();
+        recovery.CallCount.ShouldBe(1);
+        result.Services.ShouldNotBeNull();
+
+        // Production is composed and refused, which is the whole shape of the activation.
+        result.Services!.GetRequiredService<IMeituProcessor>().Mode
+            .ShouldBe(AdapterExecutionMode.Production);
+        result.Services.GetRequiredService<IEnvironmentGate>()
+            .Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// A workstation configured for an unrecognised mode still refuses to start (§8).
+    /// </summary>
+    /// <remarks>
+    /// The fail-closed half that survives activation unchanged. An installation whose
+    /// configuration no longer names a mode the composition root recognises must stop at
+    /// composition rather than guess — and in particular must never fall back to Fake, which
+    /// would be a workstation quietly running against doubles.
+    /// </remarks>
+    [Fact]
+    public async Task A_workstation_configured_for_an_unknown_adapter_mode_refuses_to_start()
+    {
+        using TempApplication application = new(adapterMode: "Hybrid");
         using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
         RecordingStartupRecoveryService recovery = new();
 

@@ -70,9 +70,13 @@ public sealed class WorkstationVerificationSmoke(ITestOutputHelper output)
 
         // Observation only. The verdict is reported, never asserted: this run exists to state
         // what the workstation is, and a drift it found would be a fact to report rather than a
-        // test to fail (§24). The one thing that is asserted is that the run stayed read-only —
-        // Production is not enabled by observing it.
-        configuration.Adapters.Mode.ShouldBe("Fake");
+        // test to fail (§24).
+        //
+        // The configured mode is printed above and no longer asserted. It read `ShouldBe("Fake")`
+        // while the point was that observing the workstation could not enable Production; since
+        // Epic 11500 Part D the installation ships Production, and the claim that survives is the
+        // one this whole file rests on — nothing here composes an adapter, so nothing here can
+        // change what runs, in either direction.
     }
 
     private static string RepositoryRoot()
