@@ -69,6 +69,14 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
     /// Asserted from a single recorded sequence rather than from three separate counters,
     /// because "each ran once" is also true of an order that saved the TIFF before running W1 —
     /// and that order would produce a file with no white underbase in it.
+    /// <para>
+    /// The sequence ends at the TIFF. Epic 11600 Part B tried appending a cleanup stage that
+    /// closed the run's own working document and withdrew it — the document is modified by
+    /// construction, so the close raises Photoshop's unsaved-changes prompt, which PrintFlow does
+    /// not answer. <c>StubComposedDriver</c> records a close rather than throwing on one, so that
+    /// a close reappearing here shows up as a sequence with a fifth entry rather than as an
+    /// exception from a stub.
+    /// </para>
     /// </remarks>
     [Fact]
     public async Task The_accepted_stage_order_is_identity_then_size_then_W1_then_TIFF()
@@ -78,6 +86,7 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
         await h.Generate();
 
         h.Sequence.ShouldBe(["open", "prepare", "w1", "tiff"]);
+        h.Driver.ClosedPath.ShouldBeNull("the composed run closes nothing.");
     }
 
     // -----------------------------------------------------------------------------------
@@ -676,9 +685,23 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
                 Path.GetFileName(path), Path.GetDirectoryName(path)!, path, title)));
         }
 
+        /// <summary>The absolute path the composed run asked to close — expected to stay null.</summary>
+        /// <remarks>
+        /// This used to throw <c>NotSupportedException("The composed run closes nothing")</c>.
+        /// Recording is better: a close reappearing in the composition should fail the test that
+        /// is about the composition, with the path it named, rather than surfacing as a stub
+        /// exception from whichever test happened to run first.
+        /// </remarks>
+        public string? ClosedPath { get; private set; }
+
         public Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
-            PhotoshopTarget target, string expectedAbsolutePath, CancellationToken cancellationToken) =>
-            throw new NotSupportedException("The composed run closes nothing.");
+            PhotoshopTarget target, string expectedAbsolutePath, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ClosedPath = expectedAbsolutePath;
+            sequence.Add("close");
+            return Task.FromResult(OperationResult.Ok(target));
+        }
 
         public OperationResult<EvidenceRef> CaptureEvidence(PhotoshopTarget target, string reason) =>
             OperationResult.Fail<EvidenceRef>(FailureCode.WorkspaceError, "not used");

@@ -253,6 +253,21 @@ public sealed class ProductionPhotoshopOutputProcessor :
         }
 
         // F. Workflow output, from the validated candidate and nothing else.
+        //
+        //    There is no sixth stage, and Epic 11600 Part B established why there cannot yet be
+        //    one. Part A's Policy A leaves this operation's working document open; Part B measured
+        //    the cost — one document per job, nothing ever removing one, and at fourteen
+        //    accumulated documents the signed Save As surface stopped appearing inside its
+        //    timeout — and then tried the obvious repair. Closing the owned document here does not
+        //    work: the document is modified by construction (the resize and the W1 Action are
+        //    in-memory edits and the TIFF is a Save As *Copy*), so Ctrl+W raises Photoshop's
+        //    unsaved-changes prompt, which PrintFlow does not answer and must not. Composing the
+        //    close would therefore leave a blocking modal standing after essentially every job,
+        //    which is worse than the accumulation it was meant to bound.
+        //
+        //    Closing that gap needs signed evidence for the discard prompt — a preset change, and
+        //    its own slice. Until then this operation closes nothing, and
+        //    ExternalStateHygieneTests asserts that over this source so it cannot drift silently.
         return PhotoshopAdapterOutputFactory.Create(
             request, candidate.Value, _workspace, _clock.GetUtcNow() - started);
     }

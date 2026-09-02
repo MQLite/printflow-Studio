@@ -145,7 +145,7 @@ public sealed class ExternalStateHygieneTests : IDisposable
 
     /// <summary>
     /// A production run leaves its own document open; nothing in the composition closes it
-    /// (§3, §6).
+    /// (§3, §6, and Epic 11600 Part B §10).
     /// </summary>
     /// <remarks>
     /// A structural assertion rather than a behavioural one, and deliberately so. "Photoshop was
@@ -156,6 +156,15 @@ public sealed class ExternalStateHygieneTests : IDisposable
     /// <para>
     /// The seam itself still exists and is still tested — <c>CloseExactDocumentAsync</c> refuses
     /// any document it cannot prove PrintFlow owns — it is simply not part of the operation.
+    /// </para>
+    /// <para>
+    /// <b>Part B tried to change this and reverted.</b> The soak established that unbounded
+    /// accumulation is a real defect, so §10's Outcome B was implemented — the owned document
+    /// closed through this seam after the validated TIFF exists — and then withdrawn, because the
+    /// document is modified by construction and Ctrl+W raises Photoshop's unsaved-changes prompt.
+    /// PrintFlow does not answer that prompt, so composing the close left a blocking modal
+    /// standing after the job instead of a spare document. This test therefore still says what it
+    /// said, and now says it for a measured reason rather than a predicted one.
     /// </para>
     /// </remarks>
     [Fact]
@@ -172,7 +181,15 @@ public sealed class ExternalStateHygieneTests : IDisposable
         int endsAt = source.IndexOf("private static OperationResult<AdapterOutput> Refused", StringComparison.Ordinal);
         endsAt.ShouldBeGreaterThan(generateAt);
 
-        source[generateAt..endsAt].ShouldNotContain("Close", Case.Sensitive);
+        // Comments are stripped first. The body now explains at length why there is no close
+        // here, and a naive substring search would read that explanation as the thing it forbids.
+        string body = string.Join(
+            '\n',
+            source[generateAt..endsAt]
+                .Split('\n')
+                .Where(line => !line.TrimStart().StartsWith("//", StringComparison.Ordinal)));
+
+        body.ShouldNotContain("Close", Case.Sensitive);
     }
 
     // -----------------------------------------------------------------------------------
@@ -495,6 +512,204 @@ public sealed class ExternalStateHygieneTests : IDisposable
         ready.IsSuccess.ShouldBeTrue(ready.IsFailure ? ready.Failure.ToString() : "");
         ready.Value.Target.Process.ProcessId.ShouldBe(h.Process.ProcessId);
         h.Locator.LaunchCount.ShouldBe(0);
+    }
+
+    // -----------------------------------------------------------------------------------
+    // Epic 11600 Part B §19 — the invariants sustained repetition put under load
+    // -----------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A newer installed version of Meitu is never selected, however it presents itself
+    /// (Epic 11600 Part B Phase 0, §19).
+    /// </summary>
+    /// <remarks>
+    /// This is the Part A workstation finding written down as a rule. Meitu updated itself in
+    /// place beside the accepted version, so the machine now holds two installed binaries, and
+    /// the tempting repair — "attach to the Meitu that is running", or "use the newest one
+    /// installed" — would silently move production onto an executable no evidence chain covers.
+    /// <para>
+    /// The adapter resolves Meitu by the accepted absolute path and nothing else, so a process
+    /// running from the newer directory is not a candidate at all: it is not attached to, not
+    /// counted as an instance, and not treated as a reason to skip the launch. The assertion is
+    /// on the executable the run ended up on, because a process-id check alone would keep
+    /// passing if the selection rule were widened to a directory or a file name.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Meitu_never_selects_a_newer_installed_version()
+    {
+        MeituHarness h = BuildMeitu(registerProcess: false);
+
+        // A second installed version, beside the accepted one exactly as the workstation has it.
+        string newerDirectory = Path.Combine(_root, "7.9.9.9");
+        Directory.CreateDirectory(newerDirectory);
+        string newerExecutable = Path.Combine(newerDirectory, "XiuXiu.exe");
+        File.WriteAllBytes(newerExecutable, [0x4D, 0x5A, 0x90, 0x00, 0x09, 0x09, 0x09]);
+
+        // …and it is the one that is running.
+        ExternalProcessRef newer = MeituFakes.Process(9990) with { ExecutablePath = newerExecutable };
+        h.Locator.Register(newer, MeituFakes.Window(
+            handle: 0xB900, owningProcessId: newer.ProcessId, title: MeituFakes.EditorTitle));
+
+        // The accepted binary is launchable and presents the signed empty editor.
+        ExternalProcessRef accepted = MeituFakes.Process(5151) with { ExecutablePath = _meituExecutable };
+        ExternalWindowRef acceptedWindow = MeituFakes.Window(
+            handle: 0xA200, owningProcessId: accepted.ProcessId, title: MeituFakes.EditorTitle);
+        h.Locator.LaunchResult = accepted;
+        h.Locator.Replace(accepted, acceptedWindow);
+        h.Locator.PutInForeground(acceptedWindow);
+        h.Elements.SetTexts(acceptedWindow.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+
+        OperationResult<MeituReadiness> ready = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsSuccess.ShouldBeTrue(ready.IsFailure ? ready.Failure.ToString() : "");
+        ready.Value.Target.Process.ExecutablePath.ShouldBe(_meituExecutable,
+            "the run must be on the accepted binary, not on whichever Meitu happened to be running.");
+        ready.Value.WasLaunched.ShouldBeTrue(
+            "a process from an unaccepted path is not an instance to attach to.");
+        h.Locator.LaunchCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// When a newer instance holds the single-instance slot, PrintFlow fails closed rather than
+    /// falling back to it (Epic 11600 Part B Phase 0, §3, §19).
+    /// </summary>
+    /// <remarks>
+    /// The live shape of the drift, reproduced synthetically. Meitu enforces a single instance
+    /// itself: with a newer one already up, launching the accepted binary hands off to it and the
+    /// launched process exits without ever presenting a window. Part A's smoke hit exactly this
+    /// and reported <c>MeituLaunchFailed</c>.
+    /// <para>
+    /// What is asserted is that this stays a refusal. Availability is the cost, and it is the
+    /// right cost: the alternative is enhancing a customer's asset through an executable whose
+    /// UI nothing has verified. Nothing is sent to the newer instance on the way out.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task A_newer_meitu_holding_the_single_instance_slot_is_refused_not_adopted()
+    {
+        MeituHarness h = BuildMeitu(registerProcess: false);
+
+        string newerDirectory = Path.Combine(_root, "7.9.9.9");
+        Directory.CreateDirectory(newerDirectory);
+        string newerExecutable = Path.Combine(newerDirectory, "XiuXiu.exe");
+        File.WriteAllBytes(newerExecutable, [0x4D, 0x5A, 0x90, 0x00, 0x09, 0x09, 0x09]);
+
+        ExternalProcessRef newer = MeituFakes.Process(9991) with { ExecutablePath = newerExecutable };
+        h.Locator.Register(newer, MeituFakes.Window(
+            handle: 0xB901, owningProcessId: newer.ProcessId, title: MeituFakes.EditorTitle));
+
+        // The accepted binary launches and immediately exits, which is exactly what the live
+        // hand-off looks like from outside — Part A observed "Meitu process 21068 exited before
+        // presenting a window". Modelled as both facts, because they are separate: no window
+        // ever appears, and the process PrintFlow started is gone.
+        ExternalProcessRef handedOff = MeituFakes.Process(5152) with { ExecutablePath = _meituExecutable };
+        h.Locator.LaunchResult = handedOff;
+        h.Locator.LaunchedProcessNeverShowsWindow = true;
+        h.Locator.DeadProcessIds.Add(handedOff.ProcessId);
+
+        OperationResult<MeituReadiness> refused = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        refused.IsFailure.ShouldBeTrue();
+        refused.Failure.Code.ShouldBe(FailureCode.MeituLaunchFailed);
+
+        // The newer instance was never touched: no keystroke, no click, no window activation.
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// Meitu re-enters through its accepted neutral state on every repetition, and refuses the
+    /// moment it is holding something else (Epic 11600 Part B §11, §19).
+    /// </summary>
+    /// <remarks>
+    /// Stage C's claim, made twelve times because once is the claim Part A already proved. The
+    /// point of the repetition is that readiness is re-observed rather than remembered: an
+    /// adapter that cached "Meitu was fine last time" would pass a single-shot test and fail here
+    /// on the iteration where the editor is holding an unexpected asset.
+    /// </remarks>
+    [Fact]
+    public async Task Meitu_re_enters_through_the_accepted_neutral_state_on_every_repetition()
+    {
+        MeituHarness h = BuildMeitu();
+
+        for (int repetition = 1; repetition <= 12; repetition++)
+        {
+            h.Elements.SetTexts(h.Window.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+
+            OperationResult<MeituReadiness> ready = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+            ready.IsSuccess.ShouldBeTrue(
+                $"repetition {repetition}: " + (ready.IsFailure ? ready.Failure.ToString() : ""));
+            ready.Value.WasLaunched.ShouldBeFalse($"repetition {repetition} must reuse the instance.");
+        }
+
+        h.Locator.LaunchCount.ShouldBe(0, "twelve consecutive operations must launch nothing.");
+
+        // The thirteenth finds the editor holding an asset nobody signed for. Meitu's allow-list
+        // has no "editor with some other document" member, so this is Unknown and stops.
+        h.Elements.SetTexts(h.Window.Handle, ["某个客户的图", "保存", "撤销"]);
+
+        OperationResult<MeituReadiness> refused = await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        refused.IsFailure.ShouldBeTrue();
+        refused.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+
+        // And it is ready again as soon as the editor is empty — the refusal is about the screen,
+        // not a latch the adapter set on itself.
+        h.Elements.SetTexts(h.Window.Handle, [.. MeituFakes.EmptyEditorMarkers]);
+        (await h.Adapter.EnsureReadyAsync(CancellationToken.None)).IsSuccess.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Photoshop ownership stays absolute-path based after a stack of prior PrintFlow documents
+    /// (Epic 11600 Part B §9, §19).
+    /// </summary>
+    /// <remarks>
+    /// Policy A's safety argument, put under Stage B's load. Twelve consecutive Photoshop jobs
+    /// leave twelve PrintFlow-owned documents open, all with names from the same generated
+    /// family — so the population of things that could be mistaken for the requested document
+    /// grows with every job, and grows in exactly the direction that would defeat a name check.
+    /// <para>
+    /// The thirteenth open is answered with the right file <i>name</i> from the wrong folder.
+    /// That is refused, which is the whole of what makes accumulation harmless: identity is the
+    /// absolute path, and a leftover can never satisfy it however similar its name.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Photoshop_ownership_stays_absolute_path_based_after_many_prior_documents()
+    {
+        PhotoshopHarness h = BuildPhotoshop();
+
+        for (int job = 1; job <= 12; job++)
+        {
+            WorkspaceFileRef managed = ManagedFile(h, $"PF_SOAK_{job:D2}_WORKING.png");
+            StageOpenThenDocument(h, managed.FileName);
+
+            OperationResult<PhotoshopOpenedDocument> opened =
+                await h.Adapter.OpenManagedWorkingFileAsync(managed, CancellationToken.None);
+
+            opened.IsSuccess.ShouldBeTrue(
+                $"job {job}: " + (opened.IsFailure ? opened.Failure.ToString() : ""));
+            opened.Value.Identity.ObservedFullPath.ShouldBe(
+                Path.Combine(h.ManagedDirectory, managed.FileName));
+        }
+
+        // The thirteenth: the right name, somewhere PrintFlow never named.
+        WorkspaceFileRef thirteenth = ManagedFile(h, "PF_SOAK_13_WORKING.png");
+        StageOpenThenDocument(h, thirteenth.FileName, identityFolder: @"C:\Users\admin\Desktop");
+
+        OperationResult<PhotoshopOpenedDocument> refused =
+            await h.Adapter.OpenManagedWorkingFileAsync(thirteenth, CancellationToken.None);
+
+        refused.IsFailure.ShouldBeTrue();
+        refused.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        refused.Failure.Context["w1ActionInvoked"].ShouldBe("false");
+        refused.Failure.Context["tiffWritten"].ShouldBe("false");
+
+        // Twelve accumulated documents did not turn into twelve extra ways to be sent input.
+        h.Input.Sends.Select(sent => sent.Shortcut).Distinct()
+            .ShouldBeSubsetOf([KnownShortcut.OpenFile, KnownShortcut.SaveAsProbe]);
+        h.Locator.OwnedDialogs.ShouldBeEmpty();
     }
 
     // -----------------------------------------------------------------------------------

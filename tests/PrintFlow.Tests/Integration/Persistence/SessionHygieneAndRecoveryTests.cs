@@ -747,6 +747,128 @@ public sealed class SessionHygieneAndRecoveryTests
     }
 
     // -------------------------------------------------------------------------------------
+    // Epic 11600 Part B §19 — what sustained repetition has to keep being true
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Twelve sequential Photoshop jobs each hold only their own output, and none of the earlier
+    /// eleven changes while the later ones run (Epic 11600 Part B §4 Stage&#160;B, §19).
+    /// </summary>
+    /// <remarks>
+    /// The two-job version of this claim is above; this is the one Stage&#160;B actually makes.
+    /// Two jobs can stay separate by accident — there is only one other session to collide with.
+    /// Twelve, all asking for a TIFF, all rendering names from the same contract, and all leaving
+    /// their working documents open in the same Photoshop, is where a pipeline that resolved
+    /// anything by name rather than by the reference its own attempt reserved would finally
+    /// produce two Revisions pointing at one file.
+    /// <para>
+    /// The digest sweep at the end is the part that could not be inferred from the path
+    /// assertions: identical paths would prove nothing was <i>overwritten</i> only if the bytes
+    /// were also checked, and a later job writing through an earlier job's reference is exactly
+    /// the failure that leaves the path list intact.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Twelve_sequential_Photoshop_jobs_each_hold_only_their_own_output()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+
+        List<SessionId> sessions = [];
+        Dictionary<string, Sha256> digests = new(StringComparer.Ordinal);
+
+        for (int job = 1; job <= 12; job++)
+        {
+            // Deliberately near-identical operator-facing names: filename similarity must be
+            // useless as a separator.
+            SessionId id = await PhotoshopJobAsync(harness, service, $"soak-job-{job}", $"soak{job}.png");
+            sessions.Add(id);
+
+            SessionAggregate aggregate = await LoadAsync(harness, id);
+            StateOf(aggregate, StepKind.PhotoshopOutput).ShouldBe(StepState.ReviewRequired);
+
+            Revision tiff = OutputRevision(aggregate);
+            tiff.File.RelativePath.ShouldStartWith(aggregate.Session.Workspace.RelativePath);
+            digests.ShouldNotContainKey(tiff.File.RelativePath,
+                $"job {job} selected an output path an earlier session already owns.");
+            digests[tiff.File.RelativePath] = DigestOf(harness, tiff.File);
+        }
+
+        sessions.Distinct().Count().ShouldBe(12);
+
+        // Every earlier output is still byte-for-byte what it was when it was written, after
+        // eleven further jobs went through the same Photoshop and the same workspace.
+        foreach (SessionId id in sessions)
+        {
+            SessionAggregate aggregate = await LoadAsync(harness, id);
+            Revision tiff = OutputRevision(aggregate);
+
+            DigestOf(harness, tiff.File).ShouldBe(digests[tiff.File.RelativePath],
+                $"session {id} output changed while later jobs ran.");
+            aggregate.Attempts.ShouldAllBe(attempt => attempt.SessionId == id);
+            aggregate.Revisions.ShouldAllBe(revision => revision.SessionId == id);
+            aggregate.Outputs.Count.ShouldBe(1);
+        }
+    }
+
+    /// <summary>
+    /// A restart with many historical <c>ReviewRequired</c> jobs mutates none of them
+    /// (Epic 11600 Part B §14, §19).
+    /// </summary>
+    /// <remarks>
+    /// Part A proved this for one finished session. The soak's restart happens on top of
+    /// thirty-two, which is a different question: recovery walks what it finds, and a pass that
+    /// treated a completed attempt as a leftover would do it to all of them at once. So the
+    /// assertion is over the whole population — every state, every revision id, every attempt
+    /// status and every output digest — plus a whole-workspace file census, because "nothing
+    /// changed" has to include "nothing was quarantined or moved either".
+    /// </remarks>
+    [Fact]
+    public async Task A_restart_with_many_historical_ReviewRequired_jobs_mutates_none_of_them()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+
+        List<SessionId> sessions = [];
+        for (int job = 1; job <= 8; job++)
+        {
+            sessions.Add(await PhotoshopJobAsync(harness, service, $"restart-many-{job}", $"rm{job}.png"));
+        }
+
+        Dictionary<SessionId, SessionAggregate> before = [];
+        Dictionary<SessionId, Dictionary<string, Sha256>> digestsBefore = [];
+        foreach (SessionId id in sessions)
+        {
+            SessionAggregate aggregate = await LoadAsync(harness, id);
+            before[id] = aggregate;
+            digestsBefore[id] = DigestsOf(harness, aggregate);
+        }
+
+        string[] filesBefore = WorkspaceFileList(harness);
+
+        // A brand-new process, recovery first, exactly as ApplicationStartup orders it.
+        StartupRecoveryReport report = await RecoverAsync(harness, new FakeProcessLiveness(ProcessLiveness.Dead));
+
+        report.InterruptedAttemptCount.ShouldBe(0, "eight completed jobs leave nothing to interrupt.");
+        report.Entries.ShouldNotContain(e => e.Action == StartupRecoveryAction.WorkingFileQuarantined);
+        report.Entries.ShouldNotContain(e => e.Action == StartupRecoveryAction.RecoveryFailed);
+
+        foreach (SessionId id in sessions)
+        {
+            SessionAggregate after = await LoadAsync(harness, id);
+
+            StateOf(after, StepKind.PhotoshopOutput).ShouldBe(StepState.ReviewRequired);
+            after.Revisions.Select(r => r.Id).ShouldBe(before[id].Revisions.Select(r => r.Id));
+            after.Attempts.Select(a => (a.Id, a.Status))
+                .ShouldBe(before[id].Attempts.Select(a => (a.Id, a.Status)));
+            DigestsOf(harness, after).ShouldBe(digestsBefore[id]);
+        }
+
+        // And startup was not destructive anywhere else either.
+        WorkspaceFileList(harness).ShouldBe(filesBefore);
+    }
+
+    // -------------------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------------------
 

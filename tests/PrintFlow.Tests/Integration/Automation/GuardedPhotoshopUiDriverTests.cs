@@ -533,6 +533,75 @@ public sealed class GuardedPhotoshopUiDriverTests
         h.Input.Sends.ShouldNotContain(s => s.Shortcut == KnownShortcut.CloseActiveDocument);
     }
 
+    /// <summary>
+    /// A title that changed without the document going away is not a close
+    /// (Epic 11600 Part B §10).
+    /// </summary>
+    /// <remarks>
+    /// The regression this exists for was found on the workstation, not here. The wait used to
+    /// end when the window title stopped being <i>equal</i> to the title recorded during the
+    /// identity probe, and Photoshop's title carries more than the document's name — it also
+    /// carries the unsaved-changes marker. So a document that merely stopped being dirty produced
+    /// a different title and was reported as closed while it was still loaded: nine consecutive
+    /// calls returned success with the open-document count unmoved and the same file still named
+    /// in the title.
+    /// <para>
+    /// Here the document stays exactly where it is and only the dirty marker moves, which is the
+    /// smallest possible version of that change. Success would be a lie; a timeout saying the
+    /// document may still be loaded is the truth, and it is the direction that fails safe.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task A_document_that_only_stopped_being_dirty_is_not_reported_as_closed()
+    {
+        string dirty = PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *";
+        Harness h = Build(windowTitle: dirty);
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+
+        // Ctrl+W arrives, and all that changes is the marker: the same document, still loaded.
+        OnShortcut(
+            h,
+            KnownShortcut.CloseActiveDocument,
+            () => h.Locator.Replace(
+                h.Target.Process,
+                PhotoshopFakes.Window(title: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName))));
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue("the document is still loaded, so the close did not finish.");
+        closed.Failure.Code.ShouldBe(FailureCode.Timeout);
+        closed.Failure.TechnicalDetail.ShouldContain("still shows the document");
+    }
+
+    /// <summary>
+    /// A different document coming to the front <i>is</i> a close (Epic 11600 Part B §10).
+    /// </summary>
+    /// <remarks>
+    /// The other half of the same rule, and the reason the fix is a name comparison rather than
+    /// "wait for the no-document title": in sustained use the next thing in front is usually the
+    /// previous job's document, not an empty editor.
+    /// </remarks>
+    [Fact]
+    public async Task The_previous_document_coming_to_the_front_completes_the_close()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+
+        OnShortcut(
+            h,
+            KnownShortcut.CloseActiveDocument,
+            () => h.Locator.Replace(
+                h.Target.Process,
+                PhotoshopFakes.Window(title: PhotoshopFakes.TitleFor("PFTEST-EARLIER_WORKING.png") + " *")));
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : "");
+        closed.Value.Window.Title.ShouldContain("PFTEST-EARLIER_WORKING.png");
+    }
+
     // -----------------------------------------------------------------------------------
     // State observation (§7)
     // -----------------------------------------------------------------------------------

@@ -525,6 +525,32 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     private async Task<OperationResult<PhotoshopTarget>> AwaitDocumentClosedAsync(
         PhotoshopTarget target, PhotoshopDocumentIdentity closed, CancellationToken cancellationToken)
     {
+        // Read once, outside the loop: the signature cannot change while a document is closing,
+        // and re-verifying the whole preset on every poll would be a different operation.
+        OperationResult<PhotoshopBaseline> verifiedBaseline = _baselines.GetVerifiedBaseline();
+        if (verifiedBaseline.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(verifiedBaseline.Failure);
+        }
+
+        // Without the signed identity signature there is no way to say which document the title
+        // names, so there is no way to say the close finished. That is a refusal, not an
+        // assumption: the alternative is reporting success for a document still on screen.
+        if (verifiedBaseline.Value.DocumentIdentity is not { } identity)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "The verified evidence chain carries no document-identity signature, so PrintFlow " +
+                "cannot confirm the document closed and will not claim that it did.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["closedDocument"] = closed.ObservedFullPath,
+                    ["missingEvidence"] = "document-identity",
+                }));
+        }
+
+        string closedFileName = closed.ObservedFileName;
         DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogCloseTimeout;
         while (true)
         {
@@ -560,8 +586,18 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
                     }));
             }
 
-            if (!string.Equals(
-                    verified.Value.Window.Title, closed.WindowTitle, StringComparison.Ordinal))
+            // "The document is gone" is asked as a question about the document, not about the
+            // string in the title bar. Comparing whole titles looked equivalent and is not: the
+            // title also carries Photoshop's unsaved-changes marker, so a document that merely
+            // stopped being dirty produced a different title and was reported as closed while it
+            // was still loaded — observed live in Epic 11600 Part B, nine consecutive times, with
+            // the open-document count unmoved and the same file still named in the title.
+            //
+            // The name test is used in the negative direction only, which is the safe one: a
+            // title that no longer names this file cannot be this file, whereas "the title
+            // changed" says nothing about which document is in front.
+            if (!PhotoshopDocumentIdentityRule.TitleNamesExpectedDocument(
+                    identity, verified.Value.Window.Title, closedFileName))
             {
                 return verified;
             }
