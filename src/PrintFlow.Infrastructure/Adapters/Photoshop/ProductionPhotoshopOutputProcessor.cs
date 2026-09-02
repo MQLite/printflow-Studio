@@ -252,24 +252,25 @@ public sealed class ProductionPhotoshopOutputProcessor :
             return Refused(candidate.Failure);
         }
 
-        // F. Workflow output, from the validated candidate and nothing else.
-        //
-        //    There is no sixth stage, and Epic 11600 Part B established why there cannot yet be
-        //    one. Part A's Policy A leaves this operation's working document open; Part B measured
-        //    the cost — one document per job, nothing ever removing one, and at fourteen
-        //    accumulated documents the signed Save As surface stopped appearing inside its
-        //    timeout — and then tried the obvious repair. Closing the owned document here does not
-        //    work: the document is modified by construction (the resize and the W1 Action are
-        //    in-memory edits and the TIFF is a Save As *Copy*), so Ctrl+W raises Photoshop's
-        //    unsaved-changes prompt, which PrintFlow does not answer and must not. Composing the
-        //    close would therefore leave a blocking modal standing after essentially every job,
-        //    which is worse than the accumulation it was meant to bound.
-        //
-        //    Closing that gap needs signed evidence for the discard prompt — a preset change, and
-        //    its own slice. Until then this operation closes nothing, and
-        //    ExternalStateHygieneTests asserts that over this source so it cannot drift silently.
+        // F. Forward-only owned-document cleanup. The TIFF has already settled and passed the
+        //    independent parser. The close seam now re-proves the active Working path, establishes
+        //    that no dialog predates its own Ctrl+W, and can press only the discard control from
+        //    the signed prompt shape. A refusal is an explicit warning, not a lost production
+        //    result: the validated TIFF remains the authority and the next operation will inspect
+        //    the blocking state before doing anything.
+        OperationResult<PhotoshopTarget> cleanup = await CloseExactDocumentAsync(
+            opened.Value, request.ApprovedInput, cancellationToken).ConfigureAwait(false);
+        string cleanupNote = cleanup.IsSuccess
+            ? "cleanup signed owned-document discard completed; expected Working document gone"
+            : $"cleanup WARNING: validated TIFF retained; Photoshop cleanup refused " +
+              $"({cleanup.Failure.Code}: {cleanup.Failure.TechnicalDetail})";
+
+        // G. Workflow output is constructed only after the post-cleanup re-read below proves the
+        //    TIFF is still byte-identical to the independently validated candidate. Cleanup failure
+        //    remains a successful AdapterOutput with the warning above; TIFF drift remains a real
+        //    validation failure.
         return PhotoshopAdapterOutputFactory.Create(
-            request, candidate.Value, _workspace, _clock.GetUtcNow() - started);
+            request, candidate.Value, _workspace, _clock.GetUtcNow() - started, cleanupNote);
     }
 
     /// <summary>

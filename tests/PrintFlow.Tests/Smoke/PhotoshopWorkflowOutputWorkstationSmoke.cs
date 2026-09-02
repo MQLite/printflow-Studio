@@ -20,6 +20,8 @@ using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
+using static PrintFlow.Tests.Fixtures.WorkstationObservation;
+
 namespace PrintFlow.Tests.Smoke;
 
 /// <summary>
@@ -137,9 +139,13 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
         Console.WriteLine($"size decision        : max {dimensions.MaxWidthMm}x{dimensions.MaxHeightMm} mm @ 300 ppi");
         Console.WriteLine($"W1 branch            : {WhiteUnderbaseBranch.W1_1px}");
         Console.WriteLine("starting real Photoshop run ...");
+        WindowClassCensus beforeWindows = WindowClassCensus.Read("Photoshop");
+        int beforeDocuments = beforeWindows.ByClass.GetValueOrDefault("OWL.Document");
 
         OperationResult<SessionView> produced = await service.ExecuteAsync(
             id, new WorkflowCommand.StartStep(StepKind.PhotoshopOutput), "qa", CancellationToken.None);
+        WindowClassCensus afterWindows = await AwaitDocumentCountAsync(beforeDocuments);
+        int afterDocuments = afterWindows.ByClass.GetValueOrDefault("OWL.Document");
 
         SessionAggregate aggregate = (await new SqliteSessionRepository(factory)
             .LoadAsync(id, CancellationToken.None)).Value!;
@@ -179,13 +185,14 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
         Console.WriteLine($"output revision id   : {attempt.OutputRevisionId}");
         Console.WriteLine($"step state           : {step.State}");
         Console.WriteLine($"adapter notes        : {attempt.AdapterNotes}");
-        Console.WriteLine("cleanup policy       : TIFF, database and workspace retained; " +
-            "operator closes the synthetic document manually with Don't Save");
+        Console.WriteLine($"document census      : {beforeDocuments} -> {afterDocuments}");
+        Console.WriteLine("cleanup policy       : signed owned-document discard after TIFF validation");
 
         // §36's required end-to-end facts.
         attempt.Status.ShouldBe(AttemptStatus.Succeeded);
         attempt.OutputRevisionId.ShouldBe(tiff.Id);
         attempt.AdapterNotes.ShouldNotBeNullOrWhiteSpace();
+        attempt.AdapterNotes.ShouldContain("cleanup signed owned-document discard completed");
         step.State.ShouldBe(StepState.ReviewRequired);
         step.CurrentRevisionId.ShouldBe(tiff.Id);
 
@@ -202,6 +209,7 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
             .InspectAsync(tiffPath, CancellationToken.None));
         onDisk.Sha256.ShouldBe(tiff.Facts.Sha256);
         onDisk.ByteLength.ShouldBe(tiff.Facts.ByteLength);
+        afterDocuments.ShouldBe(beforeDocuments, "this job must retain no new dirty Working document.");
 
         // The upstream source is unchanged, and only one TIFF was produced.
         Revision source = aggregate.Revisions.Single(r => r.Id == tiff.SourceRevisionId!.Value);
@@ -217,6 +225,25 @@ public sealed class PhotoshopWorkflowOutputWorkstationSmoke
                 StringComparison.Ordinal));
 
         Console.WriteLine("ReviewRequired reached. No approval, rejection or promotion was performed.");
+    }
+
+    private static async Task<WindowClassCensus> AwaitDocumentCountAsync(int expected)
+    {
+        DateTimeOffset deadline = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(5);
+        WindowClassCensus census;
+        do
+        {
+            census = WindowClassCensus.Read("Photoshop");
+            if (census.ByClass.GetValueOrDefault("OWL.Document") == expected)
+            {
+                return census;
+            }
+
+            await Task.Delay(100);
+        }
+        while (DateTimeOffset.UtcNow < deadline);
+
+        return census;
     }
 
     /// <summary>

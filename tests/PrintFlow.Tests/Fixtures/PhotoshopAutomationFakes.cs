@@ -81,13 +81,29 @@ internal static class PhotoshopFakes
         CancelControlId: 2,
         CancelControlClass: "Button");
 
+    internal static PhotoshopOwnedDocumentCleanupSignature OwnedDocumentCleanup() => new(
+        SaveAsCopyMaySubstituteIdentityFileExtension: true,
+        PromptWindowClassName: "PSDialogBox",
+        PromptTitle: "Adobe Photoshop",
+        Message: new PhotoshopDiscardPromptMessageSignature(
+            ControlId: 203,
+            ControlClass: "Static",
+            TextPrefix: "要在关闭之前存储对 Adobe Photoshop 文档 “",
+            TextSuffix: "”的更改吗？",
+            TruncationMarker: "...",
+            MinimumDocumentNamePrefixLength: 16),
+        SaveControl: new PhotoshopDiscardPromptControlSignature(10, "Button", "是(&Y)"),
+        DiscardControl: new PhotoshopDiscardPromptControlSignature(11, "Button", "否(&N)"),
+        CancelControl: new PhotoshopDiscardPromptControlSignature(12, "Button", "取消"));
+
     internal static PhotoshopBaseline Baseline(
         PhotoshopWindowStateSignature? states = null,
         PhotoshopOpenDialogSignature? openDialog = null,
         PhotoshopDocumentIdentitySignature? identity = null,
         bool includeStates = true,
         bool includeOpenDialog = true,
-        bool includeIdentity = true) =>
+        bool includeIdentity = true,
+        bool includeCleanup = true) =>
         new(ExecutablePath,
             ExecutableSha256,
             AcceptedProductVersion: "20.0",
@@ -98,7 +114,9 @@ internal static class PhotoshopFakes
             ExcludedInstallations: [@"C:\Fake\Adobe\Adobe Photoshop 2026\Photoshop.exe"],
             includeStates ? states ?? WindowStates() : null,
             includeOpenDialog ? openDialog ?? OpenDialog() : null,
-            includeIdentity ? identity ?? DocumentIdentity() : null);
+            includeIdentity ? identity ?? DocumentIdentity() : null,
+            W1Action: null,
+            OwnedDocumentCleanup: includeCleanup ? OwnedDocumentCleanup() : null);
 
     internal static ExternalProcessRef Process(int id = 7777) =>
         new(id, ExecutablePath, new DateTimeOffset(2026, 8, 28, 9, 0, 0, TimeSpan.Zero));

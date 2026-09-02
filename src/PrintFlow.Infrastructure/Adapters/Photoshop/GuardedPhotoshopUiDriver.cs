@@ -402,7 +402,11 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
         // reads did. A probe that left the Save As surface up on a failure would leave Photoshop
         // modal, which is a worse outcome than the failure being reported (§13).
         OperationResult<PhotoshopDocumentIdentity> identity =
-            ReadIdentity(ready.Value, dialog.Value, signature);
+            ReadIdentity(
+                ready.Value,
+                dialog.Value,
+                signature,
+                baseline.Value.OwnedDocumentCleanup);
 
         OperationResult<Unit> cancelled = await CancelDialogAsync(
             ready.Value, dialog.Value, signature.CancelControlId, signature.CancelControlClass,
@@ -420,7 +424,10 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
 
     /// <summary>Reads the document's own name and folder from the raised identity surface.</summary>
     private OperationResult<PhotoshopDocumentIdentity> ReadIdentity(
-        PhotoshopTarget target, ExternalWindowRef dialog, PhotoshopDocumentIdentitySignature signature)
+        PhotoshopTarget target,
+        ExternalWindowRef dialog,
+        PhotoshopDocumentIdentitySignature signature,
+        PhotoshopOwnedDocumentCleanupSignature? cleanup)
     {
         OperationResult<VerifiedControlRef> fileNameControl = _controls.Locate(
             target.Process, dialog.Handle, signature.FileNameControlId, signature.FileNameControlClass);
@@ -455,12 +462,35 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             return OperationResult.Fail<PhotoshopDocumentIdentity>(folder.Failure);
         }
 
+        string? titleFileName = PhotoshopDocumentIdentityRule.DocumentNameInTitle(
+            signature, target.Window.Title);
+        string authoritativeFileName = fileName.Value;
+        if (cleanup is { SaveAsCopyMaySubstituteIdentityFileExtension: true })
+        {
+            if (!PhotoshopDocumentIdentityRule.SaveAsCopyFileNameCorroboratesTitle(
+                    fileName.Value, titleFileName))
+            {
+                return OperationResult.Fail<PhotoshopDocumentIdentity>(OperationFailure.Create(
+                    FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                    "The signed post-Save-As-Copy identity surface did not corroborate the exact " +
+                    "document name in Photoshop's title. Identity is refused.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["titleDocumentName"] = titleFileName ?? "(none)",
+                        ["saveAsFileName"] = fileName.Value,
+                    }));
+            }
+
+            authoritativeFileName = titleFileName!;
+        }
+
         OperationResult<string> fullPath =
-            PhotoshopDocumentIdentityRule.ResolveObservedPath(folder.Value, fileName.Value);
+            PhotoshopDocumentIdentityRule.ResolveObservedPath(folder.Value, authoritativeFileName);
         return fullPath.IsFailure
             ? OperationResult.Fail<PhotoshopDocumentIdentity>(fullPath.Failure)
             : OperationResult.Ok(new PhotoshopDocumentIdentity(
-                fileName.Value, folder.Value, fullPath.Value, target.Window.Title));
+                authoritativeFileName, folder.Value, fullPath.Value, target.Window.Title));
     }
 
     // -----------------------------------------------------------------------------------
@@ -473,6 +503,20 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedAbsolutePath);
+
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(baseline.Failure);
+        }
+
+        // A dialog that existed before the close request can never become PrintFlow's prompt.
+        OperationResult<PhotoshopTarget> initiallyClear = await EnsureNoBlockingDialogAsync(target)
+            .ConfigureAwait(false);
+        if (initiallyClear.IsFailure)
+        {
+            return initiallyClear;
+        }
 
         // The identity is re-proved here rather than taken from the caller, and re-proved
         // immediately before the keystroke. Ctrl+W closes whatever is active *now*, so an
@@ -501,7 +545,17 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
                 }));
         }
 
-        OperationResult<PhotoshopTarget> ready = await ActivateAsync(target, cancellationToken)
+        // The identity probe raises and cancels its own signed Save As surface. Check the boundary
+        // again after it has gone: anything else present now predates Ctrl+W and is never owned by
+        // the close transition.
+        OperationResult<PhotoshopTarget> clearBoundary = await EnsureNoBlockingDialogAsync(target)
+            .ConfigureAwait(false);
+        if (clearBoundary.IsFailure)
+        {
+            return clearBoundary;
+        }
+
+        OperationResult<PhotoshopTarget> ready = await ActivateAsync(clearBoundary.Value, cancellationToken)
             .ConfigureAwait(false);
         if (ready.IsFailure)
         {
@@ -514,8 +568,50 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             return OperationResult.Fail<PhotoshopTarget>(sent.Failure);
         }
 
-        return await AwaitDocumentClosedAsync(ready.Value, identity.Value, cancellationToken)
+        return await AwaitDocumentClosedAsync(
+                ready.Value,
+                identity.Value,
+                baseline.Value.OwnedDocumentCleanup,
+                cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <summary>Requires an enabled host and no titled owned surface before Ctrl+W is sent.</summary>
+    private async Task<OperationResult<PhotoshopTarget>> EnsureNoBlockingDialogAsync(
+        PhotoshopTarget target)
+    {
+        OperationResult<PhotoshopTarget> verified = await VerifyTargetAsync(target).ConfigureAwait(false);
+        if (verified.IsFailure)
+        {
+            return verified;
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
+            _locator.FindOwnedDialogs(verified.Value.Process, verified.Value.Window);
+        if (dialogs.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(AsPhotoshop(dialogs.Failure));
+        }
+
+        ExternalWindowRef[] titled =
+            [.. dialogs.Value.Where(dialog => !string.IsNullOrWhiteSpace(dialog.Title))];
+        if (!verified.Value.Window.IsEnabled || titled.Length > 0)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopBlockingDialog,
+                "Photoshop already had a blocking surface before PrintFlow requested the close. " +
+                "It cannot be attributed to this operation, so nothing was closed or dismissed.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["preExistingDialog"] = "true",
+                    ["dialogTitles"] = string.Join(" | ", titled.Select(dialog => dialog.Title)),
+                    ["inputSent"] = "false",
+                    ["discardInvoked"] = "false",
+                }));
+        }
+
+        return verified;
     }
 
     /// <summary>
@@ -523,7 +619,10 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     /// prompt that appears.
     /// </summary>
     private async Task<OperationResult<PhotoshopTarget>> AwaitDocumentClosedAsync(
-        PhotoshopTarget target, PhotoshopDocumentIdentity closed, CancellationToken cancellationToken)
+        PhotoshopTarget target,
+        PhotoshopDocumentIdentity closed,
+        PhotoshopOwnedDocumentCleanupSignature? cleanup,
+        CancellationToken cancellationToken)
     {
         // Read once, outside the loop: the signature cannot change while a document is closing,
         // and re-verifying the whole preset on every poll would be a different operation.
@@ -564,26 +663,70 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
 
             OperationResult<IReadOnlyList<ExternalWindowRef>> dialogs =
                 _locator.FindOwnedDialogs(verified.Value.Process, verified.Value.Window);
+            if (dialogs.IsFailure)
+            {
+                return OperationResult.Fail<PhotoshopTarget>(AsPhotoshop(dialogs.Failure));
+            }
 
-            // An unsaved-changes prompt is the one thing that can appear here, and PrintFlow
-            // does not answer it. Part A modifies nothing, so its appearance means something
-            // outside this attempt changed the document — exactly when a guess would be worst.
-            string[] prompts = dialogs.IsSuccess
-                ? [.. TitledDialogs(dialogs.Value)]
-                : [];
+            ExternalWindowRef[] prompts =
+                [.. dialogs.Value.Where(dialog => !string.IsNullOrWhiteSpace(dialog.Title))];
 
             if (prompts.Length > 0)
             {
-                return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
-                    FailureCode.PhotoshopBlockingDialog,
-                    "Photoshop raised a dialog while closing the document. PrintFlow does not answer " +
-                    "prompts it did not raise; the operator must resolve it.",
-                    isRetryable: false,
-                    context: new Dictionary<string, string>
-                    {
-                        ["dialogTitles"] = string.Join(" | ", prompts),
-                        ["inputSent"] = "false",
-                    }));
+                if (cleanup is null || prompts.Length != 1)
+                {
+                    return UnknownClosePrompt(prompts, "the signed owned-document cleanup evidence is absent or the prompt is ambiguous");
+                }
+
+                OperationResult<VerifiedControlRef> discard = RecognizeOwnedDiscardPrompt(
+                    verified.Value, prompts[0], closed, cleanup);
+                if (discard.IsFailure)
+                {
+                    return OperationResult.Fail<PhotoshopTarget>(discard.Failure);
+                }
+
+                OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+                if (foreground.IsFailure || foreground.Value.ProcessId != verified.Value.Process.ProcessId ||
+                    foreground.Value.Handle != prompts[0].Handle)
+                {
+                    return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                        FailureCode.PhotoshopTargetLost,
+                        "The signed discard prompt did not hold the foreground immediately before " +
+                        "its control would have been invoked. Nothing was pressed.",
+                        isRetryable: true,
+                        context: new Dictionary<string, string>
+                        {
+                            ["discardInvoked"] = "false",
+                            ["inputSent"] = "false",
+                        }));
+                }
+
+                OperationResult<ExternalWindowRef> promptNow = _locator.Refresh(prompts[0].Handle);
+                if (promptNow.IsFailure || !promptNow.Value.IsVisible || !promptNow.Value.IsEnabled ||
+                    !string.Equals(promptNow.Value.ClassName, cleanup.PromptWindowClassName, StringComparison.Ordinal) ||
+                    !string.Equals(promptNow.Value.Title, cleanup.PromptTitle, StringComparison.Ordinal))
+                {
+                    return UnknownClosePrompt(prompts, "the signed prompt changed before discard invocation");
+                }
+
+                OperationResult<Unit> pressed = _controls.Press(verified.Value.Process, discard.Value);
+                if (pressed.IsFailure)
+                {
+                    return OperationResult.Fail<PhotoshopTarget>(AsPhotoshop(pressed.Failure));
+                }
+
+                OperationResult<Unit> promptClosed = await AwaitDialogClosedAsync(
+                    verified.Value, prompts[0].Handle, _options.DialogCloseTimeout, cancellationToken)
+                    .ConfigureAwait(false);
+                if (promptClosed.IsFailure)
+                {
+                    return OperationResult.Fail<PhotoshopTarget>(promptClosed.Failure);
+                }
+
+                return await ConfirmExpectedDocumentGoneAsync(
+                    verified.Value, closed, identity, discardInvoked: true,
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             // "The document is gone" is asked as a question about the document, not about the
@@ -604,6 +747,15 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
 
             if (_clock.GetUtcNow() >= deadline)
             {
+                OperationResult<PhotoshopTarget> gone = await ConfirmExpectedDocumentGoneAsync(
+                    verified.Value, closed, identity, discardInvoked: false,
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                if (gone.IsSuccess)
+                {
+                    return gone;
+                }
+
                 return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
                     FailureCode.Timeout,
                     "Photoshop still shows the document PrintFlow asked to close. Nothing further was " +
@@ -615,6 +767,187 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
         }
     }
+
+    private OperationResult<VerifiedControlRef> RecognizeOwnedDiscardPrompt(
+        PhotoshopTarget target,
+        ExternalWindowRef dialog,
+        PhotoshopDocumentIdentity closed,
+        PhotoshopOwnedDocumentCleanupSignature signature)
+    {
+        if (!string.Equals(dialog.ClassName, signature.PromptWindowClassName, StringComparison.Ordinal) ||
+            !string.Equals(dialog.Title, signature.PromptTitle, StringComparison.Ordinal) ||
+            !dialog.IsVisible || !dialog.IsEnabled)
+        {
+            return UnknownDiscardControl("the owned window does not match the signed prompt window");
+        }
+
+        OperationResult<VerifiedControlRef> message = LocateExactControl(
+            target, dialog, signature.Message.ControlId, signature.Message.ControlClass, expectedText: null);
+        if (message.IsFailure)
+        {
+            return message;
+        }
+
+        OperationResult<string> messageText = _controls.ReadText(target.Process, message.Value);
+        if (messageText.IsFailure || !DiscardMessageNamesDocument(
+                signature.Message, messageText.IsSuccess ? messageText.Value : null, closed.ObservedFileName))
+        {
+            return UnknownDiscardControl("the signed question does not name the document PrintFlow just closed");
+        }
+
+        OperationResult<VerifiedControlRef> save = LocateExactControl(
+            target, dialog, signature.SaveControl.ControlId, signature.SaveControl.ControlClass,
+            signature.SaveControl.Text);
+        OperationResult<VerifiedControlRef> discard = LocateExactControl(
+            target, dialog, signature.DiscardControl.ControlId, signature.DiscardControl.ControlClass,
+            signature.DiscardControl.Text);
+        OperationResult<VerifiedControlRef> cancel = LocateExactControl(
+            target, dialog, signature.CancelControl.ControlId, signature.CancelControl.ControlClass,
+            signature.CancelControl.Text);
+
+        return save.IsSuccess && discard.IsSuccess && cancel.IsSuccess
+            ? discard
+            : UnknownDiscardControl("the signed Save/discard/Cancel control set is incomplete or altered");
+    }
+
+    private OperationResult<VerifiedControlRef> LocateExactControl(
+        PhotoshopTarget target,
+        ExternalWindowRef dialog,
+        int controlId,
+        string controlClass,
+        string? expectedText)
+    {
+        OperationResult<VerifiedControlRef> control = _controls.Locate(
+            target.Process, dialog.Handle, controlId, controlClass);
+        if (control.IsFailure || expectedText is null)
+        {
+            return control.IsFailure
+                ? OperationResult.Fail<VerifiedControlRef>(AsPhotoshop(control.Failure))
+                : control;
+        }
+
+        OperationResult<string> text = _controls.ReadText(target.Process, control.Value);
+        return text.IsSuccess && string.Equals(text.Value, expectedText, StringComparison.Ordinal)
+            ? control
+            : UnknownDiscardControl($"control {controlId}/{controlClass} does not carry its signed text");
+    }
+
+    private static bool DiscardMessageNamesDocument(
+        PhotoshopDiscardPromptMessageSignature signature, string? text, string documentFileName)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        static string CollapseWhitespace(string value) =>
+            string.Join(" ", value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+
+        string normalized = CollapseWhitespace(text);
+        string prefix = CollapseWhitespace(signature.TextPrefix);
+        string suffix = CollapseWhitespace(signature.TextSuffix);
+        if (!normalized.StartsWith(prefix, StringComparison.Ordinal) ||
+            !normalized.EndsWith(suffix, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        string shownName = normalized[prefix.Length..^suffix.Length];
+        if (string.Equals(shownName, documentFileName, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!shownName.EndsWith(signature.TruncationMarker, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        string shownPrefix = shownName[..^signature.TruncationMarker.Length];
+        return shownPrefix.Length >= signature.MinimumDocumentNamePrefixLength &&
+               documentFileName.StartsWith(shownPrefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<OperationResult<PhotoshopTarget>> ConfirmExpectedDocumentGoneAsync(
+        PhotoshopTarget target,
+        PhotoshopDocumentIdentity closed,
+        PhotoshopDocumentIdentitySignature identity,
+        bool discardInvoked,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogCloseTimeout;
+        OperationResult<PhotoshopTarget> verified;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            verified = await VerifyTargetAsync(target).ConfigureAwait(false);
+            if (verified.IsFailure)
+            {
+                return verified;
+            }
+
+            if (!PhotoshopDocumentIdentityRule.TitleNamesExpectedDocument(
+                    identity, verified.Value.Window.Title, closed.ObservedFileName))
+            {
+                return verified;
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                break;
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+
+        // A previous document with the same basename may have come forward. Probe it once by the
+        // signed absolute-path route; a different directory proves it is not the document just
+        // closed and is never followed by a second close.
+        OperationResult<PhotoshopDocumentIdentity> active = await ProbeDocumentIdentityAsync(
+            verified.Value, cancellationToken).ConfigureAwait(false);
+        if (active.IsSuccess && !PhotoshopDocumentIdentityRule.MatchesExpectedDocument(
+                closed.ObservedFullPath, active.Value.ObservedFullPath))
+        {
+            return verified;
+        }
+
+        return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+            FailureCode.Timeout,
+            "The exact Working document PrintFlow asked to close is still active, or its absence " +
+            "could not be proved by the signed absolute-path identity route.",
+            isRetryable: true,
+            context: new Dictionary<string, string>
+            {
+                ["expectedDocument"] = closed.ObservedFullPath,
+                ["discardInvoked"] = discardInvoked.ToString().ToLowerInvariant(),
+            }));
+    }
+
+    private static OperationResult<PhotoshopTarget> UnknownClosePrompt(
+        IReadOnlyCollection<ExternalWindowRef> prompts, string reason) =>
+        OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+            FailureCode.PhotoshopBlockingDialog,
+            $"Photoshop raised a surface after the owned-document close, but {reason}. " +
+            "No control was pressed.",
+            isRetryable: false,
+            context: new Dictionary<string, string>
+            {
+                ["dialogTitles"] = string.Join(" | ", prompts.Select(prompt => prompt.Title)),
+                ["discardInvoked"] = "false",
+                ["inputSent"] = "false",
+            }));
+
+    private static OperationResult<VerifiedControlRef> UnknownDiscardControl(string reason) =>
+        OperationResult.Fail<VerifiedControlRef>(OperationFailure.Create(
+            FailureCode.PhotoshopBlockingDialog,
+            $"The newly appearing Photoshop surface is not the complete signed owned-document " +
+            $"discard prompt because {reason}. No control was pressed.",
+            isRetryable: false,
+            context: new Dictionary<string, string>
+            {
+                ["discardInvoked"] = "false",
+                ["inputSent"] = "false",
+            }));
 
     // -----------------------------------------------------------------------------------
     // Evidence

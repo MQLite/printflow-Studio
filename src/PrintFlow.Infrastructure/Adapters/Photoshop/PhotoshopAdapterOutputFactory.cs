@@ -43,7 +43,8 @@ internal static class PhotoshopAdapterOutputFactory
         PhotoshopRequest request,
         PhotoshopValidatedTiffCandidate candidate,
         IWorkspace workspace,
-        TimeSpan elapsed)
+        TimeSpan elapsed,
+        string? cleanupNote = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(candidate);
@@ -126,7 +127,8 @@ internal static class PhotoshopAdapterOutputFactory
                 ("actualSha256", finalSha.ToString()));
         }
 
-        return OperationResult.Ok(new AdapterOutput(candidate.Tiff, elapsed, Notes(request, candidate)));
+        return OperationResult.Ok(new AdapterOutput(
+            candidate.Tiff, elapsed, Notes(request, candidate, cleanupNote)));
     }
 
     /// <summary>The bounded factual summary the successful Attempt keeps (§16).</summary>
@@ -142,7 +144,10 @@ internal static class PhotoshopAdapterOutputFactory
     /// Revision's shape (§13).
     /// </para>
     /// </remarks>
-    private static string Notes(PhotoshopRequest request, PhotoshopValidatedTiffCandidate candidate)
+    private static string Notes(
+        PhotoshopRequest request,
+        PhotoshopValidatedTiffCandidate candidate,
+        string? cleanupNote)
     {
         ProductionTiffFacts facts = candidate.Facts;
         StringBuilder note = new();
@@ -177,6 +182,11 @@ internal static class PhotoshopAdapterOutputFactory
         {
             note.Append(CultureInfo.InvariantCulture,
                 $"; limitations: {string.Join(", ", candidate.ValidationLimitations)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(cleanupNote))
+        {
+            note.Append(CultureInfo.InvariantCulture, $"; {cleanupNote.Trim()}");
         }
 
         return note.Append('.').ToString();

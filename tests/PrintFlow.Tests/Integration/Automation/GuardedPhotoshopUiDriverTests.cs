@@ -117,6 +117,59 @@ public sealed class GuardedPhotoshopUiDriverTests
         return dialog;
     }
 
+    /// <summary>Stages the exact signed prompt only after PrintFlow sends its guarded close.</summary>
+    private static ExternalWindowRef StageDiscardPrompt(
+        Harness h,
+        string? questionFileName = null,
+        string discardText = "否(&N)",
+        bool includeDiscard = true,
+        string? titleAfterDiscard = null)
+    {
+        ExternalWindowRef prompt = PhotoshopFakes.Dialog(
+            handle: 0xD15CA,
+            title: "Adobe Photoshop",
+            className: "PSDialogBox");
+        string documentName = questionFileName ?? PhotoshopFakes.ExpectedFileName;
+        h.Controls.AddControl(
+            prompt.Handle,
+            203,
+            "Static",
+            $"要在关闭之前存储对 Adobe Photoshop 文档 “{documentName}”的更改吗？");
+        h.Controls.AddControl(prompt.Handle, 10, "Button", "是(&Y)");
+        if (includeDiscard)
+        {
+            h.Controls.AddControl(prompt.Handle, 11, "Button", discardText);
+        }
+        h.Controls.AddControl(prompt.Handle, 12, "Button", "取消");
+
+        OnShortcut(h, KnownShortcut.CloseActiveDocument, () =>
+        {
+            h.Locator.OwnedDialogs.Add(prompt);
+            h.Locator.Replace(
+                h.Target.Process,
+                h.Target.Window with { IsEnabled = false });
+            h.Locator.PutInForeground(prompt);
+        });
+
+        Action<nint, int>? previous = h.Controls.OnPress;
+        h.Controls.OnPress = (host, controlId) =>
+        {
+            previous?.Invoke(host, controlId);
+            if (host != prompt.Handle.Value || controlId != 11)
+            {
+                return;
+            }
+
+            h.Locator.OwnedDialogs.RemoveAll(dialog => dialog.Handle == prompt.Handle);
+            ExternalWindowRef after = PhotoshopFakes.Window(
+                title: titleAfterDiscard ?? PhotoshopFakes.NoDocumentTitle);
+            h.Locator.Replace(h.Target.Process, after);
+            h.Locator.PutInForeground(after);
+        };
+
+        return prompt;
+    }
+
     /// <summary>Chains a reaction onto the fake keyboard without discarding earlier ones.</summary>
     private static void OnShortcut(Harness h, KnownShortcut shortcut, Action reaction)
     {
@@ -531,6 +584,147 @@ public sealed class GuardedPhotoshopUiDriverTests
         closed.Failure.Context["inputSent"].ShouldBe("false");
 
         h.Input.Sends.ShouldNotContain(s => s.Shortcut == KnownShortcut.CloseActiveDocument);
+    }
+
+    [Fact]
+    public async Task Same_filename_in_the_wrong_directory_is_never_closed()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, @"C:\SomeoneElse\Working");
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        h.Input.Sends.ShouldNotContain(s => s.Shortcut == KnownShortcut.CloseActiveDocument);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task Dirty_owned_document_uses_the_signed_discard_control_exactly_once()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, "PFTEST-A-0001_WORKING.tif", PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+        h.Input.Sends.Count(send => send.Shortcut == KnownShortcut.CloseActiveDocument).ShouldBe(1);
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 10 || press.ControlId == 12);
+    }
+
+    [Fact]
+    public async Task A_pre_existing_exact_prompt_is_never_claimed_or_dismissed()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        ExternalWindowRef prompt = PhotoshopFakes.Dialog(
+            handle: 0xD15CA, title: "Adobe Photoshop", className: "PSDialogBox");
+        h.Locator.OwnedDialogs.Add(prompt);
+        h.Locator.Replace(h.Target.Process, h.Target.Window with { IsEnabled = false });
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        closed.Failure.Context["preExistingDialog"].ShouldBe("true");
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Presses.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("PSExport_WindowClass", "存储为 Web 所用格式 (100%)")]
+    [InlineData("#32770", "另存为")]
+    [InlineData("PSDialogBox", "任意 Photoshop 错误")]
+    public async Task A_non_discard_surface_after_close_is_left_untouched(
+        string className, string title)
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        ExternalWindowRef unknown = PhotoshopFakes.Dialog(
+            handle: 0xBAD10, title: title, className: className);
+        OnShortcut(h, KnownShortcut.CloseActiveDocument, () =>
+        {
+            h.Locator.OwnedDialogs.Add(unknown);
+            h.Locator.PutInForeground(unknown);
+        });
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Theory]
+    [InlineData(false, "否(&N)")]
+    [InlineData(true, "不要保存")]
+    public async Task Missing_or_altered_discard_control_is_left_untouched(
+        bool includeDiscard, string discardText)
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h, includeDiscard: includeDiscard, discardText: discardText);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task Foreground_loss_before_discard_invocation_leaves_the_prompt_untouched()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h);
+        OnShortcut(h, KnownShortcut.CloseActiveDocument, () =>
+            h.Locator.Foreground = new ForegroundIdentity(new WindowHandle(0xDEAD), 999, "explorer"));
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopTargetLost);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task Same_name_previous_document_is_probed_by_path_and_never_closed_a_second_time()
+    {
+        string previousFolder = @"C:\Fake\PrintFlowStudio\Sessions\Earlier\Working";
+        string sameTitle = PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *";
+        Harness h = Build(windowTitle: sameTitle);
+        ExternalWindowRef identityDialog = StageIdentityDialog(
+            h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h, titleAfterDiscard: sameTitle);
+
+        Action<nint, int>? previous = h.Controls.OnPress;
+        h.Controls.OnPress = (host, controlId) =>
+        {
+            previous?.Invoke(host, controlId);
+            if (controlId == 11)
+            {
+                h.Controls.ClearControls(identityDialog.Handle);
+                h.Controls.AddControl(identityDialog.Handle, 1001, "Edit", PhotoshopFakes.ExpectedFileName);
+                h.Controls.AddControl(identityDialog.Handle, 1001, "ToolbarWindow32", $"地址: {previousFolder}");
+                h.Controls.AddControl(identityDialog.Handle, 2, "Button", "取消");
+            }
+        };
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+        h.Input.Sends.Count(send => send.Shortcut == KnownShortcut.CloseActiveDocument).ShouldBe(1);
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
+        closed.Value.Window.Title.ShouldContain(PhotoshopFakes.ExpectedFileName);
     }
 
     /// <summary>

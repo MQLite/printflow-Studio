@@ -144,31 +144,15 @@ public sealed class ExternalStateHygieneTests : IDisposable
     }
 
     /// <summary>
-    /// A production run leaves its own document open; nothing in the composition closes it
-    /// (§3, §6, and Epic 11600 Part B §10).
+    /// The production composition contains exactly one forward-only owned-document close after
+    /// the independently validated TIFF (§3, §6, and Epic 11600 Part B1).
     /// </summary>
     /// <remarks>
-    /// A structural assertion rather than a behavioural one, and deliberately so. "Photoshop was
-    /// still holding the document afterwards" is what a behavioural test would observe, and it
-    /// would keep passing if a close were added that happened to fail. What Policy A actually
-    /// says is that the composed workflow operation contains no close at all, and the only way
-    /// to state that is over the source.
-    /// <para>
-    /// The seam itself still exists and is still tested — <c>CloseExactDocumentAsync</c> refuses
-    /// any document it cannot prove PrintFlow owns — it is simply not part of the operation.
-    /// </para>
-    /// <para>
-    /// <b>Part B tried to change this and reverted.</b> The soak established that unbounded
-    /// accumulation is a real defect, so §10's Outcome B was implemented — the owned document
-    /// closed through this seam after the validated TIFF exists — and then withdrawn, because the
-    /// document is modified by construction and Ctrl+W raises Photoshop's unsaved-changes prompt.
-    /// PrintFlow does not answer that prompt, so composing the close left a blocking modal
-    /// standing after the job instead of a spare document. This test therefore still says what it
-    /// said, and now says it for a measured reason rather than a predicted one.
-    /// </para>
+    /// Structural because the ordering is the safety property: cleanup must not move before TIFF
+    /// validation and must not multiply into close-all or retrying closes.
     /// </remarks>
     [Fact]
-    public void The_composed_production_operation_closes_no_document()
+    public void The_composed_production_operation_closes_once_after_TIFF_validation()
     {
         string source = File.ReadAllText(Path.Combine(
             InfrastructureProjectDirectory(),
@@ -181,15 +165,15 @@ public sealed class ExternalStateHygieneTests : IDisposable
         int endsAt = source.IndexOf("private static OperationResult<AdapterOutput> Refused", StringComparison.Ordinal);
         endsAt.ShouldBeGreaterThan(generateAt);
 
-        // Comments are stripped first. The body now explains at length why there is no close
-        // here, and a naive substring search would read that explanation as the thing it forbids.
         string body = string.Join(
             '\n',
             source[generateAt..endsAt]
                 .Split('\n')
                 .Where(line => !line.TrimStart().StartsWith("//", StringComparison.Ordinal)));
 
-        body.ShouldNotContain("Close", Case.Sensitive);
+        (body.Split("CloseExactDocumentAsync(", StringSplitOptions.None).Length - 1).ShouldBe(1);
+        body.IndexOf("SaveProductionTiffAsync", StringComparison.Ordinal)
+            .ShouldBeLessThan(body.IndexOf("CloseExactDocumentAsync", StringComparison.Ordinal));
     }
 
     // -----------------------------------------------------------------------------------

@@ -157,6 +157,40 @@ public static class PhotoshopDocumentIdentityRule
     }
 
     /// <summary>
+    /// Corroborates the title's document name against the Save As field after Save As Copy.
+    /// </summary>
+    /// <remarks>
+    /// The accepted CC 2019 workstation was observed changing only the extension in the Save As
+    /// field to the last copied format while leaving the active document and its title on the
+    /// original Working PNG. This rule accepts that one signed transformation: exact file names,
+    /// or exact stems with two non-empty extensions. It never manufactures a path from the field;
+    /// the absolute path remains the signed address-bar folder plus the exact title basename.
+    /// </remarks>
+    public static bool SaveAsCopyFileNameCorroboratesTitle(
+        string? saveAsFileName, string? titleFileName)
+    {
+        if (string.IsNullOrWhiteSpace(saveAsFileName) || string.IsNullOrWhiteSpace(titleFileName) ||
+            !string.Equals(Path.GetFileName(saveAsFileName), saveAsFileName, StringComparison.Ordinal) ||
+            !string.Equals(Path.GetFileName(titleFileName), titleFileName, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (string.Equals(saveAsFileName, titleFileName, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        string saveExtension = Path.GetExtension(saveAsFileName);
+        string titleExtension = Path.GetExtension(titleFileName);
+        return saveExtension.Length > 0 && titleExtension.Length > 0 &&
+               string.Equals(
+                   Path.GetFileNameWithoutExtension(saveAsFileName),
+                   Path.GetFileNameWithoutExtension(titleFileName),
+                   StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Whether the observed absolute path is exactly the expected managed file.
     /// </summary>
     /// <remarks>

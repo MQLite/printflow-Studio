@@ -177,6 +177,30 @@ public sealed class PhotoshopDocumentIdentityRuleTests
             .IsFailure.ShouldBeTrue();
     }
 
+    [Theory]
+    [InlineData("PFTEST-A-0001_WORKING.png", "PFTEST-A-0001_WORKING.png")]
+    [InlineData("PFTEST-A-0001_WORKING.tif", "PFTEST-A-0001_WORKING.png")]
+    public void The_signed_Save_As_Copy_filename_variant_corroborates_the_title(
+        string saveAsName, string titleName)
+    {
+        PhotoshopDocumentIdentityRule
+            .SaveAsCopyFileNameCorroboratesTitle(saveAsName, titleName)
+            .ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("OTHER.tif", "PFTEST-A-0001_WORKING.png")]
+    [InlineData("PFTEST-A-0001_WORKING.tif", "OTHER.png")]
+    [InlineData(@"C:\Elsewhere\PFTEST-A-0001_WORKING.tif", "PFTEST-A-0001_WORKING.png")]
+    [InlineData("PFTEST-A-0001_WORKING", "PFTEST-A-0001_WORKING.png")]
+    public void Anything_beyond_the_signed_extension_substitution_is_refused(
+        string saveAsName, string titleName)
+    {
+        PhotoshopDocumentIdentityRule
+            .SaveAsCopyFileNameCorroboratesTitle(saveAsName, titleName)
+            .ShouldBeFalse();
+    }
+
     // -----------------------------------------------------------------------------------
     // The comparison identity actually rests on
     // -----------------------------------------------------------------------------------

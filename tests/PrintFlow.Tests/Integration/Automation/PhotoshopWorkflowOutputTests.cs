@@ -41,7 +41,7 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// One call runs identity, preparation, W1 and the validated TIFF save exactly once each,
+    /// One call runs identity, preparation, W1, the validated TIFF save and owned cleanup exactly once each,
     /// and returns workflow output naming the reserved destination (§4, §5).
     /// </summary>
     [Fact]
@@ -56,6 +56,7 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
         h.W1.ExecuteCount.ShouldBe(1);
         h.Tiff.SaveCount.ShouldBe(1);
         h.Driver.OpenCount.ShouldBe(1);
+        h.Driver.CloseCount.ShouldBe(1);
 
         result.Value.ProducedFile.ShouldBe(h.Output);
         result.Value.ProducedFile.Area.ShouldBe(WorkspaceArea.Working);
@@ -70,23 +71,67 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
     /// because "each ran once" is also true of an order that saved the TIFF before running W1 —
     /// and that order would produce a file with no white underbase in it.
     /// <para>
-    /// The sequence ends at the TIFF. Epic 11600 Part B tried appending a cleanup stage that
-    /// closed the run's own working document and withdrew it — the document is modified by
-    /// construction, so the close raises Photoshop's unsaved-changes prompt, which PrintFlow does
-    /// not answer. <c>StubComposedDriver</c> records a close rather than throwing on one, so that
-    /// a close reappearing here shows up as a sequence with a fifth entry rather than as an
-    /// exception from a stub.
+    /// The sequence ends with the guarded close only after the TIFF save/validation seam. The
+    /// driver owns prompt causality and signed discard recognition; composition owns the rule
+    /// that no cleanup can happen before a validated output exists.
     /// </para>
     /// </remarks>
     [Fact]
-    public async Task The_accepted_stage_order_is_identity_then_size_then_W1_then_TIFF()
+    public async Task The_accepted_stage_order_ends_with_owned_cleanup_after_validated_TIFF()
     {
         Harness h = CreateHarness();
 
         await h.Generate();
 
-        h.Sequence.ShouldBe(["open", "prepare", "w1", "tiff"]);
-        h.Driver.ClosedPath.ShouldBeNull("the composed run closes nothing.");
+        h.Sequence.ShouldBe(["open", "prepare", "w1", "tiff", "close"]);
+        h.Driver.ClosedPath.ShouldBe(h.DocumentPath);
+    }
+
+    [Fact]
+    public async Task Cleanup_failure_after_valid_output_is_an_explicit_warning_not_lost_success()
+    {
+        Harness h = CreateHarness();
+        h.Driver.CleanupFailure = OperationFailure.Create(
+            FailureCode.PhotoshopBlockingDialog, "signed prompt did not match", isRetryable: false);
+
+        OperationResult<AdapterOutput> result = await h.Generate();
+
+        result.IsSuccess.ShouldBeTrue();
+        File.Exists(h.OutputPath).ShouldBeTrue();
+        string notes = result.Value.AdapterNotes.ShouldNotBeNull();
+        notes.ShouldContain("cleanup WARNING");
+        notes.ShouldContain("validated TIFF retained");
+        h.Driver.CloseCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task The_validated_TIFF_is_rehashed_after_discard_and_must_remain_byte_identical()
+    {
+        Harness h = CreateHarness();
+        h.Driver.OnClose = () => File.WriteAllBytes(h.OutputPath, [9, 9, 9]);
+
+        OperationResult<AdapterOutput> result = await h.Generate();
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.OutputValidationFailed);
+        result.Failure.Context["validatedByteLength"].ShouldNotBe(result.Failure.Context["actualByteLength"]);
+    }
+
+    [Fact]
+    public async Task Twelve_sequential_recorded_jobs_each_close_exactly_their_own_document()
+    {
+        for (int run = 0; run < 12; run++)
+        {
+            Harness h = CreateHarness();
+
+            OperationResult<AdapterOutput> result = await h.Generate();
+
+            result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : string.Empty);
+            h.Driver.CloseCount.ShouldBe(1);
+            h.Driver.ClosedPath.ShouldBe(h.DocumentPath);
+            result.Value.AdapterNotes.ShouldNotBeNull()
+                .ShouldContain("cleanup signed owned-document discard completed");
+        }
     }
 
     // -----------------------------------------------------------------------------------
@@ -650,6 +695,12 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
     {
         public int OpenCount { get; private set; }
 
+        public int CloseCount { get; private set; }
+
+        public OperationFailure? CleanupFailure { get; set; }
+
+        public Action? OnClose { get; set; }
+
         public Task<OperationResult<PhotoshopStateSnapshot>> InspectStateAsync(
             PhotoshopTarget target, string? expectedDocumentFileName, CancellationToken cancellationToken)
         {
@@ -685,22 +736,20 @@ public sealed class PhotoshopWorkflowOutputTests : IDisposable
                 Path.GetFileName(path), Path.GetDirectoryName(path)!, path, title)));
         }
 
-        /// <summary>The absolute path the composed run asked to close — expected to stay null.</summary>
-        /// <remarks>
-        /// This used to throw <c>NotSupportedException("The composed run closes nothing")</c>.
-        /// Recording is better: a close reappearing in the composition should fail the test that
-        /// is about the composition, with the path it named, rather than surfacing as a stub
-        /// exception from whichever test happened to run first.
-        /// </remarks>
+        /// <summary>The absolute path the composed run asked to close.</summary>
         public string? ClosedPath { get; private set; }
 
         public Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
             PhotoshopTarget target, string expectedAbsolutePath, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            CloseCount++;
             ClosedPath = expectedAbsolutePath;
             sequence.Add("close");
-            return Task.FromResult(OperationResult.Ok(target));
+            OnClose?.Invoke();
+            return Task.FromResult(CleanupFailure is null
+                ? OperationResult.Ok(target)
+                : OperationResult.Fail<PhotoshopTarget>(CleanupFailure));
         }
 
         public OperationResult<EvidenceRef> CaptureEvidence(PhotoshopTarget target, string reason) =>
