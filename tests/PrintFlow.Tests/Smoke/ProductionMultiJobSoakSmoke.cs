@@ -139,8 +139,14 @@ public sealed class ProductionMultiJobSoakSmoke(ITestOutputHelper output)
 
         job.Succeeded.ShouldBeTrue("the Phase 0 enhancement must succeed against the accepted binary.");
         job.LockHeldAfter.ShouldBeFalse();
-        after.Fingerprint.ShouldBe(before.Fingerprint,
-            "the enhancement must not have changed which Meitu versions are installed or running.");
+        after.InstallationFingerprint.ShouldBe(before.InstallationFingerprint,
+            "the enhancement must not have changed which Meitu versions are installed, nor which " +
+            "one the operator's own launcher resolves to.");
+
+        // Asserted separately from the installation, and this separation is the point: a cold
+        // start legitimately takes the running set from none to one, and that is the gate
+        // succeeding rather than the workstation drifting. What must hold either way is that
+        // whatever is running is the accepted binary.
         after.OnlyAcceptedIsRunning.ShouldBeTrue();
 
         output.WriteLine(string.Empty);

@@ -283,11 +283,25 @@ internal static class WorkstationObservation
         public bool OnlyAcceptedIsRunning => RunningExecutables.All(path =>
             string.Equals(path, AcceptedExecutable, StringComparison.OrdinalIgnoreCase));
 
-        /// <summary>A single line that changes whenever the version picture changes.</summary>
-        public string Fingerprint =>
+        /// <summary>
+        /// The part of the version picture an operation must not change: which versions are
+        /// installed, and which one the operator's own launcher resolves to.
+        /// </summary>
+        /// <remarks>
+        /// The running set is deliberately <b>not</b> in here. Launching the accepted binary is
+        /// exactly what PrintFlow is supposed to do when nothing is running, so folding "running
+        /// instances" into an it-must-not-change fingerprint made a cold start fail the very gate
+        /// that exists to prove a cold start works — which is what the first Phase 0 run did.
+        /// Whether the right binary is running is a separate question with a separate answer,
+        /// <see cref="OnlyAcceptedIsRunning"/>, and it is asserted separately.
+        /// </remarks>
+        public string InstallationFingerprint =>
             $"installed=[{string.Join(",", InstalledVersionDirectories)}] " +
-            $"launcher={LauncherConfiguredVersion ?? "-"} " +
-            $"running=[{string.Join(",", RunningExecutables)}]";
+            $"launcher={LauncherConfiguredVersion ?? "-"}";
+
+        /// <summary>The whole picture, for the log rather than for an assertion.</summary>
+        public string Fingerprint =>
+            $"{InstallationFingerprint} running=[{string.Join(",", RunningExecutables)}]";
 
         private static string? ReadLauncherVersion(string configPath)
         {

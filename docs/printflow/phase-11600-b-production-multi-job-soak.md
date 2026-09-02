@@ -126,17 +126,53 @@ a note in the log.
 ### 2.5 Phase 0 evidence
 
 **Cold-start lifecycle.** Meitu was closed cleanly from its neutral state (editor → start page →
-exit; no prompt appeared and none was answered), leaving nothing running. PrintFlow then launched
-it itself, and the process that appeared was verified from the operating system:
+exit; no prompt appeared and none was answered), leaving nothing running. The gate was then run
+against that cold workstation:
 
 ```text
-ProcessId    : 7484
-CreationDate : 2026/9/3 9:56:55
-CommandLine  : "C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe"
+installed versions      : 7.8.7.5, 7.8.8.0
+launcher stub resolves  : 7.8.7.5
+running instances       : 0
+only accepted running   : True
+Production Readiness    : Ready
+
+[OK ] job  1 M   24.2s  apps 1->2 LAUNCHED  attempts 1  Succeeded/ReviewRequired  lock free->free
+         out  Sessions/S_20260902T215654Z_85651ae1/Working/01a06420-…/…_P0_HD.png
+         sha  5207F744E04267CE…  1280x960 Png 1159183 bytes
+         cleanup the editor was returned to its signed empty state
+
+running instances       : 1
+  C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe
 ```
 
-The accepted binary, launched by absolute path, from nothing running. That job produced a valid
-1 159 183-byte enhanced output.
+From nothing running, PrintFlow launched the accepted binary by absolute path and produced a valid
+output, then returned the editor to its signed empty state. Corroborated independently from the
+operating system — `ProcessId 7484`, created `2026/9/3 9:56:55`, command line
+`"C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe"`.
+
+**That run was reported as a test failure, and the failure was the harness's.** The gate asserted
+that the whole version topology — including the set of running instances — was unchanged across
+the enhancement. A cold start legitimately takes that set from none to one, so the assertion made
+the cold-start case fail the very gate that exists to prove it works.
+
+Fixed: the must-not-change comparison now covers the installed versions and the launcher's
+configured target, and "only the accepted binary is running" is asserted separately — which is the
+question that actually matters, and which held throughout. **Re-run from cold and confirmed:**
+
+```text
+running instances       : 0
+Production Readiness    : Ready
+
+[OK ] job  1 M   44.0s  apps 1->2 LAUNCHED  attempts 1  Succeeded/ReviewRequired  lock free->free
+         sha  5207F744E04267CE…  1280x960 Png 1159183 bytes
+         cleanup the editor was returned to its signed empty state
+
+MEITU BASELINE STABLE — retain accepted 7.8.7.5
+```
+
+Three cold or warm starts of this gate produced byte-identical output — the same digest
+`5207F744…` at 1 159 183 bytes each time — from three different sessions, which is the
+determinism claim rather than a contradiction of the isolation one.
 
 **Phase 0 gate, second run (warm, attaching to the instance the cold start left):**
 
@@ -255,9 +291,11 @@ and no progressive drift in the *successful* population. The degradation in §4 
 slower successes; it shows up as a job that stops succeeding.
 
 Meitu's single 38.8 s outlier (job 4) is roughly three times its neighbours. It is not a launch —
-the process was reused, as every job was. Phase 0's enhancement against the same synthetic input
-took 28.0 s, so Meitu's own variance on this operation is wide; four samples cannot separate that
-from anything else, and nothing is claimed about it.
+the process was reused, as every job was. Meitu's own variance on this operation is simply wide:
+the Phase 0 gate ran the identical synthetic input three times and took **24.2 s** (cold launch),
+**28.0 s** (warm, attached) and **44.0 s** (cold launch), producing byte-identical output every
+time. A 12.7–38.8 s spread across the soak sits inside that. Four samples cannot separate adapter
+variance from anything else, and nothing is claimed about it.
 
 ### 3.4 Resource checkpoints, run 2
 
@@ -515,15 +553,14 @@ Before run 2: 35 sessions, 70 Comparison files, 2 Quarantine files, 9 QA directo
 Read directly from the workstation afterwards:
 
 ```text
-sessions        : 46   (13 created by this slice)
+sessions        : 47   (14 created by this slice)
 Comparison files: 70   (unchanged)
 Quarantine files:  2   (unchanged)
 ```
 
-The thirteen break down exactly as the job record predicts — 2 from Phase 0 (the cold-start
-attempt at 09:56:54 and the gate at 10:08:35), 2 from run 1 (jobs 1 and 2), and 9 from run 2
-(jobs 1 through 9, a retry sharing its original's session). Every one carries the `PF_11600B_`
-prefix. Alongside them are QA directories under `D:\PrintFlowStudio\QA\Epic11600B\`, each holding
+The fourteen break down exactly as the job record predicts — 3 from the Phase 0 gate (its two
+cold starts and one warm run), 2 from soak run 1 (jobs 1 and 2), and 9 from soak run 2 (jobs 1
+through 9, a retry sharing its original's session). Every one carries the `PF_11600B_` prefix. Alongside them are QA directories under `D:\PrintFlowStudio\QA\Epic11600B\`, each holding
 its own throwaway SQLite database: **no row was written to the operator's installation database.**
 
 No session directory was lost, and Comparison and Quarantine are byte-for-byte the counts they
