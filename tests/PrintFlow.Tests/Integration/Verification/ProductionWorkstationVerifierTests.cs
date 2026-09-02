@@ -634,8 +634,8 @@ public sealed class ProductionWorkstationVerifierTests
     /// </summary>
     /// <remarks>
     /// This read <c>Fake</c> from Part A until Part D activated Production. The half that has
-    /// not moved is the one this file is about: verification still answers to preset 1.15.0, and
-    /// activation was not permitted to mint a new identity to make anything pass.
+    /// B1 intentionally moves the accepted identity to 1.16.0 because the signed Photoshop
+    /// prompt evidence changes the immutable UI contract; Production mode itself remains fixed.
     /// </remarks>
     [Fact]
     public void The_configured_adapter_mode_is_production_against_the_accepted_preset()
@@ -644,7 +644,7 @@ public sealed class ProductionWorkstationVerifierTests
             PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
 
         configuration.Adapters.Mode.ShouldBe("Production");
-        configuration.Preset.Version.ShouldBe("1.15.0");
+        configuration.Preset.Version.ShouldBe("1.16.0");
     }
 
     private static WorkstationCheckResult Check(

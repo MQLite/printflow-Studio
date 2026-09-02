@@ -125,6 +125,40 @@ public sealed record PhotoshopDocumentIdentitySignature(
     int CancelControlId,
     string CancelControlClass);
 
+/// <summary>One exact native control on Photoshop's signed owned-document discard prompt.</summary>
+public sealed record PhotoshopDiscardPromptControlSignature(
+    int ControlId,
+    string ControlClass,
+    string Text);
+
+/// <summary>The signed question that binds the discard prompt to the document just closed.</summary>
+public sealed record PhotoshopDiscardPromptMessageSignature(
+    int ControlId,
+    string ControlClass,
+    string TextPrefix,
+    string TextSuffix,
+    string TruncationMarker,
+    int MinimumDocumentNamePrefixLength);
+
+/// <summary>
+/// The closed, signed contract for disposing one dirty document after its TIFF is validated.
+/// </summary>
+/// <remarks>
+/// This is deliberately not a generic dialog contract. It describes only the prompt observed
+/// after PrintFlow requested closure of an already path-proved document, including the exact
+/// question and all three native buttons. The only actionable member is
+/// <see cref="DiscardControl"/>; the Save and Cancel controls are required decoys whose presence
+/// makes the surface narrower, not alternate actions.
+/// </remarks>
+public sealed record PhotoshopOwnedDocumentCleanupSignature(
+    bool SaveAsCopyMaySubstituteIdentityFileExtension,
+    string PromptWindowClassName,
+    string PromptTitle,
+    PhotoshopDiscardPromptMessageSignature Message,
+    PhotoshopDiscardPromptControlSignature SaveControl,
+    PhotoshopDiscardPromptControlSignature DiscardControl,
+    PhotoshopDiscardPromptControlSignature CancelControl);
+
 /// <summary>One exact runtime Action and the command names Photoshop reports for it.</summary>
 public sealed record PhotoshopW1BranchContract(
     WhiteUnderbaseBranch Branch,
@@ -193,7 +227,8 @@ public sealed record PhotoshopBaseline(
     PhotoshopWindowStateSignature? WindowStates = null,
     PhotoshopOpenDialogSignature? OpenDialog = null,
     PhotoshopDocumentIdentitySignature? DocumentIdentity = null,
-    PhotoshopW1ActionContract? W1Action = null);
+    PhotoshopW1ActionContract? W1Action = null,
+    PhotoshopOwnedDocumentCleanupSignature? OwnedDocumentCleanup = null);
 
 /// <summary>Supplies the verified Photoshop baseline.</summary>
 public interface IPhotoshopBaselineProvider

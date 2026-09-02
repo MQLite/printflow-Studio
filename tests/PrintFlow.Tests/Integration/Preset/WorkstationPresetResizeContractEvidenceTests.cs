@@ -1,6 +1,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
+using PrintFlow.Domain.Files;
+using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
 
 namespace PrintFlow.Tests.Integration.Preset;
@@ -13,7 +15,7 @@ namespace PrintFlow.Tests.Integration.Preset;
 public sealed class WorkstationPresetResizeContractEvidenceTests
 {
     [Fact]
-    public void Configured_workstation_preset_is_the_immutable_v1_15_contract()
+    public void Configured_workstation_preset_is_the_immutable_v1_16_contract()
     {
         (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
         if (configured is null)
@@ -21,9 +23,9 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             return;
         }
 
-        configured.Value.configuration.Preset.Version.ShouldBe("1.15.0");
+        configured.Value.configuration.Preset.Version.ShouldBe("1.16.0");
         configured.Value.configuration.Preset.Path.ShouldEndWith(
-            @"Baseline\workstation-v1\preset\printflow-workstation-v1.15.0.json");
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.16.0.json");
 
         // Production since Epic 11500 Part D. The mode is asserted here because this file is
         // about what the configured installation actually points at, and a preset contract that
@@ -48,13 +50,13 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
 
         using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
         JsonElement root = manifest.RootElement;
-        root.GetProperty("presetVersion").GetString().ShouldBe("1.15.0");
-        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.14.0");
+        root.GetProperty("presetVersion").GetString().ShouldBe("1.16.0");
+        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.15.0");
         root.GetProperty("supersedes").GetProperty("manifestSha256").GetString().ShouldBe(
-            "F74792276C0B264C9F064D1C82CB26806F7B836A543E0AF5FC8B4E7FB1738C62");
+            "3392873ED0CA38BB410EA6725B6C4D0392F2514ECB10D9CF825B18D0DF785D16");
 
         JsonElement integrity = root.GetProperty("sourceManifestIntegrity");
-        integrity.GetArrayLength().ShouldBe(27);
+        integrity.GetArrayLength().ShouldBe(28);
 
         bool foundResizeEvidence = false;
         bool foundFlexibleSizeEvidence = false;
@@ -62,6 +64,7 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         bool foundW1Evidence = false;
         bool foundTiffEvidence = false;
         bool foundA5ShortEdgeEvidence = false;
+        bool foundOwnedDocumentCleanupEvidence = false;
         foreach (JsonElement entry in integrity.EnumerateArray())
         {
             string path = entry.GetProperty("path").GetString().ShouldNotBeNull();
@@ -114,6 +117,14 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
                 foundA5ShortEdgeEvidence = true;
                 File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
             }
+
+            if (path.EndsWith(
+                @"apps\photoshop-2019\owned-document-cleanup.json",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                foundOwnedDocumentCleanupEvidence = true;
+                File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+            }
         }
 
         foundResizeEvidence.ShouldBeTrue();
@@ -122,6 +133,48 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         foundW1Evidence.ShouldBeTrue();
         foundTiffEvidence.ShouldBeTrue();
         foundA5ShortEdgeEvidence.ShouldBeTrue();
+        foundOwnedDocumentCleanupEvidence.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Superseded_v1_15_remains_immutable_and_exact()
+    {
+        (PrintFlowConfiguration configuration, string _)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        string path = Path.Combine(configured.Value.configuration.Workspace.Root,
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.15.0.json");
+        Hash(path).ShouldBe(
+            "3392873ED0CA38BB410EA6725B6C4D0392F2514ECB10D9CF825B18D0DF785D16",
+            StringCompareShould.IgnoreCase);
+        new FileInfo(path).Length.ShouldBe(25649);
+        File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Configured_preset_exposes_only_the_exact_signed_owned_document_cleanup_surface()
+    {
+        (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        PresetPhotoshopBaselineProvider provider = new(
+            configured.Value.manifestPath,
+            Sha256.Parse(configured.Value.configuration.Preset.ExpectedSha256));
+
+        PhotoshopOwnedDocumentCleanupSignature cleanup = provider.GetVerifiedBaseline().Value
+            .OwnedDocumentCleanup.ShouldNotBeNull();
+        cleanup.SaveAsCopyMaySubstituteIdentityFileExtension.ShouldBeTrue();
+        cleanup.PromptWindowClassName.ShouldBe("PSDialogBox");
+        cleanup.PromptTitle.ShouldBe("Adobe Photoshop");
+        cleanup.Message.ControlId.ShouldBe(203);
+        cleanup.Message.ControlClass.ShouldBe("Static");
+        cleanup.DiscardControl.ShouldBe(new PhotoshopDiscardPromptControlSignature(
+            11, "Button", "否(&N)"));
+        cleanup.SaveControl.ShouldBe(new PhotoshopDiscardPromptControlSignature(
+            10, "Button", "是(&Y)"));
+        cleanup.CancelControl.ShouldBe(new PhotoshopDiscardPromptControlSignature(
+            12, "Button", "取消"));
+        cleanup.PromptWindowClassName.ShouldNotBe("PSExport_WindowClass");
     }
 
     [Fact]

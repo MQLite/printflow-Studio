@@ -36,6 +36,7 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
     private const string OpenDialogEvidence = @"apps\photoshop-2019\open-file-dialog.json";
     private const string WindowStateEvidence = @"apps\photoshop-2019\window-states.json";
     private const string DocumentIdentityEvidence = @"apps\photoshop-2019\document-identity.json";
+    private const string OwnedDocumentCleanupEvidence = @"apps\photoshop-2019\owned-document-cleanup.json";
     private const string W1ActionEvidence = @"apps\photoshop-2019\cmyk-w1-action-runtime.json";
 
     private readonly string _manifestAbsolutePath;
@@ -153,6 +154,16 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             }
         }
 
+        OperationResult<PhotoshopOwnedDocumentCleanupSignature?> cleanup = ReadOptional(
+            root,
+            OwnedDocumentCleanupEvidence,
+            "Photoshop owned-document cleanup evidence",
+            ReadOwnedDocumentCleanup);
+        if (cleanup.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopBaseline>(cleanup.Failure);
+        }
+
         return OperationResult.Ok(new PhotoshopBaseline(
             executablePath,
             digest,
@@ -165,7 +176,8 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             states.Value,
             openDialog.Value,
             identity.Value,
-            w1.Value));
+            w1.Value,
+            cleanup.Value));
     }
 
     /// <summary>
@@ -345,6 +357,81 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             artifactPath, sha256, setName, branches.ToImmutable()));
     }
 
+    private static OperationResult<PhotoshopOwnedDocumentCleanupSignature> ReadOwnedDocumentCleanup(
+        JsonElement root)
+    {
+        JsonElement identity = root.TryGetProperty("saveAsCopyIdentity", out JsonElement i) ? i : default;
+        JsonElement prompt = root.TryGetProperty("prompt", out JsonElement p) ? p : default;
+        JsonElement message = prompt.TryGetProperty("message", out JsonElement m) ? m : default;
+
+        if (!TryBool(identity, "fileNameFieldMayUseLastSaveFormatExtension", out bool extensionSubstitution) ||
+            !extensionSubstitution)
+        {
+            return InvalidCleanupEvidence(
+                "the observed post-Save-As-Copy identity filename-extension substitution is absent");
+        }
+
+        string windowClass = StringOrNull(prompt, "windowClassName") ?? string.Empty;
+        string title = StringOrNull(prompt, "title") ?? string.Empty;
+        string messageClass = StringOrNull(message, "controlClass") ?? string.Empty;
+        string prefix = StringOrNull(message, "textPrefix") ?? string.Empty;
+        string suffix = StringOrNull(message, "textSuffix") ?? string.Empty;
+        string truncation = StringOrNull(message, "truncationMarker") ?? string.Empty;
+        if (windowClass.Length == 0 || title.Length == 0 || messageClass.Length == 0 ||
+            prefix.Length == 0 || suffix.Length == 0 || truncation.Length == 0 ||
+            !TryInt(message, "controlId", out int messageId) ||
+            !TryInt(message, "minimumDocumentNamePrefixLength", out int minimumPrefix) ||
+            minimumPrefix < 8)
+        {
+            return InvalidCleanupEvidence("the prompt window or document-bound question is incomplete");
+        }
+
+        OperationResult<PhotoshopDiscardPromptControlSignature> save =
+            ReadCleanupControl(prompt, "saveControl");
+        OperationResult<PhotoshopDiscardPromptControlSignature> discard =
+            ReadCleanupControl(prompt, "discardControl");
+        OperationResult<PhotoshopDiscardPromptControlSignature> cancel =
+            ReadCleanupControl(prompt, "cancelControl");
+        if (save.IsFailure || discard.IsFailure || cancel.IsFailure)
+        {
+            return InvalidCleanupEvidence("the exact Save, discard and Cancel control set is incomplete");
+        }
+
+        if (new[] { save.Value.ControlId, discard.Value.ControlId, cancel.Value.ControlId }.Distinct().Count() != 3)
+        {
+            return InvalidCleanupEvidence("the Save, discard and Cancel controls are not distinct");
+        }
+
+        return OperationResult.Ok(new PhotoshopOwnedDocumentCleanupSignature(
+            extensionSubstitution,
+            windowClass,
+            title,
+            new PhotoshopDiscardPromptMessageSignature(
+                messageId, messageClass, prefix, suffix, truncation, minimumPrefix),
+            save.Value,
+            discard.Value,
+            cancel.Value));
+    }
+
+    private static OperationResult<PhotoshopDiscardPromptControlSignature> ReadCleanupControl(
+        JsonElement prompt, string propertyName)
+    {
+        JsonElement control = prompt.TryGetProperty(propertyName, out JsonElement value) ? value : default;
+        string className = StringOrNull(control, "class") ?? string.Empty;
+        string text = StringOrNull(control, "text") ?? string.Empty;
+        return className.Length > 0 && text.Length > 0 && TryInt(control, "id", out int id)
+            ? OperationResult.Ok(new PhotoshopDiscardPromptControlSignature(id, className, text))
+            : OperationResult.Fail<PhotoshopDiscardPromptControlSignature>(
+                FailureCode.EnvironmentNotVerified,
+                $"The Photoshop owned-document cleanup evidence has no complete {propertyName}.");
+    }
+
+    private static OperationResult<PhotoshopOwnedDocumentCleanupSignature> InvalidCleanupEvidence(
+        string detail) =>
+        OperationResult.Fail<PhotoshopOwnedDocumentCleanupSignature>(
+            FailureCode.EnvironmentNotVerified,
+            $"The Photoshop owned-document cleanup evidence is incomplete: {detail}.");
+
     private static OperationResult<Unit> VerifyManifestActionAgreement(
         JsonElement root, PhotoshopW1ActionContract contract)
     {
@@ -392,6 +479,20 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
                element.TryGetProperty(propertyName, out JsonElement property) &&
                property.ValueKind == JsonValueKind.Number &&
                property.TryGetInt32(out value);
+    }
+
+    private static bool TryBool(JsonElement element, string propertyName, out bool value)
+    {
+        value = false;
+        if (element.ValueKind != JsonValueKind.Object ||
+            !element.TryGetProperty(propertyName, out JsonElement property) ||
+            property.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            return false;
+        }
+
+        value = property.GetBoolean();
+        return true;
     }
 
     private static ImmutableArray<string> StringArray(JsonElement element, string propertyName)
