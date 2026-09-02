@@ -1,3 +1,4 @@
+using System.Globalization;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Gate;
@@ -113,26 +114,38 @@ public sealed class ImmutableBaselineTrustModelTests
     [Fact]
     public async Task Diagnostics_show_the_cached_conclusion_and_state_the_restart_requirement()
     {
-        using WorkstationVerificationFixture fixture = new();
-        VerifiedEnvironmentGate gate = new(fixture.CreateVerifier());
-        EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation());
+        CultureInfo previousUiCulture = CultureInfo.CurrentUICulture;
+        try
+        {
+            // This assertion checks the English wording. Pin its resource culture so the test is
+            // deterministic on the accepted zh-CN workstation as well as on developer machines.
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
 
-        await screen.OpenAsync(CancellationToken.None);
-        screen.IsReady.ShouldBeTrue();
+            using WorkstationVerificationFixture fixture = new();
+            VerifiedEnvironmentGate gate = new(fixture.CreateVerifier());
+            EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation());
 
-        WorkstationVerificationFixture.Corrupt(fixture.PhotoshopPath);
-        await screen.RefreshCommand.ExecuteAsync(null);
+            await screen.OpenAsync(CancellationToken.None);
+            screen.IsReady.ShouldBeTrue();
 
-        EnvironmentCheckRow photoshop = screen.Checks.First(
-            row => row.SupportKey == nameof(WorkstationVerificationCheck.PhotoshopExecutable));
+            WorkstationVerificationFixture.Corrupt(fixture.PhotoshopPath);
+            await screen.RefreshCommand.ExecuteAsync(null);
 
-        photoshop.IsFailure.ShouldBeFalse(
-            "the process read that file once; refreshing did not read it again.");
+            EnvironmentCheckRow photoshop = screen.Checks.First(
+                row => row.SupportKey == nameof(WorkstationVerificationCheck.PhotoshopExecutable));
 
-        // And the operator is told what to do about exactly this situation, on the same screen.
-        screen.RestartRequirement.ShouldNotBeNullOrWhiteSpace();
-        screen.RestartRequirement.ShouldContain("restart", Case.Insensitive);
-        screen.RefreshScope.ShouldNotBeNullOrWhiteSpace();
+            photoshop.IsFailure.ShouldBeFalse(
+                "the process read that file once; refreshing did not read it again.");
+
+            // And the operator is told what to do about exactly this situation, on the same screen.
+            screen.RestartRequirement.ShouldNotBeNullOrWhiteSpace();
+            screen.RestartRequirement.ShouldContain("restart", Case.Insensitive);
+            screen.RefreshScope.ShouldNotBeNullOrWhiteSpace();
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUiCulture;
+        }
     }
 
     /// <summary>
