@@ -172,9 +172,10 @@ internal sealed class SessionServiceHarness : IDisposable
     public ISessionService CreateServiceWithMeitu(
         IMeituProcessor meitu,
         IWorkstationPresetProvider? preset = null,
-        IEnvironmentGate? environmentGate = null) => new SessionService(
+        IEnvironmentGate? environmentGate = null,
+        ISessionRepository? repository = null) => new SessionService(
         WorkflowEngine.Instance,
-        Repository,
+        repository ?? Repository,
         FileWorkspace,
         RecycleBin,
         FileInspector,

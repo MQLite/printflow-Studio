@@ -74,6 +74,7 @@ public sealed class PhotoshopW1ExecutionTests : IDisposable
     public async Task An_atn_replaced_after_a_successful_run_refuses_the_next_run()
     {
         Harness h = CreateHarness();
+        byte[] acceptedBytes = File.ReadAllBytes(h.ArtifactPath);
         h.Native.OutcomeFactory = command => Success(command, h.Prepared.Actual, h.DocumentCount);
 
         (await Execute(h)).IsSuccess.ShouldBeTrue();
@@ -87,6 +88,12 @@ public sealed class PhotoshopW1ExecutionTests : IDisposable
         after.Failure.Code.ShouldBe(FailureCode.EnvironmentNotVerified);
         after.Failure.Context["actionInvocationCount"].ShouldBe("0");
         h.Native.ExecuteCount.ShouldBe(1, "the replaced Action was never invoked.");
+
+        File.WriteAllBytes(h.ArtifactPath, acceptedBytes);
+        OperationResult<PhotoshopW1PreparedDocument> recovered = await Execute(h);
+
+        recovered.IsSuccess.ShouldBeTrue(recovered.IsFailure ? recovered.Failure.ToString() : string.Empty);
+        h.Native.ExecuteCount.ShouldBe(2, "the accepted Action runs once after its bytes are restored.");
     }
 
     [Fact]

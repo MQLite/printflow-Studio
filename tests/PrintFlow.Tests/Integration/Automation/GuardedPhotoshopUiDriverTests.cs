@@ -123,7 +123,9 @@ public sealed class GuardedPhotoshopUiDriverTests
         string? questionFileName = null,
         string discardText = "否(&N)",
         bool includeDiscard = true,
-        string? titleAfterDiscard = null)
+        string? titleAfterDiscard = null,
+        bool removePromptAfterDiscard = true,
+        bool reEnableMainFrame = true)
     {
         ExternalWindowRef prompt = PhotoshopFakes.Dialog(
             handle: 0xD15CA,
@@ -160,9 +162,13 @@ public sealed class GuardedPhotoshopUiDriverTests
                 return;
             }
 
-            h.Locator.OwnedDialogs.RemoveAll(dialog => dialog.Handle == prompt.Handle);
+            if (removePromptAfterDiscard)
+            {
+                h.Locator.OwnedDialogs.RemoveAll(dialog => dialog.Handle == prompt.Handle);
+            }
             ExternalWindowRef after = PhotoshopFakes.Window(
-                title: titleAfterDiscard ?? PhotoshopFakes.NoDocumentTitle);
+                title: titleAfterDiscard ?? PhotoshopFakes.NoDocumentTitle,
+                enabled: reEnableMainFrame);
             h.Locator.Replace(h.Target.Process, after);
             h.Locator.PutInForeground(after);
         };
@@ -693,6 +699,98 @@ public sealed class GuardedPhotoshopUiDriverTests
         closed.IsFailure.ShouldBeTrue();
         closed.Failure.Code.ShouldBe(FailureCode.PhotoshopTargetLost);
         h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task A_dirty_close_with_no_prompt_and_no_closed_document_times_out_without_discard()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.Timeout);
+        h.Input.Sends.Count(send => send.Shortcut == KnownShortcut.CloseActiveDocument).ShouldBe(1);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task A_prompt_question_for_another_document_is_never_discarded()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h, questionFileName: "SOMEONE-ELSES-WORK.psd");
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11);
+    }
+
+    [Fact]
+    public async Task A_recognised_discard_control_that_refuses_invocation_is_reported_without_success()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h);
+        h.Controls.PressFailures.Add(11);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopUnknownState);
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 11,
+            "the recorder contains completed invocations only, and this one was refused");
+    }
+
+    [Fact]
+    public async Task A_prompt_remaining_after_discard_is_a_bounded_failure()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h, removePromptAfterDiscard: false);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task A_main_frame_that_remains_disabled_after_discard_is_not_cleanup_success()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(h, reEnableMainFrame: false);
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue("cleanup is incomplete while Photoshop's main frame is disabled");
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task A_discard_that_leaves_the_expected_document_active_is_not_cleanup_success()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageIdentityDialog(h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        StageDiscardPrompt(
+            h, titleAfterDiscard: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+
+        OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.Timeout);
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
     }
 
     [Fact]

@@ -191,6 +191,9 @@ internal sealed class FakeVerifiedControlSink : IVerifiedControlSink
     /// <summary>Processes whose controls are refused, modelling ownership having changed.</summary>
     public HashSet<int> LostProcessIds { get; } = [];
 
+    /// <summary>Controls whose invocation is rejected after they have been recognised.</summary>
+    public HashSet<int> PressFailures { get; } = [];
+
     /// <summary>Runs after each press, so a test can model the surface it closes.</summary>
     public Action<nint, int>? OnPress { get; set; }
 
@@ -320,6 +323,12 @@ internal sealed class FakeVerifiedControlSink : IVerifiedControlSink
         if (Lost(owner))
         {
             return OperationResult.Fail<Unit>(FailureCode.MeituTargetLost, "scripted ownership loss");
+        }
+
+        if (PressFailures.Contains(control.ControlId))
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.MeituUnknownState, "scripted control invocation failure");
         }
 
         Presses.Add((control.Host.Value, control.ControlId, control.ClassName));

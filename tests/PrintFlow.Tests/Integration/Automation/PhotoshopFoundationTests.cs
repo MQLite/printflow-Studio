@@ -171,6 +171,76 @@ public sealed class PhotoshopFoundationTests : IDisposable
         h.Locator.LaunchCount.ShouldBe(1);
     }
 
+    [Fact]
+    public async Task A_launch_failure_has_no_input_and_the_next_launch_succeeds_after_recovery()
+    {
+        PhotoshopBaseline baseline = BaselineForRealFile();
+        Harness h = Build(baseline, registerProcess: false);
+
+        OperationResult<PhotoshopReadiness> failed =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        failed.IsFailure.ShouldBeTrue();
+        failed.Failure.Code.ShouldBe(FailureCode.PhotoshopLaunchFailed);
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+
+        ExternalProcessRef recoveredProcess = new(
+            8888, baseline.ExecutablePath, DateTimeOffset.UnixEpoch);
+        ExternalWindowRef recoveredWindow = PhotoshopFakes.Window(
+            handle: 0xB0000, owningProcessId: recoveredProcess.ProcessId);
+        h.Locator.LaunchResult = recoveredProcess;
+        h.Locator.Replace(recoveredProcess, recoveredWindow);
+        h.Locator.PutInForeground(recoveredWindow);
+        h.Controls.SetVisibleClasses(
+            recoveredWindow.Handle,
+            [.. PhotoshopFakes.EditorChromeClasses, PhotoshopFakes.StartScreenClass]);
+
+        OperationResult<PhotoshopReadiness> recovered =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        recovered.IsSuccess.ShouldBeTrue(recovered.IsFailure ? recovered.Failure.ToString() : string.Empty);
+        recovered.Value.WasLaunched.ShouldBeTrue();
+        h.Locator.LaunchCount.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task A_launch_handing_back_the_wrong_executable_identity_is_never_driven()
+    {
+        PhotoshopBaseline baseline = BaselineForRealFile();
+        Harness h = Build(baseline, registerProcess: false);
+        h.Locator.LaunchResult = new ExternalProcessRef(
+            8888, Path.Combine(_root, "Impostor.exe"), DateTimeOffset.UnixEpoch);
+
+        OperationResult<PhotoshopReadiness> ready =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsFailure.ShouldBeTrue();
+        ready.Failure.Code.ShouldBe(FailureCode.PhotoshopNotInstalled);
+        ready.Failure.Context["inputSent"].ShouldBe("false");
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task A_launched_process_that_exits_before_showing_a_window_is_not_ready()
+    {
+        PhotoshopBaseline baseline = BaselineForRealFile();
+        Harness h = Build(baseline, registerProcess: false);
+        ExternalProcessRef launched = new(8888, baseline.ExecutablePath, DateTimeOffset.UnixEpoch);
+        h.Locator.LaunchResult = launched;
+        h.Locator.LaunchedProcessNeverShowsWindow = true;
+        h.Locator.DeadProcessIds.Add(launched.ProcessId);
+
+        OperationResult<PhotoshopReadiness> ready =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsFailure.ShouldBeTrue();
+        ready.Failure.Code.ShouldBe(FailureCode.PhotoshopWindowNotFound);
+        ready.Failure.Context["inputSent"].ShouldBe("false");
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     /// <summary>A binary whose digest has moved is refused before any window is touched.</summary>
     [Fact]
     public async Task A_wrong_executable_hash_fails_before_any_input()
@@ -307,6 +377,28 @@ public sealed class PhotoshopFoundationTests : IDisposable
         ready.IsFailure.ShouldBeTrue();
         ready.Failure.Code.ShouldBe(FailureCode.PhotoshopWindowNotFound);
         h.Input.Sends.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task A_disabled_main_window_is_not_an_accepted_ready_state()
+    {
+        PhotoshopBaseline baseline = BaselineForRealFile();
+        Harness h = Build(baseline, registerProcess: false);
+        ExternalProcessRef process = new(7777, baseline.ExecutablePath, DateTimeOffset.UnixEpoch);
+        ExternalWindowRef disabled = PhotoshopFakes.Window(enabled: false);
+        h.Locator.Register(process, disabled);
+        h.Controls.SetVisibleClasses(
+            disabled.Handle,
+            [.. PhotoshopFakes.EditorChromeClasses, PhotoshopFakes.StartScreenClass]);
+
+        OperationResult<PhotoshopReadiness> ready =
+            await h.Adapter.EnsureReadyAsync(CancellationToken.None);
+
+        ready.IsFailure.ShouldBeTrue();
+        ready.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog,
+            "a disabled accepted frame is treated as blocked even when no titled modal can be identified");
+        h.Input.Sends.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
     }
 
     // -----------------------------------------------------------------------------------

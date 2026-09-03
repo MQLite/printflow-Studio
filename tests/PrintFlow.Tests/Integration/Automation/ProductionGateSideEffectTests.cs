@@ -311,6 +311,7 @@ public sealed class ProductionGateSideEffectTests
     [Theory]
     [InlineData(RefusalCase.DisplayMismatch)]
     [InlineData(RefusalCase.NonInteractiveSession)]
+    [InlineData(RefusalCase.UnsupportedRemoteSession)]
     [InlineData(RefusalCase.SecureDesktop)]
     [InlineData(RefusalCase.WrongMeituExecutableDigest)]
     [InlineData(RefusalCase.WrongPhotoshopExecutableDigest)]
@@ -354,6 +355,7 @@ public sealed class ProductionGateSideEffectTests
     {
         DisplayMismatch,
         NonInteractiveSession,
+        UnsupportedRemoteSession,
         SecureDesktop,
         WrongMeituExecutableDigest,
         WrongPhotoshopExecutableDigest,
@@ -377,6 +379,15 @@ public sealed class ProductionGateSideEffectTests
 
             case RefusalCase.NonInteractiveSession:
                 fixture.Facts.Session = new InteractiveSessionFacts(false, 0, "Services", false, null);
+                break;
+
+            case RefusalCase.UnsupportedRemoteSession:
+                fixture.Facts.Session = fixture.Facts.Session with
+                {
+                    SessionId = 2,
+                    SessionName = "RDP-Tcp#7",
+                    IsRemoteSession = true,
+                };
                 break;
 
             case RefusalCase.SecureDesktop:
