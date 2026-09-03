@@ -11,8 +11,15 @@ invalid output does not become a Revision, automation locks either release in th
 transaction or are recovered only after the owner is proved dead, and every automated major
 failure family has a successful restored-state retry.
 
-Part C is nevertheless blocked. During the limited live proof, three successive synthetic
-Photoshop jobs failed closed. The first two opened only their own synthetic Working PNG and then
+The operator has now restored Photoshop manually, and the closure rerun in §15 completed the
+missing live recovery chain. The next fresh synthetic Photoshop Production job succeeded, the
+established five-job restart/reuse smoke passed without a retry or cleanup warning, persistence
+readback matched the live transcript, and both external applications finished in accepted clean
+states. Part C therefore passes.
+
+The originally blocked live result remains part of the evidence. Before the closure rerun, three
+successive synthetic Photoshop jobs failed closed. The first two opened only their own synthetic
+Working PNG and then
 refused because the signed identity control was not both visible and enabled. After each refusal,
 the attempt released the automation lock and the exact synthetic document was closed manually.
 Photoshop was then cleanly closed from its no-document start screen to exercise the recommended
@@ -21,8 +28,8 @@ Production job refused with `PhotoshopWindowNotFound` because that process owned
 Photoshop main frame.
 
 The specification forbids dismissing unknown dialogs and forbids process killing as recovery.
-Consequently, the crash-report state was left for the operator and the required live sequence
-`restore accepted state -> next clean Production job succeeds` could not be completed.
+Consequently, that crash-report state was left for the operator and the required live sequence
+`restore accepted state -> next clean Production job succeeds` was not claimed until §15.
 
 ## 2. Starting accepted baseline
 
@@ -315,29 +322,162 @@ customer document visible on the workstation was never activated or sent input.
 
 ## 13. Production Readiness and remaining risks
 
-The environment gate still reports `ALLOWED` because executable, preset, evidence, desktop,
-display, culture, and workspace facts remain accepted. That does not override the adapter's
-operation-time UI refusal. Current Production operational state is blocked by the Photoshop crash
-reporter and must not be used for a real order.
+The environment gate reports `ALLOWED` because executable, preset, evidence, desktop, display,
+culture, and workspace facts remain accepted. During the original blocked run that did not
+override the adapter's operation-time UI refusal. The closure preflight and sequence in §15 now
+prove that the external Photoshop state was restored and ordinary Production operation resumed.
 
-Before the first controlled real Production order:
+The five previously outstanding live items are now closed:
 
-1. the operator must close the Adobe crash reporter or restart Photoshop without process killing;
-2. read-only preflight must show exactly one accepted Photoshop process, signed main frame,
+1. the operator cleared the Adobe crash-report state and/or normally restarted Photoshop without
+   PrintFlow manipulating or killing it;
+2. read-only preflight showed exactly one accepted Photoshop process, signed main frame,
    `KnownStartScreen`, no blocking dialog, and `OWL.Document = 0`;
-3. rerun one synthetic Photoshop Production job and prove Succeeded/`ReviewRequired`, signed owned
-   cleanup, unchanged TIFF re-read, zero cleanup warnings, and a free lock;
-4. rerun the five-job restart smoke, or an equivalent bounded Photoshop/Meitu sequence, and reach
-   the post-restart successful job;
+3. the next synthetic Photoshop Production job reached Succeeded/`ReviewRequired`, completed
+   signed owned cleanup, retained an unchanged re-read TIFF, emitted no cleanup warning, and left
+   the lock free;
+4. the established five-job restart smoke reached its post-restart successful Photoshop job;
 5. retain Meitu exact-version monitoring because 7.8.8.0 remains installed beside accepted
    7.8.7.5 and in-process auto-update remains an availability risk.
 
-Do not proceed to 11600-D while these items are outstanding.
+The fifth item is an accepted availability note rather than a closure blocker: the signed
+7.8.7.5 executable remains exact and is the only instance PrintFlow selected or attached to.
+Part C may proceed to 11600-D.
 
 ## 14. Git state
 
-Starting commit: `c1c9ce5` on `master`, clean. Current changes are the seven test/test-fixture files,
-the new persistence matrix test, and this report. No amend, rebase, history rewrite, dependency
-change, preset change, configuration change, push, or Production source change was made.
+Starting commit: `c1c9ce5` on `master`, clean. Commit `791540b` records the accepted deterministic
+matrix and the original blocked live report before this closure section was appended. The closure
+commit changes this report only. No amend, rebase, history rewrite, dependency change, preset
+change, configuration change, push, or Production source change was made.
 
-**11600-C BLOCKED — PRODUCTION FAILURE RECOVERY NOT VERIFIED**
+## 15. Closure rerun — operator restoration and resumed Production
+
+### 15.1 Missing recovery chain closed
+
+```text
+historical failure: Adobe crash reporter blocked Photoshop
+operator action:     manual clear / normal restart; PrintFlow did not manipulate the reporter
+preflight:           accepted Photoshop state restored
+next Production job: Succeeded / ReviewRequired
+```
+
+The operator confirmed that the external state had been restored before authorising the live
+sequence. PrintFlow did not dismiss the historical crash reporter, force-kill Photoshop, kill an
+Adobe crash-report process, sweep documents, or automate recovery of the blocked state.
+
+### 15.2 Read-only preflight
+
+The preflight ran before Production input and returned:
+
+| Check | Restored observation |
+| --- | --- |
+| Configuration | committed `Adapters.Mode = Production`; no override |
+| Preset | `printflow-workstation-v1 1.16.0`; SHA-256 `6396FB4EB87F69C6789304CE191453654B2B75E82A5A9AB0161F90556A6F1A80` |
+| Production Readiness | Ready; `VerifiedEnvironmentGate` = `ALLOWED`; 0 blocking failures |
+| Integrity | `PresetIntegrity` passed; `EvidenceIntegrity` 28/28 passed |
+| Photoshop processes | exactly 1 accepted process, PID 29480, `D:\Adobe Photoshop CC 2019\Photoshop.exe` |
+| Photoshop frame | exactly 1 signed `Photoshop` frame titled `Adobe Photoshop CC 2019`; enabled; no titled blocking dialog |
+| Crash reporter | 0 crash-report process/window candidates |
+| Photoshop state | `KnownStartScreen`; matched `OWL.WelcomeScreenView`; no operator work observed |
+| Document census | `OWL.Document = 0`; 0 closes and 0 refusals during the read-only census |
+| Meitu | exactly 1 accepted process, PID 27660, executable version `7.8.7.5` |
+| Filesystem | 97 session directories; 70 Comparison files; 2 Quarantine files |
+
+The Photoshop readiness smoke reported `launched by PrintFlow: False`; preflight itself produced
+no application input.
+
+### 15.3 Established five-job recovery sequence
+
+The existing `ProductionRecoveryWorkstationSmoke` protocol was reused unchanged: `P, P, M, M`, a
+fresh PrintFlow service graph and startup-recovery pass while Photoshop and Meitu remained running,
+then `P`. Its first Photoshop job is the required next clean Production job. Because it succeeded,
+the smoke continued with the remaining bounded sequence. Run token:
+`20260903-135254-C8490923`.
+
+| Job | Adapter | Launch/reuse | Output SHA-256 | Bytes / pixels | Attempt / step | Cleanup / lock |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | Photoshop | reused PID 29480 | `DA0702A13EF543ED7EFAAECFB7C55C49A71807698EBC1B6DF89DF3D9D3651411` | 2,452,724 / 600x400 | 1 `Succeeded` / `ReviewRequired` | signed owned discard; no warning; free |
+| B | Photoshop | reused PID 29480 | `D93D07092D73EBDA22807EA946A79B71F13E4D7675BCE961151D65B4F45C7CBD` | 2,452,724 / 600x400 | 1 `Succeeded` / `ReviewRequired` | signed owned discard; no warning; free |
+| C | Meitu | reused PID 27660 | `5207F744E04267CE1AA68BEAC7C0602CF5FBA62A8D17A2EA9B3139417F643ECC` | 1,159,183 / 1280x960 | 1 `Succeeded` / `ReviewRequired` | signed empty state; no warning; free |
+| D | Meitu | reused PID 27660 | `5207F744E04267CE1AA68BEAC7C0602CF5FBA62A8D17A2EA9B3139417F643ECC` | 1,159,183 / 1280x960 | 1 `Succeeded` / `ReviewRequired` | signed empty state; no warning; free |
+| E, after restart | Photoshop | reused PID 29480 | `1EBFC0D697705E8047DF2E3157A26EF5954B02BE72C8CB51E7B3612BE142108D` | 2,452,724 / 600x400 | 1 `Succeeded` / `ReviewRequired` | signed owned discard; no warning; free |
+
+The exact Photoshop Working inputs proved by the guarded identity path were:
+
+```text
+D:\PrintFlowStudio\Sessions\S_20260903T015256Z_f3cbe9db\Working\01a064f8-1d35-7e98-b45d-8d2c4fbc5ebf\PF_11600A_20260903-135254-C8490923_A.png
+D:\PrintFlowStudio\Sessions\S_20260903T015312Z_5e1860bc\Working\01a064f8-5848-712f-ab88-97a3b5396624\PF_11600A_20260903-135254-C8490923_B.png
+D:\PrintFlowStudio\Sessions\S_20260903T015357Z_d3b0d18d\Working\01a064f9-0a7a-7ba7-af73-d0f106aad38f\PF_11600A_20260903-135254-C8490923_E.png
+```
+
+Each Photoshop attempt ran W1 through the accepted guarded path. Its adapter transcript records a
+validated 600x400, 300-dpi, five-channel separated TIFF with Photoshop spot channel W1, signed
+owned-document discard, expected Working document gone, and no cleanup-warning suffix. The
+processor re-read each TIFF after cleanup; the later persistence audit re-hashed the same bytes.
+Final retained Working-document delta was `0 -> 0`.
+
+### 15.4 Restart and persistence readback
+
+The restart boundary reported:
+
+```text
+external apps still up  2
+lock before recovery    free
+lock after recovery     free
+attempts interrupted    0
+files quarantined       0
+recovery failures       0
+Production Readiness    Ready
+```
+
+The QA database was reopened read-only at
+`D:\PrintFlowStudio\QA\Epic11600A\20260903-135254-C8490923\printflow-recovery.db`.
+It contains exactly five adapter-backed closure attempts: five `SUCCEEDED`, zero failed, zero
+retry parents, and `RetrySequence = 0` throughout. Each corresponding `SessionStep` has
+`AttemptCount = 1` and `REVIEW_REQUIRED`. Every referenced output exists and its on-disk SHA-256
+and byte length match its persisted Revision. `AutomationLock.SessionId`, owner PID, and owner
+machine are all null.
+
+All three TIFFs were then independently re-read through `ProductionTiffInspector`. Each passed the
+full accepted C1 structure: 600x400 at 300x300 dpi, IBM-PC byte order, uncompressed interleaved
+five-by-eight-bit separated samples, W1 Photoshop spot channel with 240,000 non-white samples, no
+alpha, no pyramid, one layer, and all layer channels RLE.
+
+### 15.5 Filesystem, Meitu, and final application state
+
+The sequence created exactly these five synthetic sessions:
+
+```text
+S_20260903T015256Z_f3cbe9db
+S_20260903T015312Z_5e1860bc
+S_20260903T015326Z_c4d8cf3f
+S_20260903T015341Z_f16e0911
+S_20260903T015357Z_d3b0d18d
+```
+
+Session directories changed `97 -> 102`; lost directories were 0. Comparison stayed 70 files and
+Quarantine stayed 2 files. No historical failed QA session was cleaned.
+
+Meitu ended in `KnownEditorEmpty` on the same accepted PID 27660 and exact executable 7.8.7.5.
+The additional installed 7.8.8.0 remains present but unaccepted and was not running, selected, or
+attached to. `silentUpgrade` and the committed mode/preset were not changed.
+
+Photoshop ended on the same accepted PID 29480, one signed enabled main frame, title
+`Adobe Photoshop CC 2019`, `KnownStartScreen`, no blocking dialog, and `OWL.Document = 0`.
+
+### 15.6 Customer safety and testing scope
+
+- no customer Photoshop document was opened;
+- no customer document was selected, saved, closed, or discarded;
+- no customer file was overwritten, moved, renamed, deleted, or quarantined;
+- every live input was generated under the closure run's unique synthetic token;
+- no Production source, configuration, preset, evidence, dependency, or migration changed.
+
+The narrowly scoped live/readback checks passed: three Production-readiness checks, the read-only
+Photoshop classification and document census, the unchanged five-job recovery smoke, three
+independent TIFF structural revalidations, and final read-only Photoshop/Meitu checks. The complete
+10,121-test suite was not repeated. The accepted 771/771 Part C matrix, clean build/security
+evidence, and existing complete-suite result remain authoritative.
+
+**11600-C PASS — PRODUCTION FAILURE AND RECOVERY MATRIX VERIFIED**
