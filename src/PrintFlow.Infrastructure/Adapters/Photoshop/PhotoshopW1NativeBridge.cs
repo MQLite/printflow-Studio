@@ -407,6 +407,16 @@ internal static class PhotoshopW1Program
                         nonEmpty: nonWhite > 0, nonWhitePixels: nonWhite,
                         solidity: solidity, colour: colour };
                 }
+                function promoteBackgroundLayer(doc) {
+                    var background = null;
+                    try { background = doc.backgroundLayer; } catch (noBackgroundLayer) { return; }
+                    if (background === null) { return; }
+                    doc.activeLayer = background;
+                    background.isBackgroundLayer = false;
+                    if (doc.activeLayer.isBackgroundLayer) {
+                        throw new Error('The Background layer could not be promoted to an editable layer.');
+                    }
+                }
                 try {
                     if (app.documents.length < 1) { return refusal('No active document.'); }
                     var doc = app.activeDocument;
@@ -432,6 +442,7 @@ internal static class PhotoshopW1Program
                     }
                     var runtimeFailure = verifyRuntime();
                     if (runtimeFailure !== null) { return refusal(runtimeFailure); }
+                    promoteBackgroundLayer(doc);
                     actionInvocations++;
                     app.doAction({{actionName}}, {{setName}});
                     after = facts(doc);

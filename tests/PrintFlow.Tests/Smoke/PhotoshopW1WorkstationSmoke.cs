@@ -17,6 +17,8 @@ namespace PrintFlow.Tests.Smoke;
 public sealed class PhotoshopW1WorkstationSmoke
 {
     private const string EnableVariable = "PRINTFLOW_PHOTOSHOP_W1_SMOKE";
+    private const string BranchVariable = "PRINTFLOW_PHOTOSHOP_W1_SMOKE_BRANCH";
+    private const string CloseVariable = "PRINTFLOW_PHOTOSHOP_W1_SMOKE_CLOSE";
 
     [Fact]
     public async Task Execute_all_three_exact_W1_Actions_once_and_validate_factual_results()
@@ -40,9 +42,12 @@ public sealed class PhotoshopW1WorkstationSmoke
 
         Console.WriteLine($"controlled workspace : {root}");
         Console.WriteLine("candidate preset     : temporary discovery-only copy; not accepted evidence");
-        Console.WriteLine("cleanup policy       : retain all documents; no automated discard route exists");
+        bool close = Environment.GetEnvironmentVariable(CloseVariable) == "1";
+        WhiteUnderbaseBranch[] branches = SelectedBranches();
+        Console.WriteLine($"branches             : {string.Join(", ", branches)}");
+        Console.WriteLine($"cleanup policy       : {(close ? "close each exact synthetic document with signed discard" : "retain synthetic documents")}");
 
-        foreach (WhiteUnderbaseBranch branch in Enum.GetValues<WhiteUnderbaseBranch>())
+        foreach (WhiteUnderbaseBranch branch in branches)
         {
             string token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
             WorkspaceFileRef managed = WorkspaceFileRef.Create(
@@ -50,7 +55,9 @@ public sealed class PhotoshopW1WorkstationSmoke
                 WorkspaceArea.Working);
             string absolute = workspace.ResolveAbsolute(managed);
             Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
-            File.WriteAllBytes(absolute, SyntheticImages.Png(1200, 800, dpi: 240, alpha: true));
+            bool opensAsBackgroundLayer = branch == WhiteUnderbaseBranch.W1_1px;
+            File.WriteAllBytes(absolute, SyntheticImages.Png(
+                1200, 800, dpi: 240, alpha: !opensAsBackgroundLayer));
             Sha256 backingBefore = Hash(absolute);
             FitWithinBoundsPreparation preparation = new(PrintPreparationPlan.For(
                 new RevisionId(Guid.NewGuid()),
@@ -81,6 +88,7 @@ public sealed class PhotoshopW1WorkstationSmoke
             Console.WriteLine(string.Empty);
             Console.WriteLine($"## {branch}");
             Console.WriteLine($"document             : {result.DocumentFullPath}");
+            Console.WriteLine($"source layer case     : {(opensAsBackgroundLayer ? "flattened Background" : "alpha layer")}");
             Console.WriteLine($"document count       : {prepared.Value.Actual.DocumentCount} -> " +
                               $"{result.OtherDocumentsMayBeOpen} other-documents-may-be-open");
             Console.WriteLine($"before               : {prepared.Value.Actual.PixelWidth}×" +
@@ -104,11 +112,37 @@ public sealed class PhotoshopW1WorkstationSmoke
 
             Hash(absolute).ShouldBe(backingBefore);
             Directory.EnumerateFiles(Path.GetDirectoryName(absolute)!).ShouldHaveSingleItem();
+
+            if (close)
+            {
+                OperationResult<PhotoshopTarget> closed = await automation.CloseExactDocumentAsync(
+                    opened.Value, managed, CancellationToken.None);
+                closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+            }
         }
 
         Console.WriteLine(string.Empty);
-        Console.WriteLine("OPERATOR CLEANUP REQUIRED: 3 exact synthetic CMYK/W1 documents remain open and modified in memory.");
-        Console.WriteLine("Photoshop was not closed and the retained workspace must not be deleted yet.");
+        Console.WriteLine(close
+            ? "CLEANUP COMPLETE: every exact synthetic document was closed with signed discard."
+            : $"OPERATOR CLEANUP REQUIRED: {branches.Length} exact synthetic CMYK/W1 document(s) remain open and modified in memory.");
+        Console.WriteLine(close
+            ? "Photoshop itself was not closed; no synthetic document remains loaded."
+            : "Photoshop was not closed and the retained workspace must not be deleted yet.");
+    }
+
+    private static WhiteUnderbaseBranch[] SelectedBranches()
+    {
+        string? selected = Environment.GetEnvironmentVariable(BranchVariable);
+        if (string.IsNullOrWhiteSpace(selected))
+        {
+            return Enum.GetValues<WhiteUnderbaseBranch>();
+        }
+
+        return Enum.TryParse(selected, ignoreCase: false, out WhiteUnderbaseBranch branch) &&
+               Enum.IsDefined(branch)
+            ? [branch]
+            : throw new InvalidOperationException(
+                $"{BranchVariable} must be one exact {nameof(WhiteUnderbaseBranch)} value.");
     }
 
     private static string CreateCandidateManifest(string root, string acceptedManifest)

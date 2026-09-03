@@ -47,6 +47,35 @@ public sealed class PhotoshopW1ExecutionTests : IDisposable
     }
 
     [Fact]
+    public void Fixed_program_promotes_a_Photoshop_Background_layer_immediately_before_the_Action()
+    {
+        Harness h = CreateHarness();
+        PhotoshopW1ActionContract contract = Contract(h.ArtifactPath, Hash(h.ArtifactPath));
+        PhotoshopNativeW1Command command = new(
+            h.DocumentPath,
+            h.Prepared.Actual.PixelWidth,
+            h.Prepared.Actual.PixelHeight,
+            h.Prepared.Actual.ResolutionPpi,
+            WhiteUnderbaseBranch.W1_1px,
+            contract);
+
+        string program = PhotoshopW1Program.Create(command);
+
+        int runtimeGuard = program.IndexOf("var runtimeFailure = verifyRuntime();", StringComparison.Ordinal);
+        int promotion = program.IndexOf("promoteBackgroundLayer(doc);", StringComparison.Ordinal);
+        int action = program.IndexOf("app.doAction", StringComparison.Ordinal);
+
+        runtimeGuard.ShouldBeGreaterThanOrEqualTo(0);
+        promotion.ShouldBeGreaterThan(runtimeGuard,
+            "the accepted Action and its transcript must be verified before any layer mutation");
+        promotion.ShouldBeLessThan(action,
+            "a flattened PNG Background must be editable before the Action's selection commands run");
+        (program.Split("background.isBackgroundLayer = false;", StringSplitOptions.None).Length - 1)
+            .ShouldBe(1);
+        (program.Split("app.doAction", StringSplitOptions.None).Length - 1).ShouldBe(1);
+    }
+
+    [Fact]
     public async Task Missing_canonical_atn_refuses_before_native_input()
     {
         Harness h = CreateHarness();
