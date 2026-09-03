@@ -4,6 +4,113 @@
 
 ---
 
+## 0. Resolution — fresh post-B1 soak
+
+The B1 owned-document cleanup gate passed in commit `95cb24e`. A completely fresh soak then ran
+from job 1 on 2026-09-03; it did not resume either historical partial run described below. The
+configuration and registered graph were:
+
+```text
+committed Adapters.Mode : Production
+override                : none
+preset                  : printflow-workstation-v1 1.16.0
+preset SHA-256          : 6396FB4EB87F69C6789304CE191453654B2B75E82A5A9AB0161F90556A6F1A80
+gate                    : VerifiedEnvironmentGate / Production ALLOWED
+Photoshop adapter       : photoshop-cc2019-production-v1 / Production
+Meitu adapter           : meitu-xiuxiu-production-v1 / Production
+run token               : 20260903-121445-E3477306
+QA database             : D:\PrintFlowStudio\QA\Epic11600B\20260903-121445-E3477306\printflow-soak.db
+elapsed                 : 11.1055 minutes
+```
+
+### 0.1 Completed structure
+
+| Stage | Required sequence | Result |
+| --- | --- | --- |
+| A | 8 mixed jobs, `P M P M P M P M` | 8/8 succeeded |
+| B | 12 consecutive Photoshop jobs | 12/12 succeeded |
+| C | 12 consecutive Meitu jobs | 12/12 succeeded |
+| Restart checkpoint | rebuild the PrintFlow graph while leaving Photoshop and Meitu running | passed; lock free, 0 interrupted attempts, 0 unexpected quarantine, 32 prior outputs re-hashed unchanged |
+| D | 8 post-restart jobs, `P M P M P M P M` | 8/8 succeeded |
+
+All six resource checkpoints were reached in their defined order: before job 1, after job 8,
+after job 20, after job 32, after the PrintFlow restart, and after job 40. No threshold was invented
+or applied. The completed harness reached its checkpoint table and all final assertions; the
+earlier report's statement that four checkpoints were not taken applies only to the preserved
+historical run below.
+
+The post-run bounded observation found Photoshop PID 20848 still on the same process, title
+`Adobe Photoshop CC 2019`, signed `KnownStartScreen`, no operator work loaded, and no blocking
+dialog. The soak's final window census was `OWL.Document 0`, `OWL.TabPane 4`,
+`Photoshop_Document 0`. A later read-only resource sample found Photoshop at 821 MB working set,
+2,069 MB private, 1,883 handles and 75 threads; Meitu at 410 MB working set, 416 MB private,
+1,185 handles and 42 threads. These are observations, not leak thresholds.
+
+### 0.2 Job and output result
+
+The QA database was reopened read-only after completion. It contained 40 sessions and 80 successful
+attempt rows: 40 import attempts plus exactly 40 adapter-backed step attempts. There were zero
+failed attempts, zero retries, zero cleanup warnings, 40 `ReviewRequired` step states, and a free
+automation lock. The adapter split was 20 Photoshop TIFF jobs and 20 Meitu enhancement jobs.
+
+All Meitu outputs were independently recorded as 1280×960 PNG, 1,159,183 bytes, SHA-256
+`5207F744E04267CE1AA68BEAC7C0602CF5FBA62A8D17A2EA9B3139417F643ECC`. The 20 Photoshop
+outputs were independently validated 600×400 TIFFs:
+
+| Job | TIFF SHA-256 |
+| --- | --- |
+| 1 | `1D60A969957E8A6EACA0C296743D3F170129700BCCD8FD70A947104AC2708F87` |
+| 3 | `022E4C89717D651A4CBCBEF31A28AB862D2D61BCB5756FD6FEB1711809CC7ED5` |
+| 5 | `86F6F5711F5BB995639601B73DBBE2B7FA5FD8BD4FC987DB40A38C1F4090416B` |
+| 7 | `C36A8E3A965DFFA64B7DC92524A409E3FE62EE2B16E1C2AB985DC4635EB535C0` |
+| 9 | `6AD0B6113C5A18E8477C5D5AE8A901685D2E651FCBD8BAB87975913745850F9A` |
+| 10 | `46E3C442186BB23302F4971B1BC35EA0E8356CAD35B4DFE49402BA27A5114CC5` |
+| 11 | `0DF6BECFBCEE00573CC9DE50BA6C4A6F0170EC1A8F20718BBDECA5577A7747CB` |
+| 12 | `CFF73FB24E16D9DF2FD8B96015DED6C8A1E002FCD7713CF91311506ECD9157DC` |
+| 13 | `112463913D82F3368E33AA68C82184C797942FACE9EF5D78DFE739E41D2C2248` |
+| 14 | `057EBEB5194F84692D902460900C15E8F63C5D5133ACC2AE2CFD6BA3BA62BD40` |
+| 15 | `074BDE75DB1DB67C6A92FFAE3A7DCFC62F66CE7BF3FC7FFC72B05DE445D08E0D` |
+| 16 | `6BEE404397E21EF12013F89C168B92BDCC44958441639BDB7663EE8900C576CB` |
+| 17 | `326EE5F4A3F4E20A885D5B242352D8D5E8BEFB4FA132A5E9A7FE5E75CB88F4D7` |
+| 18 | `BBA67EDB3828F1F3A4C2ADF698750EB65C009CAAA3EA7B2C34D483C5D4161507` |
+| 19 | `5A3F44DD32C5DB1380E1220CACF2C95E8B698BE5EC47ECAA2C64070A2C9080A3` |
+| 20 | `8D4B42E9A51BA774EF2CB56D81FC2B37EDC033E6F571C56D51B1E3FD816AE8E6` |
+| 33 | `396C27772F8C75AA4CAB26E0E9D83C1020047962C89E3075362D89B7523C5E22` |
+| 35 | `0186E5E3D057080D956E82E265B9A4BEF428DABFEF721AA5BAE49CF7FBEFF8CA` |
+| 37 | `A14D93197A738EC5D2EE3E06A00C5DC39CA372F988FB39791B874F51A248ED72` |
+| 39 | `94D49CFD511E26CF4B910B3524750D905C6D5B7D9E2389E445A8B30D1FE18C18` |
+
+Nineteen TIFFs were 2,452,724 bytes; job 13 was 2,452,720 bytes and passed the same independent
+structural validation. Every Photoshop job recorded signed owned-document cleanup success and no
+warning, and the final retained Working-document delta was zero.
+
+### 0.3 Final filesystem/session census and customer safety
+
+```text
+sessions before/after    : 54 / 94
+new session directories : 40
+expected from this run   : 40
+session directories lost: 0
+Comparison files         : 70 (unchanged)
+Quarantine files         : 2 (unchanged)
+QA directories           : 9 (unchanged by the measured interval)
+prior-session sample     : 5/5 metadata fingerprints unchanged
+Meitu running instances  : 1, accepted 7.8.7.5 executable only
+```
+
+All run inputs were synthetic and isolated under the run's QA directory and its 40 new session
+directories. No customer artifact was opened, selected, saved, closed, discarded, overwritten,
+moved, renamed, or deleted. The full 10,121-test final-source suite was not rerun because this
+resumed proof changed no product source; the already-passed B1 suite remains the code gate.
+
+The remainder of this document preserves the original partial-run evidence and the defect that B1
+subsequently remediated. Those historical `NOT COMPLETED` statements do not override this fresh
+post-B1 result.
+
+**11600-B PASS — PRODUCTION MULTI-JOB SOAK AND RESOURCE CHECKPOINTS COMPLETE**
+
+---
+
 ## 1. Preflight
 
 Starting point: Epic 11600 Part A accepted, `master` clean at `e752ca3`.
