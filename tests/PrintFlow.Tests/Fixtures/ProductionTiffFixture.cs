@@ -15,7 +15,9 @@ public sealed record ProductionTiffFixtureOptions(
     byte ChannelKind = 2,
     bool FifthSampleNonEmpty = true,
     bool IncludePyramidIfd = false,
-    ushort LayerCompression = 1);
+    ushort LayerCompression = 1,
+    byte[]? CmykSamples = null,
+    byte? FifthSampleEverywhere = null);
 
 internal static class ProductionTiffFixture
 {
@@ -44,7 +46,7 @@ internal static class ProductionTiffFixture
         byte[] yResolution = Rational(options.Dpi, 1, options.LittleEndian);
         byte[] resources = PhotoshopResources(options.ChannelName, options.ChannelKind);
         byte[] imageSource = PhotoshopImageSourceData(options.LayerCompression, options.LittleEndian);
-        byte[] pixels = Pixels(options.SamplesPerPixel, options.FifthSampleNonEmpty);
+        byte[] pixels = Pixels(options);
 
         const ushort entryCount = 18;
         int ifdLength = 2 + entryCount * 12 + 4;
@@ -104,10 +106,48 @@ internal static class ProductionTiffFixture
         return stream.ToArray();
     }
 
-    private static byte[] Pixels(ushort samples, bool fifthNonEmpty)
+    /// <summary>
+    /// The strip's interleaved samples: white ink everywhere unless the caller asks otherwise.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="ProductionTiffFixtureOptions.CmykSamples"/> and
+    /// <see cref="ProductionTiffFixtureOptions.FifthSampleEverywhere"/> exist for the preview
+    /// regression (Epic 11600 Part D1 §7), which needs a file whose colour is distinguishable and
+    /// whose W1 channel is full ink for <i>every</i> pixel — the default's single zeroed sample
+    /// makes the channel non-empty for the inspector but leaves three of four pixels opaque after
+    /// WIC's conversion, which is not the defect the live artefact showed.
+    /// </remarks>
+    private static byte[] Pixels(ProductionTiffFixtureOptions options)
     {
+        ushort samples = options.SamplesPerPixel;
         byte[] data = Enumerable.Repeat(byte.MaxValue, Width * Height * samples).ToArray();
-        if (samples >= 5 && fifthNonEmpty) data[4] = 0;
+
+        if (options.CmykSamples is { Length: > 0 } cmyk)
+        {
+            int colourSamples = Math.Min(cmyk.Length, samples);
+            for (int pixel = 0; pixel < Width * Height; pixel++)
+            {
+                Array.Copy(cmyk, 0, data, pixel * samples, colourSamples);
+            }
+        }
+
+        if (samples < 5)
+        {
+            return data;
+        }
+
+        if (options.FifthSampleEverywhere is { } fifth)
+        {
+            for (int pixel = 0; pixel < Width * Height; pixel++)
+            {
+                data[pixel * samples + 4] = fifth;
+            }
+        }
+        else if (options.FifthSampleNonEmpty)
+        {
+            data[4] = 0;
+        }
+
         return data;
     }
 

@@ -1,4 +1,5 @@
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using PrintFlow.Domain.Files;
 
 namespace PrintFlow.Infrastructure.Imaging;
@@ -49,6 +50,51 @@ internal static class WicPixelFormats
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Whether a decoded <b>frame</b> positively carries alpha: <c>true</c>, <c>false</c>, or
+    /// <c>null</c> when neither the format nor the palette can say.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="HasAlpha"/> asks the format alone and is deliberately silent about indexed
+    /// images, whose transparency lives in the palette rather than in the format name. This asks
+    /// the frame, so an indexed PNG with a transparent palette entry is answered <c>true</c> on
+    /// the evidence of that entry rather than left unknown.
+    /// <para>
+    /// Every other unknown keeps its <c>null</c>. A five-sample separated TIFF — CMYK plus a
+    /// Photoshop spot channel — decodes as a WIC format PrintFlow cannot name, and "I cannot
+    /// tell" is the only honest reading of it: the fifth sample is ink, and nothing about the
+    /// frame says otherwise (Epic 11600 Part D1 §4, §5).
+    /// </para>
+    /// </remarks>
+    public static bool? SourceAlpha(BitmapSource frame)
+    {
+        ArgumentNullException.ThrowIfNull(frame);
+
+        bool? fromFormat = HasAlpha(frame.Format);
+        if (fromFormat is not null)
+        {
+            return fromFormat;
+        }
+
+        // Only an indexed format carries a palette, and only an entry below full opacity is
+        // evidence of transparency. A palette that is entirely opaque therefore answers "no
+        // alpha" — a positive fact about the source, not a guess about it.
+        if (frame.Palette is not { Colors: { Count: > 0 } colours })
+        {
+            return null;
+        }
+
+        foreach (Color colour in colours)
+        {
+            if (colour.A != byte.MaxValue)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>The colour mode a format implies, or <see cref="ColourMode.Unknown"/>.</summary>

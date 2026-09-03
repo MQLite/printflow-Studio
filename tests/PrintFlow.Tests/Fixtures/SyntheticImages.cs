@@ -193,6 +193,72 @@ internal static class SyntheticImages
         return (frame.PixelWidth, frame.PixelHeight);
     }
 
+    /// <summary>
+    /// An indexed image whose palette carries a fully transparent entry, alongside opaque ones.
+    /// </summary>
+    /// <remarks>
+    /// The case a format name alone cannot answer: <c>Indexed8</c> says nothing about
+    /// transparency, so the only honest source of the answer is the palette itself. Pixel 0
+    /// uses the transparent entry and every other pixel an opaque one, so a preview that
+    /// preserved real alpha and one that forced opacity give measurably different results
+    /// (Epic 11600 Part D1 §4, §6).
+    /// </remarks>
+    public static byte[] IndexedWithTransparentEntry(int width, int height, double dpi = 300)
+    {
+        BitmapPalette palette = new(
+        [
+            Color.FromArgb(0x00, 0xFF, 0xFF, 0xFF),
+            Color.FromArgb(0xFF, 0x80, 0x40, 0x20),
+        ]);
+
+        byte[] indices = new byte[width * height];
+        for (int i = 1; i < indices.Length; i++)
+        {
+            indices[i] = 1;
+        }
+
+        // Built as a BitmapSource rather than a WriteableBitmap, and saved as GIF rather than
+        // PNG, because those are the two things WIC's own encoders round-trip faithfully here:
+        // an indexed WriteableBitmap loses which pixel used which entry, and the PNG encoder
+        // writes no tRNS chunk, so the palette comes back fully opaque. GIF keeps both.
+        BitmapSource indexed = BitmapSource.Create(
+            width, height, dpi, dpi, PixelFormats.Indexed8, palette, indices, width);
+
+        GifBitmapEncoder encoder = new();
+        encoder.Frames.Add(BitmapFrame.Create(indexed));
+        using MemoryStream stream = new();
+        encoder.Save(stream);
+        return stream.ToArray();
+    }
+
+    /// <summary>Every pixel of an encoded preview payload as BGRA bytes, row-major.</summary>
+    /// <remarks>
+    /// The counterpart to <see cref="DecodeDimensions"/> for tests that must inspect what the
+    /// operator would actually see rather than merely that something decoded. Preview payloads
+    /// are always BGRA PNGs, so this asserts that too: a payload in some other format would
+    /// make every alpha and colour assertion below meaningless (Epic 11600 Part D1 §7, §12).
+    /// </remarks>
+    public static byte[] DecodePayloadBgra(ReadOnlyMemory<byte> payload, out int width, out int height)
+    {
+        using MemoryStream stream = new(payload.ToArray(), writable: false);
+        BitmapDecoder decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.PreservePixelFormat | BitmapCreateOptions.IgnoreColorProfile,
+            BitmapCacheOption.OnLoad);
+
+        BitmapSource frame = decoder.Frames[0];
+        width = frame.PixelWidth;
+        height = frame.PixelHeight;
+
+        BitmapSource bgra = frame.Format == PixelFormats.Bgra32
+            ? frame
+            : new FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0);
+
+        byte[] pixels = new byte[width * height * 4];
+        bgra.CopyPixels(pixels, width * 4, 0);
+        return pixels;
+    }
+
     /// <summary>The pixel format WIC reports for a file, preserving the stored format.</summary>
     public static PixelFormat FormatOf(string absolutePath)
     {

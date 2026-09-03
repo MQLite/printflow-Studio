@@ -25,6 +25,12 @@ namespace PrintFlow.Infrastructure.Imaging;
 /// operator information and reaches the screen through <c>FileFacts</c>, which this does not
 /// alter.
 ///
+/// <b>Display alpha comes from the source, or from nothing.</b> A frame that positively carries
+/// alpha keeps every decoded alpha value; a frame that does not is drawn opaque, because the
+/// alpha byte WIC produces for such a frame is a conversion artefact rather than a transparency
+/// the artefact expressed (Epic 11600 Part D1 §4). Colour bytes are never touched either way,
+/// and neither is the file (§9, §10).
+///
 /// <b>Nothing is cached.</b> Each call opens the file, decodes, encodes and releases; the
 /// returned bytes are the caller's and become collectable as soon as the screen drops them.
 /// A process-wide image cache would keep every artefact an operator glanced at alive for the
@@ -33,6 +39,7 @@ namespace PrintFlow.Infrastructure.Imaging;
 public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
 {
     private const int BytesPerBgra32Pixel = 4;
+    private const int AlphaByteOffset = 3;
     private const double DisplayDpi = 96.0;
 
     private readonly IWorkspace _workspace;
@@ -121,16 +128,18 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
             return Undisplayable("The decoded frame reports no pixels.");
         }
 
-        // Read from the source format, before any conversion: the payload below is BGRA for
-        // everything, so asking it would answer "transparent" for an opaque JPEG.
-        bool hasTransparency = WicPixelFormats.HasAlpha(frame.Format) == true;
+        // Read from the source frame, before any conversion: the payload below is BGRA for
+        // everything, so asking it would answer "transparent" for an opaque JPEG. Three-valued
+        // on purpose — "unknown" is what makes the normalisation in ToDisplayBgra correct.
+        bool? sourceAlpha = WicPixelFormats.SourceAlpha(frame);
+        bool hasTransparency = sourceAlpha == true;
 
         cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
             BitmapSource scaled = Scale(frame, sourceWidth, sourceHeight);
-            BitmapSource payloadSource = ToDisplayBgra(scaled);
+            BitmapSource payloadSource = ToDisplayBgra(scaled, sourceAlpha == true);
 
             PngBitmapEncoder encoder = new();
             encoder.Frames.Add(BitmapFrame.Create(payloadSource));
@@ -178,15 +187,33 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
     }
 
     /// <summary>
-    /// Copies the frame into a fresh BGRA32 bitmap declared at 96 dpi.
+    /// Copies the frame into a fresh BGRA32 bitmap declared at 96 dpi, normalising the alpha
+    /// byte when the source never positively claimed one (Epic 11600 Part D1 §3, §4, §9).
     /// </summary>
     /// <remarks>
     /// The copy is what makes the dpi normalisation possible at all — WIC carries dpi on the
     /// source, and <see cref="PngBitmapEncoder"/> writes whatever the source declares. Bounded
-    /// by <see cref="MaximumDisplayEdge"/>, so the buffer is at most 16 MB and is released with
-    /// the encoded bytes.
+    /// by <see cref="IImagePreviewDecoder.MaximumDisplayEdge"/>, so the buffer is at most 16 MB
+    /// and is released with the encoded bytes.
+    /// <para>
+    /// <paramref name="sourceAlphaIsPositivelyIdentified"/> is the whole of the alpha rule. When
+    /// the source frame genuinely carries alpha, every decoded alpha value is kept exactly as
+    /// WIC produced it — a transparent PNG previews transparent, and a partly transparent one
+    /// previews partly transparent. When it does not, the alpha byte of the BGRA conversion is
+    /// not a transparency the artefact ever expressed: it is whatever WIC happened to place in
+    /// the fourth position, which for a five-sample separated TIFF is the Photoshop spot channel.
+    /// Reading that as transparency draws a fully invisible preview of a perfectly good
+    /// Production TIFF, so it is normalised to opaque instead.
+    /// </para>
+    /// <para>
+    /// Only the alpha byte is touched. B, G and R are copied out of the conversion and written
+    /// back untouched, because a preview repair that quietly altered colour would be a worse
+    /// defect than the one it fixed (§9). And it is only the <i>preview</i> that is normalised:
+    /// this method reads a decoded frame and returns a new in-memory bitmap, so the file on disk
+    /// is neither opened for writing nor re-encoded (§2, §10).
+    /// </para>
     /// </remarks>
-    private static BitmapSource ToDisplayBgra(BitmapSource source)
+    private static BitmapSource ToDisplayBgra(BitmapSource source, bool sourceAlphaIsPositivelyIdentified)
     {
         BitmapSource bgra = source.Format == PixelFormats.Bgra32
             ? source
@@ -198,6 +225,14 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
 
         byte[] pixels = new byte[stride * height];
         bgra.CopyPixels(pixels, stride, 0);
+
+        if (!sourceAlphaIsPositivelyIdentified)
+        {
+            for (int alpha = AlphaByteOffset; alpha < pixels.Length; alpha += BytesPerBgra32Pixel)
+            {
+                pixels[alpha] = byte.MaxValue;
+            }
+        }
 
         return Frozen(BitmapSource.Create(
             width, height, DisplayDpi, DisplayDpi, PixelFormats.Bgra32, null, pixels, stride));
