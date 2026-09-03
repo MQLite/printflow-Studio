@@ -5,31 +5,34 @@
 ## 1. Verdict and scope
 
 The product change, signed evidence, preset verification, automated tests, build, security audit,
-Production Readiness check, and one-job live cleanup proof all passed. B1 is nevertheless blocked:
-the operator-only historical-document cleanup in §0 was not performed, so the required five-job
-live proof was not run.
+Production Readiness check, one-job proof, and the resumed five-job Live B proof all passed. The
+operator manually removed the known historical synthetic Photoshop documents before the resumed
+run; PrintFlow did not inspect, close, or automate their cleanup.
 
-This does not change the existing Epic 11600 Part B verdict. The 40-job soak was not rerun.
+B1 is accepted for the required fresh 11600-B soak. This report does not itself change the existing
+Epic 11600 Part B verdict.
 
 ## 2. Manual workstation precondition
 
-The required manual preflight cleanup was **not performed or confirmed by the operator** during
-this slice. PrintFlow did not automate it.
-
-Photoshop was not running at the initial process check. When the first controlled synthetic proof
-started Photoshop, CC 2019 restored its prior tabs. A final read-only Win32 census found:
+The operator confirmed the manual historical cleanup before the resumed run. PrintFlow performed
+no scan-and-close, close-all, restart-based cleanup, or other historical cleanup. The resumed
+read-only preflight found:
 
 | Observation | Result |
 | --- | --- |
 | Accepted Photoshop processes | 1 |
-| Process | PID 20848, responsive |
-| Active title | `PF_C2A_20260903-112035-F47A8A0A.png @ 100% (图层 1, W1/8) *` |
-| `OWL.Document` children | 12 |
-| Total child windows | 1073 |
+| Process | PID 20848, accepted executable `D:\Adobe Photoshop CC 2019\Photoshop.exe`, responsive |
+| Active title | `Adobe Photoshop CC 2019` |
+| Classified state | `KnownStartScreen` |
+| Main frame | enabled |
+| Titled owned dialogs | 0 |
+| `OWL.Document` children | 0 |
+| Total child windows | 999 |
+| Other tracked classes | `PSViewC 31`, `OWL.TabGroup 18`, `OWL.TabPane 4`, `Photoshop_Document 0` |
 
-These are historical/synthetic QA documents. No scan-and-close, close-all, restart-based cleanup,
-or other historical cleanup was introduced or run. This unmet operator precondition is the reason
-Live B and the PASS verdict are withheld.
+The absence of an `OWL.Document` child and the signed no-document title establish that neither a
+historical `PF_11600*` / `PF_C2A_*` document nor an unrelated document was loaded. No unrelated or
+customer document was enumerated beyond that bounded state classification.
 
 ## 3. Authoritative live prompt observation
 
@@ -240,16 +243,55 @@ bounded poll, covered by targeted tests, and the final run above passed with cen
 
 ### Live B — five consecutive jobs
 
-**Not run.** The operator-only historical synthetic-document cleanup remained unconfirmed and the
-read-only census still showed 12 documents. Running the repetition anyway would violate the
-explicit evidence precondition and could not support a PASS verdict.
+The resumed proof ran five new synthetic Photoshop Production jobs consecutively through the real
+registered graph. Every job used the committed `Adapters.Mode = Production`, preset `1.16.0`, the
+real `VerifiedEnvironmentGate`, and `ProductionPhotoshopOutputProcessor`. The gate returned
+`ALLOWED` before each job. Photoshop remained PID 20848 throughout; it was not restarted.
+
+| Job | TIFF SHA-256 | TIFF | `OWL.Document` before → immediate → settled | Discard / cleanup | Attempt / step | Lock |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `4883E3CF497EF049E4EEEAB6EE926FCAA636BEFCF0BF5332AC46B00BBF4E3753` | 2,452,724 bytes, 600×400 | `0 → 0 → 0` | signed discard completed once; expected Working document gone; no warning | `Succeeded` / `ReviewRequired` | free → free |
+| 2 | `EB907D33D7D6FBF29B4ACABF6A9BE2D4212E4293A12C0DA584C2DA0E4A390074` | 2,452,724 bytes, 600×400 | `0 → 1 → 0` | signed discard completed once; expected Working document gone; no warning | `Succeeded` / `ReviewRequired` | free → free |
+| 3 | `BDB92289312A76BCD282839C8973A3BC85E1F75D4F58DEAD0864C473E6B5C1AE` | 2,452,724 bytes, 600×400 | `0 → 1 → 0` | signed discard completed once; expected Working document gone; no warning | `Succeeded` / `ReviewRequired` | free → free |
+| 4 | `2CC44F35653F4F4D9C1200B2EB7517AC3C8EBC2AE33928D128D3D033825FA62F` | 2,452,724 bytes, 600×400 | `0 → 1 → 0` | signed discard completed once; expected Working document gone; no warning | `Succeeded` / `ReviewRequired` | free → free |
+| 5 | `CAEF8F5479E3EA082C8413DEFA7E62E2515BFEAECF7240276727B9713A2A7795` | 2,452,724 bytes, 600×400 | `0 → 1 → 0` | signed discard completed once; expected Working document gone; no warning | `Succeeded` / `ReviewRequired` | free → free |
+
+The exact Working source paths re-proved for cleanup were:
+
+| Job | Absolute Working path |
+| --- | --- |
+| 1 | `D:\PrintFlowStudio\Sessions\S_20260903T001037Z_be3a6c6f\Working\01a0649a-72a5-78f6-9aea-34c083c5c238\PF_11600B_20260903-121034-F19B4F91_B1_01.png` |
+| 2 | `D:\PrintFlowStudio\Sessions\S_20260903T001052Z_a55f5b81\Working\01a0649a-aa77-7ef5-8883-a7f2d93154e3\PF_11600B_20260903-121034-F19B4F91_B1_02.png` |
+| 3 | `D:\PrintFlowStudio\Sessions\S_20260903T001107Z_ab114d95\Working\01a0649a-e446-7011-8f6f-1c3922de5112\PF_11600B_20260903-121034-F19B4F91_B1_03.png` |
+| 4 | `D:\PrintFlowStudio\Sessions\S_20260903T001122Z_1fb40113\Working\01a0649b-1dcc-70b4-8b42-220c977c9a3a\PF_11600B_20260903-121034-F19B4F91_B1_04.png` |
+| 5 | `D:\PrintFlowStudio\Sessions\S_20260903T001136Z_a1d18c05\Working\01a0649b-5770-769c-9566-284c720ac06a\PF_11600B_20260903-121034-F19B4F91_B1_05.png` |
+
+Each TIFF was independently re-read after cleanup and matched its full recorded SHA-256. Each
+Working source path was the current job's exact attempt-scoped absolute path under
+`D:\PrintFlowStudio\Sessions\...\Working\<attempt>\`; the cleanup success is emitted only after
+that path is re-proved, the signed dirty-document prompt is recognised, the signed discard control
+is invoked through the single-input seam, and the expected document is proved gone. No job retried.
+
+For jobs 2–5, Photoshop's `OWL.Document` child outlived the already-completed close by a bounded
+fraction of a second. The same accepted five-second census settle used by the existing live smoke
+returned to zero every time; the no-document title and cleanup postcondition already held. An
+earlier measurement-only attempt stopped at job 2 on the immediate `0 → 1` sample, sent no repair
+input, and was not counted. A subsequent read-only classification found `KnownStartScreen`, so the
+fresh five-job sequence above began from job 1 with no retained document.
+
+Final Photoshop state: PID 20848, title `Adobe Photoshop CC 2019`, `OWL.Document 0`, total child
+windows 999, no blocking dialog, enabled main frame. Required invariant after every successful job:
+
+```text
+retained PrintFlow Working document delta = 0
+```
 
 ## 11. Customer and external-state statement
 
 All evidence and live inputs created by this slice were synthetic and stored under dedicated QA
 directories. No customer image content was captured. No unrelated/customer Photoshop document was
-closed, saved, discarded, or modified. The product contains no historical-document sweep. Meitu
-logic, accepted executable, and baseline evidence are unchanged.
+opened, selected, closed, saved, discarded, or modified. The product contains no
+historical-document sweep. Meitu logic, accepted executable, and baseline evidence are unchanged.
 
 The computer-use workflow influenced only the controlled evidence pass: it selected the uniquely
 named synthetic tab, raised its prompt, read the visible accessible prompt/control descriptions,
@@ -265,19 +307,18 @@ New local commits:
 - `fa2e29e` — signed Photoshop discard-prompt evidence contract and preset `1.16.0` wiring;
 - `f4ac0b2` — exact-owned-document close/discard implementation and tests;
 - `c1cb5b0` — deterministic culture pin for the English readiness wording test;
-- the commit containing this report.
+- `87e6498` — the original blocked B1 report;
+- the follow-up report/evidence commit containing this resumed proof.
 
 No commit was amended or rebased, and nothing was pushed. The existing 11600-B report and verdict
 were not rewritten.
 
 ## 13. Required next action
 
-The operator must manually discard the known historical `PF_11600*` and synthetic `PF_C2A_*` QA
-documents while leaving unrelated documents untouched. Then rerun Production Readiness and Live B:
-five consecutive synthetic Photoshop Production jobs in the same accepted Photoshop process, each
-with a valid unchanged TIFF, `ReviewRequired`, free automation lock, no cleanup warning, and zero
-retained-document growth. Only after that passes may B1 receive a PASS/PASS WITH NOTES verdict.
-The next step after a B1 PASS is a fresh 40-job 11600-B soak from job 1; B1 itself must not change
-11600-B's blocked verdict.
+Return immediately to the existing 11600-B plan and start a fresh 40-job soak from job 1 against
+preset `1.16.0`, committed Production mode with no override, and the final B1 product source. Do
+not resume the earlier 19-job run. B1 itself does not change 11600-B's blocked verdict; Part B
+remains blocked until all 40 jobs, all stages, the restart checkpoint, all resource checkpoints,
+and the final filesystem/session census complete.
 
-**11600-B1 BLOCKED — PHOTOSHOP CLEANUP NOT SAFE**
+**11600-B1 PASS — PHOTOSHOP OWNED-DOCUMENT CLEANUP READY FOR SOAK RERUN**
