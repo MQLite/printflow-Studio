@@ -199,12 +199,17 @@ internal sealed class SessionServiceHarness : IDisposable
     /// supplying its own gate. Every other test keeps the real
     /// <see cref="UnverifiedEnvironmentGate"/>, which refuses every Production adapter.
     /// </remarks>
+    /// <param name="repository">
+    /// A repository in place of the real one, so a test can fail exactly the commit that should
+    /// have closed a running attempt (SCRUM-11137 prerequisite §12).
+    /// </param>
     public ISessionService CreateServiceWithPhotoshop(
         IPhotoshopOutputProcessor photoshop,
         IEnvironmentGate? environmentGate = null,
-        IWorkstationPresetProvider? preset = null) => new SessionService(
+        IWorkstationPresetProvider? preset = null,
+        ISessionRepository? repository = null) => new SessionService(
         WorkflowEngine.Instance,
-        Repository,
+        repository ?? Repository,
         FileWorkspace,
         RecycleBin,
         FileInspector,

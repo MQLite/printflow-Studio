@@ -240,20 +240,25 @@ public sealed class SessionService : ISessionService
                 }));
         }
 
+        // The instant the import work ended, for the same reason the producing path observes one
+        // (SCRUM-11137 prerequisite §3). Copying and hashing a large source is not instantaneous,
+        // and the opening context was stamped before any of it happened.
+        CommandContext closing = context.At(_timeProvider.GetUtcNow());
+
         if (established.IsFailure)
         {
-            return await FailImportAsync(session, started.State, context, runningAttempt, established.Failure, cancellationToken);
+            return await FailImportAsync(session, started.State, closing, runningAttempt, established.Failure, cancellationToken);
         }
 
         (WorkspaceFileRef importedSource, FileFacts sourceFacts) = established.Value;
 
         RevisionId revisionId = RevisionId.From(_idGenerator.NewId());
         Revision rootRevision = Revision.Create(
-            revisionId, id, null, OperationKind.Import, importedSource, sourceFacts, context.NowUtc);
+            revisionId, id, null, OperationKind.Import, importedSource, sourceFacts, closing.NowUtc);
 
         WorkflowCommand.System.AttemptSucceeded succeeded = new(
-            context.NewAttemptId, StepKind.Import, revisionId, sourceFacts.Sha256);
-        WorkflowTransition finished = _engine.Apply(started.State, succeeded, context);
+            closing.NewAttemptId, StepKind.Import, revisionId, sourceFacts.Sha256);
+        WorkflowTransition finished = _engine.Apply(started.State, succeeded, closing);
         if (finished.IsRejected)
         {
             return OperationResult.Fail<SessionView>(MapRejection(finished.Rejection!));
@@ -261,17 +266,17 @@ public sealed class SessionService : ISessionService
 
         InputSnapshot snapshotRecord = new(
             SnapshotId.From(_idGenerator.NewId()), id, revisionId, sourceAbsolutePath,
-            FileNameOf(sourceAbsolutePath), context.NowUtc);
+            FileNameOf(sourceAbsolutePath), closing.NowUtc);
 
-        ProcessingSession sessionAfterImport = MergeSession(session, finished.State, finished.Effects, context.NowUtc);
-        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(revisionId, context.NowUtc);
+        ProcessingSession sessionAfterImport = MergeSession(session, finished.State, finished.Effects, closing.NowUtc);
+        ProcessingAttempt succeededAttempt = runningAttempt.Succeed(revisionId, closing.NowUtc);
 
         SessionAggregate aggregateSoFar = new(session, null, started.State.Steps, [], [runningAttempt], [], []);
-        SessionMutation closing = BuildMetadataMutation(
-            aggregateSoFar, sessionAfterImport, finished.State, finished.Effects, context,
+        SessionMutation closingMutation = BuildMetadataMutation(
+            aggregateSoFar, sessionAfterImport, finished.State, finished.Effects, closing,
             newRevisions: [rootRevision], newInputSnapshot: snapshotRecord, upsertAttempts: [succeededAttempt]);
 
-        OperationResult<Unit> committedClosing = await _repository.CommitAsync(closing, cancellationToken);
+        OperationResult<Unit> committedClosing = await _repository.CommitAsync(closingMutation, cancellationToken);
         if (committedClosing.IsFailure)
         {
             return OperationResult.Fail<SessionView>(committedClosing.Failure);
@@ -1416,6 +1421,15 @@ public sealed class SessionService : ISessionService
             _runs.End(runningAttempt.Id);
         }
 
+        // The instant the work actually ended, observed once here and used for whichever closing
+        // transaction follows (SCRUM-11137 prerequisite §3, §6, §7). The opening context was
+        // stamped before the adapter was called — minutes ago, for a real Photoshop run — so
+        // closing on it recorded every attempt as having ended at the moment it began. Observed
+        // before the branch rather than inside each of the three closing paths, so a success, a
+        // stop and a failure are all timed by the same rule, and the attempt, its step and its
+        // session agree on when the attempt ended.
+        CommandContext closing = context.At(_timeProvider.GetUtcNow());
+
         // §15 and §16, in the order the code has to take them. A Stop that arrives while the
         // work is already finishing does not get to undo it: an adapter that returned a
         // validated output has produced a real file, and the success transaction below runs to
@@ -1424,7 +1438,7 @@ public sealed class SessionService : ISessionService
         if (produced.IsSuccess)
         {
             return await CompleteProducingStepAsync(
-                aggregate, afterStart, started, context, work, runningAttempt, produced.Value, stop,
+                aggregate, afterStart, started, closing, work, runningAttempt, produced.Value, stop,
                 cancellationToken);
         }
 
@@ -1435,7 +1449,7 @@ public sealed class SessionService : ISessionService
             // stopping. Both facts survive: the mode and retained external state go into the
             // structured context, and whatever the adapter reported goes into the detail (§29).
             return await StopAttemptAsync(
-                afterStart, started.State, context, work.Step, runningAttempt, definition,
+                afterStart, started.State, closing, work.Step, runningAttempt, definition,
                 stopped, stop, produced.Failure);
         }
 
@@ -1456,7 +1470,7 @@ public sealed class SessionService : ISessionService
                 ? CancellationToken.None
                 : cancellationToken;
         return await FailAttemptAsync(
-            afterStart, started.State, context, work.Step, runningAttempt, produced.Failure, closingToken);
+            afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken);
     }
 
     /// <summary>
