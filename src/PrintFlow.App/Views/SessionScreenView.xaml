@@ -7,7 +7,9 @@
              xmlns:local="clr-namespace:PrintFlow.App.Views"
              xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}">
+             d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}"
+             AutomationProperties.AutomationId="Screen.Session"
+             AutomationProperties.Name="{Binding SessionName}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
@@ -234,10 +236,14 @@
                         Visibility="{Binding CanStopAutomation, Converter={StaticResource BoolToVisibility}}">
                 <Button Content="{Binding StopLabel}"
                         Command="{Binding StopAutomationCommand}"
+                        AutomationProperties.AutomationId="Session.Stop"
+                        AutomationProperties.Name="{Binding StopLabel}"
                         Padding="14,6"
                         Margin="0,0,8,0" />
                 <Button Content="{Binding TakeOverLabel}"
                         Command="{Binding BeginTakeOverCommand}"
+                        AutomationProperties.AutomationId="Session.TakeOver"
+                        AutomationProperties.Name="{Binding TakeOverLabel}"
                         Padding="14,6"
                         Margin="0,0,12,0"
                         Visibility="{Binding CanTakeOverAutomation,
@@ -274,10 +280,14 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Content="{Binding TakeOverConfirmLabel}"
                                 Command="{Binding ConfirmTakeOverCommand}"
+                                AutomationProperties.AutomationId="Session.TakeOverConfirm"
+                                AutomationProperties.Name="{Binding TakeOverConfirmLabel}"
                                 Padding="14,6"
                                 Margin="0,0,8,0" />
                         <Button Content="{Binding TakeOverCancelLabel}"
                                 Command="{Binding CancelTakeOverCommand}"
+                                AutomationProperties.AutomationId="Session.TakeOverCancel"
+                                AutomationProperties.Name="{Binding TakeOverCancelLabel}"
                                 Padding="14,6" />
                     </StackPanel>
                 </StackPanel>
@@ -307,6 +317,8 @@
                            Opacity="0.75" />
                 <Button Content="{Binding ReenterAutomationLabel}"
                         Command="{Binding ReenterAutomationCommand}"
+                        AutomationProperties.AutomationId="Session.ReenterAutomation"
+                        AutomationProperties.Name="{Binding ReenterAutomationLabel}"
                         HorizontalAlignment="Left"
                         Padding="14,6" />
             </StackPanel>
@@ -332,6 +344,8 @@
             -->
             <Button Content="{Binding BeginManualCropLabel}"
                     Command="{Binding BeginManualCropCommand}"
+                    AutomationProperties.AutomationId="Session.BeginManualCrop"
+                    AutomationProperties.Name="{Binding BeginManualCropLabel}"
                     HorizontalAlignment="Left"
                     Padding="14,6"
                     Margin="0,0,0,8"
@@ -364,7 +378,21 @@
                            Margin="0,0,0,8" />
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                    <ItemsControl ItemsSource="{Binding Steps}">
+                    <ItemsControl ItemsSource="{Binding Steps}"
+                                  IsTabStop="False"
+                                  AutomationProperties.AutomationId="Session.StepList"
+                                  AutomationProperties.Name="{Binding StepsHeading}">
+                        <!--
+                            A row announces the step it is, not the class that produced it: an
+                            item's accessible name is read from its generated container, so
+                            leaving this unset makes a screen reader say "SessionStepRow".
+                        -->
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,3">
@@ -453,7 +481,16 @@
                     </StackPanel>
                 </DockPanel>
 
-                <ItemsControl ItemsSource="{Binding PreviewPanes}">
+                <ItemsControl ItemsSource="{Binding PreviewPanes}"
+                              IsTabStop="False"
+                              AutomationProperties.AutomationId="Session.PreviewPanes"
+                              AutomationProperties.Name="{Binding PreviewHeading}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Heading}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <!--
@@ -635,7 +672,16 @@
                 <StackPanel>
                     <TextBlock Text="{Binding OutputsHeading}" FontSize="15" FontWeight="SemiBold" />
 
-                    <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,8,0,0">
+                    <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,8,0,0"
+                                  IsTabStop="False"
+                                  AutomationProperties.AutomationId="Session.OutputList"
+                                  AutomationProperties.Name="{Binding OutputsHeading}">
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding FileName}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,4">
@@ -886,7 +932,20 @@
                                      SelectedItem="{Binding SelectedTrimMode}"
                                      DisplayMemberPath="Label"
                                      BorderThickness="0"
-                                     Margin="0,8,0,0" />
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.AutomationId="Session.TrimModes"
+                                     AutomationProperties.Name="{Binding TrimHeading}">
+                                <!--
+                                    DisplayMemberPath decides what is drawn, not what is read
+                                    out: an item announces its own label rather than the class
+                                    the label came from.
+                                -->
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
 
                             <!-- Uniform: one non-negative pixel count (§11). -->
                             <StackPanel Margin="0,8,0,0"
@@ -958,7 +1017,9 @@
                         <StackPanel>
                             <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
-                            <ItemsControl ItemsSource="{Binding SizePresets}">
+                            <ItemsControl ItemsSource="{Binding SizePresets}"
+                                          IsTabStop="False"
+                                          AutomationProperties.AutomationId="Session.SizePresetList">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel Orientation="Horizontal" />
@@ -1200,7 +1261,15 @@
                                      SelectedItem="{Binding SelectedWhiteUnderbaseChoice}"
                                      DisplayMemberPath="Label"
                                      BorderThickness="0"
-                                     Margin="0,8,0,0" />
+                                     Margin="0,8,0,0"
+                                     AutomationProperties.AutomationId="Session.WhiteUnderbaseChoices"
+                                     AutomationProperties.Name="{Binding WhiteUnderbaseHeading}">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
 
                             <Button Content="{Binding ConfirmWhiteUnderbaseLabel}"
                                     Command="{Binding SelectWhiteUnderbaseCommand}"
@@ -1479,47 +1548,69 @@
 
                 <Button Content="{Binding ConfirmOriginalLabel}"
                         Command="{Binding ConfirmOriginalCommand}"
+                        AutomationProperties.AutomationId="Session.ConfirmOriginal"
+                        AutomationProperties.Name="{Binding ConfirmOriginalLabel}"
                         Visibility="{Binding CanConfirmOriginal, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding RunStepLabel}"
                         Command="{Binding RunStepCommand}"
+                        AutomationProperties.AutomationId="Session.RunStep"
+                        AutomationProperties.Name="{Binding RunStepLabel}"
                         Visibility="{Binding CanRunStep, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding ApproveLabel}"
                         Command="{Binding ApproveCommand}"
+                        AutomationProperties.AutomationId="Session.Approve"
+                        AutomationProperties.Name="{Binding ApproveLabel}"
                         Visibility="{Binding CanApprove, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding RejectLabel}"
                         Command="{Binding RejectCommand}"
+                        AutomationProperties.AutomationId="Session.Reject"
+                        AutomationProperties.Name="{Binding RejectLabel}"
                         Visibility="{Binding CanReject, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding RetryLabel}"
                         Command="{Binding RetryCommand}"
+                        AutomationProperties.AutomationId="Session.Retry"
+                        AutomationProperties.Name="{Binding RetryLabel}"
                         Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding SkipLabel}"
                         Command="{Binding SkipCommand}"
+                        AutomationProperties.AutomationId="Session.Skip"
+                        AutomationProperties.Name="{Binding SkipLabel}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding SubmitManualResultLabel}"
                         Command="{Binding SubmitManualResultCommand}"
+                        AutomationProperties.AutomationId="Session.SubmitManualResult"
+                        AutomationProperties.Name="{Binding SubmitManualResultLabel}"
                         Visibility="{Binding CanSubmitManualResult, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{Binding HandOffLabel}"
                         Command="{Binding HandOffCommand}"
+                        AutomationProperties.AutomationId="Session.HandOff"
+                        AutomationProperties.Name="{Binding HandOffLabel}"
                         Visibility="{Binding CanHandOff, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding CompleteLabel}"
                         Command="{Binding CompleteCommand}"
+                        AutomationProperties.AutomationId="Session.Complete"
+                        AutomationProperties.Name="{Binding CompleteLabel}"
                         Visibility="{Binding CanComplete, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding AddAnotherSizeLabel}"
                         Command="{Binding AddAnotherSizeCommand}"
+                        AutomationProperties.AutomationId="Session.AddAnotherSize"
+                        AutomationProperties.Name="{Binding AddAnotherSizeLabel}"
                         Visibility="{Binding CanAddAnotherSize, Converter={StaticResource BoolToVisibility}}" />
             </WrapPanel>
 
             <Button DockPanel.Dock="Right"
                     Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
+                    AutomationProperties.AutomationId="Session.BackToHome"
+                    AutomationProperties.Name="{Binding BackLabel}"
                     Padding="14,6" />
         </DockPanel>
     </Grid>

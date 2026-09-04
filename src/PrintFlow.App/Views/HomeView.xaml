@@ -8,7 +8,9 @@
              d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
              AllowDrop="True"
              DragOver="OnDragOver"
-             Drop="OnDrop">
+             Drop="OnDrop"
+             AutomationProperties.AutomationId="Screen.Home"
+             AutomationProperties.Name="{Binding Title}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
@@ -35,6 +37,8 @@
             <TextBlock Text="{Binding PresetStatus}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0" />
             <Button Content="{Binding EnvironmentLabel}"
                     Command="{Binding ShowEnvironmentCommand}"
+                    AutomationProperties.AutomationId="Home.ShowEnvironment"
+                    AutomationProperties.Name="{Binding EnvironmentLabel}"
                     Padding="10,4"
                     Margin="0,8,0,0"
                     HorizontalAlignment="Left" />
@@ -52,6 +56,8 @@
                 <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
                 <Button Content="{Binding ChooseFileLabel}"
                         Command="{Binding ChooseFileCommand}"
+                        AutomationProperties.AutomationId="Home.ChooseFile"
+                        AutomationProperties.Name="{Binding ChooseFileLabel}"
                         Padding="14,6"
                         HorizontalAlignment="Left" />
             </StackPanel>
@@ -69,6 +75,8 @@
                 <Button DockPanel.Dock="Right"
                         Content="{Binding RefreshLabel}"
                         Command="{Binding RefreshCommand}"
+                        AutomationProperties.AutomationId="Home.Refresh"
+                        AutomationProperties.Name="{Binding RefreshLabel}"
                         Padding="10,4" />
             </DockPanel>
 
@@ -79,7 +87,22 @@
                        Visibility="{Binding HasNoRecentSessions, Converter={StaticResource BoolToVisibility}}" />
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding RecentSessions}">
+                <ItemsControl ItemsSource="{Binding RecentSessions}"
+                              IsTabStop="False"
+                              AutomationProperties.AutomationId="Home.RecentSessionList"
+                              AutomationProperties.Name="{Binding RecentHeading}">
+                    <!--
+                        A row announces the operator's own name for the work, not the class that
+                        produced it, and carries the identity a driver selects it by. Both belong
+                        on the generated container: that is what item automation reads.
+                    -->
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="AutomationProperties.AutomationId" Value="Home.RecentSession" />
+                            <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="#22000000" BorderThickness="0,0,0,1" Padding="6,10">
@@ -103,10 +126,18 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <!--
+                                            The two row actions repeat once per session, so their
+                                            AutomationIds are unique within a row rather than within
+                                            the screen: a driver picks the row by its accessible name
+                                            — the operator's own output name — and then the action.
+                                        -->
                                         <Button Content="{Binding OpenActionLabel}"
                                                 Command="{Binding DataContext.ResumeCommand,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}"
+                                                AutomationProperties.AutomationId="Home.ResumeSession"
+                                                AutomationProperties.Name="{Binding OpenActionLabel}"
                                                 Padding="12,4"
                                                 Margin="0,0,8,0" />
                                         <!-- Offered only where the workflow layer says Abandon is legal (§10). -->
@@ -115,6 +146,9 @@
                                                 Command="{Binding DataContext.AbandonCommand,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}"
+                                                AutomationProperties.AutomationId="Home.AbandonSession"
+                                                AutomationProperties.Name="{Binding DataContext.AbandonLabel,
+                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 Padding="12,4"
                                                 Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
                                     </StackPanel>

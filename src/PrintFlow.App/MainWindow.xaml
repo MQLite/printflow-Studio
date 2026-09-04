@@ -9,7 +9,9 @@
         d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         Title="{Binding Title}"
         Height="700" Width="1000"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        AutomationProperties.AutomationId="PrintFlow.MainWindow"
+        AutomationProperties.Name="{Binding Title}">
 
     <Window.Resources>
         <!--
@@ -33,5 +35,10 @@
         </DataTemplate>
     </Window.Resources>
 
+    <!--
+        The screen host produces no automation element of its own — the screen it hosts is the
+        element an assistive technology sees — so the identity that answers "where is the
+        operator" lives on each view's own root instead.
+    -->
     <ContentControl Content="{Binding Current}" />
 </Window>
