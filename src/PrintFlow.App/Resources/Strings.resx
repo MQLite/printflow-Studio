@@ -530,6 +530,27 @@
   <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>Trim: Uniform {0} px</value></data>
   <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>Trim: T {0} / R {1} / B {2} / L {3} px</value></data>
 
+  <!--
+    The crop geometry the automatic trim established (SCRUM-11081 §13, §14). Two rectangles in
+    the source image's own pixels: what the alpha scan found, and what was actually cut out.
+    Neutral wording throughout — no resource key, no enum name and no internal type name reaches
+    the operator.
+
+    Right and bottom are the first pixel OUTSIDE the rectangle, which is the convention the
+    product measures and stores in. The four numbers are shown exactly as recorded rather than
+    converted, because converted they stop agreeing with each other: 980 - 120 is the 860 px the
+    size line reports, while an inclusive 979 would leave the operator with numbers that do not
+    add up. The caption says so once, in words, rather than leaving it to be inferred.
+  -->
+  <data name="Session_TrimBoundsDetectedHeading" xml:space="preserve"><value>Detected graphic bounds</value></data>
+  <data name="Session_TrimBoundsAppliedHeading" xml:space="preserve"><value>Applied trim bounds</value></data>
+  <data name="Session_TrimBoundsOrigin" xml:space="preserve"><value>Left {0} px · Top {1} px</value></data>
+  <data name="Session_TrimBoundsExtent" xml:space="preserve"><value>Right {0} px · Bottom {1} px</value></data>
+  <data name="Session_TrimBoundsSize" xml:space="preserve"><value>Size {0} × {1} px</value></data>
+  <data name="Session_TrimBoundsCaption" xml:space="preserve">
+    <value>Measured in the original image. Right and bottom are the first pixel outside the rectangle, so the size is the difference between the edges.</value>
+  </data>
+
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>Background removal</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">

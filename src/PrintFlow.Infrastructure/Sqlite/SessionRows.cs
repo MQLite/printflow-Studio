@@ -223,6 +223,27 @@ internal sealed class AttemptRow
     // Successful runtime evidence, including cleanup warnings (Epic 11300 Part D1).
     public string? AdapterNotes { get; set; }
 
+    // The rectangles THIS attempt's deterministic trim established (SCRUM-11081). Content is
+    // what the alpha scan found before any margin; Applied is what was actually cropped out.
+    // TrimBounds's half-open convention, unconverted: Left/Top inclusive, Right/Bottom exclusive.
+    // All eight null together for anything that is not a produced automatic trim, and for every
+    // attempt written before migration 0009 -- never "the whole canvas was kept".
+    public int? TrimContentLeft { get; set; }
+
+    public int? TrimContentTop { get; set; }
+
+    public int? TrimContentRight { get; set; }
+
+    public int? TrimContentBottom { get; set; }
+
+    public int? TrimAppliedLeft { get; set; }
+
+    public int? TrimAppliedTop { get; set; }
+
+    public int? TrimAppliedRight { get; set; }
+
+    public int? TrimAppliedBottom { get; set; }
+
     // The immutable snapshot of the plan THIS Photoshop output ran under (Epic 11400 Part
     // B1A.2A §12). Null for everything else -- a Meitu call, a trim, a manual crop, a promotion.
     // Self-contained: the bounds and limit kind are here too, so the audit row never has to be

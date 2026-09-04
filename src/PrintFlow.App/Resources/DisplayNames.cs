@@ -259,6 +259,35 @@ internal static class DisplayNames
         _ => Strings.Session_TrimSummaryTight,
     };
 
+    /// <summary>
+    /// The top-left corner of a crop rectangle, in the source image's pixels (SCRUM-11081 §13).
+    /// </summary>
+    /// <remarks>
+    /// Split into origin, extent and size lines rather than one long sentence because the
+    /// operator's question is a comparison — how much wider is the applied rectangle than the
+    /// detected one — and two blocks with matching line shapes answer it by reading straight
+    /// down. Every number is the value that was recorded; nothing here converts a coordinate.
+    /// </remarks>
+    internal static string TrimBoundsOrigin(TrimBounds bounds) => string.Format(
+        CultureInfo.CurrentCulture, Strings.Session_TrimBoundsOrigin, bounds.Left, bounds.Top);
+
+    /// <summary>
+    /// The far edges of a crop rectangle: the first pixel outside it on each axis.
+    /// </summary>
+    /// <remarks>
+    /// The stored half-open edges, deliberately unconverted. Subtracting an inclusive right edge
+    /// from the left would not give the width the size line reports, so a display-only inclusive
+    /// convention would hand the operator four numbers that disagree. The caption beneath the
+    /// block states the convention in words instead.
+    /// </remarks>
+    internal static string TrimBoundsExtent(TrimBounds bounds) => string.Format(
+        CultureInfo.CurrentCulture, Strings.Session_TrimBoundsExtent,
+        bounds.RightExclusive, bounds.BottomExclusive);
+
+    /// <summary>The size of a crop rectangle, which for the applied one is the output's size.</summary>
+    internal static string TrimBoundsSize(TrimBounds bounds) => string.Format(
+        CultureInfo.CurrentCulture, Strings.Session_TrimBoundsSize, bounds.Width, bounds.Height);
+
     /// <summary>The operator label for an output's cached review projection.</summary>
     internal static string ReviewState(ReviewState state) => state switch
     {

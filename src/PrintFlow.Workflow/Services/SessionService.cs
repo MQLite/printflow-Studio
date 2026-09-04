@@ -704,6 +704,33 @@ public sealed class SessionService : ISessionService
         string ProcessorId,
         TrimBounds? ManualCrop);
 
+    /// <summary>
+    /// What one attempt's file work produced, on its way to the closing transaction.
+    /// </summary>
+    /// <remarks>
+    /// A named record rather than the three-element tuple this used to be, because
+    /// <see cref="TrimGeometry"/> is the member that made the difference visible: a fourth
+    /// anonymous slot on a value threaded through twenty return statements is a slot that gets
+    /// filled in the wrong order eventually. Naming it also states the rule that matters —
+    /// everything here is <i>measured</i>, and every field is carried from whatever performed
+    /// the work rather than recomputed afterwards.
+    /// </remarks>
+    /// <param name="Output">The validated file this attempt produced.</param>
+    /// <param name="Facts">What the inspector read back off that file, never what was requested.</param>
+    /// <param name="AdapterNotes">Runtime evidence from an external application, or null.</param>
+    /// <param name="TrimGeometry">
+    /// The rectangles the deterministic trim established, carried from the processor result that
+    /// actually wrote <paramref name="Output"/> (SCRUM-11081). Null for every other kind of work,
+    /// including a manual crop. Never re-derived by scanning the cropped file: the alpha bounds
+    /// of an already-trimmed image are its own canvas, which would silently turn a margined crop
+    /// into a tight one.
+    /// </param>
+    private sealed record StepWork(
+        WorkspaceFileRef Output,
+        FileFacts Facts,
+        string? AdapterNotes = null,
+        TrimGeometry? TrimGeometry = null);
+
     /// <summary>Reads the one producing effect out of a transition, or null when there is none.</summary>
     private ProducingWork? ProducingWorkOf(IReadOnlyList<WorkflowEffect> effects)
     {
@@ -1043,8 +1070,7 @@ public sealed class SessionService : ISessionService
         // "WriteReservedAsync returned success" is the copy's own report; this is the only moment
         // at which the file that is about to be called the approved deliverable can still be
         // compared with the file that was validated (§6, §8).
-        OperationResult<(WorkspaceFileRef File, FileFacts Facts, string? Notes)> promoted =
-            await InspectAsync(approved, cancellationToken);
+        OperationResult<StepWork> promoted = await InspectAsync(approved, cancellationToken);
         if (promoted.IsFailure)
         {
             return await AbandonPromotionAsync(
@@ -1354,7 +1380,7 @@ public sealed class SessionService : ISessionService
         IAutomationStopSignal stop = _runs.Begin(
             aggregate.Session.Id, runningAttempt.Id, work.Step, definition.IsAdapterBacked);
 
-        OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)> produced;
+        OperationResult<StepWork> produced;
         try
         {
             produced = await PerformStepWorkAsync(
@@ -1362,7 +1388,7 @@ public sealed class SessionService : ISessionService
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            produced = OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+            produced = OperationResult.Fail<StepWork>(
                 OperationFailure.Create(
                     FailureCode.Cancelled,
                     "PrintFlow orchestration was cancelled after the attempt started. No further " +
@@ -1395,7 +1421,7 @@ public sealed class SessionService : ISessionService
             // caller's token is *not* cancelled. That is a step throwing cancellation nobody
             // asked for, which is a fault like any other and must not be reported to the
             // operator as though they had stopped the run.
-            produced = OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+            produced = OperationResult.Fail<StepWork>(
                 OperationFailure.Create(
                     FailureCode.AdapterUnavailable,
                     $"The {work.Step} operation ended with an unhandled {ex.GetType().Name}: {ex.Message} " +
@@ -1490,7 +1516,7 @@ public sealed class SessionService : ISessionService
         CommandContext context,
         ProducingWork work,
         ProcessingAttempt runningAttempt,
-        (WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes) produced,
+        StepWork produced,
         IAutomationStopSignal stop,
         CancellationToken cancellationToken)
     {
@@ -1513,6 +1539,16 @@ public sealed class SessionService : ISessionService
 
         ProcessingAttempt succeededAttempt = runningAttempt.Succeed(
             revisionId, context.NowUtc, produced.AdapterNotes);
+
+        // The crop geometry joins the attempt in the same closing transaction as its status, its
+        // Revision and the step's move to ReviewRequired — never as a later best-effort update
+        // (SCRUM-11081 §10). If that transaction fails, there is no successful attempt, no
+        // Revision and no bounds; the three cannot come apart.
+        if (produced.TrimGeometry is { } geometry)
+        {
+            succeededAttempt = succeededAttempt.WithTrimGeometry(geometry);
+        }
+
         ProcessingSession sessionAfterFinish = MergeSession(
             afterStart.Session, finished.State, finished.Effects, context.NowUtc);
 
@@ -1575,7 +1611,7 @@ public sealed class SessionService : ISessionService
     /// the same value by construction, not two reads of a setting that could have moved in
     /// between (Epic 11300 Part C2B1 §12).
     /// </remarks>
-    private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)>> PerformStepWorkAsync(
+    private async Task<OperationResult<StepWork>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
         ProducingWork work, ProcessingAttempt attempt, CommandContext context,
         IAutomationStopSignal stop, CancellationToken cancellationToken)
@@ -1591,14 +1627,14 @@ public sealed class SessionService : ISessionService
             // hash-bound approval already covers the promoted file by construction (plan §7.3).
             if (input is not { } sourceRef)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                return OperationResult.Fail<StepWork>(
                     FailureCode.PreconditionNotMet, "Nothing to promote: no upstream Revision.");
             }
 
             OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
             if (patterns.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(patterns.Failure);
+                return OperationResult.Fail<StepWork>(patterns.Failure);
             }
 
             string proposedName = aggregate.Session.OutputName.Value + ".png";
@@ -1606,13 +1642,13 @@ public sealed class SessionService : ISessionService
                 _workspace.ReserveOutput(session, WorkspaceArea.Approved, proposedName, patterns.Value);
             if (reserved.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(reserved.Failure);
+                return OperationResult.Fail<StepWork>(reserved.Failure);
             }
 
             OperationResult<Unit> written = await _workspace.WriteReservedAsync(reserved.Value, sourceRef, cancellationToken);
             if (written.IsFailure)
             {
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(written.Failure);
+                return OperationResult.Fail<StepWork>(written.Failure);
             }
 
             return await InspectAsync(reserved.Value, cancellationToken);
@@ -1620,7 +1656,7 @@ public sealed class SessionService : ISessionService
 
         if (input is not { } upstreamRef)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+            return OperationResult.Fail<StepWork>(
                 FailureCode.PreconditionNotMet, $"Step {work.Step} has no upstream Revision to work from.");
         }
 
@@ -1628,7 +1664,7 @@ public sealed class SessionService : ISessionService
             await _workspace.CreateWorkingCopyAsync(session, context.NewAttemptId, upstreamRef, cancellationToken);
         if (workingCopy.IsFailure)
         {
-            return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(workingCopy.Failure);
+            return OperationResult.Fail<StepWork>(workingCopy.Failure);
         }
 
         switch (work.Adapter)
@@ -1653,7 +1689,7 @@ public sealed class SessionService : ISessionService
                 OperationResult<NamingPatternSet> meituPatterns = _presetProvider.GetNamingPatterns();
                 if (meituPatterns.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(meituPatterns.Failure);
+                    return OperationResult.Fail<StepWork>(meituPatterns.Failure);
                 }
 
                 // A pattern the naming authority cannot render is reported, not thrown: it
@@ -1668,7 +1704,7 @@ public sealed class SessionService : ISessionService
                     meituPatterns.Value);
                 if (producedName.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(producedName.Failure);
+                    return OperationResult.Fail<StepWork>(producedName.Failure);
                 }
 
                 // The decision the attempt row already recorded, never a constant and never a
@@ -1685,7 +1721,7 @@ public sealed class SessionService : ISessionService
                 {
                     if (attempt.BackgroundRemovalAuthority is not { } authority)
                     {
-                        return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                        return OperationResult.Fail<StepWork>(
                             FailureCode.PreconditionNotMet,
                             "Background removal reached the adapter without a recorded reviewed-content authority. " +
                             "No request is built: a missing product decision is not something to guess at.");
@@ -1711,7 +1747,7 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(result.Failure);
+                    return OperationResult.Fail<StepWork>(result.Failure);
                 }
 
                 return await InspectAsync(
@@ -1722,13 +1758,13 @@ public sealed class SessionService : ISessionService
             {
                 if (state.Dimensions is not { } dimensions)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                    return OperationResult.Fail<StepWork>(
                         FailureCode.PreconditionNotMet, "Photoshop output requires confirmed print dimensions.");
                 }
 
                 if (state.WhiteUnderbaseBranch is not { } branch)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                    return OperationResult.Fail<StepWork>(
                         FailureCode.PreconditionNotMet, "Photoshop output requires an explicit white-underbase branch.");
                 }
 
@@ -1739,7 +1775,7 @@ public sealed class SessionService : ISessionService
                 // promise about a caller elsewhere (Epic 11400 Part B1A.2A §12, §17).
                 if (attempt.Preparation is not { } preparation)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                    return OperationResult.Fail<StepWork>(
                         FailureCode.PreconditionNotMet,
                         "Photoshop output reached the adapter without a recorded preparation. No request is " +
                         "built: which edge is written, and whether an enlargement was authorised, are not " +
@@ -1749,20 +1785,20 @@ public sealed class SessionService : ISessionService
                 OperationResult<ProductionPresetRef> preset = _presetProvider.GetVerifiedPreset();
                 if (preset.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(preset.Failure);
+                    return OperationResult.Fail<StepWork>(preset.Failure);
                 }
 
                 OperationResult<NamingPatternSet> patterns = _presetProvider.GetNamingPatterns();
                 if (patterns.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(patterns.Failure);
+                    return OperationResult.Fail<StepWork>(patterns.Failure);
                 }
 
                 OperationResult<string> tiffName = OutputFileNaming.BuildProposedFileName(
                     NamingArtifactKind.ProductionTiff, aggregate.Session.OutputName, patterns.Value, dimensions.WidthMm);
                 if (tiffName.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(tiffName.Failure);
+                    return OperationResult.Fail<StepWork>(tiffName.Failure);
                 }
 
                 // The destination this attempt's TIFF may occupy: the workflow's rendered name,
@@ -1789,7 +1825,7 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(result.Failure);
+                    return OperationResult.Fail<StepWork>(result.Failure);
                 }
 
                 return await InspectAsync(
@@ -1803,7 +1839,7 @@ public sealed class SessionService : ISessionService
                 // internal step routed here by accident would silently be trimmed.
                 if (definition.Kind != StepKind.Trim)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                    return OperationResult.Fail<StepWork>(
                         FailureCode.PreconditionNotMet,
                         $"Step {definition.Kind} is internal but has no deterministic processor.");
                 }
@@ -1821,7 +1857,7 @@ public sealed class SessionService : ISessionService
                         cancellationToken);
 
                     return cropped.IsFailure
-                        ? OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(cropped.Failure)
+                        ? OperationResult.Fail<StepWork>(cropped.Failure)
                         : await InspectAsync(cropped.Value.ProducedFile, cancellationToken);
                 }
 
@@ -1838,7 +1874,7 @@ public sealed class SessionService : ISessionService
                     cancellationToken);
                 if (trimmed.IsFailure)
                 {
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(trimmed.Failure);
+                    return OperationResult.Fail<StepWork>(trimmed.Failure);
                 }
 
                 TrimResult result = trimmed.Value;
@@ -1850,25 +1886,35 @@ public sealed class SessionService : ISessionService
                     // that never happened. The step ends in Failed with a stable code the
                     // manual-crop surface (Epic 11200 Part C) can route on, and the attempt
                     // row keeps the reason (Part B §10).
-                    return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                    return OperationResult.Fail<StepWork>(
                         OperationFailure.Create(
                             FailureCode.ManualCropRequired,
                             result.ManualCropReason ?? "No usable alpha content was found.",
                             isRetryable: false));
                 }
 
-                return await InspectAsync(result.ProducedFile!.Value, cancellationToken);
+                // The processor's own rectangles, carried to the closing transaction rather than
+                // discarded here (SCRUM-11081 §9). This is the exact geometry that produced the
+                // file being inspected on the next line: the alpha scan's content rectangle and
+                // the margined, canvas-clamped rectangle the crop was actually taken at. A
+                // produced trim always has both — TrimResult.Produced is the only way to build
+                // one — so a null here would mean the outcome was ManualCropRequired, which
+                // returned above.
+                return await InspectAsync(
+                    result.ProducedFile!.Value,
+                    cancellationToken,
+                    trimGeometry: TrimGeometry.Create(result.ContentBounds!.Value, result.AppliedBounds!.Value));
             }
 
             default:
-                return OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(
+                return OperationResult.Fail<StepWork>(
                     FailureCode.PreconditionNotMet, $"Unsupported adapter kind '{work.Adapter}'.");
         }
     }
 
     private OperationResult<PrintOutput> BuildPrintOutput(
         SessionId sessionId, RevisionId revisionId, WorkflowSnapshot stateBeforeFinish,
-        (WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes) work, CommandContext context)
+        StepWork work, CommandContext context)
     {
         if (stateBeforeFinish.Dimensions is not { } dimensions)
         {
@@ -1900,14 +1946,27 @@ public sealed class SessionService : ISessionService
             work.Output, work.Facts.ByteLength, work.Facts.Sha256, context.NowUtc));
     }
 
-    private async Task<OperationResult<(WorkspaceFileRef, FileFacts, string?)>> InspectAsync(
-        WorkspaceFileRef file, CancellationToken cancellationToken, string? adapterNotes = null)
+    /// <summary>
+    /// Reads back what was actually written, and carries the producer's own measurements with it.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="trimGeometry"/> passes straight through rather than being derived from
+    /// <paramref name="file"/>. The inspector can say how large the cropped PNG is; it cannot say
+    /// where in the source that rectangle sat, and re-running the alpha scan over an
+    /// already-cropped image would answer a different question — the trimmed file's own content
+    /// bounds, which for a margined crop are not the source's (SCRUM-11081 §9).
+    /// </remarks>
+    private async Task<OperationResult<StepWork>> InspectAsync(
+        WorkspaceFileRef file,
+        CancellationToken cancellationToken,
+        string? adapterNotes = null,
+        TrimGeometry? trimGeometry = null)
     {
         string absolute = _workspace.ResolveAbsolute(file);
         OperationResult<FileFacts> inspected = await _fileInspector.InspectAsync(absolute, cancellationToken);
         return inspected.IsSuccess
-            ? OperationResult.Ok((file, inspected.Value, adapterNotes))
-            : OperationResult.Fail<(WorkspaceFileRef, FileFacts, string?)>(inspected.Failure);
+            ? OperationResult.Ok(new StepWork(file, inspected.Value, adapterNotes, trimGeometry))
+            : OperationResult.Fail<StepWork>(inspected.Failure);
     }
 
     private async Task<OperationResult<SessionView>> FailAttemptAsync(

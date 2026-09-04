@@ -131,6 +131,42 @@ public sealed record ProcessingAttempt(
         this with { TrimParameters = margin };
 
     /// <summary>
+    /// The rectangles the deterministic trim established when this attempt produced a cropped
+    /// file (SCRUM-11081).
+    /// </summary>
+    /// <remarks>
+    /// The answer to "what did the alpha scan actually find, and what was actually cropped
+    /// out?" — the crop geometry itself, next to the <see cref="TrimParameters"/> that shaped
+    /// it. Together the two say everything about how this Trim Revision was produced: the
+    /// detected extent, the operator's margin, and the rectangle those two combined into.
+    /// <para>
+    /// On the attempt, and for the same reason <see cref="TrimParameters"/> is: an operator who
+    /// re-runs at a wider margin produces a second attempt with the same content rectangle and
+    /// a different applied one, and a session-level record would have retrospectively rewritten
+    /// what the first attempt cropped. Attempt rows are written once, so both readings stay
+    /// side by side.
+    /// </para>
+    /// <para>
+    /// Null for everything that is not a produced automatic trim — an adapter call, a
+    /// promotion, a manual crop whose rectangle a human drew, and a trim that ended in
+    /// <c>ManualCropRequired</c>, where no content was detected and nothing was cropped. Null
+    /// therefore reads as "this attempt established no trim geometry", never as "the whole
+    /// canvas was kept"; the whole canvas is itself a rectangle this type can state.
+    /// </para>
+    /// <para>
+    /// Written by the attempt's closing transaction rather than its opening one, because it is
+    /// the processor's result and does not exist until the pixel work has run. That is the one
+    /// difference from <see cref="TrimParameters"/>, and it is why the attempt upsert must
+    /// carry these columns in its update clause as well as its insert.
+    /// </para>
+    /// </remarks>
+    public TrimGeometry? TrimGeometry { get; init; }
+
+    /// <summary>Records the geometry the trim this attempt just ran established.</summary>
+    public ProcessingAttempt WithTrimGeometry(TrimGeometry geometry) =>
+        this with { TrimGeometry = geometry };
+
+    /// <summary>
     /// The reviewed-content authority this attempt ran Background Removal under
     /// (Epic 11300 Part C2B1 §11).
     /// </summary>

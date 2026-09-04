@@ -1221,6 +1221,57 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <inheritdoc cref="TrimParametersSummary" />
     public bool HasTrimParameters => _session?.HasTrimParameters == true;
 
+    // --- Detected and applied trim bounds (SCRUM-11081 §13) -------------------------------
+    //
+    // The crop geometry of the result on screen, from the attempt that produced this exact
+    // Revision. Nothing here computes a rectangle, reads a file or scales anything: every
+    // number is the one the processor measured and the closing transaction stored, formatted.
+    //
+    // Empty strings rather than placeholders when there is no geometry — a manual crop, an
+    // artefact that is not a trim result, or a trim recorded before the geometry was persisted.
+    // The block is collapsed in that case, because "Left 0 px" would be a measurement nobody
+    // took.
+
+    /// <summary>Whether the detected/applied bounds block has anything truthful to show.</summary>
+    public bool HasTrimBounds => _session?.HasTrimGeometry == true;
+
+    public string TrimBoundsDetectedHeading => Strings.Session_TrimBoundsDetectedHeading;
+
+    public string TrimBoundsAppliedHeading => Strings.Session_TrimBoundsAppliedHeading;
+
+    /// <summary>What the alpha scan found, before this attempt's margin.</summary>
+    public string TrimContentBoundsOrigin => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsOrigin(g.ContentBounds)
+        : string.Empty;
+
+    /// <inheritdoc cref="TrimContentBoundsOrigin" />
+    public string TrimContentBoundsExtent => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsExtent(g.ContentBounds)
+        : string.Empty;
+
+    /// <inheritdoc cref="TrimContentBoundsOrigin" />
+    public string TrimContentBoundsSize => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsSize(g.ContentBounds)
+        : string.Empty;
+
+    /// <summary>What was actually cropped out: the content rectangle after margin and clamp.</summary>
+    public string TrimAppliedBoundsOrigin => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsOrigin(g.AppliedBounds)
+        : string.Empty;
+
+    /// <inheritdoc cref="TrimAppliedBoundsOrigin" />
+    public string TrimAppliedBoundsExtent => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsExtent(g.AppliedBounds)
+        : string.Empty;
+
+    /// <inheritdoc cref="TrimAppliedBoundsOrigin" />
+    public string TrimAppliedBoundsSize => _session?.CurrentTrimGeometry is { } g
+        ? DisplayNames.TrimBoundsSize(g.AppliedBounds)
+        : string.Empty;
+
+    /// <summary>The one-line statement of what the four edge numbers mean.</summary>
+    public string TrimBoundsCaption => Strings.Session_TrimBoundsCaption;
+
     // --- Background removal authority (Epic 11300 Part C2B2 §3, §7–§9, §14) --------------
 
     public string BackgroundRemovalHeading => Strings.Session_BackgroundRemovalHeading;
@@ -3358,6 +3409,14 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(PendingTrimSummary));
         OnPropertyChanged(nameof(TrimParametersSummary));
         OnPropertyChanged(nameof(HasTrimParameters));
+
+        OnPropertyChanged(nameof(HasTrimBounds));
+        OnPropertyChanged(nameof(TrimContentBoundsOrigin));
+        OnPropertyChanged(nameof(TrimContentBoundsExtent));
+        OnPropertyChanged(nameof(TrimContentBoundsSize));
+        OnPropertyChanged(nameof(TrimAppliedBoundsOrigin));
+        OnPropertyChanged(nameof(TrimAppliedBoundsExtent));
+        OnPropertyChanged(nameof(TrimAppliedBoundsSize));
 
         OnPropertyChanged(nameof(CanAuthoriseAutomaticSelection));
         OnPropertyChanged(nameof(CanBeginAutomaticSelection));

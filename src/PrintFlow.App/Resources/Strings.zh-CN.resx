@@ -530,6 +530,16 @@
   <data name="Session_TrimSummaryUniform" xml:space="preserve"><value>裁切：统一 {0} 像素</value></data>
   <data name="Session_TrimSummaryEdges" xml:space="preserve"><value>裁切：上 {0} / 右 {1} / 下 {2} / 左 {3} 像素</value></data>
 
+  <!-- 自动裁切确定的裁切几何范围（SCRUM-11081 §13、§14）。 -->
+  <data name="Session_TrimBoundsDetectedHeading" xml:space="preserve"><value>检测到的图形范围</value></data>
+  <data name="Session_TrimBoundsAppliedHeading" xml:space="preserve"><value>实际裁切范围</value></data>
+  <data name="Session_TrimBoundsOrigin" xml:space="preserve"><value>左 {0} 像素 · 上 {1} 像素</value></data>
+  <data name="Session_TrimBoundsExtent" xml:space="preserve"><value>右 {0} 像素 · 下 {1} 像素</value></data>
+  <data name="Session_TrimBoundsSize" xml:space="preserve"><value>尺寸 {0} × {1} 像素</value></data>
+  <data name="Session_TrimBoundsCaption" xml:space="preserve">
+    <value>以原始图像为基准测量。右边和下边为矩形之外的第一个像素，因此尺寸即为两边坐标之差。</value>
+  </data>
+
   <!-- Background removal, reviewed-content authority (Epic 11300 Part C2B2 §3, §9, §11, §14). -->
   <data name="Session_BackgroundRemovalHeading" xml:space="preserve"><value>去除背景</value></data>
   <data name="Session_BackgroundRemovalHint" xml:space="preserve">

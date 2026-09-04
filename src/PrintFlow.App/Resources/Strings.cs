@@ -662,6 +662,18 @@ internal static class Strings
     /// <summary>Composite format: top, right, bottom, left — all in pixels.</summary>
     internal static string Session_TrimSummaryEdges => Get(nameof(Session_TrimSummaryEdges));
 
+    internal static string Session_TrimBoundsDetectedHeading => Get(nameof(Session_TrimBoundsDetectedHeading));
+
+    internal static string Session_TrimBoundsAppliedHeading => Get(nameof(Session_TrimBoundsAppliedHeading));
+
+    internal static string Session_TrimBoundsOrigin => Get(nameof(Session_TrimBoundsOrigin));
+
+    internal static string Session_TrimBoundsExtent => Get(nameof(Session_TrimBoundsExtent));
+
+    internal static string Session_TrimBoundsSize => Get(nameof(Session_TrimBoundsSize));
+
+    internal static string Session_TrimBoundsCaption => Get(nameof(Session_TrimBoundsCaption));
+
     // --- Background removal authority (Epic 11300 Part C2B2 §3, §9, §11, §14) -----------
 
     internal static string Session_BackgroundRemovalHeading => Get(nameof(Session_BackgroundRemovalHeading));

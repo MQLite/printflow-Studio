@@ -225,7 +225,7 @@ public sealed class PhotoshopTiffWorkflowOutputTests
         start.ShouldBeGreaterThan(-1, "the success transaction should still be one named method");
 
         int end = source.IndexOf(
-            "private async Task<OperationResult<(WorkspaceFileRef Output, FileFacts Facts, string? AdapterNotes)>> PerformStepWorkAsync",
+            "private async Task<OperationResult<StepWork>> PerformStepWorkAsync",
             start,
             StringComparison.Ordinal);
         end.ShouldBeGreaterThan(start);

@@ -697,6 +697,87 @@ public sealed class LocalisationResourceTests
         ValueOf(ChineseResx, key).ShouldContain("不会影响", Case.Sensitive);
     }
 
+    /// <summary>
+    /// The detected/applied trim bounds have complete wording in both languages
+    /// (SCRUM-11081 §14).
+    /// </summary>
+    /// <remarks>
+    /// Named explicitly rather than left to the blanket parity test above, for the reason the
+    /// background-removal set is: a missing key falls back to the key itself, so a half-added
+    /// block renders as <c>Session_TrimBoundsOrigin</c> beside numbers that look fine and reads
+    /// as a rendering glitch rather than as a missing translation.
+    /// <para>
+    /// The three formatted lines are also checked for their placeholders. A translation that
+    /// dropped <c>{1}</c> would silently show one coordinate where the operator is comparing
+    /// two, which is exactly the comparison the block exists for.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void The_trim_bounds_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_TrimBoundsDetectedHeading",
+            "Session_TrimBoundsAppliedHeading",
+            "Session_TrimBoundsOrigin",
+            "Session_TrimBoundsExtent",
+            "Session_TrimBoundsSize",
+            "Session_TrimBoundsCaption",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("the operator needs English wording for the crop geometry.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+
+        foreach (string key in new[]
+                 {
+                     "Session_TrimBoundsOrigin", "Session_TrimBoundsExtent", "Session_TrimBoundsSize",
+                 })
+        {
+            foreach (string resx in new[] { NeutralResx, ChineseResx })
+            {
+                ValueOf(resx, key).ShouldContain("{0}", Case.Sensitive);
+                ValueOf(resx, key).ShouldContain("{1}", Case.Sensitive);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The bounds wording names neither an internal type nor a coordinate convention by jargon
+    /// (§13, §14).
+    /// </summary>
+    /// <remarks>
+    /// The block is the first place the product shows an operator a rectangle it measured, and
+    /// the temptation is to explain it in the vocabulary the code uses. "Exclusive", a bare
+    /// "bounds" type name or an enum member would each turn an audit line into something the
+    /// operator has to be taught to read. The convention is still stated — in the caption, in
+    /// words — which is what this leaves room for.
+    /// </remarks>
+    [Theory]
+    [InlineData("TrimBounds")]
+    [InlineData("TrimGeometry")]
+    [InlineData("ContentBounds")]
+    [InlineData("AppliedBounds")]
+    [InlineData("RightExclusive")]
+    [InlineData("BottomExclusive")]
+    [InlineData("Int32Rect")]
+    [InlineData("half-open")]
+    public void The_trim_bounds_wording_names_no_internal_type(string forbidden)
+    {
+        foreach (string key in new[]
+                 {
+                     "Session_TrimBoundsDetectedHeading", "Session_TrimBoundsAppliedHeading",
+                     "Session_TrimBoundsOrigin", "Session_TrimBoundsExtent",
+                     "Session_TrimBoundsSize", "Session_TrimBoundsCaption",
+                 })
+        {
+            ValueOf(NeutralResx, key).ShouldNotContain(forbidden, Case.Insensitive);
+            ValueOf(ChineseResx, key).ShouldNotContain(forbidden, Case.Insensitive);
+        }
+    }
+
     private static string ValueOf(string relativePath, string key)
     {
         XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));

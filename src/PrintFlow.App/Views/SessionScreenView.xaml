@@ -1258,6 +1258,59 @@
                                        Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
 
                             <!--
+                                Where the artwork was found, and where the crop was actually
+                                taken (SCRUM-11081 §13). Two columns so the operator can read
+                                straight across and see what the margin added; both come from
+                                the attempt that produced this exact Revision, so a
+                                reject-and-re-run at a different margin shows the new rectangle
+                                while the superseded attempt keeps its own. Collapsed entirely
+                                for anything that established no geometry (a manual crop, a
+                                non-trim artefact, or a trim recorded before the geometry was
+                                persisted) rather than showing zeroes nobody measured.
+                            -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding HasTrimBounds, Converter={StaticResource BoolToVisibility}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding TrimBoundsDetectedHeading}"
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding TrimContentBoundsOrigin}"
+                                                   Opacity="0.8"
+                                                   Margin="0,2,0,0" />
+                                        <TextBlock Text="{Binding TrimContentBoundsExtent}"
+                                                   Opacity="0.8" />
+                                        <TextBlock Text="{Binding TrimContentBoundsSize}"
+                                                   Opacity="0.8" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="{Binding TrimBoundsAppliedHeading}"
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding TrimAppliedBoundsOrigin}"
+                                                   Opacity="0.8"
+                                                   Margin="0,2,0,0" />
+                                        <TextBlock Text="{Binding TrimAppliedBoundsExtent}"
+                                                   Opacity="0.8" />
+                                        <TextBlock Text="{Binding TrimAppliedBoundsSize}"
+                                                   Opacity="0.8" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="{Binding TrimBoundsCaption}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.65"
+                                           Margin="0,6,0,0" />
+                            </StackPanel>
+
+                            <!--
                                 The authority the cutout under review was produced under
                                 (Epic 11300 Part C2B2 §14, §15). It comes from the producing
                                 attempt, which is written once and never rewritten — so a later

@@ -584,6 +584,12 @@ public sealed class ViewRenderingTests
         session.HasTrimParameters.ShouldBeTrue();
         session.TrimParametersSummary.ShouldNotBeNullOrWhiteSpace();
 
+        // The detected/applied bounds block renders in the same panel (SCRUM-11081 §13). Every
+        // binding it adds resolves against a real trim result rather than against a placeholder.
+        session.HasTrimBounds.ShouldBeTrue();
+        session.TrimContentBoundsOrigin.ShouldNotBeNullOrWhiteSpace();
+        session.TrimAppliedBoundsSize.ShouldNotBeNullOrWhiteSpace();
+
         RenderOnStaThread(() => new SessionScreenView { DataContext = session });
     }
 
@@ -628,6 +634,76 @@ public sealed class ViewRenderingTests
 
             rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
             rendered.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
+    /// <summary>
+    /// The detected/applied bounds block renders in Chinese and still fits the window
+    /// (SCRUM-11081 §13, §14).
+    /// </summary>
+    /// <remarks>
+    /// Two columns of four lines each is the widest thing this slice adds to the review panel,
+    /// and Chinese digits sit inside CJK glyphs that are wider than the Latin ones the layout was
+    /// measured with. Rendering it at the signed-off viewport is what turns "it probably fits"
+    /// into a build failure if it ever does not.
+    /// <para>
+    /// The strings are also checked against their own resource keys, because a missing
+    /// translation falls back to the key rather than to English — so a half-translated block
+    /// would render, look plausible, and be caught by nothing else.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_trim_bounds_render_with_the_Chinese_resources_and_fit_the_window()
+    {
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo chinese = CultureInfo.GetCultureInfo("zh-CN");
+            CultureInfo.CurrentUICulture = chinese;
+            CultureInfo.CurrentCulture = chinese;
+
+            using HomeScreenHarness harness = new();
+            SessionViewModel driver = await PrepareAssetAtTrimAsync(harness, transparentSource: false);
+
+            driver.SelectedTrimMode = driver.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+            driver.UniformMarginText = "2";
+            await driver.ApplyTrimMarginCommand.ExecuteAsync(null);
+
+            await driver.RunStepCommand.ExecuteAsync(null);
+            await driver.PreviewsLoaded;
+
+            driver.HasTrimBounds.ShouldBeTrue();
+            driver.TrimBoundsDetectedHeading.ShouldNotBe("Session_TrimBoundsDetectedHeading");
+            driver.TrimBoundsAppliedHeading.ShouldNotBe("Session_TrimBoundsAppliedHeading");
+            driver.TrimBoundsCaption.ShouldNotBe("Session_TrimBoundsCaption");
+            driver.TrimContentBoundsOrigin.ShouldNotContain("Session_", Case.Sensitive);
+            driver.TrimAppliedBoundsSize.ShouldNotContain("Session_", Case.Sensitive);
+
+            // The numbers are the same measurements whatever the language.
+            driver.TrimContentBoundsSize.ShouldContain("5");
+            driver.TrimAppliedBoundsSize.ShouldContain("9");
+
+            // A separate view model for the render, for the reason the background-removal suite
+            // below states: a rendered ItemsControl binds a CollectionView to the STA thread that
+            // built it, and driving the same view model afterwards from the test thread throws.
+            SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
+            SessionViewModel rendered = harness.Session(new RecordingNavigation());
+            rendered.Open((await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value);
+            await rendered.PreviewsLoaded;
+            rendered.HasTrimBounds.ShouldBeTrue();
+
+            RenderResult<int> result = WpfRendering.RenderExpectingNoBindingErrors(
+                () => new SessionScreenView { DataContext = rendered }, WpfRendering.ReviewViewport, _ => 0);
+
+            result.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+            result.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
         }
         finally
         {

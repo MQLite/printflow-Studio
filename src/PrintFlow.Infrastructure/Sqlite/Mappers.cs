@@ -239,6 +239,47 @@ internal static class Mappers
         };
     }
 
+    /// <summary>
+    /// Rebuilds a <see cref="TrimGeometry"/> from its eight edge columns, or null when none was
+    /// stored (SCRUM-11081).
+    /// </summary>
+    /// <remarks>
+    /// All eight are required together, and a row holding only some of them is refused rather
+    /// than patched up with zeros. A missing edge is not a rectangle that starts at the canvas
+    /// corner — it is a row nobody can honestly read, and defaulting it would put a fabricated
+    /// crop into an operator-visible audit line. The 0009 trigger refuses to write such a row in
+    /// the first place, so reaching this throw means the file was edited outside PrintFlow.
+    /// <para>
+    /// Both rectangles go through <see cref="TrimBounds.FromEdges"/> and
+    /// <see cref="TrimGeometry.Create"/>, so a stored pair that could not have come from a
+    /// margin expansion fails to load rather than loading as a crop that never happened.
+    /// </para>
+    /// </remarks>
+    public static TrimGeometry? ToTrimGeometry(
+        int? contentLeft, int? contentTop, int? contentRight, int? contentBottom,
+        int? appliedLeft, int? appliedTop, int? appliedRight, int? appliedBottom)
+    {
+        if (contentLeft is null && contentTop is null && contentRight is null && contentBottom is null &&
+            appliedLeft is null && appliedTop is null && appliedRight is null && appliedBottom is null)
+        {
+            return null;
+        }
+
+        if (contentLeft is not { } cl || contentTop is not { } ct ||
+            contentRight is not { } cr || contentBottom is not { } cb ||
+            appliedLeft is not { } al || appliedTop is not { } at ||
+            appliedRight is not { } ar || appliedBottom is not { } ab)
+        {
+            throw new InvalidOperationException(
+                "A ProcessingAttempt row holds a partial trim geometry: the detected and applied " +
+                "rectangles are written together or not at all.");
+        }
+
+        return TrimGeometry.Create(
+            TrimBounds.FromEdges(cl, ct, cr, cb),
+            TrimBounds.FromEdges(al, at, ar, ab));
+    }
+
     public static string ToText(BackgroundRemovalDecision value) => value switch
     {
         BackgroundRemovalDecision.Unspecified => "UNSPECIFIED",
@@ -1248,6 +1289,20 @@ internal static class Mappers
         BackgroundRemovalRevisionId = attempt.BackgroundRemovalAuthority?.ReviewedRevisionId.ToString(),
         BackgroundRemovalReviewedSha = attempt.BackgroundRemovalAuthority?.ReviewedSha256.Value,
 
+        // The rectangles this attempt's trim established, in the source image's own pixel
+        // coordinates and in TrimBounds's half-open spelling — stored as the four edges each
+        // rectangle already has, with no conversion (SCRUM-11081). All eight are null together
+        // for anything that is not a produced automatic trim, which the 0009 trigger enforces
+        // as well as this mapper does.
+        TrimContentLeft = attempt.TrimGeometry?.ContentBounds.Left,
+        TrimContentTop = attempt.TrimGeometry?.ContentBounds.Top,
+        TrimContentRight = attempt.TrimGeometry?.ContentBounds.RightExclusive,
+        TrimContentBottom = attempt.TrimGeometry?.ContentBounds.BottomExclusive,
+        TrimAppliedLeft = attempt.TrimGeometry?.AppliedBounds.Left,
+        TrimAppliedTop = attempt.TrimGeometry?.AppliedBounds.Top,
+        TrimAppliedRight = attempt.TrimGeometry?.AppliedBounds.RightExclusive,
+        TrimAppliedBottom = attempt.TrimGeometry?.AppliedBounds.BottomExclusive,
+
         // What THIS attempt ran under. Written once with the opening transaction and left out of
         // the upsert's DO UPDATE clause, so a later change of size — or a later enlargement
         // decision — cannot relabel it (Epic 11400 Part B1A.2A §12; Part B1A.2D §24).
@@ -1402,6 +1457,15 @@ internal static class Mappers
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
                 row.BackgroundRemovalReviewedSha),
             AdapterNotes = row.AdapterNotes,
+
+            // Null on every attempt that established no trim geometry, and on every attempt
+            // written before migration 0009 — which is exactly what those rows were: attempts
+            // whose crop rectangle was never recorded, never attempts that kept the whole
+            // canvas. Nothing here reconstructs a rectangle from the output's dimensions
+            // (SCRUM-11081).
+            TrimGeometry = ToTrimGeometry(
+                row.TrimContentLeft, row.TrimContentTop, row.TrimContentRight, row.TrimContentBottom,
+                row.TrimAppliedLeft, row.TrimAppliedTop, row.TrimAppliedRight, row.TrimAppliedBottom),
 
             // Null on every attempt that was not a Photoshop output, and on every attempt written
             // before migration 0005 — which is exactly what those rows were: attempts that had no

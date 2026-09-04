@@ -574,9 +574,16 @@ public sealed class MaximumBoundsBoundaryTests
     /// kind of change this assertion exists to make somebody state out loud (correction §15,
     /// §16, §17). Each slice added exactly one script, and the number moving is the point.
     /// </para>
+    /// <para>
+    /// It moved once more to 0009 for SCRUM-11081, which persists the crop geometry the
+    /// deterministic trim already computed and then discarded: eight nullable edge columns on
+    /// <c>ProcessingAttempt</c> and three triggers. That one rebuilds nothing, widens nothing and
+    /// backfills nothing — every historical attempt reads NULL, because the rectangle a
+    /// pre-0009 trim used is genuinely unrecoverable from the output's dimensions alone.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_maximum_short_edge_migration()
+    public void The_migration_set_ends_at_the_trim_bounds_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -587,7 +594,7 @@ public sealed class MaximumBoundsBoundaryTests
             .Select(name => name!)
             .OrderBy(name => name, StringComparer.Ordinal);
 
-        scripts.Last().ShouldStartWith("0008", Case.Sensitive);
+        scripts.Last().ShouldStartWith("0009", Case.Sensitive);
     }
 
     // -------------------------------------------------------------------------------------

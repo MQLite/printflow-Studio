@@ -1151,6 +1151,257 @@ public sealed class MigrationTests
              """);
     }
 
+    // -------------------------------------------------------------------------------------
+    // 0009 — trim bounds on the producing attempt (SCRUM-11081 §7, §8, §21)
+    // -------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// A populated v8 database gains the eight bounds columns, and every attempt it already held
+    /// reads NULL rather than a rectangle inferred from anything (§8, §21).
+    /// </summary>
+    /// <remarks>
+    /// The honesty requirement made structural. A historical Trim attempt's output dimensions are
+    /// still on its Revision, and they give the applied rectangle's <i>size</i>; they do not give
+    /// its origin, and nothing anywhere gives the detected content. A backfill would have to
+    /// invent both, so this asserts that none happened — and that the seeded attempt's own audit
+    /// values are still exactly what they were.
+    /// </remarks>
+    [Fact]
+    public void A_pre_0009_database_gains_the_bounds_columns_and_backfills_no_geometry()
+    {
+        using TempDatabase database = new(migrate: false);
+
+        const string session = "pre-0009-trim";
+        const string trimAttempt = "99999999-9999-9999-9999-999999999999";
+
+        using (SqliteConnection seeded = database.OpenRaw())
+        {
+            foreach (string script in new[]
+                     {
+                         "0001_initial_schema.sql", "0002_trim_parameters.sql",
+                         "0003_background_removal_decision.sql", "0004_attempt_adapter_notes.sql",
+                         "0005_maximum_bound_print_plan.sql",
+                         "0006_flexible_size_and_enlargement_authority.sql",
+                         "0007_print_output_promotion.sql",
+                         "0008_maximum_short_edge_recommendation.sql",
+                     })
+            {
+                Execute(seeded, ReadMigrationScript(script));
+            }
+
+            Execute(
+                seeded,
+                "INSERT INTO SchemaMigration (Version, Name, AppliedAtUtc, ScriptSha256) VALUES " +
+                "(1, 'initial_schema', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(2, 'trim_parameters', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(3, 'background_removal_decision', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(4, 'attempt_adapter_notes', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(5, 'maximum_bound_print_plan', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(6, 'flexible_size_and_enlargement_authority', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(7, 'print_output_promotion', '2026-01-01T00:00:00.000Z', 'SEED'), " +
+                "(8, 'maximum_short_edge_recommendation', '2026-01-01T00:00:00.000Z', 'SEED');");
+            Execute(seeded, "PRAGMA user_version = 8;");
+
+            InsertSession(seeded, session, []);
+
+            // A historical Trim attempt that really produced a cropped file: it has a margin, a
+            // Revision and the output's dimensions — everything except the rectangle.
+            Execute(
+                seeded,
+                $$"""
+                  INSERT INTO Revision
+                      (Id, SessionId, SourceRevisionId, Operation, RelativePath, Format, ByteLength,
+                       Sha256, PixelWidth, PixelHeight, ColourMode, CreatedAtUtc)
+                  VALUES
+                      ('22222222-2222-2222-2222-222222222222', '{{session}}', NULL, 'IMPORT',
+                       'Sessions/{{session}}/Source/design.png', 'PNG', 2048, '{{new string('a', 64)}}',
+                       12, 10, 'RGB', '2026-01-01T00:00:00.000Z'),
+                      ('33333333-3333-3333-3333-333333333333', '{{session}}',
+                       '22222222-2222-2222-2222-222222222222', 'TRIM',
+                       'Sessions/{{session}}/Working/trimmed.png', 'PNG', 512, '{{new string('c', 64)}}',
+                       9, 9, 'RGB', '2026-01-01T00:01:00.000Z');
+
+                  INSERT INTO ProcessingAttempt
+                      (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc,
+                       EndedAtUtc, ResultStatus, OutputRevisionId, RetrySequence,
+                       TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft)
+                  VALUES
+                      ('{{trimAttempt}}', '{{session}}', 'Trim',
+                       '22222222-2222-2222-2222-222222222222', 'TRIM',
+                       'deterministic-alpha-trim-v1', '2026-01-01T00:00:30.000Z',
+                       '2026-01-01T00:01:00.000Z', 'SUCCEEDED',
+                       '33333333-3333-3333-3333-333333333333', 0,
+                       'UNIFORM_MARGIN', 2, 2, 2, 2);
+                  """);
+        }
+
+        using SqliteConnection upgraded = database.OpenRaw();
+        MigrationRunner.Migrate(upgraded).IsSuccess.ShouldBeTrue();
+        ReadUserVersion(upgraded).ShouldBe(MigrationRunner.NewestKnownVersion);
+
+        IReadOnlyList<string> columns = ColumnsOf(upgraded, "ProcessingAttempt");
+        foreach (string column in TrimBoundsColumns)
+        {
+            columns.ShouldContain(column);
+        }
+
+        // The historical attempt keeps every value it had, and gains no geometry. Its output is
+        // 9x9, and 9x9 is exactly what a naive backfill would have had to guess an origin from.
+        ScalarStringOf(upgraded, $"SELECT TrimMode FROM ProcessingAttempt WHERE Id = '{trimAttempt}';")
+            .ShouldBe("UNIFORM_MARGIN");
+        ScalarOf(upgraded, $"SELECT TrimMarginTop FROM ProcessingAttempt WHERE Id = '{trimAttempt}';")
+            .ShouldBe(2L);
+        ScalarOf(
+            upgraded,
+            "SELECT COUNT(*) FROM ProcessingAttempt WHERE " +
+            string.Join(" OR ", TrimBoundsColumns.Select(c => $"{c} IS NOT NULL")) + ";")
+            .ShouldBe(0L, "0009 must not invent geometry for an attempt that never recorded any");
+
+        // Nothing unrelated moved.
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM Revision;").ShouldBe(2L);
+        ScalarOf(upgraded, "SELECT COUNT(*) FROM ProcessingSession;").ShouldBe(1L);
+        ScalarOf(
+            upgraded,
+            "SELECT PixelWidth FROM Revision WHERE Id = '33333333-3333-3333-3333-333333333333';")
+            .ShouldBe(9L);
+
+        // And the upgraded schema accepts a complete, coherent pair written after the fact.
+        Execute(
+            upgraded,
+            $"""
+             UPDATE ProcessingAttempt SET
+                 TrimContentLeft = 3, TrimContentTop = 2, TrimContentRight = 8, TrimContentBottom = 7,
+                 TrimAppliedLeft = 1, TrimAppliedTop = 0, TrimAppliedRight = 10, TrimAppliedBottom = 9
+             WHERE Id = '{trimAttempt}';
+             """);
+        ScalarOf(upgraded, $"SELECT TrimAppliedRight FROM ProcessingAttempt WHERE Id = '{trimAttempt}';")
+            .ShouldBe(10L);
+    }
+
+    /// <summary>
+    /// The schema refuses a half-written pair, an empty rectangle and a crop inside the content
+    /// (§7).
+    /// </summary>
+    /// <remarks>
+    /// The constraint is stated in <c>TrimGeometry.Create</c>, in the mapper and here, and the
+    /// three are not redundant: the database is the only one of them that a support script, a
+    /// manual repair or a future code path cannot bypass. A row failing all three readings is a
+    /// row whose operator-visible audit line would be a fiction.
+    /// </remarks>
+    [Theory]
+    [InlineData(
+        "TrimContentLeft = 3, TrimContentTop = 2, TrimContentRight = 8, TrimContentBottom = 7",
+        "content without applied")]
+    [InlineData(
+        "TrimContentLeft = 3, TrimContentTop = 2, TrimContentRight = 8, TrimContentBottom = 7, " +
+        "TrimAppliedLeft = 1, TrimAppliedTop = 0, TrimAppliedRight = 10",
+        "applied missing its bottom edge")]
+    [InlineData(
+        "TrimContentLeft = 3, TrimContentTop = 2, TrimContentRight = 3, TrimContentBottom = 7, " +
+        "TrimAppliedLeft = 3, TrimAppliedTop = 2, TrimAppliedRight = 3, TrimAppliedBottom = 7",
+        "a rectangle with no pixels in it")]
+    [InlineData(
+        "TrimContentLeft = 3, TrimContentTop = 2, TrimContentRight = 8, TrimContentBottom = 7, " +
+        "TrimAppliedLeft = 4, TrimAppliedTop = 3, TrimAppliedRight = 7, TrimAppliedBottom = 6",
+        "an applied crop inside the detected content")]
+    public void The_schema_refuses_an_incoherent_trim_geometry(string assignments, string why)
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        const string session = "trim-bounds-guard";
+        const string attempt = "99999999-9999-9999-9999-999999999999";
+
+        InsertSession(connection, session, []);
+        Execute(
+            connection,
+            $"""
+             INSERT INTO Revision
+                 (Id, SessionId, SourceRevisionId, Operation, RelativePath, Format, ByteLength,
+                  Sha256, ColourMode, CreatedAtUtc)
+             VALUES
+                 ('22222222-2222-2222-2222-222222222222', '{session}', NULL, 'IMPORT',
+                  'Sessions/{session}/Source/design.png', 'PNG', 2048, '{new string('a', 64)}',
+                  'RGB', '2026-01-01T00:00:00.000Z');
+
+             INSERT INTO ProcessingAttempt
+                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc,
+                  ResultStatus, RetrySequence)
+             VALUES
+                 ('{attempt}', '{session}', 'Trim', '22222222-2222-2222-2222-222222222222', 'TRIM',
+                  'deterministic-alpha-trim-v1', '2026-01-01T00:00:30.000Z', 'RUNNING', 0);
+             """);
+
+        Should.Throw<SqliteException>(
+            () => Execute(connection, $"UPDATE ProcessingAttempt SET {assignments} WHERE Id = '{attempt}';"),
+            $"the schema must refuse {why}");
+    }
+
+    /// <summary>A geometry already recorded cannot be rewritten or erased (§17, §19).</summary>
+    /// <remarks>
+    /// The attempt upsert has to name these columns in its update clause, because the geometry is
+    /// written by the closing transaction rather than the opening one. This trigger is what stops
+    /// that from becoming a way to relabel history: the clause may fill nulls once, and nothing
+    /// may change a value that is already there.
+    /// </remarks>
+    [Fact]
+    public void A_recorded_trim_geometry_cannot_be_rewritten()
+    {
+        using TempDatabase database = new();
+        using SqliteConnection connection = database.Factory.Open();
+
+        const string session = "trim-bounds-immutable";
+        const string attempt = "99999999-9999-9999-9999-999999999999";
+
+        InsertSession(connection, session, []);
+        Execute(
+            connection,
+            $"""
+             INSERT INTO Revision
+                 (Id, SessionId, SourceRevisionId, Operation, RelativePath, Format, ByteLength,
+                  Sha256, ColourMode, CreatedAtUtc)
+             VALUES
+                 ('22222222-2222-2222-2222-222222222222', '{session}', NULL, 'IMPORT',
+                  'Sessions/{session}/Source/design.png', 'PNG', 2048, '{new string('a', 64)}',
+                  'RGB', '2026-01-01T00:00:00.000Z');
+
+             INSERT INTO ProcessingAttempt
+                 (Id, SessionId, StepKind, InputRevisionId, Operation, AdapterId, StartedAtUtc,
+                  ResultStatus, RetrySequence,
+                  TrimContentLeft, TrimContentTop, TrimContentRight, TrimContentBottom,
+                  TrimAppliedLeft, TrimAppliedTop, TrimAppliedRight, TrimAppliedBottom)
+             VALUES
+                 ('{attempt}', '{session}', 'Trim', '22222222-2222-2222-2222-222222222222', 'TRIM',
+                  'deterministic-alpha-trim-v1', '2026-01-01T00:00:30.000Z', 'RUNNING', 0,
+                  3, 2, 8, 7, 3, 2, 8, 7);
+             """);
+
+        Should.Throw<SqliteException>(() => Execute(
+            connection,
+            $"UPDATE ProcessingAttempt SET TrimAppliedRight = 10, TrimAppliedBottom = 9 WHERE Id = '{attempt}';"));
+
+        Should.Throw<SqliteException>(() => Execute(
+            connection,
+            $"""
+             UPDATE ProcessingAttempt SET
+                 TrimContentLeft = NULL, TrimContentTop = NULL, TrimContentRight = NULL,
+                 TrimContentBottom = NULL, TrimAppliedLeft = NULL, TrimAppliedTop = NULL,
+                 TrimAppliedRight = NULL, TrimAppliedBottom = NULL
+             WHERE Id = '{attempt}';
+             """));
+
+        // An update that leaves the geometry alone is still perfectly legal.
+        Execute(connection, $"UPDATE ProcessingAttempt SET AdapterNotes = 'note' WHERE Id = '{attempt}';");
+        ScalarOf(connection, $"SELECT TrimAppliedRight FROM ProcessingAttempt WHERE Id = '{attempt}';")
+            .ShouldBe(8L);
+    }
+
+    private static readonly string[] TrimBoundsColumns =
+    [
+        "TrimContentLeft", "TrimContentTop", "TrimContentRight", "TrimContentBottom",
+        "TrimAppliedLeft", "TrimAppliedTop", "TrimAppliedRight", "TrimAppliedBottom",
+    ];
+
     private static string ScalarStringOf(SqliteConnection connection, string sql)
     {
         using SqliteCommand command = connection.CreateCommand();

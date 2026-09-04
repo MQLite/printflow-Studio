@@ -41,11 +41,22 @@ public sealed class TrimBoundaryTests
     // Domain: geometry only
     // -----------------------------------------------------------------------------
 
+    /// <summary>
+    /// The trim domain is exactly these types, and adding one is a deliberate act.
+    /// </summary>
+    /// <remarks>
+    /// <c>TrimGeometry</c> joined them in SCRUM-11081: the pair of rectangles a produced trim
+    /// established, which the processor had always computed and the orchestrator had always
+    /// discarded. It belongs here rather than in the workflow layer for the reason every other
+    /// name on this list does — it is geometry, it touches no file and no repository, and the
+    /// next assertion in this file is what holds it to that.
+    /// </remarks>
     [Fact]
     public void The_trim_domain_types_exist_where_they_are_supposed_to()
     {
         DomainTrimTypes.Select(t => t.Name).ShouldBe(
-            ["TrimMode", "TrimOutcome", "TrimMargin", "TrimBounds", "AlphaBounds"], ignoreOrder: true);
+            ["TrimMode", "TrimOutcome", "TrimMargin", "TrimBounds", "TrimGeometry", "AlphaBounds"],
+            ignoreOrder: true);
     }
 
     /// <summary>

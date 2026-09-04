@@ -481,6 +481,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  TrimMode, TrimMarginTop, TrimMarginRight, TrimMarginBottom, TrimMarginLeft,
                  BackgroundRemovalDecision, BackgroundRemovalRevisionId, BackgroundRemovalReviewedSha,
                  AdapterNotes,
+                 TrimContentLeft, TrimContentTop, TrimContentRight, TrimContentBottom,
+                 TrimAppliedLeft, TrimAppliedTop, TrimAppliedRight, TrimAppliedBottom,
                  PrintPlanSourceRevisionId, PrintPlanSourceSha256,
                  PrintPlanSourcePixelWidth, PrintPlanSourcePixelHeight,
                  PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
@@ -507,6 +509,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @TrimMode, @TrimMarginTop, @TrimMarginRight, @TrimMarginBottom, @TrimMarginLeft,
                  @BackgroundRemovalDecision, @BackgroundRemovalRevisionId, @BackgroundRemovalReviewedSha,
                  @AdapterNotes,
+                 @TrimContentLeft, @TrimContentTop, @TrimContentRight, @TrimContentBottom,
+                 @TrimAppliedLeft, @TrimAppliedTop, @TrimAppliedRight, @TrimAppliedBottom,
                  @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
                  @PrintPlanSourcePixelWidth, @PrintPlanSourcePixelHeight,
                  @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
@@ -533,7 +537,27 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 OutputRevisionId = excluded.OutputRevisionId,
                 FailureCode = excluded.FailureCode,
                 FailureDetailJson = excluded.FailureDetailJson,
-                AdapterNotes = excluded.AdapterNotes;
+                AdapterNotes = excluded.AdapterNotes,
+
+                -- The one audit group written by the CLOSING transaction rather than the opening
+                -- one, and therefore the one that has to appear here (SCRUM-11081). The margin,
+                -- the background-removal authority and the preparation plan are all decisions the
+                -- attempt was started with, so leaving them out of this clause is what makes them
+                -- unrewritable. Trim geometry is a result: it does not exist until the pixel work
+                -- has run, and the row that opened the attempt necessarily carried nulls.
+                --
+                -- That is not a hole in the same guarantee. Migration 0009's
+                -- ProcessingAttempt_TrimBounds_Immutable trigger aborts any update that changes a
+                -- geometry already present, so this clause can fill nulls in exactly once and can
+                -- never edit or erase what an earlier attempt recorded.
+                TrimContentLeft = excluded.TrimContentLeft,
+                TrimContentTop = excluded.TrimContentTop,
+                TrimContentRight = excluded.TrimContentRight,
+                TrimContentBottom = excluded.TrimContentBottom,
+                TrimAppliedLeft = excluded.TrimAppliedLeft,
+                TrimAppliedTop = excluded.TrimAppliedTop,
+                TrimAppliedRight = excluded.TrimAppliedRight,
+                TrimAppliedBottom = excluded.TrimAppliedBottom;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

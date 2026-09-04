@@ -482,6 +482,31 @@ public sealed record FlexibleSizeView(
 /// The margin the attempt that produced <see cref="CurrentArtefact"/> actually ran with, or
 /// null when that artefact was not produced by a deterministic trim (Part C3 §18).
 /// </param>
+/// <param name="ArtefactTrimGeometry">
+/// The rectangles the trim that produced <see cref="CurrentArtefact"/> established: what the
+/// alpha scan detected, and what was actually cropped out (SCRUM-11081 §12, §15). Null when that
+/// artefact was not produced by a deterministic trim — including a manual crop, whose rectangle
+/// a human drew — and null for every trim attempt written before migration 0009, whose geometry
+/// was never recorded.
+/// <para>
+/// Deliberately scoped to <b>the artefact</b> rather than to the step's own result, which is
+/// where it differs from <see cref="CurrentTrimParameters"/>. Two different questions are being
+/// asked of the same fact. During the Trim review it is "how was this file made", and
+/// <see cref="CurrentTrimGeometry"/> narrows to exactly that. One step later it is "where did
+/// the artwork sit in the original", which is what SCRUM-11094 needs on screen while a print
+/// size is being decided — and there the trimmed file is the step's <i>input</i>, so a
+/// result-only reading would report nothing. The detected extent of the file being sized is a
+/// legitimate thing to state at that point; the crop parameters of an upstream step are not,
+/// which is why only this one widens.
+/// </para>
+/// <para>
+/// The domain <see cref="TrimGeometry"/> itself rather than a flattened projection, because
+/// unlike a preparation plan it holds nothing a screen must not see: two rectangles in source
+/// pixels, no Revision id and no hash. One shared shape also means the Trim review panel and any
+/// later Print Dimensions display read the same detected extent rather than each deriving one
+/// (§15).
+/// </para>
+/// </param>
 /// <param name="BackgroundRemovalDecision">
 /// The reviewed-content decision that <b>currently</b> authorises a Background Removal run, or
 /// <see cref="Domain.Sessions.BackgroundRemovalDecision.Unspecified"/> when nothing does
@@ -580,6 +605,7 @@ public sealed record SessionView(
     TrimMargin TrimMargin,
     bool CanSetTrimParameters,
     TrimMargin? CurrentTrimParameters,
+    TrimGeometry? ArtefactTrimGeometry,
     BackgroundRemovalDecision BackgroundRemovalDecision,
     RevisionId? BackgroundRemovalDecisionRevisionId,
     bool CanSetBackgroundRemovalDecision,
@@ -628,6 +654,42 @@ public sealed record SessionView(
     /// (§18).
     /// </summary>
     public bool HasTrimParameters => CurrentTrimParameters is not null;
+
+    /// <summary>
+    /// The crop rectangles for the result the operator is being asked to approve
+    /// (SCRUM-11081 §12, §13).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="ArtefactTrimGeometry"/> narrowed to the step's own result, which is the
+    /// scoping every other attempt-audit member on this record uses. While the screen shows the
+    /// file a step is about to <i>consume</i>, a line beside the review claiming "this is how it
+    /// was cropped" would be describing work an earlier step did.
+    /// </remarks>
+    public TrimGeometry? CurrentTrimGeometry =>
+        CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactTrimGeometry : null;
+
+    /// <summary>
+    /// Whether the result on screen carries the crop rectangles the trim that produced it
+    /// established (SCRUM-11081 §12, §13).
+    /// </summary>
+    /// <remarks>
+    /// False, and therefore no bounds display, for a manual crop, for an artefact that is not a
+    /// trim result at all, and for a trim attempt recorded before the geometry was persisted.
+    /// A screen must not fill that gap from the output's pixel dimensions: those give the applied
+    /// rectangle's size but never its origin, and never the detected extent.
+    /// </remarks>
+    public bool HasTrimGeometry => CurrentTrimGeometry is not null;
+
+    /// <summary>
+    /// Whether the file on screen has a recorded detected graphic extent, whether this step
+    /// produced it or is about to consume it (SCRUM-11081 §15).
+    /// </summary>
+    /// <remarks>
+    /// The predicate a Print Dimensions display would read. It stays true one step past the Trim
+    /// review, where the trimmed file becomes the input being sized and
+    /// <see cref="HasTrimGeometry"/> correctly goes false.
+    /// </remarks>
+    public bool HasDetectedGraphicBounds => ArtefactTrimGeometry is not null;
 
     /// <summary>
     /// Whether the artefact on screen was produced under a recorded reviewed-content authority
@@ -727,6 +789,7 @@ public sealed record SessionView(
             snapshot.TrimMargin,
             availableCommands.Contains(CommandKind.SetTrimParameters) && !canManualCrop,
             ResolveTrimParameters(current, attempts),
+            ResolveTrimGeometry(current, attempts),
 
             // The *usable* authority, never the raw one. A session can hold an authority granted
             // over content that has since been replaced, and reporting that as the current
@@ -915,6 +978,45 @@ public sealed record SessionView(
             if (attempt.OutputRevisionId == result.RevisionId)
             {
                 return attempt.TrimParameters;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The crop rectangles the attempt that produced <paramref name="current"/> established
+    /// (SCRUM-11081 §12, §15).
+    /// </summary>
+    /// <remarks>
+    /// Found through <see cref="ProcessingAttempt.OutputRevisionId"/>, exactly as
+    /// <see cref="ResolveTrimParameters"/> is and for the same reason: after a reject-and-re-run
+    /// at a different margin the history holds two trim attempts with the same detected content
+    /// and different applied rectangles, and "the geometry of whatever ran last" would label the
+    /// file on screen with a crop that produced a different file. Returning upstream and running
+    /// again moves this to the new attempt's rectangles while leaving the superseded attempt's
+    /// own row untouched (§19).
+    /// <para>
+    /// Unlike <see cref="ResolveTrimParameters"/> this is <b>not</b> narrowed to the step's own
+    /// result. It answers "where did the artwork sit in the original", which stays a true and
+    /// useful statement about the file after Trim hands it downstream — and is what a Print
+    /// Dimensions display needs without recomputing anything (§15). The narrower
+    /// review-line reading is <see cref="CurrentTrimGeometry"/>, one line of filtering away.
+    /// </para>
+    /// </remarks>
+    private static TrimGeometry? ResolveTrimGeometry(
+        ArtefactView? current, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (current is not { } artefact)
+        {
+            return null;
+        }
+
+        foreach (ProcessingAttempt attempt in attempts)
+        {
+            if (attempt.OutputRevisionId == artefact.RevisionId)
+            {
+                return attempt.TrimGeometry;
             }
         }
 
