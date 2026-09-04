@@ -245,3 +245,41 @@ Dependencies and the signed preset are unchanged. The desktop sandbox setting `[
 Repository `D:\Repositories\printflow-Studio`, branch `master`, started from accepted `4111bd0`. No worktree, no task branch, no alternate clone, no amend, rebase or push. Unrelated untracked files were left untouched and excluded from the commit.
 
 **PASS WITH NOTES — MANUAL PROCESSING RESULT RE-ENTRY VERIFIED**
+
+---
+
+## Culture-sensitive test determinism follow-up — 2026-09-04
+
+The accepted live verdict remains **PASS WITH NOTES — MANUAL PROCESSING RESULT RE-ENTRY VERIFIED**. **SCRUM-11092: PARTIAL → FULL; SCRUM-11112 remains PARTIAL.** This test-only follow-up preserves the original desktop-blocked evidence and the subsequent live proof above; it changes neither Product behaviour nor the coverage boundary.
+
+The earlier **10,856 passed / 0 failed** suite was produced under a different UI-language environment. The later **10,866 total / 10,863 passed / 3 failed** run inherited this workstation's `zh-CN` UI culture. As recorded above, the same three failures were reproduced against the accepted pre-SCRUM-11092 baseline with the SCRUM-11092 changes stashed; they are pre-existing culture-sensitive test defects, not a SCRUM-11092 Product regression. That historical baseline attribution is retained, not re-run by stashing accepted work in this follow-up.
+
+Fresh red evidence on accepted `1627a29`, before this correction: **3 failed / 0 passed / 0 skipped**. All three cases in `ReturnAndTrimControlsUiTests` assert English (`en-US`):
+
+- `The_review_states_the_detected_and_applied_bounds_in_words`: expected `Detected graphic bounds`, actual `检测到的图形范围`.
+- `A_tight_trim_states_the_same_rectangle_twice`: expected `Size 5 × 5 px`, actual `尺寸 5 × 5 像素`.
+- `The_bounds_follow_the_result_on_screen_across_a_retry`: expected `Size 5 × 5 px`, actual `尺寸 5 × 5 像素`.
+
+Each now saves `CurrentUICulture` and `CurrentCulture`, sets both to `en-US` before constructing the harness or resolving resources, and restores both in `finally`, exactly following `MaximumBoundsRenderingTests`. All original exact wording assertions remain; no tests were added, skipped or weakened, and no new culture helper was introduced. Existing Chinese rendering tests explicitly select `zh-CN` and remain unchanged.
+
+Parallelism audit: both classes already belong to `SqliteCollection`, which serializes its tests while other collections may run in parallel. The changed cultures are scoped to the current execution context and flow across awaits; this correction never assigns process-wide `DefaultThreadCurrentCulture` / `DefaultThreadCurrentUICulture` or a shared resource-culture override. The `finally` also covers assertion and setup failures. No runner-wide serialization or runtime culture change is needed.
+
+Verification uses the already-installed SDK **10.0.400** at `C:\Users\admin\AppData\Local\Microsoft\dotnet\dotnet.exe`; plain `dotnet` initially found only the system SDK 8.0.418. No SDK/configuration change was made. The targeted command performed the necessary test-project build; subsequent runs use those binaries with `--no-build`.
+
+- Targeted red/green: **3 failed → 3 passed / 0 failed / 0 skipped**.
+- Related filter (`ReturnAndTrimControlsUiTests`, `MaximumBoundsRenderingTests`, `ViewRenderingTests`, `LocalisationResourceTests`, `SessionAccessibilityTests`): **131 passed / 0 failed / 0 skipped**, including Trim rendering and Chinese resources.
+- Final full suite: **10,866 passed / 0 failed / 0 skipped**, 3m10s. This is the actual post-correction result on the current workstation, not the earlier language-dependent baseline.
+
+Local TRX evidence is retained under `tests/PrintFlow.Tests/TestResults/culture-determinism/`: `culture-red.trx`, `culture-green.trx`, `culture-related.trx`, and `culture-full-suite.trx`. These remain ignored test artifacts. Reproduce the three-case run with `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter "FullyQualifiedName~A_tight_trim_states_the_same_rectangle_twice|FullyQualifiedName~The_review_states_the_detected_and_applied_bounds_in_words|FullyQualifiedName~The_bounds_follow_the_result_on_screen_across_a_retry"`; the full-suite command is `dotnet test PrintFlowStudio.sln --no-build` (using the SDK executable above).
+
+Meitu settle observation: **observed once; not reproducible; no change made**. The previously recorded `ProductionMeituExportTests.A_successful_run_reports_the_source_and_output_facts_it_validated` transient did **not** reproduce in this final full suite. No Product/test timing, sleeps or assertions were changed for it.
+
+Desktop acceptance/test-infrastructure convention, not Product runtime code:
+
+- WPF controls: use `AutomationId` / UIA patterns.
+- Owned modal dialogs: do not rely solely on `AutomationElement.RootElement`; discover by Win32 ownership and attach with `AutomationElement.FromHandle`.
+- Standard Win32 dialog controls: register the client-side UI Automation provider assembly before expecting `ValuePattern` / `InvokePattern`.
+
+Scope: only the three affected tests and this report. Product source, resource files, runtime localisation, XAML, ViewModels, workflow, persistence, adapters, configuration and presets are unchanged. Work stays in `D:\Repositories\printflow-Studio` on `master`, for a new local test/report commit; no branch, worktree, amend, rebase, push or AI-attribution trailer.
+
+**PASS — SCRUM-11092 LIVE CLOSURE AND TEST BASELINE RECONCILED**

@@ -1,3 +1,4 @@
+using System.Globalization;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Revisions;
@@ -532,56 +533,71 @@ public sealed class ReturnAndTrimControlsUiTests
     [Fact]
     public async Task The_review_states_the_detected_and_applied_bounds_in_words()
     {
-        using HomeScreenHarness harness = new();
-        SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
 
-        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
-        session.UniformMarginText = "2";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
-
-        await session.RunStepCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
-
-        session.Notice.ShouldBeNull();
-        session.HasTrimBounds.ShouldBeTrue();
-
-        // Two headings the operator can tell apart, in words rather than type names.
-        session.TrimBoundsDetectedHeading.ShouldBe("Detected graphic bounds");
-        session.TrimBoundsAppliedHeading.ShouldBe("Applied trim bounds");
-
-        // Detected [3,2 -> 8,7), 5x5.
-        session.TrimContentBoundsOrigin.ShouldBe("Left 3 px · Top 2 px");
-        session.TrimContentBoundsExtent.ShouldBe("Right 8 px · Bottom 7 px");
-        session.TrimContentBoundsSize.ShouldBe("Size 5 × 5 px");
-
-        // Applied [1,0 -> 10,9), 9x9 — the top edge clamped, the other three grew by 2.
-        session.TrimAppliedBoundsOrigin.ShouldBe("Left 1 px · Top 0 px");
-        session.TrimAppliedBoundsExtent.ShouldBe("Right 10 px · Bottom 9 px");
-        session.TrimAppliedBoundsSize.ShouldBe("Size 9 × 9 px");
-
-        session.TrimBoundsCaption.ShouldNotBeNullOrWhiteSpace();
-
-        // The applied size is the file the operator is being asked to approve.
-        (await TrimmedSizeAsync(harness)).ShouldBe((9, 9));
-
-        // No resource key, enum name or internal type name reaches the operator.
-        foreach (string line in new[]
-                 {
-                     session.TrimBoundsDetectedHeading, session.TrimBoundsAppliedHeading,
-                     session.TrimContentBoundsOrigin, session.TrimContentBoundsExtent,
-                     session.TrimContentBoundsSize, session.TrimAppliedBoundsOrigin,
-                     session.TrimAppliedBoundsExtent, session.TrimAppliedBoundsSize,
-                     session.TrimBoundsCaption,
-                 })
+        try
         {
-            foreach (string forbidden in new[]
+            CultureInfo english = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.CurrentUICulture = english;
+            CultureInfo.CurrentCulture = english;
+
+            using HomeScreenHarness harness = new();
+            SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+
+            session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+            session.UniformMarginText = "2";
+            await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+
+            await session.RunStepCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
+
+            session.Notice.ShouldBeNull();
+            session.HasTrimBounds.ShouldBeTrue();
+
+            // Two headings the operator can tell apart, in words rather than type names.
+            session.TrimBoundsDetectedHeading.ShouldBe("Detected graphic bounds");
+            session.TrimBoundsAppliedHeading.ShouldBe("Applied trim bounds");
+
+            // Detected [3,2 -> 8,7), 5x5.
+            session.TrimContentBoundsOrigin.ShouldBe("Left 3 px · Top 2 px");
+            session.TrimContentBoundsExtent.ShouldBe("Right 8 px · Bottom 7 px");
+            session.TrimContentBoundsSize.ShouldBe("Size 5 × 5 px");
+
+            // Applied [1,0 -> 10,9), 9x9 — the top edge clamped, the other three grew by 2.
+            session.TrimAppliedBoundsOrigin.ShouldBe("Left 1 px · Top 0 px");
+            session.TrimAppliedBoundsExtent.ShouldBe("Right 10 px · Bottom 9 px");
+            session.TrimAppliedBoundsSize.ShouldBe("Size 9 × 9 px");
+
+            session.TrimBoundsCaption.ShouldNotBeNullOrWhiteSpace();
+
+            // The applied size is the file the operator is being asked to approve.
+            (await TrimmedSizeAsync(harness)).ShouldBe((9, 9));
+
+            // No resource key, enum name or internal type name reaches the operator.
+            foreach (string line in new[]
                      {
-                         "Session_Trim", "TrimBounds", "TrimGeometry", "ContentBounds",
-                         "AppliedBounds", "RightExclusive", "BottomExclusive",
+                         session.TrimBoundsDetectedHeading, session.TrimBoundsAppliedHeading,
+                         session.TrimContentBoundsOrigin, session.TrimContentBoundsExtent,
+                         session.TrimContentBoundsSize, session.TrimAppliedBoundsOrigin,
+                         session.TrimAppliedBoundsExtent, session.TrimAppliedBoundsSize,
+                         session.TrimBoundsCaption,
                      })
             {
-                line.ShouldNotContain(forbidden, Case.Sensitive);
+                foreach (string forbidden in new[]
+                         {
+                             "Session_Trim", "TrimBounds", "TrimGeometry", "ContentBounds",
+                             "AppliedBounds", "RightExclusive", "BottomExclusive",
+                         })
+                {
+                    line.ShouldNotContain(forbidden, Case.Sensitive);
+                }
             }
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
         }
     }
 
@@ -596,17 +612,32 @@ public sealed class ReturnAndTrimControlsUiTests
     [Fact]
     public async Task A_tight_trim_states_the_same_rectangle_twice()
     {
-        using HomeScreenHarness harness = new();
-        SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
 
-        await session.RunStepCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
+        try
+        {
+            CultureInfo english = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.CurrentUICulture = english;
+            CultureInfo.CurrentCulture = english;
 
-        session.HasTrimBounds.ShouldBeTrue();
-        session.TrimAppliedBoundsOrigin.ShouldBe(session.TrimContentBoundsOrigin);
-        session.TrimAppliedBoundsExtent.ShouldBe(session.TrimContentBoundsExtent);
-        session.TrimAppliedBoundsSize.ShouldBe(session.TrimContentBoundsSize);
-        session.TrimContentBoundsSize.ShouldBe("Size 5 × 5 px");
+            using HomeScreenHarness harness = new();
+            SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+
+            await session.RunStepCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
+
+            session.HasTrimBounds.ShouldBeTrue();
+            session.TrimAppliedBoundsOrigin.ShouldBe(session.TrimContentBoundsOrigin);
+            session.TrimAppliedBoundsExtent.ShouldBe(session.TrimContentBoundsExtent);
+            session.TrimAppliedBoundsSize.ShouldBe(session.TrimContentBoundsSize);
+            session.TrimContentBoundsSize.ShouldBe("Size 5 × 5 px");
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     /// <summary>
@@ -652,30 +683,45 @@ public sealed class ReturnAndTrimControlsUiTests
     [Fact]
     public async Task The_bounds_follow_the_result_on_screen_across_a_retry()
     {
-        using HomeScreenHarness harness = new();
-        SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
+        CultureInfo previousUi = CultureInfo.CurrentUICulture;
+        CultureInfo previous = CultureInfo.CurrentCulture;
 
-        await session.RunStepCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
+        try
+        {
+            CultureInfo english = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.CurrentUICulture = english;
+            CultureInfo.CurrentCulture = english;
 
-        session.TrimAppliedBoundsSize.ShouldBe("Size 5 × 5 px");
-        string detected = session.TrimContentBoundsOrigin;
+            using HomeScreenHarness harness = new();
+            SessionViewModel session = await AtTrimAsync(harness, opaqueSource: false);
 
-        await session.RejectCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
-        await session.RetryCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
+            await session.RunStepCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
 
-        session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
-        session.UniformMarginText = "1";
-        await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+            session.TrimAppliedBoundsSize.ShouldBe("Size 5 × 5 px");
+            string detected = session.TrimContentBoundsOrigin;
 
-        await session.RunStepCommand.ExecuteAsync(null);
-        await session.PreviewsLoaded;
+            await session.RejectCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
+            await session.RetryCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
 
-        session.Notice.ShouldBeNull();
-        session.TrimAppliedBoundsSize.ShouldBe("Size 7 × 7 px");
-        session.TrimContentBoundsOrigin.ShouldBe(detected, "the margin did not move what was detected");
+            session.SelectedTrimMode = session.TrimModes.Single(m => m.Mode == TrimMode.UniformMargin);
+            session.UniformMarginText = "1";
+            await session.ApplyTrimMarginCommand.ExecuteAsync(null);
+
+            await session.RunStepCommand.ExecuteAsync(null);
+            await session.PreviewsLoaded;
+
+            session.Notice.ShouldBeNull();
+            session.TrimAppliedBoundsSize.ShouldBe("Size 7 × 7 px");
+            session.TrimContentBoundsOrigin.ShouldBe(detected, "the margin did not move what was detected");
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousUi;
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     // -----------------------------------------------------------------------------
