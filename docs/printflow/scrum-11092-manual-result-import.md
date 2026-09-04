@@ -102,3 +102,146 @@ The automated real-file, service, ViewModel and persistence tests verify the imp
 Started from accepted `bd0dbaf`. The original checkout contained an unrelated untracked `docs/ai-follow-smoke.md`, preserved untouched. Implementation uses a clean worktree at `D:\Repositories\printflow-manual-result-import`, branch `codex/manual-result-import`. Product and tests are committed as `65ee297` (`feat: add validated manual result re-entry for SCRUM-11092`). This report is recorded in a subsequent local documentation commit. New local commits only; no amend, rebase, push or attribution trailer.
 
 **BLOCKED — MANUAL PROCESSING RESULT RE-ENTRY NOT VERIFIED**
+
+---
+
+# SCRUM-11092-A closure — UI Automation accessibility and live proof
+
+Everything above is the record of the first attempt and is unchanged, including its **BLOCKED** desktop verdict and its final verdict line. This section is the follow-up slice that removed the blocker. Baseline for it is accepted `4111bd0`, same repository, `master`, same signed preset and Production adapters.
+
+## Root cause of the first blocker
+
+The first attempt concluded that keyboard navigation "stopped advancing focus on Session". That is not what was wrong. Measured against the *unmodified* application from the first attempt, before any change in this slice, Tab left Home, entered the recovered Session screen and reached Submit Manual Result in seven presses, then cycled:
+
+```text
+Window -> Re-enter Automation -> List -> Zoom out -> Zoom in -> Reset zoom -> List
+       -> Submit Manual Result -> Back to Home -> (repeats)
+```
+
+The Session focus graph was sound. Three things about the **automation client**, not the Product, produced the failure, and each fails silently rather than reporting an error:
+
+1. **Screenshot capture and coordinate input were unavailable** (`SetIsBorderRequired ... 0x80004002`, "coordinate input geometry is unavailable"). A driver that observes focus and acts through pixels therefore had no way to see that Tab was working, or to press anything.
+2. **A modal common file dialog does not appear under `AutomationElement.RootElement`** on this desktop. Submit Manual Result *did* open the real Windows dialog on the first attempt's own build — three of them were found still open, owned by the PrintFlow window, while UI Automation's tree enumeration reported the application as having exactly one top-level window. All three were closed through the dialog's own Cancel button by UI Automation, writing nothing; the seeded database was byte-identical afterwards.
+3. **Standard Win32 dialog controls expose no UI Automation patterns** until the client-side providers are registered. Without `ClientSettings.RegisterClientSideProviderAssembly`, the filename field and the Open button are `Pane` elements supporting nothing; with it they are a `ComboBox` with `ValuePattern` and a `Button` with `InvokePattern`.
+
+So the blocker was the way the application was being driven. The Product defects this slice did find are real, but different, and are listed next.
+
+## Product accessibility defects found and fixed
+
+| Defect | Evidence before | Change |
+|---|---|---|
+| No control on any screen carried an `AutomationId`, so a driver or assistive technology could only match localized text | every element reported `id=""` | 32 stable identities, listed below |
+| The application window announced itself as a view model class | UIA name `PrintFlow.App.ViewModels.HomeViewModel` / `...SessionViewModel`, while the Win32 title was correctly `PrintFlow Studio` | `AutomationProperties.Name` bound to the shell title on `MainWindow`, plus `PrintFlow.MainWindow` |
+| List rows announced view model classes | `PrintFlow.App.ViewModels.SessionStepRow`, `...RecentSessionRow`, `...ArtefactPreviewPane`, `...TrimModeChoice`, `...WhiteUnderbaseChoice` | each list names its generated container from the row's own localized text |
+| Display-only lists were tab stops with nothing to operate | the step list and the preview panes both took Tab focus | `IsTabStop="False"` on the step, preview, output and size-preset lists |
+
+The last two row-name leaks — `TrimModeChoice` and `WhiteUnderbaseChoice` — were found by the new automated test, not by inspection, after the first three had been fixed.
+
+No workflow, domain or persistence code was touched. The change is 142 inserted and 10 deleted lines across `MainWindow.xaml`, `HomeView.xaml` and `SessionScreenView.xaml`. `IFilePicker` / `OpenFileDialogPicker` already existed from the first slice, so the optional picker abstraction was not needed.
+
+### Automation identities
+
+```text
+PrintFlow.MainWindow     Screen.Home              Screen.Session
+Home.ShowEnvironment     Home.ChooseFile          Home.Refresh
+Home.RecentSessionList   Home.RecentSession       Home.ResumeSession       Home.AbandonSession
+Session.ConfirmOriginal  Session.RunStep          Session.Approve          Session.Reject
+Session.Retry            Session.Skip             Session.SubmitManualResult
+Session.HandOff          Session.Complete         Session.AddAnotherSize   Session.BackToHome
+Session.Stop             Session.TakeOver         Session.TakeOverConfirm  Session.TakeOverCancel
+Session.ReenterAutomation                         Session.BeginManualCrop
+Session.StepList         Session.PreviewPanes     Session.OutputList       Session.SizePresetList
+Session.TrimModes        Session.WhiteUnderbaseChoices
+```
+
+Every identity is an invariant string in the XAML; none is derived from localized text. Accessible names are bound to the same localized label the operator reads, so identity and wording move independently. The two Home row actions repeat once per session and are unique *within* a row: a driver selects the row by its accessible name — the operator's own output name — and then the action inside it.
+
+## Automated accessibility tests
+
+`tests/PrintFlow.Tests/Integration/Ui/SessionAccessibilityTests.cs`, nine rendered tests. They read `AutomationPeer`s built from elements that a real WPF measure and arrange pass produced, so a control present in XAML but never realised fails them; none of them searches XAML source text.
+
+- Every required identity reaches a rendered button, across five session states: waiting, computing, failed, in review, handed off.
+- No two simultaneously visible actions share an identity, in three states.
+- The identity set is unchanged between en-US and zh-CN while the wording changes.
+- `Session.SubmitManualResult` announces `Submit Manual Result` / `提交手动处理结果`.
+- No rendered element announces a type, class or resource name.
+- `Session.SubmitManualResult` is present, enabled and offers `InvokePattern` when eligible, and is **not rendered at all** when the session is still automated.
+- Invoking the rendered button through `IInvokeProvider` — never through `SubmitManualResultCommand` — runs the real command, calls the picker seam once, and persists a `ManualResultImport` attempt, Revision and `ReviewRequired`.
+- The tab stops include Submit Manual Result before Back to Home, and exclude the display-only lists.
+
+The tab-order test states its own limit honestly. A tree that was measured and arranged but never attached to a window has no focus scope, so `PredictFocus` and `MoveFocus` give up after one element. What the test asserts instead is the two things the route is made of — which elements are tab stops, and in what tree order — together with the absence of any `TabIndex` and of any `Cycle` or `Contained` keyboard-navigation mode that could reorder or confine traversal. The traversal itself is proven live, below.
+
+## The UI Automation driver
+
+`tests/PrintFlow.Tests/Fixtures/DesktopAutomation.cs` locates controls by `AutomationId`, control type and UIA pattern. It contains no pixel read, no coordinate and no fixed position.
+
+The file dialog is identified by **ownership**, which is what makes it safe as well as findable. Three facts must agree before a path is typed: the window belongs to the application's own process, it is owned by the application's own main window, and it was not present in the set of owned dialogs captured immediately before the action. It must then expose the documented common-dialog control ids — the filename field and the confirm button — as direct children. If any of that fails, the driver throws and touches nothing. Those control ids, rather than captions, are what let the same code drive the accepted zh-CN workstation, where the confirm button reads `打开(O)`.
+
+The path is set with `ValuePattern.SetValue`, read back, and the dialog confirmed with `InvokePattern.Invoke`. No keystroke is guessed.
+
+The keyboard walk refuses a route it cannot attribute: it waits for focus to be inside the application before starting, and fails if focus leaves mid-walk. This mattered — the first driven run recorded thirty stops belonging to another process, which said nothing about the Session screen. That run is not the record below.
+
+## Live proof
+
+Evidence directory: `D:\PrintFlowStudio\Evidence\SCRUM-11092A-live-uia-20260904`. The retained `PF_MANUAL_LIVE_A` / `PF_MANUAL_LIVE_B` sessions from the first attempt were audited first and were still valid — byte-identical database, loaded by the rebuilt application — and were driven successfully through the whole flow. That run is superseded here only because its keyboard-route record was not attributable; the sessions were reseeded with the committed seed harness so the authoritative record is clean. Synthetic files only; no customer artwork.
+
+A copy of the application published from this slice's source runs with Production adapters and the accepted preset; only its database location is redirected. Repository configuration is unchanged.
+
+Driven by `Drive_both_retained_sessions_through_the_real_session_screen`, opt-in through `PRINTFLOW_MANUAL_RESULT_DRIVE`. Transcript: `live-drive-transcript.txt`. Accessibility tree: `accessibility-tree.txt`.
+
+**Live A — reached by keyboard.** Tab entered the Session screen and reached Submit Manual Result in six presses, every stop inside the application:
+
+```text
+PrintFlow.MainWindow -> Session.ReenterAutomation -> <Button: 缩小> -> <Button: 放大>
+                     -> <Button: 重置缩放> -> Session.SubmitManualResult
+```
+
+Focus rested on `提交手动处理结果`, id `Session.SubmitManualResult`. **Space** opened the application's own file dialog. `PF_MANUAL_LIVE_A-manual.png` was chosen through it by `ValuePattern`, confirmed by `InvokePattern`, and the session moved to review. Then, through the real UI: Approve, Skip the next automated step, Run Step. The step that followed produced a different artefact (`F686CCC1A0D4`) from the manual result (`2B3067612ECE`).
+
+**Live B — reached by UI Automation.** `Session.SubmitManualResult` was found by identity: enabled, named `提交手动处理结果`, `InvokePattern` available. `InvokePattern.Invoke()` opened the real dialog, and `PF_MANUAL_LIVE_B-manual.png` was chosen the same way. It was left at `ReviewRequired` and **not approved**. The application was closed normally, restarted, and the session reopened: the same SHA-256 prefix `2B3067612ECE` on screen.
+
+No screenshot was taken and no coordinate was used. Every action above is an operation on a named control.
+
+## Independent verification
+
+`Verify_desktop_results_after_restart_and_authoritative_downstream_input`, unmodified, run afterwards in its own process against the evidence database with `PRINTFLOW_MANUAL_RESULT_VERIFY`: **passed**.
+
+```text
+PF_MANUAL_LIVE_A  session  01a06add-82fd-75a7-adec-ecc6a81bb48d
+                  attempt  01a06add-fb8b-74f8-8ee7-6696d2b60bfa
+                  revision 01a06add-fcad-77cb-bee1-38956484725c
+                  sha256   2B3067612ECE142CA48E2A98708E97685D1F10F30DA89A83188AC691B0D66A1D
+                  path     Sessions/S_20260904T052137Z_a81bb48d/Working/01a06add-.../PF_MANUAL_LIVE_A-manual.png
+PF_MANUAL_LIVE_B  session  01a06add-84f8-76ac-8fed-15610e71585b
+                  attempt  01a06ade-0ae2-7fae-8502-0daaf30a0035
+                  revision 01a06ade-0bc8-7436-9514-108af0d791d2
+                  sha256   2B3067612ECE142CA48E2A98708E97685D1F10F30DA89A83188AC691B0D66A1D
+                  state    ReviewRequired after restart, same revision id, hash and managed path
+```
+
+What it asserted, from persistence rather than from the screen: the manual Revision carries `ManualResultImport` and its attempt ended; the preceding Enhance attempt is still `Failed`; the managed bytes equal the external synthetic file, and the root Revision still equals the synthetic source; for A the manual Revision is approved, `UpstreamRevisionOf(BackgroundRemoval)` resolves to it, and a **Trim attempt exists whose `InputRevisionId` is that manual Revision**; for B the reloaded session is `ReviewRequired` on the same Revision id and hash; and the automation lock is not held.
+
+## Build and tests
+
+- Clean solution build: **0 warnings / 0 errors**, pinned .NET SDK 10.0.400.
+- Manual-result, migration, localisation and accessibility filter: **428 passed / 0 failed / 0 skipped** — the accepted 418, plus 9 new accessibility tests and the opt-in drive smoke.
+- Broader focused run, adding stop/take-over, session controls and view rendering: **532 passed / 0 failed / 0 skipped**.
+- Complete suite against final source: **10,866 total / 10,863 passed / 3 failed / 0 skipped**, 3m16s. Evidence: `tests/PrintFlow.Tests/TestResults/scrum-11092a-accessibility-full-suite.trx`.
+
+The three failures are **pre-existing and not caused by this slice**. They are `ReturnAndTrimControlsUiTests.A_tight_trim_states_the_same_rectangle_twice`, `.The_review_states_the_detected_and_applied_bounds_in_words` and `.The_bounds_follow_the_result_on_screen_across_a_retry`, which assert English wording — `"Size 5 × 5 px"`, `"Detected graphic bounds"` — without pinning a culture. This workstation's Windows UI language override is `zh-CN`, so the .NET test host resolves `CurrentUICulture` to zh-CN and they read `"尺寸 5 × 5 像素"` and `"检测到的图形范围"`. The same three failures were **reproduced on the accepted baseline with this slice's changes stashed**, which is how they were attributed. The accepted 10,856 / 0 baseline was therefore recorded under a different display language. They are not weakened, skipped or edited here: pinning their culture the way their neighbours in `MaximumBoundsRenderingTests` do would fix them, but that is an unrelated accepted test file and is left for a separate decision.
+
+One further failure, `ProductionMeituExportTests.A_successful_run_reports_the_source_and_output_facts_it_validated`, appeared in one full-suite run with `OutputUnreadable: the file's length was still changing`, and did not reproduce in isolation or in the following full run. It is a file-settle timing flake under full-suite load, of the same kind the first attempt recorded, and is not an assertion about this slice.
+
+Dependencies and the signed preset are unchanged. The desktop sandbox setting `[windows] sandbox_private_desktop = false` was not touched, and nothing in this slice depends on it.
+
+## Jira coverage delta
+
+**SCRUM-11092: PARTIAL → FULL.** The one thing the first attempt was waiting on — live synthetic re-entry through the real Product UI — is now proven and independently verified. Stop and Take Over are unchanged and remain safe; a manual result is imported through the real Session screen and the real Windows picker, both by keyboard and by UI Automation; it is explicitly reviewed; the following step demonstrably consumed the approved manual Revision as its input; automation never resumed mid-sequence, and re-entry stayed explicit. The AC's force-termination sentence remains answered by the accepted Epic 11300 Part D2B decision that PrintFlow never force-terminates Meitu — an adjudicated policy from before this slice, carried forward unchanged and not re-argued here.
+
+**SCRUM-11112: PARTIAL remains PARTIAL.** This slice widened nothing: manual result import is still Enhancement and Background Removal only, and general interrupted-attempt recovery across every adapter operation is still not certified. Accessibility work does not touch eligibility, and the eligibility tests assert that it did not.
+
+## Git state for this slice
+
+Repository `D:\Repositories\printflow-Studio`, branch `master`, started from accepted `4111bd0`. No worktree, no task branch, no alternate clone, no amend, rebase or push. Unrelated untracked files were left untouched and excluded from the commit.
+
+**PASS WITH NOTES — MANUAL PROCESSING RESULT RE-ENTRY VERIFIED**
