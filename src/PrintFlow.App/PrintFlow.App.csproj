@@ -9,7 +9,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <WindowsSdkPackageVersion>10.0.19041.57</WindowsSdkPackageVersion>
     <RootNamespace>PrintFlow.App</RootNamespace>
     <AssemblyName>PrintFlow.App</AssemblyName>
     <UseWPF>true</UseWPF>

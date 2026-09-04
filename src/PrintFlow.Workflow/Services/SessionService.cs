@@ -82,6 +82,7 @@ public sealed class SessionService : ISessionService
     private readonly IFileInspector _fileInspector;
     private readonly IMeituProcessor _meitu;
     private readonly IPhotoshopOutputProcessor _photoshop;
+    private readonly IPdfPreparationProcessor _pdf;
     private readonly ITrimProcessor _trim;
     private readonly IManualCropProcessor _manualCrop;
     private readonly IWorkstationPresetProvider _presetProvider;
@@ -128,7 +129,8 @@ public sealed class SessionService : ISessionService
         IWorkstationPresetProvider presetProvider,
         IEnvironmentGate environmentGate,
         IIdGenerator idGenerator,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IPdfPreparationProcessor? pdf = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -151,6 +153,7 @@ public sealed class SessionService : ISessionService
         _fileInspector = fileInspector;
         _meitu = meitu;
         _photoshop = photoshop;
+        _pdf = pdf ?? new UnavailablePdfPreparationProcessor();
         _trim = trim;
         _manualCrop = manualCrop;
         _presetProvider = presetProvider;
@@ -309,14 +312,19 @@ public sealed class SessionService : ISessionService
 
         // Legacy PSD sessions may already have acknowledged an opaque source under the old
         // workflow. Do not fabricate preparation metadata or continue their late-failure path.
-        if (snapshot.RequiresPsdPreparation && snapshot.Step(StepKind.OriginalConfirmation)?.CurrentRevisionId is null &&
+        if ((snapshot.RequiresPsdPreparation || snapshot.RequiresPdfPreparation) && snapshot.Step(StepKind.OriginalConfirmation)?.CurrentRevisionId is null &&
             (command is WorkflowCommand.SetPrintDimensions or WorkflowCommand.SetPresetFitSize or
                 WorkflowCommand.SetCustomTargetEdgeSize ||
              command is WorkflowCommand.StartStep { Step: not (StepKind.Import or StepKind.OriginalConfirmation) }))
         {
-            return OperationResult.Fail<SessionView>(FailureCode.PsdPreparationFailed,
-                "This PSD has no prepared raster. Return to Original Confirmation and prepare it before continuing.");
+            return OperationResult.Fail<SessionView>(snapshot.RequiresPdfPreparation ? FailureCode.PdfPreparationFailed : FailureCode.PsdPreparationFailed,
+                "This source document has no prepared raster. Return to Original Confirmation and prepare it before continuing.");
         }
+
+        if (command is WorkflowCommand.Retry && snapshot.RequiresPdfPreparation &&
+            aggregate.Attempts.LastOrDefault(a => a.Operation == OperationKind.PreparePdf)?.Failure is
+                { Code: FailureCode.PdfMultiplePages or FailureCode.PdfEncrypted or FailureCode.PdfUnreadable } refusal)
+            return OperationResult.Fail<SessionView>(refusal);
 
         // The half of manual-crop eligibility the pure engine cannot see, checked before the
         // command reaches it. Button visibility is not a guard: a crop asked for against an
@@ -741,7 +749,8 @@ public sealed class SessionService : ISessionService
         FileFacts Facts,
         string? AdapterNotes = null,
         TrimGeometry? TrimGeometry = null,
-        PsdInspection? PsdInspection = null);
+        PsdInspection? PsdInspection = null,
+        PdfInspection? PdfInspection = null);
 
     /// <summary>Reads the one producing effect out of a transition, or null when there is none.</summary>
     private ProducingWork? ProducingWorkOf(IReadOnlyList<WorkflowEffect> effects)
@@ -814,7 +823,8 @@ public sealed class SessionService : ISessionService
         IReadOnlyList<PrintOutput> outputs,
         IReadOnlyList<ProcessingAttempt> attempts)
     {
-        state = state with { RequiresPsdPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd) };
+        state = state with { RequiresPsdPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd),
+            RequiresPdfPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Pdf) };
         Guid? enlargementOfferId = null;
         if (state.UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } offered &&
             state.NeedsEnlargementAuthority)
@@ -1552,7 +1562,7 @@ public sealed class SessionService : ISessionService
 
         ProcessingAttempt succeededAttempt = runningAttempt.Succeed(
             revisionId, context.NowUtc, produced.AdapterNotes)
-            with { PsdInspection = produced.PsdInspection };
+            with { PsdInspection = produced.PsdInspection, PdfInspection = produced.PdfInspection };
 
         // The crop geometry joins the attempt in the same closing transaction as its status, its
         // Revision and the step's move to ReviewRequired — never as a later best-effort update
@@ -1766,6 +1776,31 @@ public sealed class SessionService : ISessionService
 
                 return await InspectAsync(
                     result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
+            }
+
+            case AdapterKind.Pdf:
+            {
+                WorkspaceFileRef destination = SiblingOf(workingCopy.Value, "prepared-pdf.png");
+                var prepared = await _pdf.PrepareAsync(new PdfPreparationRequest(workingCopy.Value, destination)
+                    { Stop = stop }, cancellationToken);
+                if (prepared.IsFailure) return OperationResult.Fail<StepWork>(prepared.Failure);
+                if (prepared.Value.ProducedFile != destination || prepared.Value.PdfInspection is not { } inspection ||
+                    !inspection.IsPreparedSinglePage)
+                    return OperationResult.Fail<StepWork>(FailureCode.PdfPreparationFailed,
+                        "PDF preparation returned no accepted single-page inspection or the wrong destination.");
+                var inspected = await InspectAsync(destination, cancellationToken, prepared.Value.AdapterNotes);
+                if (inspected.IsFailure)
+                    return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PdfPreparationFailed,
+                        inspected.Failure.TechnicalDetail, isRetryable: true) with { PdfInspection = inspection });
+                FileFacts facts = inspected.Value.Facts;
+                if (facts != prepared.Value.ValidatedPdfRaster || facts.Format != ImageFormat.Png || facts.ColourMode != ColourMode.Rgb ||
+                    facts.PixelWidth != inspection.PixelWidth || facts.PixelHeight != inspection.PixelHeight ||
+                    facts.DpiX is not { } dx || facts.DpiY is not { } dy || Math.Abs(dx - 300) > .02 || Math.Abs(dy - 300) > .02 ||
+                    (inspection.HasTransparency == true && facts.HasAlpha != true))
+                    return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PdfPreparationFailed,
+                        "The independently inspected raster differs from the PDF full-page 300-PPI contract.")
+                        with { PdfInspection = inspection });
+                return OperationResult.Ok(inspected.Value with { PdfInspection = inspection });
             }
 
             case AdapterKind.Photoshop:
@@ -2034,7 +2069,7 @@ public sealed class SessionService : ISessionService
         }
 
         ProcessingAttempt failedAttempt = runningAttempt.Fail(failure, context.NowUtc)
-            with { PsdInspection = failure.PsdInspection };
+            with { PsdInspection = failure.PsdInspection, PdfInspection = failure.PdfInspection };
         ProcessingSession updatedSession =
             MergeSession(aggregate.Session, failedTransition.State, failedTransition.Effects, context.NowUtc);
 
@@ -2107,7 +2142,7 @@ public sealed class SessionService : ISessionService
 
         ProcessingAttempt cancelledAttempt = runningAttempt.Cancel(
             failure, context.NowUtc, DescribeRetainedState(mode, stop, definition.IsAdapterBacked))
-            with { PsdInspection = adapterFailure?.PsdInspection };
+            with { PsdInspection = adapterFailure?.PsdInspection, PdfInspection = adapterFailure?.PdfInspection };
 
         WorkflowSnapshot state = stopped.State;
         List<WorkflowEffect> effects = [.. stopped.Effects];
@@ -2553,6 +2588,7 @@ public sealed class SessionService : ISessionService
         AdapterKind.None => "internal-promote-v1",
         AdapterKind.Meitu => _meitu.AdapterId,
         AdapterKind.Photoshop => _photoshop.AdapterId,
+        AdapterKind.Pdf => _pdf.AdapterId,
         AdapterKind.Internal => _trim.ProcessorId,
         _ => "unknown",
     };
@@ -2566,6 +2602,7 @@ public sealed class SessionService : ISessionService
     {
         AdapterKind.Meitu => _meitu.Mode,
         AdapterKind.Photoshop => _photoshop.Mode,
+        AdapterKind.Pdf => _pdf.Mode,
         _ => throw new InvalidOperationException(
             $"Adapter kind '{kind}' is not adapter-backed; it has no execution mode to gate."),
     };

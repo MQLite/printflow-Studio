@@ -9,7 +9,8 @@
   -->
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <WindowsSdkPackageVersion>10.0.19041.57</WindowsSdkPackageVersion>
     <RootNamespace>PrintFlow.Infrastructure</RootNamespace>
     <!--
       UseWPF is set for two reasons, both non-negotiable for this project's job and neither a

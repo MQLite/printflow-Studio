@@ -181,4 +181,9 @@ public enum FailureCode
     PsdUnreadable,
     /// <summary>PSD preparation did not produce a verified full-canvas raster.</summary>
     PsdPreparationFailed,
+
+    PdfUnreadable,
+    PdfEncrypted,
+    PdfMultiplePages,
+    PdfPreparationFailed,
 }

@@ -88,3 +88,4 @@ desktop.ini
 !src/PrintFlow.App/Assets/*.png
 !tests/PrintFlow.Tests/Fixtures/synthetic/
 !tests/PrintFlow.Tests/Fixtures/synthetic/*.png
+!tests/PrintFlow.Tests/Fixtures/Pdf/*.pdf

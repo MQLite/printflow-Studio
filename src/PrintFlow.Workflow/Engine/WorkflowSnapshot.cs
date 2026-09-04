@@ -44,8 +44,9 @@ public sealed record WorkflowSnapshot(
 {
     /// <summary>The definition this snapshot is being driven against.</summary>
     public bool RequiresPsdPreparation { get; init; }
+    public bool RequiresPdfPreparation { get; init; }
 
-    public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType, RequiresPsdPreparation);
+    public WorkflowDefinition Definition => WorkflowCatalog.For(WorkflowType, RequiresPsdPreparation, RequiresPdfPreparation);
 
     /// <summary>
     /// The margin the next deterministic Trim attempt will run with

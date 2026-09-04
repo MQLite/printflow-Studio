@@ -17,6 +17,9 @@ public enum AdapterKind
 
     /// <summary>Deterministic in-process image work: today, alpha-bound trimming.</summary>
     Internal,
+
+    /// <summary>Single-page PDF inspection and raster preparation.</summary>
+    Pdf,
 }
 
 /// <summary>
@@ -46,5 +49,5 @@ public sealed record StepDefinition(
     AdapterKind Adapter)
 {
     /// <summary>True when starting this step invokes an external application adapter.</summary>
-    public bool IsAdapterBacked => Adapter is AdapterKind.Meitu or AdapterKind.Photoshop;
+    public bool IsAdapterBacked => Adapter is AdapterKind.Meitu or AdapterKind.Photoshop or AdapterKind.Pdf;
 }

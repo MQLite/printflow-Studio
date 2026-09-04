@@ -16,6 +16,19 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Failure_PdfUnreadable => Get(nameof(Failure_PdfUnreadable));
+
+internal static string Failure_PdfEncrypted => Get(nameof(Failure_PdfEncrypted));
+
+internal static string Failure_PdfMultiplePages => Get(nameof(Failure_PdfMultiplePages));
+
+internal static string Failure_PdfPreparationFailed => Get(nameof(Failure_PdfPreparationFailed));
+
+internal static string Session_PreparePdf => Get(nameof(Session_PreparePdf));
+
+internal static string Session_PdfPending => Get(nameof(Session_PdfPending));
+
+internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Session_PreparePsd => Get(nameof(Session_PreparePsd));
     internal static string Session_PsdPending => Get(nameof(Session_PsdPending));
     internal static string Session_PsdPrepared => Get(nameof(Session_PsdPrepared));

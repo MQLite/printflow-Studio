@@ -627,6 +627,7 @@ public sealed record SessionView(
     FlexibleSizeView Sizing)
 {
     public ImageFormat? OriginalSourceFormat { get; init; }
+    public PdfInspection? PdfInspection { get; init; }
 
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
@@ -728,7 +729,7 @@ public sealed record SessionView(
     /// </remarks>
     public bool HasBeforeAfterComparison =>
         CurrentArtefact is { IsCurrentStepResult: true } && UpstreamArtefact is not null &&
-        UpstreamArtefact.Facts.Format != ImageFormat.Psd;
+        UpstreamArtefact.Facts.Format is not (ImageFormat.Psd or ImageFormat.Pdf);
 
     public static SessionView From(
         WorkflowSnapshot snapshot,
@@ -871,6 +872,7 @@ public sealed record SessionView(
                 snapshot, availableCommands, presetRecommendations, enlargementOfferId))
         {
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
+            PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
         };
     }
 

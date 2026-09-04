@@ -583,7 +583,7 @@ public sealed class MaximumBoundsBoundaryTests
     /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_psd_preparation_migration()
+    public void The_migration_set_ends_at_the_pdf_preparation_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -596,7 +596,7 @@ public sealed class MaximumBoundsBoundaryTests
 
         // SCRUM-11099 adds typed inspection/channel tables and widens Revision.Operation.
         // The documented rebuild preserves all existing rows, constraints, indexes and triggers.
-        scripts.Last().ShouldBe("0010_psd_preparation.sql");
+        scripts.Last().ShouldBe("0011_pdf_preparation.sql");
     }
 
     // -------------------------------------------------------------------------------------

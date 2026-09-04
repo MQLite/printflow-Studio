@@ -769,7 +769,16 @@ public sealed partial class SessionViewModel : ObservableObject
     public string ConfirmOriginalLabel => Strings.Session_ConfirmOriginal;
 
     public string RunStepLabel => _session is { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation }
-        ? Strings.Session_PreparePsd : Strings.Session_RunStep;
+        ? Strings.Session_PreparePsd
+        : _session is { OriginalSourceFormat: ImageFormat.Pdf, CurrentStep.Step: StepKind.OriginalConfirmation }
+            ? Strings.Session_PreparePdf : Strings.Session_RunStep;
+
+    public bool HasPdfSource => _session?.OriginalSourceFormat == ImageFormat.Pdf;
+    public string PdfSourceNotice => !HasPdfSource || _session?.CurrentStep?.Step != StepKind.OriginalConfirmation ? string.Empty
+        : _session is { CurrentArtefact.Facts.Format: ImageFormat.Png, PdfInspection: { IsPreparedSinglePage: true } pdf }
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Session_PdfPrepared,
+                pdf.PageWidthMillimetres, pdf.PageHeightMillimetres, pdf.PixelWidth, pdf.PixelHeight)
+            : Strings.Session_PdfPending;
 
     public bool HasPsdSource => _session?.OriginalSourceFormat == ImageFormat.Psd;
     public string PsdSourceNotice => HasPsdSource
@@ -1511,7 +1520,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool CanReject => Allows(CommandKind.Reject);
 
-    public bool CanRetry => Allows(CommandKind.Retry);
+    public bool CanRetry => Allows(CommandKind.Retry) && _session?.CurrentStepFailure is not
+        (FailureCode.PdfMultiplePages or FailureCode.PdfUnreadable or FailureCode.PdfEncrypted);
 
     public bool CanSkip => Allows(CommandKind.Skip);
 
@@ -3369,6 +3379,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
         OnPropertyChanged(nameof(HasArtefact));
         OnPropertyChanged(nameof(HasPsdSource));
+        OnPropertyChanged(nameof(HasPdfSource));
+        OnPropertyChanged(nameof(PdfSourceNotice));
         OnPropertyChanged(nameof(PsdSourceNotice));
         OnPropertyChanged(nameof(RunStepLabel));
         OnPropertyChanged(nameof(HasPreview));

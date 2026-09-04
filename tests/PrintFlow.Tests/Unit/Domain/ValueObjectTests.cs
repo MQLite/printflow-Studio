@@ -284,6 +284,7 @@ public sealed class ValueObjectTests
             "PhotoshopTargetLost", "PhotoshopUnknownState", "PhotoshopBlockingDialog",
             "PhotoshopOpenInputFailed", "PhotoshopDocumentIdentityUnconfirmed",
             "PsdUnsupported", "PsdCompositeMissing", "PsdUnreadable", "PsdPreparationFailed",
+            "PdfUnreadable", "PdfEncrypted", "PdfMultiplePages", "PdfPreparationFailed",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

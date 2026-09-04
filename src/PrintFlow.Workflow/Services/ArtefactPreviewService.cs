@@ -73,10 +73,10 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
                 $"Revision {revisionId} is not a Revision of session {sessionId}.");
         }
 
-        if (revision.Facts.Format == PrintFlow.Domain.Files.ImageFormat.Psd)
+        if (revision.Facts.Format is PrintFlow.Domain.Files.ImageFormat.Psd or PrintFlow.Domain.Files.ImageFormat.Pdf)
         {
-            return OperationResult.Fail<ImagePreview>(FailureCode.PsdPreparationFailed,
-                "Review the managed Photoshop-prepared raster; the PSD source is not a UI preview.");
+            return OperationResult.Fail<ImagePreview>(revision.Facts.Format == PrintFlow.Domain.Files.ImageFormat.Pdf ? FailureCode.PdfPreparationFailed : FailureCode.PsdPreparationFailed,
+                "Review the prepared managed raster; the original source document is not a UI preview.");
         }
         OperationResult<DecodedPreview> decoded = await _decoder.DecodeAsync(revision.File, cancellationToken);
         return decoded.IsFailure

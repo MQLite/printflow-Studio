@@ -16,6 +16,8 @@ public enum MeituOperation
 public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elapsed, string? AdapterNotes)
 {
     public PsdInspection? PsdInspection { get; init; }
+    public PdfInspection? PdfInspection { get; init; }
+    public FileFacts? ValidatedPdfRaster { get; init; }
 }
 
 public sealed record PsdPreparationRequest(WorkspaceFileRef Input, WorkspaceFileRef ExpectedOutput)

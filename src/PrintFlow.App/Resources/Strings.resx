@@ -107,7 +107,7 @@
     <value>Choose file…</value>
   </data>
   <data name="Home_ImportFilter" xml:space="preserve">
-    <value>Images|*.png;*.jpg;*.jpeg;*.tif;*.tiff;*.psd|All files|*.*</value>
+    <value>Images|*.png;*.jpg;*.jpeg;*.tif;*.tiff;*.psd;*.pdf|All files|*.*</value>
   </data>
   <data name="Home_RecentHeading" xml:space="preserve">
     <value>Recent processing</value>
@@ -755,4 +755,11 @@
   <data name="Session_PreparePsd" xml:space="preserve"><value>Prepare PSD for review</value></data>
   <data name="Session_PsdPending" xml:space="preserve"><value>Original source: PSD (preserved unchanged). Prepare its raster preview before review. Supported: RGB, 8-bit, with a Photoshop-compatible composite and no existing spot/white-ink channels.</value></data>
   <data name="Session_PsdPrepared" xml:space="preserve"><value>Original source: PSD (preserved unchanged). The displayed PNG is the managed raster representation prepared by Photoshop. Review this representation before continuing.</value></data>
+  <data name="Failure_PdfUnreadable" xml:space="preserve"><value>This PDF is damaged or unreadable. No prepared image was created. Import a readable single-page PDF.</value></data>
+  <data name="Failure_PdfEncrypted" xml:space="preserve"><value>Password-protected or encrypted PDFs are unsupported. No prepared image was created.</value></data>
+  <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>This PDF contains multiple pages. PrintFlow only accepts a single-page PDF for this workflow.</value></data>
+  <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available. Check the failure before retrying.</value></data>
+  <data name="Session_PreparePdf" xml:space="preserve"><value>Prepare PDF for review</value></data>
+  <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported.</value></data>
+  <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels). Print sizing follows review.</value></data>
 </root>

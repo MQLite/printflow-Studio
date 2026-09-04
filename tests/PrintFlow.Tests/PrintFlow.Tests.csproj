@@ -6,7 +6,8 @@
   -->
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <WindowsSdkPackageVersion>10.0.19041.57</WindowsSdkPackageVersion>
     <RootNamespace>PrintFlow.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
@@ -31,6 +32,7 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="Shouldly" />
+    <EmbeddedResource Include="Fixtures\Pdf\*.pdf" />
   </ItemGroup>
 
 </Project>

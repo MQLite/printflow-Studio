@@ -160,7 +160,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
         // so its result is carried across rather than discarded.
         WorkflowSnapshot reshaped = WorkflowSnapshot.Create(
             state.SessionId, command.Type, state.OutputName, context.NowUtc)
-            with { RequiresPsdPreparation = state.RequiresPsdPreparation };
+            with { RequiresPsdPreparation = state.RequiresPsdPreparation, RequiresPdfPreparation = state.RequiresPdfPreparation };
 
         SessionStep? importBefore = state.Step(StepKind.Import);
         if (importBefore is not null && importBefore.CurrentRevisionId is not null)
@@ -608,10 +608,10 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition ConfirmOriginal(
         WorkflowSnapshot state, WorkflowCommand.ConfirmOriginal command, CommandContext context)
     {
-        if (state.RequiresPsdPreparation)
+        if (state.RequiresPsdPreparation || state.RequiresPdfPreparation)
         {
             return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
-                "Prepare the PSD and review its managed raster before continuing.");
+                "Prepare the source document and review its managed raster before continuing.");
         }
         StepResolution resolved = Resolve(state, StepKind.OriginalConfirmation, CommandKind.ConfirmOriginal);
         if (resolved.Rejection is not null)

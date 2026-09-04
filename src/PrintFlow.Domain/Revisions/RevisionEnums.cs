@@ -26,6 +26,9 @@ public enum OperationKind
 
     /// <summary>Photoshop's full-canvas raster representation of an immutable PSD source.</summary>
     PreparePsd,
+
+    /// <summary>Full-page raster of an inspected single-page PDF source.</summary>
+    PreparePdf,
 }
 
 /// <summary>Why a Revision or PrintOutput stopped being valid.</summary>

@@ -19,4 +19,5 @@
 *.jpg binary
 *.tif binary
 *.psd binary
+*.pdf binary
 *.atn binary

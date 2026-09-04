@@ -146,14 +146,15 @@ public static class WorkflowCatalog
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown workflow type."),
     };
 
-    public static WorkflowDefinition For(WorkflowType type, bool preparePsd)
+    public static WorkflowDefinition For(WorkflowType type, bool preparePsd, bool preparePdf = false)
     {
         WorkflowDefinition definition = For(type);
-        return !preparePsd ? definition : definition with
+        return !preparePsd && !preparePdf ? definition : definition with
         {
             Steps = [.. definition.Steps.Select(step => step.Kind == StepKind.OriginalConfirmation
                 ? step with { ProducesRevision = true, RequiresReview = true,
-                    Operation = OperationKind.PreparePsd, Adapter = AdapterKind.Photoshop }
+                    Operation = preparePdf ? OperationKind.PreparePdf : OperationKind.PreparePsd,
+                    Adapter = preparePdf ? AdapterKind.Pdf : AdapterKind.Photoshop }
                 : step)],
         };
     }
