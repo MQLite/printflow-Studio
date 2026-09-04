@@ -100,6 +100,7 @@ internal static class Mappers
 
     public static string ToText(OperationKind value) => value switch
     {
+        OperationKind.PreparePsd => "PREPARE_PSD",
         OperationKind.Import => "IMPORT",
         OperationKind.Enhance => "ENHANCE",
         OperationKind.RemoveBackground => "REMOVE_BACKGROUND",
@@ -112,6 +113,7 @@ internal static class Mappers
 
     public static OperationKind ToOperationKind(string text) => text switch
     {
+        "PREPARE_PSD" => OperationKind.PreparePsd,
         "IMPORT" => OperationKind.Import,
         "ENHANCE" => OperationKind.Enhance,
         "REMOVE_BACKGROUND" => OperationKind.RemoveBackground,

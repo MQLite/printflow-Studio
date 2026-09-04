@@ -208,6 +208,9 @@
                        Visibility="{Binding IsHandedOff, Converter={StaticResource BoolToVisibility}}" />
 
             <!-- The error surface: a localised sentence and a stable code, never a trace (§15). -->
+            <TextBlock Text="{Binding PsdSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
+                       Visibility="{Binding HasPsdSource, Converter={StaticResource BoolToVisibility}}" />
+
             <TextBlock Text="{Binding Notice}"
                        TextWrapping="Wrap"
                        FontWeight="SemiBold"

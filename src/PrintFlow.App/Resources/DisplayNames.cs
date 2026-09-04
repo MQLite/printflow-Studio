@@ -96,6 +96,10 @@ internal static class DisplayNames
     /// </remarks>
     internal static string Failure(FailureCode code) => code switch
     {
+        FailureCode.PsdUnsupported => Strings.Failure_PsdUnsupported,
+        FailureCode.PsdCompositeMissing => Strings.Failure_PsdCompositeMissing,
+        FailureCode.PsdUnreadable => Strings.Failure_PsdUnreadable,
+        FailureCode.PsdPreparationFailed => Strings.Failure_PsdPreparationFailed,
         FailureCode.OutputMissing => Strings.Failure_OutputMissing,
         FailureCode.OutputUnreadable => Strings.Failure_OutputUnreadable,
         FailureCode.OutputValidationFailed => Strings.Failure_OutputValidationFailed,

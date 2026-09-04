@@ -307,6 +307,17 @@ public sealed class SessionService : ISessionService
         WorkflowSnapshot snapshot = aggregate.ToSnapshot(ConfiguredRecommendations());
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
+        // Legacy PSD sessions may already have acknowledged an opaque source under the old
+        // workflow. Do not fabricate preparation metadata or continue their late-failure path.
+        if (snapshot.RequiresPsdPreparation && snapshot.Step(StepKind.OriginalConfirmation)?.CurrentRevisionId is null &&
+            (command is WorkflowCommand.SetPrintDimensions or WorkflowCommand.SetPresetFitSize or
+                WorkflowCommand.SetCustomTargetEdgeSize ||
+             command is WorkflowCommand.StartStep { Step: not (StepKind.Import or StepKind.OriginalConfirmation) }))
+        {
+            return OperationResult.Fail<SessionView>(FailureCode.PsdPreparationFailed,
+                "This PSD has no prepared raster. Return to Original Confirmation and prepare it before continuing.");
+        }
+
         // The half of manual-crop eligibility the pure engine cannot see, checked before the
         // command reaches it. Button visibility is not a guard: a crop asked for against an
         // unrelated Trim failure, or against a rejected deterministic trim, is refused here even
@@ -729,7 +740,8 @@ public sealed class SessionService : ISessionService
         WorkspaceFileRef Output,
         FileFacts Facts,
         string? AdapterNotes = null,
-        TrimGeometry? TrimGeometry = null);
+        TrimGeometry? TrimGeometry = null,
+        PsdInspection? PsdInspection = null);
 
     /// <summary>Reads the one producing effect out of a transition, or null when there is none.</summary>
     private ProducingWork? ProducingWorkOf(IReadOnlyList<WorkflowEffect> effects)
@@ -741,7 +753,7 @@ public sealed class SessionService : ISessionService
                 case WorkflowEffect.RunAdapter run:
                     return new ProducingWork(
                         run.AttemptId, run.Step, run.Adapter, run.Operation, run.InputRevision,
-                        AdapterIdFor(run.Adapter), ManualCrop: null);
+                        run.Operation == OperationKind.PreparePsd ? _photoshop.PsdPreparationAdapterId : AdapterIdFor(run.Adapter), ManualCrop: null);
 
                 case WorkflowEffect.RunManualCrop crop:
                     // The processor's own identity, asked for rather than hard-coded, so the
@@ -802,6 +814,7 @@ public sealed class SessionService : ISessionService
         IReadOnlyList<PrintOutput> outputs,
         IReadOnlyList<ProcessingAttempt> attempts)
     {
+        state = state with { RequiresPsdPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd) };
         Guid? enlargementOfferId = null;
         if (state.UsableTargetEdgePlan is { RequiresEnlargementAuthority: true } offered &&
             state.NeedsEnlargementAuthority)
@@ -1538,7 +1551,8 @@ public sealed class SessionService : ISessionService
         }
 
         ProcessingAttempt succeededAttempt = runningAttempt.Succeed(
-            revisionId, context.NowUtc, produced.AdapterNotes);
+            revisionId, context.NowUtc, produced.AdapterNotes)
+            with { PsdInspection = produced.PsdInspection };
 
         // The crop geometry joins the attempt in the same closing transaction as its status, its
         // Revision and the step's move to ReviewRequired — never as a later best-effort update
@@ -1756,6 +1770,45 @@ public sealed class SessionService : ISessionService
 
             case AdapterKind.Photoshop:
             {
+                if (work.Operation == OperationKind.PreparePsd)
+                {
+                    WorkspaceFileRef destination = SiblingOf(workingCopy.Value, "prepared-psd.png");
+                    OperationResult<AdapterOutput> prepared = await _photoshop.PreparePsdAsync(
+                        new PsdPreparationRequest(workingCopy.Value, destination) { Stop = stop }, cancellationToken);
+                    if (prepared.IsFailure)
+                    {
+                        return OperationResult.Fail<StepWork>(prepared.Failure);
+                    }
+
+                    if (prepared.Value.ProducedFile != destination || prepared.Value.PsdInspection is not { } inspection)
+                    {
+                        return OperationResult.Fail<StepWork>(FailureCode.PsdPreparationFailed,
+                            "PSD preparation returned no inspection or the wrong output destination.");
+                    }
+
+                    OperationResult<StepWork> inspected = await InspectAsync(destination, cancellationToken,
+                        prepared.Value.AdapterNotes);
+                    if (inspected.IsFailure)
+                    {
+                        return OperationResult.Fail<StepWork>(inspected.Failure with { PsdInspection = inspection });
+                    }
+
+                    FileFacts facts = inspected.Value.Facts;
+                    if (facts.Format != ImageFormat.Png || facts.ColourMode != ColourMode.Rgb ||
+                        facts.PixelWidth != inspection.PixelWidth || facts.PixelHeight != inspection.PixelHeight ||
+                        !inspection.HasRealMergedData || inspection.OriginalMode != "RGB" || inspection.BitDepth != 8 ||
+                        inspection.HasSpots || inspection.HasW1 ||
+                        inspection.HasTransparency is null ||
+                        (inspection.HasTransparency == true && facts.HasAlpha != true))
+                    {
+                        return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PsdPreparationFailed,
+                            "The prepared PSD raster did not independently match the accepted full-canvas RGB/8 contract.")
+                            with { PsdInspection = inspection });
+                    }
+
+                    return OperationResult.Ok(inspected.Value with { PsdInspection = inspection });
+                }
+
                 if (state.Dimensions is not { } dimensions)
                 {
                     return OperationResult.Fail<StepWork>(
@@ -1980,7 +2033,8 @@ public sealed class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(failedTransition.Rejection!));
         }
 
-        ProcessingAttempt failedAttempt = runningAttempt.Fail(failure, context.NowUtc);
+        ProcessingAttempt failedAttempt = runningAttempt.Fail(failure, context.NowUtc)
+            with { PsdInspection = failure.PsdInspection };
         ProcessingSession updatedSession =
             MergeSession(aggregate.Session, failedTransition.State, failedTransition.Effects, context.NowUtc);
 
@@ -2052,7 +2106,8 @@ public sealed class SessionService : ISessionService
         }
 
         ProcessingAttempt cancelledAttempt = runningAttempt.Cancel(
-            failure, context.NowUtc, DescribeRetainedState(mode, stop, definition.IsAdapterBacked));
+            failure, context.NowUtc, DescribeRetainedState(mode, stop, definition.IsAdapterBacked))
+            with { PsdInspection = adapterFailure?.PsdInspection };
 
         WorkflowSnapshot state = stopped.State;
         List<WorkflowEffect> effects = [.. stopped.Effects];

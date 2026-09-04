@@ -16,6 +16,13 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_PreparePsd => Get(nameof(Session_PreparePsd));
+    internal static string Session_PsdPending => Get(nameof(Session_PsdPending));
+    internal static string Session_PsdPrepared => Get(nameof(Session_PsdPrepared));
+    internal static string Failure_PsdUnsupported => Get(nameof(Failure_PsdUnsupported));
+    internal static string Failure_PsdCompositeMissing => Get(nameof(Failure_PsdCompositeMissing));
+    internal static string Failure_PsdUnreadable => Get(nameof(Failure_PsdUnreadable));
+    internal static string Failure_PsdPreparationFailed => Get(nameof(Failure_PsdPreparationFailed));
     private static readonly ResourceManager Manager =
         new("PrintFlow.App.Resources.Strings", typeof(Strings).Assembly);
 

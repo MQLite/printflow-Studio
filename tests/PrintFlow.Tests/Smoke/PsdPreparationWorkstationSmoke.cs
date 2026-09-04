@@ -1,0 +1,105 @@
+using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Composition;
+using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Revisions;
+using PrintFlow.Domain.Sessions;
+using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Sqlite;
+using PrintFlow.Tests.Integration.Ui;
+using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
+using Xunit.Abstractions;
+
+namespace PrintFlow.Tests.Smoke;
+
+public sealed class PsdPreparationWorkstationSmoke(ITestOutputHelper output)
+{
+    [Theory]
+    [InlineData("rgb")]
+    [InlineData("transparent")]
+    [InlineData("no-composite")]
+    [InlineData("w1")]
+    [InlineData("cmyk")]
+    public async Task Accepted_production_prepares_synthetic_PSD_and_returns_clean(string variant)
+    {
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_PSD_PREPARATION_SMOKE") != "1") return;
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_PSD_CASE") is { } selected && selected != variant) return;
+        DirectoryInfo? repo = new(AppContext.BaseDirectory);
+        while (repo is not null && !File.Exists(Path.Combine(repo.FullName, "PrintFlowStudio.sln"))) repo = repo.Parent;
+        var configuration = PrintFlowConfiguration.LoadFromFile(Path.Combine(repo!.FullName, "appsettings.json"));
+        configuration.Adapters.Mode.ShouldBe("Production");
+        string qa = Path.Combine(configuration.Workspace.Root, "Evidence", "SCRUM-11099-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(qa);
+        output.WriteLine("Evidence workspace: " + qa);
+        var factory = new SqliteConnectionFactory(Path.Combine(qa, "psd-smoke.db"));
+        using (var connection = factory.Open()) MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        using var provider = ServiceRegistration.BuildServiceProvider(configuration, configuration.Workspace.Root, factory);
+        var gate = provider.GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production);
+        output.WriteLine("VerifiedEnvironmentGate: " + (gate.IsSuccess ? "ALLOWED" : gate.Failure.ToString()));
+        gate.IsSuccess.ShouldBeTrue(gate.IsFailure ? gate.Failure.ToString() : "");
+        var processor = provider.GetRequiredService<IPhotoshopOutputProcessor>().ShouldBeOfType<ProductionPhotoshopOutputProcessor>();
+        var before = await processor.EnsureReadyAsync(CancellationToken.None);
+        before.IsSuccess.ShouldBeTrue(before.IsFailure ? before.Failure.ToString() : "");
+        output.WriteLine("Photoshop starting state: " + before.Value.State.State);
+        (before.Value.State.State is PhotoshopStartingState.KnownStartScreen or PhotoshopStartingState.KnownEditorNoDocument)
+            .ShouldBeTrue("The controlled smoke requires an accepted clean Photoshop starting state.");
+        var service = provider.GetRequiredService<ISessionService>();
+        var repository = provider.GetRequiredService<ISessionRepository>();
+        byte[] bytes = PsdInputPreparationTests.RgbCompositePsd(variant == "transparent", variant == "w1");
+        if (variant == "no-composite") bytes[50] = 0;
+        if (variant == "cmyk") { bytes[13] = 4; bytes[25] = 4; bytes = [.. bytes, .. new byte[12]]; }
+        string source = Path.Combine(qa, "PF_SCRUM11099_" + variant + ".psd");
+        File.WriteAllBytes(source, bytes);
+        var imported = await service.ImportAsync(WorkflowType.GeneratePrintTiff, source, null, "synthetic-qa", CancellationToken.None);
+        imported.IsSuccess.ShouldBeTrue();
+        output.WriteLine("Session: " + imported.Value.Id);
+        var prepared = await service.ExecuteAsync(imported.Value.Id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation), "synthetic-qa", CancellationToken.None);
+        output.WriteLine("Preparation: " + (prepared.IsSuccess ? "SUCCEEDED" : prepared.Failure.ToString()));
+        (await repository.GetAutomationLockAsync(CancellationToken.None)).Value.IsHeld.ShouldBeFalse();
+        output.WriteLine("Automation lock: free");
+        File.ReadAllBytes(source).ShouldBe(bytes);
+        if (variant == "no-composite")
+        {
+            prepared.IsFailure.ShouldBeTrue();
+            prepared.Failure.Code.ShouldBe(PrintFlow.Domain.Results.FailureCode.PsdCompositeMissing);
+            (await repository.LoadAsync(imported.Value.Id, CancellationToken.None)).Value!.Revisions.Count.ShouldBe(1);
+            output.WriteLine("No-composite source refused before Photoshop open; no prepared Revision.");
+            return;
+        }
+        if (variant is "w1" or "cmyk")
+        {
+            prepared.IsFailure.ShouldBeTrue();
+            prepared.Failure.Code.ShouldBe(PrintFlow.Domain.Results.FailureCode.PsdUnsupported);
+            var refused = (await repository.LoadAsync(imported.Value.Id, CancellationToken.None)).Value!;
+            refused.Revisions.Count.ShouldBe(1);
+            var facts = refused.Attempts.Single(a => a.Operation == OperationKind.PreparePsd).PsdInspection!;
+            output.WriteLine("Refused inspection: " + System.Text.Json.JsonSerializer.Serialize(facts));
+            if (variant == "w1") { facts.HasSpots.ShouldBeTrue(); facts.HasW1.ShouldBeTrue(); }
+            else facts.OriginalMode.ShouldBe("CMYK");
+            var clean = await processor.EnsureReadyAsync(CancellationToken.None);
+            clean.IsSuccess.ShouldBeTrue();
+            clean.Value.State.State.ShouldBe(before.Value.State.State);
+            output.WriteLine("Unsupported PSD refused; no prepared Revision; Photoshop clean.");
+            return;
+        }
+        prepared.IsSuccess.ShouldBeTrue(prepared.IsFailure ? prepared.Failure.ToString() : "");
+        var state = (await repository.LoadAsync(imported.Value.Id, CancellationToken.None)).Value!;
+        var root = state.Revisions.Single(r => r.IsRoot);
+        var raster = state.Revisions.Single(r => r.Operation == OperationKind.PreparePsd);
+        var attempt = state.Attempts.Single(a => a.Operation == OperationKind.PreparePsd);
+        output.WriteLine($"Source: {root.Id} / {root.Sha256}");
+        output.WriteLine($"Raster: {raster.Id} / {raster.Sha256} / {raster.Facts.PixelWidth}x{raster.Facts.PixelHeight}");
+        output.WriteLine("Inspection: " + System.Text.Json.JsonSerializer.Serialize(attempt.PsdInspection));
+        attempt.PsdInspection!.HasTransparency.ShouldBe(variant == "transparent");
+        output.WriteLine("Adapter: " + attempt.AdapterId + " / " + attempt.AdapterNotes);
+        state.ToSnapshot().CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        var after = await processor.EnsureReadyAsync(CancellationToken.None);
+        after.IsSuccess.ShouldBeTrue(after.IsFailure ? after.Failure.ToString() : "");
+        output.WriteLine("Photoshop final state: " + after.Value.State.State);
+        after.Value.State.State.ShouldBe(before.Value.State.State);
+        output.WriteLine("Smoke ends at prepared-raster review. No TIFF production was run.");
+    }
+}

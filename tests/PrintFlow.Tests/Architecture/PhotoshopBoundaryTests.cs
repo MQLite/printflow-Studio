@@ -223,8 +223,13 @@ public sealed class PhotoshopBoundaryTests
             .Select(Path.GetFileName)
             .ToList()!;
 
-        saveCallFiles.ShouldBe(["PhotoshopTiffNativeBridge.cs"]);
-        string native = File.ReadAllText(Path.Combine(directory, saveCallFiles[0]));
+        saveCallFiles.ShouldBe(["PhotoshopPsdNativeBridge.cs", "PhotoshopTiffNativeBridge.cs"], ignoreOrder: true);
+        string psd = File.ReadAllText(Path.Combine(directory, "PhotoshopPsdNativeBridge.cs"));
+        psd.ShouldContain("new PNGSaveOptions()");
+        psd.ShouldNotContain("TiffSaveOptions");
+        psd.ShouldNotContain("source.saveAs(");
+        psd.ShouldNotContain(".flatten(");
+        string native = File.ReadAllText(Path.Combine(directory, "PhotoshopTiffNativeBridge.cs"));
         Regex.Matches(native, Regex.Escape("doc.saveAs("), RegexOptions.None,
             TimeSpan.FromSeconds(5)).Count.ShouldBe(1);
         native.ShouldContain("doc.saveAs(output, options, true, Extension.LOWERCASE);");
@@ -362,7 +367,8 @@ public sealed class PhotoshopBoundaryTests
 
         creators.ShouldNotBeEmpty();
         creators.ShouldAllBe(method => method.GetParameters()
-            .Any(parameter => parameter.ParameterType == typeof(PhotoshopValidatedTiffCandidate)));
+            .Any(parameter => parameter.ParameterType == (method.Name == "CreatePsd"
+                ? typeof(PhotoshopValidatedPsdCandidate) : typeof(PhotoshopValidatedTiffCandidate))));
     }
 
     // -----------------------------------------------------------------------------------

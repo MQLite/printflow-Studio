@@ -13,7 +13,15 @@ public enum MeituOperation
 }
 
 /// <summary>A validated file an adapter produced.</summary>
-public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elapsed, string? AdapterNotes);
+public sealed record AdapterOutput(WorkspaceFileRef ProducedFile, TimeSpan Elapsed, string? AdapterNotes)
+{
+    public PsdInspection? PsdInspection { get; init; }
+}
+
+public sealed record PsdPreparationRequest(WorkspaceFileRef Input, WorkspaceFileRef ExpectedOutput)
+{
+    public IAutomationStopSignal Stop { get; init; } = InertAutomationStopSignal.Instance;
+}
 
 /// <summary>What the Meitu adapter is asked to do.</summary>
 public sealed record MeituRequest(
@@ -107,14 +115,21 @@ public interface IMeituProcessor
 }
 
 /// <summary>
-/// Production TIFF generation (MVP design §16.2).
+/// Photoshop input preparation and production TIFF generation (MVP design §16.2).
 /// </summary>
 /// <remarks>
-/// No implementation exists in Epic 11100 Part 1. Real Photoshop automation is Epic 11400.
-/// Nothing in this Epic launches, focuses, reads or scripts Photoshop.
+/// Both operations use the same execution mode and workstation trust boundary. Preparation
+/// carries no production-sizing or white-ink decision and cannot create a production TIFF.
 /// </remarks>
 public interface IPhotoshopOutputProcessor
 {
+    string PsdPreparationAdapterId => AdapterId + "/psd-preparation-v1";
+
+    Task<OperationResult<AdapterOutput>> PreparePsdAsync(
+        PsdPreparationRequest request, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<AdapterOutput>(FailureCode.PsdUnsupported,
+            "PSD preparation is unavailable in this adapter. No raster was produced."));
+
     string AdapterId { get; }
 
     /// <summary>Whether this is a deterministic local double or real automation; consulted by <see cref="IEnvironmentGate"/>.</summary>

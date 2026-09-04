@@ -159,7 +159,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
         // Re-shape the session onto the new definition. Import may already have completed,
         // so its result is carried across rather than discarded.
         WorkflowSnapshot reshaped = WorkflowSnapshot.Create(
-            state.SessionId, command.Type, state.OutputName, context.NowUtc);
+            state.SessionId, command.Type, state.OutputName, context.NowUtc)
+            with { RequiresPsdPreparation = state.RequiresPsdPreparation };
 
         SessionStep? importBefore = state.Step(StepKind.Import);
         if (importBefore is not null && importBefore.CurrentRevisionId is not null)
@@ -607,6 +608,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
     private static WorkflowTransition ConfirmOriginal(
         WorkflowSnapshot state, WorkflowCommand.ConfirmOriginal command, CommandContext context)
     {
+        if (state.RequiresPsdPreparation)
+        {
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Prepare the PSD and review its managed raster before continuing.");
+        }
         StepResolution resolved = Resolve(state, StepKind.OriginalConfirmation, CommandKind.ConfirmOriginal);
         if (resolved.Rejection is not null)
         {

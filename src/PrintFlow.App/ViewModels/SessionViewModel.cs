@@ -768,7 +768,13 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string ConfirmOriginalLabel => Strings.Session_ConfirmOriginal;
 
-    public string RunStepLabel => Strings.Session_RunStep;
+    public string RunStepLabel => _session is { OriginalSourceFormat: ImageFormat.Psd, CurrentStep.Step: StepKind.OriginalConfirmation }
+        ? Strings.Session_PreparePsd : Strings.Session_RunStep;
+
+    public bool HasPsdSource => _session?.OriginalSourceFormat == ImageFormat.Psd;
+    public string PsdSourceNotice => HasPsdSource
+        ? (_session?.CurrentArtefact?.Facts.Format == ImageFormat.Psd ? Strings.Session_PsdPending : Strings.Session_PsdPrepared)
+        : string.Empty;
 
     /// <summary>
     /// Whether the artefact currently under review is the production TIFF
@@ -2863,9 +2869,11 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
+        if (current.Facts.Format == ImageFormat.Psd) return;
+
         List<ArtefactPreviewPane> loaded = [];
 
-        if (session.UpstreamArtefact is { } upstream)
+        if (session.UpstreamArtefact is { } upstream && upstream.Facts.Format != ImageFormat.Psd)
         {
             loaded.Add(await BuildPaneAsync(
                 session.Id, BeforeLabel, upstream, cancellationToken).ConfigureAwait(true));
@@ -3360,6 +3368,9 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasOutputs));
 
         OnPropertyChanged(nameof(HasArtefact));
+        OnPropertyChanged(nameof(HasPsdSource));
+        OnPropertyChanged(nameof(PsdSourceNotice));
+        OnPropertyChanged(nameof(RunStepLabel));
         OnPropertyChanged(nameof(HasPreview));
         OnPropertyChanged(nameof(IsManualCropRequired));
         OnPropertyChanged(nameof(CanManualCrop));

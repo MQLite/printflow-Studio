@@ -748,4 +748,11 @@
   <data name="Environment_RefreshScope" xml:space="preserve">
     <value>Check again re-reads what can change while PrintFlow runs: the desktop session, the display configuration, the Windows display language and the working folder. The accepted files listed above are read once per run and are not re-read here.</value>
   </data>
+  <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>This PSD has no verified compatible composite. Save a copy in Photoshop with Maximize Compatibility enabled, then import that copy.</value></data>
+  <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved; review the failure before retrying.</value></data>
+  <data name="Failure_PsdUnreadable" xml:space="preserve"><value>The PSD is corrupt or unreadable. No prepared image was created.</value></data>
+  <data name="Failure_PsdUnsupported" xml:space="preserve"><value>This PSD cannot be prepared automatically. Use RGB 8-bit with no existing spot or white-ink channels. Existing ink channels require an operator decision.</value></data>
+  <data name="Session_PreparePsd" xml:space="preserve"><value>Prepare PSD for review</value></data>
+  <data name="Session_PsdPending" xml:space="preserve"><value>Original source: PSD (preserved unchanged). Prepare its raster preview before review. Supported: RGB, 8-bit, with a Photoshop-compatible composite and no existing spot/white-ink channels.</value></data>
+  <data name="Session_PsdPrepared" xml:space="preserve"><value>Original source: PSD (preserved unchanged). The displayed PNG is the managed raster representation prepared by Photoshop. Review this representation before continuing.</value></data>
 </root>

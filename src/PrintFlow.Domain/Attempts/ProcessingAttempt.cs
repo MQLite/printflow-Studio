@@ -76,6 +76,8 @@ public sealed record ProcessingAttempt(
     AttemptId? RetryOfAttemptId,
     int RetrySequence)
 {
+    public PrintFlow.Domain.Files.PsdInspection? PsdInspection { get; init; }
+
     /// <summary>Starts an attempt. The output Revision, if any, is attached on success.</summary>
     public static ProcessingAttempt Start(
         AttemptId id,

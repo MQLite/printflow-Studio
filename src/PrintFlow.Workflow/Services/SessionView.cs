@@ -626,6 +626,8 @@ public sealed record SessionView(
     PrintPreparationAttemptView? AttemptPreparation,
     FlexibleSizeView Sizing)
 {
+    public ImageFormat? OriginalSourceFormat { get; init; }
+
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
 
@@ -725,7 +727,8 @@ public sealed record SessionView(
     /// (§17).
     /// </remarks>
     public bool HasBeforeAfterComparison =>
-        CurrentArtefact is { IsCurrentStepResult: true } && UpstreamArtefact is not null;
+        CurrentArtefact is { IsCurrentStepResult: true } && UpstreamArtefact is not null &&
+        UpstreamArtefact.Facts.Format != ImageFormat.Psd;
 
     public static SessionView From(
         WorkflowSnapshot snapshot,
@@ -865,7 +868,10 @@ public sealed record SessionView(
             // reads. Nothing here is a second opinion: the UI is told what was decided and what
             // may be decided next, and calculates none of it (Part B1A.2D §28).
             FlexibleSizeView.From(
-                snapshot, availableCommands, presetRecommendations, enlargementOfferId));
+                snapshot, availableCommands, presetRecommendations, enlargementOfferId))
+        {
+            OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
+        };
     }
 
     /// <summary>

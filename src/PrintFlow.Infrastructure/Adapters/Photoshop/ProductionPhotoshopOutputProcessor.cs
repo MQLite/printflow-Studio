@@ -35,7 +35,7 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// adapter neither consults nor bypasses the gate; it declares what it is and lets
 /// <c>SessionService</c> apply the gate before calling.
 /// </remarks>
-public sealed class ProductionPhotoshopOutputProcessor :
+public sealed partial class ProductionPhotoshopOutputProcessor :
     IPhotoshopOutputProcessor,
     IPhotoshopTiffAutomation
 {

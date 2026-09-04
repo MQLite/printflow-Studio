@@ -283,6 +283,7 @@ public sealed class ValueObjectTests
             "PhotoshopNotInstalled", "PhotoshopLaunchFailed", "PhotoshopWindowNotFound",
             "PhotoshopTargetLost", "PhotoshopUnknownState", "PhotoshopBlockingDialog",
             "PhotoshopOpenInputFailed", "PhotoshopDocumentIdentityUnconfirmed",
+            "PsdUnsupported", "PsdCompositeMissing", "PsdUnreadable", "PsdPreparationFailed",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

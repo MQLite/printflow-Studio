@@ -17,6 +17,8 @@ public sealed record OperationFailure(
     IReadOnlyDictionary<string, string> Context,
     bool IsRetryable)
 {
+    public PrintFlow.Domain.Files.PsdInspection? PsdInspection { get; init; }
+
     private static readonly IReadOnlyDictionary<string, string> NoContext =
         new Dictionary<string, string>(0);
 

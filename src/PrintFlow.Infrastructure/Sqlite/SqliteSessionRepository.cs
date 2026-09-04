@@ -55,6 +55,8 @@ public sealed class SqliteSessionRepository : ISessionRepository
 
         IEnumerable<AttemptRow> attemptRows = await connection.QueryAsync<AttemptRow>(
             "SELECT * FROM ProcessingAttempt WHERE SessionId = @sessionId ORDER BY StartedAtUtc;", new { sessionId });
+        IReadOnlyList<ProcessingAttempt> attempts = await PsdInspectionStorage.LoadAsync(
+            connection, attemptRows.Select(Mappers.ToDomain).ToList());
 
         IEnumerable<ReviewRow> reviewRows = await connection.QueryAsync<ReviewRow>(
             "SELECT * FROM ReviewDecision WHERE SessionId = @sessionId ORDER BY DecidedAtUtc;", new { sessionId });
@@ -67,7 +69,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
             snapshotRow is null ? null : Mappers.ToDomain(snapshotRow),
             stepRows.Select(Mappers.ToDomain).ToList(),
             revisionRows.Select(Mappers.ToDomain).ToList(),
-            attemptRows.Select(Mappers.ToDomain).ToList(),
+            attempts,
             reviewRows.Select(Mappers.ToDomain).ToList(),
             outputRows.Select(Mappers.ToDomain).ToList());
 
@@ -138,6 +140,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
             foreach (ProcessingAttempt attempt in mutation.UpsertAttempts)
             {
                 await UpsertAttemptAsync(connection, transaction, attempt);
+                await PsdInspectionStorage.WriteAsync(connection, transaction, attempt);
             }
 
             foreach (ReviewDecision review in mutation.NewReviews)

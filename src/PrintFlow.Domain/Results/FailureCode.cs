@@ -172,4 +172,13 @@ public enum FailureCode
     /// must never be allowed to continue into an irreversible production step.
     /// </remarks>
     PhotoshopDocumentIdentityUnconfirmed,
+
+    /// <summary>The inspected PSD mode/depth or existing ink channels cannot be prepared safely.</summary>
+    PsdUnsupported,
+    /// <summary>No positive Photoshop-compatible composite evidence exists in this PSD.</summary>
+    PsdCompositeMissing,
+    /// <summary>The PSD container cannot be read safely.</summary>
+    PsdUnreadable,
+    /// <summary>PSD preparation did not produce a verified full-canvas raster.</summary>
+    PsdPreparationFailed,
 }

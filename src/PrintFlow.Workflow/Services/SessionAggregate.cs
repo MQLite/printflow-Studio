@@ -70,6 +70,7 @@ public sealed record SessionAggregate(
             Session.WhiteUnderbaseBranch,
             approvedOutputCount)
         {
+            RequiresPsdPreparation = Revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd),
             // Carried across like the print size and the W1 branch, and for the same reason:
             // it is a decision the operator made that no Revision records, so a reload that
             // dropped it would silently re-trim at zero margin (Epic 11200 Part C3 §13).

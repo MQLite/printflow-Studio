@@ -28,6 +28,28 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// </remarks>
 internal static class PhotoshopAdapterOutputFactory
 {
+    internal static OperationResult<AdapterOutput> CreatePsd(PsdPreparationRequest request,
+        PhotoshopValidatedPsdCandidate candidate, IWorkspace workspace, TimeSpan elapsed, string notes)
+    {
+        try
+        {
+            string expected = Path.GetFullPath(workspace.ResolveAbsolute(request.ExpectedOutput));
+            if (request.ExpectedOutput.Area != WorkspaceArea.Working ||
+                !string.Equals(expected, candidate.AbsolutePath, StringComparison.OrdinalIgnoreCase))
+                return OperationResult.Fail<AdapterOutput>(FailureCode.PsdPreparationFailed, "PSD candidate destination mismatch.");
+            using FileStream stream = File.OpenRead(expected);
+            if (stream.Length != candidate.Facts.ByteLength ||
+                Sha256.FromBytes(SHA256.HashData(stream)) != candidate.Facts.Sha256)
+                return OperationResult.Fail<AdapterOutput>(FailureCode.PsdPreparationFailed, "PSD raster changed after independent validation.");
+            return OperationResult.Ok(new AdapterOutput(request.ExpectedOutput, elapsed, notes)
+                { PsdInspection = candidate.Inspection });
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return OperationResult.Fail<AdapterOutput>(FailureCode.PsdPreparationFailed, "PSD raster could not be reverified: " + ex.Message);
+        }
+    }
+
     /// <summary>The validation identity recorded in the note, so a stored note stays readable.</summary>
     internal const string ValidationVersion = "photoshop-tiff-validation-c1-v1";
 

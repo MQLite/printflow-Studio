@@ -23,6 +23,9 @@ public enum OperationKind
 
     /// <summary>Photoshop production output (implementation: Epic 11400).</summary>
     PhotoshopOutput,
+
+    /// <summary>Photoshop's full-canvas raster representation of an immutable PSD source.</summary>
+    PreparePsd,
 }
 
 /// <summary>Why a Revision or PrintOutput stopped being valid.</summary>
