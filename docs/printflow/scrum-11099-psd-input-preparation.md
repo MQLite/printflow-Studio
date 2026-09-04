@@ -2,6 +2,8 @@
 
 Date: 2026-09-04. Starting branch: `master`, clean at `b186c66`. The accepted configuration remains Production, `printflow-workstation-v1` **1.16.0**. No accepted history was rewritten and nothing was pushed.
 
+Current verdict after the accepted-workstation closure below: **SCRUM-11099 PASS — PSD INPUT PREPARATION VERIFIED**. The original implementation report and its blocked evidence are preserved below as historical findings.
+
 ## Original Jira authority
 
 Read before source changes from `C:\Users\admin\Downloads\printflow_studio_mvp_jira_epics_tasks.csv`, row titled **Implement PSD Input Preparation**. The CSV uses internal Work Item ID `11406`, Parent `11400`, Priority High, five story points. Those internal numbers are not the Jira key; this implementation is SCRUM-11099.
@@ -153,3 +155,104 @@ SCRUM-11099 implementation is present, including the advertised-PSD early-bounda
 To complete verification, the operator must save/close unrelated Photoshop work and leave an accepted empty state. Then rerun the controlled final-source PSD smoke, including a clean CMYK refusal, and confirm Photoshop/lock cleanup. The requirement comes from the user's owned-document/unknown-dialog safety rules and the accepted Photoshop guards; PrintFlow must not close unrelated work to obtain a passing smoke.
 
 **SCRUM-11099 BLOCKED — PSD INPUT PREPARATION NOT VERIFIED**
+
+## Final accepted-workstation verification closure — 2026-09-04
+
+Closure ran at 13:47–13:51 NZST (01:47–01:51 UTC), starting clean at `b23936a`, with implementation `872570a` unchanged. This section supersedes the original blocked verdict above; it does not erase or reinterpret either earlier CMYK failure. The closure request explicitly confirmed that the operator had manually saved/closed unrelated Photoshop work. Initial process enumeration independently found **zero Photoshop processes**. PrintFlow then performed its normal accepted launch. No operator recovery or manual synthetic-document cleanup occurred during this run.
+
+### Read-only preflight
+
+The existing `PhotoshopWorkstationSmoke` ran with only its read-only enable switch; its open/close switches were unset. The real composed readiness screen and `VerifiedEnvironmentGateWorkstationSmoke` also ran. Three checks passed using the existing final-source test binaries, with `--no-build --no-restore`.
+
+| Required observation | Closure evidence |
+|---|---|
+| Accepted identity | `D:\Adobe Photoshop CC 2019\Photoshop.exe`, SHA-256 `81EE8930FC1E28637B501866A8B946FA0740C376CDA4302FEA61AA82806A80C5`; signed baseline and all 28 preset evidence hashes verified |
+| Process and signed main frame | Exactly one process after normal launch, PID `12764`, started `01:47:07.4483112Z`; handle `0x3113A`; class `Photoshop`; title `Adobe Photoshop CC 2019` |
+| Accepted state | `KnownStartScreen`, signed marker `OWL.WelcomeScreenView`; no document marker. The committed classifier can return this state only with the main frame enabled and no titled blocking owned dialog |
+| Independent document observation | Read-only attachment to the existing `Photoshop.Application.130` object: accepted installation path, version `20.0.10`, `Documents.Count = 0` at 13:48:10; therefore no unrelated or unsaved document loaded |
+| Lock | Production database independently opened with SQLite `mode=ro`: `AutomationLock.SessionId`, `AcquiredAtUtc`, `ProcessId`, and `MachineName` all null. The isolated QA database starts migrated and empty |
+| Production authorization | Readiness: `Workstation verified for production work.`; real `VerifiedEnvironmentGate`, `gate(Production) = ALLOWED`; `Adapters.Mode = Production`; preset `printflow-workstation-v1 1.16.0` |
+
+The additional computer-use screenshot capture failed twice with `SetIsBorderRequired ... 0x80004002`; no screenshot is counted as evidence. State acceptance rests on the real signed guard/classifier and independent read-only document observation. No UI recovery action was taken.
+
+### Live CMYK refusal and automatic owned-document cleanup
+
+Ran only the `cmyk` case of the committed `PsdPreparationWorkstationSmoke`, with `PRINTFLOW_PSD_PREPARATION_SMOKE=1` and `PRINTFLOW_PSD_CASE=cmyk`. The test filter selected exactly **one test: passed**. This uses the Home import service (`ISessionService.ImportAsync`), its immutable PSD Source snapshot, `StartStep(OriginalConfirmation)`, the real registered Production environment gate and `ProductionPhotoshopOutputProcessor.PreparePsdAsync`. It is the committed preparation boundary, with an isolated QA database and purpose-built synthetic input.
+
+| Identity or result | Observed value |
+|---|---|
+| QA directory | `D:\PrintFlowStudio\Evidence\SCRUM-11099-5bbfeee1e87244c2af10822735bbcb15` |
+| Fixture | `PF_SCRUM11099_cmyk.psd`, 118 bytes, synthetic PSD v1, 4×3 pixels, explicit real merged composite resource |
+| Session | `01a06a1b-1690-7b68-afe0-fdc864e0deca` |
+| Source Revision | `01a06a1b-1709-7e6c-9b68-28a4cb951af0`, `IMPORT`, format `PSD` |
+| Preparation attempt | `01a06a1b-178e-7e77-8a26-68cb44d2e86e`, 01:49:15.534–01:49:25.145 UTC |
+| Adapter | `photoshop-cc2019-production-v1/psd-preparation-v1` |
+| Photoshop inspection | `OriginalMode = CMYK`, `BitDepth = 8`, `PixelWidth = 4`, `PixelHeight = 3`, `HasRealMergedData = true`, Photoshop `20.0.10` |
+| Channels | Four `COMPONENT` channels: `青色`, `洋红`, `黄色`, `黑色`; no alpha-mask or spot channels, no W1; visual transparency unmeasured/null |
+| Structured refusal | `PsdUnsupported`, `Failure_PsdUnsupported`, `PSD was not prepared: Only RGB 8-bit PSD input is supported.`; `IsRetryable = false`; persisted failure context `{}` with no cleanup error |
+| Cleanup | Real exact-owned-document cleanup completed; smoke independently required `KnownStartScreen` again. Read-only document query at 13:49:52 found zero documents in the same PID `12764` |
+
+The incompatibility was discovered by the actual guarded Photoshop inspection. No CMYK-to-RGB conversion or flatten-and-continue operation occurred. No prepared raster Revision, PNG, or TIFF exists in this CMYK session. The synthetic Working PSD remains on disk as attempt evidence, but is **not retained as an open Photoshop document**. No unrelated document was opened, saved, discarded, closed or changed; no unknown dialog was dismissed and Photoshop was not terminated.
+
+### Independent persistence and source-integrity readback
+
+A separate Python process opened both QA databases using SQLite read-only URIs, without application repositories or services. It retained every table's rows and asserted the closure contract; integrity and foreign-key checks also passed.
+
+- Exactly two CMYK attempts exist: Import `SUCCEEDED`, followed by one `PREPARE_PSD` attempt `FAILED` at `OriginalConfirmation`. `RetrySequence = 0`, `RetryOfAttemptId = null`, and preparation `OutputRevisionId = null`.
+- The single Revision remains the valid PSD Import Revision. `InputSnapshot.RootRevisionId` still points to that same Source Revision. `OriginalConfirmation` is `FAILED` with one attempt; `PrintDimensions` and `PhotoshopOutput` remain `WAITING` with zero attempts. There is no Trim attempt, PrintOutput, prepared Revision or fabricated successful preparation state.
+- `PsdInspection` persists CMYK/8, canvas, real-merged-data evidence and Photoshop version; four ordered `PsdChannel` rows belong to that preparation attempt. The PSD-specific failure detail is persisted separately in `ProcessingAttempt.FailureDetailJson`.
+- CMYK and RGB QA locks have all ownership fields null. The production lock is also null/free and matches its preflight readback.
+
+Before the live run, the exact deterministic bytes of the committed CMYK generator were materialized as `CMYK-reference-before.psd` and hashed at 01:48:59 UTC. The live harness generated the identical fixture; Import recorded its hash at 01:49:15.401 UTC, before preparation started. After refusal, independent byte comparisons and SHA-256 reads matched the before-reference, live fixture, Source snapshot and Working PSD:
+
+```text
+before reference SHA-256 = Import-time Source SHA-256
+                        = after fixture SHA-256
+                        = after Source snapshot SHA-256
+                        = after Working PSD SHA-256
+                        = E336D6FBD58F6F66C0DA6A1C0EC6EB1C43E517C565727DB6D4D756EE6A034D85
+```
+
+Source snapshot: `D:\PrintFlowStudio\Sessions\S_20260904T014915Z_64e0deca\Source\PF_SCRUM11099_cmyk.psd`. All compared files are 118 bytes. Only synthetic artwork was used.
+
+### Supported-path follow-up and final Photoshop state
+
+After CMYK cleanup and independent zero-document readback, ran only the existing `rgb` smoke: **one test passed**, using the real Production gate and adapter. Session `01a06a1b-f4f2-7a77-9b1f-5e9c8bec920e` in `D:\PrintFlowStudio\Evidence\SCRUM-11099-f213301d694645e1a64208476383e094` prepared a full-canvas 4×3 RGB/8 PNG and stopped at `ReviewRequired`.
+
+```text
+Source Revision: 01a06a1b-f585-7b73-a690-8fa3e95ade3a
+Source SHA-256:  7EC057BB073977E2A61A4AAAA805B783A454F9CCD9C9FBAB98BFA2195C6E0C8B
+PNG Revision:    01a06a1c-1938-7a9d-810e-cc281dc35ffb
+PNG SHA-256:     1B2E72EC93EE7E3531570C5B85061FA00CD61F0E1A01F5E0094641B34DD522F3
+```
+
+Independent SQLite/file readback confirmed the two successful Import/preparation attempts, both persisted hashes and a free lock. The smoke verified `KnownStartScreen → KnownStartScreen`. Final read-only Photoshop observation at **13:51:18 NZST** confirmed the same single accepted process, version `20.0.10`, no-document main-frame title and `Documents.Count = 0`. The signed classifier's accepted final state establishes an enabled main frame without a blocking dialog. The complete observed sequence is **CMYK refusal → clean accepted state → supported RGB preparation succeeds → clean accepted state**.
+
+### Retained closure evidence and final coverage decision
+
+Closure evidence bundle: `D:\PrintFlowStudio\Evidence\SCRUM-11099-closure-20260904-1347`.
+
+- `scrum-11099-closure-preflight.trx`: three read-only readiness/gate/foundation checks passed.
+- `scrum-11099-closure-cmyk.trx`: one live CMYK case passed; SHA-256 `D9174B5E7528D02B6D8A946217231C519A6A956278E1ED4E0C0DB9553F8B0EB3`.
+- `scrum-11099-closure-rgb-followup.trx`: one live supported follow-up passed.
+- `preflight-documents.json`, `cmyk-post-documents.json`, `final-documents.json`: independent native document-count/process observations. Final observation SHA-256 `DA143A84040FBE477968A4225A10DB4B8F1C95DBA5C738015C652692BD5E0CD3`.
+- `before-integrity.json`, `CMYK-reference-before.psd`, `independent-readback.json`: pre-run hash, deterministic reference and independent persisted-state/file readback. Readback SHA-256 `63D3885C66B2403FDFF1C5671D61295D8A5034AB62AF4F00D3530845197A80AA`.
+- `before-integrity.py`, `independent-readback.py`, `observe-documents.ps1`: local evidence generation/readback scripts; no product source changes.
+
+No product defect was exposed and no product source, tests, dependencies, accepted configuration or preset changed. The existing final-source **0-warning/0-error build** and **10,253 passed / 0 failed / 0 skipped** suite remain the code gate; the full suite was not rerun. This closure adds only the bounded live/readback evidence above. A new report-only commit follows the three existing SCRUM-11099 commits, with no amendment, rebase, push or attribution trailer. Local artwork, databases and evidence binaries remain outside Git.
+
+Recorded Jira coverage delta:
+
+```text
+SCRUM-11099:
+NOT_IMPLEMENTED → FULL
+
+SCRUM-11132:
+still PARTIAL
+PSD prerequisite unblocked
+PDF prerequisite still blocked
+```
+
+This records the coverage decision in the report; it does not claim a Jira service update or the separate Generate Print TIFF fixed-workstation E2E.
+
+**SCRUM-11099 PASS — PSD INPUT PREPARATION VERIFIED**
