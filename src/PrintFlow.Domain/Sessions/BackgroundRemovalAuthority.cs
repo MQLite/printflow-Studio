@@ -30,6 +30,8 @@ public enum BackgroundRemovalDecision
     /// for it.
     /// </summary>
     UseAutomaticSelectionForReviewedContent,
+
+    ManualResultForReviewedContent,
 }
 
 /// <summary>

@@ -29,6 +29,9 @@ public enum OperationKind
 
     /// <summary>Full-page raster of an inspected single-page PDF source.</summary>
     PreparePdf,
+
+    // SCRUM-11092 / SCRUM-11112: distinct from manual crop.
+    ManualResultImport,
 }
 
 /// <summary>Why a Revision or PrintOutput stopped being valid.</summary>

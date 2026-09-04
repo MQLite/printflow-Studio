@@ -295,9 +295,8 @@
                                     Converter={StaticResource BoolToVisibility}}" />
 
             <!--
-                Explicit re-entry after a takeover (§22, §30). Nothing anywhere else lifts
-                SessionState.HandedOff, so this is the only way back — which is what stops a
-                restart from silently resuming handed-off work.
+                Explicit automation re-entry after takeover. SCRUM-11092 / SCRUM-11112 adds
+                a separate local manual-result submission; restart never resumes automation.
             -->
             <StackPanel Margin="0,0,0,8"
                         Visibility="{Binding CanReenterAutomation,
@@ -742,7 +741,11 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding FileNameLabel}" />
-                                <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactFileName}" />
+                                <StackPanel Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Style="{StaticResource MetadataValue}" Text="{Binding ArtefactFileName}" />
+                                    <TextBlock Text="{Binding ManualProcessingResultLabel}" FontWeight="SemiBold"
+                                               Visibility="{Binding IsManualProcessingResult, Converter={StaticResource BoolToVisibility}}" />
+                                </StackPanel>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Style="{StaticResource MetadataLabel}" Text="{Binding FormatLabel}" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource MetadataValue}" Text="{Binding ArtefactFormat}" />
@@ -1498,6 +1501,9 @@
                         Command="{Binding SkipCommand}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
 
+                <Button Content="{Binding SubmitManualResultLabel}"
+                        Command="{Binding SubmitManualResultCommand}"
+                        Visibility="{Binding CanSubmitManualResult, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{Binding HandOffLabel}"
                         Command="{Binding HandOffCommand}"
                         Visibility="{Binding CanHandOff, Converter={StaticResource BoolToVisibility}}" />

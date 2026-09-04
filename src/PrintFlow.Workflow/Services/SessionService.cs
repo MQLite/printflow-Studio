@@ -85,6 +85,7 @@ public sealed class SessionService : ISessionService
     private readonly IPdfPreparationProcessor _pdf;
     private readonly ITrimProcessor _trim;
     private readonly IManualCropProcessor _manualCrop;
+    private readonly IManualResultImporter? _manualResults;
     private readonly IWorkstationPresetProvider _presetProvider;
     private readonly IEnvironmentGate _environmentGate;
     private readonly RevisionIntegrityGuard _integrityGuard;
@@ -130,7 +131,8 @@ public sealed class SessionService : ISessionService
         IEnvironmentGate environmentGate,
         IIdGenerator idGenerator,
         TimeProvider timeProvider,
-        IPdfPreparationProcessor? pdf = null)
+        IPdfPreparationProcessor? pdf = null,
+        IManualResultImporter? manualResults = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -156,6 +158,7 @@ public sealed class SessionService : ISessionService
         _pdf = pdf ?? new UnavailablePdfPreparationProcessor();
         _trim = trim;
         _manualCrop = manualCrop;
+        _manualResults = manualResults;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _idGenerator = idGenerator;
@@ -338,6 +341,11 @@ public sealed class SessionService : ISessionService
                 "A manual crop is legal only after a Trim attempt reported ManualCropRequired, or " +
                 "after an earlier manual crop was rejected.");
         }
+
+        if (command is WorkflowCommand.SubmitManualResult submission &&
+            (!ManualResultEligibility.CanSubmit(snapshot) || snapshot.CurrentStep!.Step != submission.Step))
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "Manual result submission requires an eligible handed-off step.");
 
         OperationResult<Unit> integrity = await EnsureIntegrityAsync(aggregate, snapshot, command, context, cancellationToken);
         if (integrity.IsFailure)
@@ -721,7 +729,8 @@ public sealed class SessionService : ISessionService
         OperationKind Operation,
         RevisionId? InputRevision,
         string ProcessorId,
-        TrimBounds? ManualCrop);
+        TrimBounds? ManualCrop,
+        string? ManualResultPath = null);
 
     /// <summary>
     /// What one attempt's file work produced, on its way to the closing transaction.
@@ -763,6 +772,11 @@ public sealed class SessionService : ISessionService
                     return new ProducingWork(
                         run.AttemptId, run.Step, run.Adapter, run.Operation, run.InputRevision,
                         run.Operation == OperationKind.PreparePsd ? _photoshop.PsdPreparationAdapterId : AdapterIdFor(run.Adapter), ManualCrop: null);
+
+                case WorkflowEffect.ImportManualResult manual:
+                    return new ProducingWork(manual.AttemptId, manual.Step, AdapterKind.Internal,
+                        OperationKind.ManualResultImport, manual.InputRevision,
+                        "manual-result-import-v1", null, manual.SelectedPath);
 
                 case WorkflowEffect.RunManualCrop crop:
                     // The processor's own identity, asked for rather than hard-coded, so the
@@ -912,6 +926,7 @@ public sealed class SessionService : ISessionService
             WorkflowCommand.Approve approve => FindRevision(aggregate, snapshot.Step(approve.Step)?.CurrentRevisionId),
             WorkflowCommand.Reject reject => FindRevision(aggregate, snapshot.Step(reject.Step)?.CurrentRevisionId),
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
+            WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
 
             // Authorising reviewed content is a decision about specific bytes, exactly as an
             // Approve is, so it is checked exactly as an Approve is (Epic 11300 Part C2B2 §20).
@@ -1285,7 +1300,9 @@ public sealed class SessionService : ISessionService
                 FailureCode.PreconditionNotMet, $"Step {work.Step} is not part of this workflow.");
         }
 
-        if (definition.IsAdapterBacked)
+        bool drivesExternalApplication = definition.IsAdapterBacked && work.ManualResultPath is null;
+
+        if (drivesExternalApplication)
         {
             OperationResult<Unit> gate = _environmentGate.Verify(AdapterModeFor(work.Adapter));
             if (gate.IsFailure)
@@ -1295,7 +1312,7 @@ public sealed class SessionService : ISessionService
         }
 
         AutomationLockChange? acquire = null;
-        if (definition.IsAdapterBacked)
+        if (drivesExternalApplication)
         {
             OperationResult<AutomationLockState> lockState = await _repository.GetAutomationLockAsync(cancellationToken);
             if (lockState.IsFailure)
@@ -1331,6 +1348,12 @@ public sealed class SessionService : ISessionService
             context.NewAttemptId, aggregate.Session.Id, work.Step, work.InputRevision,
             work.Operation, work.ProcessorId, context.NowUtc,
             retryOfAttemptId: retryOf, retrySequence: retrySequence);
+
+        if (work.ManualResultPath is { } selectedEvidence)
+            runningAttempt = runningAttempt with
+            {
+                AdapterNotes = $"Manual result selected as {selectedEvidence.Replace('\\', '/').Split('/')[^1]}; operator {context.Operator}",
+            };
 
         // The parameter record, written with the opening transaction — before any pixel work —
         // so the row says what this attempt was asked to do rather than what it turned out to
@@ -1377,6 +1400,13 @@ public sealed class SessionService : ISessionService
             runningAttempt = runningAttempt.WithPreparation(preparation);
         }
 
+        if (work.ManualResultPath is not null && work.Step == StepKind.BackgroundRemoval &&
+            FindRevision(aggregate, work.InputRevision) is { } manualInput)
+        {
+            runningAttempt = runningAttempt.WithBackgroundRemovalAuthority(BackgroundRemovalAuthority.For(
+                BackgroundRemovalDecision.ManualResultForReviewedContent, manualInput.Id, manualInput.Sha256));
+        }
+
         ProcessingSession sessionAfterStart = MergeSession(aggregate.Session, started.State, started.Effects, context.NowUtc);
 
         SessionMutation opening = BuildMetadataMutation(
@@ -1401,7 +1431,7 @@ public sealed class SessionService : ISessionService
         // window in which Stop is offered is exactly the window in which it is meaningful
         // (Part D2A §24, §28).
         IAutomationStopSignal stop = _runs.Begin(
-            aggregate.Session.Id, runningAttempt.Id, work.Step, definition.IsAdapterBacked);
+            aggregate.Session.Id, runningAttempt.Id, work.Step, drivesExternalApplication);
 
         OperationResult<StepWork> produced;
         try
@@ -1421,7 +1451,7 @@ public sealed class SessionService : ISessionService
                     {
                         ["attemptId"] = runningAttempt.Id.ToString(),
                         ["step"] = work.Step.ToString(),
-                        ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
+                        ["retainedExternalState"] = drivesExternalApplication ? "unknown" : "none",
                     }));
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
@@ -1449,7 +1479,7 @@ public sealed class SessionService : ISessionService
                     FailureCode.AdapterUnavailable,
                     $"The {work.Step} operation ended with an unhandled {ex.GetType().Name}: {ex.Message} " +
                     "No output was validated and no Revision was created. " +
-                    (definition.IsAdapterBacked
+                    (drivesExternalApplication
                         ? "The external application was left untouched; what it retains is unknown."
                         : "No external application was involved."),
                     isRetryable: true,
@@ -1459,7 +1489,7 @@ public sealed class SessionService : ISessionService
                         ["step"] = work.Step.ToString(),
                         ["faultType"] = ex.GetType().FullName ?? ex.GetType().Name,
                         ["revisionCreated"] = "false",
-                        ["retainedExternalState"] = definition.IsAdapterBacked ? "unknown" : "none",
+                        ["retainedExternalState"] = drivesExternalApplication ? "unknown" : "none",
                     },
                     messageKey: "Failure_OperationFaulted"));
         }
@@ -1593,6 +1623,9 @@ public sealed class SessionService : ISessionService
             afterStart, sessionAfterFinish, finished.State, finished.Effects, context,
             newRevisions: [newRevision], upsertAttempts: [succeededAttempt], upsertOutputs: newOutputs);
 
+        if (work.ManualResultPath is not null)
+            finishing = finishing with { LockChange = null };
+
         // Closed on CancellationToken.None when a stop is pending, for the same reason a
         // cancelled attempt is: the validated file already exists, and losing the transaction
         // that records it would leave a real output with no Revision — the one outcome §16
@@ -1641,6 +1674,17 @@ public sealed class SessionService : ISessionService
         IAutomationStopSignal stop, CancellationToken cancellationToken)
     {
         WorkspaceDirRef session = aggregate.Session.Workspace;
+        if (work.ManualResultPath is { } selected)
+        {
+            if (_manualResults is null)
+                return OperationResult.Fail<StepWork>(FailureCode.PreconditionNotMet, "Manual result import is unavailable.");
+            var imported = await _manualResults.ImportAsync(session, attempt.Id, work.Step,
+                FindRevision(aggregate, work.InputRevision)!.Facts, selected, cancellationToken);
+            return imported.IsFailure
+                ? OperationResult.Fail<StepWork>(imported.Failure)
+                : OperationResult.Ok(new StepWork(imported.Value.File, imported.Value.Facts,
+                    $"Manual result selected as {imported.Value.File.FileName}; copied SHA256 {imported.Value.Facts.Sha256}; operator {context.Operator}"));
+        }
         WorkspaceFileRef? input = work.InputRevision is RevisionId inputId
             ? aggregate.Revisions.FirstOrDefault(r => r.Id == inputId)?.File
             : null;
@@ -2066,6 +2110,16 @@ public sealed class SessionService : ISessionService
         if (failedTransition.IsRejected)
         {
             return OperationResult.Fail<SessionView>(MapRejection(failedTransition.Rejection!));
+        }
+
+        if (runningAttempt.Operation == OperationKind.ManualResultImport)
+        {
+            WorkflowTransition handedOff = _engine.Apply(failedTransition.State,
+                new WorkflowCommand.HandOff(step, "Manual result validation failed; manual processing remains authorised."), context);
+            if (handedOff.IsRejected)
+                return OperationResult.Fail<SessionView>(MapRejection(handedOff.Rejection!));
+            failedTransition = WorkflowTransition.Accepted(handedOff.State,
+                handedOff.Effects.Where(e => e is not WorkflowEffect.ReleaseAutomationLock).ToArray());
         }
 
         ProcessingAttempt failedAttempt = runningAttempt.Fail(failure, context.NowUtc)

@@ -435,6 +435,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private const double ZoomStep = 1.25;
 
     private readonly ISessionService _sessions;
+    private readonly IFilePicker? _filePicker;
     private readonly IArtefactPreviewService _previews;
     private readonly INavigationService _navigation;
 
@@ -663,13 +664,14 @@ public sealed partial class SessionViewModel : ObservableObject
     private SessionView? _session;
 
     public SessionViewModel(
-        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation)
+        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation, IFilePicker? filePicker = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
         ArgumentNullException.ThrowIfNull(navigation);
 
         _sessions = sessions;
+        _filePicker = filePicker;
         _previews = previews;
         _navigation = navigation;
 
@@ -1398,7 +1400,10 @@ public sealed partial class SessionViewModel : ObservableObject
     public string BackgroundRemovalAttemptAudit =>
         _session is { HasBackgroundRemovalAttemptAuthority: true, BackgroundRemovalAttemptReviewedRevisionId: { } reviewed }
             ? string.Format(
-                CultureInfo.CurrentCulture, Strings.Session_BackgroundRemovalAttemptAudit, ShortRevision(reviewed))
+                CultureInfo.CurrentCulture,
+                _session.BackgroundRemovalAttemptDecision == BackgroundRemovalDecision.ManualResultForReviewedContent
+                    ? Strings.Session_ManualBackgroundRemovalAudit : Strings.Session_BackgroundRemovalAttemptAudit,
+                ShortRevision(reviewed))
             : string.Empty;
 
     /// <inheritdoc cref="BackgroundRemovalAttemptAudit" />
@@ -1524,6 +1529,11 @@ public sealed partial class SessionViewModel : ObservableObject
         (FailureCode.PdfMultiplePages or FailureCode.PdfUnreadable or FailureCode.PdfEncrypted);
 
     public bool CanSkip => Allows(CommandKind.Skip);
+
+    public bool CanSubmitManualResult => _session?.CanSubmitManualResult == true;
+    public string SubmitManualResultLabel => Strings.Session_SubmitManualResult;
+    public bool IsManualProcessingResult => _session?.CurrentArtefact?.IsManualProcessingResult == true;
+    public string ManualProcessingResultLabel => Strings.Session_ManualProcessingResult;
 
     public bool CanHandOff => Allows(CommandKind.HandOff);
 
@@ -2225,6 +2235,19 @@ public sealed partial class SessionViewModel : ObservableObject
     /// operator still presses Run Step afterwards, which is what produces the new attempt
     /// against a fresh working copy.
     /// </remarks>
+    [RelayCommand]
+    private async Task SubmitManualResultAsync(CancellationToken cancellationToken)
+    {
+        if (!CanSubmitManualResult || IsBusy || _session?.CurrentStep is not { } step)
+            return;
+        string filter = step.Step == StepKind.BackgroundRemoval
+            ? Strings.Session_ManualCutoutFilter : Strings.Session_ManualEnhancementFilter;
+        string? selected = _filePicker?.PickSingleFile(Strings.Session_SubmitManualResult, filter);
+        if (string.IsNullOrWhiteSpace(selected))
+            return;
+        await RunAsync(new WorkflowCommand.SubmitManualResult(step.Step, selected), cancellationToken).ConfigureAwait(true);
+    }
+
     [RelayCommand]
     private Task ReenterAutomationAsync(CancellationToken cancellationToken) =>
         RunAsync(new WorkflowCommand.ReenterAutomation(), cancellationToken);
@@ -3410,6 +3433,8 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanHandOff));
+        OnPropertyChanged(nameof(CanSubmitManualResult));
+        OnPropertyChanged(nameof(IsManualProcessingResult));
         OnPropertyChanged(nameof(CanSetMaximumBounds));
         OnPropertyChanged(nameof(CanChooseFlexibleSize));
         OnPropertyChanged(nameof(HasPresetSizeSelection));

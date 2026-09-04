@@ -246,6 +246,7 @@ public sealed class TransitionMatrixTests
             CommandKind.AttemptCancelled =>
                 SystemCommands.Cancelled(AttemptId.From(Guid.CreateVersion7()), step),
             CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
+            CommandKind.SubmitManualResult => new WorkflowCommand.SubmitManualResult(step, @"C:\manual-result.png"),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unhandled command kind."),
         };
     }

@@ -108,6 +108,7 @@ internal static class Mappers
         OperationKind.Trim => "TRIM",
         OperationKind.PromoteApproved => "PROMOTE_APPROVED",
         OperationKind.ManualImport => "MANUAL_IMPORT",
+        OperationKind.ManualResultImport => "MANUAL_RESULT_IMPORT",
         OperationKind.PhotoshopOutput => "PHOTOSHOP_OUTPUT",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
     };
@@ -122,6 +123,7 @@ internal static class Mappers
         "TRIM" => OperationKind.Trim,
         "PROMOTE_APPROVED" => OperationKind.PromoteApproved,
         "MANUAL_IMPORT" => OperationKind.ManualImport,
+        "MANUAL_RESULT_IMPORT" => OperationKind.ManualResultImport,
         "PHOTOSHOP_OUTPUT" => OperationKind.PhotoshopOutput,
         _ => throw new InvalidOperationException($"Unknown OperationKind '{text}' in database."),
     };
@@ -287,6 +289,7 @@ internal static class Mappers
     public static string ToText(BackgroundRemovalDecision value) => value switch
     {
         BackgroundRemovalDecision.Unspecified => "UNSPECIFIED",
+        BackgroundRemovalDecision.ManualResultForReviewedContent => "MANUAL_RESULT_FOR_REVIEWED_CONTENT",
         BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent =>
             "USE_AUTOMATIC_SELECTION_FOR_REVIEWED_CONTENT",
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
@@ -295,6 +298,7 @@ internal static class Mappers
     public static BackgroundRemovalDecision ToBackgroundRemovalDecision(string text) => text switch
     {
         "UNSPECIFIED" => BackgroundRemovalDecision.Unspecified,
+        "MANUAL_RESULT_FOR_REVIEWED_CONTENT" => BackgroundRemovalDecision.ManualResultForReviewedContent,
         "USE_AUTOMATIC_SELECTION_FOR_REVIEWED_CONTENT" =>
             BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
         _ => throw new InvalidOperationException($"Unknown BackgroundRemovalDecision '{text}' in database."),

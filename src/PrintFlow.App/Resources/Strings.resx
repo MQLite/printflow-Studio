@@ -762,4 +762,13 @@
   <data name="Session_PreparePdf" xml:space="preserve"><value>Prepare PDF for review</value></data>
   <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported.</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels). Print sizing follows review.</value></data>
+  <data name="Session_SubmitManualResult" xml:space="preserve"><value>Submit Manual Result</value></data>
+  <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
+  <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
+  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>Raster image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
+  <data name="Failure_ManualResultInvalid" xml:space="preserve"><value>Invalid manual result. Select a complete, readable image in a supported format.</value></data>
+  <data name="Failure_ManualResultImport" xml:space="preserve"><value>The result could not be imported. Check file access and workspace storage, then submit again.</value></data>
+  <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>The background removal result must be a PNG with transparent pixels and visible artwork.</value></data>
+  <data name="Failure_ManualResultCanvas" xml:space="preserve"><value>The background removal result must keep the same pixel dimensions as the approved input.</value></data>
+  <data name="Session_ManualBackgroundRemovalAudit" xml:space="preserve"><value>Background removal: Manual processing result from reviewed Revision {0}</value></data>
 </root>

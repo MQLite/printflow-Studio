@@ -113,6 +113,9 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record ReenterAutomation : WorkflowCommand;
 
+    /// <summary>SCRUM-11092 / SCRUM-11112: import a result after explicit manual handoff.</summary>
+    public sealed record SubmitManualResult(StepKind Step, string SelectedPath) : WorkflowCommand;
+
     /// <summary>
     /// Confirm typed maximum bounds. The custom fit-box route only
     /// (Epic 11400 Part B1A.2D §3, §19).

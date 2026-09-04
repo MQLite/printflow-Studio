@@ -45,6 +45,7 @@ public enum CommandKind
 
     /// <summary>Bring a handed-off session back under automation, explicitly (Part D2A §22).</summary>
     ReenterAutomation,
+    SubmitManualResult,
 
     AttemptSucceeded,
     AttemptFailed,
@@ -117,6 +118,7 @@ public static class TransitionTable
         // when the session is HandedOff, which is a state no step row records. It names no
         // step in its payload for the same reason (Epic 11300 Part D2A §22).
         CommandKind.ReenterAutomation,
+        CommandKind.SubmitManualResult,
     ];
 
     /// <summary>

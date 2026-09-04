@@ -12,6 +12,53 @@ namespace PrintFlow.Tests.Integration.Persistence;
 public sealed class MigrationTests
 {
     [Fact]
+    public void Manual_result_migration_preserves_v11_rows_and_revision_identity_guards()
+    {
+        // SCRUM-11092 / SCRUM-11112: exercise upgrade from the actual preceding schema.
+        using TempDatabase database = new(migrate: false);
+        using var connection = database.OpenRaw();
+        var assembly = typeof(MigrationRunner).Assembly;
+        foreach (string resource in assembly.GetManifestResourceNames()
+            .Where(n => n.Contains(".Migrations.", StringComparison.Ordinal) && n.EndsWith(".sql", StringComparison.Ordinal))
+            .OrderBy(n => n, StringComparer.Ordinal))
+        {
+            string file = resource[(resource.LastIndexOf(".Migrations.", StringComparison.Ordinal) + 12)..];
+            if (int.Parse(file[..4], System.Globalization.CultureInfo.InvariantCulture) >= 12) continue;
+            Execute(connection, ReadMigrationScript(file));
+        }
+        InsertSession(connection, "manual-upgrade", []);
+        Execute(connection, $"""
+            INSERT INTO Revision (Id, SessionId, Operation, RelativePath, Format, ByteLength, Sha256, ColourMode, CreatedAtUtc)
+            VALUES ('old-crop', 'manual-upgrade', 'MANUAL_IMPORT', 'Sessions/manual-upgrade/Working/old.png',
+                    'PNG', 100, '{new string('a', 64)}', 'RGB', '2026-01-01T00:00:00.000Z');
+            INSERT INTO ProcessingAttempt (Id, SessionId, StepKind, Operation, AdapterId, StartedAtUtc,
+                EndedAtUtc, ResultStatus, OutputRevisionId, RetrySequence)
+            VALUES ('old-attempt', 'manual-upgrade', 'Trim', 'MANUAL_IMPORT', 'manual-crop-v1',
+                '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:01.000Z', 'SUCCEEDED', 'old-crop', 0);
+            PRAGMA user_version = 11;
+            """);
+        string rowsBefore = Dump("Revision") + Dump("ProcessingAttempt");
+        MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        (Dump("Revision") + Dump("ProcessingAttempt")).ShouldBe(rowsBefore);
+        using var foreignKeys = connection.CreateCommand();
+        foreignKeys.CommandText = "PRAGMA foreign_key_check;";
+        using (var reader = foreignKeys.ExecuteReader()) reader.Read().ShouldBeFalse();
+        Should.Throw<SqliteException>(() => Execute(connection,
+            "UPDATE Revision SET Operation = 'MANUAL_RESULT_IMPORT' WHERE Id = 'old-crop';"));
+        Execute(connection, "UPDATE ProcessingAttempt SET BackgroundRemovalDecision = 'MANUAL_RESULT_FOR_REVIEWED_CONTENT' WHERE Id = 'old-attempt';");
+
+        string Dump(string table)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT * FROM " + table + " ORDER BY Id;";
+            using var reader = command.ExecuteReader();
+            List<object[]> rows = [];
+            while (reader.Read()) { object[] row = new object[reader.FieldCount]; reader.GetValues(row); rows.Add(row); }
+            return System.Text.Json.JsonSerializer.Serialize(rows);
+        }
+    }
+
+    [Fact]
     public void Empty_database_migrates_successfully()
     {
         using TempDatabase database = new();

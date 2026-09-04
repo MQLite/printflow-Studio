@@ -75,8 +75,11 @@ public sealed record ArtefactView(
     /// <summary>The hash an approval or rejection of this artefact must be bound to.</summary>
     public Sha256 Sha256 => Facts.Sha256;
 
+    public bool IsManualProcessingResult { get; init; }
+
     internal static ArtefactView From(Revision revision, bool isCurrentStepResult) => new(
-        revision.Id, revision.File.FileName, revision.Facts, isCurrentStepResult, revision.SourceRevisionId);
+        revision.Id, revision.File.FileName, revision.Facts, isCurrentStepResult, revision.SourceRevisionId)
+        { IsManualProcessingResult = revision.Operation == OperationKind.ManualResultImport };
 }
 
 /// <summary>
@@ -626,6 +629,8 @@ public sealed record SessionView(
     PrintPreparationAttemptView? AttemptPreparation,
     FlexibleSizeView Sizing)
 {
+    public bool CanSubmitManualResult => AvailableCommands.Contains(CommandKind.SubmitManualResult);
+
     public ImageFormat? OriginalSourceFormat { get; init; }
     public PdfInspection? PdfInspection { get; init; }
 

@@ -143,7 +143,7 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock);
+        Clock, manualResults: new WicManualResultImporter(workspace ?? FileWorkspace, FileInspector));
 
     /// <summary>
     /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and
@@ -186,7 +186,7 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         environmentGate ?? EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock);
+        Clock, manualResults: new WicManualResultImporter(FileWorkspace, FileInspector));
 
     /// <summary>
     /// Builds a service with a caller-supplied Photoshop adapter, and optionally a caller-supplied
@@ -220,7 +220,7 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         environmentGate ?? EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock);
+        Clock, manualResults: new WicManualResultImporter(FileWorkspace, FileInspector));
 
     /// <summary>
     /// Records the reviewed-content authority for whatever Background Removal is currently about

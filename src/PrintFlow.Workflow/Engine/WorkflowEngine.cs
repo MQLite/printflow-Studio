@@ -67,6 +67,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.System.AttemptFailed c => AttemptFailed(state, c, context),
             WorkflowCommand.System.AttemptInterrupted c => AttemptInterrupted(state, c, context),
             WorkflowCommand.System.AttemptCancelled c => AttemptCancelled(state, c, context),
+            WorkflowCommand.SubmitManualResult c => SubmitManualResult(state, c, context),
             WorkflowCommand.ReenterAutomation => ReenterAutomation(state, context),
             _ => WorkflowTransition.Rejected(
                 RejectionCode.CommandNotApplicable,
@@ -1495,13 +1496,39 @@ public sealed class WorkflowEngine : IWorkflowEngine
             ]);
     }
 
+    /// <summary>SCRUM-11092 / SCRUM-11112: start a local import from explicit manual handoff.</summary>
+    private static WorkflowTransition SubmitManualResult(
+        WorkflowSnapshot state, WorkflowCommand.SubmitManualResult command, CommandContext context)
+    {
+        if (!Services.ManualResultEligibility.CanSubmit(state) || state.CurrentStep!.Step != command.Step)
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "This step has not authorised manual result submission.");
+        if (string.IsNullOrWhiteSpace(command.SelectedPath))
+            return WorkflowTransition.Rejected(RejectionCode.InvalidPayload, "Select a manual result file.");
+        SessionStep step = state.CurrentStep!;
+        RevisionId source = state.UpstreamRevisionOf(step.Step)!.Value;
+        SessionStep started = step with
+        {
+            State = StepState.Processing,
+            CurrentRevisionId = null,
+            CurrentRevisionSha256 = null,
+            AttemptCount = step.AttemptCount + 1,
+            EnteredStateAtUtc = context.NowUtc,
+        };
+        return WorkflowTransition.Accepted(
+            state.WithStep(started) with { SessionState = SessionState.Active },
+            new WorkflowEffect.RecordAttemptStarted(context.NewAttemptId, step.Step,
+                OperationKind.ManualResultImport, source, step.AttemptCount),
+            new WorkflowEffect.ImportManualResult(context.NewAttemptId, step.Step, source, command.SelectedPath));
+    }
+
     /// <summary>
     /// Returns a handed-off session to automation, at the operator's explicit request
     /// (Epic 11300 Part D2A §22, §30).
     /// </summary>
     /// <remarks>
-    /// The one command that lifts <c>SessionState.HandedOff</c>, and therefore the one thing
-    /// standing between a takeover and automation quietly resuming. Everything else that could
+    /// The command that explicitly returns to automation after <c>SessionState.HandedOff</c>,
+    /// preventing automation from quietly resuming after a takeover. Everything else that could
     /// drive the session forward goes through <see cref="Resolve"/>, which refuses a session
     /// that is not <c>Active</c> — so a restart, a reload, or an operator pressing Run again
     /// all fail closed until this command is issued (§30).
@@ -1585,7 +1612,12 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// </summary>
     private static StepResolution Resolve(WorkflowSnapshot state, StepKind kind, CommandKind command)
     {
-        if (!SessionStateRules.AllowsProgress(state.SessionState))
+        // SCRUM-11092 / SCRUM-11112: a late takeover can retain an already-validated result.
+        // Explicit rejection discards that offer before another manual submission; no automation resumes.
+        bool rejectHandedOffResult = state.SessionState == SessionState.HandedOff &&
+            command == CommandKind.Reject && Services.ManualResultEligibility.Supports(kind) &&
+            state.CurrentStep is { State: StepState.ReviewRequired } currentResult && currentResult.Step == kind;
+        if (!SessionStateRules.AllowsProgress(state.SessionState) && !rejectHandedOffResult)
         {
             return StepResolution.Refused(
                 RejectionCode.SessionNotActive,
@@ -1777,6 +1809,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             // therefore what the answer reports, is whether the session is handed off and
             // whether its current step is one whose attempt stopped without a result
             // (Epic 11300 Part D2A §22).
+            CommandKind.SubmitManualResult => new WorkflowCommand.SubmitManualResult(step, "manual-result.png"),
             CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
             CommandKind.Approve when current?.CurrentRevisionSha256 is Sha256 hash =>
                 new WorkflowCommand.Approve(step, hash),

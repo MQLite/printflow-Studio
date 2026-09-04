@@ -342,7 +342,9 @@ public sealed class SessionControlsTests
         // No run action survives: automated progression is over for this session.
         screen.CanRunStep.ShouldBeFalse();
         screen.CanApprove.ShouldBeFalse();
-        screen.CanReject.ShouldBeFalse();
+        // SCRUM-11092 / SCRUM-11112: reject the retained offer before manual replacement.
+        screen.CanReject.ShouldBeTrue();
+        screen.CanSubmitManualResult.ShouldBeFalse();
         screen.CanRetry.ShouldBeFalse();
         screen.CanSkip.ShouldBeFalse();
 

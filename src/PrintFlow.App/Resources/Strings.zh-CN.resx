@@ -751,4 +751,13 @@
   <data name="Session_PreparePdf" xml:space="preserve"><value>准备 PDF 以供检查</value></data>
   <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置打印尺寸。</value></data>
+  <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
+  <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
+  <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
+  <data name="Session_ManualEnhancementFilter" xml:space="preserve"><value>栅格图像 (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg</value></data>
+  <data name="Failure_ManualResultInvalid" xml:space="preserve"><value>手动处理结果无效。请选择完整、可读取且格式受支持的图像。</value></data>
+  <data name="Failure_ManualResultImport" xml:space="preserve"><value>无法导入结果。请检查文件访问权限及工作区存储，然后重新提交。</value></data>
+  <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>去背景结果必须为 PNG，并同时包含透明像素和可见图案。</value></data>
+  <data name="Failure_ManualResultCanvas" xml:space="preserve"><value>去背景结果的像素尺寸必须与已批准的输入图像相同。</value></data>
+  <data name="Session_ManualBackgroundRemovalAudit" xml:space="preserve"><value>去背景：基于已确认版本 {0} 的手动处理结果</value></data>
 </root>

@@ -55,6 +55,9 @@ public abstract record WorkflowEffect
     /// rectangle on the same audited path as every other input to a producing attempt, rather
     /// than being smuggled to the processor around the reducer.
     /// </remarks>
+    public sealed record ImportManualResult(
+        AttemptId AttemptId, StepKind Step, RevisionId InputRevision, string SelectedPath) : WorkflowEffect;
+
     public sealed record RunManualCrop(
         AttemptId AttemptId,
         StepKind Step,

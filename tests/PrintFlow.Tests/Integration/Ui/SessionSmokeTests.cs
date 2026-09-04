@@ -185,7 +185,9 @@ public sealed class SessionSmokeTests
         session.IsHandedOff.ShouldBeTrue();
         session.CanRunStep.ShouldBeFalse();
         session.CanApprove.ShouldBeFalse();
-        session.CanReject.ShouldBeFalse();
+        // SCRUM-11092 / SCRUM-11112: reject the retained offer before manual replacement.
+        session.CanReject.ShouldBeTrue();
+        session.CanSubmitManualResult.ShouldBeFalse();
         session.CanRetry.ShouldBeFalse();
         session.CanSkip.ShouldBeFalse();
 
