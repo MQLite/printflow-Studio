@@ -282,4 +282,18 @@ Desktop acceptance/test-infrastructure convention, not Product runtime code:
 
 Scope: only the three affected tests and this report. Product source, resource files, runtime localisation, XAML, ViewModels, workflow, persistence, adapters, configuration and presets are unchanged. Work stays in `D:\Repositories\printflow-Studio` on `master`, for a new local test/report commit; no branch, worktree, amend, rebase, push or AI-attribution trailer.
 
+### Independent re-verification — 2026-09-07
+
+The correction above was re-verified from a clean tree on accepted `7dba4a0`, on the same workstation, without changing any source. The workstation still resolves the culture that produced the original failures: a minimal .NET 10 probe reports `CurrentUICulture=zh-CN`, `CurrentCulture=zh-CN`, `InstalledUICulture=zh-CN`. The culture pin is therefore still load-bearing rather than a no-op — without it the three cases would still resolve Chinese resources on this machine.
+
+A caveat worth recording for anyone repeating this check: Windows PowerShell 5.1 reports `CurrentUICulture=en-US` in the same shell, because PowerShell falls back to `en-US` when it has no localized resources for the display language. That reading is a PowerShell artifact and must not be used to judge the culture the test host will resolve; probe the .NET runtime directly.
+
+Re-run results, all reproduced exactly:
+
+- Targeted three cases: **3 passed / 0 failed / 0 skipped**.
+- Related Trim UI / localisation filter: **131 passed / 0 failed / 0 skipped**.
+- Complete suite (`dotnet test PrintFlowStudio.sln`): **10,866 passed / 0 failed / 0 skipped**, 3m42s.
+
+Meitu settle observation on re-run: **did not reproduce** — the full suite was clean, so no Product or test timing change was made for it. No source, resource, configuration or preset file was modified during this re-verification; the only repository change is this note.
+
 **PASS — SCRUM-11092 LIVE CLOSURE AND TEST BASELINE RECONCILED**
