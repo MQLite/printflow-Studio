@@ -34,7 +34,54 @@ public sealed class PhotoshopW1BoundaryTests
         properties.ShouldNotContain("Revision");
         properties.ShouldNotContain("OutputPath");
         properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.BackingWorkingSha256));
-        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.ActionInvocationOccurredExactlyOnce));
+        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.Provenance));
+    }
+
+    /// <summary>
+    /// A prepared document names where its white ink came from, and does not assert an origin it
+    /// cannot know.
+    /// </summary>
+    /// <remarks>
+    /// SCRUM-11101 allows an operator to keep white ink that arrived in the customer's own file.
+    /// A prepared document must therefore be able to represent that case truthfully, which it
+    /// cannot do while it carries an unconditional action name, branch and invocation flag. The
+    /// origin is a closed choice instead: exactly two cases, both declared inside
+    /// <see cref="PhotoshopWhiteInkProvenance"/>, and no way to add a third from outside it.
+    /// </remarks>
+    [Fact]
+    public void W1_result_names_its_provenance_and_no_longer_assumes_the_Action_produced_it()
+    {
+        string[] properties = [.. typeof(PhotoshopW1PreparedDocument).GetProperties().Select(p => p.Name)];
+        properties.ShouldNotContain("ActionInvocationOccurredExactlyOnce");
+        properties.ShouldNotContain("ActionName");
+        properties.ShouldNotContain("ActionSetName");
+        properties.ShouldNotContain("Branch");
+
+        Type provenance = typeof(PhotoshopWhiteInkProvenance);
+        provenance.IsAbstract.ShouldBeTrue();
+        // Every constructor a derived record could chain to is private. The one exception is the
+        // compiler-generated copy constructor, which takes the record type itself and cannot be
+        // used as a base initialiser, so it does not open the hierarchy.
+        provenance.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(constructor =>
+            {
+                ParameterInfo[] parameters = constructor.GetParameters();
+                return parameters.Length != 1 || parameters[0].ParameterType != provenance;
+            })
+            .ShouldAllBe(constructor => constructor.IsPrivate,
+                "a non-private constructor would let a case be declared outside this hierarchy");
+
+        Type[] cases = [.. provenance.Assembly.GetTypes()
+            .Where(type => type.BaseType == provenance)
+            .OrderBy(type => type.Name, StringComparer.Ordinal)];
+        cases.Select(type => type.Name).ShouldBe(["Generated", "Retained"]);
+
+        // The Action-specific facts still exist — they are simply confined to the case that can
+        // truthfully claim them.
+        typeof(PhotoshopWhiteInkProvenance.Generated).GetProperties().Select(p => p.Name)
+            .ShouldContain(nameof(PhotoshopWhiteInkProvenance.Generated.ActionName));
+        typeof(PhotoshopWhiteInkProvenance.Retained).GetProperties().Select(p => p.Name)
+            .ShouldNotContain(name => name.Contains("Action", StringComparison.Ordinal));
     }
 
     [Fact]

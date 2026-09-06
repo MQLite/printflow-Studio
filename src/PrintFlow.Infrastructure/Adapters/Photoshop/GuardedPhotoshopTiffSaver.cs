@@ -377,7 +377,7 @@ internal sealed class GuardedPhotoshopTiffSaver
             !string.Equals(prepared.W1.Name, "W1", StringComparison.Ordinal) ||
             !string.Equals(prepared.W1.Type, "ChannelType.SPOTCOLOR", StringComparison.Ordinal) ||
             !prepared.W1.IsNonEmpty || prepared.W1.NonWhitePixelCount <= 0 ||
-            !prepared.ActionInvocationOccurredExactlyOnce)
+            !HasEstablishedProvenance(prepared.Provenance))
         {
             return OperationResult.Fail<Unit>(OperationFailure.Create(
                 FailureCode.PreconditionNotMet,
@@ -390,6 +390,29 @@ internal sealed class GuardedPhotoshopTiffSaver
         }
         return OperationResult.Ok();
     }
+
+    /// <summary>
+    /// Whether the document's white ink has an origin that was positively established, rather than
+    /// merely being present.
+    /// </summary>
+    /// <remarks>
+    /// The saver's job here has never been to check that the Action ran — the structural facts
+    /// above are what prove the document is production-shaped, and the native bridge and the TIFF
+    /// inspector beneath this method refer to the Action nowhere at all. Its job is to refuse a
+    /// document whose W1 nobody has accounted for. Both accepted origins are named explicitly, so
+    /// adding a third would have to be a deliberate edit here rather than a silent consequence of
+    /// a new caller.
+    /// </remarks>
+    private static bool HasEstablishedProvenance(PhotoshopWhiteInkProvenance provenance) =>
+        provenance switch
+        {
+            PhotoshopWhiteInkProvenance.Generated generated =>
+                !string.IsNullOrWhiteSpace(generated.ActionSetName) &&
+                !string.IsNullOrWhiteSpace(generated.ActionName),
+            PhotoshopWhiteInkProvenance.Retained retained =>
+                !string.IsNullOrWhiteSpace(retained.CarrierDocumentFullPath),
+            _ => false,
+        };
 
     private static OperationResult<Unit> ValidateNativeFacts(
         PhotoshopW1PreparedDocument prepared, PhotoshopNativeTiffOutcome outcome)

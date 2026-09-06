@@ -105,8 +105,8 @@ public sealed class PhotoshopW1WorkstationSmoke
                               $"non-white={result.W1.NonWhitePixelCount}, " +
                               $"solidity={result.W1.SolidityPercent?.ToString("R") ?? "unavailable"}, " +
                               $"colour={string.Join(",", result.W1.SpotColourComponents)}");
-            Console.WriteLine($"action               : {result.ActionSetName} / {result.ActionName} / once=" +
-                              result.ActionInvocationOccurredExactlyOnce);
+            var generated = result.Provenance.ShouldBeOfType<PhotoshopWhiteInkProvenance.Generated>();
+            Console.WriteLine($"action               : {generated.ActionSetName} / {generated.ActionName}");
             Console.WriteLine($"backing SHA          : {backingBefore} -> {Hash(absolute)}");
             Console.WriteLine("saved/output         : false / false");
 

@@ -38,10 +38,10 @@ public sealed class PhotoshopW1ExecutionTests : IDisposable
             h.Opened, h.Prepared, branch, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.ToString() : string.Empty);
-        result.Value.Branch.ShouldBe(branch);
-        result.Value.ActionName.ShouldBe(expectedAction);
-        result.Value.ActionSetName.ShouldBe("PrintFlow DTF");
-        result.Value.ActionInvocationOccurredExactlyOnce.ShouldBeTrue();
+        var generated = result.Value.Provenance.ShouldBeOfType<PhotoshopWhiteInkProvenance.Generated>();
+        generated.Branch.ShouldBe(branch);
+        generated.ActionName.ShouldBe(expectedAction);
+        generated.ActionSetName.ShouldBe("PrintFlow DTF");
         h.Native.ExecuteCount.ShouldBe(1);
         h.Native.Commands.Single().Branch.ShouldBe(branch);
     }
