@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -141,7 +142,7 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
                 output.WriteLine($"  mode/bits    : {stage.Mode} / {stage.Bits}");
                 output.WriteLine($"  profile      : {stage.ColourProfile}");
                 output.WriteLine($"  pixels/res   : {stage.PixelWidth}x{stage.PixelHeight} @ {stage.Resolution} PPI");
-                output.WriteLine($"  channels     : {string.Join(", ", stage.Channels)}");
+                output.WriteLine($"  channels     : {string.Join(", ", stage.Channels.Select(c => c.Name + "/" + c.Type))}");
                 output.WriteLine($"  W1 name/kind : {stage.W1Name} / {stage.W1Kind}");
                 output.WriteLine($"  W1 ink px    : {stage.W1InkPixels} of {stage.TotalPixels} " +
                                  $"({100.0 * stage.W1InkPixels / stage.TotalPixels:F2}%)");
@@ -228,6 +229,166 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
     }
 
     /// <summary>
+    /// SCRUM-11101-A Gate E. Produces a validated production TIFF from a carrier whose W1 was
+    /// retained from the customer's own file, without the signed W1 Action running at all.
+    /// </summary>
+    /// <remarks>
+    /// This is not SCRUM-11101 acceptance and there is no operator decision anywhere in it. It
+    /// answers one question: is the Retain production primitive technically viable end to end, or
+    /// does something below the saver quietly require the Action? The prepared document is handed
+    /// to the real <c>GuardedPhotoshopTiffSaver</c> with
+    /// <see cref="PhotoshopWhiteInkProvenance.Retained"/>, so nothing in this flow claims an origin
+    /// it does not have.
+    /// <para>
+    /// The asymmetric quadrant pattern earns its keep here: the saved TIFF's own fifth sample is
+    /// counted, and a W1 covering roughly three quarters of the canvas is evidence of the retained
+    /// channel specifically. A regenerated underbase would cover essentially all of it.
+    /// </para>
+    /// <para>
+    /// Opt in with <c>PRINTFLOW_RETAIN_TIFF_SMOKE=1</c>. The TIFF is left in a QA working directory
+    /// outside Git and the document is closed through the accepted seam.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Retained_W1_carrier_produces_a_validated_production_TIFF_without_the_Action()
+    {
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_RETAIN_TIFF_SMOKE") != "1")
+        {
+            return;
+        }
+
+        PrintFlowConfiguration configuration =
+            PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));
+        configuration.Adapters.Mode.ShouldBe("Production");
+
+        string token = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) +
+                       "-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
+        string manifest = Path.Combine(configuration.Workspace.Root, configuration.Preset.Path);
+        string root = Path.Combine(configuration.Workspace.Root, "QA", "Scrum11101A", token);
+        FileWorkspace workspace = new(root);
+        IPhotoshopTiffAutomation automation = PhotoshopAutomationComposition.CreateTiffAutomation(
+            manifest, Sha256.Parse(configuration.Preset.ExpectedSha256), workspace,
+            Path.Combine(root, "Evidence"), TimeProvider.System);
+
+        WorkspaceFileRef carrier = WorkspaceFileRef.Create(
+            $"Sessions/S_11101A/Working/A_{token}/PF_11101A_RETAINED.psd", WorkspaceArea.Working);
+        string carrierPath = workspace.ResolveAbsolute(carrier);
+        Directory.CreateDirectory(Path.GetDirectoryName(carrierPath)!);
+        byte[] synthetic = SpotChannelPsdFixtures.QuadrantW1Psd();
+        File.WriteAllBytes(carrierPath, synthetic);
+        Sha256 carrierBefore = Sha256.FromBytes(SHA256.HashData(synthetic));
+
+        WorkspaceFileRef tiff = WorkspaceFileRef.Create(
+            carrier.RelativePath[..^carrier.FileName.Length] + $"PRINT_50mm_CMYK_W_{token}.tif",
+            WorkspaceArea.Working);
+        output.WriteLine($"controlled workspace : {root}");
+        output.WriteLine($"preset               : v{configuration.Preset.Version}");
+        output.WriteLine($"retained carrier     : {carrier.RelativePath}");
+        output.WriteLine($"carrier SHA          : {carrierBefore}");
+        output.WriteLine($"rendered output      : {tiff.RelativePath}");
+        output.WriteLine(string.Empty);
+
+        var opened = await automation.OpenManagedWorkingFileAsync(carrier, CancellationToken.None);
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.ToString() : "");
+
+        // The two accepted primitives, in place of PrepareDocumentAsync (which refuses a spot
+        // channel outright) and ExecuteW1Async (which would regenerate the retained W1).
+        string response = RunProbeProgram(
+            ProbeProgram(opened.Value.Identity.ObservedFullPath, promoteBackground: true),
+            Path.GetDirectoryName(Path.GetFullPath(
+                PresetExecutablePath(configuration, configuration.Workspace.Root)))!);
+        ProbeStage[] stages = Decode(response);
+        ProbeStage carrierState = stages[^1];
+
+        output.WriteLine($"carrier state        : {carrierState.Mode} / {carrierState.Bits} / " +
+                              $"{carrierState.PixelWidth}x{carrierState.PixelHeight} @ {carrierState.Resolution} PPI");
+        output.WriteLine($"carrier profile      : {carrierState.ColourProfile}");
+        output.WriteLine($"carrier W1           : {carrierState.W1Name}/{carrierState.W1Kind}, " +
+                              $"ink={carrierState.W1InkPixels}");
+        output.WriteLine($"carrier W1 quadrants : {string.Join("  ",
+            carrierState.W1Quadrants.Select(value => value.ToString("F1", CultureInfo.InvariantCulture)))}");
+        output.WriteLine("W1 Action invoked    : NO");
+        output.WriteLine(string.Empty);
+
+        PhotoshopW1PreparedDocument retained = new(
+            opened.Value.Identity.ObservedFullPath,
+            carrierState.PixelWidth,
+            carrierState.PixelHeight,
+            carrierState.Resolution,
+            carrierState.PhysicalWidthMm,
+            carrierState.PhysicalHeightMm,
+            carrierState.Mode,
+            carrierState.Bits,
+            [.. carrierState.Channels.Where(channel => channel.Type == "ChannelType.COMPONENT")],
+            new PhotoshopW1ChannelFacts(
+                carrierState.W1Name, carrierState.W1Kind, carrierState.W1InkPixels > 0,
+                carrierState.W1InkPixels, null, []),
+            new PhotoshopWhiteInkProvenance.Retained(carrierPath, carrierBefore),
+            OtherDocumentsMayBeOpen: true,
+            BackingWorkingSha256: carrierBefore);
+
+        var saved = await automation.SaveProductionTiffAsync(
+            opened.Value, retained, tiff, CancellationToken.None);
+        if (saved.IsFailure)
+        {
+            output.WriteLine($"TIFF failure         : {saved.Failure}");
+            output.WriteLine("failure context      : " + string.Join(" | ",
+                saved.Failure.Context.Select(pair => $"{pair.Key}={pair.Value}")));
+        }
+        saved.IsSuccess.ShouldBeTrue(saved.IsFailure ? saved.Failure.ToString() : "");
+        PhotoshopValidatedTiffCandidate candidate = saved.Value;
+        ProductionTiffFacts facts = candidate.Facts;
+
+        output.WriteLine($"TIFF bytes/SHA       : {candidate.ByteLength} / {candidate.Sha256}");
+        output.WriteLine($"pixels/DPI           : {facts.PixelWidth}x{facts.PixelHeight} / " +
+                              $"{facts.XResolutionDpi:R}x{facts.YResolutionDpi:R}");
+        output.WriteLine($"samples/bits         : {facts.SamplesPerPixel} / " +
+                              $"{string.Join(',', facts.BitsPerSample)}, photometric={facts.PhotometricInterpretation}, " +
+                              $"extraSamples=[{string.Join(',', facts.ExtraSamples)}]");
+        output.WriteLine($"W1 in the TIFF       : names={string.Join(',', facts.ExtraChannelNames)}, " +
+                              $"spot={facts.W1IsPhotoshopSpotChannel}, nonWhite={facts.W1NonWhiteSampleCount}");
+        output.WriteLine($"save settings        : {candidate.SaveSettings}");
+
+        // CMYK/8 five-sample production shape, the same contract the generated branch produces.
+        facts.SamplesPerPixel.ShouldBe((ushort)5);
+        // Exactly one extra sample, tagged 0 — a production ink, not alpha or transparency.
+        facts.ExtraSamples.ShouldBe([(ushort)0]);
+        facts.BitsPerSample.ShouldBe([(ushort)8, 8, 8, 8, 8]);
+        facts.PhotometricInterpretation.ShouldBe((ushort)5);
+        facts.HasAlphaOrTransparencySample.ShouldBeFalse();
+        facts.HasPhotoshopImageSourceData.ShouldBeTrue();
+        facts.ExtraChannelNames.ShouldBe(["W1"]);
+        facts.W1IsPhotoshopSpotChannel.ShouldBeTrue();
+        facts.XResolutionDpi.ShouldBe(300, 0.0001);
+        facts.YResolutionDpi.ShouldBe(300, 0.0001);
+        candidate.SaveSettings.ShouldBe(PhotoshopProductionTiffSaveSettings.Accepted);
+
+        // The retained channel, recognisable as itself. Roughly three quarters of the canvas
+        // carries ink because one whole quadrant of the fixture deliberately carries none.
+        double coverage = (double)facts.W1NonWhiteSampleCount / ((long)facts.PixelWidth * facts.PixelHeight);
+        output.WriteLine($"W1 coverage in TIFF  : {coverage:P2} (retained pattern is ~75%)");
+        facts.W1NonWhiteSampleCount.ShouldBe(carrierState.W1InkPixels,
+            "the TIFF's fifth sample is not the exact retained channel Photoshop was holding");
+        Math.Abs(coverage - 0.75).ShouldBeLessThan(0.02,
+            "the TIFF's W1 does not carry the retained quadrant pattern");
+
+        File.ReadAllBytes(carrierPath).ShouldBe(synthetic, "the managed carrier was modified");
+        Directory.EnumerateFiles(Path.GetDirectoryName(carrierPath)!).Order().ShouldBe(
+            new[] { carrierPath, workspace.ResolveAbsolute(tiff) }.Order());
+
+        var closed = await automation.CloseExactDocumentAsync(
+            opened.Value, carrier, CancellationToken.None);
+        output.WriteLine(closed.IsSuccess
+            ? "document closed      : cleanly, through the accepted seam"
+            : $"document close       : REFUSED — {closed.Failure.Code}: {closed.Failure.TechnicalDetail}");
+
+        var after = await automation.EnsureReadyAsync(CancellationToken.None);
+        after.IsSuccess.ShouldBeTrue(after.IsFailure ? after.Failure.ToString() : "");
+        output.WriteLine($"Photoshop after      : {after.Value.State.State}");
+        output.WriteLine("workflow objects     : AdapterOutput=false / Revision=false / PrintOutput=false");
+    }
+
+    /// <summary>
     /// Asserts that the four quadrant ink densities are still in their original spatial order and
     /// still distinguishable from one another.
     /// </summary>
@@ -264,10 +425,11 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
     /// One fixed, test-owned ExtendScript program. It takes no caller-supplied source and names
     /// exactly one document, by absolute path, which it re-proves before touching anything.
     /// </summary>
-    private static string ProbeProgram(string expectedPath)
+    private static string ProbeProgram(string expectedPath, bool promoteBackground = false)
     {
         string path = JsonSerializer.Serialize(Path.GetFullPath(expectedPath));
         string width = TargetWidthMm.ToString("R", CultureInfo.InvariantCulture);
+        string promote = promoteBackground ? "true" : "false";
         return $$"""
             (function () {
                 var stages = [];
@@ -326,6 +488,8 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
                         enc(profile),
                         Math.round(doc.width.as('px')),
                         Math.round(doc.height.as('px')),
+                        Number(doc.width.as('mm')),
+                        Number(doc.height.as('mm')),
                         Number(doc.resolution),
                         enc(String(doc.mode)),
                         enc(String(doc.bitsPerChannel)),
@@ -351,6 +515,21 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
                         return result(false, 'The active document is not the exact managed Working copy.');
                     }
                     observe(doc, 'opened');
+                    // The accepted production path promotes the Background layer immediately
+                    // before its Action, and the production TIFF contract depends on the layer
+                    // data that promotion produces. A Retain carrier has to do the same thing or
+                    // it saves a flat TIFF with no ImageSourceData block at all.
+                    if ({{promote}}) {
+                        var background = null;
+                        try { background = doc.backgroundLayer; } catch (noBackgroundLayer) { }
+                        if (background !== null) {
+                            doc.activeLayer = background;
+                            background.isBackgroundLayer = false;
+                            if (doc.activeLayer.isBackgroundLayer) {
+                                return result(false, 'The Background layer could not be promoted.');
+                            }
+                        }
+                    }
                     // The accepted colour transform, as pinned by the workstation preset's
                     // colourSettings: Image > Mode > CMYK Color, not Convert to Profile.
                     doc.changeMode(ChangeMode.CMYK);
@@ -407,10 +586,12 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
         string ColourProfile,
         int PixelWidth,
         int PixelHeight,
+        double PhysicalWidthMm,
+        double PhysicalHeightMm,
         double Resolution,
         string Mode,
         string Bits,
-        string[] Channels,
+        ImmutableArray<PhotoshopChannelFact> Channels,
         string W1Name,
         string W1Kind,
         long W1InkPixels,
@@ -430,7 +611,7 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
         return [.. lines.Skip(3).Where(line => line.Length > 0).Select(line =>
         {
             string[] f = line.Split('|');
-            f.Length.ShouldBe(13);
+            f.Length.ShouldBe(15);
             double Number(string value) => double.Parse(value, CultureInfo.InvariantCulture);
             return new ProbeStage(
                 Uri.UnescapeDataString(f[0]),
@@ -438,15 +619,21 @@ public sealed class ExistingWhiteInkRetainPrimitiveProbe(ITestOutputHelper outpu
                 int.Parse(f[2], CultureInfo.InvariantCulture),
                 int.Parse(f[3], CultureInfo.InvariantCulture),
                 Number(f[4]),
-                Uri.UnescapeDataString(f[5]),
-                Uri.UnescapeDataString(f[6]),
-                [.. f[7].Split(';', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(pair => Uri.UnescapeDataString(pair.Replace(',', ' ')))],
+                Number(f[5]),
+                Number(f[6]),
+                Uri.UnescapeDataString(f[7]),
                 Uri.UnescapeDataString(f[8]),
-                Uri.UnescapeDataString(f[9]),
-                long.Parse(f[10], CultureInfo.InvariantCulture),
-                [.. f[11].Split(',').Select(Number)],
-                [.. f[12].Split(',').Select(Number)]);
+                [.. f[9].Split(';', StringSplitOptions.RemoveEmptyEntries).Select(pair =>
+                {
+                    string[] parts = pair.Split(',');
+                    return new PhotoshopChannelFact(
+                        Uri.UnescapeDataString(parts[0]), Uri.UnescapeDataString(parts[1]));
+                })],
+                Uri.UnescapeDataString(f[10]),
+                Uri.UnescapeDataString(f[11]),
+                long.Parse(f[12], CultureInfo.InvariantCulture),
+                [.. f[13].Split(',').Select(Number)],
+                [.. f[14].Split(',').Select(Number)]);
         })];
     }
 
