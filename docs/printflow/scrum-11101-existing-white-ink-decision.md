@@ -268,3 +268,328 @@ created:
 - this report
 
 Unrelated untracked files in the worktree were left untouched.
+
+---
+
+# SCRUM-11101-A Feasibility Gate
+
+Date: 2026-09-07. Branch `master`, starting clean at `d8d1e1c`. Accepted configuration
+`Adapters.Mode = Production`, preset `printflow-workstation-v1` **1.16.0**, signed `.atn` not
+re-recorded and invoked only where it belongs. No accepted history was rewritten, no branch or
+worktree was created and nothing was pushed.
+
+**Verdict: BLOCKED — SCRUM-11101 PDF WHITE-INK DETECTION AUTHORITY MISSING.**
+
+Every Retain and Regenerate primitive this gate set out to test is verified, on the accepted
+workstation. The one thing that is not verified — and cannot be, with the current authority — is the
+PDF half of the requirement. The original Jira row says "PSD **or PDF** preparation", and PDF
+preparation today cannot see a white-ink separation at all.
+
+SCRUM-11101 coverage is unchanged: still **PARTIAL**. No operator can see a Retain/Regenerate choice.
+
+## A. PDF
+
+**Can the current PDF authority detect spot/white-ink structure: NO.**
+
+This is not "hard" or "unreliable". There is no such information at the boundary.
+
+### Evidence
+
+The whole public surface of `Windows.Data.Pdf` is five types:
+
+| Type | What it can report |
+|---|---|
+| `PdfDocument` | page count, password-protected, get a page |
+| `PdfPage` | index, size, rotation, preferred zoom, render to a stream |
+| `PdfPageDimensions` | MediaBox, CropBox, BleedBox, ArtBox, TrimBox |
+| `PdfPageRenderOptions` | destination pixels, background colour, encoder, source rect |
+| `PdfPageRotation` | four rotation values |
+
+Not one member mentions a colourant, separation, colour space, ink, plate, channel or page
+resource. `RenderToStreamAsync` is the only route to page content and it returns composited BGRA8
+pixels. Whatever the source said about inks is resolved by the rasteriser and gone.
+
+`ExistingWhiteInkPdfDetectionGateTests` pins this three ways:
+
+1. **The surface itself.** The five type names are asserted exactly and a list of forbidden member
+   substrings is checked. A future Windows SDK that closes this gap fails the test, which is the
+   only automatic signal we would get.
+2. **A spot PDF is prepared successfully today.** Synthetic single-page fixtures paint their artwork
+   through `[/Separation /W1 /DeviceCMYK]` and through `[/DeviceN [/W1] /DeviceCMYK]`
+   (`SpotColourantPdfFixtures`, written byte by byte in C# so the colourant name and tint transform
+   are legible as evidence). Both are accepted by the accepted path, rendered, and turned into a
+   prepared Revision. The spot really is honoured — the painted rectangle reaches the PNG.
+3. **Spot and spot-free are indistinguishable.** The `PdfInspection` persisted for either fixture is
+   **record-equal** to the one persisted for a `/DeviceRGB` control of identical geometry.
+
+So the warning in §5 of the task is exactly right, and the situation is worse than a missing
+feature: today a customer PDF carrying an existing white-ink separation is **silently rasterised**
+and proceeds as an ordinary job. There is no refusal, because there is no observation to refuse on.
+
+### What is missing, and what it would take
+
+To satisfy the PDF half of the Jira row, PrintFlow must be able to answer, before rasterisation:
+
+* does any page resource declare a `Separation` or `DeviceN` colour space;
+* what are the colourant names, so `W1` can be matched against the production contract;
+* which page each is associated with;
+* is the colourant actually used by the content stream, or merely declared.
+
+None of these is derivable from a rendered raster. Recovering them needs the PDF object graph —
+cross-reference table or stream, object streams, page tree, `/Resources /ColorSpace`, and the
+content stream's colour operators.
+
+**A regex or byte scan for `/Separation`, `/DeviceN` or `/ColorSpace` is not an acceptable
+substitute and was not attempted.** The repository's own `compressed-two.pdf` fixture exists because
+that class of shortcut is already known to be wrong here: it stores its page dictionaries inside a
+compressed object stream and plants a `/Type /Page` decoy in a content stream. A text scan
+miscounts it. The same file shape would hide a `/Separation` from a scan, and an unrelated string in
+a compressed stream would invent one.
+
+Two honest options for the implementation slice, neither of which belongs in this gate:
+
+* **A narrow structural inspector.** Feasible but genuinely not tiny: it must parse both classic
+  cross-reference tables and cross-reference streams, object streams, `FlateDecode`, the page tree
+  and resource dictionaries — on adversarial input, since the input is customer artwork. It would be
+  a second PDF authority in a codebase whose current invariant is "Windows is the sole PDF
+  authority; WIC independently validates only its PNG output".
+* **A maintained library.** Removes the parser risk and adds a third-party dependency to an offline
+  installer product that currently ships none for this purpose, with the supply-chain and update
+  obligations that implies.
+
+Until one is chosen, the safe interim behaviour is to **refuse** a PDF whose spot content cannot be
+ruled out, rather than to keep rasterising it silently. That is a Product change and is deliberately
+not made here: §17 forbids leaving Product half-wired, and refusing every PDF outright would be a
+regression for the many that carry no spot at all. It is recorded as the first decision the
+implementation slice must take.
+
+## B. Retain
+
+All four questions answered on the accepted workstation. `ExistingWhiteInkRetainPrimitiveProbe`
+(`PRINTFLOW_RETAIN_PRIMITIVE_PROBE=1`, `PRINTFLOW_RETAIN_TIFF_SMOKE=1`).
+
+The fixture matters. `SpotChannelPsdFixtures.QuadrantW1Psd` is RGB/8 with exactly one `W1` spot
+channel carrying an asymmetric four-quadrant ink pattern — **0 / 96 / 192 / 255**, one quadrant with
+no ink at all. "W1 still exists" would also be true of a regenerated or a shifted channel; this
+pattern separates retention from regeneration, loss and misregistration.
+
+| Question | Result |
+|---|---|
+| Spot survives `changeMode(ChangeMode.CMYK)` | **PASS** |
+| Spot survives the accepted 300-PPI sizing | **PASS** |
+| Saver accepts a truthful Retained provenance | **PASS** |
+| Retained TIFF validates | **PASS** |
+
+### Observed
+
+```text
+opened               400x300 @72  RGB/8   4 channels  W1 SPOTCOLOR   90000 ink px (75.00%)
+changeMode(CMYK)     400x300 @72  CMYK/8  5 channels  W1 SPOTCOLOR   90000 ink px (75.00%)
+resizeImage(300 PPI) 591x443 @300 CMYK/8  5 channels  W1 SPOTCOLOR  196618 ink px (75.10%)
+```
+
+Quadrant densities read exactly **0 / 96 / 192 / 255 at all three stages**, including after
+resampling. The retained channel is transformed *with* the canvas, not merely preserved beside it.
+The mode change altered no pixel of it at all.
+
+### The CMYK contract (§9)
+
+Not accepted merely because both commands say "CMYK". The converted document reports its profile as
+**`Coated FOGRA39 (ISO 12647-2:2004)`**, which is exactly the preset's `cmykWorkingSpace`, reached
+through `图像 > 模式 > CMYK 颜色` with `convertToProfileCommandUsed: false`. The probe asserts the
+observed profile against the preset value rather than against a literal. No divergent
+colour-management path appeared, so no preset change is proposed.
+
+### The saver boundary (§11)
+
+`GuardedPhotoshopTiffSaver` took a `PhotoshopW1PreparedDocument` whose `Branch`, `ActionSetName`,
+`ActionName` and `ActionInvocationOccurredExactlyOnce` were true of every document the Product could
+produce — so the type asserted that *all* valid W1 comes from the signed Action. SCRUM-11101 makes
+that false.
+
+Those four members are now one `Provenance` member of a closed hierarchy:
+
+```text
+PhotoshopWhiteInkProvenance
+    Generated(branch, action set, action name)
+    Retained(carrier path, carrier hash)
+```
+
+A private base constructor closes it. This is not an alias or a permissive base class: the
+Action-specific facts still exist, confined to the case that can truthfully claim them, and an
+architecture test asserts the prepared document no longer carries any of them directly.
+
+The saver's guard changed from "the Action ran exactly once" to "the white ink has a positively
+established origin", checked per case — a `Retained` naming no carrier and a `Generated` naming no
+action are both refused before the single native save call. Nothing else moved, because nothing else
+was ever about the Action: `PhotoshopTiffNativeBridge` and `ProductionTiffInspector` are purely
+structural and mention it nowhere. Blast radius was six files, all in `Adapters/Photoshop`; no
+Workflow, App or Domain source references the type.
+
+`Retained` deliberately carries no operator decision, authority record or classification contract.
+Those belong to the slice that introduces the decision itself; what this case asserts today is only
+that the W1 arrived on a named managed carrier, which is what the Retain TIFF smoke needs and no
+more.
+
+### The retained TIFF
+
+Produced from the retained carrier with the signed Action **not invoked**, and validated by the
+existing inspector unchanged:
+
+```text
+591x443 @ 300x300 DPI, 5 samples of 8 bits, photometric 5
+ExtraSamples [0]              one production ink, not alpha
+ExtraChannelNames [W1]        Photoshop spot channel, ImageSourceData present
+W1 non-white samples 196618   exactly the count Photoshop was holding
+accepted PhotoshopProductionTiffSaveSettings
+```
+
+Coverage in the file is **75.10%** — recognisably the retained quadrant pattern, since one quadrant
+carries no ink. A regenerated underbase covers essentially the whole canvas, as section C shows.
+
+The managed carrier is byte-identical afterwards, exactly one file was added, the document closed
+cleanly through the accepted seam and Photoshop ended clean.
+
+### Two findings the implementation slice must carry
+
+1. **`GuardedPhotoshopDocumentPreparer` refuses a retained W1 by design.** It requires RGB/8 with
+   three component channels and rejects outright if `before.W1Exists || after.W1Exists ||
+   HasSpot(...)`. The *primitive* underneath it preserves the spot perfectly — that is Gate C's
+   result — but the accepted guarded sizing operation cannot be pointed at a Retain carrier as it
+   stands. It needs the same kind of truthful generalisation the saver just received. This is
+   scoped, small and understood; it is not a blocker, but it is a second boundary and B2 must not
+   assume the saver was the only one.
+2. **A Retain carrier must promote its Background layer**, exactly as the accepted path does before
+   its Action. Without it the TIFF is written but the inspector rightly refuses it: required tag
+   **37724** (`ImageSourceData`) is missing, because a background-only document saves no layer data.
+   This cost one failed run to discover and is precisely the kind of thing this gate existed for.
+
+## C. Regenerate
+
+`ExistingWhiteInkRegenerateReuseProbe` (`PRINTFLOW_REGENERATE_REUSE_PROBE=1`).
+
+| Question | Result |
+|---|---|
+| Supported-W1 removal on a managed copy feasible | **PASS** |
+| Existing Action path reusable unchanged | **YES** |
+
+Removing the one supported W1 leaves exactly the state the accepted path already demands:
+
+```text
+before : RGB/8 | components=3 | spots=1 | w1=yes | 400x300
+after  : RGB/8 | components=3 | spots=0 | w1=no  | 400x300
+```
+
+The whole accepted chain then ran with **no modification at all**:
+
+```text
+PrepareDocumentAsync    -> 400x300 @ 300 PPI, DocumentMode.RGB
+ExecuteW1Async          -> signed Action  PrintFlow DTF / W1_1px
+SaveProductionTiffAsync -> 400x300 @ 300 DPI, 5 samples, W1 spot channel
+```
+
+The generated underbase covers **100.00%** of the canvas against the retained carrier's 75.10%, so
+the two branches are distinguishable in the produced TIFF rather than only in intent.
+
+This is the structural reason Regenerate is the branch to build first, and it is now demonstrated
+rather than argued: the accepted preparer and W1 executor both already require RGB/8, three
+component channels and no spot, which is precisely what removal produces. **No other accepted output
+logic needs redesign.**
+
+### The removal primitive (§15)
+
+Implemented as a fixed program inside the probe, not as Product source — this is a feasibility gate,
+§17 requires ordinary Product behaviour to stay the safe refusal, and nothing here is reachable from
+`SessionService`.
+
+It operates only on a PrintFlow-owned managed copy, re-proves the document's absolute path before
+touching anything, and applies the closed classification: RGB/8, exactly three component channels,
+exactly one non-component channel, that channel a `SPOTCOLOR` named exactly `W1`, content non-empty.
+It then positively verifies the post-condition itself, so a removal that left an unexpected shape
+cannot report success.
+
+Refusals were proven live, not merely written. Against a two-spot carrier:
+
+```text
+REFUSED — Exactly one non-component channel is required; found 2.
+          Ambiguous ink cannot be classified.
+before  : RGB/8 | components=3 | spots=2 | w1=yes | 400x300
+```
+
+and the document was left untouched. A mask named `W1`, several candidates, an empty `W1` and any
+unknown spot fall out of the same contract as refusals. Ink identity stays a production-preset
+concern; nothing is guessed.
+
+## D. Baseline
+
+`PhotoshopPsdBoundaryTests.Production_psd_path_enforces_real_guards_and_independent_validation(variant: "malformed")`
+remains the known load-sensitive case and is **not** an independently reproducible defect.
+
+Across five targeted-matrix runs in this slice it failed **once** — on the first run after the
+provenance change, when the build had just completed and the machine was busiest — with the same
+signature the baseline records (expected `PsdPreparationFailed`, observed `OutputUnreadable`). The
+three most recent consecutive runs were **517 / 517** each, including that case, and the class passes
+**12 / 12** in isolation.
+
+Per §19 it was not fixed and not weakened: no sleep was added, no settle timeout was widened, and
+the evidence is preserved rather than tidied away. The baseline is still not deterministically green
+and is not described as such.
+
+## E. Testing performed
+
+Targeted only, per §18. The complete 10,866-test suite was **not** run; this slice's Production
+change is confined to `Adapters/Photoshop`, and the broader Photoshop/W1/TIFF/PSD/PDF matrix is the
+proportionate scope.
+
+```text
+Photoshop | Tiff | W1 | Psd | WhiteInk | Pdf      517 passed / 517   (x3 consecutive)
+ExistingWhiteInkPreFixReproductionTests             2 passed / 2
+Live: retain primitive probe (Gates B, C)           PASS
+Live: retained TIFF smoke (Gate E)                  PASS
+Live: regenerate reuse probe (Gate F)               PASS
+Live: ambiguous-spot refusal (§15)                  PASS
+```
+
+`dotnet build PrintFlowStudio.sln -c Debug` succeeds with 0 warnings and 0 errors.
+
+## F. Product behaviour is unchanged (§17)
+
+`ExistingWhiteInkPreFixReproductionTests` still passes unmodified. A PSD carrying an existing W1 is
+still refused with `FailureCode.PsdUnsupported`, still lands in `StepState.Failed`, still creates no
+prepared Revision, and the closed `CommandKind` vocabulary still contains no member mentioning a
+white-ink decision. No `ExistingWhiteInkDecision` type, authority persistence, migration 0013,
+Session control, localisation string or AutomationId was added. **No operator can see a
+Retain/Regenerate choice.**
+
+Two Photoshop documents left open by failed probe runs were closed without saving, addressed by
+absolute path, leaving the operator's own unrelated document untouched.
+
+## G. Commits
+
+```text
+b0fe7e3  test: prove PDF preparation cannot observe an existing white-ink spot
+2b689f0  test: prove an existing W1 survives the CMYK and 300-PPI primitives
+0b3c81b  feat: model white-ink provenance instead of assuming the Action produced it
+ac93c67  test: produce a validated production TIFF from a retained-W1 carrier
+54ccb5b  test: prove Regenerate reuses the accepted output path unchanged
+```
+
+Nothing pushed. `18d20c5` and `d8d1e1c` are intact.
+
+## H. Recommended next order
+
+Unchanged from the task's proposal, with one insertion forced by section A:
+
+```text
+B0. Decide the PDF white-ink authority, and close the silent-rasterisation hole
+    in the meantime. This is the only remaining blocker, and it gates the PDF
+    half of the Jira row; the PSD half is now unblocked.
+B1. Regenerate backend + authority persistence
+B2. Retain backend + carrier/provenance
+      including the GuardedPhotoshopDocumentPreparer generalisation and the
+      Background-layer promotion recorded in section B
+B3. Operator decision UI + restart/invalidation
+B4. Live Retain / Regenerate / ambiguous-spot acceptance
+```
+
+B1 was not started; §22 does not authorise it without explicit instruction.
