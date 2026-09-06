@@ -75,30 +75,58 @@ internal static class SpotChannelPsdFixtures
     /// RGB/8, one W1 spot channel, uncompressed planar composite, no layers, 72 PPI by omission
     /// of a resolution resource.
     /// </summary>
-    internal static byte[] QuadrantW1Psd()
+    internal static byte[] QuadrantW1Psd() => QuadrantSpotPsd("W1");
+
+    /// <summary>
+    /// The same canvas carrying two spot channels, so nothing can positively classify which one
+    /// is the production white ink.
+    /// </summary>
+    /// <remarks>
+    /// The supported-existing-W1 contract is "exactly one spot channel, named W1". This file
+    /// satisfies neither half on its own terms and must be refused rather than guessed at — the
+    /// original Jira row defines behaviour for "an existing white-ink spot channel", singular, and
+    /// keeps ink identity a production-preset concern rather than something the workflow may infer.
+    /// </remarks>
+    internal static byte[] AmbiguousTwoSpotPsd() => QuadrantSpotPsd("W1", "W2");
+
+    /// <summary>
+    /// RGB/8 with one spot channel per supplied name; the first carries the quadrant ink pattern
+    /// and any further channel is solid, i.e. empty of ink.
+    /// </summary>
+    private static byte[] QuadrantSpotPsd(params string[] spotNames)
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream, Encoding.ASCII, leaveOpen: true);
         void U16(ushort value) { writer.Write((byte)(value >> 8)); writer.Write((byte)value); }
         void U32(uint value) { U16((ushort)(value >> 16)); U16((ushort)value); }
 
-        // File header: four channels (R, G, B and the spot), RGB colour mode, 8 bits.
-        writer.Write("8BPS"u8); U16(1); writer.Write(new byte[6]); U16(4);
+        // File header: R, G, B plus one channel per spot; RGB colour mode, 8 bits.
+        writer.Write("8BPS"u8); U16(1); writer.Write(new byte[6]); U16((ushort)(3 + spotNames.Length));
         U32(Height); U32(Width); U16(8); U16(3);
 
         // Colour mode data: none for RGB.
         U32(0);
 
-        // Image resources: merged-data marker, the fourth channel's name, and the display info
-        // that makes it a spot channel rather than an alpha mask.
-        U32(72);
+        // 1006, alpha channel names: one Pascal string per extra channel, the block padded to an
+        // even length. 1007, display info: 14 bytes per extra channel, kind 2 meaning spot.
+        byte[] names = [.. spotNames.SelectMany(name =>
+            new byte[] { (byte)name.Length }.Concat(Encoding.ASCII.GetBytes(name)))];
+        int namesPadded = names.Length + (names.Length % 2);
+        int displayLength = 14 * spotNames.Length;
+
+        // Image resources: merged-data marker, then the two blocks above.
+        U32((uint)(30 + (12 + namesPadded) + (12 + displayLength)));
         writer.Write("8BIM"u8); U16(1057); U16(0); U32(17);
         U32(1); writer.Write((byte)1); U32(0); U32(0); U32(1); writer.Write((byte)0);
-        // 1006, alpha channel names: one Pascal string "W1", padded to an even length.
-        writer.Write("8BIM"u8); U16(1006); U16(0); U32(3); writer.Write(new byte[] { 2, 87, 49, 0 });
-        // 1007, display info: RGB space, pure red ink colour, 100% opacity, kind 2 = spot.
-        writer.Write("8BIM"u8); U16(1007); U16(0); U32(14);
-        U16(0); U16(65535); U16(0); U16(0); U16(0); U16(100); writer.Write(new byte[] { 2, 0 });
+        writer.Write("8BIM"u8); U16(1006); U16(0); U32((uint)names.Length);
+        writer.Write(names);
+        if (namesPadded != names.Length) writer.Write((byte)0);
+        writer.Write("8BIM"u8); U16(1007); U16(0); U32((uint)displayLength);
+        foreach (string _ in spotNames)
+        {
+            // RGB space, pure red ink colour, 100% opacity, kind 2 = spot, one padding byte.
+            U16(0); U16(65535); U16(0); U16(0); U16(0); U16(100); writer.Write(new byte[] { 2, 0 });
+        }
 
         // Layer and mask information: none. The merged composite is the whole document.
         U32(0);
@@ -115,11 +143,15 @@ internal static class SpotChannelPsdFixtures
                 }
             }
         }
-        for (int y = 0; y < Height; y++)
+        for (int spot = 0; spot < spotNames.Length; spot++)
         {
-            for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
             {
-                writer.Write(QuadrantInk[Quadrant(x, y)]);
+                for (int x = 0; x < Width; x++)
+                {
+                    // Only the first spot carries the quadrant pattern; any further one is blank.
+                    writer.Write(spot == 0 ? QuadrantInk[Quadrant(x, y)] : BottomRightInk);
+                }
             }
         }
 
