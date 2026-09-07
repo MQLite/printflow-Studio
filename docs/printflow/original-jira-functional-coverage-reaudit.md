@@ -661,3 +661,68 @@ Evidence: clean build **0 warnings / 0 errors**; final targeted regression **558
 Full requirements, semantics, tests, live boundaries, evidence, known failure and Git discipline: [SCRUM-11082 manual crop completion report](scrum-11082-manual-crop-completion.md).
 
 **PASS WITH NOTES — SCRUM-11082 MANUAL CROP FALLBACK VERIFIED**
+
+---
+
+## L. Coverage delta — SCRUM-11104 TIFF final review mode (8 September 2026)
+
+**SCRUM-11104: previous audit PARTIAL → current FULL.** This supersedes the preview and metadata
+gaps in the historical row without rewriting that row. The exact original CSV requirement is source
+Work Item **11411**, *Build TIFF Final Review Mode*, re-read before any Product edit.
+
+All six audited gaps are closed. The final TIFF review now offers three distinct modes — **Colour**,
+**White ink** and **Colour + white overlay** — over one canvas, decoded once from the validated
+file's own samples rather than from a generic WIC flattening that spends the spot channel on alpha.
+The Colour mode is an uncalibrated device conversion of the separated CMYK and says so on screen in
+both languages; the embedded ICC profile is deliberately not applied and no printed-colour claim is
+made. The White-ink mode is the validated W1 fifth sample under one closed, documented, tested
+polarity (stored 255 = no ink, 0 = 100% ink, displayed inverted so bright means ink), verified
+region by region against deliberately banded fixtures and against the inspector's own non-empty
+count. The overlay marks W1 coverage over the colour with a restrained fixed-strength wash and an
+unambiguous legend.
+
+The production metadata block now states output filename, output path, pixel dimensions, physical
+dimensions, TIFF resolution, **effective source resolution**, enlargement authority where one was
+required, colour mode and bit depth, W1 status with its ink-sample count, the signed preset
+identifier with its manifest hash, and an abbreviated SHA-256. Rows a payload cannot answer are
+absent rather than guessed; the preset **version** is omitted because the `PrintOutput` row does not
+persist it. Effective resolution is bound to the exact Revision the producing attempt's preparation
+was calculated from — proven across automatic-trim, keep-original-extent and manual-crop upstream
+routes — and introduces **no thresholds, bands or colours**.
+
+Every preview mode is bound to the reviewed `PrintOutput` hash: the decoder hashes the file before
+reading a byte for display and refuses a mismatch, so a TIFF changed after validation yields no
+preview, no metadata and no path, and the existing approval refusal is unaffected. Changing mode
+alters nothing an approval binds to. Rejection and Recycle Bin disposal, multiple independently
+reviewed sizes, and restart reconstruction without a Photoshop rerun are all unchanged and
+regression-covered. `SharedReviewSurface` (SCRUM-11079) is untouched; the specialist surface sits
+beside it and reuses the same zoom and viewport state.
+
+Evidence: clean build **0 warnings / 0 errors**; final-source full suite **11,453 passed, 0 failed,
+0 skipped** (baseline 11,400 + 53 new tests); the live workstation proof passed against the **real
+Photoshop-produced Epic 11000 baseline TIFF** with W1 ink samples, effective DPI, output path and
+hash each verified independently of the view model. **Note:** Photoshop is not installed on this
+workstation, so under §60 the live proof reuses that already generated validated TIFF rather than
+producing a new one; no new Photoshop run was made and none is claimed.
+
+**SCRUM-11095: remains PARTIAL — one factual half of its gap retired.** Its exact original source
+Work Item **11402**, *Implement Effective-DPI Resolution Risk Rules*, was independently re-read. The
+historical row's statement that "effective DPI is never computed or displayed anywhere in the
+product (no such concept exists in the source)" is no longer true: the concept exists and
+millimetres, pixel dimensions and effective DPI are displayed together at final review. Still open
+and unchanged: effective DPI is shown only **after** the TIFF exists rather than at the Print
+Dimensions preflight decision; **graphic bounds are still not displayed anywhere**; and the
+sufficient / warning / blocking bands remain superseded by explicit enlargement authority, because
+no print-test thresholds were ever captured (SCRUM-11065/11066 waived) and invented numbers are
+still refused. This delta is recorded exactly and claims nothing further.
+
+**SCRUM-11132, SCRUM-11134, SCRUM-11135 and SCRUM-11105 are unchanged, and the parent Epic
+SCRUM-11093 is not closed by this slice** — its PSD and PDF input gaps (SCRUM-11099, SCRUM-11100)
+are untouched.
+
+Exact original AC, polarity evidence from the real production TIFF, colour-management limits,
+effective-DPI definition and matrix, metadata block, hash binding, restart and integrity behaviour,
+keyboard/UIA/localisation coverage, tests, live proof and its stated scope, build, suite and Git
+discipline: [SCRUM-11104 TIFF final review completion report](scrum-11104-tiff-final-review-completion.md).
+
+**PASS WITH NOTES — SCRUM-11104 TIFF FINAL REVIEW VERIFIED**
