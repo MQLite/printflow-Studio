@@ -1,8 +1,17 @@
-# SCRUM-11099 — PSD input preparation
+| Existing spot channel or a channel named W1 | *(Superseded 2026-09-07 — see the amendment above.)* As accepted here: refuse; retain inspection metadata; no retain/regenerate decision is made. **Now:** prepare as ordinary visual artwork; the inspection is kept as a diagnostic only |# SCRUM-11099 — PSD input preparation
 
 Date: 2026-09-04. Starting branch: `master`, clean at `b186c66`. The accepted configuration remains Production, `printflow-workstation-v1` **1.16.0**. No accepted history was rewritten and nothing was pushed.
 
 Current verdict after the accepted-workstation closure below: **SCRUM-11099 PASS — PSD INPUT PREPARATION VERIFIED**. The original implementation report and its blocked evidence are preserved below as historical findings.
+
+> **Later amendment — one rule below has been superseded.** On 2026-09-07 a business clarification
+> defined PSD and PDF as visual-only design inputs: existing spot-colour and white-ink channels in
+> customer source files are not production authority, PrintFlow does not retain source W1, and
+> production W1 is always generated from the approved visual artwork immediately before the TIFF is
+> written. The refusal recorded below for *"existing spot channel or a channel named W1"* was
+> therefore removed; such a PSD now prepares as ordinary visual artwork. **Every other refusal in
+> this document still stands unchanged.** This document is preserved as written; the change and its
+> evidence are in `docs/printflow/scrum-11101-existing-white-ink-decision.md`.
 
 ## Original Jira authority
 
