@@ -115,6 +115,6 @@ The full suite is therefore reported with the known unrelated failure, not as an
 
 ## Git discipline
 
-Started clean on `master` at `b78f748` (accepted SCRUM-11083). Work stays in the canonical checkout; no branch, worktree, alternate clone, amend, rebase or push. Unrelated files and the known Photoshop PSD settle-poll flake are unchanged. Implementation, tests, this report and the dated coverage delta are included in a new local commit; the final response identifies it. `git diff --check` passes. No attribution trailer is added.
+Started clean on `master` at `b78f748` (accepted SCRUM-11083). Work stays in the canonical checkout; no branch, worktree, alternate clone, amend, rebase or push. Unrelated files and the known Photoshop PSD settle-poll flake are unchanged. Implementation, tests, this report and the dated coverage delta are included in local commit 49b6294 and a small follow-up removing only a terminal blank line from the new migration. The complete suite tested the same executable SQL/code; the whitespace cleanup changes no statement or test. `git diff --check` passes. No attribution trailer is added.
 
 **PASS WITH NOTES — SCRUM-11082 MANUAL CROP FALLBACK VERIFIED**

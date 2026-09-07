@@ -55,4 +55,3 @@ CREATE TRIGGER ProcessingAttempt_ManualCrop_Immutable
 BEFORE UPDATE ON ProcessingAttempt
 WHEN OLD.ManualMarginMode IS NOT NULL AND (NEW.ManualSelectedLeft IS NOT OLD.ManualSelectedLeft OR NEW.ManualSelectedTop IS NOT OLD.ManualSelectedTop OR NEW.ManualSelectedRight IS NOT OLD.ManualSelectedRight OR NEW.ManualSelectedBottom IS NOT OLD.ManualSelectedBottom OR NEW.ManualAppliedLeft IS NOT OLD.ManualAppliedLeft OR NEW.ManualAppliedTop IS NOT OLD.ManualAppliedTop OR NEW.ManualAppliedRight IS NOT OLD.ManualAppliedRight OR NEW.ManualAppliedBottom IS NOT OLD.ManualAppliedBottom OR NEW.ManualMarginTop IS NOT OLD.ManualMarginTop OR NEW.ManualMarginRight IS NOT OLD.ManualMarginRight OR NEW.ManualMarginBottom IS NOT OLD.ManualMarginBottom OR NEW.ManualMarginLeft IS NOT OLD.ManualMarginLeft OR NEW.ManualMarginMode IS NOT OLD.ManualMarginMode)
 BEGIN SELECT RAISE(ABORT, 'Manual crop history is immutable.'); END;
-
