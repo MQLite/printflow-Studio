@@ -118,3 +118,24 @@ The full suite is therefore reported with the known unrelated failure, not as an
 Started clean on `master` at `b78f748` (accepted SCRUM-11083). Work stays in the canonical checkout; no branch, worktree, alternate clone, amend, rebase or push. Unrelated files and the known Photoshop PSD settle-poll flake are unchanged. Implementation, tests, this report and the dated coverage delta are included in local commit 49b6294 and a small follow-up removing only a terminal blank line from the new migration. The complete suite tested the same executable SQL/code; the whitespace cleanup changes no statement or test. `git diff --check` passes. No attribution trailer is added.
 
 **PASS WITH NOTES — SCRUM-11082 MANUAL CROP FALLBACK VERIFIED**
+
+---
+
+## Addendum (2026-09-07) — the PSD settle-poll flake has since been closed
+
+Recorded after the fact; nothing above is amended, and the evidence it preserves stands.
+
+The known unrelated failure this slice reported — `PhotoshopPsdBoundaryTests(variant: "malformed")`
+returning `OutputUnreadable` instead of `PsdPreparationFailed` — was not a `malformed` problem and
+not a test-only one. The bounded settle poll in `PreparePsdAsync` checked its deadline after each
+observation, so a single slow read could spend the whole budget and leave the loop holding one of
+the two equal observations its contract requires. Any variant reaching the poll could lose it,
+which is why `success` had been seen failing the same way.
+
+It is now reproduced deterministically without load, and closed: the deadline may no longer end
+the poll before the minimum observation sequence has been taken, and an unsatisfiable
+timeout/interval combination is refused up front. No timing constant changed and no expected
+failure code was weakened. The complete suite against the fixed source is
+**11,400 passed / 0 failed / 0 skipped**.
+
+Full account: [photoshop-psd-settle-determinism.md](photoshop-psd-settle-determinism.md).
