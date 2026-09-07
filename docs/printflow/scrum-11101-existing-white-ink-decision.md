@@ -992,10 +992,47 @@ The population changed, so the totals are reconciled rather than compared:
 = 10,881  measured
 ```
 
-**The known malformed-PSD flake did not occur.** `PhotoshopPsdBoundaryTests.Production_psd_path_enforces_real_guards_and_independent_validation(variant: "malformed")`
-passed in this run and in every targeted run of this slice. That is **not** a claim that it is fixed:
-nothing was done to it, no sleep was added and no settle timeout was widened. It remains the
-load-sensitive case sections 2 and D describe, and a single green run does not retire it.
+**The known load-sensitive flake did not occur in the full suite, but it did occur once
+afterwards — on a different variant than previously recorded.**
+
+In the complete suite above, and in every targeted run of this slice,
+`PhotoshopPsdBoundaryTests.Production_psd_path_enforces_real_guards_and_independent_validation(variant: "malformed")`
+passed. That is **not** a claim that it is fixed.
+
+After the final commits, one confirmation run of a narrow filter
+(`PhotoshopW1BoundaryTests | VisualOnly | PsdInspection | PhotoshopPsdBoundary`) failed **1 of 43**:
+
+```text
+失败  PhotoshopPsdBoundaryTests
+      .Production_psd_path_enforces_real_guards_and_independent_validation(variant: "success", expected: null)  [77 ms]
+```
+
+That is the **`success`** variant, not `malformed`. It is the first time this case has been observed
+failing, and it is recorded here rather than tidied away.
+
+**Reproducibility: no.** Immediately re-run:
+
+```text
+PhotoshopPsdBoundaryTests in isolation                     12 passed / 12
+the exact failing filter, three consecutive runs           43 / 43,  43 / 43,  43 / 43
+```
+
+The one failure came on the run that immediately followed a `dotnet build`, when the machine was
+busiest — the same circumstance section D records for the `malformed` observation.
+
+**Assessment.** This is the same defect, not a second one, and the variant is incidental. Both cases
+run the same bounded settle poll in `PreparePsdAsync`, which requires two equal independent reads of
+the output before it will accept the file; these boundary tests configure `TiffSettleTimeout` at
+40 ms, so under load the poll can expire before two equal reads are obtained. The variant only
+decides which failure code the expiry surfaces. The earlier characterisation — "the malformed case
+races the bounded settle poll" — was therefore narrower than the truth: **any** variant of this test
+class can lose that race, and the accepted baseline should be read as such.
+
+Per the correction's own constraint, nothing was done about it here: no sleep was added, no settle
+timeout was widened, and no test was weakened. It is not a regression introduced by this slice — the
+settle poll and its 40 ms test timeout are untouched, and the `success` variant's assertions are the
+ones it has always had. The baseline is still not deterministically green and is not described as
+such.
 
 ## 18. Jira coverage delta
 
