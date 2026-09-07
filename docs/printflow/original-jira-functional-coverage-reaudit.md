@@ -617,3 +617,17 @@ the clarification, and the live evidence: `docs/printflow/scrum-11101-existing-w
 | --- | --- | --- |
 | SCRUM-11104 | **PARTIAL** | Untouched. Still owns the CMYK preview, the W1 preview, the colour-plus-white overlay and the final-TIFF review metadata gaps. Not closed by this clarification. |
 | SCRUM-11132 | **PARTIAL** | The PSD and PDF input prerequisites are now **FULL** (SCRUM-11099 and SCRUM-11100 shipped after this audit), and the existing-white-input decision is **not required** by the current production contract. Still pending: the actual fixed-workstation multi-format E2E acceptance. Not FULL. |
+
+---
+
+## I. Coverage delta — SCRUM-11079 shared review completion (7 September 2026)
+
+**SCRUM-11079: PARTIAL → FULL.** This supersedes the shared-review gap assessment in the historical row above; it does not rewrite the original audit or close the parent Epic.
+
+One `SharedReviewSurface` now provides bidirectional normalized pan, shared checkerboard/white/black inspection backgrounds, and side-by-side or slider comparison across the existing general review workflows. It preserves shared zoom, Fit, 100%, and high magnification. Different-sized images keep their natural aspect ratios and a documented shared top-left origin in Slider mode. Display changes reuse preview bitmaps and do not change revision bytes, hashes, review authority, or workflow state.
+
+Evidence: **149 targeted tests passed**; **10,903 full-suite tests passed, 0 failed, 0 skipped**; clean build **0 warnings / 0 errors**; real synthetic WPF window/UIA smoke passed, including normalized scrolling, background/mode changes, RangeValue slider operation, WPF keyboard traversal/routed keys, normal approval, and independent persisted revision/hash binding verification. The known Photoshop settle-poll flake did not occur.
+
+Full original Jira wording, coordinate policy, zero-extent/resize/reset behavior, ephemeral preference lifetime, keyboard-evidence limits, tests, live transcript, and Git discipline: [SCRUM-11079 completion report](scrum-11079-shared-review-completion.md).
+
+This closes only the shared-review portion of historical P1-3. **SCRUM-11077 remains PARTIAL. SCRUM-11082 and SCRUM-11083 are unchanged**; trim cancellation and manual-crop gaps remain outside this slice.

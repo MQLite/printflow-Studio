@@ -49,4 +49,7 @@
     <EmbeddedResource Update="Resources\Strings.zh-CN.resx" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PrintFlow.Tests" />
+  </ItemGroup>
 </Project>

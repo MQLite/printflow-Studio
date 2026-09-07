@@ -771,4 +771,10 @@
   <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>The background removal result must be a PNG with transparent pixels and visible artwork.</value></data>
   <data name="Failure_ManualResultCanvas" xml:space="preserve"><value>The background removal result must keep the same pixel dimensions as the approved input.</value></data>
   <data name="Session_ManualBackgroundRemovalAudit" xml:space="preserve"><value>Background removal: Manual processing result from reviewed Revision {0}</value></data>
+  <data name="Session_ReviewModeSideBySide" xml:space="preserve"><value>Side by side</value></data>
+  <data name="Session_ReviewModeSlider" xml:space="preserve"><value>Slider</value></data>
+  <data name="Session_ReviewBackgroundCheckerboard" xml:space="preserve"><value>Checkerboard</value></data>
+  <data name="Session_ReviewBackgroundWhite" xml:space="preserve"><value>White</value></data>
+  <data name="Session_ReviewBackgroundBlack" xml:space="preserve"><value>Black</value></data>
+  <data name="Session_ReviewComparisonSlider" xml:space="preserve"><value>Comparison slider</value></data>
 </root>

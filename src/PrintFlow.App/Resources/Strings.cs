@@ -16,6 +16,12 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_ReviewModeSideBySide => Get(nameof(Session_ReviewModeSideBySide));
+    internal static string Session_ReviewModeSlider => Get(nameof(Session_ReviewModeSlider));
+    internal static string Session_ReviewBackgroundCheckerboard => Get(nameof(Session_ReviewBackgroundCheckerboard));
+    internal static string Session_ReviewBackgroundWhite => Get(nameof(Session_ReviewBackgroundWhite));
+    internal static string Session_ReviewBackgroundBlack => Get(nameof(Session_ReviewBackgroundBlack));
+    internal static string Session_ReviewComparisonSlider => Get(nameof(Session_ReviewComparisonSlider));
     internal static string Session_ManualBackgroundRemovalAudit => Get(nameof(Session_ManualBackgroundRemovalAudit));
     internal static string Failure_ManualResultCanvas => Get(nameof(Failure_ManualResultCanvas));
     internal static string Session_SubmitManualResult => Get(nameof(Session_SubmitManualResult));

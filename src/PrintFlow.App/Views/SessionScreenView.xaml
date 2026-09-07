@@ -54,100 +54,7 @@
             </DrawingBrush.Drawing>
         </DrawingBrush>
 
-        <!--
-            One preview pane (§7, §11). Used for the single-image state and for both halves of
-            a Before/After comparison, so the two can never drift apart in appearance and the
-            heading is the only thing that differs.
-        -->
-        <DataTemplate DataType="{x:Type vm:ArtefactPreviewPane}">
-            <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Margin="0,0,10,0">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Margin="10,8,10,8">
-                        <TextBlock Text="{Binding Heading}" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding FileName}"
-                                   Opacity="0.75"
-                                   TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Detail}"
-                                   Opacity="0.6"
-                                   TextWrapping="Wrap"
-                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}" />
-                    </StackPanel>
 
-                    <!--
-                        A preview that could not be produced is a sentence, never a blank box and
-                        never a reason for anything else on this screen to stop (§21).
-                    -->
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="{Binding Unavailable}"
-                               TextWrapping="Wrap"
-                               Opacity="0.75"
-                               FontStyle="Italic"
-                               Margin="10,0,10,10"
-                               Visibility="{Binding IsUnavailable, Converter={StaticResource BoolToVisibility}}" />
-
-                    <ScrollViewer Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibility}}">
-                        <ScrollViewer.Style>
-                            <Style TargetType="ScrollViewer">
-                                <!--
-                                    Panning is scrolling (§13): once the image is larger than the
-                                    viewport the ordinary scrollbars appear. While it is fitted
-                                    there is nothing off-screen, so they are disabled and the
-                                    Image's Uniform stretch has the whole viewport to fit into
-                                    (§15).
-                                -->
-                                <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
-                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
-                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                 Value="True">
-                                        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
-                                        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ScrollViewer.Style>
-
-                        <Grid Background="{StaticResource TransparencyCheckerboard}">
-                            <Image Source="{Binding Payload, Converter={StaticResource PreviewPayload}}"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center">
-                                <Image.LayoutTransform>
-                                    <!--
-                                        The magnification, shared by both panes (§14). Applied to
-                                        the displayed element only — no Revision is resampled,
-                                        rewritten or re-hashed by zooming (§12).
-                                    -->
-                                    <ScaleTransform
-                                        ScaleX="{Binding DataContext.ZoomScale,
-                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        ScaleY="{Binding DataContext.ZoomScale,
-                                                 RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                                </Image.LayoutTransform>
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <!--
-                                            The preview payload is a 96-dpi PNG, so None means one
-                                            image pixel per device-independent pixel and "100%"
-                                            reads as 100% whatever dpi the artefact records.
-                                        -->
-                                        <Setter Property="Stretch" Value="None" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
-                                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                         Value="True">
-                                                <Setter Property="Stretch" Value="Uniform" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
-                        </Grid>
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -466,42 +373,28 @@
                                    TextAlignment="Right"
                                    Margin="0,0,10,0" />
                         <Button Content="{Binding ZoomOutLabel}"
+                                AutomationProperties.AutomationId="Session.ReviewZoomOut"
+                                AutomationProperties.Name="{Binding ZoomOutLabel}"
                                 Command="{Binding ZoomOutCommand}"
                                 IsEnabled="{Binding CanZoomOut}"
                                 Padding="10,4"
                                 Margin="0,0,6,0" />
                         <Button Content="{Binding ZoomInLabel}"
+                                AutomationProperties.AutomationId="Session.ReviewZoomIn"
+                                AutomationProperties.Name="{Binding ZoomInLabel}"
                                 Command="{Binding ZoomInCommand}"
                                 IsEnabled="{Binding CanZoomIn}"
                                 Padding="10,4"
                                 Margin="0,0,6,0" />
                         <Button Content="{Binding ResetZoomLabel}"
+                                AutomationProperties.AutomationId="Session.ReviewResetZoom"
+                                AutomationProperties.Name="{Binding ResetZoomLabel}"
                                 Command="{Binding ResetZoomCommand}"
                                 Padding="10,4" />
                     </StackPanel>
                 </DockPanel>
 
-                <ItemsControl ItemsSource="{Binding PreviewPanes}"
-                              IsTabStop="False"
-                              AutomationProperties.AutomationId="Session.PreviewPanes"
-                              AutomationProperties.Name="{Binding PreviewHeading}">
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="AutomationProperties.Name" Value="{Binding Heading}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <!--
-                                One row, and as many equal columns as there are panes: a single
-                                preview fills the width, and a comparison splits it evenly
-                                side by side (§11).
-                            -->
-                            <primitives:UniformGrid Rows="1" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <local:SharedReviewSurface />
             </DockPanel>
 
             <!--

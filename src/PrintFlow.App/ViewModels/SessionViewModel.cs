@@ -722,6 +722,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public ObservableCollection<ArtefactPreviewPane> PreviewPanes { get; } = [];
 
+    public ReviewViewportState ReviewViewport { get; } = new();
+
     /// <summary>Every quick rejection reason, in enum order.</summary>
     public IReadOnlyList<RejectionReasonChoice> RejectionReasons { get; }
 
@@ -2813,6 +2815,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void ResetZoom()
     {
+        ReviewViewport.Reset();
         IsFitToViewport = true;
         ZoomScale = 1.0;
     }

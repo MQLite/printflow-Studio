@@ -760,4 +760,10 @@
   <data name="Failure_ManualResultTransparency" xml:space="preserve"><value>去背景结果必须为 PNG，并同时包含透明像素和可见图案。</value></data>
   <data name="Failure_ManualResultCanvas" xml:space="preserve"><value>去背景结果的像素尺寸必须与已批准的输入图像相同。</value></data>
   <data name="Session_ManualBackgroundRemovalAudit" xml:space="preserve"><value>去背景：基于已确认版本 {0} 的手动处理结果</value></data>
+  <data name="Session_ReviewModeSideBySide" xml:space="preserve"><value>并排比较</value></data>
+  <data name="Session_ReviewModeSlider" xml:space="preserve"><value>滑动比较</value></data>
+  <data name="Session_ReviewBackgroundCheckerboard" xml:space="preserve"><value>棋盘格</value></data>
+  <data name="Session_ReviewBackgroundWhite" xml:space="preserve"><value>白色</value></data>
+  <data name="Session_ReviewBackgroundBlack" xml:space="preserve"><value>黑色</value></data>
+  <data name="Session_ReviewComparisonSlider" xml:space="preserve"><value>比较滑块</value></data>
 </root>
