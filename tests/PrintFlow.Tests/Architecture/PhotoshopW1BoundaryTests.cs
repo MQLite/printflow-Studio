@@ -34,54 +34,97 @@ public sealed class PhotoshopW1BoundaryTests
         properties.ShouldNotContain("Revision");
         properties.ShouldNotContain("OutputPath");
         properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.BackingWorkingSha256));
-        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.Provenance));
+        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.ActionInvocationOccurredExactlyOnce));
     }
 
     /// <summary>
-    /// A prepared document names where its white ink came from, and does not assert an origin it
-    /// cannot know.
+    /// The production white-ink invariant, asserted structurally: for every production TIFF that
+    /// carries white ink, the W1 origin is the PrintFlow validated production path — never a
+    /// customer PSD and never a customer PDF.
     /// </summary>
     /// <remarks>
-    /// SCRUM-11101 allows an operator to keep white ink that arrived in the customer's own file.
-    /// A prepared document must therefore be able to represent that case truthfully, which it
-    /// cannot do while it carries an unconditional action name, branch and invocation flag. The
-    /// origin is a closed choice instead: exactly two cases, both declared inside
-    /// <see cref="PhotoshopWhiteInkProvenance"/>, and no way to add a third from outside it.
+    /// PSD and PDF are visual design inputs. Source spot-colour and white-ink channels are not
+    /// preserved as production channels, so there is no such thing as retained white ink, and the
+    /// only document the TIFF saver accepts is one the signed Action produced here. The type
+    /// system is what enforces this: <see cref="PhotoshopW1PreparedDocument"/> is the sole input
+    /// to the saver, it is constructed in exactly one place, and it has no member capable of
+    /// describing white ink from anywhere else.
+    /// <para>
+    /// SCRUM-11101-A modelled an open <c>Provenance</c> choice here — <c>Generated</c> or
+    /// <c>Retained</c> — while the original SCRUM-11101 acceptance criterion still stood. The
+    /// business contract that superseded SCRUM-11101 makes <c>Retained</c> business-invalid, so
+    /// the capability was removed rather than left as unreachable future surface. This test is
+    /// what stops it, or any equivalent, from returning by accident.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void W1_result_names_its_provenance_and_no_longer_assumes_the_Action_produced_it()
+    public void Production_W1_can_only_originate_from_the_validated_Action_path()
     {
         string[] properties = [.. typeof(PhotoshopW1PreparedDocument).GetProperties().Select(p => p.Name)];
-        properties.ShouldNotContain("ActionInvocationOccurredExactlyOnce");
-        properties.ShouldNotContain("ActionName");
-        properties.ShouldNotContain("ActionSetName");
-        properties.ShouldNotContain("Branch");
 
-        Type provenance = typeof(PhotoshopWhiteInkProvenance);
-        provenance.IsAbstract.ShouldBeTrue();
-        // Every constructor a derived record could chain to is private. The one exception is the
-        // compiler-generated copy constructor, which takes the record type itself and cannot be
-        // used as a base initialiser, so it does not open the hierarchy.
-        provenance.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Where(constructor =>
+        // The Action facts are unconditional members, not one case of a choice: a prepared
+        // document cannot exist without naming the branch, the set, the action and the fact that
+        // it was invoked exactly once.
+        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.Branch));
+        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.ActionSetName));
+        properties.ShouldContain(nameof(PhotoshopW1PreparedDocument.ActionName));
+
+        // No member can describe white ink that arrived from somewhere else.
+        properties.ShouldNotContain("Provenance");
+        properties.ShouldNotContain(name => name.Contains("Retain", StringComparison.OrdinalIgnoreCase));
+        properties.ShouldNotContain(name => name.Contains("Carrier", StringComparison.OrdinalIgnoreCase));
+        properties.ShouldNotContain(name => name.Contains("Existing", StringComparison.OrdinalIgnoreCase));
+
+        // And no Retain vocabulary survives anywhere in the Infrastructure assembly's type names.
+        typeof(PhotoshopW1PreparedDocument).Assembly.GetTypes()
+            .Select(type => type.Name)
+            .ShouldNotContain(name => name.Contains("WhiteInkProvenance", StringComparison.Ordinal) ||
+                name.Contains("ExistingWhiteInk", StringComparison.Ordinal) ||
+                name.Contains("RetainExisting", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// No Product source anywhere offers the operator a Retain-versus-Regenerate choice, and no
+    /// preparation or output rule treats a source spot/white-ink channel as authority.
+    /// </summary>
+    /// <remarks>
+    /// The original SCRUM-11101 acceptance criterion required exactly that prompt. The business
+    /// clarification that superseded it defines PSD and PDF as visual-only inputs, so the prompt
+    /// must not exist — not merely be unwired. This reads the shipped source of all four Product
+    /// projects rather than a chosen list of types, so a new decision surface in a view model, a
+    /// workflow command or a resource string is caught wherever it is added.
+    /// </remarks>
+    [Fact]
+    public void No_product_source_offers_a_retain_or_regenerate_white_ink_decision()
+    {
+        string[] projects = ["PrintFlow.Domain", "PrintFlow.Workflow", "PrintFlow.Infrastructure", "PrintFlow.App"];
+        string[] forbidden =
+        [
+            "ExistingWhiteInkDecision", "RetainExistingWhiteInk", "RegenerateWhiteInk",
+            "WhiteInkDecision", "RetainedWhiteInk", "IPdfSpotColourInspector",
+        ];
+
+        List<string> found = [];
+        foreach (string project in projects)
+        {
+            foreach (string file in Directory.EnumerateFiles(
+                ProjectDirectory(project), "*.*", SearchOption.AllDirectories))
             {
-                ParameterInfo[] parameters = constructor.GetParameters();
-                return parameters.Length != 1 || parameters[0].ParameterType != provenance;
-            })
-            .ShouldAllBe(constructor => constructor.IsPrivate,
-                "a non-private constructor would let a case be declared outside this hierarchy");
+                if (Path.GetExtension(file) is not (".cs" or ".xaml" or ".resx")) continue;
+                // bin/obj carry generated copies of the same sources and of stale builds.
+                if (file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
+                    file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)) continue;
 
-        Type[] cases = [.. provenance.Assembly.GetTypes()
-            .Where(type => type.BaseType == provenance)
-            .OrderBy(type => type.Name, StringComparer.Ordinal)];
-        cases.Select(type => type.Name).ShouldBe(["Generated", "Retained"]);
+                string text = File.ReadAllText(file);
+                found.AddRange(forbidden
+                    .Where(term => text.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .Select(term => $"{term} in {Path.GetFileName(file)}"));
+            }
+        }
 
-        // The Action-specific facts still exist — they are simply confined to the case that can
-        // truthfully claim them.
-        typeof(PhotoshopWhiteInkProvenance.Generated).GetProperties().Select(p => p.Name)
-            .ShouldContain(nameof(PhotoshopWhiteInkProvenance.Generated.ActionName));
-        typeof(PhotoshopWhiteInkProvenance.Retained).GetProperties().Select(p => p.Name)
-            .ShouldNotContain(name => name.Contains("Action", StringComparison.Ordinal));
+        found.ShouldBeEmpty(
+            "PSD and PDF are visual-only inputs; PrintFlow does not ask the operator whether to " +
+            "retain source white ink, so no Product surface may name that decision");
     }
 
     [Fact]

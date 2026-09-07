@@ -212,9 +212,12 @@ internal sealed class GuardedPhotoshopW1Executor
             observed.After.BitDepth,
             [.. observed.After.Channels.Where(IsComponent)],
             observed.W1,
-            new PhotoshopWhiteInkProvenance.Generated(branch, contract.SetName, actionName.Value),
+            branch,
+            contract.SetName,
+            actionName.Value,
             prepared.OtherDocumentsMayBeOpen || observed.Before.DocumentCount > 1,
-            hashAfter.Value);
+            hashAfter.Value,
+            ActionInvocationOccurredExactlyOnce: true);
 
         if (cancellationAfterAction)
         {
@@ -440,8 +443,8 @@ internal sealed class GuardedPhotoshopW1Executor
     private static Dictionary<string, string> ResultContext(PhotoshopW1PreparedDocument result) => new()
     {
         ["document"] = result.DocumentFullPath,
-        ["branch"] = ((PhotoshopWhiteInkProvenance.Generated)result.Provenance).Branch.ToString(),
-        ["action"] = ((PhotoshopWhiteInkProvenance.Generated)result.Provenance).ActionName,
+        ["branch"] = result.Branch.ToString(),
+        ["action"] = result.ActionName,
         ["actionInvocationCount"] = "1",
         ["backingSha256"] = result.BackingWorkingSha256.ToString(),
         ["inMemoryCmykW1MayBeRetained"] = "true",
