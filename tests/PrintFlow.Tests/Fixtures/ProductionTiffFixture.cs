@@ -17,12 +17,22 @@ public sealed record ProductionTiffFixtureOptions(
     bool IncludePyramidIfd = false,
     ushort LayerCompression = 1,
     byte[]? CmykSamples = null,
+    int PixelWidth = 2,
+    int PixelHeight = 2,
+    byte[]? W1VerticalBands = null,
     byte? FifthSampleEverywhere = null);
 
 internal static class ProductionTiffFixture
 {
-    private const int Width = 2;
-    private const int Height = 2;
+    /// <summary>The fixture canvas, from the options rather than a constant (SCRUM-11104 §42).</summary>
+    /// <remarks>
+    /// The 2 × 2 default is what every pre-existing caller wrote against and stays exactly that.
+    /// A review-payload test needs more: a W1 pattern with distinguishable 0%, partial and 100%
+    /// regions cannot exist on four pixels, and a downsampling assertion needs a canvas larger
+    /// than the display edge.
+    /// </remarks>
+    private static int WidthOf(ProductionTiffFixtureOptions options) => options.PixelWidth;
+    private static int HeightOf(ProductionTiffFixtureOptions options) => options.PixelHeight;
 
     internal static string Write(string directory, ProductionTiffFixtureOptions? options = null)
     {
@@ -45,7 +55,8 @@ internal static class ProductionTiffFixture
         byte[] xResolution = Rational(options.Dpi, 1, options.LittleEndian);
         byte[] yResolution = Rational(options.Dpi, 1, options.LittleEndian);
         byte[] resources = PhotoshopResources(options.ChannelName, options.ChannelKind);
-        byte[] imageSource = PhotoshopImageSourceData(options.LayerCompression, options.LittleEndian);
+        byte[] imageSource = PhotoshopImageSourceData(
+            options.LayerCompression, options.LittleEndian, WidthOf(options), HeightOf(options));
         byte[] pixels = Pixels(options);
 
         const ushort entryCount = 18;
@@ -67,8 +78,8 @@ internal static class ProductionTiffFixture
         WriteUInt16(stream, entryCount, options.LittleEndian);
 
         Entry(stream, 254, 4, 1, ScalarLong(0, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 256, 4, 1, ScalarLong(Width, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 257, 4, 1, ScalarLong(Height, options.LittleEndian), options.LittleEndian);
+        Entry(stream, 256, 4, 1, ScalarLong(WidthOf(options), options.LittleEndian), options.LittleEndian);
+        Entry(stream, 257, 4, 1, ScalarLong(HeightOf(options), options.LittleEndian), options.LittleEndian);
         Entry(stream, 258, 3, options.SamplesPerPixel,
             OffsetOrInline(bits, bitsOffset, options.LittleEndian), options.LittleEndian);
         Entry(stream, 259, 3, 1, ScalarShort(options.Compression, options.LittleEndian), options.LittleEndian);
@@ -77,7 +88,7 @@ internal static class ProductionTiffFixture
         Entry(stream, 274, 3, 1, ScalarShort(1, options.LittleEndian), options.LittleEndian);
         Entry(stream, 277, 3, 1,
             ScalarShort(options.SamplesPerPixel, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 278, 4, 1, ScalarLong(Height, options.LittleEndian), options.LittleEndian);
+        Entry(stream, 278, 4, 1, ScalarLong(HeightOf(options), options.LittleEndian), options.LittleEndian);
         Entry(stream, 279, 4, 1, ScalarLong(pixels.Length, options.LittleEndian), options.LittleEndian);
         Entry(stream, 282, 5, 1, ScalarLong(xResolutionOffset, options.LittleEndian), options.LittleEndian);
         Entry(stream, 283, 5, 1, ScalarLong(yResolutionOffset, options.LittleEndian), options.LittleEndian);
@@ -116,16 +127,25 @@ internal static class ProductionTiffFixture
     /// whose W1 channel is full ink for <i>every</i> pixel — the default's single zeroed sample
     /// makes the channel non-empty for the inspector but leaves three of four pixels opaque after
     /// WIC's conversion, which is not the defect the live artefact showed.
+    /// <para>
+    /// <see cref="ProductionTiffFixtureOptions.W1VerticalBands"/> is the review-payload form
+    /// (SCRUM-11104 §10, §42): equal-width vertical bands of <i>stored</i> fifth-sample values,
+    /// left to right, so a file can carry deliberately distinguishable 0% (255), partial and
+    /// 100% (0) white-ink regions and a preview can be checked against them per region rather
+    /// than merely "the channel exists".
+    /// </para>
     /// </remarks>
     private static byte[] Pixels(ProductionTiffFixtureOptions options)
     {
         ushort samples = options.SamplesPerPixel;
-        byte[] data = Enumerable.Repeat(byte.MaxValue, Width * Height * samples).ToArray();
+        int width = WidthOf(options);
+        int height = HeightOf(options);
+        byte[] data = Enumerable.Repeat(byte.MaxValue, width * height * samples).ToArray();
 
         if (options.CmykSamples is { Length: > 0 } cmyk)
         {
             int colourSamples = Math.Min(cmyk.Length, samples);
-            for (int pixel = 0; pixel < Width * Height; pixel++)
+            for (int pixel = 0; pixel < width * height; pixel++)
             {
                 Array.Copy(cmyk, 0, data, pixel * samples, colourSamples);
             }
@@ -136,9 +156,20 @@ internal static class ProductionTiffFixture
             return data;
         }
 
-        if (options.FifthSampleEverywhere is { } fifth)
+        if (options.W1VerticalBands is { Length: > 0 } bands)
         {
-            for (int pixel = 0; pixel < Width * Height; pixel++)
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int band = Math.Min(bands.Length - 1, x * bands.Length / width);
+                    data[((y * width) + x) * samples + 4] = bands[band];
+                }
+            }
+        }
+        else if (options.FifthSampleEverywhere is { } fifth)
+        {
+            for (int pixel = 0; pixel < width * height; pixel++)
             {
                 data[pixel * samples + 4] = fifth;
             }
@@ -190,14 +221,15 @@ internal static class ProductionTiffFixture
         if ((data.Length & 1) != 0) stream.WriteByte(0);
     }
 
-    private static byte[] PhotoshopImageSourceData(ushort layerCompression, bool littleEndian)
+    private static byte[] PhotoshopImageSourceData(
+        ushort layerCompression, bool littleEndian, int width, int height)
     {
         using MemoryStream layer = new();
         WriteUInt16(layer, 1, littleEndian);
         WriteUInt32(layer, 0, littleEndian);
         WriteUInt32(layer, 0, littleEndian);
-        WriteUInt32(layer, Height, littleEndian);
-        WriteUInt32(layer, Width, littleEndian);
+        WriteUInt32(layer, height, littleEndian);
+        WriteUInt32(layer, width, littleEndian);
         WriteUInt16(layer, 5, littleEndian);
         short[] ids = [-1, 0, 1, 2, 3];
         foreach (short id in ids)

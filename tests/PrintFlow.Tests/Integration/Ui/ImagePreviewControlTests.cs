@@ -274,7 +274,7 @@ public sealed class ImagePreviewControlTests
 
         // The first decode is held open, so the overlap is real rather than a matter of timing.
         GatedPreviewService gated = new(harness.Previews);
-        SessionViewModel session = new(harness.Sessions, gated, new RecordingNavigation());
+        SessionViewModel session = new(harness.Sessions, gated, harness.TiffReviews, new RecordingNavigation());
 
         session.Open(harness.Navigation.WorkflowSelectionFor!);
         Task overtaken = session.PreviewsLoaded;

@@ -776,4 +776,37 @@
   <data name="Session_ManualCropSelected" xml:space="preserve"><value>所选范围</value></data>
   <data name="Session_ManualCropApplied" xml:space="preserve"><value>实际裁切范围</value></data>
   <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>请输入大于或等于零的整数像素值。</value></data>
+  <data name="Session_TiffModeHeading" xml:space="preserve"><value>预览模式</value></data>
+  <data name="Session_TiffModeColour" xml:space="preserve"><value>彩色</value></data>
+  <data name="Session_TiffModeWhiteInk" xml:space="preserve"><value>白墨</value></data>
+  <data name="Session_TiffModeOverlay" xml:space="preserve"><value>彩色 + 白墨叠加</value></data>
+  <data name="Session_TiffColourPreviewName" xml:space="preserve"><value>彩色预览</value></data>
+  <data name="Session_TiffWhiteInkPreviewName" xml:space="preserve"><value>白墨预览</value></data>
+  <data name="Session_TiffOverlayPreviewName" xml:space="preserve"><value>彩色与白墨叠加预览</value></data>
+  <data name="Session_TiffColourLegend" xml:space="preserve"><value>这是 CMYK 内容未经色彩校准的屏幕近似显示，不能作为印刷颜色的依据。</value></data>
+  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>亮部 = 有白墨 · 黑色 = 无白墨。</value></data>
+  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>白色叠加 = 白墨覆盖范围，并非最终印刷效果。</value></data>
+  <data name="Session_TiffProductionHeading" xml:space="preserve"><value>生产信息</value></data>
+  <data name="Session_TiffLabelOutputFile" xml:space="preserve"><value>输出文件</value></data>
+  <data name="Session_TiffLabelOutputPath" xml:space="preserve"><value>输出路径</value></data>
+  <data name="Session_TiffLabelPixelDimensions" xml:space="preserve"><value>像素尺寸</value></data>
+  <data name="Session_TiffLabelPhysicalSize" xml:space="preserve"><value>物理尺寸</value></data>
+  <data name="Session_TiffLabelResolution" xml:space="preserve"><value>TIFF 分辨率</value></data>
+  <data name="Session_TiffLabelEffectiveDpi" xml:space="preserve"><value>源图有效分辨率</value></data>
+  <data name="Session_TiffLabelColourMode" xml:space="preserve"><value>色彩</value></data>
+  <data name="Session_TiffLabelWhiteInk" xml:space="preserve"><value>白墨</value></data>
+  <data name="Session_TiffLabelEnlargement" xml:space="preserve"><value>放大</value></data>
+  <data name="Session_TiffLabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_TiffValuePixels" xml:space="preserve"><value>{0} × {1} 像素</value></data>
+  <data name="Session_TiffValuePhysical" xml:space="preserve"><value>{0:0.0} × {1:0.0} 毫米</value></data>
+  <data name="Session_TiffValueResolution" xml:space="preserve"><value>{0:0.##} × {1:0.##} PPI</value></data>
+  <data name="Session_TiffValueEffectiveDpi" xml:space="preserve"><value>{0:0} × {1:0} PPI，来自 {2} × {3} 源图像素</value></data>
+  <data name="Session_TiffValueBelowProduction" xml:space="preserve"><value> · 低于 {0} PPI 生产分辨率</value></data>
+  <data name="Session_TiffValueColourMode" xml:space="preserve"><value>{0} · {1} 位 · {2} 个墨通道</value></data>
+  <data name="Session_TiffValueWhiteInk" xml:space="preserve"><value>{0} 已验证 · {1} · {2:N0} 像素有墨</value></data>
+  <data name="Session_TiffValueEnlargementAuthorised" xml:space="preserve"><value>需要放大，操作员已授权</value></data>
+  <data name="Session_TiffValueEnlargementUnauthorised" xml:space="preserve"><value>需要放大，但未记录操作员授权</value></data>
+  <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>无法生成该文件的彩色、白墨和彩色 + 白墨预览。TIFF 文件本身未受影响，下方的审核决定不变。</value></data>
+  <data name="Session_TiffLabelPreset" xml:space="preserve"><value>生产预设</value></data>
+  <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0}（{1}）</value></data>
 </root>

@@ -302,7 +302,7 @@ public sealed class PdfPreparationWorkflowTests
             var imported = navigation.WorkflowSelectionFor.ShouldNotBeNull();
             authority.Opens.ShouldBe(0);
             var chosen = await service.ExecuteAsync(imported.Id, new WorkflowCommand.SelectWorkflow(WorkflowType.GeneratePrintTiff), "qa", default);
-            var screen = new SessionViewModel(service, h.Previews, navigation);
+            var screen = new SessionViewModel(service, h.Previews, h.TiffReviews, navigation);
             screen.Open(chosen.Value);
             screen.CanConfirmOriginal.ShouldBeFalse();
             screen.RunStepLabel.ShouldContain(label);

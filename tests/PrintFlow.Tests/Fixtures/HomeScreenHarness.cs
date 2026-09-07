@@ -165,12 +165,29 @@ internal sealed class HomeScreenHarness : IDisposable
     /// A preset provider in place of the fixture-backed one, so a screen can be driven against
     /// naming patterns the renderer cannot honour (naming-contract fix §6, §11).
     /// </param>
-    public HomeScreenHarness(IWorkstationPresetProvider? preset = null)
+    /// <param name="photoshop">
+    /// A Photoshop adapter in place of the default fake, so a final-review screen test can be
+    /// driven against a real accepted production TIFF (SCRUM-11104 §42). Held so
+    /// <see cref="RestartSession"/> composes the restarted service with the same one — which is
+    /// what lets a restart test prove no further Photoshop call happened (§39, §54).
+    /// </param>
+    public HomeScreenHarness(
+        IWorkstationPresetProvider? preset = null,
+        Func<IWorkspace, IPhotoshopOutputProcessor>? photoshop = null)
     {
+        // A factory rather than an instance: the adapter needs the workspace, and the workspace
+        // belongs to the harness being constructed. This is the only order in which a caller can
+        // hold both the adapter it wants to assert on and the screens that drive it.
+        _photoshop = photoshop?.Invoke(_harness.FileWorkspace);
         Meitu = new CountingMeituProcessor(_harness.FakeMeitu);
-        Sessions = _harness.CreateServiceWithMeitu(Meitu, preset);
+        Sessions = _harness.CreateServiceWithMeitu(Meitu, preset, photoshop: _photoshop);
         Home = new HomeViewModel(Sessions, Navigation, FilePicker, StartupStatus);
     }
+
+    private readonly IPhotoshopOutputProcessor? _photoshop;
+
+    /// <summary>The Photoshop adapter this harness composed, when a caller supplied one.</summary>
+    public IPhotoshopOutputProcessor? Photoshop => _photoshop;
 
     /// <summary>
     /// The Meitu port the screens actually drive, counting its calls.
@@ -224,16 +241,19 @@ internal sealed class HomeScreenHarness : IDisposable
     /// </remarks>
     public RestartedSession RestartSession(RecordingNavigation navigation)
     {
-        ISessionService restarted = _harness.CreateService();
-        return new RestartedSession(restarted, new SessionViewModel(restarted, Previews, navigation));
+        ISessionService restarted = _harness.CreateService(photoshop: _photoshop);
+        return new RestartedSession(restarted, new SessionViewModel(restarted, Previews, TiffReviews, navigation));
     }
 
     /// <summary>A session screen over the same service (Epic 11100 Part 3C3A §19).</summary>
 
-    public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, Previews, navigation);
+    public SessionViewModel Session(RecordingNavigation navigation) => new(Sessions, Previews, TiffReviews, navigation);
 
     /// <summary>The read-only image seam the session screen previews through (Part C1 §3).</summary>
     public IArtefactPreviewService Previews => _harness.Previews;
+
+    /// <summary>The specialist production-TIFF review seam (SCRUM-11104 §43).</summary>
+    public IProductionTiffReviewService TiffReviews => _harness.TiffReviews;
 
     /// <summary>
     /// The absolute path of a file inside the workspace, for a test that needs to corrupt one.

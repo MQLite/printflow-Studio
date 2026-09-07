@@ -450,7 +450,7 @@ public sealed class ManualCropUiTests
         // A second screen over the same session — what resuming it does — with crop A's preview
         // load held open the moment it starts.
         GatedPreviewService gated = new(harness.Previews);
-        SessionViewModel resumed = new(harness.Sessions, gated, new RecordingNavigation());
+        SessionViewModel resumed = new(harness.Sessions, gated, harness.TiffReviews, new RecordingNavigation());
 
         gated.HoldNextCall();
         resumed.Open(showingCropA);

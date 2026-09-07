@@ -5,6 +5,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
+using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
@@ -83,6 +84,16 @@ internal sealed class SessionServiceHarness : IDisposable
     /// <summary>The read-only image seam over the same workspace and database.</summary>
     public IArtefactPreviewService Previews { get; }
 
+    /// <summary>The real production-TIFF review decoder (SCRUM-11104 §43).</summary>
+    /// <remarks>
+    /// Real, for the reason <see cref="PreviewDecoder"/> is: a doubled decoder would prove
+    /// nothing about whether an operator can actually see the white ink in the file on disk.
+    /// </remarks>
+    public ITiffReviewDecoder TiffReviewDecoder { get; }
+
+    /// <summary>The specialist review seam over the same workspace and database.</summary>
+    public IProductionTiffReviewService TiffReviews { get; }
+
     public SessionServiceHarness()
     {
         Workspace = new TempWorkspace();
@@ -101,6 +112,8 @@ internal sealed class SessionServiceHarness : IDisposable
         ManualCrop = new WicManualCropProcessor(FileWorkspace);
         PreviewDecoder = new WicImagePreviewDecoder(FileWorkspace);
         Previews = new ArtefactPreviewService(Repository, PreviewDecoder);
+        TiffReviewDecoder = new ProductionTiffReviewDecoder(FileWorkspace);
+        TiffReviews = new ProductionTiffReviewService(Repository, TiffReviewDecoder, FileWorkspace);
     }
 
     /// <summary>
@@ -130,14 +143,15 @@ internal sealed class SessionServiceHarness : IDisposable
     public ISessionService CreateService(
         IWorkstationPresetProvider? preset = null,
         IWorkspace? workspace = null,
-        ISessionRepository? repository = null) => new SessionService(
+        ISessionRepository? repository = null,
+        IPhotoshopOutputProcessor? photoshop = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         workspace ?? FileWorkspace,
         RecycleBin,
         FileInspector,
         FakeMeitu,
-        FakePhotoshop,
+        photoshop ?? FakePhotoshop,
         Trim,
         ManualCrop,
         preset ?? Preset,
@@ -169,18 +183,24 @@ internal sealed class SessionServiceHarness : IDisposable
     /// for tests that need to prove something about a non-fake <see cref="AdapterExecutionMode"/>
     /// (Epic 11100 Part 3A §8: <see cref="IEnvironmentGate"/> blocking a production adapter).
     /// </summary>
+    /// <param name="photoshop">
+    /// A Photoshop adapter in place of <see cref="FakePhotoshop"/>, so a screen test can be
+    /// driven against an output that is a genuine production TIFF rather than a copy of the input
+    /// wearing a <c>.tif</c> name (SCRUM-11104 §42).
+    /// </param>
     public ISessionService CreateServiceWithMeitu(
         IMeituProcessor meitu,
         IWorkstationPresetProvider? preset = null,
         IEnvironmentGate? environmentGate = null,
-        ISessionRepository? repository = null) => new SessionService(
+        ISessionRepository? repository = null,
+        IPhotoshopOutputProcessor? photoshop = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         FileWorkspace,
         RecycleBin,
         FileInspector,
         meitu,
-        FakePhotoshop,
+        photoshop ?? FakePhotoshop,
         Trim,
         ManualCrop,
         preset ?? Preset,

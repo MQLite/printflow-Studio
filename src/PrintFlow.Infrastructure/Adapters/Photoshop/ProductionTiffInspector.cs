@@ -13,6 +13,35 @@ internal interface IProductionTiffInspector
 }
 
 /// <summary>
+/// Where the accepted layout's pixels actually are, for a reader that has already been told the
+/// layout is accepted (SCRUM-11104 §15, §45).
+/// </summary>
+/// <remarks>
+/// Deliberately not part of <see cref="ProductionTiffFacts"/>. Facts are the validation record a
+/// Revision's audit note is written from and a file offset is not a fact about production
+/// quality; it is a detail only something about to read the samples has any use for. Keeping it
+/// separate is what stops "where the bytes are" from leaking into the workflow-facing record.
+/// <para>
+/// It exists at all so the review decoder does not become a second TIFF parser. One parse
+/// establishes both that the file is an accepted production TIFF and where its strips lie, which
+/// is also what makes "no review payload for an unvalidated TIFF" structural rather than a rule
+/// two parsers each have to remember (§45, §61).
+/// </para>
+/// </remarks>
+internal sealed record ProductionTiffRaster(
+    int PixelWidth,
+    int PixelHeight,
+    int SamplesPerPixel,
+    uint RowsPerStrip,
+    ImmutableArray<uint> StripOffsets,
+    ImmutableArray<uint> StripByteCounts);
+
+/// <summary>One validated production TIFF: what it is, and where its samples are.</summary>
+internal sealed record ProductionTiffInspection(
+    ProductionTiffFacts Facts,
+    ProductionTiffRaster Raster);
+
+/// <summary>
 /// Narrow classic-TIFF parser for PrintFlow's accepted uncompressed separated-CMYK + W1 output.
 /// It deliberately does not become the PNG/JPEG inspector and does not decode composite colour.
 /// </summary>
@@ -27,6 +56,24 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
     private const ushort TypeUndefined = 7;
 
     public OperationResult<ProductionTiffFacts> Inspect(string absolutePath)
+    {
+        OperationResult<ProductionTiffInspection> inspected = InspectForReview(absolutePath);
+        return inspected.IsFailure
+            ? OperationResult.Fail<ProductionTiffFacts>(inspected.Failure)
+            : OperationResult.Ok(inspected.Value.Facts);
+    }
+
+    /// <summary>
+    /// The same single validation pass, keeping the strip geometry a review decode needs
+    /// (SCRUM-11104 §15, §45).
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Inspect"/> is this method with the raster dropped, rather than a second parser
+    /// beside it. That is deliberate: two readers of the same bytes are two chances for the one
+    /// that draws pixels to accept a layout the one that validates would have refused, and the
+    /// whole point of §45 is that a review payload cannot exist for a file validation rejected.
+    /// </remarks>
+    internal OperationResult<ProductionTiffInspection> InspectForReview(string absolutePath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(absolutePath);
 
@@ -149,7 +196,8 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
                 return Invalid("The named W1 production ink sample is wholly empty on disk.");
             }
 
-            return OperationResult.Ok(new ProductionTiffFacts(
+            return OperationResult.Ok(new ProductionTiffInspection(
+                new ProductionTiffFacts(
                 ByteOrder: "IBM PC / little-endian",
                 PixelWidth: checked((int)width),
                 PixelHeight: checked((int)height),
@@ -175,7 +223,14 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
                 [
                     "W1 sample content is proven non-empty from the fifth uncompressed interleaved sample; " +
                     "the inspector does not interpret the ink's visual meaning.",
-                ]));
+                ]),
+                new ProductionTiffRaster(
+                    checked((int)width),
+                    checked((int)height),
+                    samples,
+                    rowsPerStrip,
+                    [.. stripOffsets],
+                    [.. stripByteCounts])));
         }
         catch (TiffValidationException ex)
         {
@@ -184,7 +239,7 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or EndOfStreamException or
                                    OverflowException or ArgumentException)
         {
-            return OperationResult.Fail<ProductionTiffFacts>(OperationFailure.Create(
+            return OperationResult.Fail<ProductionTiffInspection>(OperationFailure.Create(
                 FailureCode.OutputUnreadable,
                 $"The production TIFF could not be read completely: {ex.Message}",
                 isRetryable: false));
@@ -638,8 +693,8 @@ internal sealed class ProductionTiffInspector : IProductionTiffInspector
         return bytes.Length == count ? bytes : throw new EndOfStreamException();
     }
 
-    private static OperationResult<ProductionTiffFacts> Invalid(string detail) =>
-        OperationResult.Fail<ProductionTiffFacts>(OperationFailure.Create(
+    private static OperationResult<ProductionTiffInspection> Invalid(string detail) =>
+        OperationResult.Fail<ProductionTiffInspection>(OperationFailure.Create(
             FailureCode.OutputValidationFailed,
             detail + " The Working artefact was retained and no output metadata was created.",
             isRetryable: false,

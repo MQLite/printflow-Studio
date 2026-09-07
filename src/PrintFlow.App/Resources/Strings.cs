@@ -55,6 +55,42 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Failure_PsdCompositeMissing => Get(nameof(Failure_PsdCompositeMissing));
     internal static string Failure_PsdUnreadable => Get(nameof(Failure_PsdUnreadable));
     internal static string Failure_PsdPreparationFailed => Get(nameof(Failure_PsdPreparationFailed));
+
+    // --- Production TIFF final review (SCRUM-11104) ---------------------------------------
+
+    internal static string Session_TiffModeHeading => Get(nameof(Session_TiffModeHeading));
+    internal static string Session_TiffModeColour => Get(nameof(Session_TiffModeColour));
+    internal static string Session_TiffModeWhiteInk => Get(nameof(Session_TiffModeWhiteInk));
+    internal static string Session_TiffModeOverlay => Get(nameof(Session_TiffModeOverlay));
+    internal static string Session_TiffColourPreviewName => Get(nameof(Session_TiffColourPreviewName));
+    internal static string Session_TiffWhiteInkPreviewName => Get(nameof(Session_TiffWhiteInkPreviewName));
+    internal static string Session_TiffOverlayPreviewName => Get(nameof(Session_TiffOverlayPreviewName));
+    internal static string Session_TiffColourLegend => Get(nameof(Session_TiffColourLegend));
+    internal static string Session_TiffWhiteInkLegend => Get(nameof(Session_TiffWhiteInkLegend));
+    internal static string Session_TiffOverlayLegend => Get(nameof(Session_TiffOverlayLegend));
+    internal static string Session_TiffProductionHeading => Get(nameof(Session_TiffProductionHeading));
+    internal static string Session_TiffLabelOutputFile => Get(nameof(Session_TiffLabelOutputFile));
+    internal static string Session_TiffLabelOutputPath => Get(nameof(Session_TiffLabelOutputPath));
+    internal static string Session_TiffLabelPixelDimensions => Get(nameof(Session_TiffLabelPixelDimensions));
+    internal static string Session_TiffLabelPhysicalSize => Get(nameof(Session_TiffLabelPhysicalSize));
+    internal static string Session_TiffLabelResolution => Get(nameof(Session_TiffLabelResolution));
+    internal static string Session_TiffLabelEffectiveDpi => Get(nameof(Session_TiffLabelEffectiveDpi));
+    internal static string Session_TiffLabelColourMode => Get(nameof(Session_TiffLabelColourMode));
+    internal static string Session_TiffLabelWhiteInk => Get(nameof(Session_TiffLabelWhiteInk));
+    internal static string Session_TiffLabelEnlargement => Get(nameof(Session_TiffLabelEnlargement));
+    internal static string Session_TiffLabelHash => Get(nameof(Session_TiffLabelHash));
+    internal static string Session_TiffLabelPreset => Get(nameof(Session_TiffLabelPreset));
+    internal static string Session_TiffValuePreset => Get(nameof(Session_TiffValuePreset));
+    internal static string Session_TiffValuePixels => Get(nameof(Session_TiffValuePixels));
+    internal static string Session_TiffValuePhysical => Get(nameof(Session_TiffValuePhysical));
+    internal static string Session_TiffValueResolution => Get(nameof(Session_TiffValueResolution));
+    internal static string Session_TiffValueEffectiveDpi => Get(nameof(Session_TiffValueEffectiveDpi));
+    internal static string Session_TiffValueBelowProduction => Get(nameof(Session_TiffValueBelowProduction));
+    internal static string Session_TiffValueColourMode => Get(nameof(Session_TiffValueColourMode));
+    internal static string Session_TiffValueWhiteInk => Get(nameof(Session_TiffValueWhiteInk));
+    internal static string Session_TiffValueEnlargementAuthorised => Get(nameof(Session_TiffValueEnlargementAuthorised));
+    internal static string Session_TiffValueEnlargementUnauthorised => Get(nameof(Session_TiffValueEnlargementUnauthorised));
+    internal static string Session_TiffPreviewUnavailable => Get(nameof(Session_TiffPreviewUnavailable));
     private static readonly ResourceManager Manager =
         new("PrintFlow.App.Resources.Strings", typeof(Strings).Assembly);
 

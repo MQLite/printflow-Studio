@@ -798,6 +798,96 @@ public sealed class LocalisationResourceTests
             .ToHashSet(StringComparer.Ordinal);
     }
 
+    /// <summary>
+    /// The production-TIFF final review strings exist in both languages, by name
+    /// (SCRUM-11104 §32).
+    /// </summary>
+    /// <remarks>
+    /// Named explicitly for the reason the background-removal set is: the two parity tests catch a
+    /// key present on one side and missing on the other, but not both sides losing a string
+    /// together. Every mode label, every metadata label and every legend is listed, so a rename
+    /// that tidied one file and then the other becomes a failure here rather than a screen with no
+    /// wording for the three modes at all.
+    /// </remarks>
+    [Fact]
+    public void The_production_TIFF_review_strings_exist_in_both_languages()
+    {
+        string[] required =
+        [
+            "Session_TiffModeHeading",
+            "Session_TiffModeColour",
+            "Session_TiffModeWhiteInk",
+            "Session_TiffModeOverlay",
+            "Session_TiffColourPreviewName",
+            "Session_TiffWhiteInkPreviewName",
+            "Session_TiffOverlayPreviewName",
+            "Session_TiffColourLegend",
+            "Session_TiffWhiteInkLegend",
+            "Session_TiffOverlayLegend",
+            "Session_TiffProductionHeading",
+            "Session_TiffLabelOutputFile",
+            "Session_TiffLabelOutputPath",
+            "Session_TiffLabelPixelDimensions",
+            "Session_TiffLabelPhysicalSize",
+            "Session_TiffLabelResolution",
+            "Session_TiffLabelEffectiveDpi",
+            "Session_TiffLabelColourMode",
+            "Session_TiffLabelWhiteInk",
+            "Session_TiffLabelEnlargement",
+            "Session_TiffLabelHash",
+            "Session_TiffLabelPreset",
+            "Session_TiffValuePreset",
+            "Session_TiffValuePixels",
+            "Session_TiffValuePhysical",
+            "Session_TiffValueResolution",
+            "Session_TiffValueEffectiveDpi",
+            "Session_TiffValueBelowProduction",
+            "Session_TiffValueColourMode",
+            "Session_TiffValueWhiteInk",
+            "Session_TiffValueEnlargementAuthorised",
+            "Session_TiffValueEnlargementUnauthorised",
+            "Session_TiffPreviewUnavailable",
+        ];
+
+        IReadOnlySet<string> english = KeysOf(NeutralResx);
+        IReadOnlySet<string> chinese = KeysOf(ChineseResx);
+
+        required.Except(english).ShouldBeEmpty("the final TIFF review needs English wording.");
+        required.Except(chinese).ShouldBeEmpty("...and zh-CN wording, on a Chinese workstation.");
+    }
+
+    /// <summary>
+    /// The colour preview never claims to be a colour proof, in either language
+    /// (SCRUM-11104 §7, §12).
+    /// </summary>
+    /// <remarks>
+    /// A wording test, and the one that matters most in this slice. The Colour mode is an
+    /// uncalibrated screen conversion of separated CMYK with no ICC profile applied; an operator
+    /// who read it as evidence of printed colour would be trusting a judgement nothing in
+    /// PrintFlow made. The legend has to say so, and a later edit that softened it into "accurate"
+    /// or "as printed" would make the screen quietly dishonest.
+    /// </remarks>
+    [Fact]
+    public void The_colour_preview_legend_disclaims_printed_colour_accuracy()
+    {
+        string english = ValueOf(NeutralResx, "Session_TiffColourLegend");
+        string chinese = ValueOf(ChineseResx, "Session_TiffColourLegend");
+
+        english.ShouldContain("not", Case.Insensitive);
+        english.ShouldContain("colour", Case.Insensitive);
+        chinese.ShouldContain("不");
+
+        foreach (string overclaim in new[] { "accurate", "exact", "as printed", "faithful" })
+        {
+            english.ShouldNotContain(overclaim, Case.Insensitive);
+            chinese.ShouldNotContain(overclaim, Case.Insensitive);
+        }
+
+        // And the overlay says what its marker means rather than what the print will look like.
+        ValueOf(NeutralResx, "Session_TiffOverlayLegend").ShouldContain("white ink", Case.Insensitive);
+        ValueOf(ChineseResx, "Session_TiffOverlayLegend").ShouldContain("白墨");
+    }
+
     /// <summary>Walks up to the repository root, then into <c>src\PrintFlow.App</c>.</summary>
     private static string ShellProjectDirectory()
     {

@@ -301,7 +301,7 @@ public sealed class SessionAccessibilityTests
         SessionId id = await HandedOffAsync(harness, "invoke-path.png");
 
         StubFilePicker picker = new(harness.Inner.WriteSourcePng("operator-finished-this.png"));
-        SessionViewModel screen = new(harness.Sessions, harness.Previews, new RecordingNavigation(), picker);
+        SessionViewModel screen = new(harness.Sessions, harness.Previews, harness.TiffReviews, new RecordingNavigation(), picker);
         screen.Open((await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value);
         await screen.PreviewsLoaded;
         screen.CanSubmitManualResult.ShouldBeTrue();

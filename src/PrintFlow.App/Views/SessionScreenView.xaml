@@ -350,6 +350,15 @@
                                 <MultiDataTrigger.Conditions>
                                     <Condition Binding="{Binding HasPreview}" Value="True" />
                                     <Condition Binding="{Binding IsCropping}" Value="False" />
+                                    <!--
+                                        And not while the specialist TIFF surface is up
+                                        (SCRUM-11104 §14). The two answer different questions and
+                                        showing both would put a WIC flattening of the production
+                                        file beside PrintFlow's own decode of it — two pictures of
+                                        one TIFF, made differently, with nothing on screen to say
+                                        which the operator should believe.
+                                    -->
+                                    <Condition Binding="{Binding HasTiffReview}" Value="False" />
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Visible" />
                             </MultiDataTrigger>
@@ -395,6 +404,69 @@
                 </DockPanel>
 
                 <local:SharedReviewSurface />
+            </DockPanel>
+
+            <!--
+                The production TIFF inspection surface (SCRUM-11104 §5, §14, §33).
+
+                Same row as the general review panes and shown instead of them, exactly as the
+                crop surface is: one artefact, one picture of it. The zoom controls are the
+                screen's own, so switching between the two surfaces — or between Colour, White ink
+                and Colour + white — never means learning a second zoom.
+            -->
+            <DockPanel Grid.Row="1" Margin="0,14,0,0">
+                <DockPanel.Style>
+                    <Style TargetType="DockPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding HasTiffReview}" Value="True" />
+                                    <Condition Binding="{Binding IsCropping}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DockPanel.Style>
+
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding TiffReviewModeHeading}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <TextBlock Text="{Binding ZoomLabel}"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.75"
+                                   MinWidth="52"
+                                   TextAlignment="Right"
+                                   Margin="0,0,10,0" />
+                        <Button Content="{Binding ZoomOutLabel}"
+                                AutomationProperties.AutomationId="Session.TiffReviewZoomOut"
+                                AutomationProperties.Name="{Binding ZoomOutLabel}"
+                                Command="{Binding ZoomOutCommand}"
+                                IsEnabled="{Binding CanZoomOut}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ZoomInLabel}"
+                                AutomationProperties.AutomationId="Session.TiffReviewZoomIn"
+                                AutomationProperties.Name="{Binding ZoomInLabel}"
+                                Command="{Binding ZoomInCommand}"
+                                IsEnabled="{Binding CanZoomIn}"
+                                Padding="10,4"
+                                Margin="0,0,6,0" />
+                        <Button Content="{Binding ResetZoomLabel}"
+                                AutomationProperties.AutomationId="Session.TiffReviewResetZoom"
+                                AutomationProperties.Name="{Binding ResetZoomLabel}"
+                                Command="{Binding ResetZoomCommand}"
+                                Padding="10,4" />
+                    </StackPanel>
+                </DockPanel>
+
+                <local:TiffReviewSurface />
             </DockPanel>
 
             <!--
@@ -1251,6 +1323,64 @@
                                            TextWrapping="Wrap"
                                            Opacity="0.65"
                                            Margin="0,4,0,0" />
+                            </StackPanel>
+
+                            <!--
+                                The production metadata block (SCRUM-11104 §25–§28). Facts only,
+                                and only the ones actually recorded: a row a payload could not
+                                answer is absent rather than blank, because a blank line beside
+                                "Effective source resolution" reads as a measurement of zero.
+
+                                Every row carries the same stable English key as its
+                                AutomationId, so a test and a screen reader address it by
+                                identity while the operator reads localised wording (§29, §32).
+                            -->
+                            <ItemsControl ItemsSource="{Binding TiffMetadata}"
+                                          Margin="0,10,0,0"
+                                          AutomationProperties.AutomationId="Session.TiffProductionMetadata"
+                                          AutomationProperties.Name="{Binding TiffProductionHeading}"
+                                          Visibility="{Binding HasTiffReview, Converter={StaticResource BoolToVisibility}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="190" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Label}"
+                                                       Opacity="0.7"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Value}"
+                                                       TextWrapping="Wrap"
+                                                       AutomationProperties.AutomationId="{Binding Key,
+                                                           StringFormat=Session.TiffMetadata.{0}}"
+                                                       AutomationProperties.Name="{Binding Label}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!--
+                                The full managed path, in a control an operator can select and
+                                copy with the keyboard (§23, §24). Read-only rather than a label
+                                so Ctrl+C works without this screen adding a clipboard action of
+                                its own, and so UIA exposes the path as a value a test can read.
+                            -->
+                            <StackPanel Margin="0,8,0,0"
+                                        Visibility="{Binding HasTiffReview, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding TiffOutputPathLabel}" Opacity="0.7" />
+                                <TextBox Text="{Binding TiffOutputPath, Mode=OneWay}"
+                                         IsReadOnly="True"
+                                         IsReadOnlyCaretVisible="True"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         TextWrapping="Wrap"
+                                         Margin="0,2,0,0"
+                                         AutomationProperties.AutomationId="Session.TiffOutputPath"
+                                         AutomationProperties.Name="{Binding TiffOutputPathLabel}" />
                             </StackPanel>
 
                             <!--

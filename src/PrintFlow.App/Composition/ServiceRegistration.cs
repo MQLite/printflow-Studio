@@ -102,6 +102,13 @@ public static class ServiceRegistration
         services.AddSingleton<IImagePreviewDecoder, WicImagePreviewDecoder>();
         services.AddSingleton<IArtefactPreviewService, ArtefactPreviewService>();
 
+        // The specialist production-TIFF review seam (SCRUM-11104 §14, §43). A second read-only
+        // seam rather than a wider first one: the general review surface compares artefacts, and
+        // teaching it to read separated CMYK and a Photoshop spot channel would make every
+        // ordinary preview carry a TIFF parser it never uses.
+        services.AddSingleton<ITiffReviewDecoder, ProductionTiffReviewDecoder>();
+        services.AddSingleton<IProductionTiffReviewService, ProductionTiffReviewService>();
+
         // Composed here, invoked only by ApplicationStartup — once, behind the single-instance
         // guard and after migrations. Nothing else in the graph may call RecoverAsync.
         services.AddSingleton<IProcessLiveness, SystemProcessLiveness>();

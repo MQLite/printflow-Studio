@@ -438,6 +438,16 @@ public sealed partial class SessionViewModel : ObservableObject
     private readonly ISessionService _sessions;
     private readonly IFilePicker? _filePicker;
     private readonly IArtefactPreviewService _previews;
+
+    /// <summary>The specialist production-TIFF review seam (SCRUM-11104 §43).</summary>
+    /// <remarks>
+    /// A second read-only seam beside <see cref="_previews"/> rather than a wider version of it.
+    /// The general one compares artefacts and knows nothing about ink; this one decodes one
+    /// validated production TIFF into the three representations a print operator needs, and is
+    /// asked for nothing else (§14).
+    /// </remarks>
+    private readonly IProductionTiffReviewService _tiffReviews;
+
     private readonly INavigationService _navigation;
 
     /// <summary>
@@ -665,15 +675,21 @@ public sealed partial class SessionViewModel : ObservableObject
     private SessionView? _session;
 
     public SessionViewModel(
-        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation, IFilePicker? filePicker = null)
+        ISessionService sessions,
+        IArtefactPreviewService previews,
+        IProductionTiffReviewService tiffReviews,
+        INavigationService navigation,
+        IFilePicker? filePicker = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
+        ArgumentNullException.ThrowIfNull(tiffReviews);
         ArgumentNullException.ThrowIfNull(navigation);
 
         _sessions = sessions;
         _filePicker = filePicker;
         _previews = previews;
+        _tiffReviews = tiffReviews;
         _navigation = navigation;
 
         // The Stop and Take Over controls have to appear and disappear *while* a command is in
@@ -2943,6 +2959,12 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(HasPreview));
+
+        // The specialist surface last, and only for a validated production output. It is a
+        // second, narrower request rather than part of the loop above: the generic panes are
+        // about comparing artefacts, and a TIFF's Colour/White ink/Overlay modes are about
+        // inspecting one production file (SCRUM-11104 §14).
+        await LoadTiffReviewAsync(session, generation, cancellationToken).ConfigureAwait(true);
     }
 
     private async Task<ArtefactPreviewPane> BuildPaneAsync(
@@ -2970,6 +2992,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private void ClearPreviews()
     {
         _previewGeneration++;
+        ClearTiffReview();
 
         if (PreviewPanes.Count == 0)
         {

@@ -787,4 +787,37 @@
   <data name="Session_ManualCropSelected" xml:space="preserve"><value>Selected bounds</value></data>
   <data name="Session_ManualCropApplied" xml:space="preserve"><value>Applied crop bounds</value></data>
   <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>Enter whole numbers of zero or more pixels.</value></data>
+  <data name="Session_TiffModeHeading" xml:space="preserve"><value>Preview mode</value></data>
+  <data name="Session_TiffModeColour" xml:space="preserve"><value>Colour</value></data>
+  <data name="Session_TiffModeWhiteInk" xml:space="preserve"><value>White ink</value></data>
+  <data name="Session_TiffModeOverlay" xml:space="preserve"><value>Colour + white overlay</value></data>
+  <data name="Session_TiffColourPreviewName" xml:space="preserve"><value>Colour preview</value></data>
+  <data name="Session_TiffWhiteInkPreviewName" xml:space="preserve"><value>White ink preview</value></data>
+  <data name="Session_TiffOverlayPreviewName" xml:space="preserve"><value>Colour and white ink overlay</value></data>
+  <data name="Session_TiffColourLegend" xml:space="preserve"><value>An uncalibrated screen approximation of the CMYK content. It is not proof of printed colour.</value></data>
+  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>Bright = white ink present · Black = no white ink.</value></data>
+  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>White overlay = white ink coverage. Not how the print will look.</value></data>
+  <data name="Session_TiffProductionHeading" xml:space="preserve"><value>Production details</value></data>
+  <data name="Session_TiffLabelOutputFile" xml:space="preserve"><value>Output file</value></data>
+  <data name="Session_TiffLabelOutputPath" xml:space="preserve"><value>Output path</value></data>
+  <data name="Session_TiffLabelPixelDimensions" xml:space="preserve"><value>Pixel dimensions</value></data>
+  <data name="Session_TiffLabelPhysicalSize" xml:space="preserve"><value>Physical size</value></data>
+  <data name="Session_TiffLabelResolution" xml:space="preserve"><value>TIFF resolution</value></data>
+  <data name="Session_TiffLabelEffectiveDpi" xml:space="preserve"><value>Effective source resolution</value></data>
+  <data name="Session_TiffLabelColourMode" xml:space="preserve"><value>Colour</value></data>
+  <data name="Session_TiffLabelWhiteInk" xml:space="preserve"><value>White ink</value></data>
+  <data name="Session_TiffLabelEnlargement" xml:space="preserve"><value>Enlargement</value></data>
+  <data name="Session_TiffLabelHash" xml:space="preserve"><value>SHA-256</value></data>
+  <data name="Session_TiffValuePixels" xml:space="preserve"><value>{0} × {1} px</value></data>
+  <data name="Session_TiffValuePhysical" xml:space="preserve"><value>{0:0.0} × {1:0.0} mm</value></data>
+  <data name="Session_TiffValueResolution" xml:space="preserve"><value>{0:0.##} × {1:0.##} PPI</value></data>
+  <data name="Session_TiffValueEffectiveDpi" xml:space="preserve"><value>{0:0} × {1:0} PPI, from {2} × {3} source px</value></data>
+  <data name="Session_TiffValueBelowProduction" xml:space="preserve"><value> · below the {0} PPI production resolution</value></data>
+  <data name="Session_TiffValueColourMode" xml:space="preserve"><value>{0} · {1}-bit · {2} ink channels</value></data>
+  <data name="Session_TiffValueWhiteInk" xml:space="preserve"><value>{0} validated · {1} · {2:N0} px of ink</value></data>
+  <data name="Session_TiffValueEnlargementAuthorised" xml:space="preserve"><value>required and authorised by the operator</value></data>
+  <data name="Session_TiffValueEnlargementUnauthorised" xml:space="preserve"><value>required; no operator authority is recorded</value></data>
+  <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>The Colour, White ink and Colour + white previews are unavailable for this file. The TIFF itself is unaffected and the decision below is unchanged.</value></data>
+  <data name="Session_TiffLabelPreset" xml:space="preserve"><value>Production preset</value></data>
+  <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0} ({1})</value></data>
 </root>

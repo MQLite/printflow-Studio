@@ -70,7 +70,7 @@ public sealed class ManualResultImportTests
         if (step == StepKind.BackgroundRemoval)
         {
             attempt.BackgroundRemovalAuthority!.Decision.ShouldBe(BackgroundRemovalDecision.ManualResultForReviewedContent);
-            var screen = new SessionViewModel(restarted, h.Previews, new RecordingNavigation());
+            var screen = new SessionViewModel(restarted, h.Previews, h.TiffReviews, new RecordingNavigation());
             screen.Open(review);
             await screen.PreviewsLoaded;
             screen.BackgroundRemovalAttemptAudit.ShouldNotContain("Automatic Selection");
@@ -165,7 +165,7 @@ public sealed class ManualResultImportTests
         var service = h.CreateService();
         var id = await HandedOff(h, service);
         var picker = new StubFilePicker();
-        var screen = new SessionViewModel(service, h.Previews, new RecordingNavigation(), picker);
+        var screen = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation(), picker);
         screen.Open((await service.LoadAsync(id, default)).Value);
         await screen.PreviewsLoaded;
         var before = await Load(h, id);
