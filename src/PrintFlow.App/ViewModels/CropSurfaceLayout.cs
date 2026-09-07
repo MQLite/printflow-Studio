@@ -146,12 +146,9 @@ public readonly record struct CropSurfaceLayout(
     /// The corners may arrive in any order — an operator dragging up and to the left is drawing
     /// the same rectangle as one dragging down and to the right — so they are normalised first.
     /// <para>
-    /// <b>Clamping, and where it stops.</b> The rectangle is intersected with the canvas
-    /// <i>before</i> it is rounded, so a drag that starts outside the image and ends inside it
-    /// yields the part that overlaps — which is the part the operator drew over the artwork
-    /// (Part C2 §23). A rectangle that misses the canvas entirely has no overlap and is refused
-    /// rather than clamped into a sliver at the edge: nothing the operator could see was
-    /// selected, so nothing should be cropped.
+    /// The selected rectangle must be entirely inside the canvas. Only margin expansion may
+    /// clamp; an invalid base selection is refused, never silently intersected with the image.
+    /// EdgeTolerance accommodates floating-point projection noise at an exact canvas edge.
     /// </para>
     /// <para>
     /// Rounding is outward — <c>floor</c> on the near edges, <c>ceil</c> on the far ones — so
@@ -178,6 +175,14 @@ public readonly record struct CropSurfaceLayout(
         double sourceRight = ToSourceX(Math.Max(x1, x2));
         double sourceTop = ToSourceY(Math.Min(y1, y2));
         double sourceBottom = ToSourceY(Math.Max(y1, y2));
+
+        if (!double.IsFinite(sourceLeft) || !double.IsFinite(sourceRight) ||
+            !double.IsFinite(sourceTop) || !double.IsFinite(sourceBottom) ||
+            sourceLeft < -EdgeTolerance || sourceTop < -EdgeTolerance ||
+            sourceRight > SourcePixelWidth + EdgeTolerance || sourceBottom > SourcePixelHeight + EdgeTolerance)
+        {
+            return false;
+        }
 
         double left = Math.Max(0, sourceLeft);
         double right = Math.Min(SourcePixelWidth, sourceRight);

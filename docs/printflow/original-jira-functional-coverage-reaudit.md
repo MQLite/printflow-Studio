@@ -645,3 +645,19 @@ Evidence: **9,215 intermediate broad targeted tests passed**; **162 final focuse
 Exact original AC, representation rationale, restart/return behavior, test coverage, live evidence and its scope, rejected harness attempts, build and Git discipline: [SCRUM-11083 trim cancellation report](scrum-11083-trim-cancellation.md).
 
 **SCRUM-11077 remains PARTIAL. SCRUM-11082 remains PARTIAL.** The Epic is reassessed independently: closing independent Trim cancellation does not deliver manual-crop margin controls or persisted manual-crop rectangle metadata. Shared review remains accepted under SCRUM-11079 and its implementation is unchanged by this slice.
+
+## K. Coverage delta — SCRUM-11082 manual crop completion (7 September 2026)
+
+**SCRUM-11082: historical PARTIAL → current FULL.** The exact original CSV row is source Work Item 11205, **Implement Manual Crop Fallback for Non-Transparent Inputs**, read before Product edits. Manual crop now supports Tight, Uniform and independent per-edge expansion around the operator's strictly validated selection. The editor displays selected and actual clamped applied bounds immediately. No colour/alpha-boundary inference is introduced. Apply produces the real managed `ManualImport` Revision and independent shared review; Cancel persists nothing; Keep original extent remains a distinct available action.
+
+Migration 0013 records selected/applied half-open bounds and explicit manual margin mode/values on the producing attempt, independently of automatic trim settings. Old rows remain null without inferred origins. SQLite prevents rewriting recorded history and ambiguous automatic/manual metadata. Rejected/retried crops retain independent geometry. Restart/reopened review retains Revision/hash/geometry/state. Actual raster dimensions and pixels agree with applied bounds; approval selects that exact Revision for customer dimensions and asset export. Existing shared-review mechanics and SCRUM-11083 behavior remain intact.
+
+**SCRUM-11126: independently reassessed PARTIAL → FULL.** Its exact original source Work Item 11702, **Test Trimming and Manual Crop Deterministically**, was re-read. Existing real-interface alpha bounds, safety margins, transparent/no-transparency inputs, cancellation and no-colour-guessing coverage remains; new manual adjustment, invalid bounds, actual raster/Revision consistency, persistence and restart tests close its remaining metadata criterion. SCRUM-11081 already closed the automatic bounds portion.
+
+**SCRUM-11077 remains PARTIAL.** SCRUM-11078's separate import/workflow-selection UX gaps are unchanged; neither child completion nor the testing reassessment automatically completes the Epic.
+
+Evidence: clean build **0 warnings / 0 errors**; final targeted regression **558 passed, 0 failed, 0 skipped**; final live Uniform, Per-edge and Cancel/Keep cases **3/3 passed**, including raw SQLite readback, real raster/hash checks, reopened real WPF review, keyboard/UIA controls and unchanged source/lock. One complete suite against final source: **11,382 passed, 1 failed, 0 skipped** (11,383 total). The sole failure was the known unrelated PSD malformed-input settle-poll case; its exact isolated rerun **passed 1/1**. Both results are preserved; PSD code is untouched. No second full-suite run replaced the failure.
+
+Full requirements, semantics, tests, live boundaries, evidence, known failure and Git discipline: [SCRUM-11082 manual crop completion report](scrum-11082-manual-crop-completion.md).
+
+**PASS WITH NOTES — SCRUM-11082 MANUAL CROP FALLBACK VERIFIED**

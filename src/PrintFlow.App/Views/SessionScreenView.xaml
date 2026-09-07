@@ -450,14 +450,48 @@
                 </DockPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <TextBlock Text="{Binding ManualCropAdjustmentLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <RadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0"
+                                     AutomationProperties.AutomationId="Session.ManualCropModeTight" AutomationProperties.Name="{Binding ManualCropTightLabel}" />
+                        <RadioButton Content="{Binding ManualCropUniformLabel}" IsChecked="{Binding IsManualCropUniform}" GroupName="ManualCropMode" Margin="0,0,14,0"
+                                     AutomationProperties.AutomationId="Session.ManualCropModeUniform" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
+                        <RadioButton Content="{Binding ManualCropPerEdgeLabel}" IsChecked="{Binding IsManualCropPerEdge}" GroupName="ManualCropMode"
+                                     AutomationProperties.AutomationId="Session.ManualCropModePerEdge" AutomationProperties.Name="{Binding ManualCropPerEdgeLabel}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{Binding IsManualCropUniform, Converter={StaticResource BoolToVisibility}}">
+                        <TextBox Text="{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}" Width="64" Padding="5,3"
+                                 AutomationProperties.AutomationId="Session.ManualCropUniformMargin" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
+                        <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    </StackPanel>
+                    <WrapPanel Margin="0,0,0,6" Visibility="{Binding IsManualCropPerEdge, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding TrimLeftLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox Text="{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                                 AutomationProperties.AutomationId="Session.ManualCropMarginLeft" AutomationProperties.Name="{Binding TrimLeftLabel}" />
+                        <TextBlock Text="{Binding TrimTopLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox Text="{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                                 AutomationProperties.AutomationId="Session.ManualCropMarginTop" AutomationProperties.Name="{Binding TrimTopLabel}" />
+                        <TextBlock Text="{Binding TrimRightLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox Text="{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                                 AutomationProperties.AutomationId="Session.ManualCropMarginRight" AutomationProperties.Name="{Binding TrimRightLabel}" />
+                        <TextBlock Text="{Binding TrimBottomLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox Text="{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3"
+                                 AutomationProperties.AutomationId="Session.ManualCropMarginBottom" AutomationProperties.Name="{Binding TrimBottomLabel}" />
+                        <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    </WrapPanel>
                     <TextBlock Text="{Binding ManualCropInstructions}"
                                TextWrapping="Wrap"
                                Opacity="0.75"
                                Margin="0,0,0,4" />
 
                     <TextBlock Text="{Binding CropSelectionSummary}"
+                               AutomationProperties.AutomationId="Session.ManualCropSelectedBounds"
                                FontWeight="SemiBold"
                                Margin="0,0,0,4" />
+
+                    <TextBlock Text="{Binding CropAppliedSummary}" AutomationProperties.AutomationId="Session.ManualCropAppliedBounds" FontWeight="SemiBold" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding ManualCropMarginInvalidNotice}" TextWrapping="Wrap" Margin="0,0,0,6"
+                               Visibility="{Binding IsManualCropMarginInvalid, Converter={StaticResource BoolToVisibility}}" />
 
                     <!-- A refused selection says so and stops there; nothing else changes (§23). -->
                     <TextBlock Text="{Binding ManualCropInvalidNotice}"
@@ -473,11 +507,13 @@
                             Cancel calls a command that touches nothing at all (§22).
                         -->
                         <Button Content="{Binding ApplyManualCropLabel}"
+                                AutomationProperties.AutomationId="Session.ApplyManualCrop" AutomationProperties.Name="{Binding ApplyManualCropLabel}"
                                 Command="{Binding ApplyManualCropCommand}"
                                 IsEnabled="{Binding CanApplyManualCrop}"
                                 Padding="14,6"
                                 Margin="0,0,8,0" />
                         <Button Content="{Binding CancelManualCropLabel}"
+                                AutomationProperties.AutomationId="Session.CancelManualCrop" AutomationProperties.Name="{Binding CancelManualCropLabel}"
                                 Command="{Binding CancelManualCropCommand}"
                                 Padding="14,6" />
                     </StackPanel>
@@ -529,15 +565,18 @@
 
                             <!--
                                 Transparent so it is hit-testable across the whole surface,
-                                including the letterboxed margins — a drag that begins beside the
-                                image and ends on it is still a drag the operator made, and the
-                                geometry clamps it to the part that overlaps (§23).
+                                including the letterboxed margins. A drag that extends outside
+                                the image is refused; only expansion of valid bounds may clamp.
                             -->
                             <Canvas x:Name="CropOverlay"
+                                    AutomationProperties.AutomationId="Session.ManualCropSurface"
                                     Background="Transparent"
                                     ClipToBounds="True"
                                     Cursor="Cross">
+                                <Rectangle x:Name="CropAppliedOutline" Visibility="Collapsed" Stroke="#FF257749" StrokeThickness="2"
+                                           AutomationProperties.AutomationId="Session.ManualCropAppliedOutline" IsHitTestVisible="False" />
                                 <Rectangle x:Name="CropSelectionOutline"
+                                           AutomationProperties.AutomationId="Session.ManualCropSelectedOutline"
                                            Visibility="Collapsed"
                                            Stroke="#FF1E88E5"
                                            StrokeThickness="1.5"
@@ -1226,6 +1265,15 @@
                                        Opacity="0.8"
                                        Margin="0,8,0,0"
                                        Visibility="{Binding HasTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+
+                            <StackPanel Margin="0,8,0,0" AutomationProperties.AutomationId="Session.ManualCropReviewMetadata"
+                                        Visibility="{Binding HasManualCropGeometry, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding ManualCropHeading}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ManualCropReviewSelected}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                <TextBlock Text="{Binding ManualCropReviewApplied}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding ManualCropReviewMargin}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding TrimBoundsCaption}" TextWrapping="Wrap" Opacity="0.65" Margin="0,4,0,0" />
+                            </StackPanel>
 
                             <!--
                                 Where the artwork was found, and where the crop was actually

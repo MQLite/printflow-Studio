@@ -55,7 +55,7 @@ public sealed class TrimBoundaryTests
     public void The_trim_domain_types_exist_where_they_are_supposed_to()
     {
         DomainTrimTypes.Select(t => t.Name).ShouldBe(
-            ["TrimMode", "TrimOutcome", "TrimMargin", "TrimBounds", "TrimGeometry", "AlphaBounds"],
+            ["TrimMode", "TrimOutcome", "TrimMargin", "TrimBounds", "TrimGeometry", "AlphaBounds", "ManualCropGeometry", "ManualCropMargin"],
             ignoreOrder: true);
     }
 

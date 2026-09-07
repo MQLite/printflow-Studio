@@ -165,9 +165,25 @@ public sealed record ProcessingAttempt(
     /// </remarks>
     public TrimGeometry? TrimGeometry { get; init; }
 
+    /// <summary>Operator-selected bounds, actual applied bounds, and explicit manual margin for this exact result.</summary>
+    public ManualCropGeometry? ManualCropGeometry { get; init; }
+
+    public ProcessingAttempt WithManualCropGeometry(ManualCropGeometry geometry)
+    {
+        if (Operation != OperationKind.ManualImport || TrimGeometry is not null || TrimParameters is not null)
+            throw new InvalidOperationException("Manual crop history cannot carry automatic trim geometry or parameters.");
+        if (ManualCropGeometry is not null && ManualCropGeometry != geometry)
+            throw new InvalidOperationException("Manual crop geometry is immutable.");
+        return this with { ManualCropGeometry = geometry };
+    }
+
     /// <summary>Records the geometry the trim this attempt just ran established.</summary>
-    public ProcessingAttempt WithTrimGeometry(TrimGeometry geometry) =>
-        this with { TrimGeometry = geometry };
+    public ProcessingAttempt WithTrimGeometry(TrimGeometry geometry)
+    {
+        if (ManualCropGeometry is not null)
+            throw new InvalidOperationException("Automatic trim cannot relabel manual crop geometry.");
+        return this with { TrimGeometry = geometry };
+    }
 
     /// <summary>
     /// The reviewed-content authority this attempt ran Background Removal under

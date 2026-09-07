@@ -27,6 +27,42 @@ namespace PrintFlow.Tests.Integration.Files;
 /// </remarks>
 public sealed class ManualCropProcessorTests
 {
+    [Fact]
+    public async Task Margin_never_rescues_an_outside_base_selection_or_writes_an_output()
+    {
+        using ManualCropFixture fixture = new();
+        var input = fixture.WriteInput("invalid-margin.png", SyntheticImages.Png(12, 10, alpha: false));
+        var output = fixture.Output("refused.png");
+        var result = await fixture.Processor.CropAsync(new ManualCropRequest(input, output,
+            TrimBounds.FromEdges(3, 2, 13, 7), ManualCropMargin.Uniform(100)), CancellationToken.None);
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        File.Exists(fixture.Resolve(output)).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task Explicit_manual_adjustments_crop_exact_source_pixels_through_the_interface(int mode)
+    {
+        using ManualCropFixture fixture = new();
+        var input = fixture.WriteInput("margin.png", SyntheticImages.PngWithAlpha(12, 10, (x, y) => (byte)(1 + x * 10 + y)));
+        var selected = TrimBounds.FromEdges(3, 2, 9, 7);
+        var margin = mode switch { 0 => ManualCropMargin.Tight, 1 => ManualCropMargin.Uniform(5), _ => ManualCropMargin.PerEdge(1, 2, 0, 3) };
+        var result = await fixture.Processor.CropAsync(new ManualCropRequest(input, fixture.Output("result.png"), selected, margin), CancellationToken.None);
+        result.IsSuccess.ShouldBeTrue();
+        var expected = ManualCropGeometry.Create(selected, margin, 12, 10);
+        result.Value.Geometry.ShouldBe(expected);
+        result.Value.AppliedBounds.ShouldBe(expected.AppliedBounds);
+        var pixels = SyntheticImages.ReadAlphaPlane(fixture.Resolve(result.Value.ProducedFile), out int width, out int height);
+        width.ShouldBe(expected.AppliedBounds.Width);
+        height.ShouldBe(expected.AppliedBounds.Height);
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                pixels[y * width + x].ShouldBe((byte)(1 + (x + expected.AppliedBounds.Left) * 10 + y + expected.AppliedBounds.Top));
+    }
+
     // -----------------------------------------------------------------------------
     // §27: transparent PNG — exact dimensions and exact pixels
     // -----------------------------------------------------------------------------

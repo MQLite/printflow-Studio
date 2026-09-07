@@ -991,7 +991,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             new WorkflowEffect.RecordAttemptStarted(
                 context.NewAttemptId, command.Step, OperationKind.ManualImport, source, step.AttemptCount),
 
-            new WorkflowEffect.RunManualCrop(context.NewAttemptId, command.Step, source, command.Crop),
+            new WorkflowEffect.RunManualCrop(context.NewAttemptId, command.Step, source, command.Crop, command.Margin),
         ];
 
         SessionStep started = step with

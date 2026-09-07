@@ -629,6 +629,11 @@ public sealed record SessionView(
     PrintPreparationAttemptView? AttemptPreparation,
     FlexibleSizeView Sizing)
 {
+    public ManualCropGeometry? ArtefactManualCropGeometry { get; init; }
+    public ManualCropGeometry? CurrentManualCropGeometry =>
+        CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactManualCropGeometry : null;
+    public bool HasManualCropGeometry => CurrentManualCropGeometry is not null;
+
     public bool CanSubmitManualResult => AvailableCommands.Contains(CommandKind.SubmitManualResult);
 
     public bool CanKeepOriginalExtent => AvailableCommands.Contains(CommandKind.KeepOriginalExtent);
@@ -881,6 +886,7 @@ public sealed record SessionView(
             FlexibleSizeView.From(
                 snapshot, availableCommands, presetRecommendations, enlargementOfferId))
         {
+            ArtefactManualCropGeometry = current is null ? null : attempts.FirstOrDefault(a => a.OutputRevisionId == current.RevisionId)?.ManualCropGeometry,
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
             PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
         };

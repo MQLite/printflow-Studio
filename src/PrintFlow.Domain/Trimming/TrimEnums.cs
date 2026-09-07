@@ -1,7 +1,7 @@
 namespace PrintFlow.Domain.Trimming;
 
 /// <summary>
-/// How much canvas a trim leaves around the alpha content (MVP design §6.2 "trim to content").
+/// The declared mode of outward margin expansion around a base rectangle.
 /// </summary>
 /// <remarks>
 /// The mode is the operator's declared <i>intent</i>, not a restatement of the numbers: a
@@ -12,7 +12,7 @@ namespace PrintFlow.Domain.Trimming;
 /// </remarks>
 public enum TrimMode
 {
-    /// <summary>Crop exactly to the alpha content: zero margin on all four edges.</summary>
+    /// <summary>Crop exactly to the base rectangle: zero margin on all four edges.</summary>
     TightCrop,
 
     /// <summary>Keep the same non-negative pixel margin on all four edges.</summary>

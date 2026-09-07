@@ -488,6 +488,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  AdapterNotes,
                  TrimContentLeft, TrimContentTop, TrimContentRight, TrimContentBottom,
                  TrimAppliedLeft, TrimAppliedTop, TrimAppliedRight, TrimAppliedBottom,
+                 ManualSelectedLeft, ManualSelectedTop, ManualSelectedRight, ManualSelectedBottom, ManualAppliedLeft, ManualAppliedTop, ManualAppliedRight, ManualAppliedBottom, ManualMarginTop, ManualMarginRight, ManualMarginBottom, ManualMarginLeft, ManualMarginMode,
                  PrintPlanSourceRevisionId, PrintPlanSourceSha256,
                  PrintPlanSourcePixelWidth, PrintPlanSourcePixelHeight,
                  PrintPlanMaxWidthMm, PrintPlanMaxHeightMm, PrintPlanLimitKind,
@@ -516,6 +517,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                  @AdapterNotes,
                  @TrimContentLeft, @TrimContentTop, @TrimContentRight, @TrimContentBottom,
                  @TrimAppliedLeft, @TrimAppliedTop, @TrimAppliedRight, @TrimAppliedBottom,
+                 @ManualSelectedLeft, @ManualSelectedTop, @ManualSelectedRight, @ManualSelectedBottom, @ManualAppliedLeft, @ManualAppliedTop, @ManualAppliedRight, @ManualAppliedBottom, @ManualMarginTop, @ManualMarginRight, @ManualMarginBottom, @ManualMarginLeft, @ManualMarginMode,
                  @PrintPlanSourceRevisionId, @PrintPlanSourceSha256,
                  @PrintPlanSourcePixelWidth, @PrintPlanSourcePixelHeight,
                  @PrintPlanMaxWidthMm, @PrintPlanMaxHeightMm, @PrintPlanLimitKind,
@@ -562,7 +564,20 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 TrimAppliedLeft = excluded.TrimAppliedLeft,
                 TrimAppliedTop = excluded.TrimAppliedTop,
                 TrimAppliedRight = excluded.TrimAppliedRight,
-                TrimAppliedBottom = excluded.TrimAppliedBottom;
+                TrimAppliedBottom = excluded.TrimAppliedBottom,
+                ManualSelectedLeft = excluded.ManualSelectedLeft,
+                ManualSelectedTop = excluded.ManualSelectedTop,
+                ManualSelectedRight = excluded.ManualSelectedRight,
+                ManualSelectedBottom = excluded.ManualSelectedBottom,
+                ManualAppliedLeft = excluded.ManualAppliedLeft,
+                ManualAppliedTop = excluded.ManualAppliedTop,
+                ManualAppliedRight = excluded.ManualAppliedRight,
+                ManualAppliedBottom = excluded.ManualAppliedBottom,
+                ManualMarginTop = excluded.ManualMarginTop,
+                ManualMarginRight = excluded.ManualMarginRight,
+                ManualMarginBottom = excluded.ManualMarginBottom,
+                ManualMarginLeft = excluded.ManualMarginLeft,
+                ManualMarginMode = excluded.ManualMarginMode;
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

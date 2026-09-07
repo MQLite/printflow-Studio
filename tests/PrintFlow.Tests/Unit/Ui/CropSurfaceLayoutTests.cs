@@ -208,23 +208,22 @@ public sealed class CropSurfaceLayoutTests
 
     /// <summary>The top-left corner is inclusive and never negative (§32).</summary>
     [Fact]
-    public void A_drag_starting_past_the_top_left_corner_clamps_to_the_first_pixel()
+    public void A_drag_starting_past_the_top_left_corner_is_refused()
     {
         CropSurfaceLayout layout = Fitted(surface: 100, image: 100);
 
-        layout.TryToSourceBounds(-40, -25, 10, 10, out TrimBounds bounds).ShouldBeTrue();
-        bounds.ShouldBe(TrimBounds.FromEdges(0, 0, 10, 10));
+        layout.TryToSourceBounds(-40, -25, 10, 10, out TrimBounds bounds).ShouldBeFalse();
+        bounds.IsEmpty.ShouldBeTrue();
     }
 
     /// <summary>The bottom-right edge is exclusive and never past the canvas (§32).</summary>
     [Fact]
-    public void A_drag_running_past_the_bottom_right_corner_clamps_to_the_last_pixel()
+    public void A_drag_running_past_the_bottom_right_corner_is_refused()
     {
         CropSurfaceLayout layout = Fitted(surface: 100, image: 100);
 
-        layout.TryToSourceBounds(90, 90, 400, 400, out TrimBounds bounds).ShouldBeTrue();
-        bounds.ShouldBe(TrimBounds.FromEdges(90, 90, 100, 100));
-        bounds.FitsWithin(100, 100).ShouldBeTrue();
+        layout.TryToSourceBounds(90, 90, 400, 400, out TrimBounds bounds).ShouldBeFalse();
+        bounds.IsEmpty.ShouldBeTrue();
     }
 
     /// <summary>Corners in any order describe the same rectangle.</summary>
@@ -261,9 +260,7 @@ public sealed class CropSurfaceLayoutTests
     /// A rectangle entirely off the artwork is refused rather than clamped (§23).
     /// </summary>
     /// <remarks>
-    /// The distinction that matters: a drag that <i>overlaps</i> the image is clamped to the
-    /// overlap, because the operator did select some artwork. One that misses entirely selected
-    /// none, and clamping it would invent a sliver at the edge that nobody drew.
+    /// A selection outside the image is refused whether or not part overlaps the artwork.
     /// </remarks>
     [Fact]
     public void A_rectangle_entirely_outside_the_image_is_refused()

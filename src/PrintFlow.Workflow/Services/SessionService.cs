@@ -730,7 +730,7 @@ public sealed class SessionService : ISessionService
         RevisionId? InputRevision,
         string ProcessorId,
         TrimBounds? ManualCrop,
-        string? ManualResultPath = null);
+        string? ManualResultPath = null, ManualCropMargin ManualCropMargin = default);
 
     /// <summary>
     /// What one attempt's file work produced, on its way to the closing transaction.
@@ -759,7 +759,7 @@ public sealed class SessionService : ISessionService
         string? AdapterNotes = null,
         TrimGeometry? TrimGeometry = null,
         PsdInspection? PsdInspection = null,
-        PdfInspection? PdfInspection = null);
+        PdfInspection? PdfInspection = null, ManualCropGeometry? ManualCropGeometry = null);
 
     /// <summary>Reads the one producing effect out of a transition, or null when there is none.</summary>
     private ProducingWork? ProducingWorkOf(IReadOnlyList<WorkflowEffect> effects)
@@ -783,7 +783,7 @@ public sealed class SessionService : ISessionService
                     // attempt row can never claim an implementation that did not run.
                     return new ProducingWork(
                         crop.AttemptId, crop.Step, AdapterKind.Internal, OperationKind.ManualImport,
-                        crop.InputRevision, _manualCrop.ProcessorId, crop.Crop);
+                        crop.InputRevision, _manualCrop.ProcessorId, crop.Crop, ManualCropMargin: crop.Margin);
             }
         }
 
@@ -1605,6 +1605,9 @@ public sealed class SessionService : ISessionService
             succeededAttempt = succeededAttempt.WithTrimGeometry(geometry);
         }
 
+        if (produced.ManualCropGeometry is { } manualGeometry)
+            succeededAttempt = succeededAttempt.WithManualCropGeometry(manualGeometry);
+
         ProcessingSession sessionAfterFinish = MergeSession(
             afterStart.Session, finished.State, finished.Effects, context.NowUtc);
 
@@ -1986,12 +1989,18 @@ public sealed class SessionService : ISessionService
                         new ManualCropRequest(
                             workingCopy.Value,
                             SiblingOf(workingCopy.Value, ManualCropOutputFileName),
-                            crop),
+                            crop, work.ManualCropMargin),
                         cancellationToken);
 
-                    return cropped.IsFailure
-                        ? OperationResult.Fail<StepWork>(cropped.Failure)
-                        : await InspectAsync(cropped.Value.ProducedFile, cancellationToken);
+                    if (cropped.IsFailure) return OperationResult.Fail<StepWork>(cropped.Failure);
+                    ManualCropGeometry expected = ManualCropGeometry.Create(
+                        crop, work.ManualCropMargin, cropped.Value.SourceWidth, cropped.Value.SourceHeight);
+                    if (cropped.Value.AppliedBounds != expected.AppliedBounds ||
+                        cropped.Value.Geometry != expected)
+                        return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                            "The manual crop processor returned different geometry than requested.");
+                    return await InspectAsync(cropped.Value.ProducedFile, cancellationToken,
+                        manualCropGeometry: cropped.Value.Geometry);
                 }
 
                 // The operator's recorded decision, not a constant. It arrives here from
@@ -2093,12 +2102,16 @@ public sealed class SessionService : ISessionService
         WorkspaceFileRef file,
         CancellationToken cancellationToken,
         string? adapterNotes = null,
-        TrimGeometry? trimGeometry = null)
+        TrimGeometry? trimGeometry = null, ManualCropGeometry? manualCropGeometry = null)
     {
         string absolute = _workspace.ResolveAbsolute(file);
         OperationResult<FileFacts> inspected = await _fileInspector.InspectAsync(absolute, cancellationToken);
+        if (inspected.IsSuccess && manualCropGeometry is { AppliedBounds: var bounds } &&
+            (inspected.Value.PixelWidth != bounds.Width || inspected.Value.PixelHeight != bounds.Height))
+            return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
+                "The manual crop raster dimensions do not match its applied bounds.");
         return inspected.IsSuccess
-            ? OperationResult.Ok(new StepWork(file, inspected.Value, adapterNotes, trimGeometry))
+            ? OperationResult.Ok(new StepWork(file, inspected.Value, adapterNotes, trimGeometry, ManualCropGeometry: manualCropGeometry))
             : OperationResult.Fail<StepWork>(inspected.Failure);
     }
 

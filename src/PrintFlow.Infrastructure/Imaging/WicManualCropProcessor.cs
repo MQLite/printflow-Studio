@@ -102,9 +102,8 @@ public sealed class WicManualCropProcessor : IManualCropProcessor
                 FailureCode.OutputUnreadable, "The decoded frame reports no pixels, so there is nothing to crop.");
         }
 
-        // Refused, never clamped. The caller mapped the operator's drag onto this canvas and
-        // already clamped it there; a rectangle that still does not fit means the two disagree
-        // about the image, and quietly shrinking it would hide that rather than report it.
+        // The operator's base rectangle is refused, never clamped. Only the explicit outward
+        // margin below may stop at a canvas edge.
         if (!request.Crop.FitsWithin(width, height))
         {
             return OperationResult.Fail<ManualCropResult>(
@@ -112,10 +111,11 @@ public sealed class WicManualCropProcessor : IManualCropProcessor
                 $"The crop {request.Crop} does not fit inside the {width}x{height} source canvas.");
         }
 
-        OperationResult<Unit> written = WriteCroppedPng(frame, request.Crop, outputPath, cancellationToken);
+        ManualCropGeometry geometry = ManualCropGeometry.Create(request.Crop, request.Margin, width, height);
+        OperationResult<Unit> written = WriteCroppedPng(frame, geometry.AppliedBounds, outputPath, cancellationToken);
         return written.IsFailure
             ? OperationResult.Fail<ManualCropResult>(written.Failure)
-            : OperationResult.Ok(new ManualCropResult(request.ExpectedOutput, request.Crop, width, height));
+            : OperationResult.Ok(new ManualCropResult(request.ExpectedOutput, geometry.AppliedBounds, width, height, geometry));
     }
 
     /// <summary>

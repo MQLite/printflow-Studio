@@ -65,7 +65,7 @@ public abstract record WorkflowCommand
     /// <see cref="HandOff"/>: the work stays inside PrintFlow, the session stays
     /// <c>Active</c>, and the result goes through the same attempt, hash and review machinery
     /// every other produced file does. What it is not is a general image editor — the only
-    /// thing the operator supplies is a rectangle (Part C2 §4, §10).
+    /// geometry supplied is a rectangle and explicit outward manual margins.
     /// <para>
     /// <paramref name="Crop"/> is in the <b>source image's own pixel coordinates</b>. A
     /// viewport rectangle would mean the same drag produced a different crop depending on the
@@ -73,7 +73,7 @@ public abstract record WorkflowCommand
     /// its answer reaches a command (Part C2 §6, §7).
     /// </para>
     /// </remarks>
-    public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop) : WorkflowCommand;
+    public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowCommand;
 
     /// <summary>Decline Trim and continue with its approved upstream artwork, without producing a result.</summary>
     public sealed record KeepOriginalExtent : WorkflowCommand

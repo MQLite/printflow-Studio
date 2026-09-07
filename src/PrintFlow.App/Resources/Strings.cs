@@ -801,6 +801,14 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     /// </remarks>
     internal static string Resolve(string key) => Get(key);
 
+    internal static string Session_ManualCropAdjustment => Get(nameof(Session_ManualCropAdjustment));
+    internal static string Session_ManualCropTight => Get(nameof(Session_ManualCropTight));
+    internal static string Session_ManualCropUniform => Get(nameof(Session_ManualCropUniform));
+    internal static string Session_ManualCropPerEdge => Get(nameof(Session_ManualCropPerEdge));
+    internal static string Session_ManualCropSelected => Get(nameof(Session_ManualCropSelected));
+    internal static string Session_ManualCropApplied => Get(nameof(Session_ManualCropApplied));
+    internal static string Session_ManualCropMarginInvalid => Get(nameof(Session_ManualCropMarginInvalid));
+
     private static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 }

@@ -6,10 +6,8 @@ namespace PrintFlow.Workflow.Ports;
 
 /// <summary>What the manual-crop processor is asked to do (Epic 11200 Part C2 §9).</summary>
 /// <remarks>
-/// Three plain values, and deliberately no <see cref="TrimMargin"/>: an automatic trim measures
-/// content and then grows the result by a margin, whereas a manual crop is the rectangle the
-/// operator drew and nothing else. Adding a margin here would quietly enlarge a crop a human
-/// chose, which is the one thing this path must never do.
+/// The base rectangle and explicit manual adjustment are independent of automatic trim settings.
+/// Only the requested outward expansion is clamped; an invalid base rectangle is refused.
 /// </remarks>
 /// <param name="Input">The per-attempt working copy to read. Never modified.</param>
 /// <param name="ExpectedOutput">Where the cropped PNG must be written.</param>
@@ -19,24 +17,25 @@ namespace PrintFlow.Workflow.Ports;
 /// seam: the display-to-source mapping is the review surface's problem and is resolved before
 /// a command is ever issued (Part C2 §6, §7).
 /// </param>
+/// <param name="Margin">The operator's manual expansion decision, defaulting to Tight.</param>
 public sealed record ManualCropRequest(
     WorkspaceFileRef Input,
     WorkspaceFileRef ExpectedOutput,
-    TrimBounds Crop);
+    TrimBounds Crop, ManualCropMargin Margin = default);
 
 /// <summary>The deterministic facts one manual crop established.</summary>
 /// <remarks>
 /// <see cref="AppliedBounds"/> is reported back rather than assumed to equal
 /// <see cref="ManualCropRequest.Crop"/>, so a caller can assert that the pixels kept are the
 /// pixels asked for instead of trusting that they were. There is no "manual crop required"
-/// outcome here and no nullable geometry: unlike the alpha trim, this operation either crops
+/// outcome here: unlike the alpha trim, this operation either crops
 /// the rectangle it was given or fails.
 /// </remarks>
 public sealed record ManualCropResult(
     WorkspaceFileRef ProducedFile,
     TrimBounds AppliedBounds,
     int SourceWidth,
-    int SourceHeight)
+    int SourceHeight, ManualCropGeometry Geometry)
 {
     /// <summary>Output width in pixels; by construction the applied rectangle's width.</summary>
     public int ResultWidth => AppliedBounds.Width;

@@ -597,7 +597,7 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11099 adds typed inspection/channel tables and widens Revision.Operation.
         // The documented rebuild preserves all existing rows, constraints, indexes and triggers.
         // SCRUM-11092 / SCRUM-11112: manual result provenance and manual cutout authority.
-        scripts.Last().ShouldBe("0012_manual_result_import.sql");
+        scripts.Last().ShouldBe("0013_manual_crop_geometry.sql");
     }
 
     // -------------------------------------------------------------------------------------

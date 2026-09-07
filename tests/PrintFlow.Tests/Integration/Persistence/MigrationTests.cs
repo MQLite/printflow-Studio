@@ -12,6 +12,45 @@ namespace PrintFlow.Tests.Integration.Persistence;
 public sealed class MigrationTests
 {
     [Fact]
+    public void Manual_crop_migration_preserves_v12_historical_nulls_and_rejects_partial_metadata()
+    {
+        using TempDatabase database = new(migrate: false);
+        using var connection = database.OpenRaw();
+        foreach (string resource in typeof(MigrationRunner).Assembly.GetManifestResourceNames()
+            .Where(n => n.Contains(".Migrations.", StringComparison.Ordinal) && n.EndsWith(".sql", StringComparison.Ordinal))
+            .OrderBy(n => n, StringComparer.Ordinal))
+        {
+            string file = resource[(resource.LastIndexOf(".Migrations.", StringComparison.Ordinal) + 12)..];
+            if (int.Parse(file[..4], System.Globalization.CultureInfo.InvariantCulture) >= 13) continue;
+            Execute(connection, ReadMigrationScript(file));
+        }
+        InsertSession(connection, "crop-upgrade", []);
+        Execute(connection, $"""
+            INSERT INTO Revision (Id, SessionId, Operation, RelativePath, Format, ByteLength, Sha256, ColourMode, CreatedAtUtc)
+            VALUES ('old-crop', 'crop-upgrade', 'MANUAL_IMPORT', 'Sessions/crop-upgrade/Working/old.png',
+                    'PNG', 100, '{new string('a', 64)}', 'RGB', '2026-01-01T00:00:00.000Z');
+            INSERT INTO ProcessingAttempt (Id, SessionId, StepKind, Operation, AdapterId, StartedAtUtc,
+                EndedAtUtc, ResultStatus, OutputRevisionId, RetrySequence)
+            VALUES ('old-attempt', 'crop-upgrade', 'Trim', 'MANUAL_IMPORT', 'manual-crop-v1',
+                '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:01.000Z', 'SUCCEEDED', 'old-crop', 0);
+            PRAGMA user_version = 12;
+            """);
+        MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT ManualSelectedLeft, ManualAppliedLeft, ManualMarginMode, OutputRevisionId FROM ProcessingAttempt WHERE Id = 'old-attempt'";
+        using (var reader = command.ExecuteReader())
+        {
+            reader.Read().ShouldBeTrue();
+            reader.IsDBNull(0).ShouldBeTrue();
+            reader.IsDBNull(1).ShouldBeTrue();
+            reader.IsDBNull(2).ShouldBeTrue();
+            reader.GetString(3).ShouldBe("old-crop");
+        }
+        Should.Throw<SqliteException>(() => Execute(connection,
+            "UPDATE ProcessingAttempt SET ManualSelectedLeft = 0 WHERE Id = 'old-attempt'"));
+    }
+
+    [Fact]
     public void Manual_result_migration_preserves_v11_rows_and_revision_identity_guards()
     {
         // SCRUM-11092 / SCRUM-11112: exercise upgrade from the actual preceding schema.
@@ -37,6 +76,13 @@ public sealed class MigrationTests
                 '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:01.000Z', 'SUCCEEDED', 'old-crop', 0);
             PRAGMA user_version = 11;
             """);
+        int oldAttemptColumnCount;
+        using (var schema = connection.CreateCommand())
+        {
+            schema.CommandText = "SELECT * FROM ProcessingAttempt LIMIT 0";
+            using var reader = schema.ExecuteReader();
+            oldAttemptColumnCount = reader.FieldCount;
+        }
         string rowsBefore = Dump("Revision") + Dump("ProcessingAttempt");
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
         (Dump("Revision") + Dump("ProcessingAttempt")).ShouldBe(rowsBefore);
@@ -53,7 +99,12 @@ public sealed class MigrationTests
             command.CommandText = "SELECT * FROM " + table + " ORDER BY Id;";
             using var reader = command.ExecuteReader();
             List<object[]> rows = [];
-            while (reader.Read()) { object[] row = new object[reader.FieldCount]; reader.GetValues(row); rows.Add(row); }
+            while (reader.Read())
+            {
+                object[] row = new object[table == "ProcessingAttempt" ? oldAttemptColumnCount : reader.FieldCount];
+                for (int i = 0; i < row.Length; i++) row[i] = reader.GetValue(i);
+                rows.Add(row);
+            }
             return System.Text.Json.JsonSerializer.Serialize(rows);
         }
     }

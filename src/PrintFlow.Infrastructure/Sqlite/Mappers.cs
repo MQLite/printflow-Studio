@@ -245,6 +245,24 @@ internal static class Mappers
         };
     }
 
+    /// <summary>Restores only explicitly recorded manual crop facts.</summary>
+    private static ManualCropGeometry? ToManualCropGeometry(AttemptRow row)
+    {
+        if (row.ManualMarginMode is null) return null;
+        ManualCropMargin margin = ToTrimMode(row.ManualMarginMode) switch
+        {
+            TrimMode.TightCrop => ManualCropMargin.Tight,
+            TrimMode.UniformMargin => ManualCropMargin.Uniform(row.ManualMarginTop!.Value),
+            _ => ManualCropMargin.PerEdge(row.ManualMarginTop!.Value, row.ManualMarginRight!.Value,
+                row.ManualMarginBottom!.Value, row.ManualMarginLeft!.Value),
+        };
+        return ManualCropGeometry.Restore(
+            TrimBounds.FromEdges(row.ManualSelectedLeft!.Value, row.ManualSelectedTop!.Value,
+                row.ManualSelectedRight!.Value, row.ManualSelectedBottom!.Value),
+            TrimBounds.FromEdges(row.ManualAppliedLeft!.Value, row.ManualAppliedTop!.Value,
+                row.ManualAppliedRight!.Value, row.ManualAppliedBottom!.Value), margin);
+    }
+
     /// <summary>
     /// Rebuilds a <see cref="TrimGeometry"/> from its eight edge columns, or null when none was
     /// stored (SCRUM-11081).
@@ -1310,6 +1328,19 @@ internal static class Mappers
         TrimAppliedTop = attempt.TrimGeometry?.AppliedBounds.Top,
         TrimAppliedRight = attempt.TrimGeometry?.AppliedBounds.RightExclusive,
         TrimAppliedBottom = attempt.TrimGeometry?.AppliedBounds.BottomExclusive,
+        ManualSelectedLeft = attempt.ManualCropGeometry?.SelectedBounds.Left,
+        ManualSelectedTop = attempt.ManualCropGeometry?.SelectedBounds.Top,
+        ManualSelectedRight = attempt.ManualCropGeometry?.SelectedBounds.RightExclusive,
+        ManualSelectedBottom = attempt.ManualCropGeometry?.SelectedBounds.BottomExclusive,
+        ManualAppliedLeft = attempt.ManualCropGeometry?.AppliedBounds.Left,
+        ManualAppliedTop = attempt.ManualCropGeometry?.AppliedBounds.Top,
+        ManualAppliedRight = attempt.ManualCropGeometry?.AppliedBounds.RightExclusive,
+        ManualAppliedBottom = attempt.ManualCropGeometry?.AppliedBounds.BottomExclusive,
+        ManualMarginTop = attempt.ManualCropGeometry?.Margin.Top,
+        ManualMarginRight = attempt.ManualCropGeometry?.Margin.Right,
+        ManualMarginBottom = attempt.ManualCropGeometry?.Margin.Bottom,
+        ManualMarginLeft = attempt.ManualCropGeometry?.Margin.Left,
+        ManualMarginMode = attempt.ManualCropGeometry is { } manual ? ToText(manual.Margin.Mode) : null,
 
         // What THIS attempt ran under. Written once with the opening transaction and left out of
         // the upsert's DO UPDATE clause, so a later change of size — or a later enlargement
@@ -1471,6 +1502,7 @@ internal static class Mappers
             // whose crop rectangle was never recorded, never attempts that kept the whole
             // canvas. Nothing here reconstructs a rectangle from the output's dimensions
             // (SCRUM-11081).
+            ManualCropGeometry = ToManualCropGeometry(row),
             TrimGeometry = ToTrimGeometry(
                 row.TrimContentLeft, row.TrimContentTop, row.TrimContentRight, row.TrimContentBottom,
                 row.TrimAppliedLeft, row.TrimAppliedTop, row.TrimAppliedRight, row.TrimAppliedBottom),

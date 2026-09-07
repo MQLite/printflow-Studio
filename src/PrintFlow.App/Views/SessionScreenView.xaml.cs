@@ -153,6 +153,7 @@ public partial class SessionScreenView : UserControl
     {
         if (e.PropertyName is
             nameof(SessionViewModel.CropSelection) or
+            nameof(SessionViewModel.CropAppliedBounds) or
             nameof(SessionViewModel.IsCropping) or
             nameof(SessionViewModel.ZoomScale) or
             nameof(SessionViewModel.IsFitToViewport))
@@ -166,6 +167,7 @@ public partial class SessionScreenView : UserControl
 
     private void RedrawSelection()
     {
+        CropAppliedOutline.Visibility = Visibility.Collapsed;
         if (Model is not { IsCropping: true, CropSelection: TrimBounds bounds } model ||
             !CurrentLayout(model).TryToSurfaceRect(bounds, out double x, out double y, out double w, out double h))
         {
@@ -174,6 +176,15 @@ public partial class SessionScreenView : UserControl
         }
 
         Place(x, y, w, h);
+        if (model.CropAppliedBounds is { } applied &&
+            CurrentLayout(model).TryToSurfaceRect(applied, out x, out y, out w, out h))
+        {
+            Canvas.SetLeft(CropAppliedOutline, x);
+            Canvas.SetTop(CropAppliedOutline, y);
+            CropAppliedOutline.Width = w;
+            CropAppliedOutline.Height = h;
+            CropAppliedOutline.Visibility = Visibility.Visible;
+        }
     }
 
     private void DrawOutline(Point a, Point b) => Place(

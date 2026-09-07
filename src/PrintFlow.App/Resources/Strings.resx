@@ -485,12 +485,12 @@
   <data name="Session_ManualCropHeading" xml:space="preserve"><value>Manual crop</value></data>
   <data name="Session_ManualCropBegin" xml:space="preserve"><value>Manual Crop</value></data>
   <data name="Session_ManualCropInstructions" xml:space="preserve">
-    <value>Draw crop area: drag across the image to select the area to keep. Drag again to redraw it. Use the scrollbars to move a magnified image.</value>
+    <value>Drag inside the image to select the area to keep. Dashed blue shows your selection; solid green shows the final crop with margins. Drag again to redraw. Use scrollbars when zoomed in.</value>
   </data>
   <data name="Session_ManualCropApply" xml:space="preserve"><value>Apply Crop</value></data>
   <data name="Session_ManualCropCancel" xml:space="preserve"><value>Cancel Crop</value></data>
   <data name="Session_ManualCropInvalid" xml:space="preserve">
-    <value>Invalid crop area. The selection must cover at least one pixel of the image.</value>
+    <value>Invalid crop area. Select at least one pixel and keep the whole selection inside the image.</value>
   </data>
   <data name="Session_ManualCropSelection" xml:space="preserve"><value>Selected: {0}, {1} · {2} × {3} px</value></data>
   <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>No crop area selected yet.</value></data>
@@ -780,4 +780,11 @@
   <data name="Session_KeepOriginalExtent" xml:space="preserve"><value>Keep original extent</value></data>
   <data name="Session_KeepOriginalExtentHint" xml:space="preserve"><value>Continue without trimming</value></data>
   <data name="Session_OriginalExtentRetained" xml:space="preserve"><value>Original extent retained</value></data>
+  <data name="Session_ManualCropAdjustment" xml:space="preserve"><value>Crop adjustment</value></data>
+  <data name="Session_ManualCropTight" xml:space="preserve"><value>Tight</value></data>
+  <data name="Session_ManualCropUniform" xml:space="preserve"><value>Uniform margin</value></data>
+  <data name="Session_ManualCropPerEdge" xml:space="preserve"><value>Per-edge margin</value></data>
+  <data name="Session_ManualCropSelected" xml:space="preserve"><value>Selected bounds</value></data>
+  <data name="Session_ManualCropApplied" xml:space="preserve"><value>Applied crop bounds</value></data>
+  <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>Enter whole numbers of zero or more pixels.</value></data>
 </root>

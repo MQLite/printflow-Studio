@@ -243,6 +243,19 @@ internal sealed class AttemptRow
     public int? TrimAppliedRight { get; set; }
 
     public int? TrimAppliedBottom { get; set; }
+    public int? ManualSelectedLeft { get; set; }
+    public int? ManualSelectedTop { get; set; }
+    public int? ManualSelectedRight { get; set; }
+    public int? ManualSelectedBottom { get; set; }
+    public int? ManualAppliedLeft { get; set; }
+    public int? ManualAppliedTop { get; set; }
+    public int? ManualAppliedRight { get; set; }
+    public int? ManualAppliedBottom { get; set; }
+    public int? ManualMarginTop { get; set; }
+    public int? ManualMarginRight { get; set; }
+    public int? ManualMarginBottom { get; set; }
+    public int? ManualMarginLeft { get; set; }
+    public string? ManualMarginMode { get; set; }
 
     // The immutable snapshot of the plan THIS Photoshop output ran under (Epic 11400 Part
     // B1A.2A §12). Null for everything else -- a Meitu call, a trim, a manual crop, a promotion.

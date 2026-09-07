@@ -62,7 +62,7 @@ public abstract record WorkflowEffect
         AttemptId AttemptId,
         StepKind Step,
         RevisionId InputRevision,
-        TrimBounds Crop) : WorkflowEffect;
+        TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowEffect;
 
     /// <summary>Record the start of an attempt before any work begins, so a crash is detectable.</summary>
     public sealed record RecordAttemptStarted(

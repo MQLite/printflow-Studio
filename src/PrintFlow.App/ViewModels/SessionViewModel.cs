@@ -1110,7 +1110,7 @@ public sealed partial class SessionViewModel : ObservableObject
     public string ReenterAutomationHint => Strings.Session_ReenterAutomationHint;
 
     /// <summary>True while a drawn rectangle is ready to be submitted (§23).</summary>
-    public bool CanApplyManualCrop => IsCropping && CropSelection is not null && !IsBusy;
+    public bool CanApplyManualCrop => IsCropping && DraftManualCropGeometry is not null && !IsBusy;
 
     /// <summary>
     /// The image the crop rectangle is drawn on, or null when crop mode is closed (§24).
@@ -1134,10 +1134,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// the one about to be cropped.
     /// </remarks>
     public string CropSelectionSummary => CropSelection is { } crop
-        ? string.Format(
-            CultureInfo.CurrentCulture,
-            Strings.Session_ManualCropSelection,
-            crop.Left, crop.Top, crop.Width, crop.Height)
+        ? $"{ManualCropSelectedLabel}: {ManualBounds(crop)}"
         : Strings.Session_ManualCropNoSelection;
 
     // --- Return to an earlier step (Epic 11200 Part C3 §3, §5) ---------------------------
@@ -2311,14 +2308,15 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ApplyManualCropAsync(CancellationToken cancellationToken)
     {
-        if (CropSelection is not { } crop)
+        if (!IsCropping || IsBusy || !TryReadManualCropMargin(out var margin)) return;
+        if (DraftManualCropGeometry is not { SelectedBounds: var crop })
         {
             IsCropSelectionInvalid = true;
             return;
         }
 
         await RunAsync(
-            step => new WorkflowCommand.SubmitManualCrop(step, crop), cancellationToken).ConfigureAwait(true);
+            step => new WorkflowCommand.SubmitManualCrop(step, crop, margin), cancellationToken).ConfigureAwait(true);
     }
 
     /// <summary>
@@ -2988,18 +2986,21 @@ public sealed partial class SessionViewModel : ObservableObject
         IsCropping = false;
         CropSelection = null;
         IsCropSelectionInvalid = false;
+        ResetManualCropAdjustment();
     }
 
     partial void OnIsCroppingChanged(bool value)
     {
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CropPane));
+        NotifyManualCropDraft();
     }
 
     partial void OnCropSelectionChanged(TrimBounds? value)
     {
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CropSelectionSummary));
+        NotifyManualCropDraft();
     }
 
     partial void OnIsBusyChanged(bool value)
@@ -3472,6 +3473,10 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanSetTrimParameters));
         OnPropertyChanged(nameof(PendingTrimSummary));
         OnPropertyChanged(nameof(TrimParametersSummary));
+        OnPropertyChanged(nameof(HasManualCropGeometry));
+        OnPropertyChanged(nameof(ManualCropReviewSelected));
+        OnPropertyChanged(nameof(ManualCropReviewApplied));
+        OnPropertyChanged(nameof(ManualCropReviewMargin));
         OnPropertyChanged(nameof(HasTrimParameters));
 
         OnPropertyChanged(nameof(HasTrimBounds));

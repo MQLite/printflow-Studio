@@ -485,12 +485,12 @@
   <data name="Session_ManualCropHeading" xml:space="preserve"><value>手动裁切</value></data>
   <data name="Session_ManualCropBegin" xml:space="preserve"><value>手动裁切</value></data>
   <data name="Session_ManualCropInstructions" xml:space="preserve">
-    <value>框选裁切区域：在图像上拖动以选择要保留的范围。再次拖动可重新框选。放大后可使用滚动条移动图像。</value>
+    <value>在图像内拖动，选择要保留的范围。蓝色虚线表示选区，绿色实线表示加上边距后的实际裁切范围。再次拖动可重新框选，放大后可使用滚动条。</value>
   </data>
   <data name="Session_ManualCropApply" xml:space="preserve"><value>应用裁切</value></data>
   <data name="Session_ManualCropCancel" xml:space="preserve"><value>取消裁切</value></data>
   <data name="Session_ManualCropInvalid" xml:space="preserve">
-    <value>裁切区域无效。所选范围必须至少覆盖图像的一个像素。</value>
+    <value>裁切区域无效。请至少选择一个像素，并将整个选区保持在图像范围内。</value>
   </data>
   <data name="Session_ManualCropSelection" xml:space="preserve"><value>已选择：{0}, {1} · {2} × {3} 像素</value></data>
   <data name="Session_ManualCropNoSelection" xml:space="preserve"><value>尚未选择裁切区域。</value></data>
@@ -769,4 +769,11 @@
   <data name="Session_KeepOriginalExtent" xml:space="preserve"><value>保留原始范围</value></data>
   <data name="Session_KeepOriginalExtentHint" xml:space="preserve"><value>不裁剪并继续</value></data>
   <data name="Session_OriginalExtentRetained" xml:space="preserve"><value>已保留原始范围</value></data>
+  <data name="Session_ManualCropAdjustment" xml:space="preserve"><value>裁切调整</value></data>
+  <data name="Session_ManualCropTight" xml:space="preserve"><value>紧贴选区</value></data>
+  <data name="Session_ManualCropUniform" xml:space="preserve"><value>统一边距</value></data>
+  <data name="Session_ManualCropPerEdge" xml:space="preserve"><value>分别设置边距</value></data>
+  <data name="Session_ManualCropSelected" xml:space="preserve"><value>所选范围</value></data>
+  <data name="Session_ManualCropApplied" xml:space="preserve"><value>实际裁切范围</value></data>
+  <data name="Session_ManualCropMarginInvalid" xml:space="preserve"><value>请输入大于或等于零的整数像素值。</value></data>
 </root>
