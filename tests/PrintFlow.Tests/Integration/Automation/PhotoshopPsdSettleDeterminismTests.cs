@@ -180,6 +180,30 @@ public sealed class PhotoshopPsdSettleDeterminismTests
 
         result.IsFailure.ShouldBeTrue();
         result.Failure.Code.ShouldBe(FailureCode.PsdPreparationFailed);
+        result.Failure.TechnicalDetail.ShouldContain("independently decoded");
+        result.Failure.TechnicalDetail.ShouldNotContain("settle");
+        scenario.Inspector.Observations.ShouldBe(2);
+    }
+
+    /// <summary>
+    /// The same ordering for a raster that decodes perfectly well and is simply the wrong picture.
+    /// </summary>
+    /// <remarks>
+    /// Worth stating separately from the truncated case: this one is a valid PNG, so it proves the
+    /// refusal comes from the structural comparison against what Photoshop reported rather than
+    /// from a read that fell over, and that a slow first observation cannot preempt it either.
+    /// </remarks>
+    [Fact]
+    public async Task A_stable_raster_of_the_wrong_size_settles_first_and_then_fails_psd_validation()
+    {
+        using SettleScenario scenario = new(Budget, FreePoll);
+        scenario.Inspector.Observe(cost: Budget);
+        scenario.Inspector.Observe(cost: TimeSpan.Zero);
+
+        var result = await scenario.PrepareAsync(SyntheticImages.Png(5, 3));
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.PsdPreparationFailed);
         result.Failure.TechnicalDetail.ShouldContain("RGB/8");
         scenario.Inspector.Observations.ShouldBe(2);
     }

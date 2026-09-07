@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Media;
@@ -42,6 +43,13 @@ public sealed partial class ProductionPhotoshopOutputProcessor
         try
         {
             CheckStop();
+            // Before anything external happens, because a settle policy that no output could
+            // satisfy is a configuration mistake, not an output problem, and used to be
+            // indistinguishable from one — it reached the end of the poll and said the raster was
+            // unreadable.
+            var policy = PsdOutputSettlePolicy.Create(_options.TiffSettleTimeout, _options.PollInterval);
+            if (policy.IsFailure) return Fail(policy.Failure);
+            PsdOutputSettlePolicy settle = policy.Value;
             if (request.Input.Area != WorkspaceArea.Working || request.ExpectedOutput.Area != WorkspaceArea.Working)
                 return Fail(OperationFailure.Create(FailureCode.PsdPreparationFailed, "PSD preparation requires managed Working paths."));
             string input = _workspace.ResolveAbsolute(request.Input);
@@ -94,11 +102,13 @@ public sealed partial class ProductionPhotoshopOutputProcessor
             // alone never establishes a file, its format, its alpha, or its hash.
             IFileInspector reader = PsdOutputInspector;
             FileFacts? previous = null;
-            DateTimeOffset deadline = _clock.GetUtcNow() + _options.TiffSettleTimeout;
-            do
+            int observations = 0;
+            DateTimeOffset deadline = _clock.GetUtcNow() + settle.Timeout;
+            while (true)
             {
                 CheckStop();
                 var observed = await reader.InspectAsync(output, cancellationToken).ConfigureAwait(false);
+                observations++;
                 if (observed.IsSuccess && previous is { } first && observed.Value.Sha256 == first.Sha256)
                 {
                     FileFacts facts = observed.Value;
@@ -110,10 +120,18 @@ public sealed partial class ProductionPhotoshopOutputProcessor
                     return result.IsFailure ? Fail(result.Failure) : result;
                 }
                 previous = observed.IsSuccess ? observed.Value : null;
-                await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
-            } while (_clock.GetUtcNow() < deadline);
+                // The budget bounds how long a still-changing output is waited on. It does not
+                // bound the evidence: giving up before the rule's own minimum number of
+                // observations have been taken reports "the file is bad" when the truth is "one
+                // read was slow", which is how a finished raster became OutputUnreadable whenever
+                // the machine was busy enough. Honouring the minimum costs at most one further
+                // interval, and a file that is genuinely still changing still fails closed below.
+                if (observations >= settle.RequiredEqualObservations && _clock.GetUtcNow() >= deadline) break;
+                await Task.Delay(settle.Interval, _clock, cancellationToken).ConfigureAwait(false);
+            }
             return Fail(OperationFailure.Create(File.Exists(output) ? FailureCode.OutputUnreadable : FailureCode.OutputMissing,
-                "PSD preparation output did not settle into a readable PNG."));
+                "PSD preparation output did not settle into a readable PNG after " +
+                observations.ToString(CultureInfo.InvariantCulture) + " independent observations."));
         }
         catch (OperationCanceledException)
         {
