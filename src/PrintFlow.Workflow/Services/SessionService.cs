@@ -1876,7 +1876,6 @@ public sealed class SessionService : ISessionService
                     if (facts.Format != ImageFormat.Png || facts.ColourMode != ColourMode.Rgb ||
                         facts.PixelWidth != inspection.PixelWidth || facts.PixelHeight != inspection.PixelHeight ||
                         !inspection.HasRealMergedData || inspection.OriginalMode != "RGB" || inspection.BitDepth != 8 ||
-                        inspection.HasSpots || inspection.HasW1 ||
                         inspection.HasTransparency is null ||
                         (inspection.HasTransparency == true && facts.HasAlpha != true))
                     {

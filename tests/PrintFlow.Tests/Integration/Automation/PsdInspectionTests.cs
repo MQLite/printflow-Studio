@@ -72,6 +72,12 @@ public sealed class PsdInspectionTests
         ProductionPhotoshopOutputProcessor.ValidatePsdRaster(file, facts, inspection with { HasTransparency = !transparent }).IsFailure.ShouldBeTrue();
         ProductionPhotoshopOutputProcessor.ValidatePsdRaster(file, facts, inspection with { PixelWidth = 5 }).IsFailure.ShouldBeTrue();
         ProductionPhotoshopOutputProcessor.ValidatePsdRaster(file, facts, inspection with { BitDepth = 16 }).IsFailure.ShouldBeTrue();
-        ProductionPhotoshopOutputProcessor.ValidatePsdRaster(file, facts, inspection with { Channels = [new("W1", "SPOTCOLOR")] }).IsFailure.ShouldBeTrue();
+        ProductionPhotoshopOutputProcessor.ValidatePsdRaster(file, facts, inspection with { HasRealMergedData = false }).IsFailure.ShouldBeTrue();
+
+        // A source spot or white-ink channel does not invalidate the prepared raster. The PSD was
+        // a visual design input; its ink channels were rasterised out with every other
+        // non-component channel, and the PNG in front of us is what is being validated.
+        ProductionPhotoshopOutputProcessor.ValidatePsdRaster(
+            file, facts, inspection with { Channels = [new("W1", "SPOTCOLOR")] }).IsSuccess.ShouldBeTrue();
     }
 }

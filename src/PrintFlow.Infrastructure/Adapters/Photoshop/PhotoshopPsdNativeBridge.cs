@@ -116,15 +116,18 @@ internal static class PhotoshopPsdProgram
                         (bits === 'BitsPerChannelType.ONE' ? 1 : '')));
                     if (depth === '') return result(false, 'Unknown PSD bit depth.');
                     version = String(app.version);
-                    var spot = false, w1 = false, components = 0;
+                    // Every channel's name and kind is reported for diagnostics, including spot
+                    // and W1 channels. None of them gates preparation: a customer PSD is a visual
+                    // design input, so source spot/white-ink channels are observed, rasterised out
+                    // with the other non-component channels below, and never become production
+                    // authority. Production W1 is generated later, from the approved visual
+                    // raster, by the signed Action.
+                    var components = 0;
                     for (var i = 0; i < source.channels.length; i++) {
                         var ch = source.channels[i], kind = String(ch.kind).replace('ChannelType.', '');
                         channels.push(enc(ch.name) + ',' + enc(kind));
-                        if (kind === 'SPOTCOLOR') spot = true;
-                        if (String(ch.name).toUpperCase() === 'W1') w1 = true;
                         if (kind === 'COMPONENT') components++;
                     }
-                    if (w1 || spot) return result(false, 'Existing W1/spot channels require an operator decision.');
                     if (mode !== 'RGB' || depth !== 8 || components !== 3)
                         return result(false, 'Only RGB 8-bit PSD input is supported.');
                     var destination = new File({{output}});

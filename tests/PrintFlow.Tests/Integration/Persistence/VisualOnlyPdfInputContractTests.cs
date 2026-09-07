@@ -14,64 +14,45 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.Tests.Integration.Persistence;
 
 /// <summary>
-/// SCRUM-11101-A Gate A. The original Jira row applies the existing-white-ink decision to "PSD or
-/// PDF preparation". PSD preparation refuses a document carrying an existing W1 spot channel.
-/// This fixes what PDF preparation does with the same situation, and what it is capable of doing.
+/// The visual-only input contract that superseded SCRUM-11101, on the PDF side: a customer PDF is
+/// page artwork, so a <c>Separation</c> or <c>DeviceN</c> colourant in the source is rasterised as
+/// part of the visible page and its ink identity is intentionally not carried forward as
+/// production authority.
 /// </summary>
 /// <remarks>
-/// These tests assert the <b>current</b> behaviour, including the part of it that is unsafe. They
-/// are written this way on purpose: the gate's job was to find out whether the accepted PDF
-/// authority can see a spot colourant at all, and the answer determines whether SCRUM-11101 can
-/// be implemented for PDF from the existing authority or needs a new one. Pinning the present
-/// behaviour is what makes the eventual fix visible as a change rather than as a claim.
+/// SCRUM-11101-A established that the accepted PDF authority, <c>Windows.Data.Pdf</c>, cannot
+/// report a colourant at all: <c>RenderToStreamAsync</c> is the only route to page content and it
+/// returns composited BGRA8 pixels. That was recorded as a blocker for the original acceptance
+/// criterion, which required the operator to be asked about an existing white-ink separation, and
+/// the implementation slice would have had to add a structural PDF parser or a third-party
+/// dependency to close it.
+/// <para>
+/// The business clarification cancels that work rather than scheduling it. PDF is a visual design
+/// input; source spot semantics are outside the supported production contract, and PrintFlow
+/// generates production white ink when it creates the final TIFF. So the behaviour these tests
+/// pin — a spot-carrying PDF prepares as an ordinary visual job — is no longer an unsafe gap to
+/// be closed. It is the intended contract, and these tests exist to keep it true.
+/// </para>
+/// <para>
+/// Two assertions from the feasibility gate are deliberately gone. One pinned the exact public
+/// surface of <c>Windows.Data.Pdf</c> so that a future SDK exposing colourant metadata would fail
+/// the build; that was the signal that the gap had closed, and with the requirement cancelled it
+/// would only obstruct a harmless Windows API expansion. The other treated silent rasterisation of
+/// a spot PDF as a finding. Neither is Product architecture. The historical evidence is preserved
+/// in <c>docs/printflow/scrum-11101-existing-white-ink-decision.md</c>.
+/// </para>
 /// </remarks>
 [Collection(SqliteCollection.Name)]
-public sealed class ExistingWhiteInkPdfDetectionGateTests
+public sealed class VisualOnlyPdfInputContractTests
 {
     /// <summary>
-    /// The whole public surface of the accepted PDF authority, so that "it cannot report a
-    /// colourant" is a checked fact rather than a recollection of the documentation.
-    /// </summary>
-    /// <remarks>
-    /// If a future Windows SDK projection grows a colourant, separation, colour-space or page
-    /// resource member, this test fails and the architectural conclusion recorded in
-    /// <c>docs/printflow/scrum-11101-existing-white-ink-decision.md</c> must be revisited. That is
-    /// the intended failure: it is the only automatic signal that the gap has closed.
-    /// </remarks>
-    [Fact]
-    public void Windows_pdf_authority_exposes_no_colourant_or_colour_space_member_at_all()
-    {
-        Type[] surface = [.. typeof(Windows.Data.Pdf.PdfDocument).Assembly
-            .GetTypes()
-            .Where(type => type.Namespace == "Windows.Data.Pdf" && type.IsPublic)];
-
-        // Five types, and no more. A sixth would be a new capability worth reading.
-        surface.Select(type => type.Name).Order(StringComparer.Ordinal).ShouldBe(
-            ["PdfDocument", "PdfPage", "PdfPageDimensions", "PdfPageRenderOptions", "PdfPageRotation"]);
-
-        string[] members = [.. surface
-            .SelectMany(type => type.GetMembers(
-                BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
-            .Select(member => member.Name)];
-
-        foreach (string forbidden in
-            new[] { "Colourant", "Colorant", "Separation", "DeviceN", "ColorSpace", "ColourSpace",
-                    "Resources", "Ink", "Spot", "Channel", "Plate" })
-        {
-            members.ShouldNotContain(
-                name => name.Contains(forbidden, StringComparison.OrdinalIgnoreCase),
-                $"Windows.Data.Pdf now exposes a '{forbidden}' member. Gate A must be re-decided.");
-        }
-    }
-
-    /// <summary>
-    /// A PDF whose visible artwork is painted through a named <c>W1</c> spot colourant is prepared
-    /// successfully today, and nothing about the spot reaches the persisted attempt.
+    /// A PDF whose visible artwork is painted through a named <c>W1</c> spot colourant prepares as
+    /// an ordinary visual job, and the ink identity reaches nothing downstream.
     /// </summary>
     [Theory]
     [InlineData("separation")]
     [InlineData("devicen")]
-    public async Task Existing_W1_spot_colourant_pdf_is_prepared_with_no_observation_of_the_spot(string mechanism)
+    public async Task Existing_W1_spot_colourant_pdf_prepares_as_ordinary_visual_artwork(string mechanism)
     {
         byte[] bytes = mechanism == "separation"
             ? SpotColourantPdfFixtures.SeparationW1()
@@ -79,13 +60,15 @@ public sealed class ExistingWhiteInkPdfDetectionGateTests
 
         (PdfInspection inspection, long painted) = await PrepareAsync(bytes, mechanism + "-w1.pdf");
 
-        // Prepared, not refused. The PSD path stops on exactly this situation; the PDF path does
-        // not, and cannot, because no fact it collects mentions ink at all.
+        // Prepared, not refused — the same answer the PSD path now gives to the same situation,
+        // for the same reason: the source is design artwork and its ink identity is not
+        // production authority.
         inspection.IsPreparedSinglePage.ShouldBeTrue();
 
         // Every field the Product records about a PDF. None of them is about colourants, and the
-        // exhaustive list is written out so that a new field cannot be added without this test
-        // being reconsidered.
+        // exhaustive list is written out so that a spot-colour field cannot be added without this
+        // test being reconsidered — the structural inspector SCRUM-11101 would have needed is
+        // cancelled by the visual-only contract, not merely deferred.
         inspection.IsReadable.ShouldBeTrue();
         inspection.IsEncrypted.ShouldBe(false);
         inspection.PageCount.ShouldBe(1);
@@ -105,11 +88,11 @@ public sealed class ExistingWhiteInkPdfDetectionGateTests
     /// the same PDF.
     /// </summary>
     /// <remarks>
-    /// This is Gate A's actual finding. Not "the spot is hard to see" but "there is no observable
-    /// difference": the inspection persisted for a customer file carrying an existing white-ink
-    /// separation is byte-for-byte the inspection persisted for one that carries none. No
-    /// downstream rule, guard or operator prompt can be built on a distinction the Product never
-    /// makes.
+    /// Not "the spot is hard to see" but "there is no observable difference": the inspection
+    /// persisted for a customer file carrying an existing white-ink separation is record-equal to
+    /// the one persisted for a file that carries none. Under the visual-only contract that is the
+    /// correct outcome rather than a gap — a source separation is a property of the design, and no
+    /// downstream rule, guard or operator prompt may be built on it.
     /// </remarks>
     [Fact]
     public async Task Spot_and_spot_free_pdfs_produce_an_indistinguishable_inspection()

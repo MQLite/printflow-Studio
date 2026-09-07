@@ -24,7 +24,7 @@ public sealed class PhotoshopPsdBoundaryTests
     [InlineData("modal", FailureCode.PhotoshopBlockingDialog)]
     [InlineData("target-loss", FailureCode.PhotoshopTargetLost)]
     [InlineData("cancel", FailureCode.Cancelled)]
-    [InlineData("w1", FailureCode.PsdUnsupported)]
+    [InlineData("w1", null)]
     [InlineData("cmyk", FailureCode.PsdUnsupported)]
     public async Task Production_psd_path_enforces_real_guards_and_independent_validation(string variant, FailureCode? expected)
     {
@@ -70,9 +70,16 @@ public sealed class PhotoshopPsdBoundaryTests
             result.Value.PsdInspection!.HasTransparency.ShouldBe(true);
             driver.CloseCount.ShouldBe(1);
         }
+        if (variant == "w1")
+        {
+            // A source spot/white-ink channel is observed and recorded, and prepares like any
+            // other visual artwork. PSD is a design input; production W1 is generated later.
+            result.Value.PsdInspection!.HasW1.ShouldBeTrue();
+            result.Value.PsdInspection!.HasSpots.ShouldBeTrue();
+        }
         if (variant is "open" or "identity" or "modal") native.Calls.ShouldBe(0);
         if (variant is "native-failure" or "target-loss" or "cancel") driver.CloseCount.ShouldBe(0);
-        if (variant is "w1" or "cmyk") result.Failure.PsdInspection.ShouldNotBeNull();
+        if (variant == "cmyk") result.Failure.PsdInspection.ShouldNotBeNull();
         File.ReadAllBytes(input).ShouldBe(before);
     }
 
@@ -85,7 +92,7 @@ public sealed class PhotoshopPsdBoundaryTests
             if (variant == "native-failure") return OperationResult.Fail<PsdNativeOutcome>(FailureCode.PhotoshopUnknownState, "No native evidence.");
             var facts = new PsdInspection(4, 3, variant == "cmyk" ? "CMYK" : "RGB", 8, true, true,
                 variant == "w1" ? [new("W1", "SPOTCOLOR")] : [], "native-test-double");
-            if (variant is "w1" or "cmyk") return OperationResult.Ok(new PsdNativeOutcome(false, facts, "Unsupported PSD state."));
+            if (variant == "cmyk") return OperationResult.Ok(new PsdNativeOutcome(false, facts, "Unsupported PSD state."));
             if (variant != "missing") File.WriteAllBytes(command.OutputPath, variant == "malformed" ? [1, 2, 3] :
                 SyntheticImages.Png(variant == "wrong-size" ? 5 : 4, 3));
             after();

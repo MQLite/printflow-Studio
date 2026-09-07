@@ -740,16 +740,16 @@
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>无法验证此 PSD 的兼容合成图。请在 Photoshop 中启用“最大兼容性”另存副本，再导入该副本。</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图。原始文件已保留，请检查失败原因后重试。</value></data>
   <data name="Failure_PsdUnreadable" xml:space="preserve"><value>PSD 已损坏或无法读取。未生成准备图像。</value></data>
-  <data name="Failure_PsdUnsupported" xml:space="preserve"><value>无法自动准备此 PSD。需使用 RGB 8 位且无现有专色或白墨通道；已有墨色通道需要操作员决定。</value></data>
+  <data name="Failure_PsdUnsupported" xml:space="preserve"><value>无法自动准备此 PSD。需使用包含 Photoshop 兼容合成图的 RGB 8 位 PSD。</value></data>
   <data name="Session_PreparePsd" xml:space="preserve"><value>准备 PSD 以供检查</value></data>
-  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图且无现有专色或白墨通道的 PSD。</value></data>
+  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
   <data name="Session_PsdPrepared" xml:space="preserve"><value>原始文件：PSD（保持不变）。显示的 PNG 是 Photoshop 生成的受管栅格副本。请检查此副本后继续。</value></data>
   <data name="Failure_PdfUnreadable" xml:space="preserve"><value>PDF 已损坏或无法读取，未生成准备图像。请导入可读取的单页 PDF。</value></data>
   <data name="Failure_PdfEncrypted" xml:space="preserve"><value>不支持受密码保护或加密的 PDF，未生成准备图像。</value></data>
   <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>此 PDF 包含多页。此工作流程仅接受单页 PDF。</value></data>
   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。请检查失败原因后重试。</value></data>
   <data name="Session_PreparePdf" xml:space="preserve"><value>准备 PDF 以供检查</value></data>
-  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。</value></data>
+  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
   <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置打印尺寸。</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>

@@ -58,8 +58,11 @@ public sealed partial class ProductionPhotoshopOutputProcessor
             // A synchronous Photoshop call cannot be recalled. Once it returns, a Stop or
             // Take Over prevents all further external input, including document cleanup.
             CheckStop();
+            // Spot and W1 channels are deliberately absent from every unsupported test here. A PSD
+            // is a visual design input; its source ink channels are diagnostics, not a refusal
+            // reason. Colour mode and depth remain SCRUM-11099 refusals.
             OperationFailure? unsupported = !exported.Value.Succeeded && inspection is not null &&
-                (inspection.HasSpots || inspection.HasW1 || inspection.OriginalMode != "RGB" || inspection.BitDepth != 8)
+                (inspection.OriginalMode != "RGB" || inspection.BitDepth != 8)
                 ? OperationFailure.Create(FailureCode.PsdUnsupported, "PSD was not prepared: " + exported.Value.Detail)
                 : null;
             var after = await _preparer.VerifyExactMutationTargetAsync(opened.Value, baseline.Value,
@@ -71,7 +74,6 @@ public sealed partial class ProductionPhotoshopOutputProcessor
             CheckStop();
             if (!exported.Value.Succeeded || inspection is null)
                 return Fail(OperationFailure.Create(
-                    inspection is { HasSpots: true } or { HasW1: true } ||
                     inspection is not null && (inspection.OriginalMode != "RGB" || inspection.BitDepth != 8)
                         ? FailureCode.PsdUnsupported : FailureCode.PsdPreparationFailed,
                     "PSD was not prepared: " + exported.Value.Detail));
@@ -117,10 +119,13 @@ public sealed partial class ProductionPhotoshopOutputProcessor
         {
             using FileStream stream = File.OpenRead(path);
             Span<byte> header = stackalloc byte[26]; stream.ReadExactly(header);
+            // PNG colour type 2 or 6 at 8 bits is RGB or RGB+alpha and nothing else. That is the
+            // structural proof that whatever ink channels the source PSD carried, the managed
+            // raster is ordinary visual artwork carrying no production channel of any kind.
             if (facts.Format != ImageFormat.Png || header[24] != 8 || header[25] is not (2 or 6) ||
                 facts.ColourMode != ColourMode.Rgb || facts.PixelWidth != inspection.PixelWidth ||
                 facts.PixelHeight != inspection.PixelHeight || inspection.OriginalMode != "RGB" ||
-                inspection.BitDepth != 8 || inspection.HasSpots || inspection.HasW1 || !inspection.HasRealMergedData)
+                inspection.BitDepth != 8 || !inspection.HasRealMergedData)
                 return Invalid("Prepared PNG does not match RGB/8, channels, or full PSD canvas.");
             stream.Position = 0;
             BitmapDecoder decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
