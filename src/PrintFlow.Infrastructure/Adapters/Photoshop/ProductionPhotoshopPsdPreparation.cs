@@ -15,6 +15,18 @@ public sealed partial class ProductionPhotoshopOutputProcessor
 {
     internal IPhotoshopPsdNativeBridge PsdNative { get; init; } = new RotPhotoshopPsdNativeBridge();
 
+    /// <summary>
+    /// The independent reader the settle poll observes the prepared raster with.
+    /// </summary>
+    /// <remarks>
+    /// A seam rather than a <c>new</c> inside the loop, because the settle rule is a statement
+    /// about a <i>sequence of observations</i>, and a sequence whose timing belongs to WIC and the
+    /// thread pool can only be re-run until it behaves, never stated. Substituting the reader lets
+    /// a test write the timeline down — what each observation saw and what it cost — and get the
+    /// same answer every run. Production keeps the real WIC reader.
+    /// </remarks>
+    internal IFileInspector PsdOutputInspector { get; init; } = new WicFileInspector();
+
     public async Task<OperationResult<AdapterOutput>> PreparePsdAsync(
         PsdPreparationRequest request, CancellationToken cancellationToken)
     {
@@ -80,7 +92,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor
 
             // Two equal independent reads separated by a bounded settle poll. A script return
             // alone never establishes a file, its format, its alpha, or its hash.
-            WicFileInspector reader = new();
+            IFileInspector reader = PsdOutputInspector;
             FileFacts? previous = null;
             DateTimeOffset deadline = _clock.GetUtcNow() + _options.TiffSettleTimeout;
             do
