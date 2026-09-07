@@ -385,8 +385,15 @@ internal sealed class StubPhotoshopWorkspace(string? root = null) : PrintFlow.Wo
         WorkspaceDirRef session, WorkspaceFileRef source, string fileName, CancellationToken cancellationToken) =>
         throw new NotSupportedException("The Photoshop foundation rejects nothing.");
 
-    public OperationResult<Unit> CleanupWorking(WorkspaceDirRef session) =>
+    public OperationResult<WorkingCleanupResult> CleanupWorking(WorkspaceDirRef session, WorkingCleanupPlan plan) =>
         throw new NotSupportedException("The Photoshop foundation cleans up nothing.");
+
+    public OperationResult<Unit> VerifyRetentionFiles(WorkspaceDirRef session, IReadOnlyList<RetentionFile> files) =>
+        throw new NotSupportedException();
+
+    public Task<OperationResult<WorkspaceFileRef>> PromoteRevisionAsync(
+        WorkspaceDirRef session, PrintFlow.Domain.Ids.RevisionId revisionId, RetentionFile source, CancellationToken cancellationToken) =>
+        throw new NotSupportedException();
 
     public OperationResult<IReadOnlyList<WorkingFileEntry>> ListWorkingFiles(WorkspaceDirRef session) =>
         throw new NotSupportedException("The Photoshop foundation lists nothing.");

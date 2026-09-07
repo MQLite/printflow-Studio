@@ -264,19 +264,15 @@ public sealed class PhotoshopTiffFinalReviewTests
     }
 
     /// <summary>
-    /// Completing the session does not carry out <c>CleanupWorking</c>, so the artefacts every
-    /// Revision points at survive (§20, §21).
+    /// Completion retention preserves every authoritative Revision at its persisted location.
     /// </summary>
     /// <remarks>
-    /// Deliberate, and recorded rather than fixed here. <c>IWorkspace.CleanupWorking</c> deletes
-    /// the whole <c>Working\</c> tree, and since C2A the production TIFF's Revision — like every
-    /// Meitu-derived Revision before it — names a file inside that tree. Executing the effect as
-    /// it stands would destroy the files those immutable records point at and break their
-    /// integrity guard, so the effect is left unexecuted and the gap is reported instead of being
-    /// closed by a slice that owns one artefact's lifecycle (§20).
+    /// SCRUM-11114 replaces the former unwired boundary with verified promotion followed by
+    /// classified cleanup. The stronger assertion is against reloaded authority, not a folder
+    /// name: a current Revision must still resolve after its storage location changes.
     /// </remarks>
     [Fact]
-    public async Task Completing_the_session_does_not_delete_the_Working_artefacts()
+    public async Task Completing_the_session_retains_all_authoritative_Revision_files()
     {
         using SessionServiceHarness harness = new();
         ISessionService service = harness.CreateService();

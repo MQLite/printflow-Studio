@@ -583,7 +583,7 @@ public sealed class MaximumBoundsBoundaryTests
     /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_manual_result_import_migration()
+    public void The_migration_set_ends_at_the_revision_retention_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -597,7 +597,8 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11099 adds typed inspection/channel tables and widens Revision.Operation.
         // The documented rebuild preserves all existing rows, constraints, indexes and triggers.
         // SCRUM-11092 / SCRUM-11112: manual result provenance and manual cutout authority.
-        scripts.Last().ShouldBe("0013_manual_crop_geometry.sql");
+        // SCRUM-11114: verified Revision relocation and explicit rejected-Meitu expiry.
+        scripts.Last().ShouldBe("0014_revision_retention.sql");
     }
 
     // -------------------------------------------------------------------------------------

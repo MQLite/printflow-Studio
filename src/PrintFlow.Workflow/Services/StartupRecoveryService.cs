@@ -132,6 +132,27 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             await QuarantineOrphanWorkingFilesAsync(sessionId, nowUtc, entries, cancellationToken);
         }
 
+        OperationResult<IReadOnlyList<SessionId>> completed = await _repository.FindCompletedSessionsAsync(cancellationToken);
+        if (completed.IsFailure)
+            entries.Add(new StartupRecoveryEntry(StartupRecoveryAction.RecoveryFailed, nowUtc, null, null,
+                completed.Failure.Code, "Could not enumerate completed sessions for retention recovery."));
+        else
+        {
+            SessionRetentionService retention = new(_repository, _workspace, _timeProvider);
+            foreach (SessionId sessionId in completed.Value.Where(id => id != lockVerdict.ProtectedSession))
+            {
+                SessionCleanupResult result = await retention.CleanupAsync(sessionId, cancellationToken);
+                if (result.Failure is { } failure)
+                    entries.Add(new StartupRecoveryEntry(StartupRecoveryAction.RecoveryFailed, nowUtc, sessionId,
+                        null, failure.Code, $"Session completed; retention cleanup pending: {failure.TechnicalDetail}"));
+                else if (result.PromotedCount != 0 || result.DeletedCount != 0 || result.Warnings.Count != 0)
+                    entries.Add(new StartupRecoveryEntry(StartupRecoveryAction.CompletedSessionCleanup, nowUtc,
+                        sessionId, null, null,
+                        $"Retained {result.PreservedCount} files, promoted {result.PromotedCount}, deleted {result.DeletedCount}. " +
+                        string.Join(" ", result.Warnings)));
+            }
+        }
+
         return OperationResult.Ok(new StartupRecoveryReport(entries));
     }
 

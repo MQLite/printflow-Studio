@@ -40,6 +40,10 @@ internal sealed class FaultingWorkspace : IWorkspace
     /// </summary>
     public bool CorruptWrittenBytes { get; set; }
 
+    public bool RetentionCleanupFails { get; set; }
+    public bool RetentionListingFails { get; set; }
+    public Func<Task>? BeforeRetentionPromotionAsync { get; set; }
+
     /// <summary>Every path this workspace was asked to quarantine, in call order.</summary>
     public List<string> Quarantined { get; } = [];
 
@@ -83,11 +87,25 @@ internal sealed class FaultingWorkspace : IWorkspace
         WorkspaceDirRef session, WorkspaceFileRef source, string fileName, CancellationToken cancellationToken) =>
         _inner.MoveToRejectedAsync(session, source, fileName, cancellationToken);
 
-    public OperationResult<PrintFlow.Domain.Results.Unit> CleanupWorking(WorkspaceDirRef session) =>
-        _inner.CleanupWorking(session);
+    public OperationResult<WorkingCleanupResult> CleanupWorking(WorkspaceDirRef session, WorkingCleanupPlan plan) =>
+        RetentionCleanupFails
+            ? OperationResult.Fail<WorkingCleanupResult>(FailureCode.WorkspaceError, "Simulated interruption before deletion.")
+            : _inner.CleanupWorking(session, plan);
+
+    public OperationResult<PrintFlow.Domain.Results.Unit> VerifyRetentionFiles(
+        WorkspaceDirRef session, IReadOnlyList<RetentionFile> files) => _inner.VerifyRetentionFiles(session, files);
+
+    public async Task<OperationResult<WorkspaceFileRef>> PromoteRevisionAsync(
+        WorkspaceDirRef session, RevisionId revisionId, RetentionFile source, CancellationToken cancellationToken)
+    {
+        if (BeforeRetentionPromotionAsync is { } before) await before();
+        return await _inner.PromoteRevisionAsync(session, revisionId, source, cancellationToken);
+    }
 
     public OperationResult<IReadOnlyList<WorkingFileEntry>> ListWorkingFiles(WorkspaceDirRef session) =>
-        _inner.ListWorkingFiles(session);
+        RetentionListingFails
+            ? OperationResult.Fail<IReadOnlyList<WorkingFileEntry>>(FailureCode.WorkspaceError, "Simulated interruption before cleanup planning.")
+            : _inner.ListWorkingFiles(session);
 
     public OperationResult<PrintFlow.Domain.Results.Unit> QuarantineWorkingFile(WorkspaceFileRef file, string reason) =>
         _inner.QuarantineWorkingFile(file, reason);
@@ -120,6 +138,9 @@ internal sealed class FaultingWorkspace : IWorkspace
 /// </remarks>
 internal sealed class FaultingRepository : ISessionRepository
 {
+    public Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken) =>
+        _inner.FindCompletedSessionsAsync(cancellationToken);
+
     private readonly ISessionRepository _inner;
     private int _commits;
 

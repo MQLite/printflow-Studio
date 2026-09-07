@@ -90,17 +90,16 @@ public sealed class PhotoshopFinalReviewBoundaryTests
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// There is exactly one implementation of the disposal port, it lives in Infrastructure, and
-    /// nothing in the solution hard-deletes a file (§14, §42).
+    /// Production TIFF disposal has one Recycle Bin implementation. Classified retention
+    /// deletion is confined to FileWorkspace and cannot become a TIFF disposal fallback.
     /// </summary>
     /// <remarks>
     /// "No hard-delete fallback" is only a real guarantee if there is no second route to deletion
-    /// beside the one that refuses to fall back. <c>Directory.Delete</c> in
-    /// <c>FileWorkspace.CleanupWorking</c> is the single exception, and it is exempted by name
-    /// rather than by pattern so that adding a second one is a visible edit to this test.
+    /// beside the one that refuses to fall back. FileWorkspace is exempted by exact filename
+    /// for closed-list retention deletion; RetentionWorkspaceTests enforce its TIFF refusal.
     /// </remarks>
     [Fact]
-    public void The_only_deletion_route_is_the_Recycle_Bin_abstraction_in_Infrastructure()
+    public void Production_disposal_and_classified_retention_have_only_their_named_Infrastructure_boundaries()
     {
         List<string> implementations = [];
         foreach (Assembly assembly in new[]
@@ -129,7 +128,7 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 // to make an output vanish so the workflow's own failure handling can be tested,
                 // and it never runs against a Revision, an approved file or a rejected one. It is
                 // exempted by name so that a second exemption is a visible edit here.
-                if (name != "FakeAdapterExecution.cs")
+                if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs"))
                 {
                     source.ShouldNotContain("File.Delete(", Case.Sensitive, $"{name} deletes a file outright.");
                 }
@@ -228,27 +227,19 @@ public sealed class PhotoshopFinalReviewBoundaryTests
     }
 
     // -----------------------------------------------------------------------------------
-    // §20, §21 — CleanupWorking was not globalised
+    // §20, §21 — SCRUM-11114 safe completion integration
     // -----------------------------------------------------------------------------------
 
     /// <summary>
-    /// <c>WorkflowEffect.CleanupWorking</c> still has no production interpreter, and
-    /// <c>IWorkspace.CleanupWorking</c> still has no production caller (§20, §21).
+    /// There is one completion interpreter and one shared retention orchestration boundary.
     /// </summary>
     /// <remarks>
-    /// C2B needed file lifecycle handling, which is exactly the moment someone wires up the
-    /// dormant cleanup effect because it is there and it sounds related. It is not safe to wire as
-    /// it stands: it deletes the whole <c>Working\</c> tree, and since C2A the production TIFF's
-    /// Revision — like every Meitu-derived Revision before it — names a file inside that tree, so
-    /// executing it would destroy the artefacts immutable records point at. The gap is reported,
-    /// not closed by a slice that owns one artefact's lifecycle.
-    /// <para>
-    /// This test is what makes "deliberately left alone" checkable. It fails the moment the effect
-    /// gains an interpreter, which is the moment the audit §21 asks for has to happen.
-    /// </para>
+    /// This replaces the historical assertion that cleanup must remain unwired. The retention
+    /// matrix now proves file authority and completion eligibility, while this scan prevents
+    /// callers from bypassing that audited service or restoring recursive directory deletion.
     /// </remarks>
     [Fact]
-    public void CleanupWorking_still_has_no_production_interpreter_or_caller()
+    public void CleanupWorking_has_one_completion_interpreter_and_one_retention_boundary()
     {
         List<string> callers = [];
         foreach (string project in new[] { "PrintFlow.Workflow", "PrintFlow.Infrastructure", "PrintFlow.App" })
@@ -277,9 +268,13 @@ public sealed class PhotoshopFinalReviewBoundaryTests
             }
         }
 
-        callers.ShouldBeEmpty(
-            "CleanupWorking gained an interpreter. Epic 11400 Part C2B §21 requires the safety audit " +
-            "and the full test matrix before that is allowed.");
+        callers.OrderBy(name => name).ShouldBe(new[] { "SessionRetentionService.cs", "SessionService.cs" });
+        string interpreter = File.ReadAllText(SourceFiles("PrintFlow.Workflow")
+            .Single(file => Path.GetFileName(file) == "SessionService.cs"));
+        interpreter.Split("effect is WorkflowEffect.CleanupWorking").Length.ShouldBe(2);
+        string workspace = File.ReadAllText(SourceFiles("PrintFlow.Infrastructure")
+            .Single(file => Path.GetFileName(file) == "FileWorkspace.cs"));
+        workspace.ShouldNotContain("Directory.Delete(");
     }
 
     // -----------------------------------------------------------------------------------

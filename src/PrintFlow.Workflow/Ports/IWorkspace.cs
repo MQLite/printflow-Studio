@@ -23,7 +23,7 @@ namespace PrintFlow.Workflow.Ports;
 /// </remarks>
 public interface IWorkspace
 {
-    /// <summary>Creates the session directory tree (<c>Source</c>, <c>Working</c>, <c>Approved</c>, <c>Rejected</c>, <c>Logs</c>).</summary>
+    /// <summary>Creates Source, Working, Revisions, Approved, Rejected and Logs for one session.</summary>
     OperationResult<WorkspaceDirRef> CreateSession(SessionId id, DateTimeOffset createdUtc);
 
     /// <summary>
@@ -69,16 +69,30 @@ public interface IWorkspace
     Task<OperationResult<WorkspaceFileRef>> MoveToRejectedAsync(
         WorkspaceDirRef session, WorkspaceFileRef source, string fileName, CancellationToken cancellationToken);
 
-    /// <summary>Removes safe-to-delete working copies once a session concludes.</summary>
-    OperationResult<Unit> CleanupWorking(WorkspaceDirRef session);
+    /// <summary>
+    /// Copies one Working Revision to its deterministic Revisions destination and verifies its
+    /// hash. The source remains intact; the caller must commit the returned location before cleanup.
+    /// </summary>
+    Task<OperationResult<WorkspaceFileRef>> PromoteRevisionAsync(
+        WorkspaceDirRef session, RevisionId revisionId, RetentionFile source, CancellationToken cancellationToken);
+
+    /// <summary>Verifies exact managed session containment and all recorded hashes without mutation.</summary>
+    OperationResult<Unit> VerifyRetentionFiles(WorkspaceDirRef session, IReadOnlyList<RetentionFile> files);
+
+    /// <summary>
+    /// Verifies preserved authority, then removes only explicitly listed, hash-matching Working
+    /// copies. Missing delete candidates are a no-op. Never recursively deletes or disposes of TIFFs.
+    /// </summary>
+    OperationResult<WorkingCleanupResult> CleanupWorking(WorkspaceDirRef session, WorkingCleanupPlan plan);
 
     /// <summary>
     /// Lists every file currently present under this session's <c>Working\</c> area, each
     /// attributed to the attempt folder it sits in.
     /// </summary>
     /// <remarks>
-    /// Deliberately scoped to <c>Working\</c> and nothing else: startup recovery is the only
-    /// caller, and confining what it can even see to the one disposable area makes "recovery
+    /// Deliberately scoped to <c>Working\</c> and nothing else: recovery and completion retention
+    /// classify these files against persisted authority. Working is not inherently disposable.
+    /// Confining this scan makes "recovery
     /// never touches <c>Source</c>, <c>Approved</c>, <c>Baseline</c> or <c>TestData</c>"
     /// (Epic 11100 Part 3B §8) a property of the seam rather than a rule recovery has to
     /// remember. A missing <c>Working\</c> directory is an empty list, not a failure.
@@ -109,10 +123,10 @@ public interface IWorkspace
 }
 
 /// <summary>
-/// The only deletion route PrintFlow ever calls (Epic 11100 Task 11106b; plan §12.2).
+/// The only disposal route for production TIFFs (Epic 11100 Task 11106b; plan §12.2).
 /// </summary>
 /// <remarks>
-/// There is deliberately no hard-delete path anywhere in the solution. A failure to move a
+/// There is deliberately no hard-delete fallback for a production TIFF. A failure to move a
 /// file to the Recycle Bin is a structured failure, never a silent fallback to permanent
 /// deletion.
 /// </remarks>

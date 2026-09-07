@@ -809,4 +809,5 @@
   <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>无法生成该文件的彩色、白墨和彩色 + 白墨预览。TIFF 文件本身未受影响，下方的审核决定不变。</value></data>
   <data name="Session_TiffLabelPreset" xml:space="preserve"><value>生产预设</value></data>
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0}（{1}）</value></data>
+  <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>处理已完成。文件清理尚未完成，PrintFlow 下次启动时将重试。已批准的输出文件会保留。</value></data>
 </root>

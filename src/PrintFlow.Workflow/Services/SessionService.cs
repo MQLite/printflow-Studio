@@ -296,6 +296,14 @@ public sealed class SessionService : ISessionService
     public async Task<OperationResult<SessionView>> ExecuteAsync(
         SessionId id, WorkflowCommand command, string? operatorName, CancellationToken cancellationToken)
     {
+        using IDisposable? completionLease = command is WorkflowCommand.Complete or WorkflowCommand.AddAnotherSize
+            ? await SessionCompletionGate.EnterAsync(id, cancellationToken) : null;
+        return await ExecuteCoreAsync(id, command, operatorName, cancellationToken);
+    }
+
+    private async Task<OperationResult<SessionView>> ExecuteCoreAsync(
+        SessionId id, WorkflowCommand command, string? operatorName, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(command);
 
         OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
@@ -416,6 +424,17 @@ public sealed class SessionService : ISessionService
             if (committed.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(committed.Failure);
+            }
+
+            if (transition.Effects.Any(effect => effect is WorkflowEffect.CleanupWorking))
+            {
+                // Completion has committed. Maintenance failure must never relabel approved
+                // production work as failed. Startup retries from the same durable metadata.
+                SessionCleanupResult cleanup = await new SessionRetentionService(_repository, _workspace, _timeProvider)
+                    .CleanupUnderCompletionGateAsync(id, CancellationToken.None);
+                OperationResult<SessionView> completedView = await LoadAsync(id, CancellationToken.None);
+                return completedView.IsFailure ? completedView :
+                    OperationResult.Ok(completedView.Value with { CompletionCleanup = cleanup });
             }
 
             return ViewOf(

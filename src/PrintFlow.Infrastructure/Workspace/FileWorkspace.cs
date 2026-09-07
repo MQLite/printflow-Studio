@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
@@ -17,6 +19,7 @@ namespace PrintFlow.Infrastructure.Workspace;
 /// {root}\Sessions\S_&lt;utc&gt;_&lt;shortid&gt;\
 ///   Source\      InputSnapshot, marked read-only
 ///   Working\&lt;attemptId&gt;\   one directory per attempt
+///   Revisions\&lt;revisionId&gt;\   durable retained history after completion
 ///   Approved\    collision-safe, never overwritten
 ///   Rejected\    retained for comparison until the session ends
 ///   Logs\
@@ -292,31 +295,195 @@ public sealed class FileWorkspace : IWorkspace
     }
 
     /// <inheritdoc />
-    public OperationResult<Unit> CleanupWorking(WorkspaceDirRef session)
+    public OperationResult<WorkingCleanupResult> CleanupWorking(WorkspaceDirRef session, WorkingCleanupPlan plan)
     {
-        string workingRelative = $"{session.RelativePath}/{AreaFolder(WorkspaceArea.Working)}";
-        OperationResult<string> workingAbsolute = PathGuard.ResolveWithinRoot(_rootAbsolute, workingRelative);
-        if (workingAbsolute.IsFailure)
-        {
-            return OperationResult.Fail<Unit>(workingAbsolute.Failure);
-        }
-
+        int deleted = 0;
         try
         {
-            if (Directory.Exists(workingAbsolute.Value))
+            OperationResult<Unit> verified = VerifyRetentionFiles(session, plan.Preserve);
+            if (verified.IsFailure)
+                return OperationResult.Fail<WorkingCleanupResult>(verified.Failure);
+
+            HashSet<string> preserved = new(plan.Preserve.Select(f => f.File.RelativePath), StringComparer.OrdinalIgnoreCase);
+            // Validate the entire destructive plan before deleting its first member.
+            foreach (RetentionFile file in plan.Delete)
             {
-                Directory.Delete(workingAbsolute.Value, recursive: true);
+                string absolute = RetentionPath(session, file.File, WorkspaceArea.Working);
+                if (preserved.Contains(file.File.RelativePath) || IsTiff(absolute))
+                    return OperationResult.Fail<WorkingCleanupResult>(FailureCode.WorkspaceError,
+                        "Cleanup refused a preserved file or TIFF; production TIFF disposal requires the Recycle Bin.");
+                if (File.Exists(absolute)) VerifyHash(absolute, file.Sha256);
             }
 
-            Directory.CreateDirectory(workingAbsolute.Value);
+            foreach (RetentionFile file in plan.Delete.DistinctBy(f => f.File.RelativePath, StringComparer.OrdinalIgnoreCase))
+            {
+                // Re-prove containment and reparse ancestry immediately before each mutation.
+                string absolute = RetentionPath(session, file.File, WorkspaceArea.Working);
+                if (!File.Exists(absolute)) continue;
+                VerifyHash(absolute, file.Sha256);
+                absolute = RetentionPath(session, file.File, WorkspaceArea.Working);
+                if ((File.GetAttributes(absolute) & FileAttributes.ReadOnly) != 0)
+                {
+                    // Manual-result imports are immutable/read-only. Their former copy is
+                    // disposable only now, after promotion. Never change attributes through a
+                    // hard link that might also name an external/customer file.
+                    using (FileStream owned = new(absolute, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        if (!NativeMethods.GetFileInformationByHandle(owned.SafeFileHandle, out NativeMethods.FileInformation information) ||
+                            information.NumberOfLinks != 1)
+                            throw new IOException("Readonly retention copy has unverifiable or shared file identity.");
+                    }
+                    absolute = RetentionPath(session, file.File, WorkspaceArea.Working);
+                    File.SetAttributes(absolute, File.GetAttributes(absolute) & ~FileAttributes.ReadOnly);
+                }
+                absolute = RetentionPath(session, file.File, WorkspaceArea.Working);
+                File.Delete(absolute);
+                deleted++;
+            }
         }
-        catch (IOException ex)
+        catch (Exception ex) when (IsRetentionFailure(ex))
         {
-            return OperationResult.Fail<Unit>(FailureCode.WorkspaceError, $"Could not clean up working copies: {ex.Message}");
+            return OperationResult.Fail<WorkingCleanupResult>(OperationFailure.Create(FailureCode.WorkspaceError,
+                $"Session completed; cleanup pending after {deleted} deletions: {ex.Message}",
+                context: new Dictionary<string, string>
+                {
+                    ["retentionDeletedCount"] = deleted.ToString(CultureInfo.InvariantCulture),
+                }));
         }
 
-        return OperationResult.Ok();
+        return OperationResult.Ok(new WorkingCleanupResult(deleted,
+            plan.Preserve.Select(f => f.File.RelativePath).Distinct(StringComparer.OrdinalIgnoreCase).Count()));
     }
+
+    public OperationResult<Unit> VerifyRetentionFiles(WorkspaceDirRef session, IReadOnlyList<RetentionFile> files)
+    {
+        try
+        {
+            foreach (RetentionFile file in files)
+                VerifyHash(RetentionPath(session, file.File), file.Sha256);
+            return OperationResult.Ok();
+        }
+        catch (Exception ex) when (IsRetentionFailure(ex))
+        {
+            return OperationResult.Fail<Unit>(FailureCode.WorkspaceError, $"Retention verification failed: {ex.Message}");
+        }
+    }
+
+    public async Task<OperationResult<WorkspaceFileRef>> PromoteRevisionAsync(
+        WorkspaceDirRef session, RevisionId revisionId, RetentionFile source, CancellationToken cancellationToken)
+    {
+        WorkspaceFileRef destination = WorkspaceFileRef.Create(
+            $"{session.RelativePath}/Revisions/{revisionId}/{source.File.FileName}", WorkspaceArea.Revisions);
+        string destinationDirectory = $"{session.RelativePath}/Revisions/{revisionId}";
+        WorkspaceFileRef staging = WorkspaceFileRef.Create(destinationDirectory + "/.retention-copy.partial", WorkspaceArea.Revisions);
+        try
+        {
+            string sourcePath = RetentionPath(session, source.File, WorkspaceArea.Working);
+            string destinationPath = RetentionPath(session, destination, WorkspaceArea.Revisions);
+            string stagingPath = RetentionPath(session, staging, WorkspaceArea.Revisions);
+            VerifyHash(sourcePath, source.Sha256);
+            if (File.Exists(destinationPath))
+            {
+                VerifyHash(destinationPath, source.Sha256);
+                return OperationResult.Ok(destination);
+            }
+
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destinationPath)!);
+            sourcePath = RetentionPath(session, source.File, WorkspaceArea.Working);
+            stagingPath = RetentionPath(session, staging, WorkspaceArea.Revisions);
+            // Never truncate an existing file, including a partial copy or a manipulated hard
+            // link. A crash leftover stays as evidence; retry uses a fresh staging name.
+            if (File.Exists(stagingPath))
+            {
+                staging = WorkspaceFileRef.Create(
+                    $"{destinationDirectory}/.retention-{Guid.NewGuid():N}.partial", WorkspaceArea.Revisions);
+                stagingPath = RetentionPath(session, staging, WorkspaceArea.Revisions);
+            }
+            await using (FileStream input = new(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read,
+                1 << 20, useAsync: true))
+            await using (FileStream output = new(stagingPath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
+                1 << 20, useAsync: true))
+            {
+                await input.CopyToAsync(output, cancellationToken);
+                await output.FlushAsync(cancellationToken);
+                output.Flush(flushToDisk: true);
+            }
+            stagingPath = RetentionPath(session, staging, WorkspaceArea.Revisions);
+            VerifyHash(stagingPath, source.Sha256);
+            destinationPath = RetentionPath(session, destination, WorkspaceArea.Revisions);
+            // Same destination directory/volume: only this last staging rename is a move.
+            File.Move(stagingPath, destinationPath, overwrite: false);
+            VerifyHash(RetentionPath(session, destination, WorkspaceArea.Revisions), source.Sha256);
+            return OperationResult.Ok(destination);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return OperationResult.Fail<WorkspaceFileRef>(FailureCode.WorkspaceError,
+                "Retention copy interrupted; original authority is unchanged and cleanup will retry.");
+        }
+        catch (Exception ex) when (IsRetentionFailure(ex))
+        {
+            return OperationResult.Fail<WorkspaceFileRef>(FailureCode.WorkspaceError,
+                $"Retention promotion failed; original authority is unchanged: {ex.Message}");
+        }
+    }
+
+    private string RetentionPath(WorkspaceDirRef session, WorkspaceFileRef file, WorkspaceArea? requiredArea = null)
+    {
+        string[] sessionParts = session.RelativePath.Split('/');
+        if (sessionParts.Length != 2 || sessionParts[0] != SessionsFolder || !sessionParts[1].StartsWith("S_", StringComparison.Ordinal))
+            throw new InvalidOperationException("Retention requires an exact managed session root.");
+        if (requiredArea is { } required && file.Area != required)
+            throw new InvalidOperationException($"Retention expected area {required}, got {file.Area}.");
+        string areaPrefix = $"{session.RelativePath}/{AreaFolder(file.Area)}/";
+        if (!file.RelativePath.StartsWith(areaPrefix, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Retention file does not belong to this session and declared area.");
+        string root = ResolveAbsoluteDirectory(session);
+        string absolute = ResolveAbsolute(file);
+        if (!absolute.StartsWith(root + System.IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Retention path escapes the exact session.");
+        RefuseReparseAncestry(absolute);
+        return absolute;
+    }
+
+    private static void RefuseReparseAncestry(string absolute)
+    {
+        // Include the workspace root and its ancestors, not just descendants of the session.
+        for (string? current = absolute; current is not null; current = System.IO.Path.GetDirectoryName(current))
+        {
+            try
+            {
+                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                    throw new IOException($"Retention refuses reparse traversal at '{current}'.");
+            }
+            catch (FileNotFoundException) { }
+            catch (DirectoryNotFoundException) { }
+        }
+    }
+
+    private static void VerifyHash(string absolute, Sha256 expected)
+    {
+        using FileStream file = new(absolute, FileMode.Open, FileAccess.Read, FileShare.Read);
+        string actual = Convert.ToHexString(SHA256.HashData(file));
+        if (!string.Equals(actual, expected.Value, StringComparison.OrdinalIgnoreCase))
+            throw new IOException($"Retention hash mismatch for '{absolute}'. No deletion is authorised.");
+    }
+
+    private static bool IsTiff(string path)
+    {
+        if (System.IO.Path.GetExtension(path).Equals(".tif", StringComparison.OrdinalIgnoreCase) ||
+            System.IO.Path.GetExtension(path).Equals(".tiff", StringComparison.OrdinalIgnoreCase)) return true;
+        if (!File.Exists(path)) return false;
+        using FileStream file = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        Span<byte> header = stackalloc byte[4];
+        if (file.Read(header) != 4) return false;
+        // Refuse TIFF/BigTIFF bytes even if somebody renamed the file to a scratch extension.
+        return (header[0] == 73 && header[1] == 73 && header[2] is 42 or 43 && header[3] == 0) ||
+            (header[0] == 77 && header[1] == 77 && header[2] == 0 && header[3] is 42 or 43);
+    }
+
+    private static bool IsRetentionFailure(Exception ex) =>
+        ex is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException;
 
     /// <inheritdoc />
     public OperationResult<IReadOnlyList<WorkingFileEntry>> ListWorkingFiles(WorkspaceDirRef session)
@@ -337,8 +504,7 @@ public sealed class FileWorkspace : IWorkspace
         List<WorkingFileEntry> entries = [];
         try
         {
-            foreach (string absolute in Directory.EnumerateFiles(
-                workingAbsolute.Value, "*", SearchOption.AllDirectories))
+            foreach (string absolute in EnumerateWithoutReparseTraversal(workingAbsolute.Value))
             {
                 string relativeToWorking = System.IO.Path
                     .GetRelativePath(workingAbsolute.Value, absolute)
@@ -367,6 +533,22 @@ public sealed class FileWorkspace : IWorkspace
         }
 
         return OperationResult.Ok<IReadOnlyList<WorkingFileEntry>>(entries);
+    }
+
+    private static IEnumerable<string> EnumerateWithoutReparseTraversal(string root)
+    {
+        Stack<string> directories = new();
+        directories.Push(root);
+        while (directories.TryPop(out string? directory))
+        {
+            RefuseReparseAncestry(directory);
+            foreach (string entry in Directory.EnumerateFileSystemEntries(directory))
+            {
+                RefuseReparseAncestry(entry);
+                if ((File.GetAttributes(entry) & FileAttributes.Directory) != 0) directories.Push(entry);
+                else yield return entry;
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -451,7 +633,7 @@ public sealed class FileWorkspace : IWorkspace
     private static readonly WorkspaceArea[] AllAreas =
     [
         WorkspaceArea.Source, WorkspaceArea.Working, WorkspaceArea.Approved,
-        WorkspaceArea.Rejected, WorkspaceArea.Logs,
+        WorkspaceArea.Rejected, WorkspaceArea.Logs, WorkspaceArea.Revisions,
     ];
 
     private static string AreaFolder(WorkspaceArea area) => area switch
@@ -461,6 +643,7 @@ public sealed class FileWorkspace : IWorkspace
         WorkspaceArea.Approved => "Approved",
         WorkspaceArea.Rejected => "Rejected",
         WorkspaceArea.Logs => "Logs",
+        WorkspaceArea.Revisions => "Revisions",
         _ => throw new ArgumentOutOfRangeException(nameof(area), area, "Unknown workspace area."),
     };
 
@@ -474,7 +657,7 @@ public sealed class FileWorkspace : IWorkspace
     /// copy's streams have already been disposed by the <c>await using</c> blocks unwinding, so
     /// the move is against a closed handle — and <see cref="Quarantine"/> reports a failure
     /// rather than falling back to a hard delete if some scanner still holds the file, which is
-    /// the solution-wide rule that there is no hard-delete path anywhere.
+    /// this import boundary's rule that an uncertain source copy is quarantined, never hard-deleted.
     ///
     /// Quarantining is the right existing semantic rather than a new one: those bytes are
     /// precisely what <see cref="IWorkspace.Quarantine"/> exists for — a file on disk with no

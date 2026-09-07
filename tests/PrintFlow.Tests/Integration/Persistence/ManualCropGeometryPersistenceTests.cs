@@ -1,5 +1,7 @@
 using Microsoft.Data.Sqlite;
 using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
@@ -92,7 +94,21 @@ public sealed class ManualCropGeometryPersistenceTests
             dimensions.CurrentArtefact!.RevisionId.ShouldBe(revision.Id);
             await Execute(service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
             (await Load(h, id)).Session.PrintPreparationPlan!.SourceRevisionId.ShouldBe(revision.Id);
+            await Execute(service, id, new WorkflowCommand.SelectWhiteUnderbaseBranch(
+                WhiteUnderbaseBranch.W1_1px, "synthetic retention test"));
+            var tiff = await Execute(service, id, new WorkflowCommand.StartStep(StepKind.PhotoshopOutput));
+            await Execute(service, id, new WorkflowCommand.Approve(StepKind.PhotoshopOutput,
+                tiff.CurrentStep!.CurrentRevisionSha256!.Value));
         }
+        var completed = await Execute(service, id, new WorkflowCommand.Complete());
+        completed.CompletionCleanup!.IsComplete.ShouldBeTrue(completed.CompletionCleanup.Failure?.ToString());
+        var retained = await RetentionCleanupTests.AssertAuthority(h, id);
+        retained.Attempts.Single(a => a.Id == attempt.Id).ManualCropGeometry.ShouldBe(expected);
+        var durableCrop = retained.Revisions.Single(r => r.Id == revision.Id);
+        durableCrop.File.Area.ShouldBe(WorkspaceArea.Revisions);
+        await AssertRaster(h, durableCrop, expected);
+        await RetentionCleanupTests.Restart(h);
+        await RetentionCleanupTests.AssertAuthority(h, id);
         var original = before.Revisions.Single(r => r.IsRoot);
         (await h.FileInspector.InspectAsync(h.FileWorkspace.ResolveAbsolute(original.File), CancellationToken.None)).Value.ShouldBe(original.Facts);
     }

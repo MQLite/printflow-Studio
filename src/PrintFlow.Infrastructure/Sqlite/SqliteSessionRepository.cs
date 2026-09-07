@@ -22,6 +22,14 @@ namespace PrintFlow.Infrastructure.Sqlite;
 /// </remarks>
 public sealed class SqliteSessionRepository : ISessionRepository
 {
+    public async Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken)
+    {
+        using SqliteConnection connection = _connectionFactory.Open();
+        IEnumerable<string> ids = await connection.QueryAsync<string>(
+            "SELECT Id FROM ProcessingSession WHERE State = 'COMPLETED' AND CompletedAtUtc IS NOT NULL ORDER BY Id;");
+        return OperationResult.Ok<IReadOnlyList<SessionId>>(ids.Select(id => SessionId.From(Guid.Parse(id))).ToList());
+    }
+
     private readonly SqliteConnectionFactory _connectionFactory;
 
     public SqliteSessionRepository(SqliteConnectionFactory connectionFactory)
@@ -103,12 +111,79 @@ public sealed class SqliteSessionRepository : ISessionRepository
     {
         ArgumentNullException.ThrowIfNull(mutation);
 
+        if (mutation.IsRetentionMaintenance && (mutation.UpsertSteps.Count != 0 || mutation.RemoveSteps.Count != 0 ||
+            mutation.NewRevisions.Count != 0 || mutation.RevisionInvalidations.Count != 0 ||
+            mutation.UpsertAttempts.Count != 0 || mutation.NewReviews.Count != 0 || mutation.NewSnapshot is not null ||
+            mutation.LockChange is not null))
+            return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                "Retention maintenance cannot change workflow, attempts, reviews, snapshots or automation ownership.");
+
+        foreach (RevisionRetentionChange change in mutation.RevisionRetentionChanges)
+        {
+            string expectedPrefix = mutation.Session.Workspace.RelativePath + "/Working/";
+            string expectedDestination = $"{mutation.Session.Workspace.RelativePath}/Revisions/{change.RevisionId}/{change.ExpectedFile.FileName}";
+            if ((change.PromotedFile is null) == (change.ReleasedAtUtc is null) ||
+                change.ExpectedFile.Area != Domain.Files.WorkspaceArea.Working ||
+                !change.ExpectedFile.RelativePath.StartsWith(expectedPrefix, StringComparison.Ordinal) ||
+                (change.PromotedFile is { } destination &&
+                    (destination.Area != Domain.Files.WorkspaceArea.Revisions || destination.RelativePath != expectedDestination)))
+                return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "Invalid Revision retention transition.");
+        }
+
         using SqliteConnection connection = _connectionFactory.Open();
         using SqliteTransaction transaction = connection.BeginTransaction();
 
         try
         {
-            await UpsertSessionAsync(connection, transaction, mutation.Session);
+            if (mutation.IsRetentionMaintenance)
+            {
+                int eligible = await connection.ExecuteScalarAsync<int>(
+                    """
+                    SELECT COUNT(*) FROM ProcessingSession s
+                    WHERE s.Id = @id AND s.State = 'COMPLETED' AND s.CompletedAtUtc IS NOT NULL
+                      AND NOT EXISTS (SELECT 1 FROM ProcessingAttempt a WHERE a.SessionId = s.Id AND a.ResultStatus = 'RUNNING')
+                      AND NOT EXISTS (SELECT 1 FROM AutomationLock l WHERE l.SessionId = s.Id);
+                    """, new { id = mutation.Session.Id.ToString() }, transaction);
+                if (eligible != 1)
+                    return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                        "Retention refused: the session is no longer safely completed.");
+            }
+            else
+            {
+                if (mutation.RevisionRetentionChanges.Count != 0)
+                    return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                        "Revision retention requires a maintenance transaction.");
+                await UpsertSessionAsync(connection, transaction, mutation.Session);
+            }
+
+            foreach (RevisionRetentionChange change in mutation.RevisionRetentionChanges)
+            {
+                int changed = await connection.ExecuteAsync(
+                    """
+                    UPDATE Revision SET
+                      FormerWorkingPath = CASE WHEN @target IS NOT NULL THEN RelativePath ELSE FormerWorkingPath END,
+                      RelativePath = COALESCE(@target, RelativePath),
+                      RetentionReleasedAtUtc = COALESCE(@released, RetentionReleasedAtUtc),
+                      IsValid = CASE WHEN @released IS NOT NULL THEN 0 ELSE IsValid END,
+                      ReviewState = CASE WHEN @released IS NOT NULL THEN 'REJECTED' ELSE ReviewState END,
+                      InvalidatedAtUtc = CASE WHEN @released IS NOT NULL THEN COALESCE(InvalidatedAtUtc, @released) ELSE InvalidatedAtUtc END,
+                      InvalidationReason = CASE WHEN @released IS NOT NULL THEN COALESCE(InvalidationReason, 'REJECTED') ELSE InvalidationReason END
+                    WHERE Id = @id AND SessionId = @sessionId AND RelativePath = @expected AND Sha256 = @hash
+                      AND RetentionReleasedAtUtc IS NULL;
+                    """, new
+                    {
+                        id = change.RevisionId.ToString(), sessionId = mutation.Session.Id.ToString(),
+                        expected = change.ExpectedFile.RelativePath, hash = change.ExpectedHash.Value,
+                        target = change.PromotedFile?.RelativePath,
+                        released = change.ReleasedAtUtc is { } at ? Mappers.ToText(at) : null,
+                    }, transaction);
+                if (changed != 1)
+                {
+                    transaction.Rollback();
+                    return OperationResult.Fail<Unit>(FailureCode.PersistenceError,
+                        "Revision changed while retention was being planned; no authority was switched.");
+                }
+            }
 
             foreach (SessionStep step in mutation.UpsertSteps)
             {

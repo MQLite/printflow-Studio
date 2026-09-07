@@ -3349,6 +3349,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private void Show(SessionView session)
     {
+        if (session.CompletionCleanup is { IsComplete: false })
+            Notice = Strings.Session_CompletionCleanupPending;
         _session = session;
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).

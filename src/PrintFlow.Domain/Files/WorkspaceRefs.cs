@@ -19,6 +19,9 @@ public enum WorkspaceArea
 
     /// <summary>Session-scoped logs.</summary>
     Logs,
+
+    /// <summary>Immutable retained Revision history, including unapproved artefacts.</summary>
+    Revisions,
 }
 
 /// <summary>

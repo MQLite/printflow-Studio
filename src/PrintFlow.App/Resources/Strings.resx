@@ -820,4 +820,5 @@
   <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>The Colour, White ink and Colour + white previews are unavailable for this file. The TIFF itself is unaffected and the decision below is unchanged.</value></data>
   <data name="Session_TiffLabelPreset" xml:space="preserve"><value>Production preset</value></data>
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>Session completed. File cleanup is pending and will be retried when PrintFlow starts again. Approved outputs are retained.</value></data>
 </root>

@@ -16,6 +16,32 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class PsdPreparationWorkflowTests
 {
+    [Fact]
+    public async Task Prepared_PSD_raster_and_inspection_survive_completion_retention()
+    {
+        using SessionServiceHarness h = new();
+        var service = h.CreateServiceWithPhotoshop(new PsdProcessor(h.FileWorkspace));
+        byte[] bytes = PsdInputPreparationTests.RgbCompositePsd();
+        string source = h.Workspace.CreateSourceFile("retention.psd", bytes);
+        var imported = await service.ImportAsync(WorkflowType.GeneratePrintTiff, source, "retention", "qa", default);
+        var id = imported.Value.Id;
+        var prepared = await RetentionCleanupTests.Command(service, id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation));
+        await RetentionCleanupTests.Command(service, id, new WorkflowCommand.Approve(StepKind.OriginalConfirmation,
+            prepared.CurrentStep!.CurrentRevisionSha256!.Value));
+        SessionAggregate before = await RetentionCleanupTests.Load(h, id);
+        service = h.CreateService();
+        await RetentionCleanupTests.ProduceTiff(service, id, 120);
+        var completed = await RetentionCleanupTests.Command(service, id, new WorkflowCommand.Complete());
+        completed.CompletionCleanup!.IsComplete.ShouldBeTrue(completed.CompletionCleanup.Failure?.ToString());
+        var after = await RetentionCleanupTests.AssertAuthority(h, id);
+        after.Revisions.Single(r => r.Operation == OperationKind.PreparePsd).File.Area.ShouldBe(WorkspaceArea.Revisions);
+        System.Text.Json.JsonSerializer.Serialize(after.Attempts.Single(a => a.Operation == OperationKind.PreparePsd))
+            .ShouldBe(System.Text.Json.JsonSerializer.Serialize(before.Attempts.Single(a => a.Operation == OperationKind.PreparePsd)));
+        File.ReadAllBytes(source).ShouldBe(bytes);
+        await RetentionCleanupTests.Restart(h);
+        await RetentionCleanupTests.AssertAuthority(h, id);
+    }
+
     [Theory]
     [InlineData(AutomationStopMode.StopOperation)]
     [InlineData(AutomationStopMode.TakeOver)]

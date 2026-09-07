@@ -14,6 +14,9 @@ internal sealed class TempWorkspace : IDisposable
 {
     public string Root { get; }
 
+    /// <summary>Explicit opt-in for bounded synthetic filesystem proof and independent inspection.</summary>
+    public bool RetainForInspection { get; set; }
+
     public TempWorkspace()
     {
         Root = Path.Combine(Path.GetTempPath(), "PrintFlowTests", Guid.NewGuid().ToString("N"));
@@ -31,6 +34,7 @@ internal sealed class TempWorkspace : IDisposable
 
     public void Dispose()
     {
+        if (RetainForInspection) return;
         try
         {
             if (Directory.Exists(Root))

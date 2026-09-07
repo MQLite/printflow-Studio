@@ -166,6 +166,8 @@ internal sealed class SnapshotRow
 
 internal sealed class RevisionRow
 {
+    public string? FormerWorkingPath { get; set; }
+    public string? RetentionReleasedAtUtc { get; set; }
     public string Id { get; set; } = "";
     public string SessionId { get; set; } = "";
     public string? SourceRevisionId { get; set; }

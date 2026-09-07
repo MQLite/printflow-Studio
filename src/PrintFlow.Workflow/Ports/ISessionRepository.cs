@@ -32,6 +32,9 @@ public interface ISessionRepository
     /// </summary>
     Task<OperationResult<IReadOnlyList<ProcessingAttempt>>> FindRunningAttemptsAsync(CancellationToken cancellationToken);
 
+    /// <summary>Every completed session, without the Home screen's age/count retention limits.</summary>
+    Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken);
+
     /// <summary>Reads the current holder of the singleton global automation lock, if any.</summary>
     Task<OperationResult<AutomationLockState>> GetAutomationLockAsync(CancellationToken cancellationToken);
 }

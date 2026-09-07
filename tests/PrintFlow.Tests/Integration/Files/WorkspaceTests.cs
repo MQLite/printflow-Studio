@@ -202,7 +202,10 @@ public sealed class WorkspaceTests
         WorkspaceFileRef approved = fileWorkspace.ReserveOutput(
             session, WorkspaceArea.Approved, "final.png", NamingPatternSet.DesignDefault).Value;
 
-        OperationResult<PrintFlow.Domain.Results.Unit> cleaned = fileWorkspace.CleanupWorking(session);
+        Sha256 sourceHash = Sha256.Parse(Convert.ToHexString(
+            System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(fileWorkspace.ResolveAbsolute(source)))));
+        OperationResult<WorkingCleanupResult> cleaned = fileWorkspace.CleanupWorking(session,
+            new WorkingCleanupPlan([new(source, sourceHash)], [new(working, sourceHash)]));
 
         cleaned.IsSuccess.ShouldBeTrue();
         File.Exists(fileWorkspace.ResolveAbsolute(working)).ShouldBeFalse();

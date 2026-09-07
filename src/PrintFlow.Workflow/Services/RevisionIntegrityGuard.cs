@@ -41,7 +41,7 @@ public sealed class RevisionIntegrityGuard
     {
         ArgumentNullException.ThrowIfNull(revision);
 
-        if (!revision.IsValid)
+        if (!revision.IsValid || revision.RetentionReleasedAtUtc is not null)
         {
             return OperationResult.Fail<Sha256>(
                 FailureCode.RevisionIntegrityMismatch,

@@ -20,6 +20,31 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class PdfPreparationWorkflowTests
 {
+    [Fact]
+    public async Task Prepared_PDF_raster_and_page_provenance_survive_completion_retention()
+    {
+        using SessionServiceHarness h = new();
+        var service = Service(h, new WindowsPdfPreparationProcessor(h.FileWorkspace, h.FileInspector));
+        byte[] bytes = PdfFixtures.Read("single");
+        string source = h.Workspace.CreateSourceFile("retention.pdf", bytes);
+        var imported = await service.ImportAsync(WorkflowType.GeneratePrintTiff, source, "retention", "qa", default);
+        var id = imported.Value.Id;
+        var prepared = await RetentionCleanupTests.Command(service, id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation));
+        await RetentionCleanupTests.Command(service, id, new WorkflowCommand.Approve(StepKind.OriginalConfirmation,
+            prepared.CurrentStep!.CurrentRevisionSha256!.Value));
+        SessionAggregate before = await RetentionCleanupTests.Load(h, id);
+        await RetentionCleanupTests.ProduceTiff(service, id, 120);
+        var completed = await RetentionCleanupTests.Command(service, id, new WorkflowCommand.Complete());
+        completed.CompletionCleanup!.IsComplete.ShouldBeTrue(completed.CompletionCleanup.Failure?.ToString());
+        var after = await RetentionCleanupTests.AssertAuthority(h, id);
+        after.Revisions.Single(r => r.Operation == OperationKind.PreparePdf).File.Area.ShouldBe(WorkspaceArea.Revisions);
+        after.Attempts.Single(a => a.Operation == OperationKind.PreparePdf)
+            .ShouldBe(before.Attempts.Single(a => a.Operation == OperationKind.PreparePdf));
+        File.ReadAllBytes(source).ShouldBe(bytes);
+        await RetentionCleanupTests.Restart(h);
+        await RetentionCleanupTests.AssertAuthority(h, id);
+    }
+
     internal sealed class AllowedGate : IEnvironmentGate
     {
         public OperationResult<PrintFlow.Domain.Results.Unit> Verify(AdapterExecutionMode mode) => OperationResult.Ok();

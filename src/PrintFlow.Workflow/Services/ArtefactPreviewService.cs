@@ -73,6 +73,10 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
                 $"Revision {revisionId} is not a Revision of session {sessionId}.");
         }
 
+        if (revision.RetentionReleasedAtUtc is not null)
+            return OperationResult.Fail<ImagePreview>(FailureCode.PreconditionNotMet,
+                "This rejected Meitu result's comparison retention ended when the session completed.");
+
         if (revision.Facts.Format is PrintFlow.Domain.Files.ImageFormat.Psd or PrintFlow.Domain.Files.ImageFormat.Pdf)
         {
             return OperationResult.Fail<ImagePreview>(revision.Facts.Format == PrintFlow.Domain.Files.ImageFormat.Pdf ? FailureCode.PdfPreparationFailed : FailureCode.PsdPreparationFailed,

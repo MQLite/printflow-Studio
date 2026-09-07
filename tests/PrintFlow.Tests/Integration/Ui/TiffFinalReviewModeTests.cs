@@ -286,6 +286,7 @@ public sealed class TiffFinalReviewModeTests
     [Fact]
     public async Task An_authorised_enlargement_reports_the_factual_resolution_and_the_authority()
     {
+        using EnglishUiScope culture = new();
         using HomeScreenHarness harness = Harness(out _);
         Review review = await EnlargedReviewRequiredAsync(harness, "enlarged.png");
 
@@ -612,6 +613,13 @@ public sealed class TiffFinalReviewModeTests
     // -----------------------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------------------
+
+    private sealed class EnglishUiScope : IDisposable
+    {
+        private readonly CultureInfo _previous = CultureInfo.CurrentUICulture;
+        public EnglishUiScope() => CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+        public void Dispose() => CultureInfo.CurrentUICulture = _previous;
+    }
 
     private static string Value(SessionViewModel screen, string key) =>
         screen.TiffMetadata.Single(row => row.Key == key).Value;

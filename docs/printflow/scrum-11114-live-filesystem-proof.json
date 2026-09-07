@@ -1,0 +1,72 @@
+{
+  "RunAtUtc": "2026-09-07T23:32:19.5921157+00:00",
+  "SessionId": "01a07e37-269e-7ca9-b2c1-aca5741c28af",
+  "WorkspaceRoot": "C:\\Users\\admin\\AppData\\Local\\Temp\\PrintFlowTests\\16b3d073fb6d4055838dff3eb86a9d55",
+  "Database": "C:\\Users\\admin\\AppData\\Local\\Temp\\PrintFlowTests\\c6f7a3d8451441f5b576fad24d99f42d.db",
+  "Source": "C:\\Users\\admin\\AppData\\Local\\Temp\\PrintFlowTests\\16b3d073fb6d4055838dff3eb86a9d55\\source.png",
+  "SourceSha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+  "Evidence": "C:\\Users\\admin\\AppData\\Local\\Temp\\PrintFlowTests\\16b3d073fb6d4055838dff3eb86a9d55\\Sessions\\S_20260819T090000Z_741c28af\\Working\\01a07e37-2793-7b98-81d6-d98865753333\\failure-evidence.png",
+  "EvidenceSha256": "9C44EE27124DC209743BC2FFB9CADE7279732BE06B1F6614D66DFCBBDBDCBBBB",
+  "IdentityBefore": [
+    {
+      "Id": "01a07e37-271d-71ae-a66c-4c0d8d775ab9",
+      "Sha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+      "ByteLength": 155,
+      "PixelWidth": 6,
+      "PixelHeight": 5,
+      "BeforePath": "Sessions/S_20260819T090000Z_741c28af/Source/source.png"
+    },
+    {
+      "Id": "01a07e37-27e8-7c1c-8914-51c142644ef7",
+      "Sha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+      "ByteLength": 155,
+      "PixelWidth": 6,
+      "PixelHeight": 5,
+      "BeforePath": "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-27d2-7530-8754-32595bbad1bb/retention_HD.png"
+    },
+    {
+      "Id": "01a07e37-280f-749a-96b9-8b91a5a3807f",
+      "Sha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+      "ByteLength": 155,
+      "PixelWidth": 6,
+      "PixelHeight": 5,
+      "BeforePath": "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2802-7386-8e11-4dca865e191b/retention_CUTOUT.png"
+    },
+    {
+      "Id": "01a07e37-2831-7bf0-a042-f30e8194fbdb",
+      "Sha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+      "ByteLength": 155,
+      "PixelWidth": 6,
+      "PixelHeight": 5,
+      "BeforePath": "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2824-7789-9fc8-87333f3c4939/trimmed.png"
+    },
+    {
+      "Id": "01a07e37-2861-7f31-af57-95c7defc53a9",
+      "Sha256": "C2ADA80DAA8EE63E7B6531E2216FF0720755C174667EBD34D9CC2A0D4D453A50",
+      "ByteLength": 598,
+      "PixelWidth": 6,
+      "PixelHeight": 5,
+      "BeforePath": "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-284c-7dff-952b-59ca51c75848/retention_40mm_CMYK_W.tif"
+    }
+  ],
+  "RemovedWorkingFiles": [
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-27d2-7530-8754-32595bbad1bb/retention_HD.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2802-7386-8e11-4dca865e191b/retention_CUTOUT.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2824-7789-9fc8-87333f3c4939/trimmed.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-27d2-7530-8754-32595bbad1bb/source.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2802-7386-8e11-4dca865e191b/retention_HD.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-2824-7789-9fc8-87333f3c4939/retention_CUTOUT.png",
+    "Sessions/S_20260819T090000Z_741c28af/Working/01a07e37-284c-7dff-952b-59ca51c75848/trimmed.png"
+  ],
+  "Cleanup": {
+    "PromotedCount": 4,
+    "DeletedCount": 7,
+    "PreservedCount": 6,
+    "Warnings": [],
+    "Failure": null,
+    "IsComplete": true
+  },
+  "RestartVerified": true,
+  "AutomationLockFree": true,
+  "Adapter": "SyntheticProductionTiffProcessor (real TIFF bytes; no Photoshop/Meitu automation)"
+}

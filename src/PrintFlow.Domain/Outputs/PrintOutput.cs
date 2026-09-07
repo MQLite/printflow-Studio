@@ -96,9 +96,9 @@ public sealed record PrintOutput(
     /// <remarks>
     /// <see cref="Sha256"/> and <see cref="ByteLength"/> are deliberately untouched: promotion
     /// copies already validated bytes and is never a second export, so an approval that changed
-    /// either would be describing a different file (§8). The producing Revision is untouched as
-    /// well — it stays the immutable record of what was produced and where, which the database
-    /// enforces in <c>Revision_Immutable_Update</c>.
+    /// either would be describing a different file (§8). This approval leaves the producing
+    /// Revision untouched. Later completed-session retention may promote that Revision's
+    /// location independently, preserving its identity and recording its former producing path.
     /// </remarks>
     public PrintOutput Promoted(WorkspaceFileRef approved) =>
         this with { File = approved, PromotionReservation = null };

@@ -12,9 +12,9 @@ namespace PrintFlow.Domain.Revisions;
 /// <see cref="SourceRevisionId"/>, which is what makes downstream invalidation a
 /// well-defined descendant walk rather than a heuristic.
 ///
-/// Once written, only validity, invalidation and the cached review state may change.
-/// Everything else — including the hash — is immutable. Epic 11100 Task 11108 enforces that
-/// in the database as well as here; disk hashing itself belongs to Task 11106.
+/// Identity, bytes and pixel facts are immutable. Completion retention may switch a Working
+/// location to a verified durable copy, preserving the former location as provenance, or
+/// explicitly release rejected Meitu comparison bytes. Both transitions are guarded in SQLite.
 /// </remarks>
 public sealed record Revision(
     RevisionId Id,
@@ -29,6 +29,19 @@ public sealed record Revision(
     InvalidationReason? InvalidationReason,
     ReviewState ReviewState)
 {
+    /// <summary>
+    /// Historical producing location after verified retention promotion. This is provenance,
+    /// not a second claim that bytes still exist there; cleanup may remove the redundant copy.
+    /// </summary>
+    public WorkspaceFileRef? FormerWorkingFile { get; init; }
+
+    /// <summary>
+    /// End of the rejected Meitu comparison retention period. File then names the historical
+    /// location, whose bytes may be absent. This state never authorises consumption or approval.
+    /// Written before deletion so a crash leaves recoverable excess bytes, not lost authority.
+    /// </summary>
+    public DateTimeOffset? RetentionReleasedAtUtc { get; init; }
+
     /// <summary>The root of a session's derivation tree has no source.</summary>
     public bool IsRoot => SourceRevisionId is null;
 

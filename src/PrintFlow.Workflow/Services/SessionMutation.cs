@@ -4,11 +4,17 @@ using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Outputs;
+using PrintFlow.Domain.Files;
 
 namespace PrintFlow.Workflow.Services;
 
 /// <summary>One <c>Revision</c> being marked invalid, as part of a mutation.</summary>
 public sealed record RevisionInvalidation(RevisionId RevisionId, InvalidationReason Reason, DateTimeOffset AtUtc);
+
+/// <summary>One verified location switch or explicit end of rejected-result retention.</summary>
+public sealed record RevisionRetentionChange(
+    RevisionId RevisionId, WorkspaceFileRef ExpectedFile, Sha256 ExpectedHash,
+    WorkspaceFileRef? PromotedFile, DateTimeOffset? ReleasedAtUtc);
 
 /// <summary>Whether an automation-lock change acquires or releases the singleton lock.</summary>
 public enum AutomationLockAction
@@ -43,6 +49,14 @@ public sealed record SessionMutation(
     InputSnapshot? NewSnapshot,
     AutomationLockChange? LockChange)
 {
+    public IReadOnlyList<RevisionRetentionChange> RevisionRetentionChanges { get; init; } = [];
+
+    /// <summary>
+    /// Retention changes operate on the already committed completed aggregate. They must not
+    /// upsert stale session metadata and accidentally turn a reopened session back to Completed.
+    /// </summary>
+    public bool IsRetentionMaintenance { get; init; }
+
     /// <summary>
     /// Step rows to delete, for a session that has been re-shaped onto a different workflow
     /// (Epic 11100 Part 3C3B, defect fix).

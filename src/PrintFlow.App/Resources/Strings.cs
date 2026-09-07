@@ -16,6 +16,7 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_CompletionCleanupPending => Get(nameof(Session_CompletionCleanupPending));
     internal static string Session_KeepOriginalExtent => Get(nameof(Session_KeepOriginalExtent));
     internal static string Session_KeepOriginalExtentHint => Get(nameof(Session_KeepOriginalExtentHint));
     internal static string Session_OriginalExtentRetained => Get(nameof(Session_OriginalExtentRetained));

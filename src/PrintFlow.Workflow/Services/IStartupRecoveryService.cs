@@ -32,6 +32,9 @@ public enum StartupRecoveryAction
 
     /// <summary>Recovery could not complete one unit of work. Nothing was forced.</summary>
     RecoveryFailed,
+
+    /// <summary>Completed-session retention was safely retried or reported preserved unknown files.</summary>
+    CompletedSessionCleanup,
 }
 
 /// <summary>

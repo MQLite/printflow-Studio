@@ -10,6 +10,9 @@ internal sealed class TempDatabase : IDisposable
 {
     public string Path { get; }
 
+    /// <summary>Explicit opt-in for the synthetic retention proof; ordinary tests still dispose.</summary>
+    public bool RetainForInspection { get; set; }
+
     public SqliteConnectionFactory Factory { get; }
 
     public TempDatabase(bool migrate = true)
@@ -36,6 +39,7 @@ internal sealed class TempDatabase : IDisposable
     public void Dispose()
     {
         SqliteConnection.ClearAllPools();
+        if (RetainForInspection) return;
         TryDelete(Path);
         TryDelete(Path + "-wal");
         TryDelete(Path + "-shm");

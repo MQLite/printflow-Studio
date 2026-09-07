@@ -726,3 +726,21 @@ keyboard/UIA/localisation coverage, tests, live proof and its stated scope, buil
 discipline: [SCRUM-11104 TIFF final review completion report](scrum-11104-tiff-final-review-completion.md).
 
 **PASS WITH NOTES — SCRUM-11104 TIFF FINAL REVIEW VERIFIED**
+
+---
+
+## M. Coverage delta — SCRUM-11114 safe completion and retention cleanup (8 September 2026)
+
+**SCRUM-11114: IMPLEMENTED_NOT_INTEGRATED → FULL.** The exact original CSV row is Work Item **11507**, parent **11500**. Completion now interprets CleanupWorking after the valid completion transaction. A pure retention plan preserves source snapshots, approved PNG/TIFF deliverables and failed-attempt evidence, promotes authoritative Working Revision history by verified copy before one metadata transaction, and deletes only positively classified redundant files. Rejected Meitu comparison bytes expire through explicit persisted retention state after session end. Unknown files remain preserved; final TIFF disposal retains its existing Recycle Bin boundary.
+
+Crash recovery derives pending cleanup from completed metadata and file authority, and startup invokes the same retention service. All three workflows, multiple approved TIFF sizes, retry/ReturnToStep history, manual imports/crops, PSD/PDF prepared rasters, active-session refusal, path containment, junctions, hard links, hash corruption, transaction rollback and interruption boundaries are covered. No authoritative file reference silently loses its bytes.
+
+**SCRUM-11127: PARTIAL → FULL, independently reassessed.** Original CSV Work Item **11703**, parent **11700**, was re-read after implementation. Every clause is supported: temporary SQLite/filesystem integration; transactions; InputSnapshots; Revision registration; hashes; collision-safe output naming; restart persistence; production cleanup; Recycle Bin behaviour; fixture-source preservation; and refusal to retain invalidated/rejected outputs as current production results. The completion report contains the clause-by-clause evidence matrix.
+
+Final build: **0 warnings / 0 errors**. Targeted gate: **1,057 passed, 0 failed, 0 skipped**. Final complete suite: **11,494 passed, 0 failed, 0 skipped** (11,453 accepted baseline + 41). The first complete run exposed one existing English-text assertion inheriting zh-CN culture; a scoped test-only culture fix passed in isolation, then the clean rebuild and complete rerun passed. Product TIFF review behaviour is unchanged.
+
+The bounded synthetic live proof used real SQLite, FileWorkspace, SessionService and completion interpretation, then rebuilt services for restart verification. Independent read-only Python/SQLite/disk checks passed: six authoritative file-bearing rows resolved with matching hashes, four Revisions were promoted, seven classified files removed, source/snapshot/output/evidence survived and the automation lock remained free. No customer files or external application execution were used.
+
+**PASS WITH NOTES:** redundant TIFF Working copies, unknown files, partial staging evidence and empty directories remain intentionally preserved. This is safe completion retention, not a claim of complete disk reclamation. **SCRUM-11107 remains open**, including its other SCRUM-11110/11112 gaps. The three-size test makes no SCRUM-11133 acceptance claim. Historical audit rows above are unchanged.
+
+Evidence: [SCRUM-11114 safe completion and retention cleanup report](scrum-11114-safe-completion-retention-cleanup.md), including exact AC, authority inventory, crash ordering, live proof, verification results and Git discipline.

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 
 namespace PrintFlow.Infrastructure.Automation;
@@ -19,6 +20,27 @@ namespace PrintFlow.Infrastructure.Automation;
 /// </remarks>
 internal static partial class NativeMethods
 {
+    // Workspace retention reads link identity before clearing a redundant copy's readonly
+    // attribute. This query cannot mutate files or interact with external applications.
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetFileInformationByHandle(SafeFileHandle file, out FileInformation information);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileInformation
+    {
+        public uint Attributes;
+        public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastAccessTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastWriteTime;
+        public uint VolumeSerialNumber;
+        public uint FileSizeHigh;
+        public uint FileSizeLow;
+        public uint NumberOfLinks;
+        public uint FileIndexHigh;
+        public uint FileIndexLow;
+    }
+
     internal const int SW_RESTORE = 9;
 
     internal const uint INPUT_KEYBOARD = 1;

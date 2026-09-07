@@ -629,6 +629,9 @@ public sealed record SessionView(
     PrintPreparationAttemptView? AttemptPreparation,
     FlexibleSizeView Sizing)
 {
+    /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
+    public SessionCleanupResult? CompletionCleanup { get; init; }
+
     public ManualCropGeometry? ArtefactManualCropGeometry { get; init; }
     public ManualCropGeometry? CurrentManualCropGeometry =>
         CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactManualCropGeometry : null;

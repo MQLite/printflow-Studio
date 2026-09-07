@@ -83,6 +83,13 @@ public sealed class MigrationTests
             using var reader = schema.ExecuteReader();
             oldAttemptColumnCount = reader.FieldCount;
         }
+        int oldRevisionColumnCount;
+        using (var schema = connection.CreateCommand())
+        {
+            schema.CommandText = "SELECT * FROM Revision LIMIT 0";
+            using var reader = schema.ExecuteReader();
+            oldRevisionColumnCount = reader.FieldCount;
+        }
         string rowsBefore = Dump("Revision") + Dump("ProcessingAttempt");
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
         (Dump("Revision") + Dump("ProcessingAttempt")).ShouldBe(rowsBefore);
@@ -101,7 +108,7 @@ public sealed class MigrationTests
             List<object[]> rows = [];
             while (reader.Read())
             {
-                object[] row = new object[table == "ProcessingAttempt" ? oldAttemptColumnCount : reader.FieldCount];
+                object[] row = new object[table == "ProcessingAttempt" ? oldAttemptColumnCount : oldRevisionColumnCount];
                 for (int i = 0; i < row.Length; i++) row[i] = reader.GetValue(i);
                 rows.Add(row);
             }

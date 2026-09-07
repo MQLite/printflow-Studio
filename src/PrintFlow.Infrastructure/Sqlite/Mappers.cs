@@ -1248,7 +1248,12 @@ internal static class Mappers
             row.IsValid,
             ToDateTimeOffsetOrNull(row.InvalidatedAtUtc),
             row.InvalidationReason is string ir ? ToInvalidationReason(ir) : null,
-            ToReviewState(row.ReviewState));
+            ToReviewState(row.ReviewState))
+        {
+            FormerWorkingFile = row.FormerWorkingPath is { } former
+                ? WorkspaceFileRef.Create(former, WorkspaceArea.Working) : null,
+            RetentionReleasedAtUtc = ToDateTimeOffsetOrNull(row.RetentionReleasedAtUtc),
+        };
     }
 
     /// <summary>
@@ -1268,6 +1273,7 @@ internal static class Mappers
                 case "Approved": return WorkspaceArea.Approved;
                 case "Rejected": return WorkspaceArea.Rejected;
                 case "Logs": return WorkspaceArea.Logs;
+                case "Revisions": return WorkspaceArea.Revisions;
             }
         }
 
