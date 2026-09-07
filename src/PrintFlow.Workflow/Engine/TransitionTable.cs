@@ -22,6 +22,7 @@ public enum CommandKind
     Reject,
     Retry,
     Skip,
+    KeepOriginalExtent,
     HandOff,
     SubmitManualCrop,
     SetPrintDimensions,
@@ -129,6 +130,7 @@ public static class TransitionTable
         [StepState.Waiting] =
         [
             CommandKind.ConfirmOriginal,
+            CommandKind.KeepOriginalExtent,
             CommandKind.StartStep,
             CommandKind.Skip,
             CommandKind.SetPrintDimensions,
@@ -160,6 +162,7 @@ public static class TransitionTable
         [StepState.ReviewRequired] =
         [
             CommandKind.Approve,
+            CommandKind.KeepOriginalExtent,
             CommandKind.Reject,
             CommandKind.HandOff,
         ],
@@ -172,6 +175,7 @@ public static class TransitionTable
         // crop rather than the deterministic trim that already refused (Part C2 §21).
         [StepState.RetryRequired] =
         [
+            CommandKind.KeepOriginalExtent,
             CommandKind.StartStep,
             CommandKind.Retry,
             CommandKind.Skip,
@@ -183,6 +187,7 @@ public static class TransitionTable
 
         [StepState.Failed] =
         [
+            CommandKind.KeepOriginalExtent,
             CommandKind.StartStep,
             CommandKind.Retry,
             CommandKind.Skip,
@@ -192,6 +197,7 @@ public static class TransitionTable
 
         [StepState.Interrupted] =
         [
+            CommandKind.KeepOriginalExtent,
             CommandKind.StartStep,
             CommandKind.Retry,
             CommandKind.Skip,
@@ -242,6 +248,7 @@ public static class TransitionTable
         CommandKind.Retry => StepState.Waiting,
 
         CommandKind.Skip => StepState.Skipped,
+        CommandKind.KeepOriginalExtent => StepState.Skipped,
         CommandKind.SetPrintDimensions => StepState.Approved,
         CommandKind.SetPresetFitSize => StepState.Approved,
         CommandKind.SetCustomTargetEdgeSize => StepState.Approved,

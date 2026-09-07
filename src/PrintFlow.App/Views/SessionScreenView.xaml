@@ -1475,6 +1475,13 @@
                         AutomationProperties.Name="{Binding SkipLabel}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
 
+                <Button Content="{Binding KeepOriginalExtentLabel}"
+                        ToolTip="{Binding KeepOriginalExtentHint}"
+                        Command="{Binding KeepOriginalExtentCommand}"
+                        AutomationProperties.AutomationId="Session.KeepOriginalExtent"
+                        AutomationProperties.Name="{Binding KeepOriginalExtentLabel}"
+                        Visibility="{Binding CanKeepOriginalExtent, Converter={StaticResource BoolToVisibility}}" />
+
                 <Button Content="{Binding SubmitManualResultLabel}"
                         Command="{Binding SubmitManualResultCommand}"
                         AutomationProperties.AutomationId="Session.SubmitManualResult"

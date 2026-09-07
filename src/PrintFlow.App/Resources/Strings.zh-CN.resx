@@ -766,4 +766,7 @@
   <data name="Session_ReviewBackgroundWhite" xml:space="preserve"><value>白色</value></data>
   <data name="Session_ReviewBackgroundBlack" xml:space="preserve"><value>黑色</value></data>
   <data name="Session_ReviewComparisonSlider" xml:space="preserve"><value>比较滑块</value></data>
+  <data name="Session_KeepOriginalExtent" xml:space="preserve"><value>保留原始范围</value></data>
+  <data name="Session_KeepOriginalExtentHint" xml:space="preserve"><value>不裁剪并继续</value></data>
+  <data name="Session_OriginalExtentRetained" xml:space="preserve"><value>已保留原始范围</value></data>
 </root>

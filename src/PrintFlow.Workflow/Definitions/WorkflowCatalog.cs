@@ -46,7 +46,7 @@ public static class WorkflowCatalog
                 IsSkippable: false, RequiresReview: true, ProducesRevision: true,
                 OperationKind.Trim, AdapterKind.Internal),
 
-            // Promotion copies the approved trimmed bytes into the Approved area unchanged,
+            // Promotion copies the approved upstream bytes (trimmed or original extent) unchanged,
             // so the existing hash-bound approval already covers the promoted file. No
             // second review is fabricated; the Revision is still recorded so the chain stays
             // complete (Epic 11100 plan §7.3).

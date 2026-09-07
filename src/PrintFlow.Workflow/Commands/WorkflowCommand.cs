@@ -75,6 +75,13 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop) : WorkflowCommand;
 
+    /// <summary>Decline Trim and continue with its approved upstream artwork, without producing a result.</summary>
+    public sealed record KeepOriginalExtent : WorkflowCommand
+    {
+        /// <summary>Stable persisted operator intent; display wording is localized separately.</summary>
+        public const string Reason = "Operator chose to keep original extent";
+    }
+
     /// <summary>Skip a skippable step. Creates no Revision.</summary>
     public sealed record Skip(StepKind Step, string? Reason = null) : WorkflowCommand
     {

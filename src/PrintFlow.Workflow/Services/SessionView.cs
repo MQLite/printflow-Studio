@@ -631,6 +631,11 @@ public sealed record SessionView(
 {
     public bool CanSubmitManualResult => AvailableCommands.Contains(CommandKind.SubmitManualResult);
 
+    public bool CanKeepOriginalExtent => AvailableCommands.Contains(CommandKind.KeepOriginalExtent);
+
+    /// <summary>Explicit persisted Trim outcome, never inferred from the absence of a file.</summary>
+    public bool OriginalExtentRetained => Steps.Any(step => step.Step == StepKind.Trim && step.State == StepState.Skipped);
+
     public ImageFormat? OriginalSourceFormat { get; init; }
     public PdfInspection? PdfInspection { get; init; }
 

@@ -51,6 +51,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.Retry c => Retry(state, c, context),
             WorkflowCommand.SubmitManualCrop c => SubmitManualCrop(state, c, context),
             WorkflowCommand.Skip c => Skip(state, c, context),
+            WorkflowCommand.KeepOriginalExtent => KeepOriginalExtent(state, context),
             WorkflowCommand.HandOff c => HandOff(state, c, context),
             WorkflowCommand.SetPrintDimensions c => SetPrintDimensions(state, c, context),
             WorkflowCommand.SetPresetFitSize c => SetPresetFitSize(state, c, context),
@@ -1003,6 +1004,37 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(state.WithStep(started), effects);
     }
 
+    private static WorkflowTransition KeepOriginalExtent(WorkflowSnapshot state, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, StepKind.Trim, CommandKind.KeepOriginalExtent);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        if (state.UpstreamResultOf(StepKind.Trim) is not { } upstream ||
+            !state.Steps.Any(step => step.State == StepState.Approved && step.CurrentRevisionId == upstream.Id))
+        {
+            return WorkflowTransition.Rejected(RejectionCode.PreconditionNotMet,
+                "Keeping the original extent requires an approved upstream Revision.");
+        }
+
+        // Supersede the current offer, not its immutable Revision/attempt or review history.
+        // Skipped is a persisted, finished step with no result; downstream falls through to
+        // the approved upstream. No processing, review, file or lock effect is required.
+        SessionStep kept = resolved.Step! with
+        {
+            State = StepState.Skipped,
+            CurrentRevisionId = null,
+            CurrentRevisionSha256 = null,
+            SkipReason = WorkflowCommand.KeepOriginalExtent.Reason,
+            EnteredStateAtUtc = context.NowUtc,
+        };
+        return WorkflowTransition.Accepted(
+            state.WithStep(kept) with { LatestApprovedRevisionId = upstream.Id },
+            new WorkflowEffect.RecordSkip(StepKind.Trim, WorkflowCommand.KeepOriginalExtent.Reason));
+    }
+
     private static WorkflowTransition Skip(
         WorkflowSnapshot state, WorkflowCommand.Skip command, CommandContext context)
     {
@@ -1770,6 +1802,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.Retry => new WorkflowCommand.Retry(step),
             CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(step, ProbeCrop),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
+            CommandKind.KeepOriginalExtent => new WorkflowCommand.KeepOriginalExtent(),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
             CommandKind.SetPrintDimensions => new WorkflowCommand.SetPrintDimensions(ProbeDimensions),
 

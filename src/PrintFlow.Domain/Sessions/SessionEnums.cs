@@ -77,7 +77,7 @@ public enum StepState
     /// <summary>The current result was rejected; a new attempt is required.</summary>
     RetryRequired,
 
-    /// <summary>The step was unnecessary because the file already satisfied it. Creates no Revision.</summary>
+    /// <summary>The operator chose to continue without this step's result. Creates no Revision.</summary>
     Skipped,
 
     /// <summary>Automation did not produce a valid result.</summary>

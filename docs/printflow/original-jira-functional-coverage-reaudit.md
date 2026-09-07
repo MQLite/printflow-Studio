@@ -631,3 +631,17 @@ Evidence: **149 targeted tests passed**; **10,903 full-suite tests passed, 0 fai
 Full original Jira wording, coordinate policy, zero-extent/resize/reset behavior, ephemeral preference lifetime, keyboard-evidence limits, tests, live transcript, and Git discipline: [SCRUM-11079 completion report](scrum-11079-shared-review-completion.md).
 
 This closes only the shared-review portion of historical P1-3. **SCRUM-11077 remains PARTIAL. SCRUM-11082 and SCRUM-11083 are unchanged**; trim cancellation and manual-crop gaps remain outside this slice.
+
+---
+
+## J. Coverage delta — SCRUM-11083 explicit trim cancellation (7 September 2026)
+
+**SCRUM-11083: previous audit PARTIAL → current FULL.** This supersedes the cancellation gap in the historical row without rewriting that row. The exact original CSV requirement is Work Item 11206, **Implement Independent Trim Review and Adjustment**.
+
+The operator can now choose **Keep original extent** before processing, after a Trim result reaches ReviewRequired, or after ManualCropRequired. The typed command persists the existing Skipped state and explicit reason, clears the current Trim offer, and advances using the exact approved pre-Trim Revision. It fabricates no processing attempt, Revision, geometry, file or review approval. Real earlier Trim results and decisions remain history. Restart preserves the choice; ReturnToStep clears it for reevaluation and retains normal downstream invalidation. Print Dimensions and approved PNG export use the original upstream canvas. The action is bilingual, keyboard accessible and addressable as `Session.KeepOriginalExtent` through UIA.
+
+Evidence: **9,215 intermediate broad targeted tests passed**; **162 final focused tests passed**; final-source full suite **11,353 passed, 0 failed, 0 skipped**; clean build **0 warnings / 0 errors**. Three real synthetic WPF cases passed independently: automatic Trim/Before-After/Keep via UIA, no-alpha/ManualCropRequired/Keep via UIA, and Waiting/Keep via keyboard Enter. Independent repository and file readback confirms original Revision authority, immutable historical offers, no fabricated output or approval, full canvas dimensions and unchanged automation lock. The known unrelated PSD settle-poll flake did not occur.
+
+Exact original AC, representation rationale, restart/return behavior, test coverage, live evidence and its scope, rejected harness attempts, build and Git discipline: [SCRUM-11083 trim cancellation report](scrum-11083-trim-cancellation.md).
+
+**SCRUM-11077 remains PARTIAL. SCRUM-11082 remains PARTIAL.** The Epic is reassessed independently: closing independent Trim cancellation does not deliver manual-crop margin controls or persisted manual-crop rectangle metadata. Shared review remains accepted under SCRUM-11079 and its implementation is unchanged by this slice.

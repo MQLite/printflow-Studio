@@ -197,6 +197,7 @@ public sealed class TransitionMatrixTests
             CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(
                 step, global::PrintFlow.Domain.Trimming.TrimBounds.Canvas(4, 4)),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
+            CommandKind.KeepOriginalExtent => new WorkflowCommand.KeepOriginalExtent(),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, "matrix probe"),
             CommandKind.SetPrintDimensions =>
                 new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox),

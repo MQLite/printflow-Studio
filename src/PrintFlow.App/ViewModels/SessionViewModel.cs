@@ -27,7 +27,8 @@ public sealed class SessionStepRow
 
         Ordinal = step.Ordinal + 1;
         Name = DisplayNames.Step(step.Step);
-        State = DisplayNames.StepState(step.State);
+        State = step.Step == StepKind.Trim && step.State == StepState.Skipped
+            ? Strings.Session_OriginalExtentRetained : DisplayNames.StepState(step.State);
         IsCurrent = isCurrent;
     }
 
@@ -839,6 +840,10 @@ public sealed partial class SessionViewModel : ObservableObject
     public string RetryLabel => Strings.Session_Retry;
 
     public string SkipLabel => Strings.Session_Skip;
+
+    public string KeepOriginalExtentLabel => Strings.Session_KeepOriginalExtent;
+    public string KeepOriginalExtentHint => Strings.Session_KeepOriginalExtentHint;
+    public bool CanKeepOriginalExtent => _session?.CanKeepOriginalExtent == true && !IsBusy;
 
     public string HandOffLabel => Strings.Session_HandOff;
 
@@ -2131,6 +2136,10 @@ public sealed partial class SessionViewModel : ObservableObject
     private Task SkipAsync(CancellationToken cancellationToken) =>
         RunAsync(step => new WorkflowCommand.Skip(step), cancellationToken);
 
+    [RelayCommand(CanExecute = nameof(CanKeepOriginalExtent))]
+    private Task KeepOriginalExtentAsync(CancellationToken cancellationToken) =>
+        RunAsync(new WorkflowCommand.KeepOriginalExtent(), cancellationToken);
+
     /// <summary>Ends automated processing and transfers the work to the operator.</summary>
     [RelayCommand]
     private Task HandOffAsync(CancellationToken cancellationToken) =>
@@ -2995,6 +3004,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsBusyChanged(bool value)
     {
+        OnPropertyChanged(nameof(CanKeepOriginalExtent));
+        KeepOriginalExtentCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CanBeginReturn));
         OnPropertyChanged(nameof(CanBeginAutomaticSelection));
@@ -3435,6 +3446,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
         OnPropertyChanged(nameof(CanRetry));
         OnPropertyChanged(nameof(CanSkip));
+        OnPropertyChanged(nameof(CanKeepOriginalExtent));
+        KeepOriginalExtentCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanHandOff));
         OnPropertyChanged(nameof(CanSubmitManualResult));
         OnPropertyChanged(nameof(IsManualProcessingResult));

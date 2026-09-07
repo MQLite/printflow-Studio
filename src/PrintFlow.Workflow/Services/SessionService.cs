@@ -926,6 +926,8 @@ public sealed class SessionService : ISessionService
             WorkflowCommand.Approve approve => FindRevision(aggregate, snapshot.Step(approve.Step)?.CurrentRevisionId),
             WorkflowCommand.Reject reject => FindRevision(aggregate, snapshot.Step(reject.Step)?.CurrentRevisionId),
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
+            // Retaining the approved original is a decision about those exact bytes.
+            WorkflowCommand.KeepOriginalExtent => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
             WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
 
             // Authorising reviewed content is a decision about specific bytes, exactly as an
