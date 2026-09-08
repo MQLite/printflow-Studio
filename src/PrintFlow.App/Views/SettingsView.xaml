@@ -1,0 +1,151 @@
+<UserControl x:Class="PrintFlow.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+             AutomationProperties.AutomationId="Screen.Settings"
+             AutomationProperties.Name="{Binding Heading}">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,18,0,6" />
+        </Style>
+        <Style x:Key="RowLabel" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,8,0,2" />
+        </Style>
+        <Style x:Key="RowHint" TargetType="TextBlock">
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+        <!-- A read-only production fact reads as a fact, not as a field somebody forgot to
+             enable: selectable text so it can be copied for a support call, and no editor. -->
+        <Style x:Key="ReadOnlyValue" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Heading}"
+                   FontSize="26"
+                   FontWeight="SemiBold" />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+            <StackPanel MaxWidth="640" HorizontalAlignment="Left">
+
+                <!-- General: the operator's own preferences. Everything here is editable and
+                     everything here is committed by the one Apply below. -->
+                <TextBlock Text="{Binding GeneralHeading}" Style="{StaticResource SectionHeading}" />
+
+                <TextBlock Text="{Binding LanguageLabel}" Style="{StaticResource RowLabel}" />
+                <ComboBox ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                          DisplayMemberPath="DisplayName"
+                          HorizontalAlignment="Left"
+                          MinWidth="220"
+                          Padding="8,4"
+                          AutomationProperties.AutomationId="Settings.Language"
+                          AutomationProperties.Name="{Binding LanguageLabel}" />
+
+                <TextBlock Text="{Binding TrimMarginLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding TrimSafetyMarginPixels, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left"
+                         MinWidth="120"
+                         Padding="6,4"
+                         AutomationProperties.AutomationId="Settings.TrimMargin"
+                         AutomationProperties.Name="{Binding TrimMarginLabel}" />
+                <TextBlock Text="{Binding TrimMarginHint}" Style="{StaticResource RowHint}" />
+
+                <!-- Production: read-only facts of the verified workstation preset. There is no
+                     editor here by design (SCRUM-11118). -->
+                <TextBlock Text="{Binding ProductionHeading}" Style="{StaticResource SectionHeading}" />
+                <TextBlock Text="{Binding ProductionHint}" Style="{StaticResource RowHint}" />
+
+                <TextBlock Text="{Binding OutputRootLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding OutputRoot, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.OutputRoot"
+                         AutomationProperties.Name="{Binding OutputRootLabel}" />
+                <TextBlock Text="{Binding OutputRootHint}" Style="{StaticResource RowHint}" />
+
+                <TextBlock Text="{Binding ProductionDpiLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding ProductionDpi, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.ProductionDpi"
+                         AutomationProperties.Name="{Binding ProductionDpiLabel}" />
+
+                <TextBlock Text="{Binding PresetLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding Preset, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.Preset"
+                         AutomationProperties.Name="{Binding PresetLabel}" />
+
+                <TextBlock Text="{Binding ColourSetupLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding ColourSetupStatus, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.PhotoshopColourSettings"
+                         AutomationProperties.Name="{Binding ColourSetupLabel}" />
+                <TextBlock Text="{Binding ColourSetupHint}" Style="{StaticResource RowHint}" />
+                <Button Content="{Binding OpenEnvironmentLabel}"
+                        Command="{Binding OpenEnvironmentCommand}"
+                        HorizontalAlignment="Left"
+                        Padding="10,4"
+                        Margin="0,8,0,0"
+                        AutomationProperties.AutomationId="Settings.OpenEnvironment"
+                        AutomationProperties.Name="{Binding OpenEnvironmentLabel}" />
+
+                <!-- Diagnostics: the retention period is recorded here; the cleanup that
+                     enforces it is a separate task and this screen does not claim otherwise. -->
+                <TextBlock Text="{Binding DiagnosticsHeading}" Style="{StaticResource SectionHeading}" />
+
+                <TextBlock Text="{Binding LogRetentionLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding LogRetentionDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left"
+                         MinWidth="120"
+                         Padding="6,4"
+                         AutomationProperties.AutomationId="Settings.LogRetention"
+                         AutomationProperties.Name="{Binding LogRetentionLabel}" />
+                <TextBlock Text="{Binding LogRetentionHint}" Style="{StaticResource RowHint}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock Text="{Binding Notice}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,8"
+                       AutomationProperties.AutomationId="Settings.Notice" />
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="{Binding ApplyLabel}"
+                        Command="{Binding ApplyCommand}"
+                        IsDefault="True"
+                        Padding="14,5"
+                        AutomationProperties.AutomationId="Settings.Apply"
+                        AutomationProperties.Name="{Binding ApplyLabel}" />
+                <Button Content="{Binding BackLabel}"
+                        Command="{Binding BackToHomeCommand}"
+                        Margin="10,0,0,0"
+                        Padding="14,5"
+                        AutomationProperties.AutomationId="Settings.Back"
+                        AutomationProperties.Name="{Binding BackLabel}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

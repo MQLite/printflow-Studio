@@ -977,3 +977,88 @@ full-suite decision and Git discipline:
 [SCRUM-11076 completion report](scrum-11076-transactional-sqlite-persistence-completion.md).
 
 **PASS WITH NOTES — SCRUM-11076 TRANSACTIONAL SQLITE PERSISTENCE VERIFIED**
+
+---
+
+## Delta — 8 September 2026: SCRUM-11118 and SCRUM-11119 implemented
+
+**Appended, not a rewrite.** Every row above records what was true when it was written.
+
+### SCRUM-11118 — Complete Settings and Production Preset Display: NOT_IMPLEMENTED → **FULL**
+
+The audit's finding — *"There is no Settings screen. None of the seven items exists as an operator
+surface … The `Setting` table has no reader and no writer"* — no longer holds. A reachable Settings
+screen exists (`Screen.Settings`, opened from Home beside Production Readiness, a fifth destination
+on the existing navigation model), and all seven items are on it.
+
+The slice also made the precedence decision SCRUM-11076 explicitly deferred, and it is **not one
+rule**. Three items are *operator preferences* — UI language, default trim safety margin, local log
+retention — persisted through the existing `ISettingsRepository`, with a persisted row beating
+`appsettings.json` and then the Product constant. The other four state *facts of the verified
+production preset* — the accepted output root, the fixed 300 PPI production resolution, the
+workstation preset's identity and the Photoshop colour setup — and are displayed **read-only** from
+the existing verification authority, with **no `Setting` row ever written for any of them**. That
+split is what answers the AC's own limiting sentence about not becoming a general configuration
+tool, and an architecture test scans all of `src` to keep it true.
+
+The output root is read-only deliberately: the signed preset states it as
+`storageAndNamingContract.defaultOutputRoot`, the workstation verifier fails verification when the
+configured root disagrees with it, and the preset's own `implementationGate` names "output root
+availability" as a required runtime check. Making it editable would either close production or
+weaken the verifier. Nothing existing is moved by any Settings change: the trim default applies to
+newly imported jobs only and never rewrites a session, attempt, Revision or approved output.
+
+### SCRUM-11119 — Simplified Chinese and English Localisation: PARTIAL → **FULL**
+
+Both missing halves are now present. Simplified Chinese is an **enforced Product default** rather
+than an accident of the workstation's Windows culture — `OperatorLanguages.FirstRunDefault`, applied
+by `ApplicationStartup` before the shell is shown, proven under an `en-US` ambient culture, with an
+architecture test forbidding any OS-culture read in the shell. English is selectable in Settings and
+takes effect **immediately, with no restart**, in both directions, proven on a rendered screen in a
+bounded WPF/UIA pass. The explicit choice survives a restart. Internal state names, failure codes,
+adapter ids, `SettingKey` names and AutomationIds remain stable English, asserted in both cultures.
+
+One design note worth recording, because it is the sort of thing that would otherwise be
+rediscovered painfully: resolving strings against `CultureInfo.CurrentUICulture` is **not** enough
+for a runtime switch. That property is carried by `ExecutionContext`, so a value assigned inside an
+`async` continuation — which is exactly where a Settings Apply lands, after awaiting a database
+write — is restored to the caller's when the continuation unwinds. The selected culture is
+therefore held explicitly by one authority (`OperatorCulture`, set only by `ILocalisationService`),
+with the ambient properties kept in step beside it rather than instead of it.
+
+### Parent Epic SCRUM-11115 — remains **PARTIAL**
+
+Two more children close, and two of the Epic's own named deliverables still have no product at all.
+Reread clause by clause: the Settings and Environment Check surfaces are now complete, and the
+"simplified Chinese default and English switchable without restart" clause is met. Still open:
+**SCRUM-11120** (no Error Details page — no structured code, bilingual description, screenshot,
+input path, expected output path, retry information or recovery actions surface);
+**SCRUM-11121** (**PARTIAL** — the retention *setting* is now visible and editable, but there is
+still no rolling local text log, no `ILogger`/Serilog rollout, no cleanup execution honouring active
+diagnostic references, and no operator-visible stored *locations*); **SCRUM-11122** (no diagnostic
+package export, contents preview or consent step); **SCRUM-11123** (no versioned offline installer
+or documented install/configure/rollback procedure). SCRUM-11116 and SCRUM-11117 were not
+reassessed by this slice — the only change to Home is one navigation button.
+
+**SCRUM-11121 is explicitly not marked FULL**, and the Settings screen says so in the operator's own
+words: its retention hint states that automatic clean-up is not yet in place and that nothing is
+deleted for them.
+
+**Evidence:** clean build **0 warnings / 0 errors**; 33 new targeted cases across
+`SettingsAndLocalisationTests` and `SettingsAuthorityTests`; the Settings, environment-gate,
+readiness-screen and environment-boundary suites green at 145 passed; one complete suite against
+final source **11,586 passed, 0 failed, 0 skipped** (baseline 11,553; +33, exactly the new cases).
+The full suite was run rather than skipped because the slice changes shared application culture
+resolution, session initialisation defaults, and DI/composition and navigation root behaviour. One
+bounded WPF/UI Automation pass proves the switch on a rendered screen and its persistence across a
+restart; no external application was launched, and Settings has no path that can launch one. No
+`ILogger`/Serilog, no cleanup engine, no Error Details page, no diagnostic export, no installer and
+no digital-signature or code-signing work was added. Migration `0001` is unchanged, no second
+key/value store exists, and no Jira mutation was performed.
+
+Exact child and parent Descriptions, pre-change matrix, the full precedence table, the localisation
+authority and its `ExecutionContext` rationale, prospective-default semantics, production read-only
+facts, accessibility/UIA evidence, tests, full-suite decision and Git discipline:
+[SCRUM-11118 / SCRUM-11119 completion report](scrum-11118-11119-settings-localisation-completion.md).
+
+**PASS — SCRUM-11118 / SCRUM-11119 SETTINGS AND LOCALISATION VERIFIED**

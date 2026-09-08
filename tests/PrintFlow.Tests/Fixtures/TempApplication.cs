@@ -16,6 +16,24 @@ internal sealed class TempApplication : IDisposable
 
     private readonly string _root;
 
+    /// <summary>
+    /// The process UI culture as this fixture found it (SCRUM-11119).
+    /// </summary>
+    /// <remarks>
+    /// The real startup sequence now selects the operator's language before it hands back a
+    /// service graph, and that selection is deliberately process-wide — it is what makes the
+    /// runtime switch work with no restart. Harmless in an application that starts once;
+    /// poisonous in a test host that starts one dozens of times, where a leaked selection would
+    /// make every later test that renders an operator string read it in a language it did not
+    /// choose. So the fixture that owns "an application was started" also owns putting the
+    /// process back.
+    /// </remarks>
+    private readonly System.Globalization.CultureInfo _previousUiCulture =
+        System.Globalization.CultureInfo.CurrentUICulture;
+
+    private readonly System.Globalization.CultureInfo? _previousDefaultUiCulture =
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture;
+
     public TempApplication(string adapterMode = "Fake", string? presetSha256Override = null)
     {
         _root = Path.Combine(Path.GetTempPath(), "PrintFlowTests", Guid.NewGuid().ToString("N"));
@@ -57,6 +75,10 @@ internal sealed class TempApplication : IDisposable
 
     public void Dispose()
     {
+        PrintFlow.App.Resources.OperatorCulture.Select(null);
+        System.Globalization.CultureInfo.CurrentUICulture = _previousUiCulture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = _previousDefaultUiCulture;
+
         Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
         try

@@ -862,4 +862,32 @@
   <data name="Home_RecoveryUnavailable" xml:space="preserve"><value>无法加载恢复条目（{0}）。请刷新重试。</value></data>
   <data name="Home_RecoveryPending" xml:space="preserve"><value>{0} 个中断的任务需要选择恢复操作。</value></data>
   <data name="Home_RecoveryUnfinishedImport" xml:space="preserve"><value>尚未记录导入完成。如果导入失败，请重新启动 PrintFlow 以恢复未完成的尝试。</value></data>
+  <data name="Settings_Open" xml:space="preserve"><value>设置</value></data>
+  <data name="Settings_Heading" xml:space="preserve"><value>设置</value></data>
+  <data name="Settings_GeneralHeading" xml:space="preserve"><value>常规</value></data>
+  <data name="Settings_ProductionHeading" xml:space="preserve"><value>生产</value></data>
+  <data name="Settings_ProductionHint" xml:space="preserve"><value>以下内容来自本机已认可的生产配置，仅供查看核对，不能在此修改。</value></data>
+  <data name="Settings_DiagnosticsHeading" xml:space="preserve"><value>本机记录</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>界面语言</value></data>
+  <data name="Settings_OutputRoot" xml:space="preserve"><value>输出位置</value></data>
+  <data name="Settings_OutputRootHint" xml:space="preserve"><value>成品文件的存放位置，由已认可的生产配置固定，不会移动任何已有任务的文件。</value></data>
+  <data name="Settings_OutputRootUnavailable" xml:space="preserve"><value>已认可的生产配置尚未通过校验，因此未给出输出位置。</value></data>
+  <data name="Settings_TrimMargin" xml:space="preserve"><value>默认安全边（像素）</value></data>
+  <data name="Settings_TrimMarginHint" xml:space="preserve"><value>裁切时在图案四周保留的额外空间。仅对此后新建的任务生效；已经打开的任务保持原有取值。填 0 表示紧贴图案裁切。</value></data>
+  <data name="Settings_TrimMarginInvalid" xml:space="preserve"><value>请将默认安全边填写为 0 或更大的整数像素值。本次未保存任何内容。</value></data>
+  <data name="Settings_ProductionDpi" xml:space="preserve"><value>打印分辨率</value></data>
+  <data name="Settings_ProductionDpiValue" xml:space="preserve"><value>{0} PPI（固定）</value></data>
+  <data name="Settings_Preset" xml:space="preserve"><value>已认可的生产配置</value></data>
+  <data name="Settings_ColourSetup" xml:space="preserve"><value>Photoshop 颜色设置</value></data>
+  <data name="Settings_ColourSetupHint" xml:space="preserve"><value>在生产就绪状态页面进行检查。PrintFlow 不会替您修改 Photoshop 的颜色设置。</value></data>
+  <data name="Settings_ColourConfirmed" xml:space="preserve"><value>已确认</value></data>
+  <data name="Settings_ColourMismatch" xml:space="preserve"><value>与认可的颜色设置不一致</value></data>
+  <data name="Settings_ColourNotVerified" xml:space="preserve"><value>尚未检查——请在生产就绪状态页面运行检查</value></data>
+  <data name="Settings_LogRetention" xml:space="preserve"><value>本机记录保留天数</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>任务记录和故障截图仅保存在本机，不会上传。此处记录的是保留期限；自动清理尚未启用，因此不会自动删除任何文件。</value></data>
+  <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>请填写 1 到 {0} 之间的本机记录保留天数。本次未保存任何内容。</value></data>
+  <data name="Settings_Apply" xml:space="preserve"><value>应用</value></data>
+  <data name="Settings_Saved" xml:space="preserve"><value>设置已保存。</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>无法保存设置（{0}）。未做任何更改。</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>无法读取已保存的设置（{0}）。当前显示的是默认值。</value></data>
 </root>

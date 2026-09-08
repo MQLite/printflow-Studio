@@ -98,11 +98,7 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
     {
         WorkstationVerificationResult result = _verifier.Verify();
 
-        return new EnvironmentReadinessReport(
-            result.Verified,
-            result.Preset?.ToString(),
-            result.ObservedAt,
-            [.. result.Checks.Select(ToReport)]);
+        return ToReadinessReport(result);
     }
 
     /// <inheritdoc />
@@ -112,16 +108,50 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
             .RunLiveChecksAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return new EnvironmentReadinessReport(
-            result.Verified,
-            result.Preset?.ToString(),
-            result.ObservedAt,
-            [.. result.Checks.Select(ToReport)]);
+        return ToReadinessReport(result);
     }
 
     /// <summary>The stable per-check resource key, for the resx and for tests to enumerate.</summary>
     internal static string MessageKeyFor(WorkstationVerificationCheck check) =>
         CheckMessageKeyPrefix + check;
+
+    /// <summary>
+    /// Projects one verification result onto the operator-facing report, naming the individual
+    /// facts a screen may need by themselves (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// The two named facts are lifted here rather than picked out of <c>Checks</c> by a caller,
+    /// because the verification vocabulary belongs to this layer: a shell that had to know which
+    /// check states the accepted output root would be a shell that knows the check list, which is
+    /// exactly the coupling Part B §11.10 forbids. Both are null when the check did not run — a
+    /// passive reading states nothing about the live colour setup, and an unverified manifest
+    /// states nothing about the accepted root.
+    /// </remarks>
+    private static EnvironmentReadinessReport ToReadinessReport(WorkstationVerificationResult result)
+    {
+        WorkstationCheckResult? workspaceRoot = FirstOrNull(
+            result, WorkstationVerificationCheck.WorkspaceRoot);
+        WorkstationCheckResult? colourSetup = FirstOrNull(
+            result, WorkstationVerificationCheck.PhotoshopColourSettings);
+
+        return new EnvironmentReadinessReport(
+            result.Verified,
+            result.Preset?.ToString(),
+            result.ObservedAt,
+            [.. result.Checks.Select(ToReport)])
+        {
+            // The accepted value, never the observed one: this is the root the signed preset
+            // requires, which is what "the output location" means to an operator.
+            AcceptedOutputRoot = workspaceRoot is null
+                ? null
+                : workspaceRoot.Expected ?? workspaceRoot.Observed,
+            PhotoshopColourSetup = colourSetup is null ? null : ToStatus(colourSetup.Outcome),
+        };
+    }
+
+    private static WorkstationCheckResult? FirstOrNull(
+        WorkstationVerificationResult result, WorkstationVerificationCheck check) =>
+        result.Checks.FirstOrDefault(candidate => candidate.Check == check);
 
     private OperationResult<Unit> AuthoriseProduction()
     {
@@ -196,15 +226,17 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
         return context;
     }
 
+    private static EnvironmentCheckStatus ToStatus(WorkstationCheckOutcome outcome) => outcome switch
+    {
+        WorkstationCheckOutcome.Passed => EnvironmentCheckStatus.Passed,
+        WorkstationCheckOutcome.Failed => EnvironmentCheckStatus.Failed,
+        WorkstationCheckOutcome.Blocked => EnvironmentCheckStatus.Blocked,
+        _ => EnvironmentCheckStatus.Advisory,
+    };
+
     private static EnvironmentCheckReport ToReport(WorkstationCheckResult check) =>
         new(check.Check.ToString(),
-            check.Outcome switch
-            {
-                WorkstationCheckOutcome.Passed => EnvironmentCheckStatus.Passed,
-                WorkstationCheckOutcome.Failed => EnvironmentCheckStatus.Failed,
-                WorkstationCheckOutcome.Blocked => EnvironmentCheckStatus.Blocked,
-                _ => EnvironmentCheckStatus.Advisory,
-            },
+            ToStatus(check.Outcome),
             check.Outcome != WorkstationCheckOutcome.Advisory,
             MessageKeyFor(check.Check),
             Truncate(check.Explanation, MaxExplanationLength),

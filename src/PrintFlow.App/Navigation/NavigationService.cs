@@ -68,6 +68,14 @@ public sealed class NavigationService : INavigationService
         await readiness.OpenAsync(cancellationToken).ConfigureAwait(true);
     }
 
+    /// <inheritdoc />
+    public async Task GoToSettingsAsync(CancellationToken cancellationToken)
+    {
+        SettingsViewModel settings = _services.GetRequiredService<SettingsViewModel>();
+        Show(settings);
+        await settings.OpenAsync(cancellationToken).ConfigureAwait(true);
+    }
+
     private void Show(object viewModel)
     {
         Current = viewModel;

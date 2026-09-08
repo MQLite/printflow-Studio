@@ -35,6 +35,15 @@ internal sealed class RecordingNavigation : INavigationService
     /// <summary>How many times Home asked for Production Readiness (Epic 11500 Part C §3).</summary>
     public int EnvironmentReadinessCount { get; private set; }
 
+    /// <summary>How many times a screen asked for Settings (SCRUM-11118).</summary>
+    public int SettingsCount { get; private set; }
+
+    public Task GoToSettingsAsync(CancellationToken cancellationToken)
+    {
+        SettingsCount++;
+        return Task.CompletedTask;
+    }
+
     public Task GoHomeAsync(CancellationToken cancellationToken)
     {
         GoHomeCount++;

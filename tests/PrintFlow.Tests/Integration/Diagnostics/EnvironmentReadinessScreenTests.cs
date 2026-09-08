@@ -21,6 +21,13 @@ namespace PrintFlow.Tests.Integration.Diagnostics;
 /// configuration.
 /// </para>
 /// </remarks>
+/// <remarks>
+/// In the SQLite collection although it opens no database, so that it never runs beside the
+/// Settings tests: those switch the application's UI culture for real, and a screen resolving
+/// its text in one culture while this class resolves the expected resource in another would be
+/// a flake with no defect behind it (SCRUM-11119).
+/// </remarks>
+[Collection(SqliteCollection.Name)]
 public sealed class EnvironmentReadinessScreenTests
 {
     // ---------------------------------------------------------------- §12 diagnostics

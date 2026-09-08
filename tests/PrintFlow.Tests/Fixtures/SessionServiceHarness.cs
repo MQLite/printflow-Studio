@@ -45,6 +45,17 @@ internal sealed class SessionServiceHarness : IDisposable
 
     public ISessionRepository Repository { get; }
 
+    /// <summary>
+    /// The real settings store, over the same throwaway database (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Wired into every service this harness builds, so "the trim safety-margin default applies
+    /// to a newly imported job" is provable against the real repository rather than a double —
+    /// and so every existing test still sees the behaviour it always had, because an empty
+    /// Setting table resolves to <c>TrimMargin.Tight</c>.
+    /// </remarks>
+    public ISettingsRepository Settings { get; }
+
     public IEnvironmentGate EnvironmentGate { get; } = new UnverifiedEnvironmentGate();
 
     /// <summary>
@@ -106,6 +117,7 @@ internal sealed class SessionServiceHarness : IDisposable
         Preset = new WorkstationPresetProvider(presetPath, PresetFixture.PresetId, PresetFixture.PresetVersion, hash);
 
         Repository = new SqliteSessionRepository(Database.Factory);
+        Settings = new SqliteSettingsRepository(Database.Factory);
         FakeMeitu = new FakeMeituProcessor(FileWorkspace);
         FakePhotoshop = new FakePhotoshopOutputProcessor(FileWorkspace);
         Trim = new DeterministicAlphaTrimProcessor(FileWorkspace);
@@ -157,7 +169,9 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock, manualResults: new WicManualResultImporter(workspace ?? FileWorkspace, FileInspector));
+        Clock,
+        manualResults: new WicManualResultImporter(workspace ?? FileWorkspace, FileInspector),
+        settings: Settings);
 
     /// <summary>
     /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and
@@ -206,7 +220,9 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         environmentGate ?? EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock, manualResults: new WicManualResultImporter(FileWorkspace, FileInspector));
+        Clock,
+        manualResults: new WicManualResultImporter(FileWorkspace, FileInspector),
+        settings: Settings);
 
     /// <summary>
     /// Builds a service with a caller-supplied Photoshop adapter, and optionally a caller-supplied
@@ -240,7 +256,9 @@ internal sealed class SessionServiceHarness : IDisposable
         preset ?? Preset,
         environmentGate ?? EnvironmentGate,
         SystemIdGenerator.Instance,
-        Clock, manualResults: new WicManualResultImporter(FileWorkspace, FileInspector));
+        Clock,
+        manualResults: new WicManualResultImporter(FileWorkspace, FileInspector),
+        settings: Settings);
 
     /// <summary>
     /// Records the reviewed-content authority for whatever Background Removal is currently about

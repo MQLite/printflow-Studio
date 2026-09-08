@@ -7,6 +7,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
 using PrintFlow.Domain.Sessions;
+using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Definitions;
@@ -87,6 +88,25 @@ public sealed partial class SessionService : ISessionService
     private readonly ITrimProcessor _trim;
     private readonly IManualCropProcessor _manualCrop;
     private readonly IManualResultImporter? _manualResults;
+
+    /// <summary>
+    /// The persisted operator preferences, read at exactly one point: the trim safety margin a
+    /// <b>newly imported</b> job starts with (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Optional, and answered by <c>TrimMargin.Tight</c> when it is absent, unreadable or unset,
+    /// so every existing construction of this service keeps the behaviour it has: crop exactly
+    /// to the alpha content.
+    /// <para>
+    /// <b>It is a default, not a policy.</b> It is consulted once, at import, and the value it
+    /// yields becomes that session's own persisted pending trim decision — which the operator
+    /// may then change, and which nothing here ever revisits. Changing the default later cannot
+    /// reach back into a session that already exists, and no already-run trim, Revision or
+    /// approved output is affected by it at all.
+    /// </para>
+    /// </remarks>
+    private readonly ISettingsRepository? _settings;
+
     private readonly IWorkstationPresetProvider _presetProvider;
     private readonly IEnvironmentGate _environmentGate;
     private readonly RevisionIntegrityGuard _integrityGuard;
@@ -133,7 +153,8 @@ public sealed partial class SessionService : ISessionService
         IIdGenerator idGenerator,
         TimeProvider timeProvider,
         IPdfPreparationProcessor? pdf = null,
-        IManualResultImporter? manualResults = null)
+        IManualResultImporter? manualResults = null,
+        ISettingsRepository? settings = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -160,6 +181,7 @@ public sealed partial class SessionService : ISessionService
         _trim = trim;
         _manualCrop = manualCrop;
         _manualResults = manualResults;
+        _settings = settings;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _idGenerator = idGenerator;
@@ -199,8 +221,17 @@ public sealed partial class SessionService : ISessionService
         }
 
         WorkspaceDirRef workspaceDir = created.Value;
-        ProcessingSession session = ProcessingSession.Start(id, workflowType, name, workspaceDir, context.NowUtc);
-        WorkflowSnapshot initialSnapshot = WorkflowSnapshot.Create(id, workflowType, name, context.NowUtc);
+
+        // The configured default, applied to this new job only. Read here rather than inside the
+        // domain constructors, so the value a session is created with is a decision this service
+        // made once and persisted, not a lookup the domain repeats (SCRUM-11118).
+        TrimMargin startingMargin = await ResolveDefaultTrimMarginAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        ProcessingSession session = ProcessingSession.Start(id, workflowType, name, workspaceDir, context.NowUtc)
+            with { TrimMargin = startingMargin };
+        WorkflowSnapshot initialSnapshot = WorkflowSnapshot.Create(id, workflowType, name, context.NowUtc)
+            with { TrimMargin = startingMargin };
 
         WorkflowTransition started = _engine.Apply(initialSnapshot, new WorkflowCommand.StartStep(StepKind.Import), context);
         if (started.IsRejected)
@@ -291,6 +322,37 @@ public sealed partial class SessionService : ISessionService
 
         // A freshly imported session has produced nothing yet, so it holds no PrintOutput.
         return ViewOf(finished.State, [rootRevision], [], [succeededAttempt]);
+    }
+
+    /// <summary>
+    /// The trim safety margin a job imported now starts with (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Every unusable answer resolves to <see cref="TrimMargin.Tight"/> — no repository, a
+    /// persistence failure, no persisted row, a value that is not a whole number, and a
+    /// negative or zero one. That is the margin every trim has had since Epic 11200 Part B, so
+    /// the failure direction of a settings read is "behave exactly as before", never "start a
+    /// production job with a margin nobody chose".
+    /// <para>
+    /// A uniform margin, because the setting is one number. The per-edge form stays what it has
+    /// always been: a decision the operator makes on a specific image while looking at it, not
+    /// a default (Epic 11200 Part C3 §10).
+    /// </para>
+    /// </remarks>
+    private async Task<TrimMargin> ResolveDefaultTrimMarginAsync(CancellationToken cancellationToken)
+    {
+        if (_settings is null)
+        {
+            return TrimMargin.Tight;
+        }
+
+        OperationResult<SettingEntry?> persisted = await _settings
+            .ReadAsync(SettingKey.TrimSafetyMarginPixels, cancellationToken)
+            .ConfigureAwait(false);
+
+        return persisted.IsSuccess && persisted.Value?.AsInteger() is { } pixels && pixels > 0
+            ? TrimMargin.Uniform(pixels)
+            : TrimMargin.Tight;
     }
 
     /// <inheritdoc />

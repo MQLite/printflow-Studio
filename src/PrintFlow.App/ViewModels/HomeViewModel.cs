@@ -102,6 +102,9 @@ public sealed partial class HomeViewModel : ObservableObject
     /// <summary>The way to the Production Readiness screen (Epic 11500 Part C §3).</summary>
     public string EnvironmentLabel => Strings.Environment_Open;
 
+    /// <summary>The way to Settings (SCRUM-11118).</summary>
+    public string SettingsLabel => Strings.Settings_Open;
+
     /// <summary>True while the list is empty, so the view can say so rather than show nothing.</summary>
     public bool HasNoRecentSessions => RecentSessions.Count == 0 && !HasRecoverySessions;
 
@@ -145,6 +148,18 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
         await _navigation.GoToEnvironmentReadinessAsync(cancellationToken).ConfigureAwait(true);
+
+    /// <summary>
+    /// Opens Settings (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Navigation and nothing else, exactly as the readiness link above. Home reads no setting
+    /// and decides nothing from one; the screen it opens is the only place a preference is read
+    /// or written.
+    /// </remarks>
+    [RelayCommand]
+    private async Task ShowSettingsAsync(CancellationToken cancellationToken) =>
+        await _navigation.GoToSettingsAsync(cancellationToken).ConfigureAwait(true);
 
     /// <summary>
     /// Whether the signed workstation preset verified, in one line (Part 3C2 §13).

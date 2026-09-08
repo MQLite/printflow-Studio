@@ -3,8 +3,8 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.App.Navigation;
 
 /// <summary>
-/// The whole navigation model: four destinations and one current view model
-/// (Epic 11100 Part 3C2 §16).
+/// The whole navigation model: five destinations and one current view model
+/// (Epic 11100 Part 3C2 §16; SCRUM-11118).
 /// </summary>
 /// <remarks>
 /// Deliberately not a navigation framework. There is no journal, no back stack, no URI routing
@@ -16,7 +16,9 @@ namespace PrintFlow.App.Navigation;
 /// re-reads state the caller already holds and never invents its own idea of which session is
 /// open. Production Readiness is the one destination that is about no session at all: it reports
 /// on the workstation, which is why it hangs off Home rather than off a piece of work
-/// (Epic 11500 Part C §3).
+/// (Epic 11500 Part C §3). Settings is the second: it is about this installation's preferences
+/// and about the verified workstation's own facts, and likewise belongs to no job
+/// (SCRUM-11118).
 /// </para>
 /// </remarks>
 public interface INavigationService
@@ -44,4 +46,14 @@ public interface INavigationService
     /// then populated, so the shell does not wait on a reading before it can draw anything.
     /// </remarks>
     Task GoToEnvironmentReadinessAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows Settings and loads it (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Asynchronous for the same reason the two above are: the screen is shown and then
+    /// populated, so the shell never waits on a persisted read or on a workstation reading
+    /// before it can draw anything.
+    /// </remarks>
+    Task GoToSettingsAsync(CancellationToken cancellationToken);
 }

@@ -873,4 +873,32 @@
   <data name="Home_RecoveryUnavailable" xml:space="preserve"><value>Recovery entries could not be loaded ({0}). Refresh to try again.</value></data>
   <data name="Home_RecoveryPending" xml:space="preserve"><value>Interrupted jobs needing a recovery decision: {0}.</value></data>
   <data name="Home_RecoveryUnfinishedImport" xml:space="preserve"><value>Import completion is not recorded. If the import failed, restart PrintFlow to recover its unfinished attempt.</value></data>
+  <data name="Settings_Open" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Heading" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_GeneralHeading" xml:space="preserve"><value>General</value></data>
+  <data name="Settings_ProductionHeading" xml:space="preserve"><value>Production</value></data>
+  <data name="Settings_ProductionHint" xml:space="preserve"><value>These come from the approved production setup for this workstation. They are shown here so you can check them; they are not changed here.</value></data>
+  <data name="Settings_DiagnosticsHeading" xml:space="preserve"><value>Local records</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings_OutputRoot" xml:space="preserve"><value>Output location</value></data>
+  <data name="Settings_OutputRootHint" xml:space="preserve"><value>Where finished files are kept. It is fixed by the approved production setup, and no existing job is ever moved.</value></data>
+  <data name="Settings_OutputRootUnavailable" xml:space="preserve"><value>The approved production setup has not been confirmed, so no output location is stated.</value></data>
+  <data name="Settings_TrimMargin" xml:space="preserve"><value>Default safety edge (pixels)</value></data>
+  <data name="Settings_TrimMarginHint" xml:space="preserve"><value>Extra space kept around the artwork when trimming. Applies to jobs started from now on; jobs already open keep the value they were given. Zero trims exactly to the artwork.</value></data>
+  <data name="Settings_TrimMarginInvalid" xml:space="preserve"><value>Enter the default safety edge as a whole number of pixels, zero or more. Nothing was saved.</value></data>
+  <data name="Settings_ProductionDpi" xml:space="preserve"><value>Print resolution</value></data>
+  <data name="Settings_ProductionDpiValue" xml:space="preserve"><value>{0} PPI (fixed)</value></data>
+  <data name="Settings_Preset" xml:space="preserve"><value>Approved production setup</value></data>
+  <data name="Settings_ColourSetup" xml:space="preserve"><value>Photoshop colour setup</value></data>
+  <data name="Settings_ColourSetupHint" xml:space="preserve"><value>Checked on the production readiness screen. PrintFlow never changes Photoshop colour settings for you.</value></data>
+  <data name="Settings_ColourConfirmed" xml:space="preserve"><value>Confirmed</value></data>
+  <data name="Settings_ColourMismatch" xml:space="preserve"><value>Does not match the approved colour setup</value></data>
+  <data name="Settings_ColourNotVerified" xml:space="preserve"><value>Not checked yet — run the check on the production readiness screen</value></data>
+  <data name="Settings_LogRetention" xml:space="preserve"><value>Keep local records for (days)</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>Job records and failure screenshots stay on this workstation and are never uploaded. This is the period that is recorded; automatic clean-up is not yet in place, so nothing is deleted for you.</value></data>
+  <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>Enter the number of days to keep local records, from 1 to {0}. Nothing was saved.</value></data>
+  <data name="Settings_Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Settings_Saved" xml:space="preserve"><value>Settings saved.</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>The settings could not be saved ({0}). Nothing was changed.</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>The saved settings could not be read ({0}). The values shown are the defaults.</value></data>
 </root>

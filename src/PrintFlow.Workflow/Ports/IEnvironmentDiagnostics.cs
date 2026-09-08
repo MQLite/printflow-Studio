@@ -83,6 +83,29 @@ public sealed record EnvironmentReadinessReport(
     DateTimeOffset ObservedAt,
     IReadOnlyList<EnvironmentCheckReport> Checks)
 {
+    /// <summary>
+    /// The output location this workstation was verified against, or null when the accepted
+    /// preset states none (SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// A named fact beside <see cref="PresetIdentity"/> and for the same reason: a screen that
+    /// needs one particular verified value must not have to pick a check out of
+    /// <see cref="Checks"/> by name. Which check states it is the verification authority's
+    /// business, and it is the only thing that fills this in.
+    /// </remarks>
+    public string? AcceptedOutputRoot { get; init; }
+
+    /// <summary>
+    /// What the Photoshop colour-setup check concluded, or null when it did not run
+    /// (SCRUM-11110, displayed by SCRUM-11118).
+    /// </summary>
+    /// <remarks>
+    /// Null is the honest answer for a passive reading: the colour setup is verified by the
+    /// explicit live application phase, so a report that has not run one states nothing about
+    /// it. A display must say so rather than infer a confirmation from silence.
+    /// </remarks>
+    public EnvironmentCheckStatus? PhotoshopColourSetup { get; init; }
+
     /// <summary>The blocking checks that closed Production.</summary>
     public IEnumerable<EnvironmentCheckReport> BlockingFailures =>
         Checks.Where(c => c.IsBlocking &&

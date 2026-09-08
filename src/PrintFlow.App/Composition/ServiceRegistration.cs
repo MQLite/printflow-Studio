@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Localisation;
 using PrintFlow.App.Navigation;
+using PrintFlow.App.Settings;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Files;
@@ -91,10 +93,26 @@ public static class ServiceRegistration
         // The settings store the same migrated database already carries (Jira 11108; MVP design
         // §17.6). Registered beside the session repository and against the same connection
         // factory, so a persisted setting and a persisted session are the same database's facts.
-        // Which values the operator may edit, and what wins when a persisted value disagrees
-        // with appsettings.json or the signed preset, is SCRUM-11118's decision; nothing in this
-        // graph reads a setting yet, and no current default changed.
+        //
+        // SCRUM-11118 made the precedence decision this registration deferred: a persisted row
+        // is authoritative for the three operator preferences (UI language, default trim safety
+        // margin, log retention), falling back to appsettings.json and then to the Product
+        // constant. The four production facts on the Settings list — production DPI, the
+        // workstation preset, the accepted output root and the Photoshop colour settings — are
+        // owned by the verified preset, are displayed read-only, and no row is ever written for
+        // them.
         services.AddSingleton<ISettingsRepository>(new SqliteSettingsRepository(connectionFactory));
+
+        // The configured rung of that precedence, taken once from the configuration this method
+        // was handed rather than re-read anywhere later.
+        services.AddSingleton(new SettingsDefaults(configuration.Logging is { } logging
+            ? logging.RetentionDays
+            : SettingsDefaults.FallbackLogRetentionDays));
+
+        // The one runtime culture authority (SCRUM-11119). A singleton, because the UI culture
+        // it owns is process-wide; ApplicationStartup restores the persisted choice from it
+        // before the shell is shown, and Settings is the only thing that changes it.
+        services.AddSingleton<ILocalisationService, LocalisationService>();
 
         RegisterAdapters(
             services,
@@ -140,6 +158,13 @@ public static class ServiceRegistration
         // reach the workstation. Passive refresh and the explicitly labelled bounded live check
         // share that authority; the shell still has no route to authorisation.
         services.AddTransient<EnvironmentReadinessViewModel>();
+
+        // Settings (SCRUM-11118). Transient like every other screen, so each visit reads the
+        // persisted preferences and takes its own passive workstation reading rather than
+        // showing what was true when it was last opened. It resolves the settings repository,
+        // the culture authority and the same IEnvironmentDiagnostics the readiness screen reads
+        // — and nothing that could change a workstation, a preset or a colour space.
+        services.AddTransient<SettingsViewModel>();
 
         overrides?.Invoke(services);
 

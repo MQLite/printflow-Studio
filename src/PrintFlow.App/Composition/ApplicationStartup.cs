@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Localisation;
 using PrintFlow.App.Startup;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Configuration;
@@ -47,6 +48,7 @@ public sealed class StartupResult : IDisposable
 ///   <item>compose the service graph;</item>
 ///   <item>verify the signed preset's integrity, recorded and non-blocking;</item>
 ///   <item>run <see cref="IStartupRecoveryService.RecoverAsync"/> exactly once;</item>
+///   <item>restore the operator's persisted UI language, or the Product default;</item>
 ///   <item>record the result in <see cref="StartupStatusAccessor"/>;</item>
 ///   <item>hand the caller a graph it may show the shell from.</item>
 /// </list>
@@ -219,11 +221,23 @@ public sealed class ApplicationStartup : IDisposable
                     null);
             }
 
-            // 8 — record the result where the shell can read it.
+            // 8 — the operator's language, before any screen is constructed.
+            //
+            // Deliberately not a stage that can refuse: the culture authority answers an absent,
+            // unreadable or unrecognised persisted value with the Product's first-run default
+            // (Simplified Chinese), so a language preference can never be the reason a
+            // production workstation will not open. It runs here rather than in the composition
+            // root because it reads the database, which is a startup step and not a
+            // registration (SCRUM-11119).
+            await services.GetRequiredService<ILocalisationService>()
+                .RestoreAsync(cancellationToken)
+                .ConfigureAwait(true);
+
+            // 9 — record the result where the shell can read it.
             StartupStatus status = StartupStatus.Started(preset.IsSuccess, recovered.Value);
             services.GetRequiredService<StartupStatusAccessor>().Publish(status);
 
-            // 9 — the caller composes and shows the shell.
+            // 10 — the caller composes and shows the shell.
             return new StartupResult(status, services);
         }
         catch

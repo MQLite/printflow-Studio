@@ -15,14 +15,34 @@ namespace PrintFlow.Domain.Settings;
 /// member may be added but never renamed or renumbered (MVP design §13.4).
 /// </para>
 /// <para>
-/// Which of these the operator may actually change, and what wins when a persisted value and
-/// <c>appsettings.json</c> or the signed preset disagree, is SCRUM-11118's decision and is not
-/// made here. This task supplies the storage; it wires no runtime precedence.
+/// <b>SCRUM-11118 made the precedence decision this vocabulary deferred, and it is not one
+/// rule.</b> Three of these are <i>operator preferences</i>: <see cref="UiLanguage"/>,
+/// <see cref="TrimSafetyMarginPixels"/> and <see cref="LogRetentionDays"/>. For those, a
+/// persisted row wins, then <c>appsettings.json</c>, then the hard Product constant, and the
+/// operator may change them from the Settings screen.
+/// </para>
+/// <para>
+/// The other four state <i>facts of the verified production preset</i>:
+/// <see cref="DefaultOutputRoot"/>, <see cref="ProductionDpi"/>,
+/// <see cref="WorkstationPresetDetails"/> and <see cref="PhotoshopColourSettingsConfirmed"/>.
+/// The signed preset and the workstation verifier own all four, Settings displays them
+/// read-only from that authority, and <b>PrintFlow writes no row for any of them</b>. A
+/// persisted copy would be a second number able to disagree with the preset the outputs were
+/// actually made under, which is exactly the disagreement a fixed-workstation product must not
+/// be able to have. The members stay in the vocabulary because a persisted name is never
+/// removed (MVP design §13.4), not because anything writes them.
 /// </para>
 /// </remarks>
 public enum SettingKey
 {
-    /// <summary>Operator UI language. Absent means "follow Windows", which is current behaviour.</summary>
+    /// <summary>
+    /// Operator UI language, as a stable culture name (<c>zh-CN</c> / <c>en-US</c>).
+    /// </summary>
+    /// <remarks>
+    /// Absent means "the operator has never chosen", which SCRUM-11119 answers with the
+    /// Product default of Simplified Chinese — deliberately not with the workstation's Windows
+    /// UI culture.
+    /// </remarks>
     UiLanguage,
 
     /// <summary>Default output directory. Absent means the configured/preset root.</summary>

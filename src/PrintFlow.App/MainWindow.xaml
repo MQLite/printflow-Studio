@@ -33,6 +33,10 @@
         <DataTemplate DataType="{x:Type vm:EnvironmentReadinessViewModel}">
             <views:EnvironmentReadinessView />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView />
+        </DataTemplate>
     </Window.Resources>
 
     <!--

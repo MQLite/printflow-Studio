@@ -7,9 +7,13 @@ namespace PrintFlow.App.Resources;
 /// Typed access to the operator-visible strings in <c>Strings.resx</c>.
 /// </summary>
 /// <remarks>
-/// Resolution follows <see cref="CultureInfo.CurrentUICulture"/>, so the <c>zh-CN</c>
-/// satellite is picked up automatically on a Chinese workstation. A runtime language
-/// switcher is a later slice (Epic 11100 plan §16.3).
+/// Resolution follows <see cref="OperatorCulture"/> and is read afresh on every access, which is
+/// what makes the runtime language switch possible at all: the culture is set by
+/// <c>ILocalisationService</c> — the one authority for which language the interface is in — and
+/// every string on the visible screen answers the next read in the new language, with no restart
+/// and no per-label rebinding (SCRUM-11119; Epic 11100 plan §16.3). Until a language has been
+/// selected, <see cref="OperatorCulture"/> is <see cref="CultureInfo.CurrentUICulture"/>, so the
+/// <c>zh-CN</c> satellite is still picked up automatically on a Chinese workstation.
 ///
 /// Internal state names, failure codes and adapter identifiers deliberately stay outside
 /// this file: they are stable English and are never localised (MVP design §13.4).
@@ -871,6 +875,40 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
 
     internal static string Environment_ObservedAt => Get(nameof(Environment_ObservedAt));
 
+    // Settings and the operator language selection (SCRUM-11118, SCRUM-11119). The language
+    // names themselves are deliberately absent: a language is always offered in its own
+    // language, so "English" and the Chinese endonym are constants in the view model rather
+    // than translated resources.
+
+    internal static string Settings_Open => Get(nameof(Settings_Open));
+    internal static string Settings_Heading => Get(nameof(Settings_Heading));
+    internal static string Settings_GeneralHeading => Get(nameof(Settings_GeneralHeading));
+    internal static string Settings_ProductionHeading => Get(nameof(Settings_ProductionHeading));
+    internal static string Settings_ProductionHint => Get(nameof(Settings_ProductionHint));
+    internal static string Settings_DiagnosticsHeading => Get(nameof(Settings_DiagnosticsHeading));
+    internal static string Settings_Language => Get(nameof(Settings_Language));
+    internal static string Settings_OutputRoot => Get(nameof(Settings_OutputRoot));
+    internal static string Settings_OutputRootHint => Get(nameof(Settings_OutputRootHint));
+    internal static string Settings_OutputRootUnavailable => Get(nameof(Settings_OutputRootUnavailable));
+    internal static string Settings_TrimMargin => Get(nameof(Settings_TrimMargin));
+    internal static string Settings_TrimMarginHint => Get(nameof(Settings_TrimMarginHint));
+    internal static string Settings_TrimMarginInvalid => Get(nameof(Settings_TrimMarginInvalid));
+    internal static string Settings_ProductionDpi => Get(nameof(Settings_ProductionDpi));
+    internal static string Settings_ProductionDpiValue => Get(nameof(Settings_ProductionDpiValue));
+    internal static string Settings_Preset => Get(nameof(Settings_Preset));
+    internal static string Settings_ColourSetup => Get(nameof(Settings_ColourSetup));
+    internal static string Settings_ColourSetupHint => Get(nameof(Settings_ColourSetupHint));
+    internal static string Settings_ColourConfirmed => Get(nameof(Settings_ColourConfirmed));
+    internal static string Settings_ColourMismatch => Get(nameof(Settings_ColourMismatch));
+    internal static string Settings_ColourNotVerified => Get(nameof(Settings_ColourNotVerified));
+    internal static string Settings_LogRetention => Get(nameof(Settings_LogRetention));
+    internal static string Settings_LogRetentionHint => Get(nameof(Settings_LogRetentionHint));
+    internal static string Settings_LogRetentionInvalid => Get(nameof(Settings_LogRetentionInvalid));
+    internal static string Settings_Apply => Get(nameof(Settings_Apply));
+    internal static string Settings_Saved => Get(nameof(Settings_Saved));
+    internal static string Settings_SaveFailed => Get(nameof(Settings_SaveFailed));
+    internal static string Settings_LoadFailed => Get(nameof(Settings_LoadFailed));
+
     /// <summary>
     /// Returns the resource for <paramref name="key"/>, falling back to the key itself.
     /// </summary>
@@ -889,5 +927,5 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Session_ManualCropMarginInvalid => Get(nameof(Session_ManualCropMarginInvalid));
 
     private static string Get(string key) =>
-        Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        Manager.GetString(key, OperatorCulture.Current) ?? key;
 }

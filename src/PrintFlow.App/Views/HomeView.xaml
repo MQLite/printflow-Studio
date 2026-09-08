@@ -35,13 +35,21 @@
         <StackPanel Grid.Row="1" Margin="0,6,0,16">
             <TextBlock Text="{Binding StartupSummary}" TextWrapping="Wrap" Opacity="0.85" />
             <TextBlock Text="{Binding PresetStatus}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0" />
-            <Button Content="{Binding EnvironmentLabel}"
-                    Command="{Binding ShowEnvironmentCommand}"
-                    AutomationProperties.AutomationId="Home.ShowEnvironment"
-                    AutomationProperties.Name="{Binding EnvironmentLabel}"
-                    Padding="10,4"
-                    Margin="0,8,0,0"
-                    HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Button Content="{Binding EnvironmentLabel}"
+                        Command="{Binding ShowEnvironmentCommand}"
+                        AutomationProperties.AutomationId="Home.ShowEnvironment"
+                        AutomationProperties.Name="{Binding EnvironmentLabel}"
+                        Padding="10,4"
+                        HorizontalAlignment="Left" />
+                <Button Content="{Binding SettingsLabel}"
+                        Command="{Binding ShowSettingsCommand}"
+                        AutomationProperties.AutomationId="Home.ShowSettings"
+                        AutomationProperties.Name="{Binding SettingsLabel}"
+                        Padding="10,4"
+                        Margin="8,0,0,0"
+                        HorizontalAlignment="Left" />
+            </StackPanel>
         </StackPanel>
 
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
