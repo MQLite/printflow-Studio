@@ -43,6 +43,26 @@ public interface ISessionRepository
     Task<OperationResult<AutomationLockState>> GetAutomationLockAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Reads the structured automation errors recorded for one session, oldest first
+    /// (Jira 11108; MVP design §17.6).
+    /// </summary>
+    /// <remarks>
+    /// Separate from <see cref="LoadAsync"/> rather than folded into the aggregate: every
+    /// command path loads an aggregate, and none of them reasons about the error log, so adding
+    /// it there would put a query on the hot path for the benefit of no caller. The reader
+    /// exists because "restart preserves history" is not a claim that can be made about records
+    /// nothing can read back.
+    /// <para>
+    /// The default refuses rather than returning an empty list. A repository that cannot read
+    /// the log must say so; answering "no errors" would be a lie a caller could not detect.
+    /// </para>
+    /// </remarks>
+    Task<OperationResult<IReadOnlyList<Domain.Automation.AutomationLogEntry>>> LoadAutomationLogAsync(
+        SessionId sessionId, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<IReadOnlyList<Domain.Automation.AutomationLogEntry>>(
+            FailureCode.PersistenceError, "This repository cannot read the automation log."));
+
+    /// <summary>
     /// Releases only the exact environment-verification owner observed dead by startup.
     /// This lock has no session aggregate; it must never use a session mutation to release it.
     /// </summary>

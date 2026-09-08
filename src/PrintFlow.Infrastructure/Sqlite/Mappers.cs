@@ -1679,4 +1679,91 @@ internal static class Mappers
                 ? WorkspaceFileRef.Create(reserved, InferArea(reserved))
                 : null);
     }
+
+    // ------------------------------------------------------------------------------------
+    // AutomationLogEntry (Jira 11108; MVP design §17.6)
+    // ------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Flattens one structured automation error into its row.
+    /// </summary>
+    /// <remarks>
+    /// The failure's structured context is written as a JSON object under <c>ContextJson</c>,
+    /// using the same shape <c>ProcessingAttempt.FailureDetailJson</c> already uses for the
+    /// context half — one encoding of a context map on disk, not two. An empty context is
+    /// written as NULL rather than <c>{}</c>, so "this error carried no context" reads the same
+    /// way everywhere else a nullable column does.
+    /// </remarks>
+    public static AutomationLogRow ToRow(PrintFlow.Domain.Automation.AutomationLogEntry entry) => new()
+    {
+        Id = entry.Id.ToString(),
+        SessionId = entry.SessionId?.ToString(),
+        StepKind = entry.Step is { } step ? ToText(step) : null,
+        AtUtc = ToText(entry.AtUtc),
+        FailureCode = entry.Failure.Code.ToString(),
+        MessageKey = entry.Failure.MessageKey,
+        TechnicalDetail = entry.Failure.TechnicalDetail,
+        ContextJson = entry.Failure.Context.Count == 0
+            ? null
+            : System.Text.Json.JsonSerializer.Serialize(entry.Failure.Context),
+        ScreenshotPath = entry.ScreenshotPath,
+    };
+
+    public static PrintFlow.Domain.Automation.AutomationLogEntry ToDomain(AutomationLogRow row)
+    {
+        Dictionary<string, string> context = new(StringComparer.Ordinal);
+        if (!string.IsNullOrWhiteSpace(row.ContextJson))
+        {
+            using System.Text.Json.JsonDocument document =
+                System.Text.Json.JsonDocument.Parse(row.ContextJson);
+            if (document.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                foreach (System.Text.Json.JsonProperty property in document.RootElement.EnumerateObject())
+                {
+                    context[property.Name] = property.Value.GetString() ?? property.Value.ToString();
+                }
+            }
+        }
+
+        // IsRetryable is deliberately not persisted here: it is a property of the operation the
+        // attempt row already records, not of the historical error, and a stored copy would be a
+        // second answer to "may the operator retry?" that could disagree with the first.
+        Domain.Results.OperationFailure failure = Domain.Results.OperationFailure.Create(
+            Enum.Parse<Domain.Results.FailureCode>(row.FailureCode),
+            row.TechnicalDetail,
+            isRetryable: false,
+            context: context.Count == 0 ? null : context,
+            messageKey: row.MessageKey);
+
+        return new PrintFlow.Domain.Automation.AutomationLogEntry(
+            AutomationLogId.From(Guid.Parse(row.Id)),
+            row.SessionId is string sid ? SessionId.From(Guid.Parse(sid)) : null,
+            row.StepKind is string step ? ToStepKind(step) : null,
+            ToDateTimeOffset(row.AtUtc),
+            failure,
+            row.ScreenshotPath);
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Setting (Jira 11108; MVP design §17.6)
+    // ------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The stable on-disk text of a <see cref="Domain.Settings.SettingKey"/>.
+    /// </summary>
+    /// <remarks>
+    /// The enum name, exactly as <see cref="StepKind"/> is stored: the <c>Setting</c> table
+    /// carries no CHECK constraint to keep a translation table in sync with, and one convention
+    /// beats two. A member may be added but never renamed — a renamed key is an orphaned row.
+    /// </remarks>
+    public static string ToText(Domain.Settings.SettingKey value) => value.ToString();
+
+    /// <summary>Reads a stored key, or null when the row predates or postdates this build's vocabulary.</summary>
+    /// <remarks>
+    /// Null rather than a throw: an unknown key is a row this build has no business interpreting,
+    /// and refusing to read the whole settings table because one row is unrecognised would make a
+    /// downgrade unrecoverable.
+    /// </remarks>
+    public static Domain.Settings.SettingKey? ToSettingKeyOrNull(string text) =>
+        Enum.TryParse(text, ignoreCase: false, out Domain.Settings.SettingKey key) ? key : null;
 }

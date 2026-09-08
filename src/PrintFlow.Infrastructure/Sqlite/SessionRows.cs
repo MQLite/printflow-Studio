@@ -408,3 +408,22 @@ internal sealed class AutomationLockRow
     public string? Purpose { get; set; }
     public string? OwnerToken { get; set; }
 }
+
+internal sealed class AutomationLogRow
+{
+    public string Id { get; set; } = "";
+    public string? SessionId { get; set; }
+    public string? StepKind { get; set; }
+    public string AtUtc { get; set; } = "";
+    public string FailureCode { get; set; } = "";
+    public string MessageKey { get; set; } = "";
+    public string TechnicalDetail { get; set; } = "";
+    public string? ContextJson { get; set; }
+    public string? ScreenshotPath { get; set; }
+}
+
+internal sealed class SettingRow
+{
+    public string Key { get; set; } = "";
+    public string Value { get; set; } = "";
+}

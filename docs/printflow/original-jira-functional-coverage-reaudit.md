@@ -889,3 +889,91 @@ semantics, persistence, bilingual/keyboard/UIA evidence, full-suite result and G
 [SCRUM-11075 / SCRUM-11078 completion report](scrum-11075-11078-output-name-import-selection-completion.md).
 
 **PASS — SCRUM-11075 / SCRUM-11078 UX COMPLETION VERIFIED**
+
+---
+
+## Q. Coverage delta — SCRUM-11076 transactional SQLite metadata persistence, and SCRUM-11068 parent reassessment (8 September 2026)
+
+Historical rows above are unchanged. Sections A–P stand exactly as written; this section records
+only what was verified in this slice.
+
+**SCRUM-11076: historical PARTIAL → current FULL.** The exact original CSV Work Item **11108**,
+*Implement Transactional SQLite Metadata Persistence*, was reread before any Product edit. The
+historical row's two gaps — *"`AutomationLogEntry` has no writer" and "`Setting` has no reader or
+writer" — two of the seven record types the AC names are never persisted"* — were re-verified as
+still true in current source (zero C# references to either table) and are now closed.
+
+`AutomationLogEntry` has a real Product writer. A typed, closed `PrintFlow.Domain.Automation.AutomationLogEntry`
+— reusing the existing `OperationFailure` rather than introducing a second structured-error shape —
+is appended at three pre-existing Product events: an adapter or validation failure closing a running
+attempt (`FailAttemptAsync`), an unreadable import (`FailImportAsync`), and an operator Stop or
+take-over (`StopAttemptAsync`). Each entry travels in the same `SessionMutation` and commits in the
+**same SQLite transaction** as the attempt row whose failure it describes, so a crash can never
+leave an attempt marked failed with no record of why, nor a record of a failure the database never
+accepted. The role is deliberately narrow and matches what the schema can hold: `FailureCode`,
+`MessageKey` and `TechnicalDetail` are `NOT NULL`, so every row is a structured error. A
+crash-recovered `Interrupted` attempt carries no `OperationFailure` and therefore writes **no** row
+rather than an invented code — `StartupRecoveryService` is unchanged. The screenshot path, until now
+reachable only as an ad-hoc `evidencePath` key inside an attempt's failure JSON, is promoted to the
+queryable `ScreenshotPath` column.
+
+`Setting` has a real typed reader and writer. `ISettingsRepository` (a Workflow port) and
+`SqliteSettingsRepository` provide `ReadAsync` / `ReadAllAsync` / a transactional batch
+`UpsertAsync` over a closed seven-member `SettingKey` vocabulary taken verbatim from MVP design
+§17.6, registered in the composition root beside `ISessionRepository`. **No operator-facing setting
+value is wired**, and that is a deliberate reading of the exact AC rather than an omission: every
+value on the design's list is either owned by an existing authority whose precedence SCRUM-11118 has
+not yet decided (output root — signed preset plus `appsettings.json`; log retention —
+`appsettings.json`; production DPI and preset details — signed preset) or has no current Product
+behaviour to preserve (there is no default trim margin, and no runtime language switcher). Absent
+rows read as `null`, so an upgraded installation behaves exactly as before and no current default
+changed.
+
+**No migration was added.** Migration `0001` already created both tables with every column the AC
+requires; the sequence remains `0001`–`0015`, historical scripts were not edited, and
+`MigrationRunner.NewestKnownVersion` is unchanged. Row P2-6's note that the `Setting` table is
+unused and `AutomationLogEntry` has no writer no longer holds for the persistence half of that row.
+
+**Parent SCRUM-11068: PARTIAL → FULL**, reassessed independently against the exact original **11100**
+Description rather than from child labels. The Epic's one outstanding clause was "SQLite metadata
+persistence"; all seven record types the child AC names now have typed, transactional Product
+persistence. Every other clause was re-verified clause by clause: the WPF/.NET foundation, the fixed
+workflow state model, immutable snapshot and revision rules, the controlled file workspace,
+collision-safe naming (closed in section P), one operator and exactly one input image per session,
+the deliberate exclusion of Job/Order/Customer/multi-user/batch/configurable-workflow concepts
+(re-checked against the new `SettingKey` vocabulary, which introduces none and adds no
+user-management concept), attempts and revisions remaining separate, only fully exported/readable/
+hashed files becoming revisions, hash-bound approvals, and the UI executing no SQL and mutating no
+workflow state directly.
+
+**SCRUM-11118, SCRUM-11120, SCRUM-11121 and SCRUM-11091 keep their current status.** Factual
+prerequisite notes only: a typed settings repository now exists and is composed into the application
+(SCRUM-11118 still has no Settings screen, no navigation, no language selector, no editors and no
+precedence rule); `AutomationLogEntry` now has a real Product writer and a repository reader, which
+is the durable backing an Error Details page needs (SCRUM-11120 still has no page); failure
+screenshot paths are now recorded in a queryable column (SCRUM-11121 still has no rolling text log,
+no `ILogger`/Serilog, no 30-day cleanup and no operator-visible log location). SCRUM-11091's Meitu
+evidence fields were not expanded. SCRUM-11114 retention and SCRUM-11112 recovery behaviour are
+untouched — no settings or log row became a file authority, and no new startup side effect reads
+either table. No digital-signature or code-signing work was added.
+
+**Evidence:** clean build **0 warnings / 0 errors**; 12 new targeted cases in
+`AutomationLogAndSettingPersistenceTests`; the whole `Integration.Persistence` and `Architecture`
+namespaces green at **917 passed, 0 failed, 0 skipped**; one complete suite against final source
+**11,553 passed, 0 failed, 0 skipped** (baseline 11,541; +12, exactly the new cases). The full suite
+was run rather than skipped because the slice changes the shared SQLite repository's transaction
+body, the shared `SessionMutation`, and the common attempt-failure path every adapter-backed step
+uses. Rollback was proven both ways against real SQLite: a failed closing commit leaves neither the
+`Failed` attempt nor its log row, and a settings batch whose second entry violates the table's own
+`NOT NULL` constraint commits neither entry. Restart/readback was proven through repositories
+rebuilt on new connection factories, plus one independent raw-`SqliteConnection` inspection of
+`AutomationLogEntry` after every service and repository was disposed. No WPF/UIA smoke was
+manufactured: the slice changes no view, view model, XAML or resource string. No external
+application was launched and no Jira mutation was performed.
+
+Exact original child and parent Descriptions, pre-change entity matrix, migration/schema reality,
+AutomationLogEntry and Setting semantics, transaction boundaries, rollback, restart/readback, tests,
+full-suite decision and Git discipline:
+[SCRUM-11076 completion report](scrum-11076-transactional-sqlite-persistence-completion.md).
+
+**PASS WITH NOTES — SCRUM-11076 TRANSACTIONAL SQLITE PERSISTENCE VERIFIED**

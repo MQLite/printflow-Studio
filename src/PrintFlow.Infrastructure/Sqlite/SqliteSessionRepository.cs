@@ -247,6 +247,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
                 await UpsertOutputAsync(connection, transaction, output);
             }
 
+            // Inside the same transaction as the attempt whose failure each entry describes, so
+            // a stopped attempt and the durable record of why it stopped can never disagree
+            // (Jira 11108; SessionMutation.NewAutomationLog).
+            foreach (Domain.Automation.AutomationLogEntry entry in mutation.NewAutomationLog)
+            {
+                await InsertAutomationLogAsync(connection, transaction, entry);
+            }
+
             if (mutation.LockChange is { } lockChange)
             {
                 int changed = await ApplyLockChangeAsync(connection, transaction, lockChange);
@@ -280,6 +288,27 @@ public sealed class SqliteSessionRepository : ISessionRepository
             "SELECT * FROM ProcessingAttempt WHERE ResultStatus = 'RUNNING';");
 
         return OperationResult.Ok<IReadOnlyList<ProcessingAttempt>>(rows.Select(Mappers.ToDomain).ToList());
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<IReadOnlyList<Domain.Automation.AutomationLogEntry>>> LoadAutomationLogAsync(
+        SessionId sessionId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using SqliteConnection connection = _connectionFactory.Open();
+            IEnumerable<AutomationLogRow> rows = await connection.QueryAsync<AutomationLogRow>(new CommandDefinition(
+                "SELECT * FROM AutomationLogEntry WHERE SessionId = @sessionId ORDER BY AtUtc, Id;",
+                new { sessionId = sessionId.ToString() }, cancellationToken: cancellationToken));
+
+            return OperationResult.Ok<IReadOnlyList<Domain.Automation.AutomationLogEntry>>(
+                rows.Select(Mappers.ToDomain).ToList());
+        }
+        catch (SqliteException ex)
+        {
+            return OperationResult.Fail<IReadOnlyList<Domain.Automation.AutomationLogEntry>>(
+                FailureCode.PersistenceError, $"The automation log could not be read: {ex.Message}");
+        }
     }
 
     /// <inheritdoc />
@@ -735,6 +764,27 @@ public sealed class SqliteSessionRepository : ISessionRepository
             VALUES
                 (@Id, @SessionId, @StepKind, @SubjectKind, @SubjectId, @ReviewedSha256, @Operator, @DecidedAtUtc,
                  @Decision, @QuickReason, @Notes);
+            """;
+        return connection.ExecuteAsync(sql, row, transaction);
+    }
+
+    /// <summary>Appends one structured automation error (Jira 11108; MVP design §17.6).</summary>
+    /// <remarks>
+    /// A plain INSERT, never an upsert: the log is a record of what happened, and an error that
+    /// could be rewritten in place would be a record of what someone last said happened.
+    /// </remarks>
+    private static Task InsertAutomationLogAsync(
+        SqliteConnection connection, SqliteTransaction transaction, Domain.Automation.AutomationLogEntry entry)
+    {
+        AutomationLogRow row = Mappers.ToRow(entry);
+        const string sql =
+            """
+            INSERT INTO AutomationLogEntry
+                (Id, SessionId, StepKind, AtUtc, FailureCode, MessageKey, TechnicalDetail,
+                 ContextJson, ScreenshotPath)
+            VALUES
+                (@Id, @SessionId, @StepKind, @AtUtc, @FailureCode, @MessageKey, @TechnicalDetail,
+                 @ContextJson, @ScreenshotPath);
             """;
         return connection.ExecuteAsync(sql, row, transaction);
     }

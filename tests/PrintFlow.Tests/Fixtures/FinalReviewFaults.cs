@@ -182,4 +182,11 @@ internal sealed class FaultingRepository : ISessionRepository
 
     public Task<OperationResult<AutomationLockState>> GetAutomationLockAsync(CancellationToken cancellationToken) =>
         _inner.GetAutomationLockAsync(cancellationToken);
+
+    // Delegated, never faulted: a test that injects a commit failure still has to read back what
+    // the real database kept, and a decorator that answered "no errors" would hide exactly the
+    // rollback behaviour it exists to expose.
+    public Task<OperationResult<IReadOnlyList<PrintFlow.Domain.Automation.AutomationLogEntry>>> LoadAutomationLogAsync(
+        SessionId sessionId, CancellationToken cancellationToken) =>
+        _inner.LoadAutomationLogAsync(sessionId, cancellationToken);
 }

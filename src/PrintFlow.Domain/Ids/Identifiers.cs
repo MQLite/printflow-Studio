@@ -60,3 +60,11 @@ public readonly record struct SnapshotId(Guid Value) : ITypedId
 
     public override string ToString() => Value.ToString("D");
 }
+
+/// <summary>Identifies one <c>AutomationLogEntry</c>.</summary>
+public readonly record struct AutomationLogId(Guid Value) : ITypedId
+{
+    public static AutomationLogId From(Guid value) => new(value);
+
+    public override string ToString() => Value.ToString("D");
+}

@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Automation;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
@@ -2165,13 +2166,38 @@ public sealed partial class SessionService : ISessionService
 
         SessionMutation mutation = BuildMetadataMutation(
             aggregate, updatedSession, failedTransition.State, failedTransition.Effects, context,
-            upsertAttempts: [failedAttempt]);
+            upsertAttempts: [failedAttempt]) with
+        {
+            NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
+        };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
         return committed.IsSuccess
             ? OperationResult.Fail<SessionView>(failure)
             : OperationResult.Fail<SessionView>(committed.Failure);
     }
+
+    /// <summary>
+    /// Builds the one durable <see cref="AutomationLogEntry"/> an automation stop produces
+    /// (Jira 11108; MVP design §17.6).
+    /// </summary>
+    /// <remarks>
+    /// Called only where an attempt ends carrying a structured <see cref="OperationFailure"/> —
+    /// a failure or a stop. An <c>Interrupted</c> attempt, which startup recovery writes for a
+    /// process that died, carries no failure at all, and it gets no row rather than an invented
+    /// code: the table's <c>FailureCode</c> is NOT NULL because every row it holds is a real
+    /// structured error, not a lifecycle breadcrumb.
+    /// <para>
+    /// The identifier is minted here rather than arriving through <c>CommandContext</c>: the
+    /// engine is a pure reducer that knows nothing about a diagnostic log, and pre-allocating an
+    /// id on every context for the rare command that stops would be allocation the reducer's
+    /// determinism does not need.
+    /// </para>
+    /// </remarks>
+    private AutomationLogEntry RecordAutomationStop(
+        SessionId sessionId, StepKind step, OperationFailure failure, DateTimeOffset atUtc) =>
+        AutomationLogEntry.ForStop(
+            AutomationLogId.From(_idGenerator.NewId()), sessionId, step, atUtc, failure);
 
     /// <summary>
     /// The stable English reason recorded on the session when an operator takes the external
@@ -2252,7 +2278,10 @@ public sealed partial class SessionService : ISessionService
 
         ProcessingSession updatedSession = MergeSession(aggregate.Session, state, effects, context.NowUtc);
         SessionMutation mutation = BuildMetadataMutation(
-            aggregate, updatedSession, state, effects, context, upsertAttempts: [cancelledAttempt]);
+            aggregate, updatedSession, state, effects, context, upsertAttempts: [cancelledAttempt]) with
+        {
+            NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
+        };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
         return committed.IsFailure
@@ -2436,7 +2465,10 @@ public sealed partial class SessionService : ISessionService
         ProcessingSession updatedSession = MergeSession(session, failedTransition.State, failedTransition.Effects, context.NowUtc);
 
         SessionMutation mutation = new(
-            updatedSession, failedTransition.State.Steps, [], [], [failedAttempt], [], [], null, null);
+            updatedSession, failedTransition.State.Steps, [], [], [failedAttempt], [], [], null, null)
+        {
+            NewAutomationLog = [RecordAutomationStop(session.Id, StepKind.Import, failure, context.NowUtc)],
+        };
 
         await _repository.CommitAsync(mutation, cancellationToken);
         return OperationResult.Fail<SessionView>(failure);

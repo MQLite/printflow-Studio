@@ -88,6 +88,14 @@ public static class ServiceRegistration
             expectedPresetHash, connectionFactory);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
 
+        // The settings store the same migrated database already carries (Jira 11108; MVP design
+        // §17.6). Registered beside the session repository and against the same connection
+        // factory, so a persisted setting and a persisted session are the same database's facts.
+        // Which values the operator may edit, and what wins when a persisted value disagrees
+        // with appsettings.json or the signed preset, is SCRUM-11118's decision; nothing in this
+        // graph reads a setting yet, and no current default changed.
+        services.AddSingleton<ISettingsRepository>(new SqliteSettingsRepository(connectionFactory));
+
         RegisterAdapters(
             services,
             configuration.Adapters is { } adapters ? adapters.Mode : null,

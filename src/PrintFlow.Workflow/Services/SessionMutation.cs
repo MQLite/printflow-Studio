@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Automation;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Reviews;
@@ -50,6 +51,25 @@ public sealed record SessionMutation(
     AutomationLockChange? LockChange)
 {
     public IReadOnlyList<RevisionRetentionChange> RevisionRetentionChanges { get; init; } = [];
+
+    /// <summary>
+    /// Structured automation errors to append alongside the transition that produced them
+    /// (Jira 11108; MVP design §17.6).
+    /// </summary>
+    /// <remarks>
+    /// Part of the mutation rather than a separate best-effort write, because an entry here
+    /// describes the <i>same</i> authoritative transition as the attempt row it accompanies. Were
+    /// the two able to commit apart, a crash between them would leave either an attempt recorded
+    /// as failed with no durable record of why, or a recorded error for a failure the database
+    /// never accepted — both of which are exactly the "records remain consistent across failures"
+    /// the task's acceptance forbids breaking. Committing them together introduces no new failure
+    /// mode: the row is derived entirely from the failure the attempt already carries.
+    /// <para>
+    /// An empty list is the ordinary case. A success writes none, and so does a transition that
+    /// produced no structured error.
+    /// </para>
+    /// </remarks>
+    public IReadOnlyList<AutomationLogEntry> NewAutomationLog { get; init; } = [];
 
     /// <summary>
     /// Retention changes operate on the already committed completed aggregate. They must not
