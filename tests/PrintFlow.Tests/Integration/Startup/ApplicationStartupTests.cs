@@ -2,8 +2,11 @@ using System.IO;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
+using PrintFlow.App.Localisation;
+using PrintFlow.App.Resources;
 using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
+using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Sqlite;
@@ -52,6 +55,7 @@ public sealed class ApplicationStartupTests
         // The screens the App would show resolve from the graph startup returned.
         result.Services.ShouldNotBeNull();
         result.Services!.GetRequiredService<WorkflowSelectionViewModel>().Workflows.Count.ShouldBe(3);
+        result.Services!.GetRequiredService<HomeViewModel>().StartupSummary.ShouldBe(Strings.Startup_RecoveryClean);
     }
 
     [Fact]
@@ -277,6 +281,69 @@ public sealed class ApplicationStartupTests
         result.Services.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Diagnostic_retention_runs_after_recovery_and_a_warning_does_not_refuse_startup()
+    {
+        using TempApplication application = new();
+        using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
+        List<string> order = [];
+        RecordingStartupRecoveryService recovery = new(onCalled: () => order.Add("recovery"));
+        RecordingDiagnosticRetentionService retention = new(
+            new DiagnosticRetentionReport(
+                0, 0, 0, 1,
+                OperationFailure.Create(FailureCode.WorkspaceError, @"Private detail: C:\customer-secret\evidence.png")),
+            () => order.Add("retention"));
+
+        using StartupResult result = await RunAsync(application, guard, services =>
+        {
+            services.AddSingleton<IStartupRecoveryService>(recovery);
+            services.AddSingleton<IDiagnosticRetentionService>(retention);
+        });
+
+        order.ShouldBe(["recovery", "retention"]);
+        retention.CallCount.ShouldBe(1);
+        result.Status.CanShowShell.ShouldBeTrue();
+        result.Status.DiagnosticRetentionReport.ShouldNotBeNull();
+        result.Status.DiagnosticRetentionReport!.Succeeded.ShouldBeFalse();
+        result.Status.DiagnosticRetentionReport.Warning!.Code.ShouldBe(FailureCode.WorkspaceError);
+
+        foreach (OperatorLanguage language in new[] { OperatorLanguage.English, OperatorLanguage.SimplifiedChinese })
+        {
+            result.Services!.GetRequiredService<ILocalisationService>().Use(language);
+            HomeViewModel home = result.Services!.GetRequiredService<HomeViewModel>();
+            home.StartupSummary.ShouldContain(Strings.Startup_RecoveryClean);
+            home.StartupSummary.ShouldContain(Strings.Startup_DiagnosticRetentionWarning);
+            home.StartupSummary.ShouldNotContain("customer-secret");
+            home.StartupSummary.ShouldNotContain("Private detail");
+            WpfRendering.RenderExpectingNoBindingErrors(
+                () => new HomeView { DataContext = home },
+                WpfRendering.ReviewViewport,
+                tree =>
+                {
+                    tree.OfType<System.Windows.Controls.TextBlock>().ShouldContain(
+                        block => block.Visibility == System.Windows.Visibility.Visible && block.ActualHeight > 0
+                            && block.Text.Contains(Strings.Startup_DiagnosticRetentionWarning));
+                    return true;
+                });
+        }
+    }
+
+    [Fact]
+    public async Task An_unexpected_retention_exception_becomes_a_warning_after_successful_recovery()
+    {
+        using TempApplication application = new();
+        using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
+
+        using StartupResult result = await RunAsync(application, guard, services =>
+            services.AddSingleton<IDiagnosticRetentionService>(new ThrowingDiagnosticRetentionService()));
+
+        result.Status.CanShowShell.ShouldBeTrue();
+        result.Status.RecoveryExecuted.ShouldBeTrue();
+        result.Status.DiagnosticRetentionReport!.Warning!.Code.ShouldBe(FailureCode.WorkspaceError);
+        result.Services!.GetRequiredService<HomeViewModel>().StartupSummary
+            .ShouldContain(Strings.Startup_DiagnosticRetentionWarning);
+    }
+
     // -------------------------------------------------------------------------------------
     // §8: an unrecognised adapter mode remains fail-closed through the sequence
     // -------------------------------------------------------------------------------------
@@ -351,6 +418,26 @@ public sealed class ApplicationStartupTests
 
     private static Action<IServiceCollection> Substitute(IStartupRecoveryService recovery) =>
         services => services.AddSingleton(recovery);
+
+    private sealed class RecordingDiagnosticRetentionService(
+        DiagnosticRetentionReport report,
+        Action? onCalled = null) : IDiagnosticRetentionService
+    {
+        public int CallCount { get; private set; }
+
+        public Task<DiagnosticRetentionReport> MaintainAsync(CancellationToken cancellationToken)
+        {
+            CallCount++;
+            onCalled?.Invoke();
+            return Task.FromResult(report);
+        }
+    }
+
+    private sealed class ThrowingDiagnosticRetentionService : IDiagnosticRetentionService
+    {
+        public Task<DiagnosticRetentionReport> MaintainAsync(CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Synthetic unexpected retention failure.");
+    }
 
     /// <summary>Walks up to the repository root, then into <c>src\</c>.</summary>
     private static string SourceRoot()

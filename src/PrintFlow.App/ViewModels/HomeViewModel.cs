@@ -113,6 +113,11 @@ public sealed partial class HomeViewModel : ObservableObject
     /// visibly rather than only in a report object (Part 3C1 §6, Part 3C2 §12).
     /// </summary>
     public string StartupSummary
+        => _startupStatus.Status?.DiagnosticRetentionReport?.Warning is not null
+            ? RecoverySummary + " " + Strings.Startup_DiagnosticRetentionWarning
+            : RecoverySummary;
+
+    private string RecoverySummary
     {
         get
         {

@@ -442,23 +442,8 @@ public sealed class FileWorkspace : IWorkspace
         string absolute = ResolveAbsolute(file);
         if (!absolute.StartsWith(root + System.IO.Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Retention path escapes the exact session.");
-        RefuseReparseAncestry(absolute);
+        ReparsePointGuard.RefuseAncestry(absolute);
         return absolute;
-    }
-
-    private static void RefuseReparseAncestry(string absolute)
-    {
-        // Include the workspace root and its ancestors, not just descendants of the session.
-        for (string? current = absolute; current is not null; current = System.IO.Path.GetDirectoryName(current))
-        {
-            try
-            {
-                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
-                    throw new IOException($"Retention refuses reparse traversal at '{current}'.");
-            }
-            catch (FileNotFoundException) { }
-            catch (DirectoryNotFoundException) { }
-        }
     }
 
     private static void VerifyHash(string absolute, Sha256 expected)
@@ -541,10 +526,10 @@ public sealed class FileWorkspace : IWorkspace
         directories.Push(root);
         while (directories.TryPop(out string? directory))
         {
-            RefuseReparseAncestry(directory);
+            ReparsePointGuard.RefuseAncestry(directory);
             foreach (string entry in Directory.EnumerateFileSystemEntries(directory))
             {
-                RefuseReparseAncestry(entry);
+                ReparsePointGuard.RefuseAncestry(entry);
                 if ((File.GetAttributes(entry) & FileAttributes.Directory) != 0) directories.Push(entry);
                 else yield return entry;
             }

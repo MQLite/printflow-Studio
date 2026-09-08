@@ -60,6 +60,9 @@ public sealed record StartupStatus
     /// <summary>Everything that pass did, or null when it did not run.</summary>
     public StartupRecoveryReport? RecoveryReport { get; private init; }
 
+    /// <summary>What the bounded diagnostic-retention pass changed or preserved.</summary>
+    public DiagnosticRetentionReport? DiagnosticRetentionReport { get; private init; }
+
     /// <summary>Set when startup stopped; null when the shell may be shown.</summary>
     public StartupFailure? Failure { get; private init; }
 
@@ -98,7 +101,10 @@ public sealed record StartupStatus
         };
 
     /// <summary>Startup completed: this process is primary and recovery has run exactly once.</summary>
-    public static StartupStatus Started(bool presetVerified, StartupRecoveryReport recoveryReport)
+    public static StartupStatus Started(
+        bool presetVerified,
+        StartupRecoveryReport recoveryReport,
+        DiagnosticRetentionReport? diagnosticRetentionReport = null)
     {
         ArgumentNullException.ThrowIfNull(recoveryReport);
 
@@ -108,6 +114,7 @@ public sealed record StartupStatus
             PresetVerified = presetVerified,
             RecoveryExecuted = true,
             RecoveryReport = recoveryReport,
+            DiagnosticRetentionReport = diagnosticRetentionReport,
         };
     }
 

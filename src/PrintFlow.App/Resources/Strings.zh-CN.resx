@@ -884,7 +884,12 @@
   <data name="Settings_ColourMismatch" xml:space="preserve"><value>与认可的颜色设置不一致</value></data>
   <data name="Settings_ColourNotVerified" xml:space="preserve"><value>尚未检查——请在生产就绪状态页面运行检查</value></data>
   <data name="Settings_LogRetention" xml:space="preserve"><value>本机记录保留天数</value></data>
-  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>任务记录和故障截图仅保存在本机，不会上传。此处记录的是保留期限；自动清理尚未启用，因此不会自动删除任何文件。</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>诊断记录和故障截图仅保存在本机，不会上传。应用安全启动并完成恢复后，会按设置的天数限量清理符合条件的过期记录和截图。当前工作仍需使用的诊断资料会保留。更改将在下次启动时生效。</value></data>
+  <data name="Settings_LocalLogLocation" xml:space="preserve"><value>本机诊断记录位置</value></data>
+  <data name="Settings_LocalLogLocationHint" xml:space="preserve"><value>保存诊断记录的本机数据库。选中路径即可复制。</value></data>
+  <data name="Settings_ScreenshotLocation" xml:space="preserve"><value>故障截图位置</value></data>
+  <data name="Settings_ScreenshotLocationHint" xml:space="preserve"><value>保存故障截图的本机文件夹。选中路径即可复制。</value></data>
+  <data name="Startup_DiagnosticRetentionWarning" xml:space="preserve"><value>本机诊断记录和截图的自动清理未能安全完成。您可以继续工作；下次启动时将重试清理。</value></data>
   <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>请填写 1 到 {0} 之间的本机记录保留天数。本次未保存任何内容。</value></data>
   <data name="Settings_Apply" xml:space="preserve"><value>应用</value></data>
   <data name="Settings_Saved" xml:space="preserve"><value>设置已保存。</value></data>

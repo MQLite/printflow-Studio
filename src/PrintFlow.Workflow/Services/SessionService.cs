@@ -1457,7 +1457,7 @@ public sealed partial class SessionService : ISessionService
             retryOfAttemptId: retryOf, retrySequence: retrySequence);
 
         if (work.ManualResultPath is { } selectedEvidence)
-            runningAttempt = runningAttempt with
+            runningAttempt = runningAttempt.WithManualResultSourcePath(selectedEvidence) with
             {
                 AdapterNotes = $"Manual result selected as {selectedEvidence.Replace('\\', '/').Split('/')[^1]}; operator {context.Operator}",
             };

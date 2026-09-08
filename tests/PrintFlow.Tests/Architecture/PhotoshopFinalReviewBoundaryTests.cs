@@ -91,12 +91,16 @@ public sealed class PhotoshopFinalReviewBoundaryTests
 
     /// <summary>
     /// Production TIFF disposal has one Recycle Bin implementation. Classified retention
-    /// deletion is confined to FileWorkspace and cannot become a TIFF disposal fallback.
+    /// deletion is confined to FileWorkspace and the diagnostic capture store, and neither can
+    /// become a TIFF disposal fallback.
     /// </summary>
     /// <remarks>
     /// "No hard-delete fallback" is only a real guarantee if there is no second route to deletion
     /// beside the one that refuses to fall back. FileWorkspace is exempted by exact filename
-    /// for closed-list retention deletion; RetentionWorkspaceTests enforce its TIFF refusal.
+    /// for closed-list session retention deletion; RetentionWorkspaceTests enforce its TIFF
+    /// refusal. LocalDiagnosticFileStore is the second exact exemption: it deletes only a direct
+    /// child of the dedicated Evidence root after positive capture-name, reference, authority,
+    /// age and reparse checks; DiagnosticRetentionTests enforce those boundaries.
     /// </remarks>
     [Fact]
     public void Production_disposal_and_classified_retention_have_only_their_named_Infrastructure_boundaries()
@@ -132,6 +136,7 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 // probe. It can delete only after Photoshop proves that exact owned document
                 // closed; it has no session/Revision/Approved reference to dispose of.
                 if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs" or
+                                 "LocalDiagnosticFileStore.cs" or
                                  "ProductionLiveWorkstationVerifier.cs"))
                 {
                     source.ShouldNotContain("File.Delete(", Case.Sensitive, $"{name} deletes a file outright.");

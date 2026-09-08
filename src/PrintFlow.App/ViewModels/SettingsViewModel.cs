@@ -59,9 +59,10 @@ public sealed record LanguageOption(OperatorLanguage Language, string DisplayNam
 /// <para>
 /// <b>Effects, per row.</b> Language is immediate and needs no restart. The trim default is
 /// prospective — it is the margin a <i>newly imported</i> job starts with, and it never rewrites
-/// a job already under way. Log retention is persisted configuration in this slice; the cleanup
-/// that enforces it is SCRUM-11121 and is not implemented here, so nothing on this screen claims
-/// that files are being deleted.
+/// a job already under way. The configured retention days govern bounded cleanup of eligible
+/// local diagnostic records and screenshots at safe application startup, after recovery.
+/// Saving here takes effect on the next startup; it does not run cleanup. The diagnostic
+/// locations are read-only facts supplied by composition, never persisted preferences.
 /// </para>
 /// <para>
 /// <b>It repairs nothing.</b> There is no button here that changes a Photoshop colour space,
@@ -77,6 +78,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IEnvironmentDiagnostics _diagnostics;
     private readonly INavigationService _navigation;
     private readonly SettingsDefaults _defaults;
+    private readonly LocalDiagnosticLocations _locations;
 
     private EnvironmentReadinessReport? _report;
 
@@ -103,19 +105,22 @@ public sealed partial class SettingsViewModel : ObservableObject
         ILocalisationService localisation,
         IEnvironmentDiagnostics diagnostics,
         INavigationService navigation,
-        SettingsDefaults defaults)
+        SettingsDefaults defaults,
+        LocalDiagnosticLocations locations)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
         ArgumentNullException.ThrowIfNull(diagnostics);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(defaults);
+        ArgumentNullException.ThrowIfNull(locations);
 
         _settings = settings;
         _localisation = localisation;
         _diagnostics = diagnostics;
         _navigation = navigation;
         _defaults = defaults;
+        _locations = locations;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {
@@ -162,6 +167,20 @@ public sealed partial class SettingsViewModel : ObservableObject
     public string LogRetentionLabel => Strings.Settings_LogRetention;
 
     public string LogRetentionHint => Strings.Settings_LogRetentionHint;
+
+    public string LocalLogLocationLabel => Strings.Settings_LocalLogLocation;
+
+    public string ScreenshotLocationLabel => Strings.Settings_ScreenshotLocation;
+
+    public string LocalLogLocationHint => Strings.Settings_LocalLogLocationHint;
+
+    public string ScreenshotLocationHint => Strings.Settings_ScreenshotLocationHint;
+
+    /// <summary>The actual SQLite database containing local structured diagnostic records.</summary>
+    public string LocalLogLocation => _locations.LocalLogLocation;
+
+    /// <summary>The actual local failure-evidence capture root.</summary>
+    public string ScreenshotLocation => _locations.ScreenshotLocation;
 
     public string ApplyLabel => Strings.Settings_Apply;
 
@@ -361,7 +380,8 @@ public sealed partial class SettingsViewModel : ObservableObject
                     TrimSafetyMarginPixels = pixels.ToString(CultureInfo.InvariantCulture);
                     break;
 
-                case SettingKey.LogRetentionDays when entry.AsInteger() is { } days && days >= 1:
+                case SettingKey.LogRetentionDays when entry.AsInteger() is { } days &&
+                    days >= 1 && days <= SettingsDefaults.MaximumLogRetentionDays:
                     LogRetentionDays = days.ToString(CultureInfo.InvariantCulture);
                     break;
 

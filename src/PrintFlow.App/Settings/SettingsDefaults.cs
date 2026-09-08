@@ -19,7 +19,7 @@ namespace PrintFlow.App.Settings;
 /// </remarks>
 /// <param name="LogRetentionDays">
 /// <c>Logging:RetentionDays</c> from <c>appsettings.json</c>. Displayed and editable on
-/// Settings; the cleanup that enforces it is SCRUM-11121 and is not in this slice.
+/// Settings; bounded startup maintenance uses it to expire eligible local diagnostics.
 /// </param>
 public sealed record SettingsDefaults(int LogRetentionDays)
 {

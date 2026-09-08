@@ -48,6 +48,7 @@ public sealed class StartupResult : IDisposable
 ///   <item>compose the service graph;</item>
 ///   <item>verify the signed preset's integrity, recorded and non-blocking;</item>
 ///   <item>run <see cref="IStartupRecoveryService.RecoverAsync"/> exactly once;</item>
+///   <item>run bounded local diagnostic retention after recovery has reconciled state;</item>
 ///   <item>restore the operator's persisted UI language, or the Product default;</item>
 ///   <item>record the result in <see cref="StartupStatusAccessor"/>;</item>
 ///   <item>hand the caller a graph it may show the shell from.</item>
@@ -58,9 +59,11 @@ public sealed class StartupResult : IDisposable
 /// precedes the shell, and therefore recovery precedes any session interaction or adapter-backed
 /// processing this process could start.
 /// <para>
-/// Every stage fails closed. A refused startup returns no container at all rather than a
-/// half-usable one, because "recovery did not finish" and "the operator may start work" must
-/// never be true at the same time.
+/// Every authority-establishing stage fails closed. A refused startup returns no container at
+/// all rather than a half-usable one, because "recovery did not finish" and "the operator may
+/// start work" must never be true at the same time. Diagnostic retention is observational
+/// maintenance after recovery; its failure is deliberately the exception to that rule and is
+/// published as a warning while all uncertain evidence is preserved.
 /// </para>
 /// <para>
 /// This object owns the single-instance guard: the caller keeps it alive for the whole
@@ -221,7 +224,35 @@ public sealed class ApplicationStartup : IDisposable
                     null);
             }
 
-            // 8 — the operator's language, before any screen is constructed.
+            // 8 — bounded local diagnostic retention. Recovery has reconciled persisted state,
+            // and the shell cannot issue commands yet. Maintenance failures preserve evidence,
+            // are carried as a warning, and do not turn a sound workflow database into a startup
+            // refusal.
+            DiagnosticRetentionReport retention;
+            try
+            {
+                retention = await services
+                    .GetRequiredService<IDiagnosticRetentionService>()
+                    .MaintainAsync(cancellationToken)
+                    .ConfigureAwait(true);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // Retention adapters normally return a warning report. This final boundary also
+                // prevents an unexpected local-maintenance exception from relabelling successful
+                // recovery as a startup failure. The shell deliberately shows only a localised,
+                // non-technical warning; this detail remains local for diagnosis.
+                retention = new DiagnosticRetentionReport(
+                    0,
+                    0,
+                    0,
+                    0,
+                    OperationFailure.Create(
+                        FailureCode.WorkspaceError,
+                        $"Diagnostic retention could not finish safely: {ex.Message}"));
+            }
+
+            // 9 — the operator's language, before any screen is constructed.
             //
             // Deliberately not a stage that can refuse: the culture authority answers an absent,
             // unreadable or unrecognised persisted value with the Product's first-run default
@@ -233,11 +264,11 @@ public sealed class ApplicationStartup : IDisposable
                 .RestoreAsync(cancellationToken)
                 .ConfigureAwait(true);
 
-            // 9 — record the result where the shell can read it.
-            StartupStatus status = StartupStatus.Started(preset.IsSuccess, recovered.Value);
+            // 10 — record the result where the shell can read it.
+            StartupStatus status = StartupStatus.Started(preset.IsSuccess, recovered.Value, retention);
             services.GetRequiredService<StartupStatusAccessor>().Publish(status);
 
-            // 10 — the caller composes and shows the shell.
+            // 11 — the caller composes and shows the shell.
             return new StartupResult(status, services);
         }
         catch

@@ -599,7 +599,7 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11092 / SCRUM-11112: manual result provenance and manual cutout authority.
         // SCRUM-11114: verified Revision relocation and explicit rejected-Meitu expiry.
         // SCRUM-11110: the same singleton lock also owns bounded environment verification.
-        scripts.Last().ShouldBe("0015_environment_verification_lock.sql");
+        scripts.Last().ShouldBe("0016_manual_result_source_authority.sql");
     }
 
     // -------------------------------------------------------------------------------------

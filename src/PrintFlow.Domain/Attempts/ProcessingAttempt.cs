@@ -221,6 +221,29 @@ public sealed record ProcessingAttempt(
     /// </remarks>
     public string? AdapterNotes { get; init; }
 
+    /// <summary>
+    /// The operator-selected external file copied by a manual-result import, or null for every
+    /// other operation. This remains source authority after the managed Revision is created.
+    /// </summary>
+    /// <remarks>
+    /// Stored separately from <see cref="AdapterNotes"/> because retention safety must compare
+    /// path identity without parsing human-readable audit text. The supplied spelling is kept as
+    /// evidence; filesystem policy canonicalises it when comparing authorities.
+    /// </remarks>
+    public string? ManualResultSourcePath { get; init; }
+
+    public ProcessingAttempt WithManualResultSourcePath(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (Operation != OperationKind.ManualResultImport)
+            throw new InvalidOperationException(
+                "Only a manual-result import can record an external manual-result source path.");
+        if (ManualResultSourcePath is not null &&
+            !string.Equals(ManualResultSourcePath, path, StringComparison.Ordinal))
+            throw new InvalidOperationException("A manual-result source path is immutable.");
+        return this with { ManualResultSourcePath = path };
+    }
+
     /// <summary>Records the reviewed-content authority this attempt is about to run under.</summary>
     public ProcessingAttempt WithBackgroundRemovalAuthority(BackgroundRemovalAuthority authority) =>
         this with { BackgroundRemovalAuthority = authority };

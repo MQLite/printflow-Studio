@@ -67,7 +67,9 @@ internal sealed class SettingsScreenHarness : IDisposable
     /// <summary>A Settings screen, optionally over a substituted store or readiness seam.</summary>
     public SettingsViewModel Create(
         ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null) =>
-        new(settings ?? Settings, Localisation, diagnostics ?? Diagnostics, Navigation, Defaults);
+        new(settings ?? Settings, Localisation, diagnostics ?? Diagnostics, Navigation, Defaults,
+            new LocalDiagnosticLocations(_harness.Database.Path,
+                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")));
 
     /// <summary>A Settings screen that has already loaded, as navigation would have left it.</summary>
     public async Task<SettingsViewModel> OpenAsync(

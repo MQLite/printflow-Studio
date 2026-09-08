@@ -225,6 +225,9 @@ internal sealed class AttemptRow
     // Successful runtime evidence, including cleanup warnings (Epic 11300 Part D1).
     public string? AdapterNotes { get; set; }
 
+    // Immutable external source selected for a manual-result import (SCRUM-11121).
+    public string? ManualResultSourcePath { get; set; }
+
     // The rectangles THIS attempt's deterministic trim established (SCRUM-11081). Content is
     // what the alpha scan found before any margin; Applied is what was actually cropped out.
     // TrimBounds's half-open convention, unconverted: Left/Top inclusive, Right/Bottom exclusive.

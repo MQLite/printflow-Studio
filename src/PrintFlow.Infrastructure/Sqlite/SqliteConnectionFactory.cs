@@ -15,15 +15,19 @@ public sealed class SqliteConnectionFactory
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(databaseAbsolutePath);
 
-        string? directory = System.IO.Path.GetDirectoryName(databaseAbsolutePath);
+        DatabasePath = Path.GetFullPath(databaseAbsolutePath);
+        string? directory = Path.GetDirectoryName(DatabasePath);
         if (!string.IsNullOrEmpty(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        SqliteConnectionStringBuilder builder = new() { DataSource = databaseAbsolutePath };
+        SqliteConnectionStringBuilder builder = new() { DataSource = DatabasePath };
         _connectionString = builder.ToString();
     }
+
+    /// <summary>The database path used by every connection this factory opens.</summary>
+    public string DatabasePath { get; }
 
     /// <summary>Opens a new connection with WAL, full durability, foreign keys and a busy timeout applied.</summary>
     public SqliteConnection Open()

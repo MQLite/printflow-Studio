@@ -895,7 +895,12 @@
   <data name="Settings_ColourMismatch" xml:space="preserve"><value>Does not match the approved colour setup</value></data>
   <data name="Settings_ColourNotVerified" xml:space="preserve"><value>Not checked yet — run the check on the production readiness screen</value></data>
   <data name="Settings_LogRetention" xml:space="preserve"><value>Keep local records for (days)</value></data>
-  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>Job records and failure screenshots stay on this workstation and are never uploaded. This is the period that is recorded; automatic clean-up is not yet in place, so nothing is deleted for you.</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>Diagnostic records and failure screenshots stay on this workstation and are never uploaded. At safe application startup, after recovery, bounded cleanup uses the configured days to remove eligible expired records and screenshots. Diagnostics still needed for current work are kept. Changes apply at the next startup.</value></data>
+  <data name="Settings_LocalLogLocation" xml:space="preserve"><value>Local diagnostic records location</value></data>
+  <data name="Settings_LocalLogLocationHint" xml:space="preserve"><value>The local database containing diagnostic records. Select the path to copy it.</value></data>
+  <data name="Settings_ScreenshotLocation" xml:space="preserve"><value>Failure screenshots location</value></data>
+  <data name="Settings_ScreenshotLocationHint" xml:space="preserve"><value>The local folder for failure screenshots. Select the path to copy it.</value></data>
+  <data name="Startup_DiagnosticRetentionWarning" xml:space="preserve"><value>Automatic cleanup of local diagnostic records and screenshots could not finish safely. You can continue working; cleanup will be tried again at the next startup.</value></data>
   <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>Enter the number of days to keep local records, from 1 to {0}. Nothing was saved.</value></data>
   <data name="Settings_Apply" xml:space="preserve"><value>Apply</value></data>
   <data name="Settings_Saved" xml:space="preserve"><value>Settings saved.</value></data>

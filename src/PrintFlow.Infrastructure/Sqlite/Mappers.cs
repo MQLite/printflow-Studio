@@ -1436,6 +1436,7 @@ internal static class Mappers
             TargetOf(attempt)?.Authority?.ProjectedTargetPixelHeight,
 
         AdapterNotes = attempt.AdapterNotes,
+        ManualResultSourcePath = attempt.ManualResultSourcePath,
     };
 
     private static PrintPreparationPlan? BoundsOf(ProcessingAttempt attempt) =>
@@ -1502,6 +1503,7 @@ internal static class Mappers
                 row.BackgroundRemovalDecision, row.BackgroundRemovalRevisionId,
                 row.BackgroundRemovalReviewedSha),
             AdapterNotes = row.AdapterNotes,
+            ManualResultSourcePath = row.ManualResultSourcePath,
 
             // Null on every attempt that established no trim geometry, and on every attempt
             // written before migration 0009 — which is exactly what those rows were: attempts

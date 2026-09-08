@@ -111,8 +111,7 @@
                         AutomationProperties.AutomationId="Settings.OpenEnvironment"
                         AutomationProperties.Name="{Binding OpenEnvironmentLabel}" />
 
-                <!-- Diagnostics: the retention period is recorded here; the cleanup that
-                     enforces it is a separate task and this screen does not claim otherwise. -->
+                <!-- Diagnostics: saved retention applies at the next safe startup. -->
                 <TextBlock Text="{Binding DiagnosticsHeading}" Style="{StaticResource SectionHeading}" />
 
                 <TextBlock Text="{Binding LogRetentionLabel}" Style="{StaticResource RowLabel}" />
@@ -123,6 +122,20 @@
                          AutomationProperties.AutomationId="Settings.LogRetention"
                          AutomationProperties.Name="{Binding LogRetentionLabel}" />
                 <TextBlock Text="{Binding LogRetentionHint}" Style="{StaticResource RowHint}" />
+
+                <TextBlock Text="{Binding LocalLogLocationLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding LocalLogLocation, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.LocalLogLocation"
+                         AutomationProperties.Name="{Binding LocalLogLocationLabel}" />
+                <TextBlock Text="{Binding LocalLogLocationHint}" Style="{StaticResource RowHint}" />
+
+                <TextBlock Text="{Binding ScreenshotLocationLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Text="{Binding ScreenshotLocation, Mode=OneWay}"
+                         Style="{StaticResource ReadOnlyValue}"
+                         AutomationProperties.AutomationId="Settings.ScreenshotLocation"
+                         AutomationProperties.Name="{Binding ScreenshotLocationLabel}" />
+                <TextBlock Text="{Binding ScreenshotLocationHint}" Style="{StaticResource RowHint}" />
             </StackPanel>
         </ScrollViewer>
 

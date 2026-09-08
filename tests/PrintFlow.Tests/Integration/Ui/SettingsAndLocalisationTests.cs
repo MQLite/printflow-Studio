@@ -7,8 +7,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Composition;
 using PrintFlow.App.Localisation;
 using PrintFlow.App.Settings;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
@@ -17,6 +20,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Settings;
 using PrintFlow.Domain.Trimming;
 using PrintFlow.Infrastructure.Gate;
+using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Ports;
@@ -152,6 +156,22 @@ public sealed class SettingsAndLocalisationTests
 
         screen.SelectedLanguage.Language.ShouldBe(OperatorLanguage.SimplifiedChinese);
         screen.TrimSafetyMarginPixels.ShouldBe("0");
+        screen.LogRetentionDays.ShouldBe("21");
+    }
+
+    /// <summary>
+    /// A legacy value outside today's accepted range must not describe a policy cleanup will not
+    /// use. The screen and startup maintenance resolve the same configured fallback.
+    /// </summary>
+    [Fact]
+    public async Task An_invalid_legacy_retention_value_displays_the_effective_configured_fallback()
+    {
+        using SettingsScreenHarness harness = new(configuredLogRetentionDays: 21);
+        await harness.Settings.UpsertAsync(
+            [SettingEntry.Integer(SettingKey.LogRetentionDays, 5000)], CancellationToken.None);
+
+        SettingsViewModel screen = await harness.OpenAsync();
+
         screen.LogRetentionDays.ShouldBe("21");
     }
 
@@ -474,6 +494,71 @@ public sealed class SettingsAndLocalisationTests
     // =====================================================================================
     // Reachability, accessibility and rendering
     // =====================================================================================
+
+    [Fact]
+    public async Task Composed_diagnostic_paths_render_read_only_and_copyable_in_both_languages()
+    {
+        using TempApplication application = new();
+        using FakeSingleInstanceGuard guard = new(SingleInstanceOutcome.Acquired);
+        using StartupResult startup = await new ApplicationStartup(guard, application.ConfigurationFilePath)
+            .RunAsync(CancellationToken.None);
+        startup.Status.CanShowShell.ShouldBeTrue();
+        var services = startup.Services!;
+        SettingsViewModel screen = services.GetRequiredService<SettingsViewModel>();
+        await screen.OpenAsync(CancellationToken.None);
+
+        foreach (var (language, logLabel, screenshotLabel) in new[]
+                 {
+                     (OperatorLanguage.English, "Local diagnostic records location", "Failure screenshots location"),
+                     (OperatorLanguage.SimplifiedChinese, "本机诊断记录位置", "故障截图位置"),
+                 })
+        {
+            services.GetRequiredService<ILocalisationService>().Use(language);
+            WpfRendering.RenderExpectingNoBindingErrors(
+                () => new SettingsView { DataContext = screen },
+                WpfRendering.ReviewViewport,
+                tree =>
+                {
+                    ScrollViewer scroll = tree.OfType<ScrollViewer>().First();
+                    scroll.ScrollToBottom();
+                    tree.Root.UpdateLayout();
+
+                    foreach (var (id, path, label) in new[]
+                             {
+                                 ("Settings.LocalLogLocation", application.DatabasePath, logLabel),
+                                 ("Settings.ScreenshotLocation",
+                                     System.IO.Path.Combine(application.WorkspaceRoot, "Evidence"), screenshotLabel),
+                             })
+                    {
+                        TextBox box = tree.OfType<TextBox>().Single(
+                            b => AutomationProperties.GetAutomationId(b) == id);
+                        box.Text.ShouldBe(path);
+                        box.IsReadOnly.ShouldBeTrue();
+                        box.IsEnabled.ShouldBeTrue();
+                        box.Focusable.ShouldBeTrue();
+                        box.IsTabStop.ShouldBeTrue();
+                        // This harness arranges without a Window, so IsVisible is false even
+                        // for rendered controls. Check visibility and viewport bounds instead.
+                        box.Visibility.ShouldBe(Visibility.Visible);
+                        box.ActualWidth.ShouldBeGreaterThan(0);
+                        box.ActualHeight.ShouldBeGreaterThan(0);
+                        Rect bounds = box.TransformToAncestor(scroll).TransformBounds(
+                            new Rect(box.RenderSize));
+                        bounds.Top.ShouldBeGreaterThanOrEqualTo(0);
+                        bounds.Bottom.ShouldBeLessThanOrEqualTo(scroll.ActualHeight);
+                        box.SelectAll();
+                        box.SelectedText.ShouldBe(path);
+                        ApplicationCommands.Copy.CanExecute(null, box).ShouldBeTrue();
+                        AutomationProperties.GetName(box).ShouldBe(label);
+                        tree.OfType<TextBlock>().ShouldContain(
+                            b => b.Text == label && b.Visibility == Visibility.Visible && b.ActualHeight > 0);
+                    }
+
+                    tree.OfType<TextBlock>().ShouldContain(b => b.Text == screen.LogRetentionHint);
+                    return true;
+                });
+        }
+    }
 
     /// <summary>Home offers a way in, and it is navigation only.</summary>
     [Fact]

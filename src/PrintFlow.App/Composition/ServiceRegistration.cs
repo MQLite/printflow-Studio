@@ -103,6 +103,18 @@ public static class ServiceRegistration
         // them.
         services.AddSingleton<ISettingsRepository>(new SqliteSettingsRepository(connectionFactory));
 
+        string evidenceRoot = System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName);
+        services.AddSingleton(new LocalDiagnosticLocations(connectionFactory.DatabasePath, evidenceRoot));
+        services.AddSingleton<IDiagnosticRetentionRepository>(
+            new SqliteDiagnosticRetentionRepository(connectionFactory, workspaceRootAbsolute));
+        services.AddSingleton<IDiagnosticFileStore>(new LocalDiagnosticFileStore(evidenceRoot));
+        services.AddSingleton(new DiagnosticRetentionOptions(
+            evidenceRoot,
+            configuration.Logging?.RetentionDays ?? SettingsDefaults.FallbackLogRetentionDays,
+            SettingsDefaults.FallbackLogRetentionDays,
+            SettingsDefaults.MaximumLogRetentionDays));
+        services.AddSingleton<IDiagnosticRetentionService, DiagnosticRetentionService>();
+
         // The configured rung of that precedence, taken once from the configuration this method
         // was handed rather than re-read anywhere later.
         services.AddSingleton(new SettingsDefaults(configuration.Logging is { } logging
