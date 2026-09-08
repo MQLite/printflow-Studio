@@ -79,6 +79,12 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             return OperationResult.Fail<StartupRecoveryReport>(lockRead.Failure);
         }
 
+        // Verification owns a token, not a session. Its death cannot identify an interrupted
+        // session attempt, and its release must compare the observed token rather than load
+        // an invented session aggregate.
+        if (lockRead.Value.Purpose == AutomationLockPurpose.EnvironmentVerification)
+            await RecoverVerificationLockAsync(lockRead.Value, nowUtc, entries, cancellationToken);
+
         LockVerdict lockVerdict = VerifyLock(lockRead.Value, nowUtc, entries);
 
         OperationResult<IReadOnlyList<ProcessingAttempt>> running =
@@ -194,6 +200,32 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             $"The automation lock is held and its owner is {liveness}; it was not released."));
 
         return new LockVerdict(holder, ReleaseStaleLock: false, ProtectedSession: holder);
+    }
+
+    private async Task RecoverVerificationLockAsync(
+        AutomationLockState state, DateTimeOffset nowUtc, List<StartupRecoveryEntry> entries,
+        CancellationToken cancellationToken)
+    {
+        ProcessLiveness liveness = state.ProcessId is int processId
+            ? _processLiveness.Check(processId, state.MachineName)
+            : ProcessLiveness.Unknown;
+        if (liveness != ProcessLiveness.Dead)
+        {
+            entries.Add(new StartupRecoveryEntry(
+                StartupRecoveryAction.AutomationLockRetained, nowUtc, null, null, null,
+                $"The environment-verification owner is {liveness}; its lock was not released."));
+            return;
+        }
+
+        OperationResult<Unit> released = await _repository.ReleaseEnvironmentVerificationLockAsync(
+            state, cancellationToken);
+        entries.Add(released.IsSuccess
+            ? new StartupRecoveryEntry(StartupRecoveryAction.AutomationLockReleased,
+                nowUtc, null, null, null,
+                "The environment-verification owner is gone; its observed token lock was released.")
+            : new StartupRecoveryEntry(StartupRecoveryAction.RecoveryFailed,
+                nowUtc, null, null, released.Failure.Code,
+                "The stale environment-verification lock could not be released; its current owner was preserved."));
     }
 
     private async Task ReleaseOrphanedLockAsync(

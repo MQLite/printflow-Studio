@@ -202,7 +202,12 @@ internal static class DesktopAutomation
     public static IReadOnlyList<IntPtr> OwnedDialogs(Process application)
     {
         application.Refresh();
-        IntPtr owner = application.MainWindowHandle;
+        return OwnedDialogs(application, application.MainWindowHandle);
+    }
+
+    /// <summary>Allows a labelled synthetic WPF test window to supply its exact owner handle.</summary>
+    public static IReadOnlyList<IntPtr> OwnedDialogs(Process application, IntPtr owner)
+    {
         List<IntPtr> found = [];
 
         EnumWindows((handle, unused) =>
@@ -238,10 +243,13 @@ internal static class DesktopAutomation
     /// guessing, because the next thing the caller does is choose a file in it.
     /// </remarks>
     public static AutomationElement FileDialogOpenedBy(Process application, IReadOnlyList<IntPtr> before)
+        => FileDialogOpenedBy(application, before, application.MainWindowHandle);
+
+    public static AutomationElement FileDialogOpenedBy(Process application, IReadOnlyList<IntPtr> before, IntPtr owner)
     {
         IntPtr handle = Wait("the file dialog the application just opened", () =>
         {
-            List<IntPtr> appeared = [.. OwnedDialogs(application).Where(h => !before.Contains(h))];
+            List<IntPtr> appeared = [.. OwnedDialogs(application, owner).Where(h => !before.Contains(h))];
             return appeared.Count == 1 ? appeared[0] : IntPtr.Zero;
         }, IntPtr.Zero);
 

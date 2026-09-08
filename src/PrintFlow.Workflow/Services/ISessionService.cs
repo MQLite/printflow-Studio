@@ -17,6 +17,13 @@ namespace PrintFlow.Workflow.Services;
 /// </remarks>
 public interface ISessionService
 {
+    /// <summary>Unresolved interruptions, without Recent Processing's age or count limits.</summary>
+    Task<OperationResult<IReadOnlyList<RecoveryItem>>> ListRecoveryAsync(CancellationToken cancellationToken);
+
+    /// <summary>Rechecks current recovery authority and uses the ordinary session command path.</summary>
+    Task<OperationResult<SessionView>> ResolveRecoveryAsync(SessionId id, RecoveryAction action,
+        string? selectedPath, string? operatorName, CancellationToken cancellationToken);
+
     /// <summary>
     /// Creates a session, imports <paramref name="sourceAbsolutePath"/> as its root Revision,
     /// and returns the resulting view.

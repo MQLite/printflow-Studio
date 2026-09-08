@@ -86,6 +86,9 @@ internal sealed class StubFilePicker : IFilePicker
 /// </summary>
 internal sealed class RecordingSessionRepository : ISessionRepository
 {
+    public Task<OperationResult<IReadOnlyList<SessionId>>> FindRecoveryCandidatesAsync(CancellationToken cancellationToken) =>
+        throw new NotSupportedException();
+
     public Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken) =>
         throw new NotSupportedException();
 

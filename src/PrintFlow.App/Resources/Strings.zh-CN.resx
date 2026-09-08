@@ -832,4 +832,13 @@
   <data name="Session_TiffLabelPreset" xml:space="preserve"><value>生产预设</value></data>
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0}（{1}）</value></data>
   <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>处理已完成。文件清理尚未完成，PrintFlow 下次启动时将重试。已批准的输出文件会保留。</value></data>
+  <data name="Home_RecoveryDescription" xml:space="preserve"><value>{0} · 中断于{1} · {2} · 最后活动：{3}</value></data>
+  <data name="Home_RecoveryFailed" xml:space="preserve"><value>无法完成恢复（{0}）。仍可打开任务进行检查。</value></data>
+  <data name="Home_RecoveryHeading" xml:space="preserve"><value>需要恢复</value></data>
+  <data name="Home_RecoveryManualResult" xml:space="preserve"><value>导入手动结果</value></data>
+  <data name="Home_RecoveryNoActions" xml:space="preserve"><value>没有可用的恢复操作。</value></data>
+  <data name="Home_RecoveryRestart" xml:space="preserve"><value>重新开始步骤</value></data>
+  <data name="Home_RecoveryUnavailable" xml:space="preserve"><value>无法加载恢复条目（{0}）。请刷新重试。</value></data>
+  <data name="Home_RecoveryPending" xml:space="preserve"><value>{0} 个中断的任务需要选择恢复操作。</value></data>
+  <data name="Home_RecoveryUnfinishedImport" xml:space="preserve"><value>尚未记录导入完成。如果导入失败，请重新启动 PrintFlow 以恢复未完成的尝试。</value></data>
 </root>

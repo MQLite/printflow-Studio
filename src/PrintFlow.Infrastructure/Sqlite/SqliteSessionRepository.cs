@@ -1,4 +1,5 @@
 using Dapper;
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Ids;
@@ -14,7 +15,7 @@ namespace PrintFlow.Infrastructure.Sqlite;
 /// The real, Dapper-backed <see cref="ISessionRepository"/> (Epic 11100 Task 11108).
 /// </summary>
 /// <remarks>
-/// <see cref="CommitAsync"/> is the only write path and always runs inside one
+/// <see cref="CommitAsync"/> writes session mutations and always runs inside one
 /// <see cref="SqliteTransaction"/>: one operator or system command produces one
 /// <see cref="SessionMutation"/>, and either the whole batch lands or none of it does
 /// (plan §33). The workflow layer never sees <see cref="SqliteConnection"/> or SQL — every
@@ -22,6 +23,22 @@ namespace PrintFlow.Infrastructure.Sqlite;
 /// </remarks>
 public sealed class SqliteSessionRepository : ISessionRepository
 {
+    public async Task<OperationResult<IReadOnlyList<SessionId>>> FindRecoveryCandidatesAsync(CancellationToken cancellationToken)
+    {
+        using SqliteConnection connection = _connectionFactory.Open();
+        IEnumerable<string> ids = await connection.QueryAsync<string>(new CommandDefinition(
+            """
+            SELECT s.Id FROM ProcessingSession s
+            JOIN SessionStep t ON t.SessionId = s.Id AND t.StepKind = s.CurrentStep
+            WHERE s.State IN ('ACTIVE', 'HANDED_OFF')
+              AND t.State IN ('INTERRUPTED', 'FAILED', 'RETRY_REQUIRED', 'PROCESSING')
+              AND EXISTS (SELECT 1 FROM ProcessingAttempt a WHERE a.SessionId = s.Id
+                          AND a.StepKind = t.StepKind AND a.ResultStatus = 'INTERRUPTED')
+            ORDER BY s.UpdatedAtUtc DESC, s.Id;
+            """, cancellationToken: cancellationToken));
+        return OperationResult.Ok<IReadOnlyList<SessionId>>(ids.Select(id => SessionId.From(Guid.Parse(id))).ToList());
+    }
+
     public async Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken)
     {
         using SqliteConnection connection = _connectionFactory.Open();
@@ -276,7 +293,11 @@ public sealed class SqliteSessionRepository : ISessionRepository
 
         AutomationLockState state = new(
             row.SessionId is string sid ? SessionId.From(Guid.Parse(sid)) : null,
-            Mappers.ToDateTimeOffsetOrNull(row.AcquiredAtUtc),
+            // SCRUM-11110 verification leases already persist round-trip timestamps;
+            // session leases use the repository's millisecond UTC representation.
+            row.Purpose == "ENVIRONMENT_VERIFICATION" && row.AcquiredAtUtc is string verificationAt
+                ? DateTimeOffset.ParseExact(verificationAt, "O", CultureInfo.InvariantCulture, DateTimeStyles.None)
+                : Mappers.ToDateTimeOffsetOrNull(row.AcquiredAtUtc),
             row.ProcessId,
             row.MachineName,
             row.Purpose switch
@@ -288,6 +309,37 @@ public sealed class SqliteSessionRepository : ISessionRepository
             row.OwnerToken);
 
         return OperationResult.Ok(state);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<Unit>> ReleaseEnvironmentVerificationLockAsync(
+        AutomationLockState observed, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (observed.Purpose != AutomationLockPurpose.EnvironmentVerification ||
+            observed.SessionId is not null || string.IsNullOrWhiteSpace(observed.OwnerToken))
+            return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                "An environment-verification owner token is required for startup release.");
+
+        try
+        {
+            using SqliteConnection connection = _connectionFactory.Open();
+            int changed = await connection.ExecuteAsync(
+                "UPDATE AutomationLock SET SessionId = NULL, AcquiredAtUtc = NULL, ProcessId = NULL, " +
+                "MachineName = NULL, Purpose = NULL, OwnerToken = NULL " +
+                "WHERE Id = 1 AND SessionId IS NULL AND Purpose = 'ENVIRONMENT_VERIFICATION' " +
+                "AND OwnerToken = @OwnerToken AND ProcessId IS @ProcessId AND MachineName IS @MachineName;",
+                new { observed.OwnerToken, observed.ProcessId, observed.MachineName });
+            return changed == 1
+                ? OperationResult.Ok()
+                : OperationResult.Fail<Unit>(FailureCode.PersistenceError,
+                    "The observed verification lock owner changed; the lock was not released.");
+        }
+        catch (SqliteException ex)
+        {
+            return OperationResult.Fail<Unit>(FailureCode.PersistenceError,
+                $"The stale verification lock could not be released: {ex.Message}");
+        }
     }
 
     // -------------------------------------------------------------------------------------

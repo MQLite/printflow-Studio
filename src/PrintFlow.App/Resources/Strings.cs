@@ -16,6 +16,15 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Home_RecoveryHeading => Get(nameof(Home_RecoveryHeading));
+    internal static string Home_RecoveryPending => Get(nameof(Home_RecoveryPending));
+    internal static string Home_RecoveryUnfinishedImport => Get(nameof(Home_RecoveryUnfinishedImport));
+    internal static string Home_RecoveryDescription => Get(nameof(Home_RecoveryDescription));
+    internal static string Home_RecoveryRestart => Get(nameof(Home_RecoveryRestart));
+    internal static string Home_RecoveryManualResult => Get(nameof(Home_RecoveryManualResult));
+    internal static string Home_RecoveryNoActions => Get(nameof(Home_RecoveryNoActions));
+    internal static string Home_RecoveryFailed => Get(nameof(Home_RecoveryFailed));
+    internal static string Home_RecoveryUnavailable => Get(nameof(Home_RecoveryUnavailable));
     internal static string Session_CompletionCleanupPending => Get(nameof(Session_CompletionCleanupPending));
     internal static string Session_KeepOriginalExtent => Get(nameof(Session_KeepOriginalExtent));
     internal static string Session_KeepOriginalExtentHint => Get(nameof(Session_KeepOriginalExtentHint));

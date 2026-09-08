@@ -79,6 +79,10 @@ public sealed partial class HomeViewModel : ObservableObject
     /// <summary>Recent Processing, newest first, exactly as the service returned it.</summary>
     public ObservableCollection<RecentSessionRow> RecentSessions { get; } = [];
 
+    public ObservableCollection<RecoverySessionRow> RecoverySessions { get; } = [];
+    public bool HasRecoverySessions => RecoverySessions.Count > 0;
+    public string RecoveryHeading => Strings.Home_RecoveryHeading;
+
     public string Title => Strings.App_Title;
 
     public string ImportHeading => Strings.Home_ImportHeading;
@@ -99,20 +103,17 @@ public sealed partial class HomeViewModel : ObservableObject
     public string EnvironmentLabel => Strings.Environment_Open;
 
     /// <summary>True while the list is empty, so the view can say so rather than show nothing.</summary>
-    public bool HasNoRecentSessions => RecentSessions.Count == 0;
+    public bool HasNoRecentSessions => RecentSessions.Count == 0 && !HasRecoverySessions;
 
     /// <summary>
     /// One line describing what startup recovery did, so a restart after a crash says so
     /// visibly rather than only in a report object (Part 3C1 §6, Part 3C2 §12).
     /// </summary>
-    /// <remarks>
-    /// A summary and nothing more — the surface that lists individual recovery entries is a
-    /// later slice.
-    /// </remarks>
     public string StartupSummary
     {
         get
         {
+            if (HasRecoverySessions) return string.Format(CultureInfo.CurrentCulture, Strings.Home_RecoveryPending, RecoverySessions.Count);
             StartupStatus? status = _startupStatus.Status;
             if (status is null || !status.RecoveryExecuted)
             {
@@ -161,6 +162,18 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
+        if (recovery.IsFailure)
+        {
+            Notice = Describe(Strings.Home_RecoveryUnavailable, recovery.Failure);
+            return;
+        }
+        RecoverySessions.Clear();
+        foreach (RecoveryItem item in recovery.Value) RecoverySessions.Add(new RecoverySessionRow(item));
+        OnPropertyChanged(nameof(HasRecoverySessions));
+        OnPropertyChanged(nameof(StartupSummary));
+        OnPropertyChanged(nameof(HasNoRecentSessions));
+
         OperationResult<IReadOnlyList<SessionListItem>> listed =
             await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
 
@@ -175,10 +188,52 @@ public sealed partial class HomeViewModel : ObservableObject
 
         foreach (SessionListItem item in listed.Value)
         {
-            RecentSessions.Add(new RecentSessionRow(item));
+            if (!recovery.Value.Any(entry => entry.Id == item.Id)) RecentSessions.Add(new RecentSessionRow(item));
         }
 
         OnPropertyChanged(nameof(HasNoRecentSessions));
+    }
+
+    [RelayCommand]
+    private Task RestartRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken) =>
+        RecoverAsync(row, RecoveryAction.Restart, cancellationToken);
+
+    [RelayCommand]
+    private Task ImportRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken) =>
+        RecoverAsync(row, RecoveryAction.ManualResult, cancellationToken);
+
+    [RelayCommand]
+    private Task AbandonRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken) =>
+        RecoverAsync(row, RecoveryAction.Abandon, cancellationToken);
+
+    [RelayCommand]
+    private async Task OpenRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken)
+    {
+        if (row is null || IsBusy) return;
+        var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
+        if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
+        else Notice = Describe(Strings.Home_ResumeFailed, loaded.Failure);
+    }
+
+    private async Task RecoverAsync(RecoverySessionRow? row, RecoveryAction action, CancellationToken cancellationToken)
+    {
+        if (row is null || IsBusy) return;
+        IsBusy = true;
+        try
+        {
+            Notice = null;
+            string? path = null;
+            if (action == RecoveryAction.ManualResult)
+            {
+                path = _filePicker.PickSingleFile(Strings.Home_RecoveryManualResult, row.ManualFilter);
+                if (path is null) return;
+            }
+            var result = await _sessions.ResolveRecoveryAsync(row.Id, action, path, Environment.UserName, cancellationToken).ConfigureAwait(true);
+            await RefreshAsync(cancellationToken).ConfigureAwait(true);
+            if (result.IsFailure) Notice = Describe(Strings.Home_RecoveryFailed, result.Failure);
+            else if (action != RecoveryAction.Abandon) _navigation.GoToSession(result.Value);
+        }
+        finally { IsBusy = false; }
     }
 
     /// <summary>Asks the operator for one file and imports it.</summary>

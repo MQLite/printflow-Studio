@@ -31,7 +31,7 @@ namespace PrintFlow.Workflow.Services;
 /// detectable — plan §38), and the second records the outcome once the file work and its
 /// validation are complete.
 /// </remarks>
-public sealed class SessionService : ISessionService
+public sealed partial class SessionService : ISessionService
 {
     /// <summary>How many sessions "Recent Processing" shows at most (MVP design §10).</summary>
     public const int RecentSessionLimit = 100;

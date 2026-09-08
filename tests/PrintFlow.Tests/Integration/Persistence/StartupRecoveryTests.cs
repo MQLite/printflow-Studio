@@ -6,6 +6,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
+using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
@@ -28,6 +29,53 @@ namespace PrintFlow.Tests.Integration.Persistence;
 [Collection(SqliteCollection.Name)]
 public sealed class StartupRecoveryTests
 {
+    [Theory]
+    [InlineData(ProcessLiveness.Dead, true)]
+    [InlineData(ProcessLiveness.Alive, false)]
+    [InlineData(ProcessLiveness.Unknown, false)]
+    public async Task Verification_token_lock_recovery_is_purpose_aware_and_requires_proven_death(
+        ProcessLiveness ownerState, bool shouldRelease)
+    {
+        using SessionServiceHarness harness = new();
+        SessionId id = await StartSessionAsync(harness, harness.CreateService());
+        SessionAggregate before = await LoadAsync(harness, id);
+        SqliteEnvironmentAutomationLock verification = new(harness.Database.Factory, 101, "TEST");
+        (await verification.TryAcquireAsync(harness.Clock.GetUtcNow(), default)).IsSuccess.ShouldBeTrue();
+        AutomationLockState observed = (await harness.Repository.GetAutomationLockAsync(default)).Value;
+        observed.SessionId.ShouldBeNull();
+        observed.Purpose.ShouldBe(AutomationLockPurpose.EnvironmentVerification);
+
+        StartupRecoveryReport report = await RecoverAsync(harness, new FakeProcessLiveness(ownerState));
+
+        report.InterruptedAttemptCount.ShouldBe(0);
+        report.ReleasedAutomationLock.ShouldBe(shouldRelease);
+        report.Entries.Single().SessionId.ShouldBeNull("a verification token is not a session attempt owner");
+        AutomationLockState after = (await verification.ReadAsync(default)).Value;
+        if (shouldRelease) after.IsHeld.ShouldBeFalse();
+        else after.ShouldBe(observed);
+        SessionAggregate unchanged = await LoadAsync(harness, id);
+        unchanged.Session.ShouldBe(before.Session);
+        unchanged.Steps.ShouldBe(before.Steps);
+        unchanged.Attempts.ShouldBe(before.Attempts);
+    }
+
+    [Fact]
+    public async Task Verification_startup_release_cannot_clear_a_replacement_owner_token()
+    {
+        using SessionServiceHarness harness = new();
+        SqliteEnvironmentAutomationLock verification = new(harness.Database.Factory, 101, "TEST");
+        EnvironmentAutomationLease first = (await verification.TryAcquireAsync(harness.Clock.GetUtcNow(), default)).Value;
+        AutomationLockState observed = (await harness.Repository.GetAutomationLockAsync(default)).Value;
+        (await verification.ReleaseAsync(first, default)).IsSuccess.ShouldBeTrue();
+        EnvironmentAutomationLease replacement = (await verification.TryAcquireAsync(harness.Clock.GetUtcNow(), default)).Value;
+
+        (await harness.Repository.ReleaseEnvironmentVerificationLockAsync(observed, default)).IsFailure.ShouldBeTrue();
+
+        AutomationLockState retained = (await verification.ReadAsync(default)).Value;
+        retained.IsHeld.ShouldBeTrue();
+        retained.OwnerToken.ShouldBe(replacement.OwnerToken);
+    }
+
     // -------------------------------------------------------------------------------------
     // §11: a persisted Running attempt recovers to Interrupted, and Retry starts clean
     // -------------------------------------------------------------------------------------

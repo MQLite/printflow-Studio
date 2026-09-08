@@ -138,6 +138,9 @@ internal sealed class FaultingWorkspace : IWorkspace
 /// </remarks>
 internal sealed class FaultingRepository : ISessionRepository
 {
+    public Task<OperationResult<IReadOnlyList<SessionId>>> FindRecoveryCandidatesAsync(CancellationToken cancellationToken) =>
+        _inner.FindRecoveryCandidatesAsync(cancellationToken);
+
     public Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken) =>
         _inner.FindCompletedSessionsAsync(cancellationToken);
 

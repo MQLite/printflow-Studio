@@ -843,4 +843,13 @@
   <data name="Session_TiffLabelPreset" xml:space="preserve"><value>Production preset</value></data>
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>Session completed. File cleanup is pending and will be retried when PrintFlow starts again. Approved outputs are retained.</value></data>
+  <data name="Home_RecoveryDescription" xml:space="preserve"><value>{0} · Interrupted at {1} · {2} · Last activity: {3}</value></data>
+  <data name="Home_RecoveryFailed" xml:space="preserve"><value>Recovery could not be completed ({0}). The job remains available for inspection.</value></data>
+  <data name="Home_RecoveryHeading" xml:space="preserve"><value>Recovery needed</value></data>
+  <data name="Home_RecoveryManualResult" xml:space="preserve"><value>Import manual result</value></data>
+  <data name="Home_RecoveryNoActions" xml:space="preserve"><value>No recovery action available.</value></data>
+  <data name="Home_RecoveryRestart" xml:space="preserve"><value>Restart step</value></data>
+  <data name="Home_RecoveryUnavailable" xml:space="preserve"><value>Recovery entries could not be loaded ({0}). Refresh to try again.</value></data>
+  <data name="Home_RecoveryPending" xml:space="preserve"><value>Interrupted jobs needing a recovery decision: {0}.</value></data>
+  <data name="Home_RecoveryUnfinishedImport" xml:space="preserve"><value>Import completion is not recorded. If the import failed, restart PrintFlow to recover its unfinished attempt.</value></data>
 </root>
