@@ -38,6 +38,14 @@ internal sealed class RecordingNavigation : INavigationService
     /// <summary>How many times a screen asked for Settings (SCRUM-11118).</summary>
     public int SettingsCount { get; private set; }
 
+    public (SessionId SessionId, AttemptId AttemptId)? ErrorDetailsFor { get; private set; }
+
+    public Task GoToErrorDetailsAsync(SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken)
+    {
+        ErrorDetailsFor = (sessionId, attemptId);
+        return Task.CompletedTask;
+    }
+
     public Task GoToSettingsAsync(CancellationToken cancellationToken)
     {
         SettingsCount++;

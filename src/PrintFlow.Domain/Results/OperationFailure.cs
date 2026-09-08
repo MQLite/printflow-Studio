@@ -36,4 +36,46 @@ public sealed record OperationFailure(
             isRetryable);
 
     public override string ToString() => $"{Code}: {TechnicalDetail}";
+
+    /// <summary>Value equality includes the structured context rather than its dictionary instance.</summary>
+    public bool Equals(OperationFailure? other)
+    {
+        if (ReferenceEquals(this, other)) return true;
+        if (other is null || Code != other.Code || MessageKey != other.MessageKey ||
+            TechnicalDetail != other.TechnicalDetail || IsRetryable != other.IsRetryable ||
+            PsdInspection != other.PsdInspection || PdfInspection != other.PdfInspection ||
+            Context.Count != other.Context.Count)
+        {
+            return false;
+        }
+
+        foreach ((string key, string value) in Context)
+        {
+            if (!other.Context.TryGetValue(key, out string? candidate) ||
+                !string.Equals(value, candidate, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        HashCode hash = new();
+        hash.Add(Code);
+        hash.Add(MessageKey, StringComparer.Ordinal);
+        hash.Add(TechnicalDetail, StringComparer.Ordinal);
+        hash.Add(IsRetryable);
+        hash.Add(PsdInspection);
+        hash.Add(PdfInspection);
+        foreach ((string key, string value) in Context.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+        {
+            hash.Add(key, StringComparer.Ordinal);
+            hash.Add(value, StringComparer.Ordinal);
+        }
+
+        return hash.ToHashCode();
+    }
 }

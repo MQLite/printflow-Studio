@@ -36,7 +36,7 @@ namespace PrintFlow.Infrastructure.Imaging;
 /// A process-wide image cache would keep every artefact an operator glanced at alive for the
 /// life of the application, which is precisely what §6 rules out.
 /// </remarks>
-public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
+public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticImagePreviewDecoder
 {
     private const int BytesPerBgra32Pixel = 4;
     private const int AlphaByteOffset = 3;
@@ -63,6 +63,27 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder
         WorkspaceFileRef file, CancellationToken cancellationToken)
     {
         string absolutePath = _workspace.ResolveAbsolute(file);
+
+        return await DecodeAbsoluteAsync(absolutePath, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<OperationResult<DecodedPreview>> DecodeDiagnosticAsync(
+        string persistedAbsolutePath, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(persistedAbsolutePath);
+        if (!Path.IsPathFullyQualified(persistedAbsolutePath))
+        {
+            return Task.FromResult(OperationResult.Fail<DecodedPreview>(
+                FailureCode.OutputUnreadable, "The persisted diagnostic image path is not absolute."));
+        }
+
+        return DecodeAbsoluteAsync(persistedAbsolutePath, cancellationToken);
+    }
+
+    private async Task<OperationResult<DecodedPreview>> DecodeAbsoluteAsync(
+        string absolutePath, CancellationToken cancellationToken)
+    {
 
         try
         {

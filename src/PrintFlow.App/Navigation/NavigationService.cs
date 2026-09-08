@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Workflow.Services;
+using PrintFlow.Domain.Ids;
 
 namespace PrintFlow.App.Navigation;
 
@@ -74,6 +75,14 @@ public sealed class NavigationService : INavigationService
         SettingsViewModel settings = _services.GetRequiredService<SettingsViewModel>();
         Show(settings);
         await settings.OpenAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    public async Task GoToErrorDetailsAsync(
+        SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken)
+    {
+        ErrorDetailsViewModel details = _services.GetRequiredService<ErrorDetailsViewModel>();
+        Show(details);
+        await details.OpenAsync(sessionId, attemptId, cancellationToken).ConfigureAwait(true);
     }
 
     private void Show(object viewModel)

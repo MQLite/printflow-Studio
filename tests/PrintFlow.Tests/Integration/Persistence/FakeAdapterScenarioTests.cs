@@ -1,3 +1,4 @@
+using System.IO;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
@@ -225,7 +226,11 @@ public sealed class FakeAdapterScenarioTests
         reloaded.MessageKey.ShouldBe(scripted.MessageKey);
         reloaded.TechnicalDetail.ShouldBe(scripted.TechnicalDetail);
         reloaded.IsRetryable.ShouldBeTrue();
-        reloaded.Context.ShouldBe(scripted.Context);
+        foreach ((string key, string value) in scripted.Context)
+            reloaded.Context[key].ShouldBe(value);
+        FailureEvidence.AttemptIdOf(reloaded).ShouldNotBeNull();
+        reloaded.Context[FailureEvidence.ExpectedOutputEstablishedKey].ShouldBe("true");
+        Path.IsPathFullyQualified(reloaded.Context[FailureEvidence.ExpectedOutputPathKey]).ShouldBeTrue();
     }
 
     [Fact]

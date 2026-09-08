@@ -29,6 +29,9 @@
         <DataTemplate DataType="{x:Type vm:SessionViewModel}">
             <views:SessionScreenView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ErrorDetailsViewModel}">
+            <views:ErrorDetailsView />
+        </DataTemplate>
 
         <DataTemplate DataType="{x:Type vm:EnvironmentReadinessViewModel}">
             <views:EnvironmentReadinessView />

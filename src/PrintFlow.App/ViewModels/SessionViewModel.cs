@@ -855,6 +855,16 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string RetryLabel => Strings.Session_Retry;
 
+    public string ErrorDetailsLabel => Strings.ErrorDetails_Heading;
+
+    public bool CanOpenErrorDetails => _session?.CurrentFailureAttemptId is not null && !IsBusy;
+
+    [RelayCommand]
+    private Task OpenErrorDetailsAsync(CancellationToken cancellationToken) =>
+        CanOpenErrorDetails && _session is { CurrentFailureAttemptId: { } attemptId }
+            ? _navigation.GoToErrorDetailsAsync(_session.Id, attemptId, cancellationToken)
+            : Task.CompletedTask;
+
     public string SkipLabel => Strings.Session_Skip;
 
     public string KeepOriginalExtentLabel => Strings.Session_KeepOriginalExtent;
@@ -3028,6 +3038,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsBusyChanged(bool value)
     {
+        OnPropertyChanged(nameof(CanOpenErrorDetails));
         OnPropertyChanged(nameof(CanKeepOriginalExtent));
         KeepOriginalExtentCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanApplyManualCrop));
@@ -3471,6 +3482,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(TiffReviewSummary));
 
         OnPropertyChanged(nameof(CanRetry));
+        OnPropertyChanged(nameof(CanOpenErrorDetails));
         OnPropertyChanged(nameof(CanSkip));
         OnPropertyChanged(nameof(CanKeepOriginalExtent));
         KeepOriginalExtentCommand.NotifyCanExecuteChanged();

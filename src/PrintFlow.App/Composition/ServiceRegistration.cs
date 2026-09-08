@@ -121,13 +121,17 @@ public static class ServiceRegistration
             presetManifestPath,
             expectedPresetHash);
 
-        services.AddSingleton<ISessionService, SessionService>();
-
         // The read-only image seam (Epic 11200 Part C1 §3). Registered beside the session
         // service rather than inside it: previews change nothing, and a screen that could only
         // reach them through the command service would blur that.
-        services.AddSingleton<IImagePreviewDecoder, WicImagePreviewDecoder>();
+        services.AddSingleton<WicImagePreviewDecoder>();
+        services.AddSingleton<IImagePreviewDecoder>(provider =>
+            provider.GetRequiredService<WicImagePreviewDecoder>());
+        services.AddSingleton<IDiagnosticImagePreviewDecoder>(provider =>
+            provider.GetRequiredService<WicImagePreviewDecoder>());
         services.AddSingleton<IArtefactPreviewService, ArtefactPreviewService>();
+
+        services.AddSingleton<ISessionService, SessionService>();
 
         // The specialist production-TIFF review seam (SCRUM-11104 §14, §43). A second read-only
         // seam rather than a wider first one: the general review surface compares artefacts, and
@@ -152,6 +156,7 @@ public static class ServiceRegistration
         services.AddTransient<HomeViewModel>();
         services.AddTransient<WorkflowSelectionViewModel>();
         services.AddTransient<SessionViewModel>();
+        services.AddTransient<ErrorDetailsViewModel>();
 
         // The operator surface onto workstation readiness (Epic 11500 Part C §3). It resolves
         // IEnvironmentDiagnostics — the same object the gate is — and nothing else that could

@@ -1,0 +1,101 @@
+<UserControl x:Class="PrintFlow.App.Views.ErrorDetailsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:PrintFlow.App.Views"
+             AutomationProperties.AutomationId="Screen.ErrorDetails"
+             AutomationProperties.Name="{Binding Heading}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <views:PreviewPayloadConverter x:Key="PreviewPayload" />
+        <Style x:Key="SectionHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,18,0,6" />
+        </Style>
+        <Style x:Key="ReadOnlyValue" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0,3" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="MinHeight" Value="36" />
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="{Binding Heading}" FontSize="26" FontWeight="SemiBold" />
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,16"
+                      HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <StackPanel>
+                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="#A12822"
+                           AutomationProperties.AutomationId="ErrorDetails.Notice" />
+                <StackPanel Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding WhatHappenedHeading}" Style="{StaticResource SectionHeading}" />
+                    <TextBox Text="{Binding Description, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             FontSize="16" AutomationProperties.AutomationId="ErrorDetails.Description"
+                             AutomationProperties.Name="{Binding WhatHappenedHeading}" />
+                    <TextBlock Text="{Binding CodeLabel}" Margin="0,8,0,0" />
+                    <TextBox Text="{Binding Code, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             AutomationProperties.AutomationId="ErrorDetails.Code" AutomationProperties.Name="{Binding CodeLabel}" />
+                    <TextBlock Text="{Binding HistoricalNotice}" TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="ErrorDetails.HistoricalNotice" />
+
+                    <TextBlock Text="{Binding ProcessingHeading}" Style="{StaticResource SectionHeading}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <TextBlock Text="{Binding WorkflowLabel}" Margin="0,0,16,6" />
+                        <TextBlock Grid.Column="1" Text="{Binding Workflow}" TextWrapping="Wrap" AutomationProperties.AutomationId="ErrorDetails.Workflow" />
+                        <TextBlock Grid.Row="1" Text="{Binding StepLabel}" Margin="0,0,16,6" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Step}" TextWrapping="Wrap" AutomationProperties.AutomationId="ErrorDetails.Step" />
+                    </Grid>
+                    <TextBlock Text="{Binding RetryInformation}" Margin="0,2,0,10" TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="ErrorDetails.RetryInformation" />
+                    <TextBlock Text="{Binding InputLabel}" />
+                    <TextBox Text="{Binding InputPath, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             AutomationProperties.AutomationId="ErrorDetails.InputPath" AutomationProperties.Name="{Binding InputLabel}" />
+                    <TextBlock Text="{Binding ExpectedOutputLabel}" Margin="0,8,0,0" />
+                    <TextBox Text="{Binding ExpectedOutputPath, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             AutomationProperties.AutomationId="ErrorDetails.ExpectedOutputPath" AutomationProperties.Name="{Binding ExpectedOutputLabel}" />
+
+                    <TextBlock Text="{Binding EvidenceHeading}" Style="{StaticResource SectionHeading}" />
+                    <Image Source="{Binding ScreenshotPayload, Converter={StaticResource PreviewPayload}}"
+                           MaxHeight="240" Stretch="Uniform" HorizontalAlignment="Left"
+                           Visibility="{Binding HasScreenshot, Converter={StaticResource BoolToVisibility}}"
+                           AutomationProperties.AutomationId="ErrorDetails.Screenshot" AutomationProperties.Name="{Binding EvidenceHeading}" />
+                    <TextBlock Text="{Binding ScreenshotNotice}" TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="ErrorDetails.ScreenshotStatus" />
+                    <TextBlock Text="{Binding ScreenshotPathLabel}" Margin="0,8,0,0" />
+                    <TextBox Text="{Binding ScreenshotPath, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             AutomationProperties.AutomationId="ErrorDetails.ScreenshotPath" AutomationProperties.Name="{Binding ScreenshotPathLabel}" />
+
+                    <TextBlock Text="{Binding TechnicalHeading}" Style="{StaticResource SectionHeading}" />
+                    <TextBox Text="{Binding TechnicalDetail, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                             AutomationProperties.AutomationId="ErrorDetails.TechnicalDetail" AutomationProperties.Name="{Binding TechnicalHeading}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        <WrapPanel Grid.Row="2">
+            <Button Content="{Binding RetryLabel}" Command="{Binding RetryCommand}"
+                    Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}"
+                    AutomationProperties.AutomationId="ErrorDetails.Retry" AutomationProperties.Name="{Binding RetryLabel}" />
+            <Button Content="{Binding ManualProcessingLabel}" Command="{Binding ManualProcessingCommand}"
+                    Visibility="{Binding CanManualProcessing, Converter={StaticResource BoolToVisibility}}"
+                    AutomationProperties.AutomationId="ErrorDetails.ManualProcessing" AutomationProperties.Name="{Binding ManualProcessingLabel}" />
+            <Button Content="{Binding ReenterAutomationLabel}" Command="{Binding ReenterAutomationCommand}"
+                    Visibility="{Binding CanReenterAutomation, Converter={StaticResource BoolToVisibility}}"
+                    AutomationProperties.AutomationId="ErrorDetails.ReenterAutomation" AutomationProperties.Name="{Binding ReenterAutomationLabel}" />
+            <Button Content="{Binding BackLabel}" Command="{Binding BackCommand}"
+                    AutomationProperties.AutomationId="ErrorDetails.Back" AutomationProperties.Name="{Binding BackLabel}" />
+        </WrapPanel>
+    </Grid>
+</UserControl>

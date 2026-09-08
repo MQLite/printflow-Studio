@@ -1647,6 +1647,12 @@
                         AutomationProperties.Name="{Binding RetryLabel}"
                         Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}" />
 
+                <Button Content="{Binding ErrorDetailsLabel}"
+                        Command="{Binding OpenErrorDetailsCommand}"
+                        AutomationProperties.AutomationId="Session.ErrorDetails"
+                        AutomationProperties.Name="{Binding ErrorDetailsLabel}"
+                        Visibility="{Binding CanOpenErrorDetails, Converter={StaticResource BoolToVisibility}}" />
+
                 <Button Content="{Binding SkipLabel}"
                         Command="{Binding SkipCommand}"
                         AutomationProperties.AutomationId="Session.Skip"

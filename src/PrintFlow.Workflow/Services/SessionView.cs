@@ -632,6 +632,9 @@ public sealed record SessionView(
     /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
     public SessionCleanupResult? CompletionCleanup { get; init; }
 
+    /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
+    public AttemptId? CurrentFailureAttemptId { get; init; }
+
     public ManualCropGeometry? ArtefactManualCropGeometry { get; init; }
     public ManualCropGeometry? CurrentManualCropGeometry =>
         CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactManualCropGeometry : null;
@@ -927,6 +930,7 @@ public sealed record SessionView(
             SourceFileName = revisions.FirstOrDefault(r => r.IsRoot)?.File.FileName,
             RootRevisionId = revisions.FirstOrDefault(r => r.IsRoot)?.Id,
             PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
+            CurrentFailureAttemptId = ErrorDetailsSelection.Current(snapshot.CurrentStep, attempts)?.Id,
         };
     }
 

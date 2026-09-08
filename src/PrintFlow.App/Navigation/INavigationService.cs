@@ -1,10 +1,11 @@
 using PrintFlow.Workflow.Services;
+using PrintFlow.Domain.Ids;
 
 namespace PrintFlow.App.Navigation;
 
 /// <summary>
-/// The whole navigation model: five destinations and one current view model
-/// (Epic 11100 Part 3C2 §16; SCRUM-11118).
+/// The whole navigation model: six destinations and one current view model
+/// (Epic 11100 Part 3C2 §16; SCRUM-11118; SCRUM-11120).
 /// </summary>
 /// <remarks>
 /// Deliberately not a navigation framework. There is no journal, no back stack, no URI routing
@@ -37,6 +38,9 @@ public interface INavigationService
 
     /// <summary>Shows the session screen for <paramref name="session"/>.</summary>
     void GoToSession(SessionView session);
+
+    /// <summary>Shows diagnostics for exactly the selected failed attempt.</summary>
+    Task GoToErrorDetailsAsync(SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Shows Production Readiness and takes its first reading (Epic 11500 Part C §3).

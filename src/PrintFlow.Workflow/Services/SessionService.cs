@@ -88,6 +88,7 @@ public sealed partial class SessionService : ISessionService
     private readonly ITrimProcessor _trim;
     private readonly IManualCropProcessor _manualCrop;
     private readonly IManualResultImporter? _manualResults;
+    private readonly IDiagnosticImagePreviewDecoder? _diagnosticImages;
 
     /// <summary>
     /// The persisted operator preferences, read at exactly one point: the trim safety margin a
@@ -154,7 +155,8 @@ public sealed partial class SessionService : ISessionService
         TimeProvider timeProvider,
         IPdfPreparationProcessor? pdf = null,
         IManualResultImporter? manualResults = null,
-        ISettingsRepository? settings = null)
+        ISettingsRepository? settings = null,
+        IDiagnosticImagePreviewDecoder? diagnosticImages = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -182,6 +184,7 @@ public sealed partial class SessionService : ISessionService
         _manualCrop = manualCrop;
         _manualResults = manualResults;
         _settings = settings;
+        _diagnosticImages = diagnosticImages;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _idGenerator = idGenerator;
@@ -361,11 +364,15 @@ public sealed partial class SessionService : ISessionService
     {
         using IDisposable? completionLease = command is WorkflowCommand.Complete or WorkflowCommand.AddAnotherSize
             ? await SessionCompletionGate.EnterAsync(id, cancellationToken) : null;
-        return await ExecuteCoreAsync(id, command, operatorName, cancellationToken);
+        return await ExecuteCoreAsync(id, command, operatorName, expectedFailureAttemptId: null, cancellationToken);
     }
 
     private async Task<OperationResult<SessionView>> ExecuteCoreAsync(
-        SessionId id, WorkflowCommand command, string? operatorName, CancellationToken cancellationToken)
+        SessionId id,
+        WorkflowCommand command,
+        string? operatorName,
+        AttemptId? expectedFailureAttemptId,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -382,6 +389,19 @@ public sealed partial class SessionService : ISessionService
 
         SessionAggregate aggregate = loaded.Value;
         WorkflowSnapshot snapshot = aggregate.ToSnapshot(ConfiguredRecommendations());
+
+        // Error Details recovery is addressed to one immutable attempt. Its earlier diagnostic
+        // read is presentation, not authority: validate the identity again on the aggregate this
+        // command will actually apply to, so a retry/new failure between those two reads cannot
+        // receive an action from a stale page.
+        if (expectedFailureAttemptId is { } expected &&
+            ErrorDetailsSelection.Current(snapshot.CurrentStep, aggregate.Attempts)?.Id != expected)
+        {
+            return OperationResult.Fail<SessionView>(
+                FailureCode.PreconditionNotMet,
+                "This recovery action is no longer available for the error that was opened.");
+        }
+
         CommandContext context = CommandContext.Create(_timeProvider, _idGenerator, operatorName);
 
         // Legacy PSD sessions may already have acknowledged an opaque source under the old
@@ -1521,10 +1541,13 @@ public sealed partial class SessionService : ISessionService
             aggregate.Session.Id, runningAttempt.Id, work.Step, drivesExternalApplication);
 
         OperationResult<StepWork> produced;
+        WorkspaceFileRef? establishedExpectedOutput = null;
         try
         {
             produced = await PerformStepWorkAsync(
-                afterStart, started.State, definition, work, runningAttempt, context, stop, cancellationToken);
+                afterStart, started.State, definition, work, runningAttempt, context, stop,
+                output => establishedExpectedOutput = output,
+                cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -1585,6 +1608,15 @@ public sealed partial class SessionService : ISessionService
             // Unregistered whatever happened, so a later Stop against a finished run is refused
             // rather than setting a flag nothing will ever read.
             _runs.End(runningAttempt.Id);
+        }
+
+        // Once a destination has been constructed it is historical evidence even if the
+        // adapter throws, validation fails, or the operator stops the run. Attach it in one
+        // place after containment so no post-destination exit can accidentally report that a
+        // path was never established.
+        if (produced.IsFailure && establishedExpectedOutput is { } expectedOutput)
+        {
+            produced = OperationResult.Fail<StepWork>(WithExpectedOutput(produced.Failure, expectedOutput));
         }
 
         // The instant the work actually ended, observed once here and used for whichever closing
@@ -1761,7 +1793,9 @@ public sealed partial class SessionService : ISessionService
     private async Task<OperationResult<StepWork>> PerformStepWorkAsync(
         SessionAggregate aggregate, WorkflowSnapshot state, StepDefinition definition,
         ProducingWork work, ProcessingAttempt attempt, CommandContext context,
-        IAutomationStopSignal stop, CancellationToken cancellationToken)
+        IAutomationStopSignal stop,
+        Action<WorkspaceFileRef> establishExpectedOutput,
+        CancellationToken cancellationToken)
     {
         WorkspaceDirRef session = aggregate.Session.Workspace;
         if (work.ManualResultPath is { } selected)
@@ -1803,10 +1837,12 @@ public sealed partial class SessionService : ISessionService
                 return OperationResult.Fail<StepWork>(reserved.Failure);
             }
 
+            establishExpectedOutput(reserved.Value);
+
             OperationResult<Unit> written = await _workspace.WriteReservedAsync(reserved.Value, sourceRef, cancellationToken);
             if (written.IsFailure)
             {
-                return OperationResult.Fail<StepWork>(written.Failure);
+                return OperationResult.Fail<StepWork>(WithExpectedOutput(written.Failure, reserved.Value));
             }
 
             return await InspectAsync(reserved.Value, cancellationToken);
@@ -1888,13 +1924,15 @@ public sealed partial class SessionService : ISessionService
                     decision = authority.Decision;
                 }
 
+                WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, producedName.Value);
+                establishExpectedOutput(expectedOutput);
                 OperationResult<AdapterOutput> result = await _meitu.ProcessAsync(
                     new MeituRequest(
                         workingCopy.Value,
                         operation,
                         decision,
                         ParentDirOf(workingCopy.Value),
-                        SiblingOf(workingCopy.Value, producedName.Value))
+                        expectedOutput)
                     {
                         // The one seam through which an operator's Stop reaches Meitu. What the
                         // adapter may do with it is decided by AutomationStopPolicy from the
@@ -1905,35 +1943,46 @@ public sealed partial class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<StepWork>(result.Failure);
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(result.Failure, expectedOutput));
                 }
 
-                return await InspectAsync(
+                OperationResult<StepWork> inspected = await InspectAsync(
                     result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
+                return inspected.IsFailure
+                    ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspected.Failure, expectedOutput))
+                    : inspected;
             }
 
             case AdapterKind.Pdf:
             {
                 WorkspaceFileRef destination = SiblingOf(workingCopy.Value, "prepared-pdf.png");
+                establishExpectedOutput(destination);
                 var prepared = await _pdf.PrepareAsync(new PdfPreparationRequest(workingCopy.Value, destination)
                     { Stop = stop }, cancellationToken);
-                if (prepared.IsFailure) return OperationResult.Fail<StepWork>(prepared.Failure);
+                if (prepared.IsFailure)
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(prepared.Failure, destination));
                 if (prepared.Value.ProducedFile != destination || prepared.Value.PdfInspection is not { } inspection ||
                     !inspection.IsPreparedSinglePage)
-                    return OperationResult.Fail<StepWork>(FailureCode.PdfPreparationFailed,
-                        "PDF preparation returned no accepted single-page inspection or the wrong destination.");
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                        OperationFailure.Create(FailureCode.PdfPreparationFailed,
+                            "PDF preparation returned no accepted single-page inspection or the wrong destination."),
+                        destination));
                 var inspected = await InspectAsync(destination, cancellationToken, prepared.Value.AdapterNotes);
                 if (inspected.IsFailure)
-                    return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PdfPreparationFailed,
-                        inspected.Failure.TechnicalDetail, isRetryable: true) with { PdfInspection = inspection });
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                        OperationFailure.Create(FailureCode.PdfPreparationFailed,
+                            inspected.Failure.TechnicalDetail, isRetryable: true) with { PdfInspection = inspection },
+                        destination));
                 FileFacts facts = inspected.Value.Facts;
                 if (facts != prepared.Value.ValidatedPdfRaster || facts.Format != ImageFormat.Png || facts.ColourMode != ColourMode.Rgb ||
                     facts.PixelWidth != inspection.PixelWidth || facts.PixelHeight != inspection.PixelHeight ||
                     facts.DpiX is not { } dx || facts.DpiY is not { } dy || Math.Abs(dx - 300) > .02 || Math.Abs(dy - 300) > .02 ||
                     (inspection.HasTransparency == true && facts.HasAlpha != true))
-                    return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PdfPreparationFailed,
-                        "The independently inspected raster differs from the PDF full-page 300-PPI contract.")
-                        with { PdfInspection = inspection });
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                        OperationFailure.Create(FailureCode.PdfPreparationFailed,
+                            "The independently inspected raster differs from the PDF full-page 300-PPI contract.")
+                            with { PdfInspection = inspection },
+                        destination));
                 return OperationResult.Ok(inspected.Value with { PdfInspection = inspection });
             }
 
@@ -1942,24 +1991,28 @@ public sealed partial class SessionService : ISessionService
                 if (work.Operation == OperationKind.PreparePsd)
                 {
                     WorkspaceFileRef destination = SiblingOf(workingCopy.Value, "prepared-psd.png");
+                    establishExpectedOutput(destination);
                     OperationResult<AdapterOutput> prepared = await _photoshop.PreparePsdAsync(
                         new PsdPreparationRequest(workingCopy.Value, destination) { Stop = stop }, cancellationToken);
                     if (prepared.IsFailure)
                     {
-                        return OperationResult.Fail<StepWork>(prepared.Failure);
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(prepared.Failure, destination));
                     }
 
                     if (prepared.Value.ProducedFile != destination || prepared.Value.PsdInspection is not { } inspection)
                     {
-                        return OperationResult.Fail<StepWork>(FailureCode.PsdPreparationFailed,
-                            "PSD preparation returned no inspection or the wrong output destination.");
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                            OperationFailure.Create(FailureCode.PsdPreparationFailed,
+                                "PSD preparation returned no inspection or the wrong output destination."),
+                            destination));
                     }
 
                     OperationResult<StepWork> inspected = await InspectAsync(destination, cancellationToken,
                         prepared.Value.AdapterNotes);
                     if (inspected.IsFailure)
                     {
-                        return OperationResult.Fail<StepWork>(inspected.Failure with { PsdInspection = inspection });
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                            inspected.Failure with { PsdInspection = inspection }, destination));
                     }
 
                     FileFacts facts = inspected.Value.Facts;
@@ -1969,9 +2022,11 @@ public sealed partial class SessionService : ISessionService
                         inspection.HasTransparency is null ||
                         (inspection.HasTransparency == true && facts.HasAlpha != true))
                     {
-                        return OperationResult.Fail<StepWork>(OperationFailure.Create(FailureCode.PsdPreparationFailed,
-                            "The prepared PSD raster did not independently match the accepted full-canvas RGB/8 contract.")
-                            with { PsdInspection = inspection });
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                            OperationFailure.Create(FailureCode.PsdPreparationFailed,
+                                "The prepared PSD raster did not independently match the accepted full-canvas RGB/8 contract.")
+                                with { PsdInspection = inspection },
+                            destination));
                     }
 
                     return OperationResult.Ok(inspected.Value with { PsdInspection = inspection });
@@ -2038,6 +2093,7 @@ public sealed partial class SessionService : ISessionService
                 // that C1's saver would correctly refuse to overwrite. A retry gets a new attempt
                 // directory and therefore a new destination, leaving the old file untouched (§21).
                 WorkspaceFileRef reserved = SiblingOf(workingCopy.Value, tiffName.Value);
+                establishExpectedOutput(reserved);
 
                 OperationResult<AdapterOutput> result = await _photoshop.GenerateAsync(
                     new PhotoshopRequest(
@@ -2046,11 +2102,14 @@ public sealed partial class SessionService : ISessionService
                     cancellationToken);
                 if (result.IsFailure)
                 {
-                    return OperationResult.Fail<StepWork>(result.Failure);
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(result.Failure, reserved));
                 }
 
-                return await InspectAsync(
+                OperationResult<StepWork> inspectedOutput = await InspectAsync(
                     result.Value.ProducedFile, cancellationToken, result.Value.AdapterNotes);
+                return inspectedOutput.IsFailure
+                    ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspectedOutput.Failure, reserved))
+                    : inspectedOutput;
             }
 
             case AdapterKind.Internal:
@@ -2070,22 +2129,30 @@ public sealed partial class SessionService : ISessionService
                 // would refuse again for the same reason (Part C2 §10, §21).
                 if (work.ManualCrop is { } crop)
                 {
+                    WorkspaceFileRef expectedOutput = SiblingOf(workingCopy.Value, ManualCropOutputFileName);
+                    establishExpectedOutput(expectedOutput);
                     OperationResult<ManualCropResult> cropped = await _manualCrop.CropAsync(
                         new ManualCropRequest(
                             workingCopy.Value,
-                            SiblingOf(workingCopy.Value, ManualCropOutputFileName),
+                            expectedOutput,
                             crop, work.ManualCropMargin),
                         cancellationToken);
 
-                    if (cropped.IsFailure) return OperationResult.Fail<StepWork>(cropped.Failure);
+                    if (cropped.IsFailure)
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(cropped.Failure, expectedOutput));
                     ManualCropGeometry expected = ManualCropGeometry.Create(
                         crop, work.ManualCropMargin, cropped.Value.SourceWidth, cropped.Value.SourceHeight);
                     if (cropped.Value.AppliedBounds != expected.AppliedBounds ||
                         cropped.Value.Geometry != expected)
-                        return OperationResult.Fail<StepWork>(FailureCode.OutputValidationFailed,
-                            "The manual crop processor returned different geometry than requested.");
-                    return await InspectAsync(cropped.Value.ProducedFile, cancellationToken,
-                        manualCropGeometry: cropped.Value.Geometry);
+                        return OperationResult.Fail<StepWork>(WithExpectedOutput(
+                            OperationFailure.Create(FailureCode.OutputValidationFailed,
+                                "The manual crop processor returned different geometry than requested."),
+                            expectedOutput));
+                    OperationResult<StepWork> inspectedCrop = await InspectAsync(
+                        cropped.Value.ProducedFile, cancellationToken, manualCropGeometry: cropped.Value.Geometry);
+                    return inspectedCrop.IsFailure
+                        ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspectedCrop.Failure, expectedOutput))
+                        : inspectedCrop;
                 }
 
                 // The operator's recorded decision, not a constant. It arrives here from
@@ -2093,15 +2160,17 @@ public sealed partial class SessionService : ISessionService
                 // change — so nothing between the screen and the processor can substitute a
                 // margin, and the same value is what the attempt row recorded before this ran
                 // (Epic 11200 Part C3 §13, §14).
+                WorkspaceFileRef trimOutput = SiblingOf(workingCopy.Value, TrimOutputFileName);
+                establishExpectedOutput(trimOutput);
                 OperationResult<TrimResult> trimmed = await _trim.TrimAsync(
                     new TrimRequest(
                         workingCopy.Value,
-                        SiblingOf(workingCopy.Value, TrimOutputFileName),
+                        trimOutput,
                         state.TrimMargin),
                     cancellationToken);
                 if (trimmed.IsFailure)
                 {
-                    return OperationResult.Fail<StepWork>(trimmed.Failure);
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(trimmed.Failure, trimOutput));
                 }
 
                 TrimResult result = trimmed.Value;
@@ -2113,11 +2182,11 @@ public sealed partial class SessionService : ISessionService
                     // that never happened. The step ends in Failed with a stable code the
                     // manual-crop surface (Epic 11200 Part C) can route on, and the attempt
                     // row keeps the reason (Part B §10).
-                    return OperationResult.Fail<StepWork>(
+                    return OperationResult.Fail<StepWork>(WithExpectedOutput(
                         OperationFailure.Create(
                             FailureCode.ManualCropRequired,
                             result.ManualCropReason ?? "No usable alpha content was found.",
-                            isRetryable: false));
+                            isRetryable: false), trimOutput));
                 }
 
                 // The processor's own rectangles, carried to the closing transaction rather than
@@ -2127,10 +2196,13 @@ public sealed partial class SessionService : ISessionService
                 // produced trim always has both — TrimResult.Produced is the only way to build
                 // one — so a null here would mean the outcome was ManualCropRequired, which
                 // returned above.
-                return await InspectAsync(
+                OperationResult<StepWork> inspectedTrim = await InspectAsync(
                     result.ProducedFile!.Value,
                     cancellationToken,
                     trimGeometry: TrimGeometry.Create(result.ContentBounds!.Value, result.AppliedBounds!.Value));
+                return inspectedTrim.IsFailure
+                    ? OperationResult.Fail<StepWork>(WithExpectedOutput(inspectedTrim.Failure, trimOutput))
+                    : inspectedTrim;
             }
 
             default:
@@ -2204,6 +2276,7 @@ public sealed partial class SessionService : ISessionService
         SessionAggregate aggregate, WorkflowSnapshot stateAfterStart, CommandContext context, StepKind step,
         ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken)
     {
+        failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
         WorkflowCommand.System.AttemptFailed failedCommand = new(runningAttempt.Id, step, failure);
         WorkflowTransition failedTransition = _engine.Apply(stateAfterStart, failedCommand, context);
         if (failedTransition.IsRejected)
@@ -2310,6 +2383,7 @@ public sealed partial class SessionService : ISessionService
     {
         OperationFailure failure = DescribeStop(
             mode, stop, definition.IsAdapterBacked, runningAttempt, step, adapterFailure);
+        failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
 
         WorkflowCommand.System.AttemptCancelled cancelled = new(runningAttempt.Id, step, failure);
         WorkflowTransition stopped = _engine.Apply(stateAfterStart, cancelled, context);
@@ -2455,6 +2529,22 @@ public sealed partial class SessionService : ISessionService
         if (adapterFailure is not null)
         {
             audit["adapterFailureCode"] = adapterFailure.Code.ToString();
+
+            // Preserve only the closed Error Details evidence fields. The stop owns its own
+            // code/message and audit vocabulary; the adapter remains the authority for a local
+            // capture and for the destination that had already been established.
+            foreach (string key in new[]
+                     {
+                         AutomationLogEntry.ScreenshotContextKey,
+                         FailureEvidence.ExpectedOutputPathKey,
+                         FailureEvidence.ExpectedOutputEstablishedKey,
+                     })
+            {
+                if (adapterFailure.Context.TryGetValue(key, out string? value))
+                {
+                    audit[key] = value;
+                }
+            }
         }
 
         string detail = adapterFailure is null
@@ -2516,6 +2606,7 @@ public sealed partial class SessionService : ISessionService
         ProcessingSession session, WorkflowSnapshot stateAfterStart, CommandContext context,
         ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken)
     {
+        failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
         WorkflowCommand.System.AttemptFailed failedCommand = new(runningAttempt.Id, StepKind.Import, failure);
         WorkflowTransition failedTransition = _engine.Apply(stateAfterStart, failedCommand, context);
         if (failedTransition.IsRejected)
@@ -2744,6 +2835,9 @@ public sealed partial class SessionService : ISessionService
         string directory = slash < 0 ? string.Empty : path[..(slash + 1)];
         return WorkspaceFileRef.Create(directory + fileName, file.Area);
     }
+
+    private OperationFailure WithExpectedOutput(OperationFailure failure, WorkspaceFileRef expectedOutput) =>
+        FailureEvidence.WithExpectedOutputPath(failure, _workspace.ResolveAbsolute(expectedOutput));
 
     /// <summary>
     /// The file name component of an absolute path, without touching the file system.

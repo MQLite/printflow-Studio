@@ -47,6 +47,18 @@ public interface ISessionService
     /// <summary>Loads a session's current view without changing anything.</summary>
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
 
+    /// <summary>Loads one exact terminal attempt as operator-facing Error Details.</summary>
+    Task<OperationResult<ErrorDetailsView>> LoadErrorDetailsAsync(
+        SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken);
+
+    /// <summary>Rechecks the opened attempt and routes an authorised action through the engine.</summary>
+    Task<OperationResult<SessionView>> ResolveErrorRecoveryAsync(
+        SessionId sessionId,
+        AttemptId attemptId,
+        ErrorRecoveryAction action,
+        string? operatorName,
+        CancellationToken cancellationToken);
+
     /// <summary>
     /// Explicitly authorises the enlargement currently offered for this session.
     /// </summary>

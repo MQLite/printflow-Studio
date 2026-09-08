@@ -404,6 +404,9 @@ public sealed class TiffFinalReviewWorkstationSmoke
 
         public Task GoToSettingsAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
+        public Task GoToErrorDetailsAsync(SessionId sessionId, AttemptId attemptId,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+
         public void GoToWorkflowSelection(SessionView session)
         {
         }

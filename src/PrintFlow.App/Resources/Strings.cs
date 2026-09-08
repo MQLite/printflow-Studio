@@ -20,6 +20,28 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string ErrorDetails_ManualProcessing => Get(nameof(ErrorDetails_ManualProcessing));
+    internal static string ErrorDetails_Heading => Get(nameof(ErrorDetails_Heading));
+    internal static string ErrorDetails_WhatHappened => Get(nameof(ErrorDetails_WhatHappened));
+    internal static string ErrorDetails_Processing => Get(nameof(ErrorDetails_Processing));
+    internal static string ErrorDetails_Workflow => Get(nameof(ErrorDetails_Workflow));
+    internal static string ErrorDetails_Step => Get(nameof(ErrorDetails_Step));
+    internal static string ErrorDetails_Code => Get(nameof(ErrorDetails_Code));
+    internal static string ErrorDetails_RetryInformation => Get(nameof(ErrorDetails_RetryInformation));
+    internal static string ErrorDetails_InputPath => Get(nameof(ErrorDetails_InputPath));
+    internal static string ErrorDetails_ExpectedOutputPath => Get(nameof(ErrorDetails_ExpectedOutputPath));
+    internal static string ErrorDetails_Evidence => Get(nameof(ErrorDetails_Evidence));
+    internal static string ErrorDetails_ScreenshotPath => Get(nameof(ErrorDetails_ScreenshotPath));
+    internal static string ErrorDetails_TechnicalDetail => Get(nameof(ErrorDetails_TechnicalDetail));
+    internal static string ErrorDetails_Back => Get(nameof(ErrorDetails_Back));
+    internal static string ErrorDetails_NotEstablished => Get(nameof(ErrorDetails_NotEstablished));
+    internal static string ErrorDetails_NotRecorded => Get(nameof(ErrorDetails_NotRecorded));
+    internal static string ErrorDetails_PathUnavailable => Get(nameof(ErrorDetails_PathUnavailable));
+    internal static string ErrorDetails_NotCaptured => Get(nameof(ErrorDetails_NotCaptured));
+    internal static string ErrorDetails_ImageUnavailable => Get(nameof(ErrorDetails_ImageUnavailable));
+    internal static string ErrorDetails_Historical => Get(nameof(ErrorDetails_Historical));
+    internal static string ErrorDetails_Interrupted => Get(nameof(ErrorDetails_Interrupted));
+    internal static string ErrorDetails_Cancelled => Get(nameof(ErrorDetails_Cancelled));
     internal static string Home_RecoveryHeading => Get(nameof(Home_RecoveryHeading));
     internal static string Home_RecoveryPending => Get(nameof(Home_RecoveryPending));
     internal static string Home_RecoveryUnfinishedImport => Get(nameof(Home_RecoveryUnfinishedImport));

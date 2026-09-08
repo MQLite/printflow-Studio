@@ -890,4 +890,26 @@
   <data name="Settings_Saved" xml:space="preserve"><value>设置已保存。</value></data>
   <data name="Settings_SaveFailed" xml:space="preserve"><value>无法保存设置（{0}）。未做任何更改。</value></data>
   <data name="Settings_LoadFailed" xml:space="preserve"><value>无法读取已保存的设置（{0}）。当前显示的是默认值。</value></data>
+  <data name="ErrorDetails_Heading" xml:space="preserve"><value>错误详情</value></data>
+  <data name="ErrorDetails_WhatHappened" xml:space="preserve"><value>发生了什么</value></data>
+  <data name="ErrorDetails_Processing" xml:space="preserve"><value>处理信息</value></data>
+  <data name="ErrorDetails_Workflow" xml:space="preserve"><value>处理流程</value></data>
+  <data name="ErrorDetails_Step" xml:space="preserve"><value>处理步骤</value></data>
+  <data name="ErrorDetails_Code" xml:space="preserve"><value>错误代码</value></data>
+  <data name="ErrorDetails_RetryInformation" xml:space="preserve"><value>尝试次数：{0}   已重试：{1}</value></data>
+  <data name="ErrorDetails_InputPath" xml:space="preserve"><value>托管输入文件</value></data>
+  <data name="ErrorDetails_ExpectedOutputPath" xml:space="preserve"><value>预期输出文件</value></data>
+  <data name="ErrorDetails_Evidence" xml:space="preserve"><value>诊断截图</value></data>
+  <data name="ErrorDetails_ScreenshotPath" xml:space="preserve"><value>截图路径</value></data>
+  <data name="ErrorDetails_TechnicalDetail" xml:space="preserve"><value>技术详情</value></data>
+  <data name="ErrorDetails_Back" xml:space="preserve"><value>返回处理</value></data>
+  <data name="ErrorDetails_NotEstablished" xml:space="preserve"><value>尚未确定</value></data>
+  <data name="ErrorDetails_NotRecorded" xml:space="preserve"><value>未记录</value></data>
+  <data name="ErrorDetails_PathUnavailable" xml:space="preserve"><value>路径不可用</value></data>
+  <data name="ErrorDetails_NotCaptured" xml:space="preserve"><value>未捕获截图</value></data>
+  <data name="ErrorDetails_ImageUnavailable" xml:space="preserve"><value>诊断截图不可用</value></data>
+  <data name="ErrorDetails_Historical" xml:space="preserve"><value>这是以前的故障。本次尝试的恢复操作已不可用。</value></data>
+  <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>处理在结果确认之前中断。请查看可用的恢复操作。</value></data>
+  <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>处理在结果确认之前取消。请查看可用的恢复操作。</value></data>
+  <data name="ErrorDetails_ManualProcessing" xml:space="preserve"><value>手动处理</value></data>
 </root>

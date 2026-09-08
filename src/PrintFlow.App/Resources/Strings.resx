@@ -901,4 +901,26 @@
   <data name="Settings_Saved" xml:space="preserve"><value>Settings saved.</value></data>
   <data name="Settings_SaveFailed" xml:space="preserve"><value>The settings could not be saved ({0}). Nothing was changed.</value></data>
   <data name="Settings_LoadFailed" xml:space="preserve"><value>The saved settings could not be read ({0}). The values shown are the defaults.</value></data>
+  <data name="ErrorDetails_Heading" xml:space="preserve"><value>Error details</value></data>
+  <data name="ErrorDetails_WhatHappened" xml:space="preserve"><value>What happened</value></data>
+  <data name="ErrorDetails_Processing" xml:space="preserve"><value>Processing information</value></data>
+  <data name="ErrorDetails_Workflow" xml:space="preserve"><value>Workflow</value></data>
+  <data name="ErrorDetails_Step" xml:space="preserve"><value>Step</value></data>
+  <data name="ErrorDetails_Code" xml:space="preserve"><value>Code</value></data>
+  <data name="ErrorDetails_RetryInformation" xml:space="preserve"><value>Attempt: {0}   Previous retries: {1}</value></data>
+  <data name="ErrorDetails_InputPath" xml:space="preserve"><value>Managed input file</value></data>
+  <data name="ErrorDetails_ExpectedOutputPath" xml:space="preserve"><value>Expected output file</value></data>
+  <data name="ErrorDetails_Evidence" xml:space="preserve"><value>Evidence</value></data>
+  <data name="ErrorDetails_ScreenshotPath" xml:space="preserve"><value>Screenshot path</value></data>
+  <data name="ErrorDetails_TechnicalDetail" xml:space="preserve"><value>Technical details</value></data>
+  <data name="ErrorDetails_Back" xml:space="preserve"><value>Back to processing</value></data>
+  <data name="ErrorDetails_NotEstablished" xml:space="preserve"><value>Not established</value></data>
+  <data name="ErrorDetails_NotRecorded" xml:space="preserve"><value>Not recorded</value></data>
+  <data name="ErrorDetails_PathUnavailable" xml:space="preserve"><value>Path unavailable</value></data>
+  <data name="ErrorDetails_NotCaptured" xml:space="preserve"><value>No screenshot captured</value></data>
+  <data name="ErrorDetails_ImageUnavailable" xml:space="preserve"><value>Evidence image unavailable</value></data>
+  <data name="ErrorDetails_Historical" xml:space="preserve"><value>This is a previous failure. Recovery actions are no longer available for this attempt.</value></data>
+  <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>Processing was interrupted before a result was confirmed. Review the available recovery actions.</value></data>
+  <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>Processing was cancelled before a result was confirmed. Review the available recovery actions.</value></data>
+  <data name="ErrorDetails_ManualProcessing" xml:space="preserve"><value>Manual processing</value></data>
 </root>
