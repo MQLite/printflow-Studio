@@ -1137,3 +1137,85 @@ full-suite rationale, Jira reassessments and Git discipline:
 [SCRUM-11120 completion report](scrum-11120-error-details-recovery-ui-completion.md).
 
 **PASS — SCRUM-11120 STRUCTURED ERROR DETAILS AND RECOVERY UI VERIFIED**
+
+---
+
+## Delta — 9 September 2026: SCRUM-11121 local log and screenshot retention
+
+**Appended, not a rewrite.** Every historical row above remains the record of what was true when it
+was written.
+
+### SCRUM-11121 — Implement Local Log and Screenshot Retention: PARTIAL → **FULL**
+
+The exact original CSV Work Item **11606** was reread before Product edits. “Customer-processing
+logs” is explicitly the existing durable structured SQLite `AutomationLogEntry` store; the AC does
+not require a second text/rolling log or third-party logging framework. Eligible old log rows and
+positively owned direct failure captures now expire from the effective
+`Setting(LogRetentionDays) → appsettings Logging.RetentionDays → Product default 30` authority.
+Everything remains local: no uploader, HTTP client, telemetry exporter, email path, or diagnostic
+package export was added.
+
+Cleanup is narrow and fail-safe. Persisted running/current/recoverable attempt facts and retry or
+manual-import ancestry override age; every log and attempt-context reference is considered before a
+shared capture can be deleted. Canonical absolute path identity covers dot, separator and Unicode
+case aliases. Source/InputSnapshot, Revisions and former working paths, approved and review-bound
+files, PrintOutputs and reservations, and exact manual-result sources veto diagnostic byte deletion.
+A new nullable immutable path on `MANUAL_RESULT_IMPORT` attempts records that last authority without
+parsing human-readable notes; any legacy manual import whose source is unknown conservatively
+preserves all candidate bytes. Unknown, nested, malformed, read-only, new-by-filesystem-time, or
+reparse-backed Evidence files are kept.
+
+Bounded maintenance runs after successful startup recovery and before shell publication. It never
+starts Meitu/Photoshop or acquires/clears their lease. Files are deleted individually before one
+bounded log-row transaction, so a crash may leave a truthful historical row pointing to normally
+unavailable expired evidence, but cannot remove the only ownership record before destructive work.
+Failed file deletion keeps its row for retry; an already-missing file and a second cleanup are
+idempotent. Attempts, failure identity/context, sessions, reviews, Revisions, and outputs never
+expire under this policy. A failure or held automation lease warns, preserves, and allows a
+successfully recovered application to start.
+
+Settings now shows the actual SQLite database and Evidence-root paths as read-only, focusable,
+copyable bilingual values with stable IDs `Settings.LocalLogLocation` and
+`Settings.ScreenshotLocation`. Its retention hint truthfully states that cleanup runs at the next
+safe startup. No log browser, Explorer launch, scheduler, manual-cleanup button, recursive directory
+deletion, SCRUM-11114 merger, or signing work was added.
+
+### Overlapping Jira reassessments
+
+**SCRUM-11091: PARTIAL → FULL.** Its exact Work Item **11306** already had exact attempt/session/step,
+timestamp, current application, managed input, established expected output, screenshot path and
+display, structured code, bilingual guidance, and retry sequence. This slice closes its sole
+remaining material clause: the local evidence now follows the configured retention policy without
+silent upload.
+
+**Parent SCRUM-11085: PARTIAL → FULL.** Work Item **11300** was reassessed clause by clause rather
+than from child labels. Current source and accepted completion deltas establish the replaceable
+Meitu adapter, narrow workflow contract, fresh working copies, recognised UI-state guards, export
+validation before Revision creation, local structured failure evidence, safe stop/manual takeover,
+validated manual-result re-entry, and no mid-click resume. This slice closes the parent row's last
+recorded evidence-retention gap; no parent clause remains open.
+
+**Parent SCRUM-11115 remains PARTIAL.** Its local-only logs/screenshots clause is now complete. Open
+clauses remain SCRUM-11116's format-specific unsupported-file feedback concern; SCRUM-11117's
+thumbnail and delete-record action; SCRUM-11122's absent explicit diagnostic-package
+export/preview/consent flow; and SCRUM-11123's absent repeatable versioned offline installer and
+install/configure/rollback procedure.
+
+### Evidence
+
+Twelve new focused tests cover real SQLite/filesystem expiry, active/shared/source/Revision/output
+and manual-source protection, legacy uncertainty, duration precedence, reparse refusal, lease
+deferral, startup ordering/warnings, fallback consistency, and rendered bilingual WPF locations.
+Independent-review regressions failed **4/4** and then **3/3** before their respective corrections,
+and passed afterward. The expanded affected set passed **581/581**. Final build: **0 warnings / 0
+errors**. The first complete run recorded **11,605 passed / 1 failed / 0 skipped**; its sole failure
+was the intentional direct-deletion architecture allowlist, which was extended by exact filename
+for the new guarded diagnostic store. The final complete suite passed **11,609 / 11,609**, exactly
+the accepted 11,597 baseline plus twelve new tests. A final fresh read-only Astra High review found
+no material issue or blocker.
+
+Exact ACs, pre-change matrix, artefact classification, duration/reference/path authority, ordering,
+cadence, operator UI, red/green review evidence, full-suite results, routing and Git discipline:
+[SCRUM-11121 completion report](scrum-11121-local-log-screenshot-retention-completion.md).
+
+**PASS — SCRUM-11121 LOCAL LOG AND SCREENSHOT RETENTION VERIFIED**
