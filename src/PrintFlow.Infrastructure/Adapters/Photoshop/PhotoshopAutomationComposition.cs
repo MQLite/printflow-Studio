@@ -198,6 +198,7 @@ public static class PhotoshopAutomationComposition
             locator, controls, input, evidence, baselines, resolved, clock);
 
         return new ProductionPhotoshopOutputProcessor(
-            baselines, locator, driver, workspace, resolved, clock);
+            baselines, locator, driver, workspace, resolved, clock,
+            new RotPhotoshopRuntimeFactReader());
     }
 }

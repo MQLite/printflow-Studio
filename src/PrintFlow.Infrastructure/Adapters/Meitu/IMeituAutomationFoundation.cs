@@ -77,6 +77,10 @@ public interface IMeituAutomationFoundation
     /// </remarks>
     Task<OperationResult<MeituReadiness>> EnsureReadyAsync(CancellationToken cancellationToken);
 
+    /// <summary>Re-observes a previously verified process without launching or changing it.</summary>
+    Task<OperationResult<MeituReadiness>> ReinspectAsync(
+        MeituReadiness previous, CancellationToken cancellationToken);
+
     /// <summary>
     /// Opens a PrintFlow-created working copy in the verified Meitu and confirms it is loaded.
     /// </summary>

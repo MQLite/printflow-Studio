@@ -38,6 +38,17 @@ public sealed record PhotoshopWindowStateSignature(
     string DocumentMarkerClass,
     ImmutableArray<string> EditorChromeClasses);
 
+/// <summary>The active working spaces required by the accepted Photoshop preset.</summary>
+public sealed record PhotoshopColourSettingsContract(
+    string RgbWorkingSpace,
+    string CmykWorkingSpace,
+    string GrayWorkingSpace,
+    string SpotWorkingSpace)
+{
+    public override string ToString() =>
+        $"RGB: {RgbWorkingSpace}; CMYK: {CmykWorkingSpace}; Gray: {GrayWorkingSpace}; Spot: {SpotWorkingSpace}";
+}
+
 /// <summary>
 /// The signature of the Open dialog Photoshop raises, as observed and signed on this
 /// workstation (Epic 11400 Part A §10).
@@ -228,7 +239,8 @@ public sealed record PhotoshopBaseline(
     PhotoshopOpenDialogSignature? OpenDialog = null,
     PhotoshopDocumentIdentitySignature? DocumentIdentity = null,
     PhotoshopW1ActionContract? W1Action = null,
-    PhotoshopOwnedDocumentCleanupSignature? OwnedDocumentCleanup = null);
+    PhotoshopOwnedDocumentCleanupSignature? OwnedDocumentCleanup = null,
+    PhotoshopColourSettingsContract? ColourSettings = null);
 
 /// <summary>Supplies the verified Photoshop baseline.</summary>
 public interface IPhotoshopBaselineProvider

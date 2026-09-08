@@ -635,6 +635,13 @@
   <data name="EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
     <value>部分已认可的文件不再标记为只读。其签名仍然一致，因此不会影响生产处理。</value>
   </data>
+  <data name="EnvironmentCheck_ExternalApplicationAutomationLock" xml:space="preserve"><value>共享的应用自动化锁当前不可用。</value></data>
+  <data name="EnvironmentCheck_MeituLaunchability" xml:space="preserve"><value>无法安全启动或连接到美图秀秀。</value></data>
+  <data name="EnvironmentCheck_MeituSafeStartingState" xml:space="preserve"><value>美图秀秀当前不处于已识别的安全初始状态。</value></data>
+  <data name="EnvironmentCheck_PhotoshopLaunchability" xml:space="preserve"><value>无法安全启动或连接到 Photoshop。</value></data>
+  <data name="EnvironmentCheck_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop 中有未保存的工作、未知状态或阻塞对话框。</value></data>
+  <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置与已认可的预设不一致。</value></data>
+  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop 无法安全打开并关闭 PrintFlow 测试图像。</value></data>
   <data name="Environment_Verified" xml:space="preserve">
     <value>本工作站已通过生产环境校验。</value>
   </data>
@@ -683,6 +690,13 @@
   <data name="EnvironmentCheckName_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
     <value>已认可文件的只读标记</value>
   </data>
+  <data name="EnvironmentCheckName_ExternalApplicationAutomationLock" xml:space="preserve"><value>应用自动化可用性</value></data>
+  <data name="EnvironmentCheckName_MeituLaunchability" xml:space="preserve"><value>美图秀秀启动能力</value></data>
+  <data name="EnvironmentCheckName_MeituSafeStartingState" xml:space="preserve"><value>美图秀秀初始状态</value></data>
+  <data name="EnvironmentCheckName_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop 启动能力</value></data>
+  <data name="EnvironmentCheckName_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop 初始状态</value></data>
+  <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置</value></data>
+  <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop 测试图像</value></data>
   <data name="Environment_Heading" xml:space="preserve">
     <value>生产就绪状态</value>
   </data>
@@ -695,6 +709,13 @@
   <data name="Environment_Refresh" xml:space="preserve">
     <value>重新检查</value>
   </data>
+  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>运行实时应用检查</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>明确启动或连接到美图秀秀和 Photoshop，检查安全状态及 Photoshop 色彩设置，然后打开并关闭一张仅由 PrintFlow 管理的测试图像。不会更改设置，也绝不会关闭操作员的工作。</value></data>
+  <data name="Environment_Checking" xml:space="preserve"><value>正在检查工作站……本次检查完成前，重复检查操作已禁用。</value></data>
+  <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>自动检查</value></data>
+  <data name="Environment_LiveChecksHeading" xml:space="preserve"><value>实时应用检查</value></data>
+  <data name="Environment_Expected" xml:space="preserve"><value>应为</value></data>
+  <data name="Environment_Current" xml:space="preserve"><value>当前</value></data>
   <data name="Environment_Preset" xml:space="preserve">
     <value>已校验的工作站预设</value>
   </data>
@@ -725,6 +746,7 @@
   <data name="Environment_StatusAdvisory" xml:space="preserve">
     <value>提示</value>
   </data>
+  <data name="Environment_StatusBlocked" xml:space="preserve"><value>未运行</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>必须满足</value>
   </data>

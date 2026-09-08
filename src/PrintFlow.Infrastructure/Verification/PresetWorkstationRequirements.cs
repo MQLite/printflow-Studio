@@ -129,6 +129,12 @@ internal static class PresetWorkstationRequirements
             return OperationResult.Fail<WorkstationRequirements>(action.Failure);
         }
 
+        OperationResult<AcceptedPhotoshopColourSettings> colourSettings = ReadColourSettings(root);
+        if (colourSettings.IsFailure)
+        {
+            return OperationResult.Fail<WorkstationRequirements>(colourSettings.Failure);
+        }
+
         OperationResult<ImmutableArray<AcceptedEvidence>> evidence = ReadEvidence(root);
         if (evidence.IsFailure)
         {
@@ -144,6 +150,7 @@ internal static class PresetWorkstationRequirements
             meitu.Value,
             photoshop.Value,
             action.Value,
+            colourSettings.Value,
             evidence.Value));
     }
 
@@ -229,6 +236,36 @@ internal static class PresetWorkstationRequirements
         return OperationResult.Ok(new AcceptedActionArtifact(setName, path, bytes.Value, digest));
     }
 
+    private static OperationResult<AcceptedPhotoshopColourSettings> ReadColourSettings(JsonElement root)
+    {
+        if (!TryObject(root, "photoshopContract", out JsonElement photoshop) ||
+            !TryObject(photoshop, "colourSettings", out JsonElement settings))
+        {
+            return Gap<AcceptedPhotoshopColourSettings>(
+                "The verified preset records no photoshopContract.colourSettings section.");
+        }
+
+        string? rgb = StringOrNull(settings, "rgbWorkingSpace");
+        string? cmyk = StringOrNull(settings, "cmykWorkingSpace");
+        string? gray = StringOrNull(settings, "grayWorkingSpace");
+        string? spot = StringOrNull(settings, "spotWorkingSpace");
+        string? conversion = StringOrNull(settings, "conversionCommand");
+        bool? convertToProfile = BoolOrNull(settings, "convertToProfileCommandUsed");
+        if (rgb is null || cmyk is null || gray is null || spot is null || conversion is null ||
+            convertToProfile is null ||
+            !Sha256.TryParse(StringOrNull(settings, "visibleSettingsManifestSha256") ?? string.Empty,
+                out Sha256 visibleManifest))
+        {
+            return Gap<AcceptedPhotoshopColourSettings>(
+                "The verified preset's Photoshop colour-settings contract is incomplete; all four " +
+                "working spaces, conversion command, Convert to Profile decision and visible-settings " +
+                "manifest digest are required.");
+        }
+
+        return OperationResult.Ok(new AcceptedPhotoshopColourSettings(
+            rgb, cmyk, gray, spot, conversion, convertToProfile.Value, visibleManifest));
+    }
+
     private static OperationResult<ImmutableArray<AcceptedEvidence>> ReadEvidence(JsonElement root)
     {
         if (!root.TryGetProperty("sourceManifestIntegrity", out JsonElement integrity) ||
@@ -300,6 +337,12 @@ internal static class PresetWorkstationRequirements
         value.ValueKind is JsonValueKind.True or JsonValueKind.False
             ? value.GetBoolean()
             : fallback;
+
+    private static bool? BoolOrNull(JsonElement parent, string name) =>
+        parent.TryGetProperty(name, out JsonElement value) &&
+        value.ValueKind is JsonValueKind.True or JsonValueKind.False
+            ? value.GetBoolean()
+            : null;
 
     private static DisplayRectangle? ReadRectangle(JsonElement parent, string name)
     {

@@ -646,6 +646,13 @@
   <data name="EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
     <value>Some accepted files are no longer marked read-only. Their signatures still match, so this does not stop production work.</value>
   </data>
+  <data name="EnvironmentCheck_ExternalApplicationAutomationLock" xml:space="preserve"><value>The shared application-automation lock is unavailable.</value></data>
+  <data name="EnvironmentCheck_MeituLaunchability" xml:space="preserve"><value>Meitu could not be launched or attached to safely.</value></data>
+  <data name="EnvironmentCheck_MeituSafeStartingState" xml:space="preserve"><value>Meitu is not in a recognised safe starting state.</value></data>
+  <data name="EnvironmentCheck_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop could not be launched or attached to safely.</value></data>
+  <data name="EnvironmentCheck_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop has unsaved work, an unknown state, or a blocking dialog.</value></data>
+  <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings do not match the accepted preset.</value></data>
+  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop could not safely open and close the PrintFlow test image.</value></data>
   <data name="Environment_Verified" xml:space="preserve">
     <value>Workstation verified for production work.</value>
   </data>
@@ -694,6 +701,13 @@
   <data name="EnvironmentCheckName_FilesystemReadOnlyPolicyAdvisory" xml:space="preserve">
     <value>Read-only marking of accepted files</value>
   </data>
+  <data name="EnvironmentCheckName_ExternalApplicationAutomationLock" xml:space="preserve"><value>Application automation availability</value></data>
+  <data name="EnvironmentCheckName_MeituLaunchability" xml:space="preserve"><value>Meitu launchability</value></data>
+  <data name="EnvironmentCheckName_MeituSafeStartingState" xml:space="preserve"><value>Meitu starting state</value></data>
+  <data name="EnvironmentCheckName_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop launchability</value></data>
+  <data name="EnvironmentCheckName_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop starting state</value></data>
+  <data name="EnvironmentCheckName_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings</value></data>
+  <data name="EnvironmentCheckName_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop test image</value></data>
   <data name="Environment_Heading" xml:space="preserve">
     <value>Production readiness</value>
   </data>
@@ -706,6 +720,13 @@
   <data name="Environment_Refresh" xml:space="preserve">
     <value>Check again</value>
   </data>
+  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>Run live application checks</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>Explicitly launches or attaches to Meitu and Photoshop, checks their safe state and Photoshop colour settings, then opens and closes one PrintFlow-owned test image. It changes no settings and never closes operator work.</value></data>
+  <data name="Environment_Checking" xml:space="preserve"><value>Checking the workstation… Duplicate check actions are disabled until this run finishes.</value></data>
+  <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>Automatic checks</value></data>
+  <data name="Environment_LiveChecksHeading" xml:space="preserve"><value>Live application checks</value></data>
+  <data name="Environment_Expected" xml:space="preserve"><value>Expected</value></data>
+  <data name="Environment_Current" xml:space="preserve"><value>Current</value></data>
   <data name="Environment_Preset" xml:space="preserve">
     <value>Verified workstation preset</value>
   </data>
@@ -736,6 +757,7 @@
   <data name="Environment_StatusAdvisory" xml:space="preserve">
     <value>Note</value>
   </data>
+  <data name="Environment_StatusBlocked" xml:space="preserve"><value>Not run</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>Required</value>
   </data>

@@ -35,20 +35,26 @@ public sealed class EnvironmentCheckRow
         ArgumentNullException.ThrowIfNull(report);
 
         SupportKey = report.CheckKey;
+        AutomationId = "Environment.Check." + report.CheckKey;
         IsBlocking = report.IsBlocking;
         IsFailure = report.Status == EnvironmentCheckStatus.Failed;
+        IsBlocked = report.Status == EnvironmentCheckStatus.Blocked;
         IsAdvisory = report.Status == EnvironmentCheckStatus.Advisory;
+        Phase = report.Phase;
 
         Name = Strings.Resolve(NamePrefix + report.CheckKey);
         Status = report.Status switch
         {
             EnvironmentCheckStatus.Passed => Strings.Environment_StatusPassed,
             EnvironmentCheckStatus.Failed => Strings.Environment_StatusFailed,
+            EnvironmentCheckStatus.Blocked => Strings.Environment_StatusBlocked,
             _ => Strings.Environment_StatusAdvisory,
         };
         Classification = IsBlocking ? Strings.Environment_Blocking : Strings.Environment_Advisory;
-        Explanation = IsFailure || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
+        Explanation = IsFailure || IsBlocked || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
         Detail = report.Detail;
+        Expected = report.Expected ?? string.Empty;
+        Current = report.Current ?? string.Empty;
     }
 
     /// <summary>
@@ -59,6 +65,8 @@ public sealed class EnvironmentCheckRow
     /// <c>FailureCode</c> follows: stable identifiers are quotable, not readable (§3).
     /// </remarks>
     public string SupportKey { get; }
+
+    public string AutomationId { get; }
 
     /// <summary>The localised subject of the check, shown whatever the outcome.</summary>
     public string Name { get; }
@@ -75,8 +83,25 @@ public sealed class EnvironmentCheckRow
     /// <summary>Whether this check failed. An advisory is never a failure (§5).</summary>
     public bool IsFailure { get; }
 
+    /// <summary>Whether a prerequisite prevented this check from running.</summary>
+    public bool IsBlocked { get; }
+
     /// <summary>Whether this check is an advisory that reports and never blocks.</summary>
     public bool IsAdvisory { get; }
+
+    public EnvironmentCheckPhase Phase { get; }
+
+    public string Expected { get; }
+
+    public string Current { get; }
+
+    public bool HasExpected => Expected.Length > 0;
+
+    public bool HasCurrent => Current.Length > 0;
+
+    public string ExpectedDisplay => $"{Strings.Environment_Expected}: {Expected}";
+
+    public string CurrentDisplay => $"{Strings.Environment_Current}: {Current}";
 
     /// <summary>The localised sentence, on failures and advisories only.</summary>
     public string Explanation { get; }
@@ -93,11 +118,11 @@ public sealed class EnvironmentCheckRow
 /// needs (Epic 11500 Part C §3).
 /// </summary>
 /// <remarks>
-/// <b>It observes and explains. It does not repair and it does not authorise.</b> The only thing
-/// it can do to the system is ask <see cref="IEnvironmentDiagnostics.Read"/> to look again: there
-/// is no enable, no continue-anyway, no ignore, no retry-as-production and no adapter switch on
-/// this screen or on the seam it reads (§2, §13). Fixing a workstation is done to the
-/// workstation.
+/// <b>It observes and explains. It does not repair and it does not authorise.</b> Refresh asks
+/// <see cref="IEnvironmentDiagnostics.Read"/> for a passive observation. The separate, explicit
+/// live-check command may launch or attach to the accepted applications and run one contained
+/// synthetic Photoshop round trip. There is no enable, continue-anyway, ignore,
+/// retry-as-production or adapter switch on this screen (§2, §13).
 /// <para>
 /// <b>One authority, read from one seam.</b> The shell never names the workstation verifier and
 /// never re-derives which checks matter. <c>VerifiedEnvironmentGate</c> answers both questions —
@@ -105,7 +130,7 @@ public sealed class EnvironmentCheckRow
 /// screen showing Ready and a gate refusing cannot disagree (§2).
 /// </para>
 /// <para>
-/// <b>Refreshing re-observes; it does not re-hash (§4, §8).</b> Each read asks the gate afresh,
+/// <b>Refreshing re-observes; it does not re-run the live probe (§4, §8).</b> Each read asks the gate afresh,
 /// so a restored display or an unlocked screen shows as ready without restarting PrintFlow. The
 /// accepted files behind the baseline are read once per run, which is why
 /// <see cref="RestartRequirement"/> is on the screen rather than in a report nobody on the shop
@@ -135,6 +160,10 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     /// <summary>Every check that ran, in evaluation order.</summary>
     public ObservableCollection<EnvironmentCheckRow> Checks { get; } = [];
 
+    public ObservableCollection<EnvironmentCheckRow> AutomaticChecks { get; } = [];
+
+    public ObservableCollection<EnvironmentCheckRow> LiveApplicationChecks { get; } = [];
+
     /// <summary>The blocking checks that failed, listed on their own so all of them are visible.</summary>
     public ObservableCollection<EnvironmentCheckRow> BlockingFailures { get; } = [];
 
@@ -147,6 +176,12 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
 
     public string RefreshLabel => Strings.Environment_Refresh;
 
+    public string RunLiveChecksLabel => Strings.Environment_RunLiveChecks;
+
+    public string RunLiveChecksHint => Strings.Environment_RunLiveChecksHint;
+
+    public string CheckActivityText => IsBusy ? Strings.Environment_Checking : RunLiveChecksHint;
+
     public string BackLabel => Strings.Nav_BackToHome;
 
     public string PresetLabel => Strings.Environment_Preset;
@@ -154,6 +189,14 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     public string ObservedAtLabel => Strings.Environment_ObservedAt;
 
     public string ChecksHeading => Strings.Environment_ChecksHeading;
+
+    public string AutomaticChecksHeading => Strings.Environment_AutomaticChecksHeading;
+
+    public string LiveChecksHeading => Strings.Environment_LiveChecksHeading;
+
+    public string ExpectedLabel => Strings.Environment_Expected;
+
+    public string CurrentLabel => Strings.Environment_Current;
 
     public string BlockingHeading => Strings.Environment_BlockingHeading;
 
@@ -242,8 +285,34 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     /// previous reading is discarded and replaced, so a check that has stopped failing stops
     /// being listed.
     /// </remarks>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanRunCheckCommand))]
     private Task RefreshAsync(CancellationToken cancellationToken) => ReadAsync(cancellationToken);
+
+    /// <summary>Runs the only mutating diagnostic phase, solely on explicit operator request.</summary>
+    [RelayCommand(CanExecute = nameof(CanRunCheckCommand))]
+    private async Task RunLiveChecksAsync(CancellationToken cancellationToken)
+    {
+        if (IsBusy) return;
+
+        IsBusy = true;
+        try
+        {
+            Apply(await _diagnostics.RunLiveChecksAsync(cancellationToken).ConfigureAwait(true));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool CanRunCheckCommand() => !IsBusy;
+
+    partial void OnIsBusyChanged(bool value)
+    {
+        RefreshCommand.NotifyCanExecuteChanged();
+        RunLiveChecksCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CheckActivityText));
+    }
 
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
@@ -285,12 +354,19 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         _report = report;
 
         Checks.Clear();
+        AutomaticChecks.Clear();
+        LiveApplicationChecks.Clear();
         BlockingFailures.Clear();
         Advisories.Clear();
 
         foreach (EnvironmentCheckReport check in report.Checks)
         {
-            Checks.Add(new EnvironmentCheckRow(check));
+            EnvironmentCheckRow row = new(check);
+            Checks.Add(row);
+            if (check.Phase == EnvironmentCheckPhase.LiveApplication)
+                LiveApplicationChecks.Add(row);
+            else
+                AutomaticChecks.Add(row);
         }
 
         // Both projections come off the report rather than off a rule restated here: the report

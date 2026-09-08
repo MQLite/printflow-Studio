@@ -84,7 +84,8 @@ public static class ServiceRegistration
         services.AddSingleton<IManualCropProcessor, WicManualCropProcessor>();
 
         services.AddSingleton<IRecycleBin, RecycleBin>();
-        RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath, expectedPresetHash);
+        RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath,
+            expectedPresetHash, connectionFactory);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
 
         RegisterAdapters(
@@ -126,10 +127,10 @@ public static class ServiceRegistration
         services.AddTransient<WorkflowSelectionViewModel>();
         services.AddTransient<SessionViewModel>();
 
-        // The read-only operator surface onto workstation readiness (Epic 11500 Part C §3). It
-        // resolves IEnvironmentDiagnostics — the same object the gate is — and nothing else that
-        // could reach the workstation: the shell has no second route to verification and no
-        // route at all to authorisation.
+        // The operator surface onto workstation readiness (Epic 11500 Part C §3). It resolves
+        // IEnvironmentDiagnostics — the same object the gate is — and nothing else that could
+        // reach the workstation. Passive refresh and the explicitly labelled bounded live check
+        // share that authority; the shell still has no route to authorisation.
         services.AddTransient<EnvironmentReadinessViewModel>();
 
         overrides?.Invoke(services);
@@ -168,7 +169,8 @@ public static class ServiceRegistration
         PrintFlowConfiguration configuration,
         string workspaceRootAbsolute,
         string presetManifestPath,
-        Sha256 expectedPresetHash)
+        Sha256 expectedPresetHash,
+        SqliteConnectionFactory connectionFactory)
     {
         // The narrow fact readers are composed by ProductionWorkstationVerifier.ForWorkstation
         // rather than registered here, because Part A §18 keeps them internal to Infrastructure
@@ -184,6 +186,9 @@ public static class ServiceRegistration
                 configuration.Preset.Version,
                 expectedPresetHash,
                 workspaceRootAbsolute,
+                provider.GetRequiredService<IWorkspace>(),
+                connectionFactory,
+                System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName),
                 provider.GetRequiredService<TimeProvider>()));
 
         services.AddSingleton<VerifiedEnvironmentGate>();

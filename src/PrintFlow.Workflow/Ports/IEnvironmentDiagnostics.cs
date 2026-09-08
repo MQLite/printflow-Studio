@@ -16,6 +16,16 @@ public enum EnvironmentCheckStatus
 
     /// <summary>An observation worth showing that never closes Production (§8).</summary>
     Advisory,
+
+    /// <summary>A prerequisite prevented the check from running; Production remains closed.</summary>
+    Blocked,
+}
+
+/// <summary>Whether a row is passive/automatic or part of explicit live application verification.</summary>
+public enum EnvironmentCheckPhase
+{
+    Automatic,
+    LiveApplication,
 }
 
 /// <summary>
@@ -41,10 +51,13 @@ public sealed record EnvironmentCheckReport(
     EnvironmentCheckStatus Status,
     bool IsBlocking,
     string MessageKey,
-    string Detail);
+    string Detail,
+    string? Expected = null,
+    string? Current = null,
+    EnvironmentCheckPhase Phase = EnvironmentCheckPhase.Automatic);
 
 /// <summary>
-/// A bounded, read-only account of whether this workstation may run Production right now
+/// A bounded account of whether this workstation may run Production right now
 /// (Epic 11500 Part B §21).
 /// </summary>
 /// <param name="Verified">True only when every blocking check passed.</param>
@@ -55,10 +68,9 @@ public sealed record EnvironmentCheckReport(
 /// <param name="ObservedAt">When the dynamic half of this report was observed.</param>
 /// <param name="Checks">Every check that ran, in evaluation order.</param>
 /// <remarks>
-/// <b>Read-only, and deliberately incapable of changing anything.</b> There is no "enable",
-/// "ignore", "override" or "continue anyway" on this record or on
-/// <see cref="IEnvironmentDiagnostics"/>: the report exists so a person can see why Production is
-/// closed and go and fix the workstation, not so they can talk the gate out of its answer (§24).
+/// The report itself is immutable and never grants permission. There is no "enable", "ignore",
+/// "override" or "continue anyway": it exists so a person can see why Production is closed and
+/// fix the workstation, not so they can talk the gate out of its answer (§24).
 /// <para>
 /// It is also a snapshot, never a permission. <see cref="ObservedAt"/> is audit information; the
 /// gate re-asks the verifier on every Production request rather than consulting anything stored
@@ -73,7 +85,8 @@ public sealed record EnvironmentReadinessReport(
 {
     /// <summary>The blocking checks that closed Production.</summary>
     public IEnumerable<EnvironmentCheckReport> BlockingFailures =>
-        Checks.Where(c => c.IsBlocking && c.Status == EnvironmentCheckStatus.Failed);
+        Checks.Where(c => c.IsBlocking &&
+                          c.Status is EnvironmentCheckStatus.Failed or EnvironmentCheckStatus.Blocked);
 
     /// <summary>Observations that are reported and never block (§8).</summary>
     public IEnumerable<EnvironmentCheckReport> Advisories =>
@@ -81,16 +94,21 @@ public sealed record EnvironmentReadinessReport(
 }
 
 /// <summary>
-/// The read-only support seam onto workstation readiness (Epic 11500 Part B §21).
+/// The support seam onto workstation readiness (Epic 11500 Part B §21).
 /// </summary>
 /// <remarks>
 /// Separate from <see cref="IEnvironmentGate"/> in intent but implemented by the same object, so
 /// there is exactly one thing in the process that consults the workstation verifier and no
-/// second path by which a caller could reach it. Reading this never authorises anything, and
-/// authorising never consults a stored reading.
+/// second path by which a caller could reach it. <see cref="Read"/> is passive; the explicitly
+/// named <see cref="RunLiveChecksAsync"/> may launch or attach to the accepted applications and
+/// drive one contained synthetic probe. Neither operation authorises Production, and authorising
+/// never consults a stored reading.
 /// </remarks>
 public interface IEnvironmentDiagnostics
 {
     /// <summary>Re-observes the workstation and reports what it found. Changes nothing.</summary>
     EnvironmentReadinessReport Read();
+
+    /// <summary>Explicitly runs bounded launch, state, colour, and synthetic-image checks.</summary>
+    Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken);
 }

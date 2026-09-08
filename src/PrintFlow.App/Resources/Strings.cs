@@ -790,6 +790,20 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     /// <summary>Re-observes the dynamic workstation facts. It never re-reads a cached file (§8).</summary>
     internal static string Environment_Refresh => Get(nameof(Environment_Refresh));
 
+    internal static string Environment_RunLiveChecks => Get(nameof(Environment_RunLiveChecks));
+
+    internal static string Environment_RunLiveChecksHint => Get(nameof(Environment_RunLiveChecksHint));
+
+    internal static string Environment_Checking => Get(nameof(Environment_Checking));
+
+    internal static string Environment_AutomaticChecksHeading => Get(nameof(Environment_AutomaticChecksHeading));
+
+    internal static string Environment_LiveChecksHeading => Get(nameof(Environment_LiveChecksHeading));
+
+    internal static string Environment_Expected => Get(nameof(Environment_Expected));
+
+    internal static string Environment_Current => Get(nameof(Environment_Current));
+
     internal static string Environment_Preset => Get(nameof(Environment_Preset));
 
     internal static string Environment_PresetUnavailable => Get(nameof(Environment_PresetUnavailable));
@@ -810,6 +824,8 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Environment_StatusFailed => Get(nameof(Environment_StatusFailed));
 
     internal static string Environment_StatusAdvisory => Get(nameof(Environment_StatusAdvisory));
+
+    internal static string Environment_StatusBlocked => Get(nameof(Environment_StatusBlocked));
 
     internal static string Environment_Blocking => Get(nameof(Environment_Blocking));
 

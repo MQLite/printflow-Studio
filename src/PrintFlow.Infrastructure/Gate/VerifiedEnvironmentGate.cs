@@ -32,10 +32,12 @@ namespace PrintFlow.Infrastructure.Gate;
 /// approved them.
 /// </para>
 /// <para>
-/// <b>It launches nothing.</b> Deciding readiness must not put Photoshop, Meitu or Maintop on the
-/// operator's screen; the operation-time automation guards verify the live application when an
-/// operation actually runs (§16). Nor does it look at foreground ownership, which remains an
-/// operation-time question answered by <c>PhotoshopTargetLost</c> (§17).
+/// <b>Authorisation launches nothing.</b> <see cref="Verify"/> and the diagnostic
+/// <see cref="Read"/> only re-observe the current certified processes; neither puts Photoshop,
+/// Meitu or Maintop on the operator's screen. The separately named
+/// <see cref="RunLiveChecksAsync"/> is the sole explicit readiness operation allowed to launch or
+/// drive them. Per-attempt automation guards still re-check the live state immediately before an
+/// operation (§16), including foreground ownership through <c>PhotoshopTargetLost</c> (§17).
 /// </para>
 /// </remarks>
 public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiagnostics
@@ -103,6 +105,20 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
             [.. result.Checks.Select(ToReport)]);
     }
 
+    /// <inheritdoc />
+    public async Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken)
+    {
+        WorkstationVerificationResult result = await _verifier
+            .RunLiveChecksAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return new EnvironmentReadinessReport(
+            result.Verified,
+            result.Preset?.ToString(),
+            result.ObservedAt,
+            [.. result.Checks.Select(ToReport)]);
+    }
+
     /// <summary>The stable per-check resource key, for the resx and for tests to enumerate.</summary>
     internal static string MessageKeyFor(WorkstationVerificationCheck check) =>
         CheckMessageKeyPrefix + check;
@@ -135,7 +151,7 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
     /// not even name a check.
     /// </remarks>
     private static string PrimaryMessageKeyFor(WorkstationVerificationResult result) =>
-        result.Failures.Select(f => MessageKeyFor(f.Check)).FirstOrDefault() ?? GeneralMessageKey;
+        result.BlockingChecks.Select(f => MessageKeyFor(f.Check)).FirstOrDefault() ?? GeneralMessageKey;
 
     /// <summary>
     /// A bounded structured account of the refusal (§9).
@@ -150,7 +166,7 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
     /// </remarks>
     private static IReadOnlyDictionary<string, string> ContextFor(WorkstationVerificationResult result)
     {
-        ImmutableArray<WorkstationCheckResult> failures = [.. result.Failures.Take(MaxItemisedFailures)];
+        ImmutableArray<WorkstationCheckResult> failures = [.. result.BlockingChecks.Take(MaxItemisedFailures)];
 
         Dictionary<string, string> context = new(StringComparer.Ordinal)
         {
@@ -186,11 +202,17 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
             {
                 WorkstationCheckOutcome.Passed => EnvironmentCheckStatus.Passed,
                 WorkstationCheckOutcome.Failed => EnvironmentCheckStatus.Failed,
+                WorkstationCheckOutcome.Blocked => EnvironmentCheckStatus.Blocked,
                 _ => EnvironmentCheckStatus.Advisory,
             },
             check.Outcome != WorkstationCheckOutcome.Advisory,
             MessageKeyFor(check.Check),
-            Truncate(check.Explanation, MaxExplanationLength));
+            Truncate(check.Explanation, MaxExplanationLength),
+            check.Expected,
+            check.Observed,
+            check.Kind is WorkstationCheckKind.Live or WorkstationCheckKind.Smoke
+                ? EnvironmentCheckPhase.LiveApplication
+                : EnvironmentCheckPhase.Automatic);
 
     private static string Truncate(string text, int limit) =>
         text.Length <= limit ? text : string.Concat(text.AsSpan(0, limit - 1), "…");

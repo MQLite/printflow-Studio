@@ -21,6 +21,20 @@ public sealed record AcceptedExecutable(
 /// <summary>The canonical Photoshop Action file on disk (§14).</summary>
 public sealed record AcceptedActionArtifact(string SetName, string Path, long Bytes, Sha256 Sha256);
 
+/// <summary>The active Photoshop working spaces stated by the accepted preset.</summary>
+public sealed record AcceptedPhotoshopColourSettings(
+    string RgbWorkingSpace,
+    string CmykWorkingSpace,
+    string GrayWorkingSpace,
+    string SpotWorkingSpace,
+    string ConversionCommand,
+    bool ConvertToProfileCommandUsed,
+    Sha256 VisibleSettingsManifestSha256)
+{
+    public override string ToString() =>
+        $"RGB: {RgbWorkingSpace}; CMYK: {CmykWorkingSpace}; Gray: {GrayWorkingSpace}; Spot: {SpotWorkingSpace}";
+}
+
 /// <summary>The operating-system facts the preset makes a condition (§7).</summary>
 public sealed record AcceptedOperatingSystem(
     string Edition, string Version, string Build, string Architecture, string UiCulture);
@@ -68,4 +82,5 @@ public sealed record WorkstationRequirements(
     AcceptedExecutable Meitu,
     AcceptedExecutable Photoshop,
     AcceptedActionArtifact PhotoshopAction,
+    AcceptedPhotoshopColourSettings PhotoshopColourSettings,
     ImmutableArray<AcceptedEvidence> Evidence);

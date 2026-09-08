@@ -234,6 +234,16 @@ internal sealed class WorkstationVerificationFixture : IDisposable
                 executablePath = PhotoshopPath,
                 executableSha256 = DigestOf(PhotoshopPath),
                 uiLanguage = PhotoshopUiLanguage,
+                colourSettings = new
+                {
+                    rgbWorkingSpace = "Synthetic RGB",
+                    cmykWorkingSpace = "Synthetic CMYK",
+                    grayWorkingSpace = "Synthetic Gray",
+                    spotWorkingSpace = "Synthetic Spot",
+                    conversionCommand = "image>mode>CMYK",
+                    convertToProfileCommandUsed = false,
+                    visibleSettingsManifestSha256 = DigestOf(EvidencePaths[0]),
+                },
             },
             photoshopActionContract = new
             {

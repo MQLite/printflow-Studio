@@ -149,8 +149,19 @@ public sealed record SessionListItem(
 }
 
 /// <summary>The global automation lock's current holder, if any (MVP design invariant 7).</summary>
-public sealed record AutomationLockState(
-    SessionId? SessionId, DateTimeOffset? AcquiredAtUtc, int? ProcessId, string? MachineName)
+public enum AutomationLockPurpose
 {
-    public bool IsHeld => SessionId is not null;
+    Session,
+    EnvironmentVerification,
+}
+
+public sealed record AutomationLockState(
+    SessionId? SessionId,
+    DateTimeOffset? AcquiredAtUtc,
+    int? ProcessId,
+    string? MachineName,
+    AutomationLockPurpose? Purpose = null,
+    string? OwnerToken = null)
+{
+    public bool IsHeld => SessionId is not null || Purpose is not null || OwnerToken is not null;
 }

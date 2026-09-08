@@ -744,3 +744,44 @@ The bounded synthetic live proof used real SQLite, FileWorkspace, SessionService
 **PASS WITH NOTES:** redundant TIFF Working copies, unknown files, partial staging evidence and empty directories remain intentionally preserved. This is safe completion retention, not a claim of complete disk reclamation. **SCRUM-11107 remains open**, including its other SCRUM-11110/11112 gaps. The three-size test makes no SCRUM-11133 acceptance claim. Historical audit rows above are unchanged.
 
 Evidence: [SCRUM-11114 safe completion and retention cleanup report](scrum-11114-safe-completion-retention-cleanup.md), including exact AC, authority inventory, crash ordering, live proof, verification results and Git discipline.
+
+---
+
+## N. Coverage delta — SCRUM-11110 operating environment check completion (8 September 2026)
+
+**SCRUM-11110: historical PARTIAL → current FULL.** The exact original CSV row is Work Item
+**11503**, parent **11500**, *Build the Operating Environment Check Page*. The existing twelve
+automatic checks remain intact. Seven typed live/smoke checks now cover the shared automation lock,
+Meitu launchability and recognised state, Photoshop launchability and recognised state,
+unsaved/unknown refusal, actual active RGB/CMYK/Gray/Spot settings, and a contained exact-identity
+synthetic image open/close without save. `Blocked` distinguishes checks not run after a failed
+prerequisite.
+
+Passive page entry and Refresh still launch nothing. The explicit asynchronous live command uses
+the existing accepted foundations, retains the single `ProductionWorkstationVerifier` authority,
+never executes an unverified binary, never repairs settings or closes operator work, and leaves
+applications running. Its ephemeral certificate is tied to the same process identities and is
+re-observed by the Production gate; the existing per-attempt state guards remain and now also
+re-check Photoshop colour spaces and unsaved documents. Lock ownership is tokenised in migration
+0015 so live verification and production work cannot manipulate the applications concurrently or
+release one another's lock.
+
+The controlled fixed-workstation proof passed all ten blocking automatic checks and all seven live
+checks: Meitu launched to `KnownWelcome`; Photoshop attached to an existing accepted process at
+`KnownStartScreen` with no documents; its four working spaces exactly matched preset v1.16.0; the
+1×1 PrintFlow-owned image was opened, positively identified, closed without saving and cleaned;
+the lock was free afterwards. No customer file was used or modified. The two existing automatic
+advisories remained truthful and non-blocking.
+
+Evidence: clean build **0 warnings / 0 errors**; final targeted gate **224 passed, 0 failed, 0
+skipped**; final-source complete suite **11,513 passed, 0 failed, 0 skipped**. The preceding complete
+run's sole failure was a legacy synthetic W1 preset fixture missing the newly mandatory colour
+spaces; Product remained fail-closed, the fixture was corrected, and its isolated **3/3** plus the
+complete rerun passed. Full exact AC, classification, vocabulary, authority model, colour reader,
+probe/lock lifecycle, matrix, expected/current live facts and Git discipline:
+[SCRUM-11110 operating environment completion report](scrum-11110-operating-environment-check-completion.md).
+
+**Parent Epic SCRUM-11107 remains PARTIAL.** SCRUM-11112 recovery gaps remain outside this slice;
+SCRUM-11118 Settings/preset display is unchanged. Closing SCRUM-11110 does not close the parent.
+
+**PASS — SCRUM-11110 OPERATING ENVIRONMENT CHECK VERIFIED**

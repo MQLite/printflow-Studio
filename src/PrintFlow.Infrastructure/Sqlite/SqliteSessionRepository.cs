@@ -232,7 +232,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
 
             if (mutation.LockChange is { } lockChange)
             {
-                await ApplyLockChangeAsync(connection, transaction, lockChange);
+                int changed = await ApplyLockChangeAsync(connection, transaction, lockChange);
+                if (changed != 1)
+                {
+                    transaction.Rollback();
+                    return OperationResult.Fail<Unit>(
+                        FailureCode.AdapterUnavailable,
+                        "The global automation lock changed ownership before this session could update it.");
+                }
             }
 
             transaction.Commit();
@@ -264,13 +271,21 @@ public sealed class SqliteSessionRepository : ISessionRepository
         using SqliteConnection connection = _connectionFactory.Open();
 
         AutomationLockRow row = await connection.QuerySingleAsync<AutomationLockRow>(
-            "SELECT SessionId, AcquiredAtUtc, ProcessId, MachineName FROM AutomationLock WHERE Id = 1;");
+            "SELECT SessionId, AcquiredAtUtc, ProcessId, MachineName, Purpose, OwnerToken " +
+            "FROM AutomationLock WHERE Id = 1;");
 
         AutomationLockState state = new(
             row.SessionId is string sid ? SessionId.From(Guid.Parse(sid)) : null,
             Mappers.ToDateTimeOffsetOrNull(row.AcquiredAtUtc),
             row.ProcessId,
-            row.MachineName);
+            row.MachineName,
+            row.Purpose switch
+            {
+                "SESSION" => AutomationLockPurpose.Session,
+                "ENVIRONMENT_VERIFICATION" => AutomationLockPurpose.EnvironmentVerification,
+                _ => null,
+            },
+            row.OwnerToken);
 
         return OperationResult.Ok(state);
     }
@@ -705,12 +720,18 @@ public sealed class SqliteSessionRepository : ISessionRepository
         return connection.ExecuteAsync(sql, row, transaction);
     }
 
-    private static Task ApplyLockChangeAsync(
+    private static Task<int> ApplyLockChangeAsync(
         SqliteConnection connection, SqliteTransaction transaction, AutomationLockChange change)
     {
         string sql = change.Action == AutomationLockAction.Acquire
-            ? "UPDATE AutomationLock SET SessionId = @sessionId, AcquiredAtUtc = @atUtc, ProcessId = @processId, MachineName = @machineName WHERE Id = 1;"
-            : "UPDATE AutomationLock SET SessionId = NULL, AcquiredAtUtc = NULL, ProcessId = NULL, MachineName = NULL WHERE Id = 1;";
+            ? "UPDATE AutomationLock SET SessionId = @sessionId, AcquiredAtUtc = @atUtc, " +
+              "ProcessId = @processId, MachineName = @machineName, Purpose = 'SESSION', OwnerToken = NULL " +
+              "WHERE Id = 1 AND (SessionId IS NULL OR SessionId = @sessionId) " +
+              "AND (Purpose IS NULL OR Purpose = 'SESSION') AND OwnerToken IS NULL;"
+            : "UPDATE AutomationLock SET SessionId = NULL, AcquiredAtUtc = NULL, ProcessId = NULL, " +
+              "MachineName = NULL, Purpose = NULL, OwnerToken = NULL " +
+              "WHERE Id = 1 AND ((SessionId = @sessionId AND (Purpose IS NULL OR Purpose = 'SESSION')) " +
+              "OR (SessionId IS NULL AND Purpose IS NULL AND OwnerToken IS NULL));";
 
         return connection.ExecuteAsync(sql, new
         {

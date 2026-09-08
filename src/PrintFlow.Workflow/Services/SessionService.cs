@@ -1343,9 +1343,12 @@ public sealed class SessionService : ISessionService
 
             if (lockState.Value.IsHeld && lockState.Value.SessionId != aggregate.Session.Id)
             {
+                string holder = lockState.Value.SessionId is { } sessionId
+                    ? $"session {sessionId}"
+                    : "the Production Readiness live verification";
                 return OperationResult.Fail<SessionView>(
                     FailureCode.AdapterUnavailable,
-                    $"Meitu/Photoshop is already controlled by session {lockState.Value.SessionId}.");
+                    $"Meitu/Photoshop is already controlled by {holder}.");
             }
 
             acquire = new AutomationLockChange(

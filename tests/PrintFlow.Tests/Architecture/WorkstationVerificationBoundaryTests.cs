@@ -192,7 +192,7 @@ public sealed class WorkstationVerificationBoundaryTests
     /// <summary>Static verification never starts an application (§17).</summary>
     [Theory]
     [InlineData(".Start(")]
-    [InlineData("Launch")]
+    [InlineData("Process.Start(")]
     public void No_verification_source_file_starts_a_process(string bannedToken) =>
         AssertAbsentUnder(
             VerificationDirectory,

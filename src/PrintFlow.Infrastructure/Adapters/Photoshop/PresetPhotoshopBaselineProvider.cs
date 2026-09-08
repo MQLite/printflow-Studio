@@ -164,6 +164,12 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             return OperationResult.Fail<PhotoshopBaseline>(cleanup.Failure);
         }
 
+        OperationResult<PhotoshopColourSettingsContract> colourSettings = ReadColourSettings(contract);
+        if (colourSettings.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopBaseline>(colourSettings.Failure);
+        }
+
         return OperationResult.Ok(new PhotoshopBaseline(
             executablePath,
             digest,
@@ -177,7 +183,24 @@ public sealed class PresetPhotoshopBaselineProvider : IPhotoshopBaselineProvider
             openDialog.Value,
             identity.Value,
             w1.Value,
-            cleanup.Value));
+            cleanup.Value,
+            colourSettings.Value));
+    }
+
+    private static OperationResult<PhotoshopColourSettingsContract> ReadColourSettings(JsonElement contract)
+    {
+        JsonElement settings = contract.TryGetProperty("colourSettings", out JsonElement value)
+            ? value
+            : default;
+        string rgb = StringOrNull(settings, "rgbWorkingSpace") ?? string.Empty;
+        string cmyk = StringOrNull(settings, "cmykWorkingSpace") ?? string.Empty;
+        string gray = StringOrNull(settings, "grayWorkingSpace") ?? string.Empty;
+        string spot = StringOrNull(settings, "spotWorkingSpace") ?? string.Empty;
+        return rgb.Length > 0 && cmyk.Length > 0 && gray.Length > 0 && spot.Length > 0
+            ? OperationResult.Ok(new PhotoshopColourSettingsContract(rgb, cmyk, gray, spot))
+            : OperationResult.Fail<PhotoshopColourSettingsContract>(
+                FailureCode.EnvironmentNotVerified,
+                "The verified preset's Photoshop colour-settings contract does not name all four working spaces.");
     }
 
     /// <summary>

@@ -598,7 +598,8 @@ public sealed class MaximumBoundsBoundaryTests
         // The documented rebuild preserves all existing rows, constraints, indexes and triggers.
         // SCRUM-11092 / SCRUM-11112: manual result provenance and manual cutout authority.
         // SCRUM-11114: verified Revision relocation and explicit rejected-Meitu expiry.
-        scripts.Last().ShouldBe("0014_revision_retention.sql");
+        // SCRUM-11110: the same singleton lock also owns bounded environment verification.
+        scripts.Last().ShouldBe("0015_environment_verification_lock.sql");
     }
 
     // -------------------------------------------------------------------------------------

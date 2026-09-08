@@ -689,6 +689,26 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
     }
 
     /// <inheritdoc />
+    public async Task<OperationResult<MeituReadiness>> ReinspectAsync(
+        MeituReadiness previous, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(previous);
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituReadiness>(baseline.Failure);
+        }
+
+        OperationResult<Unit> identity = VerifyExecutableIdentity(baseline.Value);
+        if (identity.IsFailure)
+        {
+            return OperationResult.Fail<MeituReadiness>(identity.Failure);
+        }
+
+        return await AttachAsync(previous.Target.Process, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
     public async Task<OperationResult<MeituOpenedWorkingCopy>> OpenWorkingCopyAsync(
         WorkspaceFileRef workingCopy, IAutomationStopSignal stop, CancellationToken cancellationToken)
     {

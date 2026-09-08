@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Files;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Fixtures;
@@ -24,6 +25,42 @@ namespace PrintFlow.Tests.Integration.Verification;
 /// </remarks>
 public sealed class VerifiedEnvironmentGateTests
 {
+    [Theory]
+    [InlineData(WorkstationVerificationCheck.ExternalApplicationAutomationLock)]
+    [InlineData(WorkstationVerificationCheck.MeituLaunchability)]
+    [InlineData(WorkstationVerificationCheck.MeituSafeStartingState)]
+    [InlineData(WorkstationVerificationCheck.PhotoshopLaunchability)]
+    [InlineData(WorkstationVerificationCheck.PhotoshopSafeStartingState)]
+    [InlineData(WorkstationVerificationCheck.PhotoshopColourSettings)]
+    [InlineData(WorkstationVerificationCheck.PhotoshopTestImageRoundTrip)]
+    public void Every_live_safety_failure_has_the_same_page_and_gate_verdict(
+        WorkstationVerificationCheck failedCheck)
+    {
+        WorkstationVerificationResult result = WorkstationVerificationResult.From(
+            new PrintFlow.Domain.Outputs.ProductionPresetRef(
+                "test", "1", Sha256.Parse(new string('A', 64))),
+            [
+                WorkstationCheckResult.Passed(
+                    WorkstationVerificationCheck.PresetIntegrity,
+                    WorkstationCheckKind.Immutable, "accepted", "accepted"),
+                WorkstationCheckResult.Failed(
+                    failedCheck,
+                    failedCheck == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
+                        ? WorkstationCheckKind.Smoke : WorkstationCheckKind.Live,
+                    FailureCode.EnvironmentNotVerified, "expected", "current", "specific failure"),
+            ],
+            DateTimeOffset.UnixEpoch);
+        VerifiedEnvironmentGate gate = new(new FixedVerifier(result));
+
+        EnvironmentReadinessReport page = gate.Read();
+        OperationResult<PrintFlow.Domain.Results.Unit> production =
+            gate.Verify(AdapterExecutionMode.Production);
+
+        page.Verified.ShouldBeFalse();
+        page.BlockingFailures.ShouldContain(check => check.CheckKey == failedCheck.ToString());
+        production.IsFailure.ShouldBeTrue();
+        production.Failure.MessageKey.ShouldBe(VerifiedEnvironmentGate.MessageKeyFor(failedCheck));
+    }
     // ---------------------------------------------------------------- §28.1, §11, §28.22
 
     /// <summary>
@@ -388,8 +425,9 @@ public sealed class VerifiedEnvironmentGateTests
         report.Checks.ShouldAllBe(c => c.MessageKey.StartsWith("EnvironmentCheck_", StringComparison.Ordinal));
 
         // Reading the report is not permission, and there is nothing on it that could become one.
-        typeof(IEnvironmentDiagnostics).GetMethods().ShouldHaveSingleItem()
-            .Name.ShouldBe(nameof(IEnvironmentDiagnostics.Read));
+        typeof(IEnvironmentDiagnostics).GetMethods().Select(method => method.Name).ShouldBe(
+            [nameof(IEnvironmentDiagnostics.Read), nameof(IEnvironmentDiagnostics.RunLiveChecksAsync)],
+            ignoreOrder: true);
         typeof(EnvironmentReadinessReport).GetMethods()
             .Where(m => m.DeclaringType == typeof(EnvironmentReadinessReport))
             .ShouldNotContain(m => m.Name.Contains("Enable", StringComparison.OrdinalIgnoreCase) ||
@@ -582,5 +620,17 @@ public sealed class VerifiedEnvironmentGateTests
     {
         public WorkstationVerificationResult Verify() =>
             throw new InvalidOperationException("Fake execution must not consult the workstation verifier.");
+
+        public Task<WorkstationVerificationResult> RunLiveChecksAsync(CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Fake execution must not consult the workstation verifier.");
+    }
+
+    private sealed class FixedVerifier(WorkstationVerificationResult result)
+        : IProductionWorkstationVerifier
+    {
+        public WorkstationVerificationResult Verify() => result;
+
+        public Task<WorkstationVerificationResult> RunLiveChecksAsync(CancellationToken cancellationToken) =>
+            Task.FromResult(result);
     }
 }

@@ -170,13 +170,23 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
     /// and it takes nothing a caller could use to steer it.
     /// </remarks>
     [Fact]
-    public void The_diagnostics_seam_offers_exactly_one_read_and_no_mutation()
+    public void The_diagnostics_seam_separates_passive_read_from_explicit_live_verification()
     {
-        MethodInfo read = typeof(IEnvironmentDiagnostics).GetMethods().ShouldHaveSingleItem();
+        MethodInfo[] methods = typeof(IEnvironmentDiagnostics).GetMethods();
+        methods.Select(method => method.Name).ShouldBe(
+            [nameof(IEnvironmentDiagnostics.Read), nameof(IEnvironmentDiagnostics.RunLiveChecksAsync)],
+            ignoreOrder: true);
 
+        MethodInfo read = methods.Single(method => method.Name == nameof(IEnvironmentDiagnostics.Read));
         read.Name.ShouldBe(nameof(IEnvironmentDiagnostics.Read));
         read.ReturnType.ShouldBe(typeof(EnvironmentReadinessReport));
         read.GetParameters().ShouldBeEmpty("a reader that took an argument could be steered.");
+
+        MethodInfo live = methods.Single(method =>
+            method.Name == nameof(IEnvironmentDiagnostics.RunLiveChecksAsync));
+        live.ReturnType.ShouldBe(typeof(Task<EnvironmentReadinessReport>));
+        live.GetParameters().Select(parameter => parameter.ParameterType)
+            .ShouldBe([typeof(CancellationToken)]);
     }
 
     /// <summary>
@@ -221,7 +231,7 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
     /// surface stopped observing.
     /// </remarks>
     [Fact]
-    public void The_readiness_screen_offers_only_refresh_and_back()
+    public void The_readiness_screen_offers_passive_refresh_explicit_live_checks_and_back()
     {
         string[] commands =
         [
@@ -231,7 +241,8 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
                 .Select(property => property.Name),
         ];
 
-        commands.ShouldBe(["RefreshCommand", "BackToHomeCommand"], ignoreOrder: true);
+        commands.ShouldBe(
+            ["RefreshCommand", "RunLiveChecksCommand", "BackToHomeCommand"], ignoreOrder: true);
     }
 
     // ---------------------------------------------------------------- §11.7

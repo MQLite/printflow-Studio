@@ -102,6 +102,13 @@ public sealed class WorkstationPresetW1ContractEvidenceTests : IDisposable
                     ["mainWindowClassName"] = "Photoshop",
                     ["noDocumentWindowTitle"] = "Adobe Photoshop CC 2019",
                 },
+                ["colourSettings"] = new JsonObject
+                {
+                    ["rgbWorkingSpace"] = "fixture-rgb",
+                    ["cmykWorkingSpace"] = "fixture-cmyk",
+                    ["grayWorkingSpace"] = "fixture-gray",
+                    ["spotWorkingSpace"] = "fixture-spot",
+                },
             },
             ["photoshopActionContract"] = new JsonObject
             {

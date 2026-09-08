@@ -128,12 +128,16 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 // to make an output vanish so the workflow's own failure handling can be tested,
                 // and it never runs against a Revision, an approved file or a rejected one. It is
                 // exempted by name so that a second exemption is a visible edit here.
-                if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs"))
+                // SCRUM-11110's second exemption is its uniquely named, hash-checked synthetic
+                // probe. It can delete only after Photoshop proves that exact owned document
+                // closed; it has no session/Revision/Approved reference to dispose of.
+                if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs" or
+                                 "ProductionLiveWorkstationVerifier.cs"))
                 {
                     source.ShouldNotContain("File.Delete(", Case.Sensitive, $"{name} deletes a file outright.");
                 }
 
-                if (name != "FileWorkspace.cs")
+                if (name is not ("FileWorkspace.cs" or "ProductionLiveWorkstationVerifier.cs"))
                 {
                     source.ShouldNotContain(
                         "Directory.Delete(", Case.Sensitive, $"{name} deletes a directory outright.");

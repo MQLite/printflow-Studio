@@ -183,6 +183,7 @@ public sealed class PhotoshopBoundaryTests
         methods.ShouldBe(
         [
             nameof(IPhotoshopAutomationFoundation.EnsureReadyAsync),
+            nameof(IPhotoshopAutomationFoundation.ReinspectAsync),
             nameof(IPhotoshopAutomationFoundation.OpenManagedWorkingFileAsync),
             nameof(IPhotoshopAutomationFoundation.CloseExactDocumentAsync),
         ], ignoreOrder: true);

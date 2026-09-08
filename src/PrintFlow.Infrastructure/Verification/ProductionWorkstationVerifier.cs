@@ -2,6 +2,10 @@ using System.Collections.Immutable;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Infrastructure.Adapters.Meitu;
+using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Sqlite;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Verification;
 
@@ -26,6 +30,11 @@ public interface IProductionWorkstationVerifier
     /// (§16). It launches nothing (§17), writes nothing, and reads no customer content (§11).
     /// </remarks>
     WorkstationVerificationResult Verify();
+
+    /// <summary>
+    /// Runs the explicit, bounded external-application verification phase after static trust passes.
+    /// </summary>
+    Task<WorkstationVerificationResult> RunLiveChecksAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -55,6 +64,9 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     private readonly IWorkstationFactReader _facts;
     private readonly IWorkstationArtifactReader _artifacts;
     private readonly TimeProvider _clock;
+    private readonly IProductionLiveWorkstationVerifier? _live;
+    private readonly object _liveEvidenceSync = new();
+    private WorkstationLiveEvidence? _liveEvidence;
 
     private readonly Lazy<RootOfTrust> _rootOfTrust;
     private ImmutableArray<WorkstationCheckResult>? _baselineChecks;
@@ -76,6 +88,21 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         IWorkstationFactReader facts,
         IWorkstationArtifactReader artifacts,
         TimeProvider clock)
+        : this(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
+            configuredWorkspaceRoot, facts, artifacts, clock, live: null)
+    {
+    }
+
+    internal ProductionWorkstationVerifier(
+        string manifestAbsolutePath,
+        string presetId,
+        string presetVersion,
+        Sha256 expectedManifestSha256,
+        string configuredWorkspaceRoot,
+        IWorkstationFactReader facts,
+        IWorkstationArtifactReader artifacts,
+        TimeProvider clock,
+        IProductionLiveWorkstationVerifier? live)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(manifestAbsolutePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(presetId);
@@ -93,6 +120,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         _facts = facts;
         _artifacts = artifacts;
         _clock = clock;
+        _live = live;
         _rootOfTrust = new Lazy<RootOfTrust>(EstablishRootOfTrust);
     }
 
@@ -113,8 +141,99 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
             new FileSystemArtifactReader(),
             clock);
 
+    /// <summary>Builds the full automatic-plus-live verifier used by the application.</summary>
+    public static ProductionWorkstationVerifier ForWorkstation(
+        string manifestAbsolutePath,
+        string presetId,
+        string presetVersion,
+        Sha256 expectedManifestSha256,
+        string configuredWorkspaceRoot,
+        IWorkspace workspace,
+        SqliteConnectionFactory connections,
+        string evidenceDirectory,
+        TimeProvider clock)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        ArgumentNullException.ThrowIfNull(connections);
+        ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
+
+        IMeituAutomationFoundation meitu = MeituAutomationComposition.CreateFoundation(
+            manifestAbsolutePath, expectedManifestSha256, workspace, evidenceDirectory, clock);
+        IPhotoshopAutomationFoundation photoshop = PhotoshopAutomationComposition.CreateFoundation(
+            manifestAbsolutePath, expectedManifestSha256, workspace, evidenceDirectory, clock);
+        IProductionLiveWorkstationVerifier live = new ProductionLiveWorkstationVerifier(
+            meitu,
+            photoshop,
+            new RotPhotoshopRuntimeFactReader(),
+            new SqliteEnvironmentAutomationLock(connections, Environment.ProcessId, Environment.MachineName),
+            workspace,
+            clock);
+
+        return new ProductionWorkstationVerifier(
+            manifestAbsolutePath,
+            presetId,
+            presetVersion,
+            expectedManifestSha256,
+            configuredWorkspaceRoot,
+            new Win32WorkstationFactReader(),
+            new FileSystemArtifactReader(),
+            clock,
+            live);
+    }
+
     /// <inheritdoc />
     public WorkstationVerificationResult Verify()
+    {
+        WorkstationVerificationResult automatic = VerifyAutomatic();
+        if (_live is null || automatic.Preset is null || !automatic.Verified)
+        {
+            return automatic;
+        }
+
+        WorkstationLiveEvidence? evidence;
+        lock (_liveEvidenceSync) evidence = _liveEvidence;
+        WorkstationLiveVerification live = _live.Reobserve(
+            _rootOfTrust.Value.Requirements!, evidence);
+        if (live.Evidence is null)
+        {
+            lock (_liveEvidenceSync) _liveEvidence = null;
+        }
+
+        return WorkstationVerificationResult.From(
+            automatic.Preset, [.. automatic.Checks, .. live.Checks], automatic.ObservedAt);
+    }
+
+    /// <inheritdoc />
+    public async Task<WorkstationVerificationResult> RunLiveChecksAsync(
+        CancellationToken cancellationToken)
+    {
+        WorkstationVerificationResult automatic = VerifyAutomatic();
+        if (_live is null)
+        {
+            return automatic;
+        }
+
+        WorkstationLiveVerification live;
+        if (automatic.Preset is null || !automatic.Verified)
+        {
+            live = new WorkstationLiveVerification(
+                ProductionLiveWorkstationVerifier.BlockedChecks(
+                    "Automatic workstation checks must pass before applications are launched."), null);
+        }
+        else
+        {
+            live = await _live.RunAsync(_rootOfTrust.Value.Requirements!, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        lock (_liveEvidenceSync) _liveEvidence = live.Evidence;
+        return WorkstationVerificationResult.From(
+            automatic.Preset,
+            [.. automatic.Checks, .. live.Checks],
+            _clock.GetUtcNow());
+    }
+
+    private WorkstationVerificationResult VerifyAutomatic()
     {
         RootOfTrust root = _rootOfTrust.Value;
         DateTimeOffset observedAt = _clock.GetUtcNow();

@@ -15,7 +15,10 @@
             by the report's own IsBlocking flag rather than by anything decided here (§5).
         -->
         <DataTemplate x:Key="CheckRowTemplate">
-            <Border BorderBrush="#22000000" BorderThickness="0,0,0,1" Padding="6,8">
+            <Border BorderBrush="#22000000"
+                    BorderThickness="0,0,0,1"
+                    Padding="6,8"
+                    AutomationProperties.AutomationId="{Binding AutomationId}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -39,6 +42,18 @@
                                    TextWrapping="Wrap"
                                    Opacity="0.65"
                                    Margin="0,2,12,0" />
+
+                        <TextBlock Text="{Binding ExpectedDisplay}"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.75"
+                                   Margin="0,2,12,0"
+                                   Visibility="{Binding HasExpected, Converter={StaticResource BoolToVisibility}}" />
+
+                        <TextBlock Text="{Binding CurrentDisplay}"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.75"
+                                   Margin="0,2,12,0"
+                                   Visibility="{Binding HasCurrent, Converter={StaticResource BoolToVisibility}}" />
                     </StackPanel>
 
                     <TextBlock Grid.Column="1"
@@ -68,11 +83,18 @@
 
         <DockPanel Grid.Row="0" LastChildFill="False">
             <TextBlock Text="{Binding Heading}" FontSize="24" FontWeight="SemiBold" />
-            <!-- The only thing this screen can do: ask the gate to look again (§4). -->
-            <Button DockPanel.Dock="Right"
-                    Content="{Binding RefreshLabel}"
-                    Command="{Binding RefreshCommand}"
-                    Padding="14,6" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="{Binding RunLiveChecksLabel}"
+                        Command="{Binding RunLiveChecksCommand}"
+                        AutomationProperties.AutomationId="Environment.RunLiveChecks"
+                        ToolTip="{Binding RunLiveChecksHint}"
+                        Padding="14,6"
+                        Margin="0,0,8,0" />
+                <Button Content="{Binding RefreshLabel}"
+                        Command="{Binding RefreshCommand}"
+                        AutomationProperties.AutomationId="Environment.Refresh"
+                        Padding="14,6" />
+            </StackPanel>
         </DockPanel>
 
         <TextBlock Grid.Row="1" Text="{Binding Hint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,6,0,12" />
@@ -127,12 +149,28 @@
                               ItemTemplate="{StaticResource CheckRowTemplate}"
                               Margin="0,4,0,0" />
 
-                <TextBlock Text="{Binding ChecksHeading}"
+                <TextBlock Text="{Binding AutomaticChecksHeading}"
                            FontSize="16"
                            FontWeight="SemiBold"
                            Margin="0,18,0,0" />
 
-                <ItemsControl ItemsSource="{Binding Checks}"
+                <ItemsControl ItemsSource="{Binding AutomaticChecks}"
+                              AutomationProperties.AutomationId="EnvironmentAutomaticChecks"
+                              ItemTemplate="{StaticResource CheckRowTemplate}"
+                              Margin="0,4,0,0" />
+
+                <TextBlock Text="{Binding LiveChecksHeading}"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,18,0,0" />
+
+                <TextBlock Text="{Binding CheckActivityText}"
+                           TextWrapping="Wrap"
+                           Opacity="0.7"
+                           Margin="0,4,0,4" />
+
+                <ItemsControl ItemsSource="{Binding LiveApplicationChecks}"
+                              AutomationProperties.AutomationId="EnvironmentLiveChecks"
                               ItemTemplate="{StaticResource CheckRowTemplate}"
                               Margin="0,4,0,0" />
             </StackPanel>
@@ -149,6 +187,7 @@
 
             <Button Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
+                    AutomationProperties.AutomationId="Environment.BackToHome"
                     Padding="14,6"
                     HorizontalAlignment="Left" />
         </StackPanel>

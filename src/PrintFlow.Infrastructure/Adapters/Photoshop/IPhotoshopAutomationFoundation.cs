@@ -73,6 +73,10 @@ public interface IPhotoshopAutomationFoundation
     /// </remarks>
     Task<OperationResult<PhotoshopReadiness>> EnsureReadyAsync(CancellationToken cancellationToken);
 
+    /// <summary>Re-observes a previously verified process without launching or changing it.</summary>
+    Task<OperationResult<PhotoshopReadiness>> ReinspectAsync(
+        PhotoshopReadiness previous, CancellationToken cancellationToken);
+
     /// <summary>
     /// Opens one managed Working file in the verified Photoshop and proves by absolute path that
     /// it is what got loaded.

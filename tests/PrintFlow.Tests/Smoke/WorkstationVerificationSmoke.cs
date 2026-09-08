@@ -1,7 +1,13 @@
 using System.IO;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Composition;
 using PrintFlow.Domain.Files;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Infrastructure.Verification;
+using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 using Xunit.Abstractions;
 
 namespace PrintFlow.Tests.Smoke;
@@ -77,6 +83,64 @@ public sealed class WorkstationVerificationSmoke(ITestOutputHelper output)
         // Epic 11500 Part D the installation ships Production, and the claim that survives is the
         // one this whole file rests on — nothing here composes an adapter, so nothing here can
         // change what runs, in either direction.
+    }
+
+    /// <summary>
+    /// Explicitly drives the bounded live phase. This is separate from the passive smoke so an
+    /// ordinary readiness observation can never launch an application by surprise.
+    /// </summary>
+    [Fact]
+    public async Task Run_the_explicit_live_application_verification()
+    {
+        if (Environment.GetEnvironmentVariable("PRINTFLOW_WORKSTATION_LIVE_VERIFY") != "1") return;
+
+        string repositoryRoot = RepositoryRoot();
+        PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(
+            Path.Combine(repositoryRoot, "appsettings.json"));
+        string scratch = Path.Combine(
+            Path.GetTempPath(), "printflow-live-readiness-" + Guid.NewGuid().ToString("N"));
+        string database = Path.Combine(scratch, "smoke.db");
+        Directory.CreateDirectory(scratch);
+
+        try
+        {
+            SqliteConnectionFactory connections = new(database);
+            using (SqliteConnection connection = connections.Open())
+                MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+            using ServiceProvider services = ServiceRegistration.BuildServiceProvider(
+                configuration, Path.GetFullPath(configuration.Workspace.Root), connections);
+
+            IEnvironmentDiagnostics diagnostics = services.GetRequiredService<IEnvironmentDiagnostics>();
+            EnvironmentReadinessReport report = await diagnostics.RunLiveChecksAsync(CancellationToken.None);
+
+            output.WriteLine($"verified          : {report.Verified}");
+            output.WriteLine($"preset            : {report.PresetIdentity ?? "(unverified)"}");
+            output.WriteLine($"observed           : {report.ObservedAt:u}");
+            foreach (EnvironmentCheckReport check in report.Checks)
+            {
+                output.WriteLine($"[{check.Status,-8}] {check.Phase,-15} {check.CheckKey}");
+                output.WriteLine($"             expected: {check.Expected ?? "-"}");
+                output.WriteLine($"             current : {check.Current ?? "-"}");
+                output.WriteLine($"             {check.Detail}");
+            }
+
+            AutomationLockState lockState = (await services.GetRequiredService<ISessionRepository>()
+                .GetAutomationLockAsync(CancellationToken.None)).Value;
+            output.WriteLine($"lock free          : {!lockState.IsHeld}");
+            lockState.IsHeld.ShouldBeFalse("every terminal live-verification path must release the shared lock");
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            try
+            {
+                if (Directory.Exists(scratch)) Directory.Delete(scratch, recursive: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                output.WriteLine($"scratch retained   : {scratch} ({ex.Message})");
+            }
+        }
     }
 
     private static string RepositoryRoot()

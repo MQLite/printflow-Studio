@@ -48,6 +48,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
     private readonly GuardedPhotoshopDocumentPreparer _preparer;
     private readonly GuardedPhotoshopW1Executor _w1;
     private readonly GuardedPhotoshopTiffSaver _tiff;
+    private readonly IPhotoshopRuntimeFactReader? _runtimeFacts;
 
     public ProductionPhotoshopOutputProcessor(
         IPhotoshopBaselineProvider baselines,
@@ -67,7 +68,23 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
             new RotPhotoshopW1NativeBridge(),
             new RotPhotoshopTiffNativeBridge(),
             new ProductionTiffInspector(),
-            new FileSystemPhotoshopTiffFileProbe())
+            new FileSystemPhotoshopTiffFileProbe(),
+            runtimeFacts: null)
+    {
+    }
+
+    internal ProductionPhotoshopOutputProcessor(
+        IPhotoshopBaselineProvider baselines,
+        IExternalAppWindowLocator locator,
+        IPhotoshopUiDriver driver,
+        IWorkspace workspace,
+        PhotoshopAutomationOptions options,
+        TimeProvider clock,
+        IPhotoshopRuntimeFactReader runtimeFacts)
+        : this(baselines, locator, driver, workspace, options, clock,
+            new RotPhotoshopPreparationNativeBridge(), new RotPhotoshopW1NativeBridge(),
+            new RotPhotoshopTiffNativeBridge(), new ProductionTiffInspector(),
+            new FileSystemPhotoshopTiffFileProbe(), runtimeFacts)
     {
     }
 
@@ -111,7 +128,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         IPhotoshopW1NativeBridge w1NativeBridge,
         IPhotoshopTiffNativeBridge tiffNativeBridge,
         IProductionTiffInspector tiffInspector,
-        IPhotoshopTiffFileProbe tiffProbe)
+        IPhotoshopTiffFileProbe tiffProbe,
+        IPhotoshopRuntimeFactReader? runtimeFacts = null)
     {
         ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(locator);
@@ -131,6 +149,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         _workspace = workspace;
         _options = options;
         _clock = clock;
+        _runtimeFacts = runtimeFacts;
         _preparer = new GuardedPhotoshopDocumentPreparer(baselines, locator, driver, nativeBridge);
         _w1 = new GuardedPhotoshopW1Executor(baselines, _preparer, w1NativeBridge);
         _tiff = new GuardedPhotoshopTiffSaver(
@@ -338,6 +357,44 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
     }
 
     /// <inheritdoc />
+    public async Task<OperationResult<PhotoshopReadiness>> ReinspectAsync(
+        PhotoshopReadiness previous, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(previous);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopReadiness>(baseline.Failure);
+        }
+
+        OperationResult<Unit> identity = PhotoshopExecutableIdentityRule.Verify(baseline.Value);
+        if (identity.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopReadiness>(identity.Failure);
+        }
+
+        OperationResult<PhotoshopTarget> target = IdentifyWindow(previous.Target.Process, baseline.Value);
+        if (target.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopReadiness>(target.Failure);
+        }
+
+        OperationResult<PhotoshopStateSnapshot> state = await _driver
+            .InspectStateAsync(target.Value, expectedDocumentFileName: null, cancellationToken)
+            .ConfigureAwait(false);
+        if (state.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopReadiness>(state.Failure);
+        }
+
+        return state.Value.IsSafeStartingState
+            ? OperationResult.Ok(new PhotoshopReadiness(target.Value, state.Value, previous.WasLaunched))
+            : OperationResult.Fail<PhotoshopReadiness>(UnsafeState(state.Value, previous.WasLaunched));
+    }
+
+    /// <inheritdoc />
     public async Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
         WorkspaceFileRef workingFile, CancellationToken cancellationToken)
     {
@@ -366,6 +423,31 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         if (ready.IsFailure)
         {
             return OperationResult.Fail<PhotoshopOpenedDocument>(ready.Failure);
+        }
+
+        if (_runtimeFacts is not null)
+        {
+            OperationResult<PhotoshopRuntimeFacts> runtime = _runtimeFacts.Read(
+                _baselines.GetVerifiedBaseline().Value.ExecutablePath);
+            if (runtime.IsFailure)
+                return OperationResult.Fail<PhotoshopOpenedDocument>(runtime.Failure);
+
+            PhotoshopColourSettingsContract? expectedSettings = _baselines.GetVerifiedBaseline().Value.ColourSettings;
+            if (expectedSettings is null ||
+                !PhotoshopColourSettingsRule.Matches(expectedSettings, runtime.Value.ColourSettings))
+                return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
+                    FailureCode.EnvironmentNotVerified,
+                    "Photoshop's active colour settings do not match the accepted preset. Nothing was opened.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+
+            if (runtime.Value.UnsavedDocumentCount > 0)
+                return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
+                    FailureCode.PhotoshopUnknownState,
+                    $"Photoshop has {runtime.Value.UnsavedDocumentCount} document(s) with unsaved changes. " +
+                    "PrintFlow did not save, close, or alter them.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
         }
 
         // The only path join in this adapter, and it goes through the workspace — which is the

@@ -227,7 +227,8 @@ public sealed class EnvironmentReadinessScreenTests
         EnvironmentReadinessViewModel screen = ScreenOver(fixture);
         await screen.OpenAsync(CancellationToken.None);
 
-        screen.Checks.Count.ShouldBe(Enum.GetValues<WorkstationVerificationCheck>().Length);
+        screen.Checks.Count.ShouldBe(Enum.GetValues<WorkstationVerificationCheck>().Length - 7,
+            "the synthetic verifier exercises the passive phase only");
         foreach (EnvironmentCheckRow row in screen.Checks)
         {
             row.Name.ShouldNotStartWith("EnvironmentCheck", Case.Sensitive);
@@ -367,7 +368,7 @@ public sealed class EnvironmentReadinessScreenTests
         await screen.RefreshCommand.ExecuteAsync(null);
 
         screen.BlockingFailures.ShouldBeEmpty();
-        screen.Checks.Count.ShouldBe(Enum.GetValues<WorkstationVerificationCheck>().Length,
+        screen.Checks.Count.ShouldBe(Enum.GetValues<WorkstationVerificationCheck>().Length - 7,
             "a refresh replaces the reading; it does not append to it.");
     }
 
@@ -472,6 +473,42 @@ public sealed class EnvironmentReadinessScreenTests
         navigation.WorkflowSelectionFor.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task The_explicit_live_command_replaces_the_passive_report_with_typed_live_detail()
+    {
+        EnvironmentReadinessReport passive = new(false, "preset", DateTimeOffset.UnixEpoch,
+        [
+            new EnvironmentCheckReport("OperatingSystem", EnvironmentCheckStatus.Passed, true,
+                "EnvironmentCheck_OperatingSystem", "matched"),
+        ]);
+        EnvironmentReadinessReport live = new(false, "preset", DateTimeOffset.UnixEpoch.AddMinutes(1),
+        [
+            new EnvironmentCheckReport("PhotoshopColourSettings", EnvironmentCheckStatus.Failed, true,
+                "EnvironmentCheck_PhotoshopColourSettings", "No setting was changed.",
+                "RGB: Accepted", "RGB: Current", EnvironmentCheckPhase.LiveApplication),
+            new EnvironmentCheckReport("PhotoshopTestImageRoundTrip", EnvironmentCheckStatus.Blocked, true,
+                "EnvironmentCheck_PhotoshopTestImageRoundTrip", "Colour settings did not pass.",
+                "Open and close exact probe", "(not run)", EnvironmentCheckPhase.LiveApplication),
+        ]);
+        StubDiagnostics diagnostics = new(passive, live);
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+
+        await screen.OpenAsync(CancellationToken.None);
+        diagnostics.LiveCalls.ShouldBe(0, "opening and refreshing the page must stay passive");
+
+        await screen.RunLiveChecksCommand.ExecuteAsync(null);
+
+        diagnostics.LiveCalls.ShouldBe(1);
+        screen.AutomaticChecks.ShouldBeEmpty();
+        screen.LiveApplicationChecks.Count.ShouldBe(2);
+        EnvironmentCheckRow mismatch = screen.LiveApplicationChecks[0];
+        mismatch.AutomationId.ShouldBe("Environment.Check.PhotoshopColourSettings");
+        mismatch.Expected.ShouldBe("RGB: Accepted");
+        mismatch.Current.ShouldBe("RGB: Current");
+        screen.LiveApplicationChecks[1].IsBlocked.ShouldBeTrue();
+        screen.LiveApplicationChecks[1].Status.ShouldBe(Resource("Environment_StatusBlocked"));
+    }
+
     /// <summary>
     /// The committed operator wording for a key, resolved the way the shell resolves it.
     /// </summary>
@@ -517,9 +554,22 @@ public sealed class EnvironmentReadinessScreenTests
     private sealed class StubDiagnostics : IEnvironmentDiagnostics
     {
         private readonly EnvironmentReadinessReport _report;
+        private readonly EnvironmentReadinessReport _liveReport;
 
-        public StubDiagnostics(EnvironmentReadinessReport report) => _report = report;
+        public StubDiagnostics(EnvironmentReadinessReport report, EnvironmentReadinessReport? liveReport = null)
+        {
+            _report = report;
+            _liveReport = liveReport ?? report;
+        }
+
+        public int LiveCalls { get; private set; }
 
         public EnvironmentReadinessReport Read() => _report;
+
+        public Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken)
+        {
+            LiveCalls++;
+            return Task.FromResult(_liveReport);
+        }
     }
 }

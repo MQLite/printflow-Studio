@@ -405,4 +405,6 @@ internal sealed class AutomationLockRow
     public string? AcquiredAtUtc { get; set; }
     public int? ProcessId { get; set; }
     public string? MachineName { get; set; }
+    public string? Purpose { get; set; }
+    public string? OwnerToken { get; set; }
 }

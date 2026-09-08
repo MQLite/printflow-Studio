@@ -50,6 +50,14 @@ public sealed record WorkstationCheckResult(
     public static WorkstationCheckResult Advisory(
         WorkstationVerificationCheck check, WorkstationCheckKind kind, string? observed, string explanation) =>
         new(check, kind, WorkstationCheckOutcome.Advisory, null, null, observed, explanation);
+
+    /// <summary>A prerequisite prevented this check from running.</summary>
+    public static WorkstationCheckResult Blocked(
+        WorkstationVerificationCheck check,
+        WorkstationCheckKind kind,
+        string? expected,
+        string explanation) =>
+        new(check, kind, WorkstationCheckOutcome.Blocked, null, expected, "(not run)", explanation);
 }
 
 /// <summary>
@@ -89,6 +97,10 @@ public sealed record WorkstationVerificationResult(
     public IEnumerable<WorkstationCheckResult> Advisories =>
         Checks.Where(c => c.Outcome == WorkstationCheckOutcome.Advisory);
 
+    /// <summary>Failed observations and deliberately unrun prerequisites; either closes Production.</summary>
+    public IEnumerable<WorkstationCheckResult> BlockingChecks =>
+        Checks.Where(c => c.Outcome is WorkstationCheckOutcome.Failed or WorkstationCheckOutcome.Blocked);
+
     /// <summary>The dynamic checks, which a caller must re-evaluate rather than remember (§16).</summary>
     public IEnumerable<WorkstationCheckResult> DynamicChecks =>
         Checks.Where(c => c.Kind == WorkstationCheckKind.Dynamic);
@@ -109,7 +121,7 @@ public sealed record WorkstationVerificationResult(
     {
         ImmutableArray<WorkstationCheckResult> all = [.. checks];
         bool verified = preset is not null &&
-            all.All(c => c.Outcome != WorkstationCheckOutcome.Failed) &&
+            all.All(c => c.Outcome is not (WorkstationCheckOutcome.Failed or WorkstationCheckOutcome.Blocked)) &&
             all.Any(c => c.Check == WorkstationVerificationCheck.PresetIntegrity &&
                          c.Outcome == WorkstationCheckOutcome.Passed);
 
@@ -141,6 +153,12 @@ public sealed record WorkstationVerificationResult(
         {
             text.AppendLine();
             text.Append("  FAIL ").Append(failure.Check).Append(": ").Append(failure.Explanation);
+        }
+
+        foreach (WorkstationCheckResult blocked in Checks.Where(c => c.Outcome == WorkstationCheckOutcome.Blocked))
+        {
+            text.AppendLine();
+            text.Append("  BLOCKED ").Append(blocked.Check).Append(": ").Append(blocked.Explanation);
         }
 
         foreach (WorkstationCheckResult advisory in Advisories)

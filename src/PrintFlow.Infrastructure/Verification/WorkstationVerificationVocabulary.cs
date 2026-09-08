@@ -61,6 +61,27 @@ public enum WorkstationVerificationCheck
     /// can close Production.
     /// </remarks>
     FilesystemReadOnlyPolicyAdvisory,
+
+    /// <summary>The shared external-application automation lock was acquired for the live run.</summary>
+    ExternalApplicationAutomationLock,
+
+    /// <summary>The accepted Meitu process can start or attach and reach a recognised state.</summary>
+    MeituLaunchability,
+
+    /// <summary>Meitu is currently in a positively recognised safe starting state.</summary>
+    MeituSafeStartingState,
+
+    /// <summary>The accepted Photoshop process can start or attach and reach a recognised state.</summary>
+    PhotoshopLaunchability,
+
+    /// <summary>Photoshop can currently be driven without an unknown dialog or unsaved document.</summary>
+    PhotoshopSafeStartingState,
+
+    /// <summary>Photoshop's active colour settings match the accepted preset.</summary>
+    PhotoshopColourSettings,
+
+    /// <summary>A PrintFlow-owned synthetic image opened, was identified, and closed safely.</summary>
+    PhotoshopTestImageRoundTrip,
 }
 
 /// <summary>
@@ -80,6 +101,12 @@ public enum WorkstationCheckKind
 
     /// <summary>Current machine state: session, display, culture, workspace availability.</summary>
     Dynamic,
+
+    /// <summary>Current external-application state, observed without changing settings or documents.</summary>
+    Live,
+
+    /// <summary>An explicit, reversible operation over PrintFlow-owned synthetic data.</summary>
+    Smoke,
 }
 
 /// <summary>What one check concluded.</summary>
@@ -96,4 +123,7 @@ public enum WorkstationCheckOutcome
     /// verification. Never closes Production on its own.
     /// </summary>
     Advisory,
+
+    /// <summary>The check deliberately did not run because its prerequisite was not satisfied.</summary>
+    Blocked,
 }
