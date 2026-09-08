@@ -1,11 +1,11 @@
 # SCRUM-11120 — Structured Error Details and Recovery UI
 
-Policy: Codex Global Development Routing & Context Policy v2.2 (2026-09-08)  
-Mode: `PLAN_EXECUTE`  
-Repository: `D:\Repositories\printflow-Studio`  
-Required branch: `master`  
-Starting HEAD: `e4cfb05a2e0971d86f87dbae4d06c2608398e763`  
-Starting worktree: clean  
+Policy: Codex Global Development Routing & Context Policy v2.2 (2026-09-08)
+Mode: `PLAN_EXECUTE`
+Repository: `D:\Repositories\printflow-Studio`
+Required branch: `master`
+Starting HEAD: `e4cfb05a2e0971d86f87dbae4d06c2608398e763`
+Starting worktree: clean
 Authorization boundary: SCRUM-11120 only; local commits; no branch, worktree, push, deploy, retention engine, general log viewer, or signing work.
 
 ## Original acceptance criterion

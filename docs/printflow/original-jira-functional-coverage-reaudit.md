@@ -1062,3 +1062,78 @@ facts, accessibility/UIA evidence, tests, full-suite decision and Git discipline
 [SCRUM-11118 / SCRUM-11119 completion report](scrum-11118-11119-settings-localisation-completion.md).
 
 **PASS — SCRUM-11118 / SCRUM-11119 SETTINGS AND LOCALISATION VERIFIED**
+
+---
+
+## Delta — 8 September 2026: SCRUM-11120 implemented
+
+**Appended, not a rewrite.** Every historical row above remains the record of what was true when it
+was written.
+
+### SCRUM-11120 — Build Structured Error Details and Recovery UI: PARTIAL → **FULL**
+
+The exact original CSV Work Item **11605** was reread before Product edits. The historical gap — no
+Error Details page and no operator surface for the screenshot, authoritative input/expected-output
+paths, or retry information — is closed.
+
+The new destination is reached from the current processing failure and is addressed by the exact
+persisted `SessionId + AttemptId`. One Workflow-owned typed read model resolves workflow/step,
+stable English code, selected-language guidance, separate technical detail, managed input, exact
+persisted output evidence, retry sequence, screenshot status/preview, historical currentness, and
+the engine-authorised recovery-action list. The App performs no aggregate/log/revision join.
+AutomationLog remains diagnostic enrichment and is accepted only when its persisted attempt ID,
+session, step, code, and message key prove that it belongs to the opened failure; a no-log
+`Interrupted` attempt still opens without an invented failure or log row.
+
+Expected output is never recalculated from mutable names or current preset data. The actual absolute
+destination is persisted in the existing closed failure context once constructed; pre-destination
+failure says "Not established" and legacy absence says "Not recorded". Post-destination validation,
+exception, cancellation, and Stop paths retain that evidence. Stop also retains the adapter's local
+screenshot path. The bounded existing WIC decoder is reused through a diagnostic-path port; missing
+files say "Evidence image unavailable" and do not affect workflow authority.
+
+Retry and Manual Processing route through the existing engine/service commands. The selected attempt
+is checked again on the aggregate used for command execution, so historical or superseded failures
+cannot act on a newer failure. Retry produces clean `Waiting` only — no application run, attempt,
+Revision, or fabricated success. Historical details remain readable with no actions. No generic
+Continue exists.
+
+All labels/guidance/statuses are in en-US and zh-CN, while failure codes and AutomationIds stay
+stable English. Paths, code, description, and technical detail are focusable/copyable read-only WPF
+controls; Retry, Manual Processing and Back expose UIA Invoke. Rendered tests used UI Automation
+providers, an actual shown-Window focus traversal, deterministic adapters, and independent
+repository/SQLite readback; no coordinates or external application were used.
+
+### Overlapping Jira items — factual reassessment only
+
+**SCRUM-11091 remains PARTIAL.** Exact attempt correlation plus managed input, established output,
+screenshot, structured code, bilingual guidance, and retry information now persist and display for
+Meitu failures. Its remaining configured-retention clause is not met because SCRUM-11121's cleanup
+engine does not exist.
+
+**SCRUM-11121 remains PARTIAL.** Structured failure records/screenshots remain local and nothing
+uploads them automatically; the retention preference is visible. There is still no executed default
+30-day cleanup, no cleanup protection based on active diagnostic references, and no operator-visible
+stored-location retention surface. No retention/logging framework was implemented here.
+
+**Parent SCRUM-11115 remains PARTIAL.** Error Details is now complete. Remaining current gaps include
+SCRUM-11117's thumbnail and delete-record action, SCRUM-11121's enforcement/location gaps,
+SCRUM-11122's absent diagnostic-package export/preview/consent flow, and SCRUM-11123's absent
+versioned offline installer and install/configure/rollback procedure. SCRUM-11116 retains the
+format-specific unsupported-file feedback concern recorded above.
+
+**Evidence:** final build **0 warnings / 0 errors**; expanded directly affected set **987 passed,
+0 failed, 0 skipped**; final full suite **11,597 passed, 0 failed, 0 skipped** (accepted baseline
+11,586; +11 new tests). The first full run's one outdated exact-dictionary assertion and three
+independent-review edge findings were investigated, fixed, covered, and then rechecked. The rendered
+proof covers real composed failure navigation, screenshot/missing-image states, live language
+switching, actual keyboard traversal, UIA Retry/Manual Processing, and durable readback. No migration,
+log browser, retention engine, diagnostic export, installer, signing infrastructure, Jira mutation,
+external application launch, or push was performed.
+
+Exact AC, pre-change matrix, diagnostic/log authority, path decision, screenshot/retry/recovery
+semantics, stale behaviour, navigation, localisation/accessibility, detailed tests, UIA evidence,
+full-suite rationale, Jira reassessments and Git discipline:
+[SCRUM-11120 completion report](scrum-11120-error-details-recovery-ui-completion.md).
+
+**PASS — SCRUM-11120 STRUCTURED ERROR DETAILS AND RECOVERY UI VERIFIED**
