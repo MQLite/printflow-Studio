@@ -1781,12 +1781,20 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// number the operator never typed (Epic 11200 Part C3 §9, §13).
     /// </para>
     /// <para>
-    /// <see cref="CommandKind.SetOutputName"/> and <see cref="CommandKind.ReturnToStep"/> stay
-    /// unprobed. <c>SetOutputName</c> has no screen in this slice, and <c>ReturnToStep</c> has
-    /// no payload-independent answer — "may I return" depends on <i>which</i> step, so a single
-    /// stand-in target would report something no button is asking (Part 3C3B §8). The screen
-    /// that offers destinations asks <see cref="AvailableReturnTargets"/> instead, which
-    /// answers with the real targets rather than a yes/no (Part C3 §8).
+    /// <see cref="CommandKind.SetOutputName"/> is probed with the session's <b>current</b> name,
+    /// the same way <see cref="CommandKind.SelectWorkflow"/> is probed with its current workflow.
+    /// The payload is valid by construction — an <c>OutputName</c> cannot be empty — so the only
+    /// guard that varies, and therefore the only thing the answer reports, is whether the session
+    /// may still progress. Workflow Selection asks this to decide whether to offer the editable
+    /// Output Name at all, so the box that is offered and the command that would be accepted are
+    /// decided by one rule (SCRUM-11075).
+    /// </para>
+    /// <para>
+    /// <see cref="CommandKind.ReturnToStep"/> stays unprobed: it has no payload-independent
+    /// answer — "may I return" depends on <i>which</i> step, so a single stand-in target would
+    /// report something no button is asking (Part 3C3B §8). The screen that offers destinations
+    /// asks <see cref="AvailableReturnTargets"/> instead, which answers with the real targets
+    /// rather than a yes/no (Part C3 §8).
     /// </para>
     /// </remarks>
     private static WorkflowCommand? BuildProbe(WorkflowSnapshot state, CommandKind kind)
@@ -1829,6 +1837,11 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.SelectWhiteUnderbaseBranch =>
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(ProbeBranch, ProbeReason),
             CommandKind.SetTrimParameters => new WorkflowCommand.SetTrimParameters(state.TrimMargin),
+
+            // Probed with the name the session already holds, never an invented one: nothing is
+            // applied by a probe, so this asks "may the name be changed at all" without proposing
+            // a change to it.
+            CommandKind.SetOutputName => new WorkflowCommand.SetOutputName(state.OutputName),
             CommandKind.SetBackgroundRemovalDecision
                 when state.Definition.Contains(StepKind.BackgroundRemoval)
                     && state.UpstreamResultOf(StepKind.BackgroundRemoval) is { } reviewed =>

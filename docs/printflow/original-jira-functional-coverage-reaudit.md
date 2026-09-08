@@ -823,3 +823,69 @@ FULL and was reused without reopening. No external Jira mutation was performed.
 Exact original child and parent Descriptions, pre-change matrix, legal actions, persistence,
 failure/review correction, bilingual/UIA/live evidence, full-suite result and Git discipline:
 [SCRUM-11112 recovery completion report](scrum-11112-interrupted-attempt-startup-recovery-completion.md).
+
+---
+
+## P. Coverage delta — SCRUM-11075 and SCRUM-11078 operator UX, and SCRUM-11077 parent reassessment (8 September 2026)
+
+This is a **delta**. Nothing above it has been edited; the historical SCRUM-11075, SCRUM-11078 and
+SCRUM-11077 rows stand exactly as the 4 September audit wrote them.
+
+**SCRUM-11075: historical PARTIAL → current FULL.** The exact original CSV Work Item **11107**,
+*Implement Collision-Safe Output Naming*, was reread before any Product edit. The historical row's
+sole gap — *"editable operator-facing Output Name has no UI; `SetOutputName` is an engine command
+with zero call sites in `PrintFlow.App`"* — is closed. Workflow Selection now carries a real
+editable box, seeded from the value `ImportAsync` already derived with `OutputName.Sanitise`,
+validated by `OutputName.Create` and committed with the pre-existing
+`WorkflowCommand.SetOutputName` before any workflow starts. A refused name shows a bounded
+bilingual sentence, rendered from the authority's own `ForbiddenCharacterList` and `MaxLength`, and
+starts nothing. No second naming system exists in the App: sanitisation, collision numbering,
+suffix patterns, size suffixes and the CMYK/W contract are untouched, and their existing coverage
+remains green. One engine change was required and is the smallest available — `CommandKind.SetOutputName`
+is now probed with the session's current name, so the offered box and the acceptable command are
+decided by one rule; the transition table already listed it as session-scoped and no guard moved.
+
+**SCRUM-11078: independently reassessed PARTIAL → current FULL.** The exact original CSV Work Item
+**11201**, *Build Single-Image Import, Validation and Workflow Selection*, was reread separately.
+The historical row's gaps — *"the editable output name, and the filename/preview are not shown on
+the import or selection screen"* — are closed. The imported file is named at
+`WorkflowSelection.SourceFile`, distinct from the editable output name, and its design is decoded
+and shown before a workflow is chosen, through the existing read-only `IArtefactPreviewService` and
+the existing `ArtefactPreviewPane` / `PreviewPayloadConverter` / checkerboard surface. No second
+image decoder and no new reduction policy were introduced; a PSD or PDF whose managed raster is
+prepared later is labelled truthfully rather than fabricated. The preview creates no Revision,
+records no ReviewDecision, touches no source byte and advances no state — asserted directly. Single
+import, clear multi-file refusal, the InputSnapshot, the three fixed workflows and the
+first-result selection lock are unchanged.
+
+**Parent SCRUM-11077: PARTIAL → FULL**, reassessed independently against the exact original **11200**
+Description rather than from child labels. Both gaps the historical Epic row named are closed: the
+comparison surface (side-by-side and slider, normalised pan, checkerboard/white/black backgrounds —
+SCRUM-11079, re-verified in current source) and trim bounds reaching the product
+(`SessionView.CurrentTrimGeometry`, SCRUM-11081, re-verified in current source). With SCRUM-11078
+closed here, every child — 11078, 11079, 11080, 11081, 11082, 11083, 11084 — satisfies its clause of
+the parent: single-image import confirmation, comparison, synchronised zoom and pan, transparency
+backgrounds, hash-bound approve/reject, alpha trimming with manual-crop fallback, trimming as an
+independent review step, and downstream invalidation on return.
+
+**Parent SCRUM-11068 remains PARTIAL.** Closing SCRUM-11075 removes only the output-name half of its
+recorded gap. **SCRUM-11076 is unchanged**: `AutomationLogEntry` and `Setting` are created by
+migration `0001` and, checked again in this slice, still have no reader and no writer anywhere in
+C#. The Epic's "SQLite metadata persistence" clause is not fully met.
+
+**Evidence:** clean build **0 warnings / 0 errors**; 16 new targeted cases across
+`OutputNameAndSourceContextTests` and `WorkflowSelectionAccessibilityTests`; one complete suite
+against final source **11,541 passed, 0 failed, 0 skipped** (baseline 11,525; +16). The full suite
+was run rather than skipped because the slice touched `WorkflowEngine.BuildProbe`, which changes
+what `AvailableCommands` reports for every session. One bounded synthetic WPF/UIA proof passed:
+a driver read the rendered source filename and picture, retyped the Output Name through
+`IValueProvider`, invoked a workflow through `IInvokeProvider` — no coordinate, no view-model call —
+and independent SQLite readback confirmed the persisted name, the retained `InputSnapshot`
+filename, and a produced `Live Proof Name_HD.png` from the deterministic adapter. No external
+application was launched and no Jira mutation was performed.
+
+Exact original child and parent Descriptions, pre-change matrix, naming-authority reuse, preview
+semantics, persistence, bilingual/keyboard/UIA evidence, full-suite result and Git discipline:
+[SCRUM-11075 / SCRUM-11078 completion report](scrum-11075-11078-output-name-import-selection-completion.md).
+
+**PASS — SCRUM-11075 / SCRUM-11078 UX COMPLETION VERIFIED**

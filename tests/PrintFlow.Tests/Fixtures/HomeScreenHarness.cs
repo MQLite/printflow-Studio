@@ -233,7 +233,7 @@ internal sealed class HomeScreenHarness : IDisposable
 
     /// <summary>A Workflow Selection screen over the same service.</summary>
     public WorkflowSelectionViewModel WorkflowSelection(RecordingNavigation navigation) =>
-        new(Sessions, navigation);
+        new(Sessions, Previews, navigation);
 
     /// <summary>
     /// A session screen over a freshly built service — what "close the application and open it

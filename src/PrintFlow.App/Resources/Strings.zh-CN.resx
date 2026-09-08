@@ -163,6 +163,27 @@
   <data name="WorkflowSelection_Refused" xml:space="preserve">
     <value>无法选择该流程（{0}）。</value>
   </data>
+  <data name="WorkflowSelection_SourceFileLabel" xml:space="preserve">
+    <value>源文件</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameLabel" xml:space="preserve">
+    <value>输出名称</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameHint" xml:space="preserve">
+    <value>PrintFlow 生成文件时所用的基础名称。源文件不会被重命名。尺寸与油墨后缀，以及同名文件已存在时的编号后缀，都会自动添加。</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRejected" xml:space="preserve">
+    <value>无法使用该输出名称。请输入 1 至 {1} 个字符，不能包含控制字符，也不能包含以下任一字符：{0}</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRefused" xml:space="preserve">
+    <value>无法保存输出名称（{0}）。未启动任何处理。</value>
+  </data>
+  <data name="WorkflowSelection_PreviewHeading" xml:space="preserve">
+    <value>已导入的文件</value>
+  </data>
+  <data name="WorkflowSelection_PreviewNeedsPreparation" xml:space="preserve">
+    <value>此文件将在处理页面中准备后才能显示。请选择流程以继续。</value>
+  </data>
   <data name="Session_StepsHeading" xml:space="preserve">
     <value>步骤</value>
   </data>

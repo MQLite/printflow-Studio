@@ -647,6 +647,36 @@ public sealed record SessionView(
     public ImageFormat? OriginalSourceFormat { get; init; }
     public PdfInspection? PdfInspection { get; init; }
 
+    /// <summary>
+    /// The name of the file the operator imported, exactly as the root Revision holds it
+    /// (SCRUM-11078).
+    /// </summary>
+    /// <remarks>
+    /// Reported so a screen can show the operator <i>which file</i> it is about to process
+    /// beside the output name it will produce. The two are deliberately separate: the output
+    /// name is editable and never renames the source (MVP design invariant 1), so a screen that
+    /// identified the source by the output name would show the operator their own edit back as
+    /// if it were the file on disk.
+    /// <para>
+    /// This is the workspace copy's file name — the same name the operator chose, since
+    /// <c>IWorkspace.ImportSourceAsync</c> copies under it — and never a path. Null only for a
+    /// session whose import has not produced a root Revision.
+    /// </para>
+    /// </remarks>
+    public string? SourceFileName { get; init; }
+
+    /// <summary>
+    /// The root Revision — the imported source — so a screen can preview it before any step has
+    /// run (SCRUM-11078).
+    /// </summary>
+    /// <remarks>
+    /// The identifier only. Reaching the pixels still goes through
+    /// <see cref="IArtefactPreviewService"/>, which is the single read-only image seam and is
+    /// what keeps "the operator looked at the file" from being an action on the session
+    /// (Epic 11200 Part C1 §3, §29).
+    /// </remarks>
+    public RevisionId? RootRevisionId { get; init; }
+
     /// <summary>Whether the operator has any legal earlier step to return to (§4).</summary>
     public bool CanReturnToStep => ReturnTargets.Count > 0;
 
@@ -891,6 +921,11 @@ public sealed record SessionView(
         {
             ArtefactManualCropGeometry = current is null ? null : attempts.FirstOrDefault(a => a.OutputRevisionId == current.RevisionId)?.ManualCropGeometry,
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
+
+            // The same root Revision the format is read from, so the file name, the format and
+            // the previewable identity can never describe three different files.
+            SourceFileName = revisions.FirstOrDefault(r => r.IsRoot)?.File.FileName,
+            RootRevisionId = revisions.FirstOrDefault(r => r.IsRoot)?.Id,
             PdfInspection = attempts.LastOrDefault(a => a.PdfInspection is not null)?.PdfInspection,
         };
     }

@@ -163,6 +163,27 @@
   <data name="WorkflowSelection_Refused" xml:space="preserve">
     <value>That workflow could not be selected ({0}).</value>
   </data>
+  <data name="WorkflowSelection_SourceFileLabel" xml:space="preserve">
+    <value>Source file</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameLabel" xml:space="preserve">
+    <value>Output name</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameHint" xml:space="preserve">
+    <value>The base name PrintFlow gives the files it produces. The source file is never renamed. Size and ink suffixes, and a numbered suffix if a file of that name already exists, are added automatically.</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRejected" xml:space="preserve">
+    <value>That output name cannot be used. Enter 1 to {1} characters, without control characters and without any of: {0}</value>
+  </data>
+  <data name="WorkflowSelection_OutputNameRefused" xml:space="preserve">
+    <value>The output name could not be saved ({0}). Nothing was started.</value>
+  </data>
+  <data name="WorkflowSelection_PreviewHeading" xml:space="preserve">
+    <value>Imported file</value>
+  </data>
+  <data name="WorkflowSelection_PreviewNeedsPreparation" xml:space="preserve">
+    <value>This file is prepared for display inside the session. Choose a workflow to continue.</value>
+  </data>
   <data name="Session_StepsHeading" xml:space="preserve">
     <value>Steps</value>
   </data>

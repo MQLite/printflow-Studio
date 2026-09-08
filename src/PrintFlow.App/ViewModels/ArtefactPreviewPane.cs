@@ -124,8 +124,20 @@ public sealed class ArtefactPreviewPane
             ? Strings.Session_PreviewLoadFailed
             : Strings.Session_PreviewUnavailable;
 
-        return new ArtefactPreviewPane(
-            heading, fileName, ReadOnlyMemory<byte>.Empty, hasImage: false, string.Empty, message,
-            payloadPixelWidth: 0, payloadPixelHeight: 0, sourcePixelWidth: 0, sourcePixelHeight: 0);
+        return WithoutImage(heading, fileName, message);
     }
+
+    /// <summary>
+    /// A pane labelled by an explanation the caller already has, rather than by a failure
+    /// (SCRUM-11078).
+    /// </summary>
+    /// <remarks>
+    /// The route for a file the product knows in advance it cannot draw yet — a PSD or a PDF
+    /// before its managed raster has been prepared. Asking the preview seam and rendering its
+    /// refusal would say the same thing less clearly, and inventing a picture is the one thing
+    /// §21 forbids: what is offered here is a sentence, and the pane is still an empty one.
+    /// </remarks>
+    internal static ArtefactPreviewPane WithoutImage(string heading, string fileName, string message) =>
+        new(heading, fileName, ReadOnlyMemory<byte>.Empty, hasImage: false, string.Empty, message,
+            payloadPixelWidth: 0, payloadPixelHeight: 0, sourcePixelWidth: 0, sourcePixelHeight: 0);
 }

@@ -22,6 +22,18 @@ public readonly record struct OutputName
     private static readonly char[] ForbiddenCharacters =
         ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
 
+    /// <summary>
+    /// The forbidden characters, spaced, for a screen that has to tell an operator which ones
+    /// they may not type (SCRUM-11075).
+    /// </summary>
+    /// <remarks>
+    /// Rendered from the rule rather than restated beside it. A UI that listed these itself
+    /// would be a second, silently divergent copy of the naming contract; asking for them here
+    /// means the sentence an operator reads and the check that rejected their name can never
+    /// disagree. It is the exact phrasing <see cref="Create"/> already uses in its own message.
+    /// </remarks>
+    public static string ForbiddenCharacterList => string.Join(' ', ForbiddenCharacters);
+
     private OutputName(string value) => Value = value;
 
     public string Value { get; }

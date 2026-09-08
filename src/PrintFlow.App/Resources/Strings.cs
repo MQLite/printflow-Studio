@@ -225,6 +225,23 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     /// <summary>Composite format: the stable failure code.</summary>
     internal static string WorkflowSelection_Refused => Get(nameof(WorkflowSelection_Refused));
 
+    internal static string WorkflowSelection_SourceFileLabel => Get(nameof(WorkflowSelection_SourceFileLabel));
+
+    internal static string WorkflowSelection_OutputNameLabel => Get(nameof(WorkflowSelection_OutputNameLabel));
+
+    internal static string WorkflowSelection_OutputNameHint => Get(nameof(WorkflowSelection_OutputNameHint));
+
+    /// <summary>Composite format: the forbidden characters, then the length cap.</summary>
+    internal static string WorkflowSelection_OutputNameRejected => Get(nameof(WorkflowSelection_OutputNameRejected));
+
+    /// <summary>Composite format: the stable failure code.</summary>
+    internal static string WorkflowSelection_OutputNameRefused => Get(nameof(WorkflowSelection_OutputNameRefused));
+
+    internal static string WorkflowSelection_PreviewHeading => Get(nameof(WorkflowSelection_PreviewHeading));
+
+    internal static string WorkflowSelection_PreviewNeedsPreparation =>
+        Get(nameof(WorkflowSelection_PreviewNeedsPreparation));
+
     internal static string Session_StepsHeading => Get(nameof(Session_StepsHeading));
 
     internal static string Session_PlaceholderNotice => Get(nameof(Session_PlaceholderNotice));
