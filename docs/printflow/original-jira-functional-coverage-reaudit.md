@@ -785,3 +785,41 @@ probe/lock lifecycle, matrix, expected/current live facts and Git discipline:
 SCRUM-11118 Settings/preset display is unchanged. Closing SCRUM-11110 does not close the parent.
 
 **PASS — SCRUM-11110 OPERATING ENVIRONMENT CHECK VERIFIED**
+
+## O. Coverage delta — SCRUM-11112 recovery and SCRUM-11107 parent reassessment (8 September 2026)
+
+**SCRUM-11112: historical PARTIAL → current FULL.** Original CSV Work Item **11505** was reread
+directly. Home now exposes persisted per-entry recovery with output name, workflow, interrupted
+step/state and activity, rather than only startup counts. One service read model computes legal
+actions from existing engine authority, independent of Recent Processing's age/count limits.
+Restart uses Retry/ReenterAutomation and stops at clean Waiting until an explicit Run. Eligible
+Enhancement/Background Removal entries use the existing HandOff/SubmitManualResult importer,
+owned file dialog, managed validation/hash/provenance and ReviewRequired. Unsupported steps gain
+no arbitrary import. Abandon preserves source/InputSnapshot and history. Invalid files and failed
+metadata commits retain truthful unresolved entries; resolved history does not reappear after an
+unrelated later failure. No startup/recovery decision launches external automation.
+
+The narrow SCRUM-11110 interaction is also covered: environment-verification tokens are distinct
+from session attempt owners; their existing timestamps are readable, and only proven-dead owners
+with the exact observed token can be released. Alive/unknown owners and replacement tokens remain
+held. Existing quarantine evidence, clean retry and retention rules remain intact.
+
+**Evidence:** 849 affected regression cases passed, then 36/36 focused cases passed after the
+independent review found and the implementation fixed a disappearing recovery card after a failed
+manual-import closing transaction. Final real synthetic WPF/UIA A Restart, B owned-dialog manual
+import and C Abandon each passed; a no-history reviewer independently checked final retained
+SQLite rows and file hashes. Final clean build: **0 warnings, 0 errors**. One final complete suite:
+**11,525 passed, 0 failed, 0 skipped** (baseline 11,513; +12 focused cases). This is the explicitly
+permitted real WPF test-window proof, not a new installed-shell production E2E claim.
+
+**Parent SCRUM-11107: PARTIAL → FULL**, independently reassessed against the exact original
+**11500** Description: global lock, recognised safe starts, environment checks/drift refusal,
+clean upstream-copy retries, actionable interruption recovery without old UI state, and controlled
+workspace cleanup. The latest SCRUM-11110 and SCRUM-11114 completions and the unchanged safety/
+retry implementations satisfy those parent clauses together with this recovery slice. This is a
+requirement/evidence assessment, not inference solely from child status labels. SCRUM-11092 remains
+FULL and was reused without reopening. No external Jira mutation was performed.
+
+Exact original child and parent Descriptions, pre-change matrix, legal actions, persistence,
+failure/review correction, bilingual/UIA/live evidence, full-suite result and Git discipline:
+[SCRUM-11112 recovery completion report](scrum-11112-interrupted-attempt-startup-recovery-completion.md).
