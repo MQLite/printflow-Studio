@@ -387,10 +387,30 @@ tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId <run-id> -Reco
 otherwise rather than work around you:
 
 1. Meitu open and on its recognised clean start page.
-2. Photoshop open, settled, and with **no unsaved document**. A saved pre-existing document is
-   tolerated and is checked for the same identity afterwards; an unsaved one fails
-   `PhotoshopSafeStartingState` and PrintFlow will neither save nor close it.
-3. Nobody else using either application. The run drives the foreground.
+2. **Photoshop open, settled at its start screen, with no document open at all.** Not "no unsaved
+   document" — *no document*. `PhotoshopSafeStartingState` must read
+   `KnownStartScreen; No document is open.` before you start the run.
+3. Nobody else using either application, and nobody using the desktop. The run drives the
+   foreground, and any other application that takes it — a browser window is the usual one — will
+   block the run.
+
+The surest way to reach state 2 is to start from nothing: close Photoshop, Meitu and PrintFlow
+entirely, then launch Meitu and let it settle on its start page, then launch Photoshop and leave it
+on its start screen without opening anything.
+
+**Why this is stricter than the check requires.** `PhotoshopSafeStartingState` will still *tolerate*
+a saved pre-existing document — it fails only on an unsaved one or an unknown dialog, and a
+tolerated document is checked for the same identity afterwards. This precondition is deliberately
+tighter than that. Every observed pass of the full live phase has had a document-free Photoshop; the
+9 September runs that had another person's document open failed
+`PhotoshopTestImageRoundTrip` during probe cleanup. That association is recorded evidence, not a
+diagnosed cause, and it has not been confirmed — see the SCRUM-11065 completion report §11.3 and its
+10 September delta. Nothing in the Product was changed to accommodate it.
+
+So this is not a workaround for a Product defect, and it should not be written up as one. It is the
+cleanest workstation condition acceptance has been observed in, stated as the condition to establish
+before a run that is meant to produce a revalidation record. Establishing it costs a minute; not
+establishing it has cost whole acceptance attempts.
 
 `-PreflightOnly` writes **no** run result. A set that exists is not a set that passed.
 

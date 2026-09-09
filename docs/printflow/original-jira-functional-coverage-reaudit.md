@@ -1595,3 +1595,81 @@ Full detail:
 [SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md).
 
 **BLOCKED — SCRUM-11065 STANDARD LOCAL REGRESSION SET NOT FULLY VERIFIED**
+
+---
+
+# Delta — 10 September 2026: SCRUM-11065 acceptance rerun, environmental finding only
+
+*Appended only. No row above is rewritten and no status moves in either direction. This delta
+records what a rerun on a clean workstation established and what it did not.*
+
+## Rows changed
+
+**None.** SCRUM-11065 stays **PARTIAL**, SCRUM-11123 stays **PARTIAL**, SCRUM-11136 is
+**unchanged**, SCRUM-11115 is **unchanged**. Two of seven categories remain the proven total: both
+of today's attempts were `Blocked` before any case ran, so no case result was produced to add or
+subtract.
+
+## What was attempted
+
+Two acceptance runs of `Invoke-PrintFlowStandardRegressionSet.ps1` on DESKTOP-0BG8884, evidence at
+`D:\PrintFlowStudio\TestData\v1\runs\acceptance-20260910\` and `…\acceptance-20260910-b\`.
+
+The workstation was first brought to the cleanest state any run has had: no Photoshop, Meitu or
+PrintFlow process and no operator documents open, then Meitu and Photoshop launched into
+recognised states — `MeituSafeStartingState: KnownWelcome` and
+`PhotoshopSafeStartingState: KnownStartScreen; No document is open.`, recorded identically in both
+runs' `readiness.json`. This is precisely the condition the 9 September delta named as the material
+difference from the 8 September pass, and it was unavailable then.
+
+## Outcome — Blocked, not Failed
+
+| Run | Status | Sole blocking failure | Detail |
+|---|---|---|---|
+| `acceptance-20260910` | **Blocked**, 0/7 | `PhotoshopTestImageRoundTrip` | *"Photoshop did not take the foreground within 5s; 'chrome' holds it. No input was produced."* |
+| `acceptance-20260910-b` | **Blocked**, 0/7 | `PhotoshopTestImageRoundTrip` | *"Control 0x21940 is not both visible and enabled… Nothing was written or pressed."* |
+
+**Every other blocking check passed in both runs** — preset and evidence integrity, OS, both
+executables, the Action artefact, workspace root, interactive session, display, UI culture, the
+automation lock, both launchability and both safe-starting-state checks, and Photoshop's colour
+settings. The two standing advisories are unchanged and non-blocking.
+
+A live operator was contending for the foreground through Chrome; run A names `'chrome'` directly.
+Run B's symptom is consistent with the same contention, though Chrome is not named in its record and
+no such claim is made here. Both runs report `Blocked` rather than `Failed`, every case reads *"the
+required live environment checks did not all pass, so no external application was driven"*, and no
+`case-*.json` was written. The runner refused to drive external applications, which is what it is
+built to do.
+
+## The 9 September scratch-directory lock — narrowed, not resolved
+
+Run B progressed materially further **than run A**: the synthetic probe was created and opened in
+Photoshop, corroborated by `20260909T220711Z_identity-unreadable_50D9C.png`. The 9 September lock
+**did not reproduce**.
+
+It was also **not exercised**, and the coverage position must say so. `RunProbeAsync` calls
+`DeleteProbe` only after the document is confirmed closed, and retries it in `finally` only when
+`closed || !openAttempted`; run A never opened and run B never closed, so `DeleteProbe` ran in
+neither. Both probe directories are still on disk un-removed. On 9 September the failure occurred
+*inside* `DeleteProbe`, after a completed open-close-restore — a point today's runs stopped short
+of.
+
+So the prior open question is **narrowed, not resolved**: the clean, document-free Photoshop it
+identified was established and did not by itself yield a passing round trip, and nothing today
+either confirms or refutes the handle-retention reading. It remains an environmental observation.
+**No Product code, cleanup rule or readiness rule was changed**, and no defect is asserted against
+the Product on the strength of it. Confirming or refuting it still needs a run that reaches
+`DeleteProbe` with Photoshop running.
+
+## Not earned by this delta
+
+No visual reviews (no case ran). No revalidation record —
+`Set-PrintFlowProductionRevalidation.ps1` was not invoked, `production-revalidation.json` does not
+exist and was not hand-edited, and Production remains closed on the same evidence as before. No
+Jira closure. The 11,712-test suite was not rerun and nothing under `src/` or `tests/` changed.
+`Adapters:Mode` stayed at `Production` and the validated preset was not modified. Local commits on
+`master` only; nothing pushed.
+
+Full detail:
+[SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md), Delta —
+10 September 2026.

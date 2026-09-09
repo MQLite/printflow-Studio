@@ -638,3 +638,114 @@ both layers work. The self-referential revalidation bootstrap is solved without 
 normal Product gate, and the full suite confirms nothing else moved. What is missing is the one
 thing that cannot be manufactured: a controlled run of all seven cases on a fixed workstation that
 was, for the duration of this task, in continuous use by somebody else.
+
+---
+
+# Delta — 10 September 2026: acceptance rerun on a clean workstation
+
+*Appended only. Nothing above is rewritten. No Jira status changes in either direction; §14 stands
+as written. This delta records an environmental finding and narrows §11.3's open question. It does
+not close it, and it is not a completion section.*
+
+## D1. The starting state — the cleanest yet
+
+Before either attempt the workstation was brought to a state neither of the 9 September runs had:
+
+- No Photoshop, Meitu or PrintFlow process running.
+- No operator documents open anywhere.
+- Meitu then launched and left on its clean start page.
+- Photoshop then launched and left settled at its start screen with **no document open**.
+
+Both runs' `readiness.json` confirm this independently, and identically:
+
+| Check | Recorded value, both runs |
+|---|---|
+| `MeituSafeStartingState` | Passed — `KnownWelcome` |
+| `PhotoshopSafeStartingState` | Passed — `KnownStartScreen; No document is open.` |
+| `PhotoshopLaunchability` | Passed — attached; process 22276 |
+| `MeituLaunchability` | Passed — attached; process 3436 |
+
+`D:\PrintFlowStudio\Evidence\20260909T220348Z_open-failed_50D9C.png` shows Photoshop's start screen
+with no document, corroborating the recorded value rather than resting on it.
+
+This is the state §11.3 said was never available on 9 September, and the state that existed on
+8 September when the check last passed. It was available today.
+
+## D2. The two attempts
+
+| Run | Evidence | Status | Sole blocking failure | Recorded detail |
+|---|---|---|---|---|
+| `acceptance-20260910` (A) | `…\runs\acceptance-20260910\` | **Blocked**, 0/7 | `PhotoshopTestImageRoundTrip` | *"Photoshop did not take the foreground within 5s; 'chrome' holds it. No input was produced."* |
+| `acceptance-20260910-b` (B) | `…\runs\acceptance-20260910-b\` | **Blocked**, 0/7 | `PhotoshopTestImageRoundTrip` | *"Control 0x21940 is not both visible and enabled, so it is not something PrintFlow may read or drive. Nothing was written or pressed."* |
+
+In both runs **every other blocking check passed** — preset integrity, evidence integrity, OS, both
+executables, the Action artefact, workspace root, interactive session, display, UI culture, the
+automation lock, both launchability checks, both safe-starting-state checks, and Photoshop's colour
+settings. `PhotoshopTestImageRoundTrip` was the only entry in `BlockingFailures` either time. The
+two standing advisories (`FilesystemReadOnlyPolicyAdvisory`, `ExternalApplicationUiLanguage`) are
+unchanged and non-blocking.
+
+Both are **Blocked, not Failed**. Every one of the seven cases reads
+*"The required live environment checks did not all pass, so no external application was driven"*,
+and no `case-*.json` was written in either run. The runner refused to drive Meitu or Photoshop, which
+is what §11.2 says it is built to do. Nothing was worked around to get past it.
+
+## D3. Why: a live operator contending for the foreground
+
+Run A names the contender directly: `'chrome' holds it`. A person was actively using the machine
+through Chrome while the run tried to take the foreground. Run B's failure — a control that is
+present but not both visible and enabled at the moment PrintFlow read it — is consistent with the
+same contention, though Chrome is **not** named in run B's record and this delta does not claim it
+was. What both records establish is that PrintFlow read the desktop honestly and stopped.
+
+## D4. The 9 September scratch-directory lock: narrowed, not resolved
+
+Run B progressed materially further **than run A**: the synthetic probe was created *and opened* in
+Photoshop. `20260909T220711Z_identity-unreadable_50D9C.png` shows
+`PF_ENV_PROBE_ef4efc85ee7d4292af4ab539d8493a91.png` open as a Photoshop document tab, with the crop
+options bar's dimension fields greyed — the controls the identity read needs.
+
+**The 9 September lock did not reproduce.** But the honest reason is not that cleanup succeeded:
+
+- Both today's probe directories are **still on disk**, un-removed —
+  `EnvironmentVerification\d16330bc…\Working\PF_ENV_PROBE_d16330bc….png` (10:03:42, run A) and
+  `EnvironmentVerification\ef4efc85…\Working\PF_ENV_PROBE_ef4efc85….png` (10:07:08, run B).
+- `ProductionLiveWorkstationVerifier.RunProbeAsync` calls `DeleteProbe` only after the document is
+  confirmed closed, and its `finally` retries it only when `closed || !openAttempted`. Run A
+  attempted the open and never closed; run B opened and never closed. **`DeleteProbe` was therefore
+  never called in either run.**
+- On 9 September the failure occurred *inside* `DeleteProbe`, after a completed open-close-restore.
+  Today's runs failed **earlier** than that point, so the code that failed on 9 September was not
+  executed at all.
+
+So relative to the 9 September failure point, run B did not get further — it got as far as the open
+and stopped short of the close. What today adds is a genuine narrowing, not a resolution:
+
+- The clean, document-free Photoshop that §11.3 identified as the material difference from
+  8 September **was established**, and it did not by itself produce a passing round trip.
+- Nothing observed today contradicts §11.3's reading that Photoshop retains the probe folder for its
+  process lifetime while a document keeps it busy. Nothing observed today confirms it either.
+
+**§11.3's open question stays open.** Confirming or refuting it still requires a run that reaches
+`DeleteProbe` with Photoshop running — which needs an uncontended foreground long enough to complete
+the open, the close and the restore. That did not happen today. This is recorded as an environmental
+observation and nothing was inferred from it about the Product.
+
+**No Product code, no cleanup rule and no readiness rule was changed.** The two leftover probe
+directories are the verifier behaving as written on a path that did not complete; they are not a
+defect finding, and they were not tidied away by hand, because their existence is the evidence for
+what did and did not run.
+
+## D5. What was not earned
+
+- **No visual reviews.** No case ran, so nothing was left `Pending` for a reviewer to decide.
+- **No revalidation record.** `Set-PrintFlowProductionRevalidation.ps1` was not invoked;
+  `production-revalidation.json` does not exist anywhere under `D:\PrintFlowStudio` and was not
+  hand-edited. Production remains closed, on the same evidence as §12.
+- **No Jira closure.** §14's assessments stand unchanged: **SCRUM-11065 PARTIAL**,
+  **SCRUM-11123 PARTIAL**, **SCRUM-11136 unchanged**, **SCRUM-11115 unchanged**. Two of seven
+  categories remain the proven total; today's runs added none, because they added no case results.
+- **No test run.** The 11,712-test suite was not rerun; nothing under `src/` or `tests/` changed.
+
+`Adapters:Mode` stayed at `Production`. The validated preset was not modified. Local commits on
+`master` only; nothing pushed.
