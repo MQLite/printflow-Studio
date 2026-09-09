@@ -1,5 +1,7 @@
 <Project>
 
+  <Import Project="$(MSBuildThisFileDirectory)Version.props" />
+
   <!--
     Common build configuration for every PrintFlow Studio project.
     Authority: Epic 11100 plan §4.1 (.NET 10 LTS), §4.2 (solution structure).
@@ -25,7 +27,7 @@
     <!-- Product identity -->
     <Company>PrintFlow Studio</Company>
     <Product>PrintFlow Studio</Product>
-    <Version>0.1.0</Version>
+    <Version>$(PrintFlowVersion)</Version>
     <NeutralLanguage>en</NeutralLanguage>
 
     <!-- No package is produced from this repository; it ships as an offline installer. -->

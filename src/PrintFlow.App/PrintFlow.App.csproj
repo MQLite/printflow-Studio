@@ -15,6 +15,16 @@
     <AssemblyName>PrintFlow.App</AssemblyName>
     <UseWPF>true</UseWPF>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+
+    <!--
+      The offline installer payload is a self-contained win-x64 publish (SCRUM-11123 Part C): the
+      validated workstation must never be asked to fetch a .NET runtime at installation time, and
+      pinning the runtime into the payload makes a runtime patch a PrintFlow version change that
+      passes the same revalidation gate as any other upgrade. Declared here rather than only on a
+      command line so the RID is restored into packages.lock.json and the release publish is
+      reproducible offline.
+    -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

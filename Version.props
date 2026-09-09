@@ -1,0 +1,27 @@
+<Project>
+
+  <!--
+    The one canonical PrintFlow Studio product version (SCRUM-11123 Part D).
+
+    Everything that has to state a version reads it from here and nothing restates it:
+
+      * every assembly's AssemblyVersion, FileVersion and InformationalVersion, because the root
+        Directory.Build.props imports this file and maps PrintFlowVersion onto <Version>;
+      * the diagnostic package's application version, which reads the running assembly;
+      * the MSI's ProductVersion, because installer\PrintFlowStudio.Installer imports this file
+        directly rather than restating a number;
+      * the installer file name, PrintFlowStudio-<version>-win-x64.msi, which the packaging
+        build derives from the same property;
+      * the production revalidation record, which records the product version that was
+        revalidated so that installing any other one closes Production until it is revalidated
+        again.
+
+    Raising the version here is therefore the whole release action. There is no second number to
+    keep in step, and InstallerVersionAuthorityTests fails the build if one appears.
+  -->
+
+  <PropertyGroup>
+    <PrintFlowVersion>0.1.0</PrintFlowVersion>
+  </PropertyGroup>
+
+</Project>
