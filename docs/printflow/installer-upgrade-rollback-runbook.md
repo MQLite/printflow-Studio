@@ -26,12 +26,13 @@ makes no difference which. Each one invalidates the production revalidation reco
 refuses Production adapters, and the only way back is Environment Readiness **and** the standard
 regression set, both passing, both recorded.
 
-> **Current blocker.** The standard local regression set required by SCRUM-11065 — a normal JPG
-> portrait, a complex background with fine hair, a transparent PNG, a complete customer design, a
-> PSD with a compatible composite preview, a single-page PDF and a reference production TIFF — has
-> **not been built**. `D:\PrintFlowStudio\TestData\v1\inputs` holds one file, in one of those seven
-> categories. Until the set exists and passes, step "Return to Production" cannot be completed and
-> **Production stays closed after any upgrade**. This is deliberate. See §7.
+> **Current state (9 September 2026).** The standard local regression set required by SCRUM-11065
+> **has been built**: all seven categories exist under `D:\PrintFlowStudio\TestData\v1`, each with
+> a manifest recording its expected processing path, expected properties and a fixed SHA-256, and
+> `tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1` is the procedure that runs it.
+> What has **not** yet happened is a complete run of all seven cases on this workstation, so no
+> revalidation record exists and Production stays closed after any upgrade. This is deliberate:
+> the gate is satisfied by a passing run, not by a set that exists. See §7.
 
 ---
 
@@ -339,51 +340,104 @@ only the second reopens Production.
 > all customer-like test data local and suitable for repeatable automated, workstation and upgrade
 > regression testing.
 
-### 7.2 Current status: NOT BUILT
+### 7.2 Where the set lives
 
-`D:\PrintFlowStudio\TestData\v1\` currently holds:
+`printflow-regression-v1`, at `D:\PrintFlowStudio\TestData\v1\`, indexed by `set.json`:
 
-- `inputs\FIX-CUSTOMER-DESIGN-001.jpeg` — one file, category `COMPLETE_CUSTOMER_DESIGN`
-- `expected\FIX-CUSTOMER-DESIGN-001_HD.png`, `…_CUTOUT.png`
-- `manifests\FIX-CUSTOMER-DESIGN-001.json` — with `"finalTiff": "PENDING"`
+| Path | Contents |
+|---|---|
+| `inputs\` | The six importable assets |
+| `reference\` | `FIX-REFERENCE-TIFF-001.tif` — reference only, never imported |
+| `expected\` | The accepted Meitu reference outputs |
+| `manifests\` | One manifest per asset — the folder `-StandardRegressionSetPath` points at |
+| `runs\<run-id>\` | Per-run evidence, including `result.json` |
 
-Six of the seven required categories are absent: `NORMAL_JPG_PORTRAIT`,
-`COMPLEX_BACKGROUND_FINE_HAIR`, `TRANSPARENT_PNG`, `PSD_WITH_COMPOSITE_PREVIEW`,
-`SINGLE_PAGE_PDF`, `REFERENCE_PRODUCTION_TIFF`. `Set-PrintFlowProductionRevalidation.ps1` reports
-exactly this when pointed at the folder.
+| Category | Asset | External applications its path needs |
+|---|---|---|
+| `NORMAL_JPG_PORTRAIT` | `FIX-PORTRAIT-001.jpg` | Meitu |
+| `COMPLEX_BACKGROUND_FINE_HAIR` | `FIX-FINE-HAIR-001.jpg` | Meitu |
+| `TRANSPARENT_PNG` | `FIX-TRANSPARENT-001.png` | none |
+| `COMPLETE_CUSTOMER_DESIGN` | `FIX-CUSTOMER-DESIGN-001.jpeg` | Photoshop |
+| `PSD_WITH_COMPOSITE_PREVIEW` | `FIX-PSD-001.psd` | Photoshop |
+| `SINGLE_PAGE_PDF` | `FIX-PDF-001.pdf` | Photoshop |
+| `REFERENCE_PRODUCTION_TIFF` | `reference\FIX-REFERENCE-TIFF-001.tif` | none |
 
-The unit and acceptance fixtures in `tests\PrintFlow.Tests\Fixtures\` are synthetic images
-generated in code for specific assertions. They are not this set and are not a substitute for it:
-they never touch Meitu or Photoshop, and a regression set whose purpose is to prove the *external
-applications* still behave after an upgrade cannot be made of images the external applications
-never see.
+The set is customer-like local test data. It is **not** in Git and must not be committed or
+uploaded. `tools\regression\New-PrintFlowRegressionAssets.ps1`,
+`New-PrintFlowRegressionPsd.ps1` and `New-PrintFlowRegressionManifests.ps1` rebuild it, and the
+manifests' recorded hashes are what make a rebuild detectable rather than silent.
 
-### 7.3 Consequence
+The unit and acceptance fixtures in `tests\PrintFlow.Tests\Fixtures\` are still not this set and
+are still not a substitute for it: they never touch Meitu or Photoshop.
 
-**The installer mechanics in this runbook are complete and work. Production reactivation after any
-upgrade is blocked until the standard regression set exists and passes.**
+### 7.3 Running it
 
-This is enforced, not merely documented. `Set-PrintFlowProductionRevalidation.ps1` verifies the
-set contains all seven categories before it will record a pass, and PrintFlow's environment
-verification treats anything other than `Passed` as blocking. There is no flag that turns "the set
-does not exist" into "the set passed".
+```powershell
+# Layer 1 only — static, offline, opens no application. Seconds. Safe any time.
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -PreflightOnly
 
-### 7.4 When the set exists
+# The full fixed-workstation run. Drives real Meitu and real Photoshop.
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1
 
-`Set-PrintFlowProductionRevalidation.ps1` will accept it once every category appears in a manifest
-under `-StandardRegressionSetPath`, and a run result is supplied via
-`-StandardRegressionSetResult` as:
+# Record the visual decisions a completed run left open, without re-running anything.
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId <run-id> -RecordVisualReview <decisions.json>
+```
+
+**Before the full run**, put the workstation in the state the run needs, because it will refuse
+otherwise rather than work around you:
+
+1. Meitu open and on its recognised clean start page.
+2. Photoshop open, settled, and with **no unsaved document**. A saved pre-existing document is
+   tolerated and is checked for the same identity afterwards; an unsaved one fails
+   `PhotoshopSafeStartingState` and PrintFlow will neither save nor close it.
+3. Nobody else using either application. The run drives the foreground.
+
+`-PreflightOnly` writes **no** run result. A set that exists is not a set that passed.
+
+Every case must pass. The top-level status is derived from all seven required categories, so a
+partial run — including one narrowed with `-Categories` — can never report `Passed`. A qualitative
+visual check that nobody has decided leaves its case `Pending`, which also never reports `Passed`.
+
+### 7.4 Recording the revalidation
+
+Once `result.json` reads `"status": "Passed"`:
+
+```powershell
+tools\installer\Set-PrintFlowProductionRevalidation.ps1 `
+  -EnvironmentReadinessPassed `
+  -StandardRegressionSetPath 'D:\PrintFlowStudio\TestData\v1\manifests' `
+  -StandardRegressionSetResult 'D:\PrintFlowStudio\TestData\v1\runs\<run-id>\result.json'
+```
+
+It re-verifies that all seven categories appear in a manifest under `-StandardRegressionSetPath`
+before it will record a pass, and reads exactly four fields from the run result:
 
 ```json
 {
   "setId": "printflow-regression-v1",
   "status": "Passed",
   "completedAtLocal": "2026-09-09T14:30:00+12:00",
-  "evidencePath": "D:\\PrintFlowStudio\\TestData\\v1\\runs\\2026-09-09"
+  "evidencePath": "D:\\PrintFlowStudio\\TestData\\v1\\runs\\<run-id>"
 }
 ```
 
-The set's own execution procedure is SCRUM-11065's to define. This runbook does not invent one.
+Never hand-edit `Revalidation\production-revalidation.json`.
+
+### 7.5 Conditions for Production to resume
+
+All of the following, together:
+
+1. Layer 1 passes — seven categories, no hash drift, no `PENDING`.
+2. The live environment checks all pass.
+3. All seven cases pass in one run, with every recorded visual check decided by a named reviewer.
+4. `Set-PrintFlowProductionRevalidation.ps1` writes a record binding this PrintFlow version, this
+   preset id/version/digest, this Windows build and the accepted Meitu and Photoshop digests, with
+   `standardRegressionSet.status = Passed`.
+5. PrintFlow's own verification, asked independently, reports `ProductionRevalidation` as passing.
+
+**This is enforced, not merely documented.** There is no flag that turns "the set did not pass"
+into "the set passed", and PrintFlow cannot write its own record — there is no writer for it
+anywhere in the solution, and an architecture test asserts so.
 
 ---
 

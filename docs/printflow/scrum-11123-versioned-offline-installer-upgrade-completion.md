@@ -621,3 +621,53 @@ tests/PrintFlow.Tests/Integration/Verification/ProductionLiveWorkstationVerifier
 src/*/packages.lock.json                                              win-x64 restore targets (all four)
 docs/printflow/original-jira-functional-coverage-reaudit.md           appended only
 ```
+
+---
+
+## Addendum — 9 September 2026: the SCRUM-11065 prerequisite
+
+*Appended, not merged. Everything above was true on 9 September when it was written and is left
+exactly as it was recorded.*
+
+The report above states that this task's clause — *"Any PrintFlow, Windows, Meitu or Photoshop
+upgrade must require rerunning the standard test set before production use"* — **is enforced but
+cannot be satisfied, because the standard set (SCRUM-11065) does not exist**.
+
+The first half of that is still true. The second half is no longer.
+
+**What changed.** SCRUM-11065 was worked later the same day. All seven required categories now
+exist under `D:\PrintFlowStudio\TestData\v1`, each with a manifest recording its expected
+processing path, expected properties, provenance and a fixed SHA-256, and there is one repeatable
+execution procedure — `tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1`. The category
+scan inside `Set-PrintFlowProductionRevalidation.ps1`, which reported six missing categories when
+this report was written, now reports none missing.
+
+**What did not change.** No revalidation record was created, and this task's clause is still not
+*satisfied* on this workstation:
+
+- Two of the seven categories passed a controlled fixed-workstation run — the two whose recorded
+  path needs no external application.
+- The other five drive Meitu or Photoshop in the foreground, and the workstation was in continuous
+  interactive use by another person for the duration of that work. The runner requires every
+  blocking live environment check to pass before it drives an external application, and reported
+  `Blocked` rather than proceeding.
+- `Set-PrintFlowProductionRevalidation.ps1` was therefore **not** invoked.
+  `Revalidation\production-revalidation.json` does not exist, was not hand-edited, and PrintFlow's
+  verification still reports `ProductionRevalidation` as failing.
+
+**SCRUM-11123 reassessment: PARTIAL, unchanged.** Reassessed independently rather than inferred
+from SCRUM-11065's label. The blocker has narrowed — from "the standard set does not exist" to
+"the standard set has not completed a run on this workstation" — but it has not been cleared, and
+Production is still correctly closed.
+
+**Nothing in this task's own gate was weakened to get there.** The revalidation check was not
+disabled, removed from `VerifiedEnvironmentGate`, or answered with a fabricated record. The one
+seam added is `ProductionWorkstationVerifier.ForStandardRegressionRun`, which *omits* the
+self-referential check for the regression run only; it is `internal`, Infrastructure grants its
+internals to `PrintFlow.Tests` alone, and an architecture test asserts the shipped application
+cannot reach it. The full Product suite passed 11,712 / 11,712.
+
+Detail, evidence and the full reassessment:
+[SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md).
+Operator procedure, now defined:
+[installation, upgrade and rollback runbook](installer-upgrade-rollback-runbook.md) §7.

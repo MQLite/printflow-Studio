@@ -1506,3 +1506,92 @@ proofs, the full test and smoke record, and both reassessments:
 Operator procedure: [installation, upgrade and rollback runbook](installer-upgrade-rollback-runbook.md).
 
 **PASS WITH NOTES — SCRUM-11123 VERSIONED OFFLINE INSTALLER VERIFIED**
+
+---
+
+# Delta — 9 September 2026 (later the same day): SCRUM-11065, the standard local regression set
+
+*Appended only. No row above is rewritten; the rows this delta supersedes are named explicitly.*
+
+## What was re-audited
+
+SCRUM-11065 (CSV row 11005), re-read verbatim from
+`C:\Users\admin\Downloads\printflow_studio_mvp_jira_epics_tasks.csv` before any change was made,
+together with its parent SCRUM-11060 and the adjacent claims in SCRUM-11123, SCRUM-11136,
+SCRUM-11067, SCRUM-11134, SCRUM-11135 and SCRUM-11137.
+
+## Rows this delta supersedes
+
+| Row | Previous statement | Position after this slice |
+|---|---|---|
+| line 115 — **SCRUM-11065** | **NOT_IMPLEMENTED**. *"`D:\PrintFlowStudio\TestData\v1\inputs` holds one file … Seven required categories absent."* | **PARTIAL.** All seven categories now exist, each with a schema-2 manifest recording expected processing path, expected properties, provenance and a fixed SHA-256; one repeatable execution procedure exists. **Two of seven** have passed a controlled fixed-workstation run. |
+| line 1439 — **SCRUM-11065** (11123 delta) | *"Re-inspected directly … still holds one file … Not built here — out of this task's scope."* | Superseded: built here. |
+| line 221 / line 1440 — **SCRUM-11136** | **PARTIAL**. *"The 90 % figure cannot be claimed against a test set that was never built."* | **PARTIAL, unchanged status.** That specific reason no longer applies — the set exists. 11136's repeated success-rate measurement was **not** implemented here and no automation-success claim is made. Record: prerequisite asset built; still blocked on a completed run. |
+| line 1432 — **SCRUM-11123** | *"…cannot be satisfied, because the standard set (SCRUM-11065) does not exist."* | **PARTIAL, unchanged.** Now *satisfiable* but not *satisfied*: the set exists and the revalidation tool accepts its shape, but no run has passed and no record exists. |
+| line 487 — P3-1 | *"Build the seven-category standard local regression set — hard prerequisite for SCRUM-11136"* | The set is built. The prerequisite that remains is a completed run, not an absent set. |
+
+## Evidence
+
+**The set.** `setId: printflow-regression-v1`, schema 2, at `D:\PrintFlowStudio\TestData\v1`:
+`FIX-PORTRAIT-001.jpg` (synthetic), `FIX-FINE-HAIR-001.jpg` (synthetic, ~7,200 sub-pixel strands
+over a textured background), `FIX-TRANSPARENT-001.png` and `reference\FIX-REFERENCE-TIFF-001.tif`
+(byte-identical copies of two artefacts preset 1.16.0 already names, with matching SHA-256),
+`FIX-CUSTOMER-DESIGN-001.jpeg` (pre-existing, untouched), `FIX-PSD-001.psd` (written by Photoshop
+CC 2019 with Maximize Compatibility; image resource 1057 proved present) and `FIX-PDF-001.pdf`
+(one page, verified through `Windows.Data.Pdf`). The set is **not** in Git and was not uploaded;
+`tools/regression` rebuilds it.
+
+**The inherited `"finalTiff": "PENDING"` is resolved.** A manifest still containing `PENDING` is
+now a preflight failure in both layers.
+
+**The procedure.** `tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1`, in two layers
+that are not interchangeable. Layer 1 is static and recomputes every SHA-256 from the bytes; it
+was verified negatively as well as positively. Layer 2 drives the real `ISessionService` against
+the real Production adapters and requires every blocking live environment check to pass first. A
+Layer 1 pass writes no run result: a set that exists is not a set that passed.
+
+**The revalidation bootstrap.** `ProductionWorkstationVerifier.ForStandardRegressionRun` omits —
+never answers — the self-referential `ProductionRevalidation` check, for the run whose own success
+creates the record that check reads. It is `internal`; Infrastructure grants internals to
+`PrintFlow.Tests` alone; architecture tests assert the shipped application cannot reach it and
+that no public factory exposes an equivalent. The test-side wrapper consults it only when
+`ProductionRevalidation` is the single blocking check. No record was written, faked or
+hand-edited, and `VerifiedEnvironmentGate` was not touched.
+
+**The run.** Two of seven categories passed on the fixed workstation: `TRANSPARENT_PNG` (the
+deterministic alpha trim produced exactly the predicted 2724×3685) and
+`REFERENCE_PRODUCTION_TIFF` (structurally intact, and still refused as a Home input with
+`SourceFormatUnsupported`). The other five drive Meitu or Photoshop, and the workstation was in
+continuous interactive use by another person — Photoshop held their documents throughout, one of
+them unsaved and being edited. The runner reported `Blocked` rather than proceeding, which is what
+it is built to do.
+
+One environmental finding is recorded with its evidence and **not** acted on:
+`PhotoshopTestImageRoundTrip` failed reproducibly because Photoshop retains a handle on the
+probe's scratch directory for its process lifetime. The same check passed on 8 September with both
+applications left running but **no document open**, which is the material difference. No Product
+code was changed on an unconfirmed diagnosis.
+
+**Tests.** Clean Release build, 0 warnings, 0 errors. 32 targeted regression-set tests; 165 in the
+verification-adjacent filter. Full Product suite **11,712 passed, 0 failed, 0 skipped** — the
+accepted 11,676 baseline plus 36 new tests, with no pre-existing test changed or weakened. The
+full suite was run because this slice changed `ProductionWorkstationVerifier`, which is production
+composition.
+
+## Unchanged, explicitly
+
+SCRUM-11067, SCRUM-11134 and SCRUM-11135 are **unchanged**. Copying the Maintop-proven reference
+TIFF into the regression set adds no new Maintop evidence, no new physical-print evidence and no
+new comparison acceptance; no Maintop import and no DTF print were performed in this task.
+SCRUM-11137 remains blocked on SCRUM-11066's absent pre-MVP benchmark, which was not fabricated.
+SCRUM-11115 is not reopened. Parent SCRUM-11060 is not closed: SCRUM-11066 remains absent and
+SCRUM-11065 is PARTIAL.
+
+No branch, worktree, alternate checkout, amend, rebase, push, deploy or AI attribution. The
+validated preset was not modified. `Adapters:Mode` was left at `Production` and changed in neither
+direction.
+
+Full detail:
+[SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md).
+
+**BLOCKED — SCRUM-11065 STANDARD LOCAL REGRESSION SET NOT FULLY VERIFIED**
