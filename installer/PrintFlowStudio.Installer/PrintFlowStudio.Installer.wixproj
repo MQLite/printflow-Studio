@@ -1,0 +1,64 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+
+  <!--
+    The PrintFlow Studio offline installer (SCRUM-11123).
+
+    Deliberately not a member of PrintFlowStudio.sln. The Product solution builds and tests the
+    application; this project packages an already-published payload. Keeping it out of the
+    solution means `dotnet build PrintFlowStudio.sln` and the Product test suite are unaffected
+    by the packaging toolchain, and the packaging build has exactly one entry point:
+    build\installer\Build-Installer.ps1.
+
+    One MSI and nothing else. There is no bootstrapper, no bundle, no update service, no
+    download of any kind, and no signing: SCRUM-11123 asks for a repeatable versioned offline
+    installer, and every one of those would be a component the original requirement does not ask
+    for and that the validated workstation would then have to carry.
+  -->
+
+  <!-- The single product-version source. See Version.props for why this is the only import. -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Version.props" />
+
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+
+    <!--
+      The versioned artefact name (Part D §12). Never a bare "setup.msi": an operator holding two
+      installers has to be able to tell which is which without opening either, and the rollback
+      procedure depends on naming a specific previous version.
+    -->
+    <OutputName>PrintFlowStudio-$(PrintFlowVersion)-win-x64</OutputName>
+
+    <!--
+      PayloadDir is the staged, allowlisted payload produced by Build-Installer.ps1. It is not
+      the raw publish directory: staging is where the default-deny payload boundary is applied,
+      so nothing that failed the policy can reach the harvest below.
+    -->
+    <DefineConstants>PayloadDir=$(PayloadDir);ProductVersion=$(PrintFlowVersion)</DefineConstants>
+
+    <!--
+      ICE60 fires on payload files that carry a version resource and no language resource, and
+      the self-contained .NET payload contains one: e_sqlite3.dll, the native library behind
+      Microsoft.Data.Sqlite. The WiX 6 harvest element writes no Language column and takes no
+      attribute to set one, so the choices are to suppress this ICE or to hand-author the whole
+      416-file payload. Suppressed here, narrowly and by name.
+
+      What ICE60 protects is Windows Installer's version-plus-language comparison when an
+      existing file is overwritten. This package does not rely on that comparison: every upgrade
+      is a major upgrade, which removes the previous version's files and installs the new set
+      whole, so no per-file overwrite decision is taken for any payload file (Part G §17).
+
+      No other ICE is suppressed. In particular, nothing here silences a validation that would
+      report an installed file reaching outside INSTALLFOLDER.
+    -->
+    <SuppressIces>ICE60</SuppressIces>
+  </PropertyGroup>
+
+  <Target Name="RequirePayloadDir" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(PayloadDir)' == ''"
+           Text="PayloadDir was not supplied. Build this package through build\installer\Build-Installer.ps1, which publishes, stages against installer\payload-policy.json and only then packages." />
+    <Error Condition="!Exists('$(PayloadDir)\PrintFlow.App.exe')"
+           Text="PayloadDir '$(PayloadDir)' does not contain PrintFlow.App.exe. The staged payload is missing or incomplete." />
+  </Target>
+
+</Project>

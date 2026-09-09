@@ -1,0 +1,19 @@
+<Project>
+
+  <!--
+    Deliberately empty, and deliberately present.
+
+    MSBuild walks up from a project directory to the first Directory.Build.props it finds.
+    Without this file the WiX installer project would inherit the repository root props, which
+    exist for C# assemblies: TreatWarningsAsErrors, Nullable, ImplicitUsings, central package
+    management and NuGet lock files all mean something to a csproj and nothing to a .wixproj,
+    and central package management in particular breaks the WiX SDK's own implicit package
+    references. Stopping the walk here keeps the packaging build independent of the Product
+    build rather than coupling one to the other's compiler settings.
+
+    The one thing the installer does share with the Product is its version, and that is imported
+    explicitly from the root Directory.Build.props by the .wixproj so there is exactly one
+    version source (SCRUM-11123 Part D).
+  -->
+
+</Project>

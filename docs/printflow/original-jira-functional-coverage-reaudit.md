@@ -1418,3 +1418,91 @@ discipline:
 [SCRUM-11122 completion report](scrum-11122-diagnostic-package-export-completion.md).
 
 **PASS WITH NOTES — SCRUM-11122 DIAGNOSTIC PACKAGE EXPORT VERIFIED**
+
+---
+
+## Delta — 9 September 2026: SCRUM-11123 versioned offline installer, upgrade and rollback
+
+Append-only. No historical row above is rewritten.
+
+### Rows changed
+
+| SCRUM | Title | Was | Now | Why |
+|---|---|---|---|---|
+| SCRUM-11123 | Build a Versioned Offline Installer and Upgrade Procedure | **NOT_IMPLEMENTED** | **PARTIAL** | A real, repeatable, versioned, offline WiX 6 MSI now exists, together with install/upgrade/uninstall/rollback semantics, a pre-upgrade checkpoint, and a fail-closed revalidation gate. The AC's "must require rerunning the standard test set before production use" is enforced but **cannot be satisfied**, because the standard set (SCRUM-11065) does not exist. |
+| SCRUM-11115 | Complete Operator UX, Localisation, Diagnostics and Offline Packaging | **PARTIAL** | **FULL** | Every clause the Epic itself states is now implemented, including its own installer clause — "a repeatable versioned offline installer with no automatic updates". The residual blocker belongs to SCRUM-11123's stricter revalidation wording and to SCRUM-11065, a child of Epic 11000. |
+
+### Rows confirmed unchanged
+
+| SCRUM | Title | Status | Confirmation |
+|---|---|---|---|
+| SCRUM-11065 | Build the Standard Local Regression Image Set | **NOT_IMPLEMENTED** (unchanged) | Re-inspected directly. `D:\PrintFlowStudio\TestData\v1\inputs` still holds one file, `FIX-CUSTOMER-DESIGN-001.jpeg`, whose manifest declares `COMPLETE_CUSTOMER_DESIGN` and `finalTiff: PENDING`. Six of the seven required categories remain absent. Machine-confirmed by `Set-PrintFlowProductionRevalidation.ps1` run against the real folder. **Not built here** — out of this task's scope, and no clause of SCRUM-11123 makes building a seven-category customer-like image set unavoidable. |
+| SCRUM-11136 | Measure Standard-Test-Set Automation Success Rate | **PARTIAL** (unchanged) | Still blocked on SCRUM-11065 for the same reason recorded in the row above at line 221. |
+
+### What was added
+
+A WiX Toolset 6.0.2 per-machine MSI (`installer/`), built by one scripted entry point
+(`build/installer/Build-Installer.ps1`) from a controlled Release, self-contained, win-x64 publish
+staged through a default-deny payload allowlist (`installer/payload-policy.json`). One canonical
+product version (`Version.props`) flows into every assembly, the MSI ProductVersion and the
+artefact name `PrintFlowStudio-<version>-win-x64.msi`.
+
+On the Product side, one member was added to the existing closed workstation-verification
+vocabulary: `WorkstationVerificationCheck.ProductionRevalidation`, a dynamic check consumed by the
+existing `VerifiedEnvironmentGate`. It binds the running product version, the preset identity and
+digest, the Windows build, and the accepted Meitu and Photoshop digests to a record written only by
+the operator's revalidation procedure. Any of them changing closes Production. No new environment
+system was created.
+
+### The honest blocker, recorded
+
+**Installer mechanics are complete. Production reactivation after any upgrade is blocked until the
+standard regression set required by SCRUM-11065 exists and passes.**
+
+This is enforced rather than merely documented. `Set-PrintFlowProductionRevalidation.ps1` verifies
+that a named set contains all seven SCRUM-11065 categories before it will record a pass, and
+PrintFlow treats anything other than `Passed` — including `NotAvailable` and `Unknown` — as
+blocking. There is no flag that turns absence into a pass. Run against the real
+`D:\PrintFlowStudio\TestData`, the tool reported six missing categories, recorded `NotAvailable`,
+and exited 2 with "Production remains CLOSED".
+
+A consequence worth stating: this workstation has no revalidation record today, so Environment
+Check now reports "Revalidation after upgrade" as failed and Production adapters are refused. That
+is the correct reading of the requirement — the standard test set has never been run because it has
+never existed. `Fake` mode is unaffected, so the application stays usable for troubleshooting the
+very workstation that is failing.
+
+### Evidence
+
+Release build **0 warnings / 0 errors**; both installer builds (0.1.0 and the synthetic 0.1.1 used
+for the upgrade smoke) **0 warnings / 0 errors**. New targeted tests **31 passed / 0 failed /
+0 skipped**; the verification-adjacent set **328 / 328**.
+
+The full Product suite was run — justified because this task changes shared readiness/gate
+behaviour — and passed **11,676 / 11,676**, the accepted 11,645 baseline plus 31 new tests. Two
+pre-existing verification assertions were updated for the new check, neither for a defect.
+
+Five installer smokes passed: payload boundary (416 files, 0 denied, all 8 required present),
+offline installation, fresh install, upgrade N → N+1 with the synthetic workspace, database,
+`appsettings.local.json` and revalidation record all byte-identical, and uninstall preservation
+computed from the package's own Directory/Component/File/RemoveFile tables.
+
+**One limit, stated:** a real elevated `msiexec /i` was attempted and refused with error 1925 (this
+session is not elevated), and elevating was declined deliberately — the only machine available to
+elevate on is the validated production workstation. Administrative installation (`msiexec /a`) plus
+MSI table analysis was used instead. Not verified by execution: elevated fresh install, elevated
+major upgrade, elevated uninstall.
+
+No signing, certificate or timestamp infrastructure was introduced. No updater, service, scheduled
+task, startup entry or network client exists anywhere in the product or the packaging, guarded by
+one architecture boundary. No branch, worktree, alternate checkout, amend, rebase, push, deploy or
+AI attribution.
+
+Exact ACs, the SCRUM-11065 prerequisite assessment, installer technology rationale, publish model
+and size tradeoff, version authority, payload boundary, configuration classification,
+migration/downgrade reality, checkpoint strategy, uninstall semantics, offline and no-auto-update
+proofs, the full test and smoke record, and both reassessments:
+[SCRUM-11123 completion report](scrum-11123-versioned-offline-installer-upgrade-completion.md).
+Operator procedure: [installation, upgrade and rollback runbook](installer-upgrade-rollback-runbook.md).
+
+**PASS WITH NOTES — SCRUM-11123 VERSIONED OFFLINE INSTALLER VERIFIED**

@@ -1,0 +1,8 @@
+<Project>
+
+  <!--
+    Empty for the same reason as Directory.Build.props beside it: the repository root enables
+    central package management, which the WiX SDK's implicit package references do not satisfy.
+  -->
+
+</Project>

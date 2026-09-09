@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!--
+    PrintFlow Studio — offline per-machine MSI (SCRUM-11123).
+
+    What this package owns, and nothing beyond it: the application binaries under
+    %ProgramFiles%\PrintFlow Studio, the shipped appsettings.json default beside them, one Start
+    Menu shortcut, and the Add/Remove Programs registration. Windows Installer removes exactly
+    what it installed, so the production workspace — D:\PrintFlowStudio, its SQLite database,
+    InputSnapshots, Revisions, approved PNGs, PrintOutput TIFFs, Evidence, the workstation preset
+    and operator diagnostic packages — survives upgrade and uninstall because this package never
+    authored any of it (Part F, Part K).
+
+    Explicitly absent, and each one on purpose:
+      * no ServiceInstall, no ScheduledTask, no Run/RunOnce registry value, and no custom action
+        of any kind, so nothing this package installs can check for, download or apply a new
+        version (Part G, Part P);
+      * no bootstrapper and no prerequisite package: the payload is a self-contained win-x64
+        publish, so installation needs no .NET runtime from anywhere (Part L);
+      * no Meitu or Photoshop payload. Both remain separately installed, separately validated
+        workstation prerequisites and this package neither installs nor modifies either (§27);
+      * no digital signature, certificate or timestamp configuration (Part Q).
+  -->
+
+  <Package
+      Name="PrintFlow Studio"
+      Manufacturer="PrintFlow Studio"
+      Version="$(ProductVersion)"
+      UpgradeCode="ACCF20C6-3340-4E2A-A489-00B98513EBED"
+      Scope="perMachine"
+      Compressed="yes"
+      InstallerVersion="500">
+
+    <SummaryInformation Description="PrintFlow Studio $(ProductVersion) — offline production workstation installer" />
+
+    <!--
+      Upgrade is a deliberate operator act: run the newer installer. Windows Installer removes
+      the previous version's files after the new ones are staged, which is exactly the N -> N+1
+      contract in Part G §17.
+
+      Downgrade is refused rather than silently permitted. Rollback in this product is not
+      "install the old MSI over the new one" — a newer application has already migrated the
+      SQLite schema forward, so the previous executable would meet a database it does not
+      understand. The rollback procedure is uninstall, restore the pre-upgrade checkpoint, then
+      install the previous version, and it is written out in the runbook. Refusing the downgrade
+      here is what stops an operator taking the shortcut that loses data.
+    -->
+    <MajorUpgrade
+        AllowDowngrades="no"
+        DowngradeErrorMessage="A newer version of PrintFlow Studio is already installed. Rolling back is a deliberate procedure that restores a compatible database checkpoint before the older version is installed: follow Rollback in the installer, upgrade and rollback runbook."
+        Schedule="afterInstallValidate" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PrintFlow Studio" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="PrintFlow Studio" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="PrintFlow Studio" Level="1">
+      <ComponentGroupRef Id="PayloadComponents" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+    <!--
+      One Start Menu entry, because the operator has to be able to start the application without
+      being told a path in Program Files. No desktop shortcut, no startup entry, no Run key: this
+      application is started deliberately at the beginning of a production session, not
+      automatically when Windows signs in.
+    -->
+    <Component Id="StartMenuShortcut" Directory="ApplicationProgramsFolder" Guid="4C0C0A76-1B7D-411B-B3E6-625C717F9C6F">
+      <Shortcut Id="PrintFlowStudioShortcut"
+                Name="PrintFlow Studio"
+                Description="PrintFlow Studio production workstation application"
+                Target="[INSTALLFOLDER]PrintFlow.App.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\PrintFlow Studio\Installed" Name="Shortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+  </Package>
+
+  <Fragment>
+    <!--
+      The payload, harvested from the staged directory rather than from the publish output.
+      Staging is where installer\payload-policy.json is enforced, so by the time this element
+      runs the default-deny boundary has already been applied and verified: what is here is
+      exactly what passed it. Harvesting a directory that has not been through the stager is
+      prevented by the RequirePayloadDir target in the .wixproj.
+
+      appsettings.json arrives through this harvest and is therefore installer-owned: an upgrade
+      replaces it with the new release's shipped default, because it carries the preset identity
+      and expected digest that belong to that build. The operator's validated deviations live in
+      appsettings.local.json, which no pattern here matches, which the installer consequently
+      never authors, and which Windows Installer therefore never replaces or removes (Part F).
+    -->
+    <ComponentGroup Id="PayloadComponents" Directory="INSTALLFOLDER">
+      <Files Include="$(PayloadDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>

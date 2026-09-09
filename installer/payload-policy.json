@@ -1,0 +1,105 @@
+{
+  "$comment": [
+    "The installer payload boundary (SCRUM-11123 Part C §10, Part M §28).",
+    "",
+    "Default deny. A file produced by the Release publish reaches the MSI only when its relative",
+    "path matches an entry in 'allow'. Anything that matches nothing is dropped and reported, and",
+    "anything that matches 'denyAlways' fails the packaging build outright rather than being",
+    "quietly dropped — a test assembly, a customer database or a private key appearing in a",
+    "publish output is a defect in the publish, not something for the stager to tidy away.",
+    "",
+    "Patterns are matched against the payload-relative path with forward slashes, case-insensitively,",
+    "using * (within one segment) and ** (across segments)."
+  ],
+
+  "policyVersion": 1,
+
+  "allow": [
+    "PrintFlow.App.exe",
+    "PrintFlow.App.dll",
+    "PrintFlow.Domain.dll",
+    "PrintFlow.Workflow.dll",
+    "PrintFlow.Infrastructure.dll",
+    "PrintFlow.App.deps.json",
+    "PrintFlow.App.runtimeconfig.json",
+    "appsettings.json",
+    "*.dll",
+    "*/*.resources.dll",
+    "createdump.exe"
+  ],
+
+  "$allowComment": [
+    "'*.dll' is the self-contained .NET runtime and the WPF framework assemblies, which are the",
+    "point of the self-contained publish and cannot be enumerated by name across servicing",
+    "updates. '*/*.resources.dll' is the framework's and the product's satellite resources, one",
+    "culture folder deep. Neither widens the boundary to a second file type: no pattern here",
+    "matches .pdb, .cs, .csproj, .db, .zip, .png, .tif, .psd, .pfx or a folder more than one level",
+    "deep, so a payload can only ever be executable code, its two runtime .json descriptors and",
+    "the shipped configuration default."
+  ],
+
+  "denyAlways": [
+    "**/*.pdb",
+    "**/*.cs",
+    "**/*.csproj",
+    "**/*.wixproj",
+    "**/*.sln",
+    "**/*.props",
+    "**/*.targets",
+    "**/*.db",
+    "**/*.db-wal",
+    "**/*.db-shm",
+    "**/*.sqlite",
+    "**/*.sqlite3",
+    "**/*.pfx",
+    "**/*.snk",
+    "**/*.p12",
+    "**/*.key",
+    "**/*.psd",
+    "**/*.psb",
+    "**/*.tif",
+    "**/*.tiff",
+    "**/*.atn",
+    "**/*.zip",
+    "**/appsettings.local.json",
+    "**/*.local.json",
+    "**/.git/**",
+    "**/.env",
+    "**/*.Tests.dll",
+    "**/xunit*.dll",
+    "**/Shouldly.dll",
+    "**/testhost*",
+    "**/Microsoft.TestPlatform*",
+    "**/packages.lock.json",
+    "**/*.user"
+  ],
+
+  "$denyComment": [
+    "Test assemblies, source, project files, any SQLite database, any signing or secret material,",
+    "customer and production imagery, the local override configuration, repository evidence and",
+    "any .git content. These are not expected in a Release publish of PrintFlow.App at all; the",
+    "list exists so that if one ever does appear the packaging build stops instead of shipping it.",
+    "",
+    "'**/*.pdb' is a deliberate drop rather than an oversight: Release symbols are a release record,",
+    "not an installed file. Build-Installer.ps1 keeps them beside the .msi in the release folder and",
+    "the runbook says to archive them with the installer."
+  ],
+
+  "requiredFiles": [
+    "PrintFlow.App.exe",
+    "PrintFlow.App.dll",
+    "PrintFlow.Domain.dll",
+    "PrintFlow.Workflow.dll",
+    "PrintFlow.Infrastructure.dll",
+    "PrintFlow.App.deps.json",
+    "PrintFlow.App.runtimeconfig.json",
+    "appsettings.json"
+  ],
+
+  "$requiredComment": [
+    "The payload is incomplete without these, and a staging run that cannot produce every one of",
+    "them fails. 'appsettings.json' is the shipped configuration default; the operator's validated",
+    "deviations belong in appsettings.local.json, which the installer never writes and never",
+    "removes (SCRUM-11123 Part F)."
+  ]
+}
