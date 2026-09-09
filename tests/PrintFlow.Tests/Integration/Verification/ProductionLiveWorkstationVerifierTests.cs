@@ -244,7 +244,7 @@ public sealed class ProductionLiveWorkstationVerifierTests
         ProductionWorkstationVerifier verifier = new(
             fixture.ManifestPath, WorkstationVerificationFixture.PresetId,
             WorkstationVerificationFixture.PresetVersion, fixture.ManifestSha256,
-            fixture.WorkspaceRoot, fixture.Facts, fixture.Artifacts, fixture.Clock, live);
+            fixture.WorkspaceRoot, fixture.Facts, fixture.Artifacts, fixture.Clock, live, revalidation: null);
 
         WorkstationVerificationResult result = await verifier.RunLiveChecksAsync(CancellationToken.None);
 

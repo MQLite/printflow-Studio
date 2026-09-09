@@ -25,6 +25,25 @@ public enum WorkstationVerificationCheck
     /// <summary>The configured workspace root is the accepted root, and is addressable (§11).</summary>
     WorkspaceRoot,
 
+    /// <summary>
+    /// This exact installation — this PrintFlow version, on this preset, on this Windows build,
+    /// against these accepted Meitu and Photoshop binaries — has been through Environment
+    /// Readiness and the standard regression set, and both passed (SCRUM-11123 Part H).
+    /// </summary>
+    /// <remarks>
+    /// The one check that is not about the machine. Every other member here asks whether this is
+    /// the accepted workstation; this one asks whether the accepted workstation and the installed
+    /// application have actually been tested together since the last thing changed. Without it, a
+    /// newly installed PrintFlow binary inherits the previous build's Production approval the
+    /// moment it starts, which is what SCRUM-11123 exists to prevent.
+    /// <para>
+    /// Dynamic rather than immutable, because an operator who records a revalidation while
+    /// PrintFlow is running must be able to return to Production without restarting it, and
+    /// because a record that is deleted mid-session must close Production on the next request.
+    /// </para>
+    /// </remarks>
+    ProductionRevalidation,
+
     /// <summary>Edition, version, build and architecture match the accepted baseline (§7).</summary>
     OperatingSystem,
 

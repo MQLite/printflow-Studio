@@ -637,6 +637,9 @@
   <data name="EnvironmentCheck_WorkspaceRoot" xml:space="preserve">
     <value>The working folder is not the one this workstation was verified with.</value>
   </data>
+  <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
+    <value>This installation has not been revalidated. After any PrintFlow, Windows, Meitu or Photoshop upgrade, the environment check and the standard test set must both be rerun and pass before production work may resume.</value>
+  </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>This computer's Windows version does not match the verified workstation.</value>
   </data>
@@ -691,6 +694,9 @@
   </data>
   <data name="EnvironmentCheckName_WorkspaceRoot" xml:space="preserve">
     <value>Working folder</value>
+  </data>
+  <data name="EnvironmentCheckName_ProductionRevalidation" xml:space="preserve">
+    <value>Revalidation after upgrade</value>
   </data>
   <data name="EnvironmentCheckName_OperatingSystem" xml:space="preserve">
     <value>Windows version</value>

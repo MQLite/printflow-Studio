@@ -65,6 +65,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     private readonly IWorkstationArtifactReader _artifacts;
     private readonly TimeProvider _clock;
     private readonly IProductionLiveWorkstationVerifier? _live;
+    private readonly IProductionRevalidationReader _revalidation;
     private readonly object _liveEvidenceSync = new();
     private WorkstationLiveEvidence? _liveEvidence;
 
@@ -89,10 +90,16 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         IWorkstationArtifactReader artifacts,
         TimeProvider clock)
         : this(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
-            configuredWorkspaceRoot, facts, artifacts, clock, live: null)
+            configuredWorkspaceRoot, facts, artifacts, clock, live: null, revalidation: null)
     {
     }
 
+    /// <param name="revalidation">
+    /// Reads the production revalidation record. Null means the real file under the configured
+    /// workspace root, which is what the application always uses; the parameter exists so the
+    /// fail-closed matrix in <c>ProductionRevalidationTests</c> can present a record without
+    /// owning a workspace.
+    /// </param>
     internal ProductionWorkstationVerifier(
         string manifestAbsolutePath,
         string presetId,
@@ -102,7 +109,8 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         IWorkstationFactReader facts,
         IWorkstationArtifactReader artifacts,
         TimeProvider clock,
-        IProductionLiveWorkstationVerifier? live)
+        IProductionLiveWorkstationVerifier? live,
+        IProductionRevalidationReader? revalidation)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(manifestAbsolutePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(presetId);
@@ -121,6 +129,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         _artifacts = artifacts;
         _clock = clock;
         _live = live;
+        _revalidation = revalidation ?? new FileProductionRevalidationReader(configuredWorkspaceRoot);
         _rootOfTrust = new Lazy<RootOfTrust>(EstablishRootOfTrust);
     }
 
@@ -178,7 +187,8 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
             new Win32WorkstationFactReader(),
             new FileSystemArtifactReader(),
             clock,
-            live);
+            live,
+            revalidation: null);
     }
 
     /// <inheritdoc />
@@ -401,6 +411,19 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         VerifyDisplay(requirements.Display),
         VerifyUiCulture(requirements.OperatingSystem, requirements.Meitu),
         DescribeExternalApplicationUiLanguage(requirements.Meitu, requirements.Photoshop),
+
+        // Dynamic, and last, because it is the only check that asks about the application rather
+        // than the machine: has this PrintFlow build, on this preset, on this Windows build,
+        // against these accepted binaries, actually been revalidated? The record is re-read on
+        // every call for the same reason the display is — an operator who records a revalidation
+        // while PrintFlow is running returns to Production without restarting it, and one whose
+        // record is removed is refused on the next request (SCRUM-11123 Part H).
+        ProductionRevalidationEvaluator.Evaluate(
+            _revalidation.Read(),
+            requirements,
+            _expectedManifestSha256,
+            _facts.ReadOperatingSystem().Build,
+            ProductionRevalidationEvaluator.RunningProductVersion),
     ];
 
     /// <summary>

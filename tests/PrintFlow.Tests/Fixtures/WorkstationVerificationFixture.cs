@@ -89,6 +89,12 @@ internal sealed class WorkstationVerificationFixture : IDisposable
         Facts = MatchingFacts();
         Artifacts = new FileSystemArtifactReader();
         Clock = new FakeTimeProvider(new DateTimeOffset(2026, 9, 1, 12, 0, 0, TimeSpan.Zero));
+
+        // The synthetic workstation starts revalidated, so that every test written before
+        // SCRUM-11123 still describes "this is the accepted workstation and nothing has changed"
+        // and keeps asserting the thing it was written to assert. A test that wants the
+        // fail-closed side calls RemoveRevalidationRecord or WriteRevalidationRecord.
+        WriteRevalidationRecord(MatchingRevalidationRecord());
     }
 
     public string ManifestPath { get; }
@@ -264,6 +270,61 @@ internal sealed class WorkstationVerificationFixture : IDisposable
 
     private static string DigestOf(string path) =>
         Sha256.FromBytes(SHA256.HashData(File.ReadAllBytes(path))).ToString();
+
+    // ------------------------------------------------------------------------------------------
+    // Production revalidation (SCRUM-11123 Part H)
+    // ------------------------------------------------------------------------------------------
+
+    /// <summary>The record that describes this fixture's workstation exactly as it stands.</summary>
+    /// <remarks>
+    /// Built from the fixture's own digests and the running assembly's version rather than from
+    /// literals, for the same reason nothing else here is a literal: a record written by hand
+    /// would drift from the manifest the moment either changed, and would then be testing that
+    /// the check tolerates drift.
+    /// </remarks>
+    public ProductionRevalidationRecord MatchingRevalidationRecord() =>
+        new(ProductionRevalidationRecord.CurrentSchemaVersion,
+            ProductionRevalidationEvaluator.RunningProductVersion,
+            PresetId,
+            PresetVersion,
+            ManifestSha256.ToString(),
+            OsBuild,
+            DigestOf(MeituPath),
+            DigestOf(PhotoshopPath),
+            EnvironmentReadinessPassed: true,
+            new StandardRegressionSetOutcome(
+                "synthetic-regression-set-v1",
+                StandardRegressionSetStatus.Passed,
+                "2026-09-01T09:00:00+12:00",
+                Path.Combine(WorkspaceRoot, "Revalidation", "synthetic-run")),
+            "SYNTHETIC\\operator",
+            "2026-09-01T09:05:00+12:00");
+
+    /// <summary>Writes a revalidation record into this fixture's workspace.</summary>
+    public void WriteRevalidationRecord(ProductionRevalidationRecord record)
+    {
+        string path = ProductionRevalidationRecord.PathFor(WorkspaceRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, record.ToJson(), Encoding.UTF8);
+    }
+
+    /// <summary>Writes arbitrary bytes where the record belongs, for the malformed-record case.</summary>
+    public void WriteRevalidationRecordRaw(string content)
+    {
+        string path = ProductionRevalidationRecord.PathFor(WorkspaceRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, content, Encoding.UTF8);
+    }
+
+    /// <summary>Removes the record, which is the state a freshly upgraded installation is in.</summary>
+    public void RemoveRevalidationRecord()
+    {
+        string path = ProductionRevalidationRecord.PathFor(WorkspaceRoot);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
 }
 
 /// <summary>

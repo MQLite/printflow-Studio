@@ -626,6 +626,9 @@
   <data name="EnvironmentCheck_WorkspaceRoot" xml:space="preserve">
     <value>当前工作文件夹不是本工作站校验时使用的那一个。</value>
   </data>
+  <data name="EnvironmentCheck_ProductionRevalidation" xml:space="preserve">
+    <value>本次安装尚未通过重新验证。PrintFlow、Windows、美图或 Photoshop 升级后，必须重新运行环境检查与标准测试集并全部通过，才能恢复生产作业。</value>
+  </data>
   <data name="EnvironmentCheck_OperatingSystem" xml:space="preserve">
     <value>本机的 Windows 版本与已校验的工作站不一致。</value>
   </data>
@@ -680,6 +683,9 @@
   </data>
   <data name="EnvironmentCheckName_WorkspaceRoot" xml:space="preserve">
     <value>工作文件夹</value>
+  </data>
+  <data name="EnvironmentCheckName_ProductionRevalidation" xml:space="preserve">
+    <value>升级后重新验证</value>
   </data>
   <data name="EnvironmentCheckName_OperatingSystem" xml:space="preserve">
     <value>Windows 版本</value>

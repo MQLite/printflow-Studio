@@ -127,7 +127,7 @@ public sealed class ProductionWorkstationVerifierTests
     public void A_workspace_root_that_is_a_file_fails_as_its_own_condition()
     {
         using WorkstationVerificationFixture fixture = new();
-        Directory.Delete(fixture.WorkspaceRoot);
+        Directory.Delete(fixture.WorkspaceRoot, recursive: true);
         File.WriteAllText(fixture.WorkspaceRoot, "not a directory");
 
         WorkstationVerificationResult result = fixture.CreateVerifier().Verify();
@@ -565,6 +565,7 @@ public sealed class ProductionWorkstationVerifierTests
                 WorkstationVerificationCheck.DisplayConfiguration,
                 WorkstationVerificationCheck.UiCulture,
                 WorkstationVerificationCheck.ExternalApplicationUiLanguage,
+                WorkstationVerificationCheck.ProductionRevalidation,
             ],
             ignoreOrder: true);
     }
