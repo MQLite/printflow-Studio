@@ -84,6 +84,31 @@ public interface ISessionService
     Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Takes one finished job's record off Recent Processing, for good (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// The single authority on whether the action is legal. The Home screen offers the button
+    /// from <see cref="SessionListItem.CanRemoveRecord"/>, but the decision is made here against
+    /// the session's persisted rows — its state, whether any attempt is still running or
+    /// interrupted, and whether it still holds the automation lock — and re-checked once more in
+    /// the repository's own guarded statement. A view model has no rule of its own to disagree
+    /// with.
+    /// <para>
+    /// This is record management, not cleanup. It deletes nothing: no file is opened, no
+    /// Revision, review, attempt or PrintOutput row is touched, and the session itself remains
+    /// loadable and complete. What ends is its appearance on Home, and that survives a restart
+    /// because it is persisted rather than remembered.
+    /// </para>
+    /// <para>
+    /// It cannot be used to hide unfinished work. Only a Completed or Abandoned session
+    /// qualifies, and a session with an unresolved interruption is neither — it is still Active
+    /// or HandedOff, which is exactly the set <see cref="ListRecoveryAsync"/> draws from, so
+    /// recovery authority cannot be bypassed by removing a card.
+    /// </para>
+    /// </remarks>
+    Task<OperationResult<Unit>> RemoveFromRecentAsync(SessionId id, CancellationToken cancellationToken);
+
+    /// <summary>
     /// What this session's automation is doing right now (Epic 11300 Part D2A §28).
     /// </summary>
     /// <remarks>

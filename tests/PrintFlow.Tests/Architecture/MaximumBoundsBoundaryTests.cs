@@ -581,9 +581,19 @@ public sealed class MaximumBoundsBoundaryTests
     /// backfills nothing — every historical attempt reads NULL, because the rectangle a
     /// pre-0009 trim used is genuinely unrecoverable from the output's dimensions alone.
     /// </para>
+    /// <para>
+    /// It moves to 0017 for SCRUM-11117's Recent Processing record management. That script adds
+    /// exactly one nullable column to <c>ProcessingSession</c> and nothing else: no table, no
+    /// rebuild, no widened constraint, no backfill, no trigger. It is stated out loud here
+    /// because the alternative reading of "delete-record" — deleting the session row — would
+    /// have cascaded into <c>ReviewDecision</c>, which the initial schema's append-only trigger
+    /// aborts, and would have destroyed the approval history binding an approved production file
+    /// to the operator who approved it. A record leaving the list is therefore a persisted flag
+    /// and never a deletion.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_revision_retention_migration()
+    public void The_migration_set_ends_at_the_recent_processing_record_removal_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -599,7 +609,8 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11092 / SCRUM-11112: manual result provenance and manual cutout authority.
         // SCRUM-11114: verified Revision relocation and explicit rejected-Meitu expiry.
         // SCRUM-11110: the same singleton lock also owns bounded environment verification.
-        scripts.Last().ShouldBe("0016_manual_result_source_authority.sql");
+        // SCRUM-11117: one nullable ProcessingSession column so a finished record can leave the list.
+        scripts.Last().ShouldBe("0017_recent_processing_record_removal.sql");
     }
 
     // -------------------------------------------------------------------------------------

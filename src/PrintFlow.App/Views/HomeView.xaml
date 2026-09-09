@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+             xmlns:views="clr-namespace:PrintFlow.App.Views"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
              AllowDrop="True"
@@ -14,6 +15,12 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <!--
+            The same converter the review surface uses, for the same reason: the one stream in
+            the preview path belongs to the view layer, so no view model ever opens one
+            (Epic 11200 Part C1 §29).
+        -->
+        <views:PreviewPayloadConverter x:Key="PreviewPayload" />
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -156,11 +163,53 @@
                             <Border BorderBrush="#22000000" BorderThickness="0,0,0,1" Padding="6,10">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <StackPanel Grid.Column="0">
+                                    <!--
+                                        The picture, or the space where one would be. Fixed extent
+                                        either way, so a row that has no preview — or has not been
+                                        given one yet — does not make the list jump as thumbnails
+                                        arrive (Jira 11602).
+                                    -->
+                                    <Border Grid.Column="0"
+                                            Width="64" Height="64"
+                                            Margin="0,0,12,0"
+                                            VerticalAlignment="Center"
+                                            Background="#0F000000"
+                                            BorderBrush="#22000000"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                        <Grid>
+                                            <!--
+                                                The identity sits on the Image and on the neutral
+                                                line beside it rather than on the Border: a Border
+                                                creates no automation peer, so an id put there is
+                                                invisible to a real UI Automation client. Each of
+                                                these does create one, and exactly one of them is
+                                                on screen at a time.
+                                            -->
+                                            <Image Source="{Binding Thumbnail, Converter={StaticResource PreviewPayload}}"
+                                                   Stretch="Uniform"
+                                                   Margin="2"
+                                                   AutomationProperties.AutomationId="Home.RecentSessionThumbnail"
+                                                   AutomationProperties.Name="{Binding ThumbnailName}"
+                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVisibility}}" />
+                                            <TextBlock Text="{Binding ThumbnailState}"
+                                                       FontSize="10"
+                                                       Opacity="0.6"
+                                                       TextWrapping="Wrap"
+                                                       TextAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       AutomationProperties.AutomationId="Home.RecentSessionNoThumbnail"
+                                                       AutomationProperties.Name="{Binding ThumbnailName}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14" />
                                         <StackPanel Orientation="Horizontal" Margin="0,2,0,0" Opacity="0.75">
                                             <TextBlock Text="{Binding Workflow}" />
@@ -173,9 +222,9 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                         <!--
-                                            The two row actions repeat once per session, so their
+                                            The row actions repeat once per session, so their
                                             AutomationIds are unique within a row rather than within
                                             the screen: a driver picks the row by its accessible name
                                             — the operator's own output name — and then the action.
@@ -198,7 +247,24 @@
                                                 AutomationProperties.Name="{Binding DataContext.AbandonLabel,
                                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 Padding="12,4"
+                                                Margin="0,0,8,0"
                                                 Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
+                                        <!--
+                                            Offered only where the workflow layer says the record may
+                                            be taken off the list — a finished job, never one still
+                                            being worked on or waiting for a recovery decision
+                                            (Jira 11602). Abandon and this are never both offered.
+                                        -->
+                                        <Button Content="{Binding DataContext.RemoveLabel,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                Command="{Binding DataContext.RemoveRecordCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                AutomationProperties.AutomationId="Home.RemoveSessionRecord"
+                                                AutomationProperties.Name="{Binding DataContext.RemoveLabel,
+                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                Padding="12,4"
+                                                Visibility="{Binding CanRemoveRecord, Converter={StaticResource BoolToVisibility}}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>

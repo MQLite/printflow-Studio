@@ -83,7 +83,83 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
                 "Review the prepared managed raster; the original source document is not a UI preview.");
         }
         OperationResult<DecodedPreview> decoded = await _decoder.DecodeAsync(revision.File, cancellationToken);
-        return decoded.IsFailure
+        return Present(revision, decoded);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(
+        SessionId sessionId, CancellationToken cancellationToken)
+    {
+        OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(sessionId, cancellationToken);
+        if (loaded.IsFailure)
+        {
+            return OperationResult.Fail<ImagePreview>(loaded.Failure);
+        }
+
+        if (loaded.Value is not { } aggregate)
+        {
+            return OperationResult.Fail<ImagePreview>(
+                FailureCode.PreconditionNotMet, $"No session {sessionId} exists.");
+        }
+
+        if (ThumbnailArtefactOf(aggregate) is not { } revision)
+        {
+            return OperationResult.Fail<ImagePreview>(
+                FailureCode.PreconditionNotMet,
+                $"Session {sessionId} holds no artefact this workstation can draw as a thumbnail.");
+        }
+
+        OperationResult<DecodedPreview> decoded =
+            await _decoder.DecodeThumbnailAsync(revision.File, cancellationToken);
+        return Present(revision, decoded);
+    }
+
+    /// <summary>
+    /// Which of a session's Revisions stands for it in a list (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// The imported original, as this product can draw it. The root Revision is the operator's
+    /// own file and the one fact about a session that never changes, which is exactly what a
+    /// recognisable list row needs; when the root is a PSD or a single-page PDF — containers the
+    /// review surface deliberately refuses and whose pixels only exist once a preparation step
+    /// has produced a managed raster — the raster derived directly from that root stands in for
+    /// it. Nothing else is considered: a later enhanced or trimmed result would make the same
+    /// job look like a different one from one visit to the next.
+    /// <para>
+    /// This chooses; it does not decode, does not create anything, and cannot fall back to a
+    /// file outside the aggregate it was handed. A session with no root Revision yet — an import
+    /// that failed — and one whose derived raster has not been produced both answer null, and
+    /// the row shows no picture rather than a wrong one.
+    /// </para>
+    /// </remarks>
+    private static Revision? ThumbnailArtefactOf(SessionAggregate aggregate)
+    {
+        Revision? root = aggregate.Revisions.FirstOrDefault(candidate => candidate.IsRoot);
+        if (root is null)
+        {
+            return null;
+        }
+
+        if (IsDrawable(root))
+        {
+            return root;
+        }
+
+        return aggregate.Revisions
+            .Where(candidate => candidate.SourceRevisionId == root.Id && IsDrawable(candidate))
+            .OrderBy(candidate => candidate.CreatedAtUtc)
+            .FirstOrDefault();
+
+        static bool IsDrawable(Revision revision) =>
+            revision.RetentionReleasedAtUtc is null &&
+            revision.Facts.Format is not (PrintFlow.Domain.Files.ImageFormat.Psd
+                or PrintFlow.Domain.Files.ImageFormat.Pdf);
+    }
+
+    /// <summary>Wraps a decoded payload in the Revision identity it came from, or reports why not.</summary>
+    private static OperationResult<ImagePreview> Present(
+        Revision revision, OperationResult<DecodedPreview> decoded) =>
+        decoded.IsFailure
             ? OperationResult.Fail<ImagePreview>(decoded.Failure)
             : OperationResult.Ok(new ImagePreview(
                 revision.Id,
@@ -93,5 +169,4 @@ public sealed class ArtefactPreviewService : IArtefactPreviewService
                 decoded.Value.SourcePixelHeight,
                 decoded.Value.HasTransparency,
                 decoded.Value.Payload));
-    }
 }

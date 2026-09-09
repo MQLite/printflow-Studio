@@ -66,6 +66,76 @@ internal static class DisplayNames
     };
 
     /// <summary>
+    /// The accepted input formats, listed for an operator (MVP design §9.2; Jira 11601).
+    /// </summary>
+    /// <remarks>
+    /// Built from <see cref="SupportedInputFormats.All"/> rather than written out, so the
+    /// sentence a refused operator reads cannot fall behind the rule the import path actually
+    /// applies. A screen with its own list is how "PSD is not supported" survives on a product
+    /// that has supported PSD since Jira 11406.
+    /// </remarks>
+    internal static string SupportedInputList =>
+        string.Join(Strings.Home_ImportFormatSeparator, SupportedInputFormats.All.Select(ImageFormat));
+
+    /// <summary>
+    /// Why one chosen file was not imported, in the operator's own terms (Jira 11201, 11601).
+    /// </summary>
+    /// <remarks>
+    /// The distinctions this preserves are the point of it. "Not a kind of file we accept",
+    /// "an accepted kind of file that is damaged", "a PSD or PDF this one cannot be prepared
+    /// from", "the file could not be read at all" and "something else went wrong" lead to four
+    /// different operator actions, and every one of them arrives as its own
+    /// <see cref="FailureCode"/> from the layer that established it. Nothing is guessed here and
+    /// no file is re-examined: the format named below is the one the inspector detected from the
+    /// file's magic bytes, carried on the failure as structured context.
+    /// <para>
+    /// The stable code is appended to every sentence for the same reason it is elsewhere: it is
+    /// what a support call can quote, and it does not change with the workstation's language
+    /// (MVP design §13.4). <c>TechnicalDetail</c> is never shown — it is English log text that
+    /// can name a path.
+    /// </para>
+    /// </remarks>
+    internal static string ImportRefusal(OperationFailure failure)
+    {
+        ArgumentNullException.ThrowIfNull(failure);
+
+        string fileName = failure.Context.TryGetValue("sourceFileName", out string? named)
+            ? named
+            : string.Empty;
+        Domain.Files.ImageFormat detected =
+            failure.Context.TryGetValue("sourceFormat", out string? format) &&
+            Enum.TryParse(format, out Domain.Files.ImageFormat parsed)
+                ? parsed
+                : Domain.Files.ImageFormat.Unknown;
+
+        string sentence = failure.Code switch
+        {
+            // Positively identified as something this product has no production path for — say
+            // which container it really is, because the operator's file may well be named .png.
+            FailureCode.SourceFormatUnsupported when detected != Domain.Files.ImageFormat.Unknown =>
+                string.Format(
+                    CultureInfo.CurrentCulture, Strings.Home_ImportUnsupportedFormat,
+                    ImageFormat(detected), SupportedInputList),
+
+            // Not any container this product recognises. Naming the file is the only specific
+            // thing that can honestly be said about it.
+            FailureCode.SourceFormatUnsupported => string.Format(
+                CultureInfo.CurrentCulture, Strings.Home_ImportUnrecognisedFile,
+                fileName, SupportedInputList),
+
+            // An accepted format whose image could not be read. Never described as unsupported:
+            // the operator's next move is to check the file, not to convert it.
+            FailureCode.SourceImageUnreadable => string.Format(
+                CultureInfo.CurrentCulture, Strings.Home_ImportUnreadableImage,
+                fileName, ImageFormat(detected)),
+
+            _ => Failure(failure.Code),
+        };
+
+        return string.Format(CultureInfo.CurrentCulture, Strings.Home_ImportRefused, sentence, failure.Code);
+    }
+
+    /// <summary>
     /// The operator label for a quick rejection reason (MVP design §7.3).
     /// </summary>
     /// <remarks>
@@ -100,6 +170,8 @@ internal static class DisplayNames
         FailureCode.PdfEncrypted => Strings.Failure_PdfEncrypted,
         FailureCode.PdfMultiplePages => Strings.Failure_PdfMultiplePages,
         FailureCode.PdfPreparationFailed => Strings.Failure_PdfPreparationFailed,
+        FailureCode.SourceFormatUnsupported => Strings.Failure_SourceFormatUnsupported,
+        FailureCode.SourceImageUnreadable => Strings.Failure_SourceImageUnreadable,
         FailureCode.PsdUnsupported => Strings.Failure_PsdUnsupported,
         FailureCode.PsdCompositeMissing => Strings.Failure_PsdCompositeMissing,
         FailureCode.PsdUnreadable => Strings.Failure_PsdUnreadable,

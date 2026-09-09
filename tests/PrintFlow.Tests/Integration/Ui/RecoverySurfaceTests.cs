@@ -30,7 +30,7 @@ public sealed class RecoverySurfaceTests
         string selected = h.WriteSourcePng("saved-result.png");
         byte[] selectedBytes = File.ReadAllBytes(selected);
         FaultingRepository repository = new(h.Repository) { FailFromCommit = 3 };
-        var home = Home(h.CreateService(repository: repository), new StubFilePicker(selected));
+        var home = Home(h, h.CreateService(repository: repository), new StubFilePicker(selected));
         await home.RefreshCommand.ExecuteAsync(null);
         await home.ImportRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
         var row = home.RecoverySessions.Single();
@@ -56,7 +56,7 @@ public sealed class RecoverySurfaceTests
         SessionId id = await Seed(h, "fault");
         SessionAggregate before = await Load(h, id);
         FaultingRepository repository = new(h.Repository) { FailFromCommit = 1 };
-        var home = Home(h.CreateService(repository: repository));
+        var home = Home(h, h.CreateService(repository: repository));
         await home.RefreshCommand.ExecuteAsync(null);
         await home.RestartRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
         home.RecoverySessions.Count.ShouldBe(1);
@@ -87,7 +87,7 @@ public sealed class RecoverySurfaceTests
         string ordinary = h.WriteSourcePng("ordinary.png");
         (await service.ImportAsync(WorkflowType.PrepareAsset, ordinary, "ordinary", "test", default)).IsSuccess.ShouldBeTrue();
         (await service.ListRecoveryAsync(default)).Value.Count.ShouldBe(1);
-        HomeViewModel home = Home(service);
+        HomeViewModel home = Home(h, service);
         await home.RefreshCommand.ExecuteAsync(null);
         home.RecentSessions.ShouldNotContain(row => row.Id == id);
         await home.RestartRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
@@ -108,7 +108,7 @@ public sealed class RecoverySurfaceTests
         StubFilePicker picker = new();
         RecordingNavigation navigation = new();
         var service = h.CreateService();
-        HomeViewModel home = Home(service, picker, navigation);
+        HomeViewModel home = Home(h, service, picker, navigation);
         await home.RefreshCommand.ExecuteAsync(null);
         home.RecoverySessions.Single().CanImport.ShouldBeTrue();
         await home.ImportRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
@@ -151,7 +151,7 @@ public sealed class RecoverySurfaceTests
         var service = h.CreateService();
         (await service.ListRecoveryAsync(default)).Value.Single().Actions.ShouldNotContain(RecoveryAction.ManualResult);
         (await service.ResolveRecoveryAsync(id, RecoveryAction.ManualResult, source, "test", default)).IsFailure.ShouldBeTrue();
-        HomeViewModel home = Home(service);
+        HomeViewModel home = Home(h, service);
         await home.RefreshCommand.ExecuteAsync(null);
         await home.AbandonRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
         home.RecoverySessions.ShouldBeEmpty();
@@ -174,7 +174,7 @@ public sealed class RecoverySurfaceTests
         {
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
-            var home = Home(h.CreateService());
+            var home = Home(h, h.CreateService());
             home.RefreshCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             home.RecoveryHeading.ShouldBe(heading);
             return new HomeView { DataContext = home };
@@ -187,8 +187,11 @@ public sealed class RecoverySurfaceTests
         result.Facts.ShouldContain(("Home.Recovery.Abandon", abandon));
     }
 
-    internal static HomeViewModel Home(ISessionService service, IFilePicker? picker = null, RecordingNavigation? navigation = null) =>
-        new(service, navigation ?? new RecordingNavigation(), picker ?? new StubFilePicker(), new StartupStatusAccessor());
+    internal static HomeViewModel Home(
+        SessionServiceHarness harness, ISessionService service,
+        IFilePicker? picker = null, RecordingNavigation? navigation = null) =>
+        new(service, harness.Previews, navigation ?? new RecordingNavigation(),
+            picker ?? new StubFilePicker(), new StartupStatusAccessor());
 
     internal static async Task<SessionAggregate> Load(SessionServiceHarness h, SessionId id) =>
         (await h.Repository.LoadAsync(id, default)).Value!;

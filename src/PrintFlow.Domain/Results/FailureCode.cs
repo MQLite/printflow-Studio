@@ -186,4 +186,33 @@ public enum FailureCode
     PdfEncrypted,
     PdfMultiplePages,
     PdfPreparationFailed,
+
+    /// <summary>
+    /// The chosen file's container is not one PrintFlow Studio accepts as an input
+    /// (<see cref="Files.SupportedInputFormats"/>; MVP design §9.2).
+    /// </summary>
+    /// <remarks>
+    /// Established from the file's own magic bytes, never its extension, so a <c>.png</c> that
+    /// is really something else is refused for what it is. Never retryable: the same bytes are
+    /// the same container every time, and the operator's recovery action is to choose a
+    /// different file.
+    /// <para>
+    /// Deliberately distinct from <see cref="SourceImageUnreadable"/>. "This kind of file is not
+    /// accepted" and "this file is accepted but damaged" lead to different operator actions, and
+    /// telling one as the other — calling a corrupt PNG an unsupported PNG — is exactly the
+    /// untruthful feedback Jira 11201 and 11601 rule out.
+    /// </para>
+    /// </remarks>
+    SourceFormatUnsupported,
+
+    /// <summary>
+    /// The chosen file is an accepted container, but no image could be read from it — it is
+    /// truncated, damaged, or not really the format its header claims.
+    /// </summary>
+    /// <remarks>
+    /// Raised only for the containers PrintFlow decodes itself at import
+    /// (<see cref="Files.SupportedInputFormats.IsDecodedAtImport"/>). PSD and PDF carry no pixel
+    /// metadata at import by design and are checked by their own preparation step instead.
+    /// </remarks>
+    SourceImageUnreadable,
 }

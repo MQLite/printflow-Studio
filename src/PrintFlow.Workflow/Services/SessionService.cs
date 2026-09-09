@@ -915,6 +915,50 @@ public sealed partial class SessionService : ISessionService
         _repository.ListRecentAsync(
             RecentSessionLimit, _timeProvider.GetUtcNow() - RecentSessionWindow, cancellationToken);
 
+    /// <inheritdoc />
+    public async Task<OperationResult<Unit>> RemoveFromRecentAsync(
+        SessionId id, CancellationToken cancellationToken)
+    {
+        OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
+        if (loaded.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(loaded.Failure);
+        }
+
+        if (loaded.Value is not { } aggregate)
+        {
+            return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, $"No session {id} exists.");
+        }
+
+        if (!SessionStateRules.AllowsRecordRemoval(aggregate.Session.State))
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.PreconditionNotMet,
+                $"Session {id} is {aggregate.Session.State}; only a finished job's record may be taken off " +
+                "Recent Processing.");
+        }
+
+        // Belt as well as the repository's braces, and for a reason no state name carries: a row
+        // recorded as Running is an operation this process believes is in flight, and a card is
+        // not something to take away while work is still happening behind it. The same pair of
+        // facts already gates completion retention, which is the other operation allowed to touch
+        // a finished session (SqliteSessionRepository's IsRetentionMaintenance check).
+        //
+        // Interrupted is deliberately *not* a bar. An interrupted attempt on a Completed or
+        // Abandoned session is resolved history: startup recovery draws its candidates only from
+        // Active and HandedOff sessions, so a crashed job the operator has since abandoned is no
+        // longer recoverable and refusing to remove its card would strand it on Home forever
+        // (SCRUM-11112; Jira 11602).
+        if (aggregate.Attempts.Any(attempt => attempt.Status is AttemptStatus.Running))
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.PreconditionNotMet,
+                $"Session {id} still has an attempt in flight; its record stays on Recent Processing.");
+        }
+
+        return await _repository.RemoveFromRecentAsync(id, _timeProvider.GetUtcNow(), cancellationToken);
+    }
+
     /// <summary>
     /// Builds the read model the UI sees, from the state the engine just produced plus the
     /// Revisions that state can refer to.
@@ -2597,9 +2641,71 @@ public sealed partial class SessionService : ISessionService
         OperationResult<FileFacts> inspected =
             await _fileInspector.InspectAsync(_workspace.ResolveAbsolute(imported.Value), cancellationToken);
 
-        return inspected.IsFailure
-            ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(inspected.Failure)
+        if (inspected.IsFailure)
+        {
+            return OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(inspected.Failure);
+        }
+
+        OperationFailure? refusal = RefuseUnacceptableInput(inspected.Value, FileNameOf(sourceAbsolutePath));
+        return refusal is not null
+            ? OperationResult.Fail<(WorkspaceFileRef, FileFacts)>(refusal)
             : OperationResult.Ok((imported.Value, inspected.Value));
+    }
+
+    /// <summary>
+    /// Whether these established facts describe a file PrintFlow Studio accepts as an input, and
+    /// if not, exactly why (Jira 11201, 11601; MVP design §9.2).
+    /// </summary>
+    /// <remarks>
+    /// Applied to the <i>managed copy's</i> facts — the same single read that produces the hash a
+    /// Revision is bound to — so acceptance is decided about the bytes the session would actually
+    /// work on, from their magic bytes rather than from a file name anyone can rename.
+    /// <para>
+    /// Two failures rather than one, because they are two different situations for the operator:
+    /// <see cref="FailureCode.SourceFormatUnsupported"/> means "choose a different kind of file",
+    /// and <see cref="FailureCode.SourceImageUnreadable"/> means "this file is damaged". Both
+    /// carry the detected format and the operator's own file name as structured context, so the
+    /// screen can say which format it found without a second opinion about the file — the shell
+    /// never re-inspects and never keeps a format list of its own.
+    /// </para>
+    /// <para>
+    /// This refuses; it does not clean up. An import refused here follows exactly the same path
+    /// as every other import failure — <see cref="FailImportAsync"/> records the failed attempt
+    /// and its structured evidence, so a refusal is explainable through Error Details rather
+    /// than vanishing (SCRUM-11120). No Revision and no <c>InputSnapshot</c> are created, so
+    /// nothing downstream can consume a file that was never accepted.
+    /// </para>
+    /// </remarks>
+    private static OperationFailure? RefuseUnacceptableInput(FileFacts facts, string sourceFileName)
+    {
+        Dictionary<string, string> context = new(2)
+        {
+            ["sourceFormat"] = facts.Format.ToString(),
+            ["sourceFileName"] = sourceFileName,
+        };
+
+        if (!SupportedInputFormats.IsSupported(facts.Format))
+        {
+            return OperationFailure.Create(
+                FailureCode.SourceFormatUnsupported,
+                $"'{sourceFileName}' was detected as {facts.Format} from its magic bytes, which is not an " +
+                "accepted PrintFlow Studio input. No Revision and no InputSnapshot were created.",
+                isRetryable: false,
+                context: context);
+        }
+
+        if (SupportedInputFormats.IsDecodedAtImport(facts.Format) &&
+            (facts.PixelWidth is null || facts.PixelHeight is null))
+        {
+            return OperationFailure.Create(
+                FailureCode.SourceImageUnreadable,
+                $"'{sourceFileName}' is a {facts.Format} container that carries no readable image. No " +
+                "Revision and no InputSnapshot were created.",
+                isRetryable: false,
+                context: context);
+        }
+
+        return null;
     }
 
     private async Task<OperationResult<SessionView>> FailImportAsync(

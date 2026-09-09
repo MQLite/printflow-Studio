@@ -54,4 +54,30 @@ public interface IArtefactPreviewService
     /// </remarks>
     Task<OperationResult<ImagePreview>> GetPreviewAsync(
         SessionId sessionId, RevisionId revisionId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A small picture of what this session is about, for a Recent Processing row (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// The caller names a session and nothing else. Which artefact stands for that session is
+    /// decided here, from the Revisions the session actually persisted, so a list cannot invent
+    /// an image authority of its own or reach for a file that is not this session's — the same
+    /// containment <see cref="GetPreviewAsync"/> gives, with the identity the caller can
+    /// reasonably be expected to hold.
+    /// <para>
+    /// The artefact chosen is the imported original as PrintFlow can draw it: the root Revision
+    /// when its container is one this product decodes, and otherwise the managed raster the
+    /// PSD/PDF preparation step derived from that root. That is what an operator recognises —
+    /// it is the picture they dropped in — and it does not change as the job progresses, so a
+    /// row does not silently become a different image between two visits to Home.
+    /// </para>
+    /// <para>
+    /// Strictly read-only, exactly like <see cref="GetPreviewAsync"/>: no Revision, no review, no
+    /// workflow state and no file is created or changed by looking at a list. A session with
+    /// nothing displayable yet, or whose artefact has gone, fails — and a failure here means
+    /// "there is no picture", never "something is wrong with this job".
+    /// </para>
+    /// </remarks>
+    Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(
+        SessionId sessionId, CancellationToken cancellationToken);
 }

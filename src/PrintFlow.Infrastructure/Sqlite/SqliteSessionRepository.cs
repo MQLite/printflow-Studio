@@ -108,8 +108,14 @@ public sealed class SqliteSessionRepository : ISessionRepository
     {
         using SqliteConnection connection = _connectionFactory.Open();
 
+        // Removed records are filtered before the limit, not after: a job the operator took off
+        // the list must not occupy one of the hundred places Home has to offer (Jira 11602).
         IEnumerable<SessionRow> rows = await connection.QueryAsync<SessionRow>(
-            "SELECT * FROM ProcessingSession WHERE UpdatedAtUtc >= @since ORDER BY UpdatedAtUtc DESC LIMIT @maxCount;",
+            """
+            SELECT * FROM ProcessingSession
+            WHERE UpdatedAtUtc >= @since AND RemovedFromRecentAtUtc IS NULL
+            ORDER BY UpdatedAtUtc DESC LIMIT @maxCount;
+            """,
             new { since = Mappers.ToText(since), maxCount });
 
         IReadOnlyList<SessionListItem> items = rows.Select(row => new SessionListItem(
@@ -368,6 +374,57 @@ public sealed class SqliteSessionRepository : ISessionRepository
         {
             return OperationResult.Fail<Unit>(FailureCode.PersistenceError,
                 $"The stale verification lock could not be released: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// One UPDATE of one nullable column, and every safety condition is part of its WHERE clause
+    /// rather than a separate read before it. That is what makes the guarantee unraceable: a
+    /// session that resumed, acquired the automation lock, or started an attempt between the
+    /// caller's check and this write simply matches no row and nothing is written.
+    /// <para>
+    /// The statement names one column of one table. There is no DELETE here and no way to add
+    /// one without rewriting the method: the customer source, the InputSnapshot bytes, every
+    /// Revision file, every approved PNG and every production TIFF are unreachable from this
+    /// SQL, and so are the session's own steps, attempts, reviews and outputs.
+    /// </para>
+    /// <para>
+    /// Already-removed is refused rather than treated as success. Removing a record is an
+    /// operator action with a visible result, and "nothing changed" and "the record was taken
+    /// off the list" must not report the same thing.
+    /// </para>
+    /// </remarks>
+    public async Task<OperationResult<Unit>> RemoveFromRecentAsync(
+        SessionId id, DateTimeOffset atUtc, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            using SqliteConnection connection = _connectionFactory.Open();
+            int changed = await connection.ExecuteAsync(new CommandDefinition(
+                """
+                UPDATE ProcessingSession SET RemovedFromRecentAtUtc = @at
+                WHERE Id = @id
+                  AND RemovedFromRecentAtUtc IS NULL
+                  AND State IN ('COMPLETED', 'ABANDONED')
+                  AND NOT EXISTS (SELECT 1 FROM ProcessingAttempt a
+                                  WHERE a.SessionId = @id AND a.ResultStatus = 'RUNNING')
+                  AND NOT EXISTS (SELECT 1 FROM AutomationLock l WHERE l.SessionId = @id);
+                """,
+                new { id = id.ToString(), at = Mappers.ToText(atUtc) },
+                cancellationToken: cancellationToken));
+
+            return changed == 1
+                ? OperationResult.Ok()
+                : OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
+                    $"Session {id} is not a finished, idle record that can be taken off Recent Processing.");
+        }
+        catch (SqliteException ex)
+        {
+            return OperationResult.Fail<Unit>(FailureCode.PersistenceError,
+                $"The record could not be taken off Recent Processing: {ex.Message}");
         }
     }
 

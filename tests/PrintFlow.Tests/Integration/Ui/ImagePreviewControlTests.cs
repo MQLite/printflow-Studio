@@ -327,6 +327,11 @@ public sealed class ImagePreviewControlTests
 
             return await _inner.GetPreviewAsync(sessionId, revisionId, cancellationToken);
         }
+
+        /// <summary>Ungated: this suite gates the review pane, not the Home list.</summary>
+        public Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(
+            SessionId sessionId, CancellationToken cancellationToken) =>
+            _inner.GetRecentThumbnailAsync(sessionId, cancellationToken);
     }
 
     // -----------------------------------------------------------------------------

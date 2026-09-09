@@ -1,0 +1,18 @@
+-- PrintFlow Studio — Recent Processing record removal (Jira 11602 / SCRUM-11117).
+--
+-- One nullable timestamp on the session that already owns the record, rather than a new table.
+-- The state being recorded is "this finished job is no longer listed on Home", which is a fact
+-- about that one session and nothing else; a side table would have needed its own identity,
+-- its own foreign key and its own cleanup rules to say the same thing.
+--
+-- It is deliberately NOT part of the ProcessingSession domain record and is never written by
+-- the ordinary session upsert, whose ON CONFLICT clause names its columns explicitly. A
+-- workflow command therefore cannot set or clear it by accident, and record management cannot
+-- change workflow state.
+--
+-- Nothing here deletes anything. Removing a record from Recent Processing must leave the
+-- session, its steps, attempts, Revisions, reviews and PrintOutputs intact — deleting the
+-- session row instead would cascade into ReviewDecision, which the initial schema's
+-- append-only trigger aborts, and would destroy the approval history that binds an approved
+-- production file to the operator who approved it.
+ALTER TABLE ProcessingSession ADD COLUMN RemovedFromRecentAtUtc TEXT NULL;

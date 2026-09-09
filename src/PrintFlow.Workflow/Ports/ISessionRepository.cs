@@ -31,6 +31,35 @@ public interface ISessionRepository
     Task<OperationResult<Unit>> CommitAsync(SessionMutation mutation, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Takes one finished session's record off Recent Processing, permanently
+    /// (Jira 11602 "delete-record"; MVP design §13.2 item 7).
+    /// </summary>
+    /// <remarks>
+    /// Deliberately <b>not</b> a <see cref="SessionMutation"/>. A mutation is what one workflow
+    /// command wrote, and taking a record off a list is not a workflow transition: it changes no
+    /// step, no attempt, no Revision and no review, and it must remain impossible for it to do
+    /// so. Its own narrow operation is what makes that structural rather than a promise
+    /// (Epic 11100 plan §33's "one command, one transaction" is preserved — this is one
+    /// operator action and one statement).
+    /// <para>
+    /// Nothing is destroyed. The session, its steps, its attempts, its Revisions, its reviews
+    /// and its PrintOutputs stay exactly as they were, and no file is touched: the customer
+    /// source, the InputSnapshot bytes, approved PNGs and production TIFFs are outside what this
+    /// can reach at all. What ends is the entry's appearance in <see cref="ListRecentAsync"/>.
+    /// </para>
+    /// <para>
+    /// Implementations must re-check safety in the same statement that writes, and refuse rather
+    /// than write anything when the session is not a finished one, still holds the automation
+    /// lock, or still has a running or interrupted attempt. The caller checks first; this is the
+    /// check that cannot be raced.
+    /// </para>
+    /// </remarks>
+    Task<OperationResult<Unit>> RemoveFromRecentAsync(
+        SessionId id, DateTimeOffset atUtc, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<Unit>(FailureCode.PersistenceError,
+            "This repository cannot remove a record from Recent Processing."));
+
+    /// <summary>
     /// Finds every <see cref="ProcessingAttempt"/> still <c>Running</c> — the crash-detection
     /// query startup recovery uses to convert them to <c>Interrupted</c>.
     /// </summary>

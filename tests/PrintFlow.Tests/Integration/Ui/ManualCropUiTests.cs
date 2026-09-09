@@ -535,6 +535,11 @@ public sealed class ManualCropUiTests
 
             return await _inner.GetPreviewAsync(sessionId, revisionId, cancellationToken);
         }
+
+        /// <summary>Ungated: this suite gates the crop surface's pane, not the Home list.</summary>
+        public Task<OperationResult<ImagePreview>> GetRecentThumbnailAsync(
+            SessionId sessionId, CancellationToken cancellationToken) =>
+            _inner.GetRecentThumbnailAsync(sessionId, cancellationToken);
     }
 
     // -----------------------------------------------------------------------------

@@ -204,7 +204,7 @@ internal sealed class HomeScreenHarness : IDisposable
         _photoshop = photoshop?.Invoke(_harness.FileWorkspace);
         Meitu = new CountingMeituProcessor(_harness.FakeMeitu);
         Sessions = _harness.CreateServiceWithMeitu(Meitu, preset, photoshop: _photoshop);
-        Home = new HomeViewModel(Sessions, Navigation, FilePicker, StartupStatus);
+        Home = new HomeViewModel(Sessions, Previews, Navigation, FilePicker, StartupStatus);
     }
 
     private readonly IPhotoshopOutputProcessor? _photoshop;
@@ -246,7 +246,7 @@ internal sealed class HomeScreenHarness : IDisposable
     /// service — what "close the application and open it again" looks like from a test.
     /// </summary>
     public HomeViewModel RestartHome(RecordingNavigation navigation) =>
-        new(_harness.CreateService(), navigation, new StubFilePicker(), new StartupStatusAccessor());
+        new(_harness.CreateService(), _harness.Previews, navigation, new StubFilePicker(), new StartupStatusAccessor());
 
     /// <summary>A Workflow Selection screen over the same service.</summary>
     public WorkflowSelectionViewModel WorkflowSelection(RecordingNavigation navigation) =>

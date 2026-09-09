@@ -285,6 +285,11 @@ public sealed class ValueObjectTests
             "PhotoshopOpenInputFailed", "PhotoshopDocumentIdentityUnconfirmed",
             "PsdUnsupported", "PsdCompositeMissing", "PsdUnreadable", "PsdPreparationFailed",
             "PdfUnreadable", "PdfEncrypted", "PdfMultiplePages", "PdfPreparationFailed",
+
+            // SCRUM-11116 — the two ways a chosen file is refused at import, kept apart because
+            // they mean different things to an operator: a container this product has no
+            // production path for, and an accepted container carrying no readable image.
+            "SourceFormatUnsupported", "SourceImageUnreadable",
         ];
 
         Enum.GetNames<FailureCode>().ShouldBe(required, ignoreOrder: true);

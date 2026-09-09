@@ -65,7 +65,32 @@ public interface IImagePreviewDecoder
     /// </remarks>
     int MaximumDisplayEdge { get; }
 
+    /// <summary>
+    /// The longest edge, in pixels, a list thumbnail may have (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// A second, much smaller bound rather than a caller-supplied number, because "how big a
+    /// thumbnail is" is the decoder's business and a screen that chose its own could ask Home
+    /// for a hundred full-size previews by accident. Home lists up to a hundred rows, so the
+    /// figure that matters is the per-row one: at this bound a decoded row costs tens of
+    /// kilobytes rather than the megabytes <see cref="MaximumDisplayEdge"/> permits a review
+    /// surface, which is the difference between a list and a working-set problem.
+    /// </remarks>
+    int ThumbnailEdge { get; }
+
     /// <summary>Decodes <paramref name="file"/> into a display payload. Reads only; never writes.</summary>
     Task<OperationResult<DecodedPreview>> DecodeAsync(
+        WorkspaceFileRef file, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Decodes <paramref name="file"/> reduced to <see cref="ThumbnailEdge"/>. Reads only.
+    /// </summary>
+    /// <remarks>
+    /// The same read-only operation as <see cref="DecodeAsync"/> with a smaller bound — not a
+    /// different kind of image and not a cached one. Nothing is stored: a thumbnail is decoded
+    /// when a list asks for it and released when the list lets go, exactly as every other
+    /// preview is (Epic 11200 Part C1 §6).
+    /// </remarks>
+    Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(
         WorkspaceFileRef file, CancellationToken cancellationToken);
 }

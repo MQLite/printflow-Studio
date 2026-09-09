@@ -142,6 +142,17 @@ public sealed record SessionListItem(
     public bool CanAbandon => SessionStateRules.AllowsAbandon(State);
 
     /// <summary>
+    /// Whether Home may offer to take this record off Recent Processing (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// Reported here for the same reason <see cref="CanAbandon"/> is, and from the same
+    /// authority: the rule that decides which entry actions a row offers must be the rule the
+    /// service enforces, or the screen and the service would each have their own idea of what
+    /// is safe.
+    /// </remarks>
+    public bool CanRemoveRecord => SessionStateRules.AllowsRecordRemoval(State);
+
+    /// <summary>
     /// Whether resuming this session means "carry on processing" rather than "look at a
     /// finished record".
     /// </summary>

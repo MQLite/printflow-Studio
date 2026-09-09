@@ -3,6 +3,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Tests.Fixtures;
@@ -202,39 +203,46 @@ public sealed class PreviewAlphaNormalizationTests
     /// </summary>
     /// <remarks>
     /// Nothing is doubled — real workspace, real database, real repository, real WIC decoder —
-    /// because the defect this closes was invisible to every layer above the payload bytes. The
-    /// TIFF is imported as the session's own artefact, which is the only way a preview request
-    /// can legitimately reach it.
+    /// because the defect this closes was invisible to every layer above the payload bytes.
+    /// <para>
+    /// The TIFF reaches the session the way a production TIFF actually does: as the Photoshop
+    /// step's own output Revision, produced by driving the real Generate Print TIFF workflow to
+    /// final review against an accepted separated-CMYK + W1 file. It used to be dropped in
+    /// through <c>ImportAsync</c>, which was always a shortcut and is now refused outright —
+    /// TIFF is an output of this product and not one of its inputs
+    /// (<see cref="SupportedInputFormats"/>; MVP design §9.2), so importing one would have
+    /// started a session with no production path. Coming through the workflow makes this the
+    /// stronger statement anyway: the bytes previewed are the ones the Photoshop step wrote.
+    /// </para>
     /// </remarks>
     [Fact]
     public async Task A_CMYK_W1_TIFF_Revision_previews_visibly_through_the_preview_service()
     {
-        using SessionServiceHarness harness = new();
-        ISessionService service = harness.CreateService();
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        TiffFinalReviewFixture.Review review =
+            await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "preview-alpha.png");
 
-        string path = Path.Combine(harness.Workspace.Root, "production.tif");
-        ProductionTiffFixture.WriteAt(path, MinimalCmykW1Options);
-        byte[] before = File.ReadAllBytes(path);
+        SessionAggregate aggregate = await review.ReloadAsync();
+        Revision tiff = aggregate.Revisions.Single(
+            revision => revision.Operation == OperationKind.PhotoshopOutput);
+        tiff.Facts.Format.ShouldBe(ImageFormat.Tiff);
 
-        SessionView imported = (await service.ImportAsync(
-            WorkflowType.GeneratePrintTiff, path, "preview-alpha", "tester",
-            CancellationToken.None)).Value;
+        string absolute = harness.Inner.FileWorkspace.ResolveAbsolute(tiff.File);
+        byte[] before = File.ReadAllBytes(absolute);
 
         OperationResult<ImagePreview> preview = await harness.Previews.GetPreviewAsync(
-            imported.Id, imported.CurrentArtefact!.RevisionId, CancellationToken.None);
+            review.Id, tiff.Id, CancellationToken.None);
 
         preview.IsSuccess.ShouldBeTrue(preview.IsFailure ? preview.Failure.ToString() : "");
-        preview.Value.PixelWidth.ShouldBe(2);
-        preview.Value.PixelHeight.ShouldBe(2);
         preview.Value.HasTransparency.ShouldBeFalse();
 
         byte[] alpha = AlphaBytes(
             SyntheticImages.DecodePayloadBgra(preview.Value.Payload, out _, out _));
-        alpha.Length.ShouldBe(4);
+        alpha.ShouldNotBeEmpty();
         alpha.ShouldAllBe(value => value == 255,
             "an operator cannot review an artefact the review screen draws as nothing");
 
-        File.ReadAllBytes(path).ShouldBe(before, "a preview reads; it never writes");
+        File.ReadAllBytes(absolute).ShouldBe(before, "a preview reads; it never writes");
     }
 
     // -----------------------------------------------------------------------------

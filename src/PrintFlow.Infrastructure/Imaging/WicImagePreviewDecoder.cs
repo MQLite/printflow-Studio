@@ -59,12 +59,30 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
     public int MaximumDisplayEdge => 2048;
 
     /// <inheritdoc />
+    /// <remarks>
+    /// 192 is a row height, not a viewport: large enough for an operator to recognise their own
+    /// artwork at a glance in a list, and small enough that a hundred of them together stay well
+    /// inside the working set a single review preview is already allowed. The same decode path
+    /// produces it, so a thumbnail is the artefact reduced and never a different picture.
+    /// </remarks>
+    public int ThumbnailEdge => 192;
+
+    /// <inheritdoc />
     public async Task<OperationResult<DecodedPreview>> DecodeAsync(
         WorkspaceFileRef file, CancellationToken cancellationToken)
     {
         string absolutePath = _workspace.ResolveAbsolute(file);
 
-        return await DecodeAbsoluteAsync(absolutePath, cancellationToken);
+        return await DecodeAbsoluteAsync(absolutePath, MaximumDisplayEdge, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<DecodedPreview>> DecodeThumbnailAsync(
+        WorkspaceFileRef file, CancellationToken cancellationToken)
+    {
+        string absolutePath = _workspace.ResolveAbsolute(file);
+
+        return await DecodeAbsoluteAsync(absolutePath, ThumbnailEdge, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -78,16 +96,16 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
                 FailureCode.OutputUnreadable, "The persisted diagnostic image path is not absolute."));
         }
 
-        return DecodeAbsoluteAsync(persistedAbsolutePath, cancellationToken);
+        return DecodeAbsoluteAsync(persistedAbsolutePath, MaximumDisplayEdge, cancellationToken);
     }
 
     private async Task<OperationResult<DecodedPreview>> DecodeAbsoluteAsync(
-        string absolutePath, CancellationToken cancellationToken)
+        string absolutePath, int maximumEdge, CancellationToken cancellationToken)
     {
 
         try
         {
-            return await Task.Run(() => Decode(absolutePath, cancellationToken), cancellationToken);
+            return await Task.Run(() => Decode(absolutePath, maximumEdge, cancellationToken), cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -96,7 +114,8 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
         }
     }
 
-    private OperationResult<DecodedPreview> Decode(string absolutePath, CancellationToken cancellationToken)
+    private static OperationResult<DecodedPreview> Decode(
+        string absolutePath, int maximumEdge, CancellationToken cancellationToken)
     {
         if (!File.Exists(absolutePath))
         {
@@ -159,7 +178,7 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
 
         try
         {
-            BitmapSource scaled = Scale(frame, sourceWidth, sourceHeight);
+            BitmapSource scaled = Scale(frame, sourceWidth, sourceHeight, maximumEdge);
             BitmapSource payloadSource = ToDisplayBgra(scaled, sourceAlpha == true);
 
             PngBitmapEncoder encoder = new();
@@ -192,16 +211,16 @@ public sealed class WicImagePreviewDecoder : IImagePreviewDecoder, IDiagnosticIm
         }
     }
 
-    /// <summary>Reduces the frame so its longest edge fits <see cref="MaximumDisplayEdge"/>.</summary>
-    private BitmapSource Scale(BitmapSource frame, int width, int height)
+    /// <summary>Reduces the frame so its longest edge fits <paramref name="maximumEdge"/>.</summary>
+    private static BitmapSource Scale(BitmapSource frame, int width, int height, int maximumEdge)
     {
         int longest = Math.Max(width, height);
-        if (longest <= MaximumDisplayEdge)
+        if (longest <= maximumEdge)
         {
             return frame;
         }
 
-        double factor = (double)MaximumDisplayEdge / longest;
+        double factor = (double)maximumEdge / longest;
         TransformedBitmap scaled = new(frame, new ScaleTransform(factor, factor));
         Freeze(scaled);
         return scaled;

@@ -77,7 +77,7 @@ public sealed class RecoverySurfaceLiveSmoke(ITestOutputHelper output)
             RecordingNavigation nav = new();
             StartupStatusAccessor startupStatus = new();
             startupStatus.Publish(StartupStatus.Started(presetVerified: false, startup.Value));
-            HomeViewModel model = new(service, nav, new OpenFileDialogPicker(), startupStatus);
+            HomeViewModel model = new(service, h.Previews, nav, new OpenFileDialogPicker(), startupStatus);
             model.RefreshCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             HomeView view = new() { DataContext = model };
             Window window = new() { Title = "PrintFlow synthetic recovery WPF proof " + phase, Content = view,

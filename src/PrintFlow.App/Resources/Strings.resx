@@ -107,7 +107,7 @@
     <value>Choose file…</value>
   </data>
   <data name="Home_ImportFilter" xml:space="preserve">
-    <value>Images|*.png;*.jpg;*.jpeg;*.tif;*.tiff;*.psd;*.pdf|All files|*.*</value>
+    <value>Images|*.png;*.jpg;*.jpeg;*.psd;*.pdf|All files|*.*</value>
   </data>
   <data name="Home_RecentHeading" xml:space="preserve">
     <value>Recent processing</value>
@@ -132,9 +132,6 @@
   </data>
   <data name="Home_DropSingleFileOnly" xml:space="preserve">
     <value>{0} files were dropped. PrintFlow Studio processes one file per session, so nothing was started — drop a single file.</value>
-  </data>
-  <data name="Home_ImportFailed" xml:space="preserve">
-    <value>That file could not be imported ({0}). No session was created.</value>
   </data>
   <data name="Home_ResumeFailed" xml:space="preserve">
     <value>That session could not be opened ({0}).</value>
@@ -801,6 +798,8 @@
   <data name="Failure_PdfUnreadable" xml:space="preserve"><value>This PDF is damaged or unreadable. No prepared image was created. Import a readable single-page PDF.</value></data>
   <data name="Failure_PdfEncrypted" xml:space="preserve"><value>Password-protected or encrypted PDFs are unsupported. No prepared image was created.</value></data>
   <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>This PDF contains multiple pages. PrintFlow only accepts a single-page PDF for this workflow.</value></data>
+  <data name="Failure_SourceFormatUnsupported" xml:space="preserve"><value>This kind of file is not one PrintFlow Studio can process. Nothing was processed and your file was not changed.</value></data>
+  <data name="Failure_SourceImageUnreadable" xml:space="preserve"><value>No image could be read from this file — it is incomplete or damaged. Nothing was processed and your file was not changed.</value></data>
   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available. Check the failure before retrying.</value></data>
   <data name="Session_PreparePdf" xml:space="preserve"><value>Prepare PDF for review</value></data>
   <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels. PrintFlow generates production white ink when creating the final TIFF.</value></data>
@@ -928,4 +927,14 @@
   <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>Processing was interrupted before a result was confirmed. Review the available recovery actions.</value></data>
   <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>Processing was cancelled before a result was confirmed. Review the available recovery actions.</value></data>
   <data name="ErrorDetails_ManualProcessing" xml:space="preserve"><value>Manual processing</value></data>
+  <data name="Home_ImportRefused" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="Home_ImportFormatSeparator" xml:space="preserve"><value>, </value></data>
+  <data name="Home_ImportUnsupportedFormat" xml:space="preserve"><value>This is a {0} file, which PrintFlow Studio cannot process. Choose one {1} file instead — a PDF must have a single page. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_ImportUnrecognisedFile" xml:space="preserve"><value>“{0}” is not an image PrintFlow Studio recognises. Choose one {1} file — a PDF must have a single page. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_ImportUnreadableImage" xml:space="preserve"><value>“{0}” is a {1} file, but no image could be read from it — the file is incomplete or damaged. This is not a format problem. Nothing was processed and your file was not changed.</value></data>
+  <data name="Home_RemoveRecord" xml:space="preserve"><value>Remove from list</value></data>
+  <data name="Home_RemoveDone" xml:space="preserve"><value>“{0}” was removed from Recent processing. Its imported file, approved outputs and processing history are kept.</value></data>
+  <data name="Home_RemoveFailed" xml:space="preserve"><value>That record could not be removed from Recent processing ({0}). It stays on the list and nothing was changed.</value></data>
+  <data name="Home_RecentNoThumbnail" xml:space="preserve"><value>No preview</value></data>
+  <data name="Home_RecentThumbnailOf" xml:space="preserve"><value>Preview of {0}</value></data>
 </root>

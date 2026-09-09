@@ -25,9 +25,23 @@ namespace PrintFlow.App.ViewModels;
 public sealed partial class HomeViewModel : ObservableObject
 {
     private readonly ISessionService _sessions;
+    private readonly IArtefactPreviewService _previews;
     private readonly INavigationService _navigation;
     private readonly IFilePicker _filePicker;
     private readonly StartupStatusAccessor _startupStatus;
+
+    /// <summary>
+    /// Cancels the thumbnail load belonging to the list that is being replaced.
+    /// </summary>
+    /// <remarks>
+    /// The whole of this screen's asynchronous bookkeeping, deliberately. Each refresh builds a
+    /// new set of row objects and a new token; the previous load is cancelled and, because the
+    /// rows it was filling are no longer in <see cref="RecentSessions"/>, anything it still
+    /// writes reaches an object nobody is looking at. That is why there is no scheduler and no
+    /// per-row state machine here — a stale result cannot land on the wrong row when no two
+    /// loads ever share a row (Jira 11602).
+    /// </remarks>
+    private CancellationTokenSource? _thumbnails;
 
     /// <summary>
     /// The workflow a session is imported under before the operator chooses.
@@ -61,16 +75,19 @@ public sealed partial class HomeViewModel : ObservableObject
 
     public HomeViewModel(
         ISessionService sessions,
+        IArtefactPreviewService previews,
         INavigationService navigation,
         IFilePicker filePicker,
         StartupStatusAccessor startupStatus)
     {
         ArgumentNullException.ThrowIfNull(sessions);
+        ArgumentNullException.ThrowIfNull(previews);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(filePicker);
         ArgumentNullException.ThrowIfNull(startupStatus);
 
         _sessions = sessions;
+        _previews = previews;
         _navigation = navigation;
         _filePicker = filePicker;
         _startupStatus = startupStatus;
@@ -96,6 +113,15 @@ public sealed partial class HomeViewModel : ObservableObject
     public string RefreshLabel => Strings.Home_Refresh;
 
     public string AbandonLabel => Strings.Home_Abandon;
+
+    /// <summary>The label for taking a finished job's record off the list (Jira 11602).</summary>
+    /// <remarks>
+    /// "Remove from list" rather than "Delete", because that is exactly what it does and no
+    /// more: the imported file, every approved output and the whole processing history stay
+    /// where they are. Labelling a durable dismissal "Delete" would invite an operator to
+    /// believe they had cleaned up production files, which is the one thing this must never do.
+    /// </remarks>
+    public string RemoveLabel => Strings.Home_RemoveRecord;
 
     public string EmptyRecentText => Strings.Home_NoRecentSessions;
 
@@ -212,6 +238,81 @@ public sealed partial class HomeViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(HasNoRecentSessions));
+
+        ThumbnailsLoaded = StartThumbnailLoad([.. RecentSessions]);
+    }
+
+    /// <summary>
+    /// The thumbnail load belonging to the list currently on screen.
+    /// </summary>
+    /// <remarks>
+    /// Exposed so a test can wait for the pictures rather than poll for them. Nothing in the
+    /// application awaits it: the list is usable the moment it is built, and the pictures arrive
+    /// into rows that are already on screen (Jira 11602).
+    /// </remarks>
+    public Task ThumbnailsLoaded { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Fills the rows' pictures, one at a time, off the UI thread.
+    /// </summary>
+    /// <remarks>
+    /// One at a time is the whole of the performance design. Home may list up to a hundred jobs,
+    /// and asking for a hundred decodes at once — synchronously or not — is the decode storm §G
+    /// forbids; a sequential walk gives a bounded degree of one without a queue, a semaphore or a
+    /// scheduler to get wrong. Each decode itself is bounded twice over: the preview seam reduces
+    /// to <c>IImagePreviewDecoder.ThumbnailEdge</c>, and the decode runs on a worker thread, so
+    /// nothing large is ever built on the dispatcher.
+    /// <para>
+    /// Every outcome is non-fatal. A row whose artefact is missing, unreadable, or not yet
+    /// prepared keeps its neutral no-picture state and the walk continues to the next row; a
+    /// cancelled load — the operator refreshed, or left Home while a database the test host owns
+    /// went away — stops silently. A picture is not information the operator needs in order to
+    /// act, so nothing here may become a notice, a failure, or a reason for the screen to stop
+    /// working (Epic 11200 Part C1 §21).
+    /// </para>
+    /// </remarks>
+    private async Task StartThumbnailLoad(IReadOnlyList<RecentSessionRow> rows)
+    {
+        CancellationTokenSource? previous = _thumbnails;
+        CancellationTokenSource current = new();
+        _thumbnails = current;
+
+        if (previous is not null)
+        {
+            await previous.CancelAsync().ConfigureAwait(true);
+            previous.Dispose();
+        }
+
+        if (rows.Count == 0) return;
+
+        try
+        {
+            foreach (RecentSessionRow row in rows)
+            {
+                if (current.IsCancellationRequested) return;
+
+                OperationResult<ImagePreview> thumbnail =
+                    await _previews.GetRecentThumbnailAsync(row.Id, current.Token).ConfigureAwait(true);
+
+                if (current.IsCancellationRequested) return;
+                if (thumbnail.IsSuccess) row.Thumbnail = thumbnail.Value.Payload;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The list this load belonged to was replaced. Nothing to report and nothing to undo:
+            // a thumbnail load creates no record and holds no resource beyond the bytes it drops.
+        }
+        catch (Exception)
+        {
+            // Deliberately everything, and deliberately silent — the same rule
+            // PreviewPayloadConverter follows for the same reason: a picture that cannot be
+            // produced must never take a screen down (Epic 11200 Part C1 §21). The realistic
+            // case is a database or workspace torn down while a read was in flight, which is
+            // what leaving Home looks like from inside this loop. Nothing here has produced a
+            // record, held a lock or changed a file, so there is nothing to undo and nothing an
+            // operator could do with the news.
+        }
     }
 
     [RelayCommand]
@@ -371,6 +472,50 @@ public sealed partial class HomeViewModel : ObservableObject
         await RefreshAsync(cancellationToken).ConfigureAwait(true);
     }
 
+    /// <summary>
+    /// Takes one finished job's record off Recent Processing, then rebuilds the list
+    /// (Jira 11602).
+    /// </summary>
+    /// <remarks>
+    /// Record management, not cleanup, and the wording says so: nothing is deleted. The imported
+    /// file, every approved output and the whole processing history stay exactly where they are;
+    /// what ends is the entry's place on this screen, and it stays ended after a restart because
+    /// the service persisted it.
+    /// <para>
+    /// The row's <see cref="RecentSessionRow.CanRemoveRecord"/> decides whether the button is
+    /// offered; the service decides whether the action is accepted, re-reading the session's
+    /// real state and its unresolved attempts. A refusal is reported rather than worked around —
+    /// exactly the division <see cref="AbandonAsync"/> keeps, and the reason an unfinished or
+    /// recoverable job cannot be made to disappear from here.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task RemoveRecordAsync(RecentSessionRow? row, CancellationToken cancellationToken)
+    {
+        if (row is null || IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            Notice = null;
+            OperationResult<Unit> removed =
+                await _sessions.RemoveFromRecentAsync(row.Id, cancellationToken).ConfigureAwait(true);
+
+            Notice = removed.IsFailure
+                ? Describe(Strings.Home_RemoveFailed, removed.Failure)
+                : string.Format(CultureInfo.CurrentCulture, Strings.Home_RemoveDone, row.DisplayName);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        await RefreshAsync(cancellationToken).ConfigureAwait(true);
+    }
+
     private async Task ImportAsync(string sourceAbsolutePath, CancellationToken cancellationToken)
     {
         if (IsBusy)
@@ -391,7 +536,12 @@ public sealed partial class HomeViewModel : ObservableObject
 
             if (imported.IsFailure)
             {
-                Notice = Describe(Strings.Home_ImportFailed, imported.Failure);
+                // The refusal sentence comes from the failure the import path produced, never
+                // from a format list this screen keeps: what PrintFlow accepts is decided by
+                // SupportedInputFormats and established from the file's own magic bytes, and a
+                // second opinion here is exactly how a screen ends up calling a corrupt PNG an
+                // unsupported one (Jira 11201, 11601).
+                Notice = DisplayNames.ImportRefusal(imported.Failure);
                 return;
             }
 

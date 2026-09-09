@@ -76,6 +76,8 @@ internal static class Strings
 internal static string Failure_PdfEncrypted => Get(nameof(Failure_PdfEncrypted));
 
 internal static string Failure_PdfMultiplePages => Get(nameof(Failure_PdfMultiplePages));
+    internal static string Failure_SourceFormatUnsupported => Get(nameof(Failure_SourceFormatUnsupported));
+    internal static string Failure_SourceImageUnreadable => Get(nameof(Failure_SourceImageUnreadable));
 
 internal static string Failure_PdfPreparationFailed => Get(nameof(Failure_PdfPreparationFailed));
 
@@ -225,8 +227,35 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     /// <summary>Composite format: how many files were dropped.</summary>
     internal static string Home_DropSingleFileOnly => Get(nameof(Home_DropSingleFileOnly));
 
+    /// <summary>Composite format: the refusal sentence, then the stable failure code.</summary>
+    internal static string Home_ImportRefused => Get(nameof(Home_ImportRefused));
+
+    /// <summary>How the accepted input formats are joined in one sentence.</summary>
+    internal static string Home_ImportFormatSeparator => Get(nameof(Home_ImportFormatSeparator));
+
+    /// <summary>Composite format: the detected format, then the accepted format list.</summary>
+    internal static string Home_ImportUnsupportedFormat => Get(nameof(Home_ImportUnsupportedFormat));
+
+    /// <summary>Composite format: the chosen file name, then the accepted format list.</summary>
+    internal static string Home_ImportUnrecognisedFile => Get(nameof(Home_ImportUnrecognisedFile));
+
+    /// <summary>Composite format: the chosen file name, then its detected format.</summary>
+    internal static string Home_ImportUnreadableImage => Get(nameof(Home_ImportUnreadableImage));
+
+    /// <summary>The label for taking a finished job's record off Recent Processing.</summary>
+    internal static string Home_RemoveRecord => Get(nameof(Home_RemoveRecord));
+
+    /// <summary>Composite format: the removed job's output name.</summary>
+    internal static string Home_RemoveDone => Get(nameof(Home_RemoveDone));
+
     /// <summary>Composite format: the stable failure code.</summary>
-    internal static string Home_ImportFailed => Get(nameof(Home_ImportFailed));
+    internal static string Home_RemoveFailed => Get(nameof(Home_RemoveFailed));
+
+    /// <summary>The neutral state a row shows in place of a picture.</summary>
+    internal static string Home_RecentNoThumbnail => Get(nameof(Home_RecentNoThumbnail));
+
+    /// <summary>Composite format: the job's output name, as an accessible picture label.</summary>
+    internal static string Home_RecentThumbnailOf => Get(nameof(Home_RecentThumbnailOf));
 
     /// <summary>Composite format: the stable failure code.</summary>
     internal static string Home_ResumeFailed => Get(nameof(Home_ResumeFailed));
