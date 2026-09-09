@@ -502,7 +502,12 @@ if (Test-ShouldWrite $pdfPath) {
 
     $content = "q`n$pageW 0 0 $pageH 0 0 cm`n/Im0 Do`nQ`n"
     Start-Obj 5
-    Add-Text "<< /Length $($content.Length) >>`nstream`n$content" + "endstream`n"
+    # Parenthesised deliberately. In command-invocation syntax `Add-Text "a" + "b"` passes three
+    # arguments rather than concatenating, so the unparenthesised form bound only "a" to $s and
+    # discarded `endstream` into $args. The resulting PDF parsed far enough to report one page and
+    # its geometry, so preflight accepted it, but Windows.Data.Pdf refused the unterminated content
+    # stream and rendered the page blank.
+    Add-Text ("<< /Length $($content.Length) >>`nstream`n$content" + "endstream`n")
     End-Obj
 
     $xref = [int] $out.Position
