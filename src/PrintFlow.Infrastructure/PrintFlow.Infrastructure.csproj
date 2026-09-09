@@ -26,6 +26,14 @@
       the `unsafe` keyword appears in no source file.
     -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!--
+      The whole shipped graph declares the RID the installer publishes for, not just the entry
+      project. Restoring only PrintFlow.App for win-x64 left this project's lock file gaining and
+      losing its win-x64 target section depending on whether the last build was the solution or
+      the packaging one. RuntimeIdentifiers (plural) is a restore target list, so it changes no
+      build output path here.
+    -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
