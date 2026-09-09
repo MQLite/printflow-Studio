@@ -1673,3 +1673,84 @@ Jira closure. The 11,712-test suite was not rerun and nothing under `src/` or `t
 Full detail:
 [SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md), Delta —
 10 September 2026.
+
+---
+
+# Delta — 10 September 2026 (later the same day): the closure attempt
+
+*Appended only. No row above is rewritten. This delta changes **no** Jira status in either
+direction; it records what a remediated workstation did and did not earn.*
+
+## What was re-audited
+
+SCRUM-11065 (CSV row 11005) and SCRUM-11123 (CSV row 11608), both re-read verbatim from
+`C:\Users\admin\Downloads\printflow_studio_mvp_jira_epics_tasks.csv` before any change was made,
+together with SCRUM-11136, SCRUM-11115 and the parent SCRUM-11060.
+
+## Rows this delta supersedes
+
+| Row | Previous statement | Position after this slice |
+|---|---|---|
+| Delta 9 Sep — **SCRUM-11065** | *"Two of seven have passed a controlled fixed-workstation run."* | **PARTIAL, status unchanged.** Now **five of seven** are demonstrably good — four passed and one Pending on its operator review — but across three runs, not one. |
+| Delta 10 Sep (earlier) — **D3** | *"a live operator contending for the foreground"* | **Superseded.** The cause was positively identified: Photoshop's persisted **Crop tool** put every opened document into crop preview, disabling the controls the identity read needs. Foreground contention was not the cause. |
+| Delta 10 Sep (earlier) — **D4**, §11.3 | *"§11.3's open question stays open."* | **Closed.** `PhotoshopTestImageRoundTrip` passed and `DeleteProbe` executed; the scratch directory was removed. The 9 September lock **did not reproduce**. Environmental-state finding, **not** a Product defect. |
+| Delta 9 Sep — **SCRUM-11123** | *"Now satisfiable but not satisfied … no run has passed and no record exists."* | **PARTIAL, unchanged.** Still no passing run and still no record. `production-revalidation.json` does not exist. |
+| Delta 9 Sep — **SCRUM-11136** | *"prerequisite asset built; still blocked on a completed run."* | **PARTIAL, unchanged.** Still blocked on a completed run. The prerequisite set is now also known to have contained one defective asset, since fixed. |
+
+## What this slice establishes
+
+**The set contained a defective asset, and preflight structurally could not see it.**
+`FIX-PDF-001.pdf` was written without an `endstream` keyword on its page content stream, so
+Windows.Data.Pdf rendered a fully transparent page — a correct-geometry 1500×2000 raster with zero
+non-transparent pixels. Layer 1 validates page count, encryption and SHA-256, all of which a
+malformed-but-parseable PDF satisfies. The cause was a PowerShell command-argument trap in
+`tools/regression/New-PrintFlowRegressionAssets.ps1`. Fixed; only that one asset was regenerated;
+the other six retain their recorded SHA-256 values. `SINGLE_PAGE_PDF` then passed end to end.
+
+This matters to row 11005's own wording — *"suitable for repeatable automated, workstation and
+upgrade regression testing"*. A fixture that renders blank was not suitable, and the set is closer
+to that requirement than it was this morning, without yet meeting the run bar.
+
+**A confirmed Product defect now blocks the two Meitu categories.** PrintFlow sets Meitu's export
+format through `ValuePattern`, which the Save surface's `formatCombo` accepts and silently ignores;
+the selector follows the source file's extension and remembers no preference across documents or
+restarts. Both Meitu fixtures are `.jpg` by design, so neither can reach a PNG export on the current
+route. PrintFlow's read-back caught the refusal and invoked nothing, which is the designed and
+correct behaviour — the gap is that the signed route has no mechanism to change the value. Recorded
+with evidence and **not** fixed: the only working mechanism drives a surface no signed baseline
+describes, so a fix is an evidence-first slice of its own.
+
+## Unchanged, explicitly
+
+**SCRUM-11065 remains PARTIAL.** Row 11005 asks for the set to be built with expected processing
+paths and properties recorded, and to be suitable for repeatable regression testing. The seven
+categories, their schema-2 manifests and the single runner all exist, and one asset defect has been
+removed — but the acceptance bar this closure was run against is one fixed-workstation run in which
+all seven pass, and that has not happened.
+
+**SCRUM-11123 remains PARTIAL.** Row 11608's standing gap is unchanged: no standard-set run has
+passed, so no revalidation record was produced and the normal Product gate was never exercised.
+`Set-PrintFlowProductionRevalidation.ps1` was not invoked.
+
+**SCRUM-11136 remains PARTIAL** and was not executed. Its prerequisites are now: the set exists, one
+asset defect is fixed, and a fixed-workstation baseline run has **not** passed. The repeated
+success-rate measurement remains a separate task and no automation-success rate is claimed.
+
+**SCRUM-11115 is not reopened.** Nothing observed contradicts an actual parent clause.
+
+**SCRUM-11067, SCRUM-11134, SCRUM-11135 and SCRUM-11137 are unchanged.** No Maintop import, no
+physical print and no pre-MVP benchmark was performed or fabricated.
+
+**Parent SCRUM-11060 is not closed.** SCRUM-11066 remains absent and SCRUM-11065 is PARTIAL.
+
+No branch, worktree, alternate checkout, amend, rebase, push, deploy or AI attribution. The
+validated preset was not modified and no signed evidence file was edited. `Adapters:Mode` stayed at
+`Production`. Nothing under `src/` or `tests/` changed, so the accepted **11,712 passed / 0 failed /
+0 skipped** baseline was not rerun; targeted validation after the generator fix was **36 passed,
+0 failed, 0 skipped**.
+
+Full detail:
+[SCRUM-11065 completion report](scrum-11065-standard-local-regression-set-completion.md), Delta —
+10 September 2026 (closure attempt).
+
+**BLOCKED — SCRUM-11065 AND SCRUM-11123 BOTH REMAIN PARTIAL**

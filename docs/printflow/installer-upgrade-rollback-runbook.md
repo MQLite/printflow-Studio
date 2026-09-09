@@ -393,19 +393,39 @@ otherwise rather than work around you:
 3. Nobody else using either application, and nobody using the desktop. The run drives the
    foreground, and any other application that takes it — a browser window is the usual one — will
    block the run.
+4. **Photoshop's active tool must not be the Crop tool.** With a crop pending, every document
+   Photoshop opens enters 裁剪预览 (crop preview), and in that state the options-bar controls the
+   run reads are present but *not enabled*. The run then stops with *"Control 0x… is not both
+   visible and enabled"*. Photoshop persists the active tool across restarts, so restarting is not
+   enough — select another tool (the Move tool, `V`) once, with no document open, and let Photoshop
+   exit cleanly so the choice is saved.
+5. **Do not type into Photoshop before starting the run.** On this `zh-CN` workstation, typing
+   engages the Simplified-Chinese IME, which creates a visible `CiceroUIWndFrame` window owned by
+   the Photoshop process. The launchability check counts any titled owned window as a dialog and
+   fails with *"A dialog owned by Photoshop is blocking its window"* when no Photoshop dialog
+   exists. If it happens, restart Photoshop and send it no keystrokes.
 
 The surest way to reach state 2 is to start from nothing: close Photoshop, Meitu and PrintFlow
 entirely, then launch Meitu and let it settle on its start page, then launch Photoshop and leave it
 on its start screen without opening anything.
+
+Items 4 and 5 are recorded from the 10 September closure attempt, where each cost a full acceptance
+run before it was identified. Both are environment conditions, not Product defects; nothing was
+changed in the Product to accommodate either.
 
 **Why this is stricter than the check requires.** `PhotoshopSafeStartingState` will still *tolerate*
 a saved pre-existing document — it fails only on an unsaved one or an unknown dialog, and a
 tolerated document is checked for the same identity afterwards. This precondition is deliberately
 tighter than that. Every observed pass of the full live phase has had a document-free Photoshop; the
 9 September runs that had another person's document open failed
-`PhotoshopTestImageRoundTrip` during probe cleanup. That association is recorded evidence, not a
-diagnosed cause, and it has not been confirmed — see the SCRUM-11065 completion report §11.3 and its
-10 September delta. Nothing in the Product was changed to accommodate it.
+`PhotoshopTestImageRoundTrip` during probe cleanup.
+
+That question is now settled. On 10 September, with a document-free Photoshop and items 4 and 5
+above satisfied, `PhotoshopTestImageRoundTrip` **passed**, `DeleteProbe` executed, and the probe file
+and its scratch directory were both removed — verified independently after the run. **The
+9 September lock did not reproduce.** It is an environmental-state finding, not a Product defect, and
+nothing in the Product was changed to accommodate it. See the SCRUM-11065 completion report §11.3 and
+its 10 September closure delta (E2).
 
 So this is not a workaround for a Product defect, and it should not be written up as one. It is the
 cleanest workstation condition acceptance has been observed in, stated as the condition to establish

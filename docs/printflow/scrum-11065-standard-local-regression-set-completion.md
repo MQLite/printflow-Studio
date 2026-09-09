@@ -749,3 +749,186 @@ what did and did not run.
 
 `Adapters:Mode` stayed at `Production`. The validated preset was not modified. Local commits on
 `master` only; nothing pushed.
+
+---
+
+# Delta — 10 September 2026 (closure attempt): environment remediated, two defects found
+
+*Appended only. Nothing above is rewritten, and the BLOCKED history of §11–§14 and of the earlier
+10 September delta stands as written. This delta closes §11.3's open question, records two genuine
+defects found by finally getting the run moving, and earns no Jira status change.*
+
+## E1. What the environment remediation actually was
+
+The earlier delta (D3) attributed the 9–10 September failures to a live operator contending for the
+foreground. That reading is now superseded by a positively identified cause.
+
+**Photoshop's persisted active tool was the Crop tool.** With a pending crop, every document
+Photoshop opens enters 裁剪预览 (crop preview) — a quasi-modal state in which the options-bar
+controls the identity read needs are present but not enabled. That is exactly what run B's
+*"Control 0x21940 is not both visible and enabled"* recorded, and exactly what D4 observed as
+"the crop options bar's dimension fields greyed" without naming the cause.
+
+The state is invisible to `PhotoshopSafeStartingState`, which asks only for a recognised screen with
+no document open. Both were true. The tool selection is not part of the check, and it survives a
+Photoshop restart because Photoshop persists it.
+
+Remediation performed under the operator's explicit authorisation:
+
+| Action | Evidence it was safe |
+|---|---|
+| Cancelled the pending crop, then closed Photoshop | It exited with **no save prompt**, so the probe document was unmodified |
+| Removed two orphan probe directories | Both files hashed to the canonical `ProbePng` digest `431CED69…`, 68 bytes, under `EnvironmentVerification\<token>\Working\` — the same test `DeleteProbe` itself applies |
+| Selected the Move tool, restarted so prefs persisted it | — |
+| Minimised Chrome; relaunched both accepted binaries | — |
+
+**A second, self-inflicted finding worth recording.** Those remediation keystrokes engaged the
+workstation's Simplified-Chinese IME, which materialised a `CiceroUIWndFrame` window owned by the
+Photoshop process. `Win32ExternalAppWindowLocator.FindOwnedDialogs` counts *any* visible owned
+window whose title is non-blank, so `PhotoshopStateClassifier` classified Photoshop as `KnownModal`
+and run `closure-20260910` failed `PhotoshopLaunchability` with *"A dialog owned by Photoshop is
+blocking its window."* No Photoshop dialog existed. Restarting Photoshop and sending it no
+keystrokes cleared it.
+
+This is recorded as an observation, not acted on. It is a real robustness gap on a workstation whose
+accepted culture is `zh-CN` — an operator who types in Photoshop before a run can reproduce it — but
+no Product code was changed on it in this task.
+
+## E2. §11.3 and D4 are closed: the scratch-directory lock did not reproduce
+
+Run `closure-20260910-b` reached `Verified: true` with **zero blocking failures**, and
+`PhotoshopTestImageRoundTrip` **passed**:
+
+> The exact PrintFlow-owned probe completed and Photoshop returned to its prior safe state.
+
+Unlike 10 September's runs, this one **executed `DeleteProbe`**. Verified independently, after the
+run rather than from the run's own report:
+
+- `D:\PrintFlowStudio\EnvironmentVerification\` is **empty** — probe file, `Working\` and the token
+  directory all gone.
+- No `PF_ENV_PROBE_*` exists anywhere under `D:\PrintFlowStudio`.
+- Photoshop was still running and back at its recognised start screen.
+- No customer or operator file was touched.
+
+**Conclusion.** The 9 September scratch-directory lock **did not reproduce under the clean accepted
+workstation condition.** Classification: **environmental-state finding, not a Product defect.** No
+Product code change is needed, and none was made. The corroborating observation is that the two
+orphan directories left by the 10 September runs deleted without any lock error once Photoshop was
+closed — consistent with §11.3's reading that Photoshop retains the folder for its process lifetime
+while a document keeps it busy, and with the check passing on 8 September with no document open.
+
+## E3. Defect 1 — `FIX-PDF-001.pdf` was malformed. Fixed.
+
+`SINGLE_PAGE_PDF` failed with `OutputValidationFailed: W1 is missing, is not a spot channel, or
+contains no non-white content`, and Photoshop raised 警告: 未选择任何像素 (no pixels selected).
+
+The prepared raster was **1500×2000 at 300 dpi — correct geometry, and 100% transparent**: zero
+non-transparent pixels across 37,600 sampled points. The source PDF's page content stream had **no
+`endstream` keyword**; the file carried two `stream` keywords and one `endstream`. Windows.Data.Pdf
+parsed the catalogue and page geometry — which is why the raster came out the right size — and
+refused the unterminated content stream, rendering only the transparent background.
+
+Cause, in `tools/regression/New-PrintFlowRegressionAssets.ps1`:
+
+```powershell
+Add-Text "<< /Length $($content.Length) >>`nstream`n$content" + "endstream`n"
+```
+
+In command-invocation syntax that passes three arguments — the string, `+`, and `"endstream\n"` —
+rather than concatenating. Only the first bound to the parameter; `endstream` went to `$args` and was
+discarded. The two neighbouring calls that build the page and image dictionaries parenthesise their
+concatenations and are correct, which is why only the content stream was affected.
+
+**Preflight could not have caught this.** Layer 1 checks page count, encryption and SHA-256; a
+malformed-but-parseable PDF satisfies all three. A blank render is not visible to it.
+
+Fixed by parenthesising, and **only** `FIX-PDF-001.pdf` was regenerated — the generator leaves
+existing inputs alone without `-Force`, and the other six assets' SHA-256 values are unchanged and
+still match their manifests. The new asset is 130,800 bytes (exactly 10 more: `endstream` and its
+newline), SHA-256 `12FF373ED02F6E3622F854EC0BC820EAADFE29E89CC26089074BFBEF09F2BE3E`, and its
+manifest's `length` and `sha256` were updated to match the bytes on disk.
+
+`SINGLE_PAGE_PDF` then **passed** in run `diag-pdf-20260910`, exercising the whole recorded path —
+`PreparePdf` through Windows.Data.Pdf, the 300-PPI raster, Print Dimensions, `W1_2px`, the signed
+Photoshop Action — with `sourceBytesUnchanged` holding.
+
+**Row superseded.** The asset table in §5 (line 96) records `FIX-PDF-001.pdf` as 130,790 bytes with
+SHA-256 `375D0463…`. That row was true when written and is left as written; it now describes the
+malformed asset. The accepted `SINGLE_PAGE_PDF` input is the 130,800-byte file whose SHA-256 is
+`12FF373E…`, recorded above and in the manifest.
+
+## E4. Defect 2 — PrintFlow cannot set Meitu's export format. Recorded, not fixed.
+
+`NORMAL_JPG_PORTRAIT` failed with:
+
+> `MeituOpenInputFailed`: The Save surface's format reads 'jpg' after PrintFlow wrote 'png'.
+> Neither Save nor Save As was invoked, so no file was written.
+
+Meitu's enhancement itself succeeded; the failure is at the export format. Established directly
+against the live Save surface, by automation id, writing nothing:
+
+| Observation | Result |
+|---|---|
+| `formatCombo` for a `.jpg` source | `jpg`, `IsReadOnly = False` |
+| `ValuePattern.SetValue('png')` — PrintFlow's route | **no error, value unchanged at `jpg`** |
+| `ExpandCollapse` / `SelectionItem` on the combo | pattern unsupported / no effect |
+| Real click on the combo, then on the `png` item | `png` ✓ |
+| A **different** `.jpg`, after a full Meitu restart | **`jpg`** — the choice does not persist |
+
+The selector follows the **source file's extension** and remembers nothing. So the code comment in
+`GuardedMeituUiDriver.DriveExportSurfaceAsync` — *"on this build the selector already reads png, so
+the write is ordinarily a no-op"* — holds only for PNG/RGBA sources, which is what
+`apps/meitu/editor-export.json` was observed against (`value='png'`, a 320×240 RGBA working copy).
+Both Meitu-driven fixtures are `.jpg` by design, so **neither can pass** on the current route.
+
+PrintFlow's behaviour throughout is correct and safe: the read-back caught the silent refusal and
+stopped before invoking anything, which is precisely the negative case `editor-export.json` records
+— *"A format value other than the signed one must stop the export before anything is invoked."*
+The defect is that the route has no way to change the value, not that it failed to notice.
+
+**Deliberately not fixed here.** The only mechanism observed to work drives a
+`QComboBoxPrivateContainer` popup, a surface no signed evidence describes. Driving an undescribed
+surface is the exact practice this project's recognition rule forbids, so a fix needs new live
+baseline evidence and a preset update before any code. That is its own evidence-first slice, and it
+is larger than this closure. No Product code, no preset and no signed evidence was changed.
+
+## E5. Case results
+
+One clean full run (`closure-20260910-b`) plus two category-scoped diagnostic runs. **No single run
+covered all seven**, so no run result is a closure result.
+
+| Category | Outcome | Run | Detail |
+|---|---|---|---|
+| `NORMAL_JPG_PORTRAIT` | **Failed** | `closure-20260910-b` | E4 |
+| `COMPLEX_BACKGROUND_FINE_HAIR` | **Blocked** | `closure-20260910-b` | Never independently reached; the portrait's failure left Meitu outside its recognised state |
+| `TRANSPARENT_PNG` | **Passed** | `closure-20260910-b` | Deterministic alpha trim produced the expected 2724×3685 |
+| `COMPLETE_CUSTOMER_DESIGN` | **Pending** | `diag-photoshop-20260910` | Validated 600×900 separated TIFF, 5 samples, 300 dpi; every structural assertion held. Open on its operator visual review |
+| `PSD_WITH_COMPOSITE_PREVIEW` | **Passed** | `diag-photoshop-20260910` | Validated 600×800 separated TIFF; composite accepted; PSD byte-identical after the run |
+| `SINGLE_PAGE_PDF` | **Passed** | `diag-pdf-20260910` | After E3 |
+| `REFERENCE_PRODUCTION_TIFF` | **Passed** | `closure-20260910-b` | Structurally intact (3307×4474, 5 samples); still refused as a Home input |
+
+## E6. What was not earned
+
+- **No visual review was recorded.** `FIX-PORTRAIT-001` and `FIX-CUSTOMER-DESIGN-001` both name
+  `decidedBy: "Operator"`. `COMPLETE_CUSTOMER_DESIGN` is the one case that reached `Pending`, and its
+  decision was **not** taken — not by an operator, and not by Claude Code under a reviewer label. No
+  `-RecordVisualReview` was invoked and no `decisions.json` exists.
+- **No 7/7 run.** Four categories passed and one is Pending, but across three runs. `-Categories`
+  was used only for diagnosis; a partial run cannot report `Passed` by design.
+- **No revalidation record.** `Set-PrintFlowProductionRevalidation.ps1` was **not** invoked;
+  `D:\PrintFlowStudio\Revalidation\production-revalidation.json` does not exist and was not
+  hand-written. Phase G's precondition — a genuine 7/7 pass — was not met.
+- **No Product gate result.** `ProductionRevalidation` and `VerifiedEnvironmentGate` were not
+  exercised, because there is no record for them to read.
+- **No Jira status change.** §14 stands: **SCRUM-11065 PARTIAL**, **SCRUM-11123 PARTIAL**,
+  **SCRUM-11136 PARTIAL**, **SCRUM-11115 FULL and not reopened**, **SCRUM-11060 not closed**.
+- **No full suite.** Nothing under `src/` or `tests/` changed. The accepted baseline stands at
+  **11,712 passed / 0 failed / 0 skipped**. Targeted validation after the generator fix:
+  **36 passed, 0 failed, 0 skipped**, clean Release build.
+
+The validated preset was not modified. `Adapters:Mode` stayed at `Production`. Local commits on
+`master` only; nothing pushed.
+
+**BLOCKED — SCRUM-11065 STANDARD LOCAL REGRESSION SET NOT FULLY VERIFIED**
+*(5 of 7 categories now demonstrably good, against 2 on 9 September. The two that remain are blocked
+by one confirmed Product defect, recorded with its evidence in E4.)*
