@@ -66,6 +66,13 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     private readonly TimeProvider _clock;
     private readonly IProductionLiveWorkstationVerifier? _live;
     private readonly IProductionRevalidationReader _revalidation;
+
+    /// <summary>
+    /// Set only by <see cref="ForStandardRegressionRun"/>. False for every verifier the
+    /// application composes, and there is no public way to make it true.
+    /// </summary>
+    private readonly bool _omitProductionRevalidation;
+
     private readonly object _liveEvidenceSync = new();
     private WorkstationLiveEvidence? _liveEvidence;
 
@@ -110,7 +117,8 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         IWorkstationArtifactReader artifacts,
         TimeProvider clock,
         IProductionLiveWorkstationVerifier? live,
-        IProductionRevalidationReader? revalidation)
+        IProductionRevalidationReader? revalidation,
+        bool omitProductionRevalidation = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(manifestAbsolutePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(presetId);
@@ -130,6 +138,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         _clock = clock;
         _live = live;
         _revalidation = revalidation ?? new FileProductionRevalidationReader(configuredWorkspaceRoot);
+        _omitProductionRevalidation = omitProductionRevalidation;
         _rootOfTrust = new Lazy<RootOfTrust>(EstablishRootOfTrust);
     }
 
@@ -160,7 +169,73 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         IWorkspace workspace,
         SqliteConnectionFactory connections,
         string evidenceDirectory,
-        TimeProvider clock)
+        TimeProvider clock) =>
+        Compose(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
+            configuredWorkspaceRoot, workspace, connections, evidenceDirectory, clock,
+            omitProductionRevalidation: false);
+
+    /// <summary>
+    /// The same verifier with the production-revalidation check omitted, for the standard
+    /// regression run whose own success is what creates the record that check reads
+    /// (SCRUM-11065; SCRUM-11123 Part H).
+    /// </summary>
+    /// <remarks>
+    /// <b>The circle this exists to break.</b> Production is closed until a revalidation record
+    /// says the standard regression set passed. Recording that requires the set to have been run.
+    /// Running it drives the real Production adapters, which are closed. Every link in that loop
+    /// is a rule worth keeping, but the first run after any upgrade has to be able to happen.
+    /// <para>
+    /// <b>Omitted, not answered.</b> Nothing here supplies a revalidation record, and there is no
+    /// value this class will accept as a passing one that it did not read from the workspace
+    /// itself — so this cannot forge an approval, only decline to ask the one question whose
+    /// answer depends on the run being composed. Everything else is evaluated exactly as the
+    /// application evaluates it: preset integrity and the evidence chain it vouches for, the OS
+    /// build, both accepted binaries, the Action artefact, the workspace root, the interactive
+    /// session, the display topology, the UI culture, and the entire live application phase —
+    /// launchability, safe starting states, Photoshop's colour settings, the test-image round
+    /// trip and the global automation lock. A workstation failing any of those still fails here.
+    /// </para>
+    /// <para>
+    /// <b>Why the application cannot use it.</b> <c>internal</c>, and this assembly grants its
+    /// internals to <c>PrintFlow.Tests</c> alone. PrintFlow.App is a separate assembly with no
+    /// such grant, so no composition the shipped product performs can reach this method — which
+    /// is what makes "PrintFlow cannot skip its own revalidation check" a structural fact rather
+    /// than a convention. <c>StandardRegressionSetTests</c> asserts it.
+    /// </para>
+    /// </remarks>
+    internal static ProductionWorkstationVerifier ForStandardRegressionRun(
+        string manifestAbsolutePath,
+        string presetId,
+        string presetVersion,
+        Sha256 expectedManifestSha256,
+        string configuredWorkspaceRoot,
+        IWorkspace workspace,
+        SqliteConnectionFactory connections,
+        string evidenceDirectory,
+        TimeProvider clock) =>
+        Compose(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
+            configuredWorkspaceRoot, workspace, connections, evidenceDirectory, clock,
+            omitProductionRevalidation: true);
+
+    /// <summary>
+    /// The live composition, in one place.
+    /// </summary>
+    /// <remarks>
+    /// Shared by both factories on purpose. A regression run composed from a second copy of this
+    /// would keep working while the application's own composition changed underneath it — and a
+    /// regression set that silently exercises a stale composition is worse than none.
+    /// </remarks>
+    private static ProductionWorkstationVerifier Compose(
+        string manifestAbsolutePath,
+        string presetId,
+        string presetVersion,
+        Sha256 expectedManifestSha256,
+        string configuredWorkspaceRoot,
+        IWorkspace workspace,
+        SqliteConnectionFactory connections,
+        string evidenceDirectory,
+        TimeProvider clock,
+        bool omitProductionRevalidation)
     {
         ArgumentNullException.ThrowIfNull(workspace);
         ArgumentNullException.ThrowIfNull(connections);
@@ -188,7 +263,8 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
             new FileSystemArtifactReader(),
             clock,
             live,
-            revalidation: null);
+            revalidation: null,
+            omitProductionRevalidation);
     }
 
     /// <inheritdoc />
@@ -418,12 +494,18 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         // every call for the same reason the display is — an operator who records a revalidation
         // while PrintFlow is running returns to Production without restarting it, and one whose
         // record is removed is refused on the next request (SCRUM-11123 Part H).
-        ProductionRevalidationEvaluator.Evaluate(
-            _revalidation.Read(),
-            requirements,
-            _expectedManifestSha256,
-            _facts.ReadOperatingSystem().Build,
-            ProductionRevalidationEvaluator.RunningProductVersion),
+        //
+        // .. omitted entirely, and only for the standard regression run — see
+        // ForStandardRegressionRun. Omitted rather than answered: there is no value this class
+        // will accept as a passing record that it did not read from the workspace itself.
+        .. _omitProductionRevalidation
+            ? ImmutableArray<WorkstationCheckResult>.Empty
+            : [ProductionRevalidationEvaluator.Evaluate(
+                _revalidation.Read(),
+                requirements,
+                _expectedManifestSha256,
+                _facts.ReadOperatingSystem().Build,
+                ProductionRevalidationEvaluator.RunningProductVersion)],
     ];
 
     /// <summary>
