@@ -1219,3 +1219,123 @@ cadence, operator UI, red/green review evidence, full-suite results, routing and
 [SCRUM-11121 completion report](scrum-11121-local-log-screenshot-retention-completion.md).
 
 **PASS — SCRUM-11121 LOCAL LOG AND SCREENSHOT RETENTION VERIFIED**
+
+---
+
+## Delta — 9 September 2026: SCRUM-11116 Home/Drop and SCRUM-11117 Recent Processing
+
+**Appended, not a rewrite.** Every historical row above remains the record of what was true when it
+was written.
+
+### SCRUM-11116 — Complete the Home and Single-Image Drop Experience: PARTIAL → **FULL**
+
+The exact original CSV Work Item **11601** was reread before Product edits, together with **11201**
+("decode and preview the file before external automation") and **11405/11406/11407**, which are the
+only rows that define what an accepted input is. The historical row above named the gap as a
+generic refusal message; reading current source found a larger one — **there was no
+input-acceptance gate at all.** A `.txt` file imported successfully as `ImageFormat.Unknown` and
+failed several steps later, and the one refusal sentence also claimed "No session was created",
+which `FailImportAsync` makes untrue.
+
+`SupportedInputFormats` in the Domain is now the single Product statement of accepted inputs — PNG,
+JPEG, PSD and single-page PDF, from design §9.2 and Jira 11405–11407. The shell keeps no format
+list: the operator-facing sentence is rendered from that authority. Acceptance is decided from the
+file's magic bytes, about the managed copy's facts — the same single read that produces the hash a
+Revision binds to — and the refusal follows the ordinary import-failure path, so it stays
+explainable through Error Details.
+
+Two typed codes keep the distinction the AC needs: `SourceFormatUnsupported` names the container it
+actually found, and `SourceImageUnreadable` says an accepted PNG or JPEG is incomplete or damaged
+and that this is *not* a format problem. **A corrupted PNG is never called an unsupported PNG.**
+PSD and single-page PDF are not regressed; multiple-file refusal is unchanged and happens before
+any file is examined; the exactly-one-image rule, InputSnapshot, source immutability and hash
+binding, workflow-selection behaviour and the PSD/PDF preparation architecture are untouched.
+
+Two behaviour changes are recorded rather than buried. **TIFF is now refused as an input** and the
+file dialog no longer offers `*.tif` — design §9.2 gives TIFF no input rule, it is this product's
+*output*, and a TIFF import could only produce a session that failed at the Photoshop step. And the
+import-failure sentence no longer claims that no session was created.
+
+### SCRUM-11117 — Implement Recent Processing with Resume and Record Management: PARTIAL → **FULL**
+
+Work Item **11602** was reread in full. The 30-day/100-session limits, name, workflow, step, state,
+timestamp and resume were already present; the thumbnail and the record action were not.
+
+**Thumbnail.** A new read-only seam method returns the session's own persisted artefact — the root
+Revision when this product decodes its container, otherwise the managed raster PSD/PDF preparation
+derived from that root. No new image authority, nothing cached, nothing persisted (SQLite still
+declares no binary column). It is bounded twice: a second, much smaller decoder bound
+(`ThumbnailEdge`) that the seam owns rather than the caller, and a decode that already runs off the
+dispatcher. Home publishes its rows first and then decodes **one row at a time**, cancelling the
+previous walk on refresh; staleness is structural because each refresh builds new row objects, so a
+late result cannot land on another row. A missing, unreadable or unprepared artefact leaves a
+neutral no-picture state, raises no notice and leaves Resume/Details working. Reading a thumbnail
+creates no Revision, records no review, changes no workflow state, writes no file and never invokes
+Meitu or Photoshop.
+
+**Record management.** "Delete-record" was implemented as *the record permanently leaves Recent
+Processing, and nothing is deleted*. The SQLite cascade was inventoried before coding rather than
+allowed to define the semantic: deleting a `ProcessingSession` row cascades into `ReviewDecision`,
+whose initial-schema `BEFORE DELETE` trigger aborts, and weakening that trigger would destroy the
+approval history binding an approved production file to the operator who approved it. Existing
+metadata could not carry the state without overloading a workflow fact, and a side table would need
+its own identity and cleanup rules to say something belonging to exactly one session, so migration
+**0017** adds one nullable `ProcessingSession.RemovedFromRecentAtUtc`. It is not part of the domain
+record and is never named by the session upsert, so a workflow command cannot set or clear it.
+`ListRecentAsync` filters it before the 100-row limit. The write is a single guarded `UPDATE` of
+that one column — no `DELETE` is reachable from it — and a second removal is refused rather than
+reported as done.
+
+Safety is one authority, `SessionStateRules.AllowsRecordRemoval`, admitting only `Completed` or
+`Abandoned`; it is consumed by the row (to offer the button) and by the service (to accept the
+action), and re-checked with the automation lock and any `RUNNING` attempt inside the write.
+Recovery cannot be bypassed structurally: recovery candidates come only from `ACTIVE`/`HANDED_OFF`,
+so the two sets are disjoint, and Home already keeps a recovery entry from appearing as a
+contradictory Recent card. `Interrupted` is deliberately not a bar on a terminal session — that is
+resolved history, and refusing it would strand a crashed-then-abandoned job on Home forever.
+Abandon and Remove are not synonyms and are never both offered.
+
+Interpretation stated so it can be challenged specifically: a reviewer who reads "delete-record" as
+metadata destruction would call that one clause PARTIAL. The AC's own next sentence binds record
+management to not deleting approved production files, and the append-only review trigger makes the
+destructive reading impossible without destroying review-authoritative history, so it was rejected
+deliberately rather than by default.
+
+### Parent SCRUM-11115 remains **PARTIAL**
+
+Reassessed from Work Item **11600**'s own text, clause by clause, not from child labels. The
+Home/Drop and Recent Processing clauses are now satisfied, joining workflow, review, dimensions,
+TIFF review, Settings/Environment Check, Error Details, bilingual runtime switching, local-only
+logs and screenshots, and the terminology rule. Exactly two clauses remain open, verified absent by
+inspection rather than carried forward: **SCRUM-11122**'s explicit diagnostic-package export (no
+export, package, preview or consent path exists anywhere in the source tree) and **SCRUM-11123**'s
+repeatable versioned offline installer with an install/configure/rollback procedure (no installer
+project, script or procedure exists).
+
+### Evidence
+
+23 new focused tests: input acceptance and truthful refusal, thumbnail authority/bounds/fallback
+and non-mutation, publish-before-decode with a bounded degree of one, durable removal with
+byte-comparison of every Revision and PrintOutput file plus the customer source, restart survival,
+refusal for active/handed-off/recoverable records, bilingual rendering with stable AutomationIds,
+keyboard traversal, `IInvokeProvider` support, and a bounded WPF/UIA proof. Three existing tests
+changed, each because a documented contract moved: the persisted failure-code set, the
+migration-set assertion, and a preview test that had been using `ImportAsync` to drop a production
+TIFF in as a session artefact (it now reaches the same state through the real Generate Print TIFF
+workflow). An opt-in real-window Windows-UIA smoke was run once per language on this workstation;
+both passed, with before/after screenshots and transcripts under
+`evidence/scrum-11117-recent-record-live/`.
+
+Final build: **0 warnings / 0 errors**. One complete suite, justified because Recent Processing
+query semantics, persisted record-management semantics, shared preview infrastructure and the
+single import path all changed: **11,632 passed / 0 failed / 0 skipped**, exactly the accepted
+11,609 baseline plus the 23 new tests.
+
+Exact ACs, pre-change matrix, input-format authority, unsupported-vs-unreadable semantics,
+thumbnail authority and lifetime, performance approach, exact Remove/Delete semantics with the full
+cascade inventory, production-file safety, recovery interaction, persistence/restart,
+localisation/accessibility, targeted tests, WPF/UIA proof, full-suite decision, Jira reassessments
+and Git discipline:
+[SCRUM-11116 / SCRUM-11117 completion report](scrum-11116-11117-home-recent-processing-completion.md).
+
+**PASS WITH NOTES — SCRUM-11116 / SCRUM-11117 HOME AND RECENT PROCESSING VERIFIED**
