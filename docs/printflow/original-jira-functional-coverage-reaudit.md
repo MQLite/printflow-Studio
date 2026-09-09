@@ -1339,3 +1339,82 @@ and Git discipline:
 [SCRUM-11116 / SCRUM-11117 completion report](scrum-11116-11117-home-recent-processing-completion.md).
 
 **PASS WITH NOTES — SCRUM-11116 / SCRUM-11117 HOME AND RECENT PROCESSING VERIFIED**
+
+---
+
+## Delta — 9 September 2026: SCRUM-11122 explicit diagnostic package export
+
+**Appended, not a rewrite.** Every historical row above remains the record of what was true when it
+was written.
+
+### SCRUM-11122 — Implement Explicit Diagnostic Package Export: NOT_IMPLEMENTED → **FULL**
+
+The exact original CSV Work Item **11607** was reread before Product edits and again before this
+reassessment. Error Details now offers one operator-controlled export for the exact terminal
+`SessionId + AttemptId` already open. It builds one immutable, default-deny
+`DiagnosticPackagePlan`; that same plan is both the preview authority and the only input to the ZIP
+writer. Historical export never guesses the latest failure or substitutes a later attempt's log or
+screenshot.
+
+Before any destination is chosen or file is written, the bilingual preview states exactly which
+manifest metadata, structured log identity, five local paths and failure screenshot will be
+included, which retained evidence is unavailable, and which customer/production categories are
+excluded by privacy policy. An available owned failure capture is visibly described as containing
+what was visible in the application window at failure time. The original row calls for preview plus
+explicit confirmation, not a second per-file checkbox, so pressing **Save package** after review is
+the package-level consent. Original customer source, InputSnapshot, Revision artwork, approved PNG,
+production TIFF, manual artwork, recovery evidence, unrelated/nested Evidence files and SQLite
+database bytes have no inclusion control because this AC never authorizes them.
+
+The operator chooses the local ZIP destination through an owned Windows Save dialog. Existing
+files are never overwritten; a numbered name is used. The archive is built in a guarded owned temp
+path, independently reopened and decompressed, verified-copied to an exact temporary sibling of the
+destination, validated again, published by no-overwrite move and then reopened from the final path.
+Only the fixed `manifest.txt` and the one exact planned `failure-screenshot.png`, when available,
+can enter. No wildcard, recursive enumeration, arbitrary file list, uploader, HTTP client,
+telemetry exporter, email or automatic support submission exists.
+
+The preview and success text state that the package is saved locally and nothing is uploaded
+automatically in en-US and zh-CN. Back, dialog cancellation and failure create no final package and
+change no workflow or evidence state. If retention removes or changes planned evidence, export
+fails truthfully and never substitutes another file. SCRUM-11121 continues to own internal
+retention; the successfully exported ZIP is operator-owned and no second cleanup policy was added.
+
+### Parent SCRUM-11115 remains **PARTIAL**
+
+Work Item **11600** was reread clause by clause. Accepted source and completion deltas now establish
+its Home/Drop, workflow/review/dimensions, TIFF review, Recent Processing,
+Settings/Environment Check, Error Details, bilingual runtime switching, local-only retained
+diagnostics, practical terminology and explicit diagnostic-package export clauses. The sole
+remaining named and independently verified gap is Work Item **11608 / SCRUM-11123**: there is still
+no repeatable versioned offline installer or documented install/configure/rollback procedure with
+no automatic updates. No installer work was added here, so the parent is not FULL.
+
+### Evidence
+
+The focused package/architecture/WPF set passed **16/16** and the expanded affected-boundary set
+passed **168/168**. Rendered real-composition WPF/UIA proof in en-US and zh-CN exercised Error
+Details → preview → explicit Save → scripted owned destination → real local ZIP using stable
+AutomationIds, UIA Value/Invoke providers and keyboard focus traversal, with no coordinate clicks
+or external application. Fresh ZIP readers independently verified exact entries, manifest facts,
+screenshot bytes, privacy exclusions and unchanged workflow/source evidence.
+
+Final Release build: **0 warnings / 0 errors**. The first complete run passed **11,644** and failed
+one exact architecture allowlist assertion for the new writer's owned staging-file cleanup. The
+single filename was documented and admitted without weakening the general deletion rule; its
+focused regression passed **9/9**. The post-fix complete suite passed **11,645 / 11,645**, exactly
+the accepted 11,632 baseline plus 13 new tests.
+
+Model/effort metadata and a real live switch were unavailable, so actual routing is recorded as
+`UNVERIFIED / MODEL_SWITCH_UNAVAILABLE`; no Sol/Astra switch is claimed. The final review is
+`SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED`, while the archive itself was independently
+reopened by both backend and composed-UI tests. No branch, worktree, push, deploy, installer,
+signing, Jira mutation or external application was used.
+
+Exact ACs, pre-change matrix, artefact inventory, privacy/consent decision, plan authority,
+manifest, path disclosure, destination/staging/validation, retention/failure semantics,
+localisation/accessibility, detailed tests, WPF/UIA and ZIP evidence, suite result, routing and Git
+discipline:
+[SCRUM-11122 completion report](scrum-11122-diagnostic-package-export-completion.md).
+
+**PASS WITH NOTES — SCRUM-11122 DIAGNOSTIC PACKAGE EXPORT VERIFIED**

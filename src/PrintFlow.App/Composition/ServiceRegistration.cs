@@ -104,7 +104,8 @@ public static class ServiceRegistration
         services.AddSingleton<ISettingsRepository>(new SqliteSettingsRepository(connectionFactory));
 
         string evidenceRoot = System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName);
-        services.AddSingleton(new LocalDiagnosticLocations(connectionFactory.DatabasePath, evidenceRoot));
+        LocalDiagnosticLocations diagnosticLocations = new(connectionFactory.DatabasePath, evidenceRoot);
+        services.AddSingleton(diagnosticLocations);
         services.AddSingleton<IDiagnosticRetentionRepository>(
             new SqliteDiagnosticRetentionRepository(connectionFactory, workspaceRootAbsolute));
         services.AddSingleton<IDiagnosticFileStore>(new LocalDiagnosticFileStore(evidenceRoot));
@@ -114,6 +115,18 @@ public static class ServiceRegistration
             SettingsDefaults.FallbackLogRetentionDays,
             SettingsDefaults.MaximumLogRetentionDays));
         services.AddSingleton<IDiagnosticRetentionService, DiagnosticRetentionService>();
+        services.AddSingleton(new DiagnosticPackageStorageLocations(
+            diagnosticLocations.LocalLogLocation,
+            diagnosticLocations.ScreenshotLocation));
+        services.AddSingleton(new DiagnosticPackageApplicationInfo(
+            "PrintFlow Studio",
+            typeof(ServiceRegistration).Assembly.GetName().Version?.ToString() ?? "Unavailable"));
+        services.AddSingleton(new LocalDiagnosticPackageEvidence(evidenceRoot));
+        services.AddSingleton<IDiagnosticPackageEvidenceInspector>(provider =>
+            provider.GetRequiredService<LocalDiagnosticPackageEvidence>());
+        services.AddSingleton<IDiagnosticPackageWriter>(provider => new DiagnosticPackageArchiveWriter(
+            provider.GetRequiredService<LocalDiagnosticPackageEvidence>(),
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(), "PrintFlowStudio", "DiagnosticPackages")));
 
         // The configured rung of that precedence, taken once from the configuration this method
         // was handed rather than re-read anywhere later.
@@ -144,6 +157,7 @@ public static class ServiceRegistration
         services.AddSingleton<IArtefactPreviewService, ArtefactPreviewService>();
 
         services.AddSingleton<ISessionService, SessionService>();
+        services.AddSingleton<IDiagnosticPackageService, DiagnosticPackageService>();
 
         // The specialist production-TIFF review seam (SCRUM-11104 §14, §43). A second read-only
         // seam rather than a wider first one: the general review surface compares artefacts, and
@@ -164,6 +178,7 @@ public static class ServiceRegistration
         // and cannot carry the previous session's state forward.
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
+        services.AddSingleton<IDiagnosticPackageDestinationPicker, SaveDiagnosticPackageDialog>();
         services.AddSingleton<ShellViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<WorkflowSelectionViewModel>();

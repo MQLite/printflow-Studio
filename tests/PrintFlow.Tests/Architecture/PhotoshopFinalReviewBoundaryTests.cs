@@ -135,8 +135,12 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 // SCRUM-11110's second exemption is its uniquely named, hash-checked synthetic
                 // probe. It can delete only after Photoshop proves that exact owned document
                 // closed; it has no session/Revision/Approved reference to dispose of.
+                // SCRUM-11122's package writer deletes only its exact randomly named staging
+                // file or a just-published archive whose final validation failed. It receives no
+                // Revision/output deletion authority and never enumerates a directory.
                 if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs" or
                                  "LocalDiagnosticFileStore.cs" or
+                                 "DiagnosticPackageArchiveWriter.cs" or
                                  "ProductionLiveWorkstationVerifier.cs"))
                 {
                     source.ShouldNotContain("File.Delete(", Case.Sensitive, $"{name} deletes a file outright.");

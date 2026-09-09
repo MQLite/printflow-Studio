@@ -937,4 +937,51 @@
   <data name="Home_RemoveFailed" xml:space="preserve"><value>That record could not be removed from Recent processing ({0}). It stays on the list and nothing was changed.</value></data>
   <data name="Home_RecentNoThumbnail" xml:space="preserve"><value>No preview</value></data>
   <data name="Home_RecentThumbnailOf" xml:space="preserve"><value>Preview of {0}</value></data>
+  <data name="ErrorDetails_ExportDiagnosticPackage" xml:space="preserve"><value>Export diagnostic package</value></data>
+  <data name="DiagnosticPackage_Heading" xml:space="preserve"><value>Diagnostic package</value></data>
+  <data name="DiagnosticPackage_LocalOnlyNotice" xml:space="preserve"><value>The package is saved locally. Nothing is uploaded automatically.</value></data>
+  <data name="DiagnosticPackage_Subject" xml:space="preserve"><value>Package subject</value></data>
+  <data name="DiagnosticPackage_ProcessingName" xml:space="preserve"><value>Processing name</value></data>
+  <data name="DiagnosticPackage_FailureReference" xml:space="preserve"><value>Failure reference</value></data>
+  <data name="DiagnosticPackage_Included" xml:space="preserve"><value>Included</value></data>
+  <data name="DiagnosticPackage_Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="DiagnosticPackage_ExcludedByPolicy" xml:space="preserve"><value>Excluded by privacy policy</value></data>
+  <data name="DiagnosticPackage_LocalPaths" xml:space="preserve"><value>Local paths recorded in the manifest</value></data>
+  <data name="DiagnosticPackage_Destination" xml:space="preserve"><value>Destination</value></data>
+  <data name="DiagnosticPackage_DestinationHint" xml:space="preserve"><value>Choose a local ZIP file after reviewing these contents. Creating the package does not change the processing record or its diagnostic evidence.</value></data>
+  <data name="DiagnosticPackage_NoOverwrite" xml:space="preserve"><value>An existing file is never replaced; PrintFlow uses a numbered name instead.</value></data>
+  <data name="DiagnosticPackage_Save" xml:space="preserve"><value>Save package</value></data>
+  <data name="DiagnosticPackage_Back" xml:space="preserve"><value>Back to error details</value></data>
+  <data name="DiagnosticPackage_SaveDialogTitle" xml:space="preserve"><value>Save diagnostic package</value></data>
+  <data name="DiagnosticPackage_SaveDialogFilter" xml:space="preserve"><value>Diagnostic package (*.zip)|*.zip</value></data>
+  <data name="DiagnosticPackage_PreviewFailed" xml:space="preserve"><value>The diagnostic package contents could not be prepared ({0}). No package was created.</value></data>
+  <data name="DiagnosticPackage_SaveFailed" xml:space="preserve"><value>The diagnostic package could not be saved ({0}). No partial package was kept.</value></data>
+  <data name="DiagnosticPackage_Saved" xml:space="preserve"><value>Diagnostic package saved locally to {0}. Nothing was uploaded automatically.</value></data>
+  <data name="DiagnosticPackage_EnvironmentReady" xml:space="preserve"><value>ready</value></data>
+  <data name="DiagnosticPackage_EnvironmentNotReady" xml:space="preserve"><value>not ready</value></data>
+  <data name="DiagnosticPackage_ItemManifest" xml:space="preserve"><value>Human-readable manifest (manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemFailureSummary" xml:space="preserve"><value>Error details, retry facts and stable failure code (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemAutomationLog" xml:space="preserve"><value>Structured local error record {0}, recorded {1} (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemLogUnavailable" xml:space="preserve"><value>The structured local error record has expired or is unavailable. The saved processing failure facts will still be included.</value></data>
+  <data name="DiagnosticPackage_ItemLogNotRecorded" xml:space="preserve"><value>No structured local error record was recorded for this attempt. The saved processing failure facts will still be included.</value></data>
+  <data name="DiagnosticPackage_ItemEnvironment" xml:space="preserve"><value>Workstation readiness: {0}; production preset: {1}; {2} checks (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemApplication" xml:space="preserve"><value>{0} version {1} (in manifest.txt)</value></data>
+  <data name="DiagnosticPackage_ItemLocalPaths" xml:space="preserve"><value>The five local paths shown below (in manifest.txt; file contents are not implied)</value></data>
+  <data name="DiagnosticPackage_ItemFailureScreenshot" xml:space="preserve"><value>Failure screenshot (failure-screenshot.png) — contains what was visible in the application window at failure time</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotUnavailable" xml:space="preserve"><value>The failure screenshot was not captured, has expired, or is unavailable. The manifest will say so.</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotExcluded" xml:space="preserve"><value>The referenced screenshot is outside PrintFlow's owned failure-capture policy and will not be included.</value></data>
+  <data name="DiagnosticPackage_ItemCustomerSource" xml:space="preserve"><value>Original customer source image</value></data>
+  <data name="DiagnosticPackage_ItemInputSnapshot" xml:space="preserve"><value>Managed input image bytes</value></data>
+  <data name="DiagnosticPackage_ItemRevisionArtwork" xml:space="preserve"><value>Working or historical processed artwork</value></data>
+  <data name="DiagnosticPackage_ItemApprovedOutput" xml:space="preserve"><value>Approved PNG files</value></data>
+  <data name="DiagnosticPackage_ItemProductionOutput" xml:space="preserve"><value>Production TIFF files</value></data>
+  <data name="DiagnosticPackage_ItemManualArtwork" xml:space="preserve"><value>Manually imported artwork</value></data>
+  <data name="DiagnosticPackage_ItemRecoveryEvidence" xml:space="preserve"><value>Recovery or quarantine files</value></data>
+  <data name="DiagnosticPackage_ItemUnknownEvidence" xml:space="preserve"><value>Unknown or unrelated files from the diagnostic folder</value></data>
+  <data name="DiagnosticPackage_ItemDiagnosticDatabase" xml:space="preserve"><value>Diagnostic database file contents</value></data>
+  <data name="DiagnosticPackage_PathManagedInput" xml:space="preserve"><value>Managed input: {0}</value></data>
+  <data name="DiagnosticPackage_PathExpectedOutput" xml:space="preserve"><value>Expected output: {0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>Failure screenshot: {0}</value></data>
+  <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>Local diagnostic database: {0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>Failure screenshot folder: {0}</value></data>
 </root>

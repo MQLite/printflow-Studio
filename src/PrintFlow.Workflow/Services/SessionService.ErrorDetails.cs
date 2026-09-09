@@ -72,6 +72,12 @@ public sealed partial class SessionService
             }
         }
 
+        DiagnosticLogStatus logStatus = correlatedLog is not null
+            ? DiagnosticLogStatus.Available
+            : attempt.Failure is null
+                ? DiagnosticLogStatus.NotRecorded
+                : DiagnosticLogStatus.Unavailable;
+
         string? screenshotPath = correlatedLog?.ScreenshotPath;
         if (string.IsNullOrWhiteSpace(screenshotPath) &&
             attempt.Failure?.Context.TryGetValue(AutomationLogEntry.ScreenshotContextKey, out string? attemptPath) == true)
@@ -106,9 +112,14 @@ public sealed partial class SessionService
         return OperationResult.Ok(new ErrorDetailsView(
             sessionId,
             attempt.Id,
+            aggregate.Session.OutputName.ToString(),
             aggregate.Session.WorkflowType,
             attempt.Step,
             attempt.Status,
+            attempt.Operation,
+            attempt.AdapterId,
+            attempt.StartedAtUtc,
+            attempt.EndedAtUtc,
             attempt.Failure?.Code.ToString(),
             attempt.Failure?.MessageKey,
             attempt.Failure?.TechnicalDetail,
@@ -119,6 +130,9 @@ public sealed partial class SessionService
             screenshotPath,
             screenshotStatus,
             screenshot,
+            logStatus,
+            correlatedLog?.Id,
+            correlatedLog?.AtUtc,
             checked(attempt.RetrySequence + 1),
             attempt.RetrySequence,
             isCurrent,

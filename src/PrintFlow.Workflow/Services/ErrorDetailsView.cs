@@ -1,5 +1,7 @@
 using PrintFlow.Domain.Attempts;
+using PrintFlow.Domain.Automation;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Ports;
 
@@ -20,6 +22,13 @@ public enum DiagnosticImageStatus
     Unavailable,
 }
 
+public enum DiagnosticLogStatus
+{
+    NotRecorded,
+    Available,
+    Unavailable,
+}
+
 public enum ErrorRecoveryAction
 {
     Retry,
@@ -31,9 +40,14 @@ public enum ErrorRecoveryAction
 public sealed record ErrorDetailsView(
     SessionId SessionId,
     AttemptId AttemptId,
+    string ProcessingName,
     WorkflowType Workflow,
     StepKind Step,
     AttemptStatus AttemptStatus,
+    OperationKind Operation,
+    string AdapterId,
+    DateTimeOffset StartedAtUtc,
+    DateTimeOffset? EndedAtUtc,
     string? StableCode,
     string? MessageKey,
     string? TechnicalDetail,
@@ -44,6 +58,9 @@ public sealed record ErrorDetailsView(
     string? ScreenshotPath,
     DiagnosticImageStatus ScreenshotStatus,
     DecodedPreview? Screenshot,
+    DiagnosticLogStatus LogStatus,
+    AutomationLogId? LogEntryId,
+    DateTimeOffset? LogAtUtc,
     int AttemptNumber,
     int PreviousRetries,
     bool IsCurrent,

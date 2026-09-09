@@ -96,6 +96,27 @@ internal sealed class StubFilePicker : IFilePicker
     }
 }
 
+/// <summary>A scripted local ZIP destination in place of the modal Windows Save dialog.</summary>
+internal sealed class StubDiagnosticPackageDestinationPicker : IDiagnosticPackageDestinationPicker
+{
+    public StubDiagnosticPackageDestinationPicker(string? path = null) => Path = path;
+
+    public string? Path { get; set; }
+    public int CallCount { get; private set; }
+    public string? LastTitle { get; private set; }
+    public string? LastFilter { get; private set; }
+    public string? LastSuggestedFileName { get; private set; }
+
+    public string? PickDestination(string dialogTitle, string filter, string suggestedFileName)
+    {
+        CallCount++;
+        LastTitle = dialogTitle;
+        LastFilter = filter;
+        LastSuggestedFileName = suggestedFileName;
+        return Path;
+    }
+}
+
 /// <summary>
 /// Captures the arguments <see cref="SessionService.ListRecentAsync"/> passes down, so the
 /// "up to 100 sessions from the last 30 days" policy can be asserted without creating a

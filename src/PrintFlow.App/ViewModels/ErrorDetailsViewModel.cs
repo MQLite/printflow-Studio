@@ -17,25 +17,36 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
 {
     private readonly ISessionService _sessions;
     private readonly INavigationService _navigation;
+    private readonly IDiagnosticPackageService? _packages;
+    private readonly IDiagnosticPackageDestinationPicker? _packageDestination;
     private SessionId? _sessionId;
     private AttemptId? _attemptId;
     private ErrorDetailsView? _details;
+    private DiagnosticPackagePlan? _packagePlan;
 
     [ObservableProperty]
     private bool _isBusy;
 
-    private OperationFailure? _noticeFailure;
+    [ObservableProperty]
+    private bool _isPackagePreview;
 
-    public string? Notice => _noticeFailure is { } failure ? DisplayNames.Failure(failure) : null;
+    private OperationFailure? _noticeFailure;
+    private string? _noticeText;
+
+    public string? Notice => _noticeText ?? (_noticeFailure is { } failure ? DisplayNames.Failure(failure) : null);
 
     public ErrorDetailsViewModel(ISessionService sessions, INavigationService navigation,
-        ILocalisationService localisation)
+        ILocalisationService localisation,
+        IDiagnosticPackageService? packages = null,
+        IDiagnosticPackageDestinationPicker? packageDestination = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(localisation);
         _sessions = sessions;
         _navigation = navigation;
+        _packages = packages;
+        _packageDestination = packageDestination;
         WeakEventManager<ILocalisationService, EventArgs>.AddHandler(
             localisation, nameof(ILocalisationService.LanguageChanged), OnLanguageChanged);
     }
@@ -81,14 +92,64 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
     public bool CanRetry => Allows(ErrorRecoveryAction.Retry);
     public bool CanManualProcessing => Allows(ErrorRecoveryAction.ManualProcessing);
     public bool CanReenterAutomation => Allows(ErrorRecoveryAction.ReenterAutomation);
-    private bool CanAct => !IsBusy;
+    public bool IsErrorDetails => !IsPackagePreview;
+    public bool CanExportDiagnosticPackage =>
+        !IsBusy && IsErrorDetails && HasDetails && _packages is not null && _packageDestination is not null;
+    private bool CanAct => !IsBusy && IsErrorDetails;
+
+    public string ExportDiagnosticPackageLabel => Strings.ErrorDetails_ExportDiagnosticPackage;
+    public string PackageHeading => Strings.DiagnosticPackage_Heading;
+    public string PackageLocalOnlyNotice => Strings.DiagnosticPackage_LocalOnlyNotice;
+    public string PackageSubjectHeading => Strings.DiagnosticPackage_Subject;
+    public string PackageProcessingNameLabel => Strings.DiagnosticPackage_ProcessingName;
+    public string PackageWorkflowLabel => Strings.ErrorDetails_Workflow;
+    public string PackageStepLabel => Strings.ErrorDetails_Step;
+    public string PackageCodeLabel => Strings.ErrorDetails_Code;
+    public string PackageReferenceLabel => Strings.DiagnosticPackage_FailureReference;
+    public string PackageProcessingName => _packagePlan?.Subject.ProcessingName ?? string.Empty;
+    public string PackageWorkflow => _packagePlan is { } plan ? DisplayNames.Workflow(plan.Subject.Workflow) : string.Empty;
+    public string PackageStep => _packagePlan is { } plan ? DisplayNames.Step(plan.Subject.Step) : string.Empty;
+    public string PackageCode => _packagePlan?.Failure.StableCode ?? Strings.ErrorDetails_NotRecorded;
+    public string PackageReference => _packagePlan?.Subject.AttemptId.ToString() ?? string.Empty;
+    public string PackageIncludedHeading => Strings.DiagnosticPackage_Included;
+    public string PackageUnavailableHeading => Strings.DiagnosticPackage_Unavailable;
+    public string PackageExcludedHeading => Strings.DiagnosticPackage_ExcludedByPolicy;
+    public string PackagePathsHeading => Strings.DiagnosticPackage_LocalPaths;
+    public string PackageDestinationHeading => Strings.DiagnosticPackage_Destination;
+    public string PackageDestinationHint => Strings.DiagnosticPackage_DestinationHint;
+    public string PackageNoOverwriteNotice => Strings.DiagnosticPackage_NoOverwrite;
+    public string SavePackageLabel => Strings.DiagnosticPackage_Save;
+    public string BackToDetailsLabel => Strings.DiagnosticPackage_Back;
+    public string PackagePathPreview => _packagePlan is not { } plan ? string.Empty : string.Join(
+        Environment.NewLine,
+        string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_PathManagedInput,
+            PathText(plan.Failure.ManagedInputPath, plan.Failure.InputPathStatus)),
+        string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_PathExpectedOutput,
+            PathText(plan.Failure.ExpectedOutputPath, plan.Failure.ExpectedOutputPathStatus)),
+        string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_PathScreenshot,
+            plan.Failure.ScreenshotPath ?? Strings.ErrorDetails_NotCaptured),
+        string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_PathLocalLog,
+            plan.Storage.LocalLogLocation),
+        string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_PathScreenshotFolder,
+            plan.Storage.ScreenshotLocation));
+    public IReadOnlyList<DiagnosticPackagePreviewItem> IncludedPackageItems =>
+        PreviewItems(DiagnosticPackageItemDisposition.Included);
+    public IReadOnlyList<DiagnosticPackagePreviewItem> UnavailablePackageItems =>
+        PreviewItems(DiagnosticPackageItemDisposition.Unavailable);
+    public IReadOnlyList<DiagnosticPackagePreviewItem> ExcludedPackageItems =>
+        PreviewItems(DiagnosticPackageItemDisposition.ExcludedByPolicy);
+    public bool HasUnavailablePackageItems => UnavailablePackageItems.Count > 0;
+    public bool HasExcludedPackageItems => ExcludedPackageItems.Count > 0;
 
     public async Task OpenAsync(SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken)
     {
         _sessionId = sessionId;
         _attemptId = attemptId;
         _details = null;
+        _packagePlan = null;
+        IsPackagePreview = false;
         _noticeFailure = null;
+        _noticeText = null;
         IsBusy = true;
         try
         {
@@ -108,6 +169,88 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
 
     [RelayCommand(CanExecute = nameof(CanAct))]
     private Task ReenterAutomationAsync(CancellationToken cancellationToken) => RecoverAsync(ErrorRecoveryAction.ReenterAutomation, cancellationToken);
+
+    [RelayCommand(CanExecute = nameof(CanExportDiagnosticPackage))]
+    private async Task OpenDiagnosticPackageAsync(CancellationToken cancellationToken)
+    {
+        if (!CanExportDiagnosticPackage || _packages is null ||
+            _sessionId is not { } sessionId || _attemptId is not { } attemptId)
+            return;
+
+        IsBusy = true;
+        _noticeFailure = null;
+        _noticeText = null;
+        try
+        {
+            OperationResult<DiagnosticPackagePlan> result = await _packages.BuildPlanAsync(
+                sessionId, attemptId, cancellationToken).ConfigureAwait(true);
+            if (result.IsSuccess)
+            {
+                _packagePlan = result.Value;
+                IsPackagePreview = true;
+            }
+            else
+            {
+                _noticeText = string.Format(
+                    CultureInfo.CurrentCulture,
+                    Strings.DiagnosticPackage_PreviewFailed,
+                    result.Failure.Code);
+            }
+            OnPropertyChanged(string.Empty);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool CanSavePackage =>
+        !IsBusy && IsPackagePreview && _packagePlan is not null &&
+        _packages is not null && _packageDestination is not null;
+
+    [RelayCommand(CanExecute = nameof(CanSavePackage))]
+    private async Task SavePackageAsync(CancellationToken cancellationToken)
+    {
+        if (!CanSavePackage || _packagePlan is not { } plan ||
+            _packages is null || _packageDestination is null)
+            return;
+
+        string? destination = _packageDestination.PickDestination(
+            Strings.DiagnosticPackage_SaveDialogTitle,
+            Strings.DiagnosticPackage_SaveDialogFilter,
+            plan.SuggestedFileName);
+        if (string.IsNullOrWhiteSpace(destination))
+            return;
+
+        IsBusy = true;
+        _noticeFailure = null;
+        _noticeText = null;
+        try
+        {
+            OperationResult<DiagnosticPackageExportResult> result = await _packages.ExportAsync(
+                plan, destination, cancellationToken).ConfigureAwait(true);
+            _noticeText = result.IsSuccess
+                ? string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_Saved, result.Value.SavedPath)
+                : string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_SaveFailed, result.Failure.Code);
+            OnPropertyChanged(nameof(Notice));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool CanBackFromPackage => !IsBusy && IsPackagePreview;
+
+    [RelayCommand(CanExecute = nameof(CanBackFromPackage))]
+    private void BackFromPackage()
+    {
+        if (!CanBackFromPackage) return;
+        _packagePlan = null;
+        _noticeText = null;
+        IsPackagePreview = false;
+        OnPropertyChanged(string.Empty);
+    }
 
     private async Task RecoverAsync(ErrorRecoveryAction action, CancellationToken cancellationToken)
     {
@@ -185,7 +328,75 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
         ManualProcessingCommand.NotifyCanExecuteChanged();
         ReenterAutomationCommand.NotifyCanExecuteChanged();
         BackCommand.NotifyCanExecuteChanged();
+        OpenDiagnosticPackageCommand.NotifyCanExecuteChanged();
+        SavePackageCommand.NotifyCanExecuteChanged();
+        BackFromPackageCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsPackagePreviewChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsErrorDetails));
+        RetryCommand.NotifyCanExecuteChanged();
+        ManualProcessingCommand.NotifyCanExecuteChanged();
+        ReenterAutomationCommand.NotifyCanExecuteChanged();
+        BackCommand.NotifyCanExecuteChanged();
+        OpenDiagnosticPackageCommand.NotifyCanExecuteChanged();
+        SavePackageCommand.NotifyCanExecuteChanged();
+        BackFromPackageCommand.NotifyCanExecuteChanged();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => OnPropertyChanged(string.Empty);
+
+    private IReadOnlyList<DiagnosticPackagePreviewItem> PreviewItems(
+        DiagnosticPackageItemDisposition disposition) => _packagePlan?.Items
+        .Where(item => item.Disposition == disposition)
+        .Select(item => new DiagnosticPackagePreviewItem(ItemText(item)))
+        .ToArray() ?? [];
+
+    private string ItemText(DiagnosticPackageItem item) => item.Role switch
+    {
+        DiagnosticPackageItemRole.Manifest => Strings.DiagnosticPackage_ItemManifest,
+        DiagnosticPackageItemRole.StructuredFailureSummary => Strings.DiagnosticPackage_ItemFailureSummary,
+        DiagnosticPackageItemRole.StructuredAutomationLog
+            when _packagePlan?.Failure.LogStatus == DiagnosticPackageLogStatus.NotRecorded =>
+            Strings.DiagnosticPackage_ItemLogNotRecorded,
+        DiagnosticPackageItemRole.StructuredAutomationLog when item.Disposition == DiagnosticPackageItemDisposition.Unavailable =>
+            Strings.DiagnosticPackage_ItemLogUnavailable,
+        DiagnosticPackageItemRole.StructuredAutomationLog => string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.DiagnosticPackage_ItemAutomationLog,
+            _packagePlan?.Failure.LogEntryId,
+            _packagePlan?.Failure.LogAtUtc),
+        DiagnosticPackageItemRole.EnvironmentSummary => string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.DiagnosticPackage_ItemEnvironment,
+            _packagePlan?.Environment.Verified == true
+                ? Strings.DiagnosticPackage_EnvironmentReady
+                : Strings.DiagnosticPackage_EnvironmentNotReady,
+            _packagePlan?.Environment.PresetIdentity ?? Strings.ErrorDetails_NotRecorded,
+            _packagePlan?.Environment.Checks.Count ?? 0),
+        DiagnosticPackageItemRole.ApplicationInfo => string.Format(
+            CultureInfo.CurrentCulture,
+            Strings.DiagnosticPackage_ItemApplication,
+            _packagePlan?.Application.Name,
+            _packagePlan?.Application.Version),
+        DiagnosticPackageItemRole.LocalPaths => Strings.DiagnosticPackage_ItemLocalPaths,
+        DiagnosticPackageItemRole.FailureScreenshot when item.Disposition == DiagnosticPackageItemDisposition.Unavailable =>
+            Strings.DiagnosticPackage_ItemScreenshotUnavailable,
+        DiagnosticPackageItemRole.FailureScreenshot when item.Disposition == DiagnosticPackageItemDisposition.ExcludedByPolicy =>
+            Strings.DiagnosticPackage_ItemScreenshotExcluded,
+        DiagnosticPackageItemRole.FailureScreenshot => Strings.DiagnosticPackage_ItemFailureScreenshot,
+        DiagnosticPackageItemRole.CustomerSource => Strings.DiagnosticPackage_ItemCustomerSource,
+        DiagnosticPackageItemRole.InputSnapshot => Strings.DiagnosticPackage_ItemInputSnapshot,
+        DiagnosticPackageItemRole.RevisionArtwork => Strings.DiagnosticPackage_ItemRevisionArtwork,
+        DiagnosticPackageItemRole.ApprovedOutput => Strings.DiagnosticPackage_ItemApprovedOutput,
+        DiagnosticPackageItemRole.ProductionOutput => Strings.DiagnosticPackage_ItemProductionOutput,
+        DiagnosticPackageItemRole.ManualArtwork => Strings.DiagnosticPackage_ItemManualArtwork,
+        DiagnosticPackageItemRole.RecoveryEvidence => Strings.DiagnosticPackage_ItemRecoveryEvidence,
+        DiagnosticPackageItemRole.UnknownEvidence => Strings.DiagnosticPackage_ItemUnknownEvidence,
+        DiagnosticPackageItemRole.DiagnosticDatabase => Strings.DiagnosticPackage_ItemDiagnosticDatabase,
+        _ => item.Role.ToString(),
+    };
 }
+
+public sealed record DiagnosticPackagePreviewItem(string Text);

@@ -926,4 +926,51 @@
   <data name="Home_RemoveFailed" xml:space="preserve"><value>该记录无法从最近处理列表移除（{0}）。记录仍在列表中，未做任何更改。</value></data>
   <data name="Home_RecentNoThumbnail" xml:space="preserve"><value>无预览</value></data>
   <data name="Home_RecentThumbnailOf" xml:space="preserve"><value>{0} 的预览</value></data>
+  <data name="ErrorDetails_ExportDiagnosticPackage" xml:space="preserve"><value>导出诊断包</value></data>
+  <data name="DiagnosticPackage_Heading" xml:space="preserve"><value>诊断包</value></data>
+  <data name="DiagnosticPackage_LocalOnlyNotice" xml:space="preserve"><value>诊断包仅保存到本机，不会自动上传任何内容。</value></data>
+  <data name="DiagnosticPackage_Subject" xml:space="preserve"><value>诊断对象</value></data>
+  <data name="DiagnosticPackage_ProcessingName" xml:space="preserve"><value>处理名称</value></data>
+  <data name="DiagnosticPackage_FailureReference" xml:space="preserve"><value>故障编号</value></data>
+  <data name="DiagnosticPackage_Included" xml:space="preserve"><value>将包含</value></data>
+  <data name="DiagnosticPackage_Unavailable" xml:space="preserve"><value>不可用</value></data>
+  <data name="DiagnosticPackage_ExcludedByPolicy" xml:space="preserve"><value>按隐私规则排除</value></data>
+  <data name="DiagnosticPackage_LocalPaths" xml:space="preserve"><value>清单中记录的本机路径</value></data>
+  <data name="DiagnosticPackage_Destination" xml:space="preserve"><value>保存位置</value></data>
+  <data name="DiagnosticPackage_DestinationHint" xml:space="preserve"><value>核对以上内容后再选择本机 ZIP 文件。创建诊断包不会更改处理记录或原有诊断资料。</value></data>
+  <data name="DiagnosticPackage_NoOverwrite" xml:space="preserve"><value>不会替换已有文件；如名称重复，PrintFlow 会使用带编号的新文件名。</value></data>
+  <data name="DiagnosticPackage_Save" xml:space="preserve"><value>保存诊断包</value></data>
+  <data name="DiagnosticPackage_Back" xml:space="preserve"><value>返回错误详情</value></data>
+  <data name="DiagnosticPackage_SaveDialogTitle" xml:space="preserve"><value>保存诊断包</value></data>
+  <data name="DiagnosticPackage_SaveDialogFilter" xml:space="preserve"><value>诊断包 (*.zip)|*.zip</value></data>
+  <data name="DiagnosticPackage_PreviewFailed" xml:space="preserve"><value>无法准备诊断包内容（{0}）。未创建诊断包。</value></data>
+  <data name="DiagnosticPackage_SaveFailed" xml:space="preserve"><value>无法保存诊断包（{0}）。未保留不完整的诊断包。</value></data>
+  <data name="DiagnosticPackage_Saved" xml:space="preserve"><value>诊断包已保存到本机：{0}。未自动上传任何内容。</value></data>
+  <data name="DiagnosticPackage_EnvironmentReady" xml:space="preserve"><value>就绪</value></data>
+  <data name="DiagnosticPackage_EnvironmentNotReady" xml:space="preserve"><value>未就绪</value></data>
+  <data name="DiagnosticPackage_ItemManifest" xml:space="preserve"><value>便于阅读的清单（manifest.txt）</value></data>
+  <data name="DiagnosticPackage_ItemFailureSummary" xml:space="preserve"><value>错误详情、重试信息和稳定错误代码（写入 manifest.txt）</value></data>
+  <data name="DiagnosticPackage_ItemAutomationLog" xml:space="preserve"><value>本机结构化错误记录 {0}，记录时间 {1}（写入 manifest.txt）</value></data>
+  <data name="DiagnosticPackage_ItemLogUnavailable" xml:space="preserve"><value>本机结构化错误记录已过期或不可用；已保存的处理故障信息仍会写入清单。</value></data>
+  <data name="DiagnosticPackage_ItemLogNotRecorded" xml:space="preserve"><value>此处理尝试未记录本机结构化错误记录；已保存的处理故障信息仍会写入清单。</value></data>
+  <data name="DiagnosticPackage_ItemEnvironment" xml:space="preserve"><value>工作站状态：{0}；生产配置：{1}；共 {2} 项检查（写入 manifest.txt）</value></data>
+  <data name="DiagnosticPackage_ItemApplication" xml:space="preserve"><value>{0} 版本 {1}（写入 manifest.txt）</value></data>
+  <data name="DiagnosticPackage_ItemLocalPaths" xml:space="preserve"><value>下方显示的五个本机路径（写入 manifest.txt；不代表包含文件内容）</value></data>
+  <data name="DiagnosticPackage_ItemFailureScreenshot" xml:space="preserve"><value>故障截图（failure-screenshot.png）——包含故障发生时应用窗口中可见的内容</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotUnavailable" xml:space="preserve"><value>故障截图未捕获、已过期或不可用；清单会如实说明。</value></data>
+  <data name="DiagnosticPackage_ItemScreenshotExcluded" xml:space="preserve"><value>引用的截图不符合 PrintFlow 自有故障截图规则，不会包含。</value></data>
+  <data name="DiagnosticPackage_ItemCustomerSource" xml:space="preserve"><value>客户原始图像</value></data>
+  <data name="DiagnosticPackage_ItemInputSnapshot" xml:space="preserve"><value>托管输入图像内容</value></data>
+  <data name="DiagnosticPackage_ItemRevisionArtwork" xml:space="preserve"><value>处理中或历史处理图稿</value></data>
+  <data name="DiagnosticPackage_ItemApprovedOutput" xml:space="preserve"><value>已批准的 PNG 文件</value></data>
+  <data name="DiagnosticPackage_ItemProductionOutput" xml:space="preserve"><value>生产 TIFF 文件</value></data>
+  <data name="DiagnosticPackage_ItemManualArtwork" xml:space="preserve"><value>手动导入的图稿</value></data>
+  <data name="DiagnosticPackage_ItemRecoveryEvidence" xml:space="preserve"><value>恢复或隔离文件</value></data>
+  <data name="DiagnosticPackage_ItemUnknownEvidence" xml:space="preserve"><value>诊断文件夹中的未知或无关文件</value></data>
+  <data name="DiagnosticPackage_ItemDiagnosticDatabase" xml:space="preserve"><value>诊断数据库文件内容</value></data>
+  <data name="DiagnosticPackage_PathManagedInput" xml:space="preserve"><value>托管输入：{0}</value></data>
+  <data name="DiagnosticPackage_PathExpectedOutput" xml:space="preserve"><value>预期输出：{0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>故障截图：{0}</value></data>
+  <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>本机诊断数据库：{0}</value></data>
+  <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>故障截图文件夹：{0}</value></data>
 </root>

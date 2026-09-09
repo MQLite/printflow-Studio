@@ -27,6 +27,7 @@
         </Style>
     </UserControl.Resources>
     <Grid Margin="24">
+      <Grid Visibility="{Binding IsErrorDetails, Converter={StaticResource BoolToVisibility}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -94,8 +95,122 @@
             <Button Content="{Binding ReenterAutomationLabel}" Command="{Binding ReenterAutomationCommand}"
                     Visibility="{Binding CanReenterAutomation, Converter={StaticResource BoolToVisibility}}"
                     AutomationProperties.AutomationId="ErrorDetails.ReenterAutomation" AutomationProperties.Name="{Binding ReenterAutomationLabel}" />
+            <Button Content="{Binding ExportDiagnosticPackageLabel}" Command="{Binding OpenDiagnosticPackageCommand}"
+                    Visibility="{Binding CanExportDiagnosticPackage, Converter={StaticResource BoolToVisibility}}"
+                    AutomationProperties.AutomationId="ErrorDetails.ExportDiagnosticPackage"
+                    AutomationProperties.Name="{Binding ExportDiagnosticPackageLabel}" />
             <Button Content="{Binding BackLabel}" Command="{Binding BackCommand}"
                     AutomationProperties.AutomationId="ErrorDetails.Back" AutomationProperties.Name="{Binding BackLabel}" />
         </WrapPanel>
+      </Grid>
+
+      <Grid Visibility="{Binding IsPackagePreview, Converter={StaticResource BoolToVisibility}}"
+            AutomationProperties.AutomationId="Screen.DiagnosticPackage"
+            AutomationProperties.Name="{Binding PackageHeading}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+          <TextBlock Text="{Binding PackageHeading}" FontSize="26" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding PackageLocalOnlyNotice}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     FontWeight="SemiBold" AutomationProperties.AutomationId="DiagnosticPackage.LocalOnlyNotice" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,16"
+                      HorizontalScrollBarVisibility="Disabled" Focusable="False"
+                      AutomationProperties.AutomationId="DiagnosticPackage.Contents">
+          <StackPanel>
+            <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="#A12822"
+                       AutomationProperties.AutomationId="DiagnosticPackage.Notice" />
+
+            <TextBlock Text="{Binding PackageSubjectHeading}" Style="{StaticResource SectionHeading}" />
+            <Grid AutomationProperties.AutomationId="DiagnosticPackage.Subject">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+              </Grid.RowDefinitions>
+              <TextBlock Text="{Binding PackageProcessingNameLabel}" Margin="0,0,16,6" />
+              <TextBlock Grid.Column="1" Text="{Binding PackageProcessingName}" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="1" Text="{Binding PackageWorkflowLabel}" Margin="0,0,16,6" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PackageWorkflow}" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="2" Text="{Binding PackageStepLabel}" Margin="0,0,16,6" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PackageStep}" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="3" Text="{Binding PackageCodeLabel}" Margin="0,0,16,6" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding PackageCode}" TextWrapping="Wrap" />
+              <TextBlock Grid.Row="4" Text="{Binding PackageReferenceLabel}" Margin="0,0,16,6" />
+              <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding PackageReference, Mode=OneWay}"
+                       Style="{StaticResource ReadOnlyValue}"
+                       AutomationProperties.AutomationId="DiagnosticPackage.FailureReference"
+                       AutomationProperties.Name="{Binding PackageReferenceLabel}" />
+            </Grid>
+
+            <TextBlock Text="{Binding PackageIncludedHeading}" Style="{StaticResource SectionHeading}" />
+            <ItemsControl ItemsSource="{Binding IncludedPackageItems}" Focusable="False"
+                          KeyboardNavigation.IsTabStop="False"
+                          AutomationProperties.AutomationId="DiagnosticPackage.Included">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Text, StringFormat=✓ {0}}" Margin="0,2" TextWrapping="Wrap" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="{Binding PackagePathsHeading}" Style="{StaticResource SectionHeading}" />
+            <TextBox Text="{Binding PackagePathPreview, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"
+                     AutomationProperties.AutomationId="DiagnosticPackage.LocalPaths"
+                     AutomationProperties.Name="{Binding PackagePathsHeading}" />
+
+            <StackPanel Visibility="{Binding HasUnavailablePackageItems, Converter={StaticResource BoolToVisibility}}">
+              <TextBlock Text="{Binding PackageUnavailableHeading}" Style="{StaticResource SectionHeading}" />
+              <ItemsControl ItemsSource="{Binding UnavailablePackageItems}" Focusable="False"
+                            KeyboardNavigation.IsTabStop="False"
+                            AutomationProperties.AutomationId="DiagnosticPackage.Unavailable">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Text, StringFormat=— {0}}" Margin="0,2" TextWrapping="Wrap" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Visibility="{Binding HasExcludedPackageItems, Converter={StaticResource BoolToVisibility}}">
+              <TextBlock Text="{Binding PackageExcludedHeading}" Style="{StaticResource SectionHeading}" />
+              <ItemsControl ItemsSource="{Binding ExcludedPackageItems}" Focusable="False"
+                            KeyboardNavigation.IsTabStop="False"
+                            AutomationProperties.AutomationId="DiagnosticPackage.ExcludedByPolicy">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Text, StringFormat=— {0}}" Margin="0,2" TextWrapping="Wrap" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <TextBlock Text="{Binding PackageDestinationHeading}" Style="{StaticResource SectionHeading}" />
+            <TextBlock Text="{Binding PackageDestinationHint}" TextWrapping="Wrap"
+                       AutomationProperties.AutomationId="DiagnosticPackage.Destination" />
+            <TextBlock Text="{Binding PackageNoOverwriteNotice}" Margin="0,4,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
+
+        <WrapPanel Grid.Row="2">
+          <Button Content="{Binding SavePackageLabel}" Command="{Binding SavePackageCommand}"
+                  AutomationProperties.AutomationId="DiagnosticPackage.Save"
+                  AutomationProperties.Name="{Binding SavePackageLabel}" />
+          <Button Content="{Binding BackToDetailsLabel}" Command="{Binding BackFromPackageCommand}"
+                  AutomationProperties.AutomationId="DiagnosticPackage.Back"
+                  AutomationProperties.Name="{Binding BackToDetailsLabel}" />
+        </WrapPanel>
+      </Grid>
     </Grid>
 </UserControl>
