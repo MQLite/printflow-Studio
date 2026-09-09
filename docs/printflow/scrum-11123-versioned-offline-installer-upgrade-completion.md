@@ -567,8 +567,21 @@ dependency on a different Epic's unbuilt deliverable.
 `evidence/scrum-11123/full-suite.log`: **11,676 passed, 0 failed, 0 skipped** — the accepted
 11,645 baseline plus the 31 new tests added here.
 
-**Git:** local commits on `master` only. No branch, worktree, alternate clone or checkout; no
-amend, rebase, push or deploy. No `Co-Authored-By` or other AI attribution.
+**Repeatability, proved from the committed state:** `artifacts\installer` deleted, then
+`Build-Installer.ps1` run from scratch — 416 staged, 4 symbols archived, 0 warnings, 0 errors, a
+versioned MSI with `ProductVersion` 0.1.0 and a stable `UpgradeCode`. A solution restore, a
+solution build and a clean packaging build all leave the working tree untouched.
+
+**Git:** five local commits on `master` only, `d5eb3c2` → `d8b3e57`. No branch, worktree, alternate
+clone or checkout; no amend, rebase, push or deploy. No `Co-Authored-By` or other AI attribution.
+
+```
+c71d419  Establish one product version source and a win-x64 publish contract
+4e2602b  Close Production after an upgrade until the environment is revalidated
+277f55e  Build a versioned offline installer with upgrade and rollback procedure
+9a03261  Pin the win-x64 restore targets the release publish resolves
+d8b3e57  Declare the publish RID across the whole shipped project graph
+```
 
 **Files added**
 
@@ -596,12 +609,15 @@ docs/printflow/scrum-11123-versioned-offline-installer-upgrade-completion.md
 ```
 Directory.Build.props                                                 imports Version.props
 src/PrintFlow.App/PrintFlow.App.csproj                                win-x64 RID
+src/PrintFlow.Domain/PrintFlow.Domain.csproj                          win-x64 RID
+src/PrintFlow.Workflow/PrintFlow.Workflow.csproj                      win-x64 RID
+src/PrintFlow.Infrastructure/PrintFlow.Infrastructure.csproj          win-x64 RID (and the new check)
 src/PrintFlow.Infrastructure/Verification/WorkstationVerificationVocabulary.cs   new check member
 src/PrintFlow.Infrastructure/Verification/ProductionWorkstationVerifier.cs       wires the check
 src/PrintFlow.App/Resources/Strings.resx, Strings.zh-CN.resx          two operator strings each
 tests/PrintFlow.Tests/Fixtures/WorkstationVerificationFixture.cs      revalidation helpers
 tests/PrintFlow.Tests/Integration/Verification/ProductionWorkstationVerifierTests.cs  two assertions
 tests/PrintFlow.Tests/Integration/Verification/ProductionLiveWorkstationVerifierTests.cs  one call site
-src/*/packages.lock.json                                              win-x64 restore targets
+src/*/packages.lock.json                                              win-x64 restore targets (all four)
 docs/printflow/original-jira-functional-coverage-reaudit.md           appended only
 ```
