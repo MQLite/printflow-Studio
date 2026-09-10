@@ -1824,3 +1824,60 @@ Final-source validation: Release clean/build both passed with **0 warnings and 0
 The single final full Product suite passed **11,745 tests, 0 failed, 0 skipped**; all 19 changed
 Product/test file hashes remained unchanged through the run. Local implementation commit:
 `bbe89bfd8cfe2855f708b2a6d61b03ea061ba338`. Documentation follows in a separate local commit.
+
+# Delta — 10 September 2026: SCRUM-11097/11129 Photoshop fault simulation and validation matrix
+
+*Append-only reassessment from exact original CSV Work Items 11404, 11705, 11410, 11403 and parent
+11400. Historical rows, including the 4 September ones and their 11,712 / 11,735 / 11,745 evidence,
+remain unchanged. No Jira service mutation.*
+
+| Item | Previous position | Reassessed current Product position |
+|---|---|---|
+| SCRUM-11097 | PARTIAL; the Fake adapter covered the behavioural outcomes but could not emit a production TIFF at all, so valid TIFF, missing white channel, wrong colour mode, wrong dimensions and incorrect output metadata were reachable only by writing fixture bytes directly | **FULL.** The shipped Fake Photoshop adapter now has a second, independent output-class vocabulary beside its behavioural one. Under any class but the default it writes a genuine production TIFF with exactly one named fact deliberately wrong and submits it to the real `ProductionTiffInspector`, so a refusal is the Product detecting a real fault rather than the fake announcing a scripted verdict. All twelve AC clauses are met through `IPhotoshopOutputProcessor`, the port Production implements. No Photoshop, COM or UI automation; no click-order assertion; the default output class still copies the approved input |
+| SCRUM-11129 | PARTIAL; sole recorded gap was saved-TIFF dimension mismatch. Invalid-output coverage also stopped at the attempt row without ever attempting an approval | **FULL.** One explicit matrix accounts for every named outcome — successful TIFF, missing white channel, wrong colour mode, wrong pixel dimensions on both axes, incorrect DPI, invalid/unreadable output, missing output, export failure, timeout, interruption, unknown dialog — driven through `SessionService` against a real database and filesystem, with the failure code asserted for each. Invalid outputs cannot enter final approval, proven by genuinely issuing `Approve` for every invalid row and, for the structural rows, again with the refused TIFF's own on-disk hash. A retry after a structural output failure is proven to start from the clean approved upstream Revision |
+| SCRUM-11103 | FULL | **Unchanged.** The validation contract was not altered. One previously unexercised inspector branch — PhotometricInterpretation — became reachable for the first time and is now covered |
+| SCRUM-11096 | FULL | **Unchanged.** The adapter contract was not altered; both adapters still return a validated output or a structured failure through the same port |
+| Parent SCRUM-11093 | FULL for current Product functional clauses | **Confirmed FULL**, assessed independently and not by child arithmetic. This slice found a gap in *test reachability*, not in production validation: the production adapter already refuses a document whose pixels are not the projected pixels and a saved TIFF whose pixels are not that document's, and its composition makes the preparer stage unskippable. The Epic clause *"must never treat an invalid TIFF as production-ready"* is now positively demonstrated end to end for eleven distinct invalid outcomes rather than inferred from unit coverage. No previously unknown Product gap was exposed, and nothing is downgraded |
+
+The saved-TIFF geometry comparison is expressed once, as `ProductionTiffPreparationMatch`, and is
+called by the Fake adapter. The production adapter reaches the same conclusion transitively through
+the Photoshop document it prepared, and is deliberately not routed through the new rule: its
+accepted B1B save surface takes only factual prepared-document state and one managed reference, and
+an architecture test enforces that. This is recorded plainly in the code and the completion report
+rather than described as shared use.
+
+Physical dimensions are derived, not separately asserted. At the fixed 300 PPI the pixel grid and
+the resolution together define the canvas, so `PrintDimensions.MillimetresFromPixels` — the inverse
+of the existing public `PixelsFromMillimetres`, now the single home for a constant that had three
+private copies — is the one conversion, and a wrong grid or a wrong resolution are the only two
+routes to a wrong print. Both are evidenced; no third validation engine was invented.
+
+The deterministic production-TIFF encoder moved out of the test project into the shipped Fake
+adapter so the fake can emit real bytes in the product, and `ProductionTiffFixture` now forwards to
+it. The repository therefore has exactly one TIFF encoder, and a fault the fake emits is byte-for-byte
+the fault the inspector's own tests describe. No `GuardedPhotoshopUiDriver`,
+`GuardedPhotoshopDocumentPreparer`, `GuardedPhotoshopW1Executor`, `GuardedPhotoshopTiffSaver`,
+`ProductionPhotoshopOutputProcessor` or `PhotoshopAdapterOutputFactory` change was required or made.
+
+A genuinely separate read-only reviewer was used, not self-review. It returned eleven findings; the
+substantive ones were fixed before this delta, including a real defect — a clamp that could have
+turned a wrong-dimension scenario into a silent success on a one-pixel edge — and a matrix row that
+passed while never exercising the timeout scenario it named. Both fixes, and the corrected claim
+that the new geometry rule is shared with production, are recorded in the completion report.
+
+Focused evidence: 47/0/0 new and inspector tests, 173/0/0 affected Photoshop/TIFF/retry/review
+suites, 623/0/0 architecture and preparation/dimension suites, all Debug.
+
+No Photoshop, Meitu or Maintop was launched for this slice. The existing 300-PPI TIFF contract, W1
+behaviour, workstation preset, regression assets and retry/retention semantics were not changed.
+SCRUM-11132/11133 live acceptance, SCRUM-11065, SCRUM-11123 and physical print thresholds are not
+completed by this reassessment. Nothing pushed or deployed.
+
+Full exact ACs, pre-change matrix, scenario vocabulary, physical-dimension interpretation, the
+complete 11129 matrix, approval and clean-retry proofs, review findings and Git evidence:
+[Photoshop fault matrix completion](scrum-11097-11129-photoshop-fault-matrix-completion.md).
+
+Final-source validation: Release build passed with **0 warnings and 0 errors**. The final full
+Product suite passed **11,778 tests, 0 failed, 0 skipped**, a +33 delta against the 11,745 baseline
+fully accounted for by the 33 tests this slice adds. Local implementation and documentation commits
+are recorded in the completion report.
