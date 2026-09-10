@@ -132,10 +132,15 @@ Configuration classification:
 
 ### 2.4 Launch and verify
 
+The ordering here matters and §7.6 states it in full. On a fresh installation Production is closed,
+so the standard set is run under the bootstrap described in §7.6 — the normal application's live
+checks come *after* the revalidation record exists, not before it.
+
 1. Start PrintFlow Studio from the Start Menu.
-2. Open **Settings → Environment Check** and run readiness. Every blocking check must pass.
-3. Run the standard regression set (§7) and confirm every case passes.
-4. Record the revalidation:
+2. Bring the workstation to the state §7.3 describes, and run one complete standard regression set
+   run (§7) against this installation. Confirm every case passes.
+3. Record the operator reviews of any qualitative checks it left open (§7.3).
+4. Record the revalidation from that run:
 
 ```powershell
 tools\installer\Set-PrintFlowProductionRevalidation.ps1 `
@@ -144,9 +149,16 @@ tools\installer\Set-PrintFlowProductionRevalidation.ps1 `
     -StandardRegressionSetResult "D:\PrintFlowStudio\TestData\v1\runs\<run>\result.json"
 ```
 
+5. Only now open **Settings → Environment Check** and run the normal application's readiness, then
+   its end-to-end work.
+
 Production is available only when this script reports **"This installation is revalidated."**
 It exits 2 and says **"Production remains CLOSED"** otherwise, including when the standard set
 does not exist. There is no override.
+
+It exits 3 and says **"THE PROPOSED REVALIDATION WAS REFUSED"** when the run result you gave it
+cannot be shown to be about this installation. That is a different outcome: nothing is written and
+the record you already had is left exactly as it was. See §7.4.
 
 ---
 
@@ -203,9 +215,13 @@ inherit the previous build's production approval.
 
 ### 3.6 Revalidate
 
-1. Run **Environment Readiness**. Every blocking check must pass.
-2. Run the standard regression set (§7). Every case must pass.
-3. Record it with `Set-PrintFlowProductionRevalidation.ps1` (§2.4).
+The full ordering is §7.6. In short:
+
+1. Bring the workstation to the controlled state the run needs (§7.3), and run **one complete**
+   standard regression set run against the installation you just made (§7).
+2. Record the actual operator reviews of the qualitative checks that run left open (§7.3).
+3. Record the revalidation from that run with `Set-PrintFlowProductionRevalidation.ps1` (§7.4).
+4. Only then run the normal application's own live checks and its end-to-end work.
 
 **Production may resume only after that script reports success.**
 
@@ -383,6 +399,28 @@ tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1
 tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId <run-id> -RecordVisualReview <decisions.json>
 ```
 
+**A run identity belongs to one execution.** If the run folder already exists the script stops and
+tells you so; it does not reuse the destination and it does not delete what is there. Pick a
+different `-RunId` — the default timestamp already differs. To record a review of that existing run
+instead, use `-RecordVisualReview`, which is the deliberate way to update it.
+
+**A claimed run identity is spent, including after a run you interrupted.** Nothing expires a claim.
+If you stop a run part way, that `RunId` is used and the next attempt needs a new one. This is on
+purpose: a claim that timed out would let a second execution overwrite the first one's evidence,
+which is the thing this whole mechanism exists to prevent. The evidence the interrupted run did write
+stays where it is, and remains readable.
+
+**The run reports a pass only when its own host completed and wrote its own result.** A host that
+exits nonzero is a run that did not complete, whatever is on disk; a result left by another
+invocation is not this one's outcome. Both were reported as success before PF-AUDIT-R1.
+
+**`-CandidateInstallFolder`** names the installation the run is testing on behalf of; it defaults to
+`%ProgramFiles%\PrintFlow Studio`. The run drives PrintFlow from the built repository rather than
+from the installed executable, so it checks that the installed candidate was built from the same
+source and records its digests. If it cannot — no installation there, or one built from different
+source — the run still produces its evidence and says plainly that no revalidation can follow from
+it.
+
 **Before the full run**, put the workstation in the state the run needs, because it will refuse
 otherwise rather than work around you:
 
@@ -449,19 +487,46 @@ tools\installer\Set-PrintFlowProductionRevalidation.ps1 `
   -StandardRegressionSetResult 'D:\PrintFlowStudio\TestData\v1\runs\<run-id>\result.json'
 ```
 
-It re-verifies that all seven categories appear in a manifest under `-StandardRegressionSetPath`
-before it will record a pass, and reads exactly four fields from the run result:
+It re-verifies that all seven categories appear in a manifest under `-StandardRegressionSetPath`,
+and then **validates the whole proposed attestation before it writes anything**:
 
-```json
-{
-  "setId": "printflow-regression-v1",
-  "status": "Passed",
-  "completedAtLocal": "2026-09-09T14:30:00+12:00",
-  "evidencePath": "D:\\PrintFlowStudio\\TestData\\v1\\runs\\<run-id>"
-}
-```
+- the run result carries an evidence binding of a version the script knows;
+- every fact the run recorded matches this installation — product version, workstation, preset id,
+  version and digest, Windows build, the accepted Meitu and Photoshop digests, and adapter mode;
+- the four PrintFlow assemblies the run attested are byte-for-byte the ones installed here;
+- the manifests the run read are among the manifests under `-StandardRegressionSetPath`;
+- the seven categories each appear exactly once, and the summary agrees with the cases underneath
+  it — a `Passed` summary over an undecided visual check is a contradiction, not a pass.
+
+**Refusal and revocation are different, and the exit code tells you which happened.**
+
+| What you did | Exit | What is on disk afterwards |
+|---|---|---|
+| Supplied a valid, matching, passing run | 0 | A new record. Production may resume. |
+| Supplied no `-StandardRegressionSetResult` | 2 | A record saying `NotAvailable`. This is the deliberate way to close Production. |
+| Supplied a validly bound run that did not pass | 2 | A record saying `Failed`, honestly. |
+| Supplied a run that cannot be bound to this installation | 3 | **Nothing written.** Any record you already had is untouched. |
+| Supplied a path that does not exist (a typo in either parameter) | 3 | **Nothing written.** Any record you already had is untouched. |
+
+The last two rows are why pointing this script at the wrong file is now safe. A result that cannot be
+bound says nothing about this installation — not that it passed, and not that it failed — so
+recording either would be an invention. Before PF-AUDIT-R1 the first of those cases recorded a pass,
+and the second silently recorded `NotAvailable` over whatever record you already had, which is
+indistinguishable from deliberately closing Production.
+
+**So a mistyped path and a deliberate revocation are no longer the same act.** Omitting
+`-StandardRegressionSetResult` closes Production on purpose and exits 2. Mistyping it is refused and
+exits 3, changing nothing.
+
+A run whose qualitative checks were concluded by a **synthetic** review — one recorded by a test of
+this protocol rather than by a person — is also refused. Synthetic decisions stay synthetic and
+cannot open Production.
 
 Never hand-edit `Revalidation\production-revalidation.json`.
+
+**Records written before PF-AUDIT-R1 are schema 1.** They stay readable as history, and PrintFlow
+blocks on them with a message saying so. They are not upgraded in place and no run is re-attributed
+to them: the installation simply owes a run.
 
 ### 7.5 Conditions for Production to resume
 
@@ -470,14 +535,58 @@ All of the following, together:
 1. Layer 1 passes — seven categories, no hash drift, no `PENDING`.
 2. The live environment checks all pass.
 3. All seven cases pass in one run, with every recorded visual check decided by a named reviewer.
-4. `Set-PrintFlowProductionRevalidation.ps1` writes a record binding this PrintFlow version, this
-   preset id/version/digest, this Windows build and the accepted Meitu and Photoshop digests, with
-   `standardRegressionSet.status = Passed`.
+4. `Set-PrintFlowProductionRevalidation.ps1` writes a record binding this PrintFlow version, **the
+   PrintFlow assembly digests actually installed**, this preset id/version/digest, this Windows
+   build and the accepted Meitu and Photoshop digests, with `standardRegressionSet.status = Passed`
+   and the run and invocation identity it passed in.
 5. PrintFlow's own verification, asked independently, reports `ProductionRevalidation` as passing.
 
 **This is enforced, not merely documented.** There is no flag that turns "the set did not pass"
 into "the set passed", and PrintFlow cannot write its own record — there is no writer for it
 anywhere in the solution, and an architecture test asserts so.
+
+### 7.6 The order these steps go in
+
+Getting this order wrong is not a formality — the steps have a real dependency on each other, and
+two of them are commonly attempted in the wrong place.
+
+```text
+controlled standard-set bootstrap
+        |
+        v
+one complete standard regression set run          <- the only thing that produces evidence
+        |
+        v
+actual operator reviews of the qualitative checks  <- a person looks; nothing automates this
+        |
+        v
+evidence-bound revalidation record                 <- Set-PrintFlowProductionRevalidation.ps1
+        |
+        v
+normal App live checks                             <- Settings -> Environment Check
+        |
+        v
+normal App end-to-end work
+```
+
+**Why the standard set comes before the normal application's live checks.** The normal application
+refuses Production until a revalidation record exists, and the record cannot exist until the set has
+run. The set's run resolves that circle once, deliberately, through the bootstrap in §7.3 — a run
+that suppresses the revalidation check *and only that check*, and only when it is the sole thing
+blocking, and records in its own result whether it needed to. Trying instead to run the normal
+application's live checks first, or to do production work before the first revalidation, does not
+work and is not a sequence anybody should reconstruct.
+
+**Bootstrap, ordinary production use, and human review are three different authorities.** The
+bootstrap exists so a first run is possible; it is not a way to run anything else. Ordinary
+production use requires the record. Human review is the only thing that can conclude a qualitative
+check, and no flag substitutes for it.
+
+**A synthetic test of this protocol is not a standard-set acceptance.** The tests in
+`RegressionEvidenceIntegrityTests` drive these scripts against a synthetic set, a synthetic
+installation and a stand-in test host. They prove the evidence chain refuses what it should and
+accepts what it should. They open no application, exercise no real image, and produce no acceptance
+of anything. Only a real run on the fixed workstation, reviewed by a person, is that.
 
 ---
 
