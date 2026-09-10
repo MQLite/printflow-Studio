@@ -3721,15 +3721,20 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<string>(before.Failure);
         }
 
-        ExternalWindowRef[] unknownBefore =
-        [
-            .. before.Value.Where(window =>
-                window.Handle != target.Window.Handle && window.Handle != surface.Handle),
-        ];
-        if (unknownBefore.Length > 0)
+        OperationResult<IReadOnlyList<ExternalWindowRef>> unknownBefore =
+            FindUnrecognisedExportSiblings(
+                target,
+                before.Value,
+                [target.Window.Handle, surface.Handle]);
+        if (unknownBefore.IsFailure)
+        {
+            return OperationResult.Fail<string>(unknownBefore.Failure);
+        }
+
+        if (unknownBefore.Value.Count > 0)
         {
             return OperationResult.Fail<string>(FormatSelectionFailure(
-                $"The accepted Meitu process already had {unknownBefore.Length} unrecognised visible " +
+                $"The accepted Meitu process already had {unknownBefore.Value.Count} unrecognised visible " +
                 "top-level window(s) before the format combo was opened. The popup route was not entered."));
         }
 
@@ -4036,17 +4041,20 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                     "disappearance is therefore unknown."));
             }
 
-            ExternalWindowRef[] unknown =
-            [
-                .. windows.Value.Where(window =>
-                    window.Handle != target.Window.Handle &&
-                    window.Handle != surface.Handle &&
-                    window.Handle != popup.Handle),
-            ];
-            if (unknown.Length > 0)
+            OperationResult<IReadOnlyList<ExternalWindowRef>> unknown =
+                FindUnrecognisedExportSiblings(
+                    target,
+                    windows.Value,
+                    [target.Window.Handle, surface.Handle, popup.Handle]);
+            if (unknown.IsFailure)
+            {
+                return OperationResult.Fail<string>(unknown.Failure);
+            }
+
+            if (unknown.Value.Count > 0)
             {
                 return OperationResult.Fail<string>(FormatSelectionFailure(
-                    $"The accepted Meitu process presented {unknown.Length} unrecognised visible " +
+                    $"The accepted Meitu process presented {unknown.Value.Count} unrecognised visible " +
                     "top-level window(s) after the png item was clicked."));
             }
 
@@ -4108,6 +4116,71 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 ["exportInvoked"] = "false",
                 ["inputRoute"] = "signed-format-popup",
             });
+
+    /// <summary>
+    /// Returns visible same-process windows that are neither part of the active export route nor
+    /// the independently signed Meitu start page.
+    /// </summary>
+    /// <remarks>
+    /// Meitu can retain its start-page window after opening the separate editor window. That
+    /// sibling is an ordinary, positively recognised application surface, not a popup raised by
+    /// the format combo. It is accepted only after a fresh read of the full signed welcome-page
+    /// rule; an unreadable, minimised, empty, changed or otherwise unknown sibling is still
+    /// returned and keeps the export fail-closed. The welcome page may be disabled by Meitu's
+    /// application-modal Save surface; that does not make it an input target, and every other
+    /// visible top-level window is still judged independently.
+    ///
+    /// Owned-dialog titles are intentionally empty in the candidate observation. Every visible
+    /// top-level window is already present in <paramref name="windows"/> and judged separately.
+    /// Feeding the export surface into the generic owned-dialog query—or feeding the disabled
+    /// bit caused by that exact surface into the generic classifier—would label the unrelated
+    /// start-page sibling modal merely because both windows belong to the same process.
+    /// </remarks>
+    private OperationResult<IReadOnlyList<ExternalWindowRef>> FindUnrecognisedExportSiblings(
+        MeituTarget target,
+        IReadOnlyList<ExternalWindowRef> windows,
+        IReadOnlyCollection<WindowHandle> routeHandles)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<IReadOnlyList<ExternalWindowRef>>(baseline.Failure);
+        }
+
+        List<ExternalWindowRef> unknown = [];
+        foreach (ExternalWindowRef candidate in windows)
+        {
+            if (routeHandles.Contains(candidate.Handle))
+            {
+                continue;
+            }
+
+            bool eligible = candidate.OwningProcessId == target.Process.ProcessId &&
+                candidate.IsVisible && !candidate.IsMinimised && !candidate.Bounds.IsEmpty;
+            OperationResult<IReadOnlyList<string>> texts = eligible
+                ? _elements.ReadTextSnapshot(candidate.Handle, _options.SnapshotItemLimit)
+                : OperationResult.Fail<IReadOnlyList<string>>(
+                    FailureCode.MeituUnknownState, "The sibling window is not readable as a welcome page.");
+
+            bool recognisedWelcome = texts.IsSuccess &&
+                MeituStateClassifier.Classify(
+                    baseline.Value,
+                    new MeituObservation(
+                        candidate.Title,
+                        [.. texts.Value],
+                        [],
+                        MainWindowEnabled: true,
+                        ExpectedWorkingCopyFileName: null,
+                        ObservedDocumentIdentity: null)).State == MeituStartingState.KnownWelcome;
+
+            if (!recognisedWelcome)
+            {
+                unknown.Add(candidate);
+            }
+        }
+
+        return OperationResult.Ok<IReadOnlyList<ExternalWindowRef>>(unknown);
+    }
 
     /// <summary>
     /// Writes one signed control's value and confirms it reads back exactly (§8).

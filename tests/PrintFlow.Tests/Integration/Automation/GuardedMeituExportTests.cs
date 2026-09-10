@@ -407,6 +407,50 @@ public sealed class GuardedMeituExportTests
         s.Invocations(DestinationConfirmId).ShouldBe(1);
     }
 
+    /// <summary>
+    /// Opening Meitu's editor from its signed start page can leave that start-page window visible
+    /// beside the editor. It is a positively recognised sibling, not an unknown popup, and must
+    /// not make the separately signed JPG-to-PNG popup route impossible.
+    /// </summary>
+    [Fact]
+    public async Task A_retained_recognised_welcome_window_does_not_block_the_JPG_popup_route()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        ExternalWindowRef welcome = MeituFakes.Window(
+            handle: 0x6300,
+            owningProcessId: s.Process.ProcessId,
+            title: "美图秀秀",
+            className: "Qt51517QWindowIcon",
+            enabled: false);
+        s.Elements.SetTexts(welcome.Handle, [.. MeituFakes.WelcomeMarkers]);
+        s.Locator.Replace(s.Process, s.Editor.Window, welcome);
+
+        // Keep the retained start page present while the non-activating format popup opens and
+        // closes. This is the live workstation shape that exposed the regression.
+        s.Elements.OnInvoke += invoked =>
+        {
+            if (invoked == SurfaceFormatId)
+            {
+                s.Locator.Replace(s.Process, s.Editor.Window, welcome, s.FormatPopup);
+            }
+        };
+        s.Elements.OnClickAtLiveClickablePoint += clicked =>
+        {
+            if (clicked == MeituFakes.ExportFormatValue)
+            {
+                s.Locator.Replace(s.Process, s.Editor.Window, welcome);
+                s.Locator.PutInForeground(s.Surface);
+            }
+        };
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsSuccess.ShouldBeTrue(export.IsFailure ? export.Failure.TechnicalDetail : string.Empty);
+        s.Elements.Clicks.ShouldBe(["png"]);
+        s.Invocations(SaveAsId).ShouldBe(1);
+        s.Invocations(DestinationConfirmId).ShouldBe(1);
+    }
+
     [Fact]
     public async Task An_unknown_popup_stops_before_Save_As()
     {
