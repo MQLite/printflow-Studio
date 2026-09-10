@@ -7,7 +7,8 @@
 | Repository | `D:\Repositories\printflow-Studio` |
 | Branch | `master` |
 | HEAD at slice start | `3f83863521c9b682f02b19ede1bcdb3a86dc60aa` (the audit commit) |
-| HEAD at handoff | see §1 — read the actual value, do not assume |
+| HEAD at handoff | `d30af787498c5c297caf0f9b007263255f2591d6` — verify it yourself, see §1 |
+| This slice's commits | `0ae8087` (fix: code, tooling, tests) and `d30af78` (docs) |
 | Working tree | clean, except the untracked `printflow-remediation-prompts\` prompt bundle, which is operator input and is deliberately not tracked |
 | Release build | 0 warnings, 0 errors |
 | Full Product suite | 11,804 passed / 0 failed / 0 skipped (Release, run on the settled source) |
