@@ -417,7 +417,46 @@ public sealed record MeituExportSignature(
     string RequiredFormatValue,
     MeituControlSignature SaveAsControl,
     MeituExportDestinationSignature Destination,
-    MeituExportResultSignature Result);
+    MeituExportResultSignature Result,
+    MeituExportFormatSelectionSignature? FormatSelection = null);
+
+/// <summary>
+/// The signed, Meitu-specific fallback that changes a Save surface from its JPG default to PNG.
+/// </summary>
+/// <remarks>
+/// This is deliberately not a generic popup or coordinate contract. It describes one transient
+/// Meitu window and one item beneath the already-signed format combo. Bounds, runtime ids and the
+/// point itself are absent: the accepted route derives a fresh clickable point from the live item
+/// only after every structural and ownership check has passed.
+/// </remarks>
+public sealed record MeituExportFormatSelectionSignature(
+    string InitialFormatValue,
+    string RequiredFormatValue,
+    MeituControlSignature FormatControl,
+    ImmutableArray<UiPatternKind> FormatControlRequiredPatterns,
+    string PopupTitle,
+    string PopupWindowClassName,
+    string PopupUiaClassName,
+    string PopupControlType,
+    ImmutableArray<UiPatternKind> PopupRequiredPatterns,
+    string ItemName,
+    string ItemControlType,
+    string ItemClassName,
+    string ItemAutomationId,
+    string RequiredParentControlType,
+    string RequiredParentClassName,
+    string RequiredComboAncestorControlType,
+    string RequiredComboAncestorClassName,
+    int ComboAncestorDepth,
+    MeituExportFormatActivation RequiredActivation,
+    bool SaveSurfaceMustRemainForeground,
+    bool PopupMustDisappear);
+
+/// <summary>The only pointer-backed Meitu action accepted by the signed export evidence.</summary>
+public enum MeituExportFormatActivation
+{
+    RuntimeDerivedClickablePoint,
+}
 
 /// <summary>
 /// The dialog in which the export's destination directory is named

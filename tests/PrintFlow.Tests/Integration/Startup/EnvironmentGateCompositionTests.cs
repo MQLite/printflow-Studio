@@ -142,7 +142,7 @@ public sealed class EnvironmentGateCompositionTests
             PrintFlowConfiguration.LoadFromFile(Path.Combine(RepositoryRoot(), "appsettings.json"));
 
         configuration.Adapters.Mode.ShouldBe("Production");
-        configuration.Preset.Version.ShouldBe("1.16.0");
+        configuration.Preset.Version.ShouldBe("1.17.0");
     }
 
     /// <summary>

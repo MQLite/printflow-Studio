@@ -978,6 +978,55 @@ public sealed class PresetMeituBaselineProviderTests : IDisposable
     private static string ExportWith(string find, string replace) =>
         ExportEvidence.Replace(find, replace, StringComparison.Ordinal);
 
+    private const string ExportFormatSelectionEvidence = """
+        {
+          "formatSelection": {
+            "initialFormatValue": "jpg",
+            "requiredFormatValue": "png",
+            "formatControl": {
+              "name": "",
+              "automationIdContains": ".SaveMaskWidget.widgetRight.wName.formatCombo",
+              "controlType": "ComboBox",
+              "className": "proui::NoAnimationComboBox",
+              "requiredPatterns": ["Invoke", "Value"]
+            },
+            "popup": {
+              "title": "XiuXiu",
+              "windowClassName": "Qt51517QWindowPopupSaveBits",
+              "uiaClassName": "QComboBoxPrivateContainer",
+              "controlType": "Window",
+              "requiredPatterns": ["Invoke", "Value", "Window"],
+              "mustBelongToAcceptedProcess": true,
+              "mustBeVisibleEnabled": true,
+              "signedSaveSurfaceMustRemainForeground": true
+            },
+            "item": {
+              "name": "png",
+              "automationId": "",
+              "className": "",
+              "controlType": "ListItem",
+              "requiredParentControlType": "List",
+              "requiredParentClassName": "QListView",
+              "requiredComboAncestorControlType": "ComboBox",
+              "requiredComboAncestorClassName": "proui::NoAnimationComboBox",
+              "comboAncestorDepth": 2,
+              "mustBelongToAcceptedProcess": true,
+              "mustBeVisibleEnabled": true,
+              "requiredActivation": "RuntimeDerivedClickablePoint"
+            },
+            "settleAndReadBack": {
+              "popupMustDisappear": true,
+              "formatMustRead": "png",
+              "savePermittedOnlyAfterReadBack": true,
+              "boundedReacquisitionRequired": true
+            }
+          }
+        }
+        """;
+
+    private static string FormatSelectionWith(string find, string replace) =>
+        ExportFormatSelectionEvidence.Replace(find, replace, StringComparison.Ordinal);
+
     [Fact]
     public void A_vouched_for_export_route_is_read_from_the_signed_file()
     {
@@ -995,6 +1044,105 @@ public sealed class PresetMeituBaselineProviderTests : IDisposable
         baseline.Export.Result.RequiredMarkers.Length.ShouldBe(2);
         baseline.Export.Result.CloseControl.AutomationIdContains
             .ShouldBe(".SaveResultMaskWidget.titleFrame.closeButton");
+    }
+
+    [Fact]
+    public void A_vouched_for_format_popup_route_is_joined_to_the_historical_export_signature()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(@"Baseline\apps\meitu\editor-export-format-popup.json", ExportFormatSelectionEvidence);
+
+        MeituExportFormatSelectionSignature selection = Load().Value.Export!.FormatSelection!;
+
+        selection.InitialFormatValue.ShouldBe("jpg");
+        selection.RequiredFormatValue.ShouldBe("png");
+        selection.FormatControl.RequiredPattern.ShouldBe(UiPatternKind.Invoke);
+        selection.PopupWindowClassName.ShouldBe("Qt51517QWindowPopupSaveBits");
+        selection.PopupUiaClassName.ShouldBe("QComboBoxPrivateContainer");
+        selection.PopupRequiredPatterns.ShouldBe(
+            [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Window]);
+        selection.ItemName.ShouldBe("png");
+        selection.RequiredParentClassName.ShouldBe("QListView");
+        selection.ComboAncestorDepth.ShouldBe(2);
+        selection.RequiredActivation.ShouldBe(MeituExportFormatActivation.RuntimeDerivedClickablePoint);
+        selection.FormatControlRequiredPatterns.ShouldBe(
+            [UiPatternKind.Invoke, UiPatternKind.Value]);
+        selection.SaveSurfaceMustRemainForeground.ShouldBeTrue();
+        selection.PopupMustDisappear.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_popup_route_whose_required_format_disagrees_with_the_Save_surface_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith("\"requiredFormatValue\": \"png\"", "\"requiredFormatValue\": \"webp\"")
+                .Replace("\"formatMustRead\": \"png\"", "\"formatMustRead\": \"webp\"", StringComparison.Ordinal));
+
+        OperationResult<MeituBaseline> baseline = Load();
+
+        baseline.IsFailure.ShouldBeTrue();
+        baseline.Failure.TechnicalDetail.ShouldContain("same format control and required value");
+    }
+
+    [Fact]
+    public void A_popup_route_without_the_exact_runtime_derived_activation_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith("RuntimeDerivedClickablePoint", "FixedCoordinate"));
+
+        Load().IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_popup_route_with_an_unobserved_ancestor_depth_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith("\"comboAncestorDepth\": 2", "\"comboAncestorDepth\": 1"));
+
+        Load().IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_popup_route_without_the_observed_Window_pattern_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith("\"Window\"", "\"Toggle\""));
+
+        Load().IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_popup_route_that_does_not_require_pre_Save_read_back_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith(
+                "\"savePermittedOnlyAfterReadBack\": true",
+                "\"savePermittedOnlyAfterReadBack\": false"));
+
+        Load().IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_popup_route_that_does_not_keep_the_signed_Save_surface_foreground_is_refused()
+    {
+        Vouch(@"Baseline\apps\meitu\editor-export.json", ExportEvidence);
+        Vouch(
+            @"Baseline\apps\meitu\editor-export-format-popup.json",
+            FormatSelectionWith(
+                "\"signedSaveSurfaceMustRemainForeground\": true",
+                "\"signedSaveSurfaceMustRemainForeground\": false"));
+
+        Load().IsFailure.ShouldBeTrue();
     }
 
     /// <summary>

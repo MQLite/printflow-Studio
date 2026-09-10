@@ -144,6 +144,45 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
             return OperationResult.Fail<MeituBaseline>(export.Failure);
         }
 
+        OperationResult<MeituExportFormatSelectionSignature?> formatSelection = ReadOptional(
+            root,
+            ExportFormatSelectionEvidence,
+            "Meitu export-format popup evidence",
+            ReadExportFormatSelection);
+        if (formatSelection.IsFailure)
+        {
+            return OperationResult.Fail<MeituBaseline>(formatSelection.Failure);
+        }
+
+        if (formatSelection.Value is not null)
+        {
+            if (export.Value is null)
+            {
+                return OperationResult.Fail<MeituBaseline>(
+                    FailureCode.EnvironmentNotVerified,
+                    "The verified chain vouches for Meitu export-format popup evidence but no Save " +
+                    "surface export evidence. A popup route cannot stand on its own, so export is refused.");
+            }
+
+            MeituExportFormatSelectionSignature selection = formatSelection.Value;
+            MeituControlSignature oldFormat = export.Value.FormatControl;
+            MeituControlSignature newFormat = selection.FormatControl;
+            if (!string.Equals(selection.RequiredFormatValue, export.Value.RequiredFormatValue, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(newFormat.Name, oldFormat.Name, StringComparison.Ordinal) ||
+                !string.Equals(newFormat.AutomationIdContains, oldFormat.AutomationIdContains, StringComparison.Ordinal) ||
+                !string.Equals(newFormat.ControlTypeName, oldFormat.ControlTypeName, StringComparison.Ordinal) ||
+                !string.Equals(newFormat.ClassName, oldFormat.ClassName, StringComparison.Ordinal))
+            {
+                return OperationResult.Fail<MeituBaseline>(
+                    FailureCode.EnvironmentNotVerified,
+                    "The supplemental Meitu export-format evidence does not describe the same format " +
+                    "control and required value as the signed Save surface export evidence. Export is refused.");
+            }
+
+            export = OperationResult.Ok<MeituExportSignature?>(
+                export.Value with { FormatSelection = selection });
+        }
+
         OperationResult<MeituBackgroundRemovalSignature?> backgroundRemoval = ReadOptional(
             root,
             BackgroundRemovalEvidence,
@@ -236,6 +275,7 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
     private const string CloseDocumentEvidence = @"apps\meitu\editor-close-document.json";
     private const string EnhancementEvidence = @"apps\meitu\editor-enhancement.json";
     private const string ExportEvidence = @"apps\meitu\editor-export.json";
+    private const string ExportFormatSelectionEvidence = @"apps\meitu\editor-export-format-popup.json";
     private const string BackgroundRemovalEvidence = @"apps\meitu\editor-background-removal.json";
     private const string BusyCancelEvidence = @"apps\meitu\editor-busy-cancel.json";
 
@@ -799,6 +839,124 @@ public sealed class PresetMeituBaselineProvider : IMeituBaselineProvider
                 destination.Value,
                 result.Value));
     }
+
+    /// <summary>
+    /// Reads the supplemental JPG-to-PNG popup route without changing the historical export
+    /// evidence that first signed the Save surface.
+    /// </summary>
+    private static OperationResult<MeituExportFormatSelectionSignature> ReadExportFormatSelection(
+        JsonElement root)
+    {
+        if (!root.TryGetProperty("formatSelection", out JsonElement selection) ||
+            selection.ValueKind != JsonValueKind.Object ||
+            !selection.TryGetProperty("formatControl", out JsonElement formatControl) ||
+            formatControl.ValueKind != JsonValueKind.Object ||
+            !selection.TryGetProperty("popup", out JsonElement popup) ||
+            popup.ValueKind != JsonValueKind.Object ||
+            !selection.TryGetProperty("item", out JsonElement item) ||
+            item.ValueKind != JsonValueKind.Object ||
+            !selection.TryGetProperty("settleAndReadBack", out JsonElement settle) ||
+            settle.ValueKind != JsonValueKind.Object)
+        {
+            return OperationResult.Fail<MeituExportFormatSelectionSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu export-format evidence does not contain the complete formatSelection, " +
+                "formatControl, popup, item and settleAndReadBack objects. The fallback is refused.");
+        }
+
+        string? initial = StringOrNull(selection, "initialFormatValue");
+        string? required = StringOrNull(selection, "requiredFormatValue");
+        string formatName = StringOrNull(formatControl, "name") ?? string.Empty;
+        string? formatId = StringOrNull(formatControl, "automationIdContains");
+        string? formatType = StringOrNull(formatControl, "controlType");
+        string? formatClass = StringOrNull(formatControl, "className");
+        ImmutableArray<string> formatPatterns = StringArray(formatControl, "requiredPatterns");
+
+        string? popupTitle = StringOrNull(popup, "title");
+        string? popupWindowClass = StringOrNull(popup, "windowClassName");
+        string? popupUiaClass = StringOrNull(popup, "uiaClassName");
+        string? popupType = StringOrNull(popup, "controlType");
+        ImmutableArray<string> popupPatterns = StringArray(popup, "requiredPatterns");
+
+        string? itemName = StringOrNull(item, "name");
+        string itemId = StringOrNull(item, "automationId") ?? string.Empty;
+        string itemClass = StringOrNull(item, "className") ?? string.Empty;
+        string? itemType = StringOrNull(item, "controlType");
+        string? parentType = StringOrNull(item, "requiredParentControlType");
+        string? parentClass = StringOrNull(item, "requiredParentClassName");
+        string? ancestorType = StringOrNull(item, "requiredComboAncestorControlType");
+        string? ancestorClass = StringOrNull(item, "requiredComboAncestorClassName");
+        string? activationText = StringOrNull(item, "requiredActivation");
+
+        bool requiredBooleans = True(popup, "mustBelongToAcceptedProcess") &&
+            True(popup, "mustBeVisibleEnabled") &&
+            True(popup, "signedSaveSurfaceMustRemainForeground") &&
+            True(item, "mustBelongToAcceptedProcess") &&
+            True(item, "mustBeVisibleEnabled") &&
+            True(settle, "popupMustDisappear") &&
+            True(settle, "savePermittedOnlyAfterReadBack") &&
+            True(settle, "boundedReacquisitionRequired");
+
+        if (string.IsNullOrWhiteSpace(initial) || string.IsNullOrWhiteSpace(required) ||
+            string.IsNullOrWhiteSpace(formatId) || string.IsNullOrWhiteSpace(formatType) ||
+            string.IsNullOrWhiteSpace(formatClass) ||
+            !formatPatterns.Contains(nameof(UiPatternKind.Invoke), StringComparer.Ordinal) ||
+            !formatPatterns.Contains(nameof(UiPatternKind.Value), StringComparer.Ordinal) ||
+            string.IsNullOrWhiteSpace(popupTitle) || string.IsNullOrWhiteSpace(popupWindowClass) ||
+            string.IsNullOrWhiteSpace(popupUiaClass) ||
+            string.IsNullOrWhiteSpace(popupType) ||
+            !popupPatterns.Contains(nameof(UiPatternKind.Invoke), StringComparer.Ordinal) ||
+            !popupPatterns.Contains(nameof(UiPatternKind.Value), StringComparer.Ordinal) ||
+            !popupPatterns.Contains(nameof(UiPatternKind.Window), StringComparer.Ordinal) ||
+            string.IsNullOrWhiteSpace(itemName) ||
+            string.IsNullOrWhiteSpace(itemType) || string.IsNullOrWhiteSpace(parentType) ||
+            string.IsNullOrWhiteSpace(parentClass) || string.IsNullOrWhiteSpace(ancestorType) ||
+            string.IsNullOrWhiteSpace(ancestorClass) || !requiredBooleans)
+        {
+            return OperationResult.Fail<MeituExportFormatSelectionSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu export-format evidence does not fully constrain the signed combo, popup, " +
+                "item, ownership, visibility, bounded reacquisition and pre-Save read-back contract.");
+        }
+
+        if (!item.TryGetProperty("comboAncestorDepth", out JsonElement depthElement) ||
+            !depthElement.TryGetInt32(out int depth) || depth != 2 ||
+            !Enum.TryParse(activationText, ignoreCase: false, out MeituExportFormatActivation activation) ||
+            !string.Equals(StringOrNull(settle, "formatMustRead"), required, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<MeituExportFormatSelectionSignature>(
+                FailureCode.EnvironmentNotVerified,
+                "The Meitu export-format evidence has no usable ancestor depth, accepted activation, " +
+                "or matching authoritative format read-back. The fallback is refused.");
+        }
+
+        return OperationResult.Ok(new MeituExportFormatSelectionSignature(
+            initial,
+            required,
+            new MeituControlSignature(
+                formatName, formatId, formatType, formatClass, UiPatternKind.Invoke),
+            [UiPatternKind.Invoke, UiPatternKind.Value],
+            popupTitle,
+            popupWindowClass,
+            popupUiaClass,
+            popupType,
+            [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Window],
+            itemName,
+            itemType,
+            itemClass,
+            itemId,
+            parentType,
+            parentClass,
+            ancestorType,
+            ancestorClass,
+            depth,
+            activation,
+            SaveSurfaceMustRemainForeground: true,
+            PopupMustDisappear: true));
+    }
+
+    private static bool True(JsonElement parent, string property) =>
+        parent.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.True;
 
     /// <summary>Reads the dialog in which the export's destination is actually named.</summary>
     private static OperationResult<MeituExportDestinationSignature> ReadExportDestination(JsonElement export)

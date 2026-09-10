@@ -2,6 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
 using PrintFlow.Domain.Files;
+using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
 
@@ -15,7 +16,7 @@ namespace PrintFlow.Tests.Integration.Preset;
 public sealed class WorkstationPresetResizeContractEvidenceTests
 {
     [Fact]
-    public void Configured_workstation_preset_is_the_immutable_v1_16_contract()
+    public void Configured_workstation_preset_is_the_immutable_v1_17_contract()
     {
         (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
         if (configured is null)
@@ -23,9 +24,9 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             return;
         }
 
-        configured.Value.configuration.Preset.Version.ShouldBe("1.16.0");
+        configured.Value.configuration.Preset.Version.ShouldBe("1.17.0");
         configured.Value.configuration.Preset.Path.ShouldEndWith(
-            @"Baseline\workstation-v1\preset\printflow-workstation-v1.16.0.json");
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.17.0.json");
 
         // Production since Epic 11500 Part D. The mode is asserted here because this file is
         // about what the configured installation actually points at, and a preset contract that
@@ -50,13 +51,13 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
 
         using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
         JsonElement root = manifest.RootElement;
-        root.GetProperty("presetVersion").GetString().ShouldBe("1.16.0");
-        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.15.0");
+        root.GetProperty("presetVersion").GetString().ShouldBe("1.17.0");
+        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.16.0");
         root.GetProperty("supersedes").GetProperty("manifestSha256").GetString().ShouldBe(
-            "3392873ED0CA38BB410EA6725B6C4D0392F2514ECB10D9CF825B18D0DF785D16");
+            "6396FB4EB87F69C6789304CE191453654B2B75E82A5A9AB0161F90556A6F1A80");
 
         JsonElement integrity = root.GetProperty("sourceManifestIntegrity");
-        integrity.GetArrayLength().ShouldBe(28);
+        integrity.GetArrayLength().ShouldBe(29);
 
         bool foundResizeEvidence = false;
         bool foundFlexibleSizeEvidence = false;
@@ -65,6 +66,7 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         bool foundTiffEvidence = false;
         bool foundA5ShortEdgeEvidence = false;
         bool foundOwnedDocumentCleanupEvidence = false;
+        bool foundMeituExportFormatPopupEvidence = false;
         foreach (JsonElement entry in integrity.EnumerateArray())
         {
             string path = entry.GetProperty("path").GetString().ShouldNotBeNull();
@@ -125,6 +127,14 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
                 foundOwnedDocumentCleanupEvidence = true;
                 File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
             }
+
+            if (path.EndsWith(
+                @"apps\meitu\editor-export-format-popup.json",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                foundMeituExportFormatPopupEvidence = true;
+                File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+            }
         }
 
         foundResizeEvidence.ShouldBeTrue();
@@ -134,6 +144,45 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
         foundTiffEvidence.ShouldBeTrue();
         foundA5ShortEdgeEvidence.ShouldBeTrue();
         foundOwnedDocumentCleanupEvidence.ShouldBeTrue();
+        foundMeituExportFormatPopupEvidence.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Superseded_v1_16_remains_immutable_and_exact()
+    {
+        (PrintFlowConfiguration configuration, string _)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        string path = Path.Combine(configured.Value.configuration.Workspace.Root,
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.16.0.json");
+        Hash(path).ShouldBe(
+            "6396FB4EB87F69C6789304CE191453654B2B75E82A5A9AB0161F90556A6F1A80",
+            StringCompareShould.IgnoreCase);
+        new FileInfo(path).Length.ShouldBe(26146);
+        File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Configured_preset_exposes_only_the_signed_Meitu_export_format_popup_route()
+    {
+        (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
+        if (configured is null) return;
+
+        PresetMeituBaselineProvider provider = new(
+            configured.Value.manifestPath,
+            Sha256.Parse(configured.Value.configuration.Preset.ExpectedSha256));
+
+        MeituExportFormatSelectionSignature selection = provider.GetVerifiedBaseline().Value
+            .Export!.FormatSelection.ShouldNotBeNull();
+        selection.InitialFormatValue.ShouldBe("jpg");
+        selection.RequiredFormatValue.ShouldBe("png");
+        selection.PopupTitle.ShouldBe("XiuXiu");
+        selection.PopupWindowClassName.ShouldBe("Qt51517QWindowPopupSaveBits");
+        selection.PopupUiaClassName.ShouldBe("QComboBoxPrivateContainer");
+        selection.ItemName.ShouldBe("png");
+        selection.RequiredParentClassName.ShouldBe("QListView");
+        selection.RequiredComboAncestorClassName.ShouldBe("proui::NoAnimationComboBox");
+        selection.RequiredActivation.ShouldBe(MeituExportFormatActivation.RuntimeDerivedClickablePoint);
     }
 
     [Fact]
