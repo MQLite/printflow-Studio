@@ -932,3 +932,88 @@ The validated preset was not modified. `Adapters:Mode` stayed at `Production`. L
 **BLOCKED — SCRUM-11065 STANDARD LOCAL REGRESSION SET NOT FULLY VERIFIED**
 *(5 of 7 categories now demonstrably good, against 2 on 9 September. The two that remain are blocked
 by one confirmed Product defect, recorded with its evidence in E4.)*
+
+---
+
+# Delta — 10 September 2026: signed Meitu JPG-to-PNG route remediated in Product
+
+*Appended only. Nothing above is rewritten. This delta removes the Product defect recorded in E4,
+but does not claim the live acceptance gates that an unrelated open Photoshop document prevented.*
+
+## F1. Evidence-first repair
+
+The controlled portrait JPG reproduced E4 exactly: `formatCombo` started at `jpg`, and
+`ValuePattern.SetValue("png")` returned without changing its fresh value. The missing transient
+hierarchy was then inspected without invoking Save or Save As. It consists of one same-process,
+visible, enabled `XiuXiu` popup whose Win32 class is `Qt51517QWindowPopupSaveBits` and UIA class is
+`QComboBoxPrivateContainer`, plus one `png` ListItem under `QListView` and
+`proui::NoAnimationComboBox`. The popup is non-activating; the already-signed Save surface remains
+the exact foreground window.
+
+`SelectionItem.Select` and `InvokePattern.Invoke` also returned normally but were inert. A click at
+the item's freshly derived UIA clickable point was the only tested mechanism that changed the
+fresh read-back to `png` and closed the popup. No observed runtime id, rectangle, point, item order,
+or process id became a recognition input.
+
+Historical preset 1.16.0 and `editor-export.json` remain byte-identical. The new read-only
+supplemental evidence hashes to `DB6E8D69…F19997`; immutable preset 1.17.0 hashes to
+`A2E1936B…FCFA9`, supersedes the exact 1.16.0 digest, retains and rehashes all 28 inherited entries,
+and adds the supplemental evidence as entry 29. The shipped configuration now binds 1.17.0.
+
+Full evidence and implementation details:
+[Meitu JPG-to-PNG export-format remediation](meitu-jpg-to-png-export-format-remediation.md).
+
+## F2. Product behavior and safety review
+
+The production adapter now leaves an already-PNG format untouched. For the signed JPG state only,
+it opens the signed combo, rejects pre-existing or new unknown windows, recognises the popup/item,
+rechecks the accepted process instance, Save surface, foreground, patterns, ancestry, live bounds,
+clickable point and hit test, sends one non-retried pointer sequence, positively observes popup
+disappearance, and freshly reads `png` before entering the existing Save As route.
+
+Any absent, duplicate, disabled, offscreen, wrong-process, wrong-class, wrong-pattern, partial-combo,
+unknown, unreadable, replaced, stale, or non-settling target stops before Save As. The accepted
+process start time is rechecked at the input boundary. Observation failure is not treated as popup
+disappearance. Qt/HWND/pointer knowledge remains inside Infrastructure; no fixed or caller-supplied
+coordinate and no generic popup driver was added.
+
+Two independent final-review passes were performed against the fixed-point diff: one for repository
+standards and one for the SCRUM-11065 specification. Their actionable findings — verify-after-tree-
+walk ordering, process-instance freshness, unknown disappearance, unused policy fields,
+pre-existing unknown windows, persisted combo pattern identity, and stale 1.16.0 Product-test pins —
+were all remediated. The historical phase-11300 no-coordinate statement is deliberately not treated
+as authority over this newer task's explicit runtime-derived-click exception.
+
+## F3. Automated checks
+
+- Focused/affected Meitu, preset, automation/Photoshop boundaries, and workstation contracts:
+  **563 passed / 0 failed / 0 skipped**.
+- Clean Release solution build: **0 warnings / 0 errors**.
+- Static seven-category preflight: **Passed**, with all seven categories, manifests and recomputed
+  hashes valid.
+- First full Product suite: **11,734 passed / 1 failed / 0 skipped** (11,735 total). The sole failure
+  was an existing synthetic-output timing case whose file remained changing inside a 400 ms
+  deadline; it passed immediately in isolation in 463 ms. No timeout or safety rule was weakened.
+- Proportionate final full-suite retry after the last safety change: **11,735 passed / 0 failed /
+  0 skipped** in 5 minutes 18 seconds.
+
+These are closure diagnostic counts after Product source/tests changed. They do not retroactively
+replace the previously accepted 11,712/0/0 baseline.
+
+## F4. Live acceptance not yet earned
+
+After the final popup/foreground correction, Photoshop contained unrelated operator work
+(`When God Made Me.tif` at the last read-only check). It was left untouched. The verifier's required
+`KnownStartScreen`/zero-document prerequisite was therefore unavailable, so the final portrait,
+fine-hair, already-PNG check, and one unfiltered seven-category run have not yet run against this
+implementation.
+
+Consequently there is no new Operator decision, no Production revalidation record, and no normal
+Product-gate result. **SCRUM-11065 remains PARTIAL. SCRUM-11123 remains PARTIAL. SCRUM-11136 remains
+PARTIAL/not executed. SCRUM-11115 remains FULL.**
+
+**PASS WITH NOTES — MEITU JPG→PNG PRODUCT ROUTE IMPLEMENTED AND AUTOMATED SAFETY VERIFIED;
+LIVE PORTRAIT/FINE-HAIR PROOF AND SCRUM-11065 ACCEPTANCE AWAIT A SAFE ZERO-DOCUMENT PHOTOSHOP STATE.**
+
+Local commits before this documentation commit: `579c41c` (accepted preset authority/configuration)
+and `378c848` (guarded Product adapter and tests). Nothing was pushed.

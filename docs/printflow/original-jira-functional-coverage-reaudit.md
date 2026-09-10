@@ -1754,3 +1754,33 @@ Full detail:
 10 September 2026 (closure attempt).
 
 **BLOCKED — SCRUM-11065 AND SCRUM-11123 BOTH REMAIN PARTIAL**
+
+---
+
+# Delta — 10 September 2026: Meitu export-format remediation reassessment
+
+*Append-only reassessment from the exact current rows. Historical PASS evidence is preserved; no
+Jira system was mutated.*
+
+| Item | Prior state | Current evidence | Reassessed state |
+|---|---|---|---|
+| SCRUM-11088 | Historical PASS retained | The new route strengthens unknown-state handling: pre-existing/new unknown windows, wrong popup identity/ownership, stale targets, lost foreground, ambiguous item, and observation failure all stop before Save As. | **Unchanged.** Latent export-format gap remediated; no contrary evidence reopens the item. |
+| SCRUM-11089 | Historical PASS retained | The accepted-process PID plus start time, exact Save surface, non-activating popup, item ancestry, live point and hit test are rechecked at the input boundary. | **Unchanged.** Remediation note only. |
+| SCRUM-11090 | Historical PASS retained | Fresh `png` read-back still precedes Save As; existing output stability/decode/hash/alpha checks and Revision-after-validation ordering are unchanged. | **Unchanged.** Live closure proof is pending, not a regression finding. |
+| SCRUM-11085 | Parent historical position retained | The repair is confined to the signed Infrastructure/Meitu adapter and immutable preset authority. | **Unchanged.** No parent clause was contradicted. |
+| SCRUM-11065 | PARTIAL | Supplemental evidence and preset 1.17.0 issued; production route implemented; 563/563 affected tests, a clean build, the 11,735/11,735 full Product suite, and static seven-category preflight passed. Live portrait/fine-hair and one complete standard-set run remain unavailable while Photoshop has unrelated operator work open. | **PARTIAL** |
+| SCRUM-11123 | PARTIAL | No complete Passed standard-set run, revalidation record, or normal verifier acceptance exists. | **PARTIAL** |
+| SCRUM-11136 | PARTIAL/not executed | The repair makes the baseline acceptance executable once the workstation is safe; repeated success-rate measurement is outside this slice. | **PARTIAL / not executed** |
+
+Accepted authority now binds `printflow-workstation-v1` 1.17.0 (`A2E1936B…FCFA9`) and the new
+read-only export-format popup evidence (`DB6E8D69…F19997`). Preset 1.16.0 and all historical
+evidence remain unchanged. No Operator decision, Production revalidation, push, deploy, Maintop
+import, physical print, or SCRUM-11136 execution is claimed.
+
+Full detail:
+[Meitu JPG-to-PNG export-format remediation](meitu-jpg-to-png-export-format-remediation.md).
+
+**PASS WITH NOTES — PRODUCT REMEDIATION VERIFIED BY AUTOMATED SAFETY TESTS; SCRUM-11065 AND
+SCRUM-11123 REMAIN PARTIAL PENDING LIVE ACCEPTANCE.**
+
+Local implementation commits: `579c41c`, `378c848`. Nothing was pushed.
