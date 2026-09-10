@@ -1,9 +1,24 @@
-using System.Buffers.Binary;
 using System.IO;
-using System.Text;
+using PrintFlow.Infrastructure.Adapters.Fake;
 
 namespace PrintFlow.Tests.Fixtures;
 
+/// <summary>
+/// The test-facing shape of one deterministic production TIFF.
+/// </summary>
+/// <remarks>
+/// <see cref="ProductionTiffFixtureOptions.PixelWidth"/> and
+/// <see cref="ProductionTiffFixtureOptions.PixelHeight"/> keep their 2 x 2 default because that
+/// is what every pre-existing caller wrote against. A review-payload test needs more: a W1 pattern
+/// with distinguishable 0%, partial and 100% regions cannot exist on four pixels, and a
+/// downsampling assertion needs a canvas larger than the display edge.
+/// <para>
+/// It stays a separate record from <c>FakeProductionTiffOptions</c> only because it is the type
+/// dozens of <c>TheoryData</c> tables are already written in. The two carry the same fields and
+/// this one is mapped onto that one before any byte is written, so there is no second contract
+/// here — only a second name for the same one (SCRUM-11097).
+/// </para>
+/// </remarks>
 public sealed record ProductionTiffFixtureOptions(
     bool LittleEndian = true,
     ushort Compression = 1,
@@ -20,320 +35,50 @@ public sealed record ProductionTiffFixtureOptions(
     int PixelWidth = 2,
     int PixelHeight = 2,
     byte[]? W1VerticalBands = null,
-    byte? FifthSampleEverywhere = null);
+    byte? FifthSampleEverywhere = null,
+    ushort PhotometricInterpretation = 5);
 
+/// <summary>
+/// Writes deterministic production TIFFs for tests, through the one shipped encoder
+/// (SCRUM-11097).
+/// </summary>
+/// <remarks>
+/// The encoder itself moved to <see cref="FakeProductionTiff"/> in the Fake adapter, because the
+/// Fake Photoshop adapter has to be able to emit these files in the product and not only in the
+/// test project. This forwards to it rather than keeping a private copy, so a fixture a test
+/// asserts against and a file the fake emits are the same bytes for the same options — which is
+/// what lets inspector coverage and adapter coverage be compared honestly rather than merely
+/// looking alike.
+/// </remarks>
 internal static class ProductionTiffFixture
 {
-    /// <summary>The fixture canvas, from the options rather than a constant (SCRUM-11104 §42).</summary>
-    /// <remarks>
-    /// The 2 × 2 default is what every pre-existing caller wrote against and stays exactly that.
-    /// A review-payload test needs more: a W1 pattern with distinguishable 0%, partial and 100%
-    /// regions cannot exist on four pixels, and a downsampling assertion needs a canvas larger
-    /// than the display edge.
-    /// </remarks>
-    private static int WidthOf(ProductionTiffFixtureOptions options) => options.PixelWidth;
-    private static int HeightOf(ProductionTiffFixtureOptions options) => options.PixelHeight;
-
     internal static string Write(string directory, ProductionTiffFixtureOptions? options = null)
     {
         Directory.CreateDirectory(directory);
         string path = Path.Combine(directory, Guid.NewGuid().ToString("N") + ".tif");
-        File.WriteAllBytes(path, Create(options ?? new ProductionTiffFixtureOptions()));
+        WriteAt(path, options);
         return path;
     }
 
-    internal static void WriteAt(string path, ProductionTiffFixtureOptions? options = null)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        File.WriteAllBytes(path, Create(options ?? new ProductionTiffFixtureOptions()));
-    }
+    internal static void WriteAt(string path, ProductionTiffFixtureOptions? options = null) =>
+        FakeProductionTiff.WriteAt(path, Shipped(options ?? new ProductionTiffFixtureOptions()));
 
-    private static byte[] Create(ProductionTiffFixtureOptions options)
-    {
-        byte[] bits = Shorts(
-            Enumerable.Repeat((ushort)8, options.SamplesPerPixel).ToArray(), options.LittleEndian);
-        byte[] xResolution = Rational(options.Dpi, 1, options.LittleEndian);
-        byte[] yResolution = Rational(options.Dpi, 1, options.LittleEndian);
-        byte[] resources = PhotoshopResources(options.ChannelName, options.ChannelKind);
-        byte[] imageSource = PhotoshopImageSourceData(
-            options.LayerCompression, options.LittleEndian, WidthOf(options), HeightOf(options));
-        byte[] pixels = Pixels(options);
-
-        const ushort entryCount = 18;
-        int ifdLength = 2 + entryCount * 12 + 4;
-        int dataOffset = 8 + ifdLength;
-        int bitsOffset = dataOffset;
-        int xResolutionOffset = bitsOffset + bits.Length;
-        int yResolutionOffset = xResolutionOffset + xResolution.Length;
-        int resourcesOffset = yResolutionOffset + yResolution.Length;
-        int imageSourceOffset = resourcesOffset + resources.Length;
-        int pixelsOffset = imageSourceOffset + imageSource.Length;
-        int secondIfdOffset = pixelsOffset + pixels.Length;
-        int totalLength = secondIfdOffset + (options.IncludePyramidIfd ? 6 : 0);
-
-        using MemoryStream stream = new(totalLength);
-        WriteAscii(stream, options.LittleEndian ? "II" : "MM");
-        WriteUInt16(stream, 42, options.LittleEndian);
-        WriteUInt32(stream, 8, options.LittleEndian);
-        WriteUInt16(stream, entryCount, options.LittleEndian);
-
-        Entry(stream, 254, 4, 1, ScalarLong(0, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 256, 4, 1, ScalarLong(WidthOf(options), options.LittleEndian), options.LittleEndian);
-        Entry(stream, 257, 4, 1, ScalarLong(HeightOf(options), options.LittleEndian), options.LittleEndian);
-        Entry(stream, 258, 3, options.SamplesPerPixel,
-            OffsetOrInline(bits, bitsOffset, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 259, 3, 1, ScalarShort(options.Compression, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 262, 3, 1, ScalarShort(5, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 273, 4, 1, ScalarLong(pixelsOffset, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 274, 3, 1, ScalarShort(1, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 277, 3, 1,
-            ScalarShort(options.SamplesPerPixel, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 278, 4, 1, ScalarLong(HeightOf(options), options.LittleEndian), options.LittleEndian);
-        Entry(stream, 279, 4, 1, ScalarLong(pixels.Length, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 282, 5, 1, ScalarLong(xResolutionOffset, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 283, 5, 1, ScalarLong(yResolutionOffset, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 284, 3, 1,
-            ScalarShort(options.PlanarConfiguration, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 296, 3, 1, ScalarShort(2, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 338, 3, 1,
-            ScalarShort(options.ExtraSample, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 34377, 1, checked((uint)resources.Length),
-            ScalarLong(resourcesOffset, options.LittleEndian), options.LittleEndian);
-        Entry(stream, 37724, 7, checked((uint)imageSource.Length),
-            ScalarLong(imageSourceOffset, options.LittleEndian), options.LittleEndian);
-        WriteUInt32(stream, options.IncludePyramidIfd ? secondIfdOffset : 0, options.LittleEndian);
-
-        stream.Write(bits);
-        stream.Write(xResolution);
-        stream.Write(yResolution);
-        stream.Write(resources);
-        stream.Write(imageSource);
-        stream.Write(pixels);
-        if (options.IncludePyramidIfd)
-        {
-            WriteUInt16(stream, 0, options.LittleEndian);
-            WriteUInt32(stream, 0, options.LittleEndian);
-        }
-        return stream.ToArray();
-    }
-
-    /// <summary>
-    /// The strip's interleaved samples: white ink everywhere unless the caller asks otherwise.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="ProductionTiffFixtureOptions.CmykSamples"/> and
-    /// <see cref="ProductionTiffFixtureOptions.FifthSampleEverywhere"/> exist for the preview
-    /// regression (Epic 11600 Part D1 §7), which needs a file whose colour is distinguishable and
-    /// whose W1 channel is full ink for <i>every</i> pixel — the default's single zeroed sample
-    /// makes the channel non-empty for the inspector but leaves three of four pixels opaque after
-    /// WIC's conversion, which is not the defect the live artefact showed.
-    /// <para>
-    /// <see cref="ProductionTiffFixtureOptions.W1VerticalBands"/> is the review-payload form
-    /// (SCRUM-11104 §10, §42): equal-width vertical bands of <i>stored</i> fifth-sample values,
-    /// left to right, so a file can carry deliberately distinguishable 0% (255), partial and
-    /// 100% (0) white-ink regions and a preview can be checked against them per region rather
-    /// than merely "the channel exists".
-    /// </para>
-    /// </remarks>
-    private static byte[] Pixels(ProductionTiffFixtureOptions options)
-    {
-        ushort samples = options.SamplesPerPixel;
-        int width = WidthOf(options);
-        int height = HeightOf(options);
-        byte[] data = Enumerable.Repeat(byte.MaxValue, width * height * samples).ToArray();
-
-        if (options.CmykSamples is { Length: > 0 } cmyk)
-        {
-            int colourSamples = Math.Min(cmyk.Length, samples);
-            for (int pixel = 0; pixel < width * height; pixel++)
-            {
-                Array.Copy(cmyk, 0, data, pixel * samples, colourSamples);
-            }
-        }
-
-        if (samples < 5)
-        {
-            return data;
-        }
-
-        if (options.W1VerticalBands is { Length: > 0 } bands)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int band = Math.Min(bands.Length - 1, x * bands.Length / width);
-                    data[((y * width) + x) * samples + 4] = bands[band];
-                }
-            }
-        }
-        else if (options.FifthSampleEverywhere is { } fifth)
-        {
-            for (int pixel = 0; pixel < width * height; pixel++)
-            {
-                data[pixel * samples + 4] = fifth;
-            }
-        }
-        else if (options.FifthSampleNonEmpty)
-        {
-            data[4] = 0;
-        }
-
-        return data;
-    }
-
-    private static byte[] PhotoshopResources(string name, byte kind)
-    {
-        using MemoryStream stream = new();
-        byte[] latinName = Encoding.Latin1.GetBytes(name);
-        byte[] pascal = new byte[latinName.Length + 1];
-        pascal[0] = checked((byte)latinName.Length);
-        latinName.CopyTo(pascal, 1);
-        Resource(stream, 1006, pascal);
-
-        using MemoryStream unicode = new();
-        string terminated = name + '\0';
-        WriteBigUInt32(unicode, terminated.Length);
-        unicode.Write(Encoding.BigEndianUnicode.GetBytes(terminated));
-        Resource(stream, 1045, unicode.ToArray());
-
-        using MemoryStream display = new();
-        WriteBigUInt32(display, 1);
-        display.Write(new byte[]
-        {
-            0, 0,
-            0xff, 0xff, 0, 0, 0, 0, 0, 0,
-            0, 100,
-            kind,
-        });
-        Resource(stream, 1077, display.ToArray());
-        return stream.ToArray();
-    }
-
-    private static void Resource(Stream stream, ushort id, byte[] data)
-    {
-        WriteAscii(stream, "8BIM");
-        WriteBigUInt16(stream, id);
-        stream.WriteByte(0);
-        stream.WriteByte(0);
-        WriteBigUInt32(stream, data.Length);
-        stream.Write(data);
-        if ((data.Length & 1) != 0) stream.WriteByte(0);
-    }
-
-    private static byte[] PhotoshopImageSourceData(
-        ushort layerCompression, bool littleEndian, int width, int height)
-    {
-        using MemoryStream layer = new();
-        WriteUInt16(layer, 1, littleEndian);
-        WriteUInt32(layer, 0, littleEndian);
-        WriteUInt32(layer, 0, littleEndian);
-        WriteUInt32(layer, height, littleEndian);
-        WriteUInt32(layer, width, littleEndian);
-        WriteUInt16(layer, 5, littleEndian);
-        short[] ids = [-1, 0, 1, 2, 3];
-        foreach (short id in ids)
-        {
-            WriteUInt16(layer, unchecked((ushort)id), littleEndian);
-            WriteUInt32(layer, 2, littleEndian);
-        }
-        WritePhotoshopIdentifier(layer, "8BIM", littleEndian);
-        WritePhotoshopIdentifier(layer, "norm", littleEndian);
-        layer.Write(new byte[] { 255, 0, 8, 0 });
-        WriteUInt32(layer, 0, littleEndian);
-        foreach (short _ in ids) WriteUInt16(layer, layerCompression, littleEndian);
-
-        using MemoryStream result = new();
-        WriteAscii(result, "Adobe Photoshop Document Data Block\0");
-        WritePhotoshopIdentifier(result, "8BIM", littleEndian);
-        WritePhotoshopIdentifier(result, "Layr", littleEndian);
-        WriteUInt32(result, layer.Length, littleEndian);
-        result.Write(layer.ToArray());
-        return result.ToArray();
-    }
-
-    private static void Entry(
-        Stream stream, ushort tag, ushort type, uint count, byte[] value, bool littleEndian)
-    {
-        WriteUInt16(stream, tag, littleEndian);
-        WriteUInt16(stream, type, littleEndian);
-        WriteUInt32(stream, count, littleEndian);
-        stream.Write(value);
-    }
-
-    private static byte[] OffsetOrInline(byte[] data, int offset, bool littleEndian) =>
-        data.Length <= 4 ? [.. data, .. new byte[4 - data.Length]] : ScalarLong(offset, littleEndian);
-
-    private static byte[] ScalarShort(long value, bool littleEndian)
-    {
-        byte[] result = new byte[4];
-        if (littleEndian) BinaryPrimitives.WriteUInt16LittleEndian(result, checked((ushort)value));
-        else BinaryPrimitives.WriteUInt16BigEndian(result, checked((ushort)value));
-        return result;
-    }
-
-    private static byte[] ScalarLong(long value, bool littleEndian)
-    {
-        byte[] result = new byte[4];
-        if (littleEndian) BinaryPrimitives.WriteUInt32LittleEndian(result, checked((uint)value));
-        else BinaryPrimitives.WriteUInt32BigEndian(result, checked((uint)value));
-        return result;
-    }
-
-    private static byte[] Shorts(ushort[] values, bool littleEndian)
-    {
-        byte[] result = new byte[values.Length * 2];
-        for (int index = 0; index < values.Length; index++)
-        {
-            if (littleEndian) BinaryPrimitives.WriteUInt16LittleEndian(result.AsSpan(index * 2), values[index]);
-            else BinaryPrimitives.WriteUInt16BigEndian(result.AsSpan(index * 2), values[index]);
-        }
-        return result;
-    }
-
-    private static byte[] Rational(uint numerator, uint denominator, bool littleEndian)
-    {
-        byte[] result = new byte[8];
-        if (littleEndian)
-        {
-            BinaryPrimitives.WriteUInt32LittleEndian(result, numerator);
-            BinaryPrimitives.WriteUInt32LittleEndian(result.AsSpan(4), denominator);
-        }
-        else
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(result, numerator);
-            BinaryPrimitives.WriteUInt32BigEndian(result.AsSpan(4), denominator);
-        }
-        return result;
-    }
-
-    private static void WritePhotoshopIdentifier(Stream stream, string value, bool littleEndian)
-    {
-        byte[] bytes = Encoding.ASCII.GetBytes(value);
-        if (littleEndian) Array.Reverse(bytes);
-        stream.Write(bytes);
-    }
-
-    private static void WriteAscii(Stream stream, string value) =>
-        stream.Write(Encoding.ASCII.GetBytes(value));
-
-    private static void WriteUInt16(Stream stream, long value, bool littleEndian) =>
-        stream.Write(ScalarShort(value, littleEndian), 0, 2);
-
-    private static void WriteUInt32(Stream stream, long value, bool littleEndian) =>
-        stream.Write(ScalarLong(value, littleEndian));
-
-    private static void WriteBigUInt16(Stream stream, ushort value)
-    {
-        Span<byte> bytes = stackalloc byte[2];
-        BinaryPrimitives.WriteUInt16BigEndian(bytes, value);
-        stream.Write(bytes);
-    }
-
-    private static void WriteBigUInt32(Stream stream, long value)
-    {
-        Span<byte> bytes = stackalloc byte[4];
-        BinaryPrimitives.WriteUInt32BigEndian(bytes, checked((uint)value));
-        stream.Write(bytes);
-    }
+    private static FakeProductionTiffOptions Shipped(ProductionTiffFixtureOptions options) => new(
+        options.LittleEndian,
+        options.Compression,
+        options.SamplesPerPixel,
+        options.PlanarConfiguration,
+        options.ExtraSample,
+        options.Dpi,
+        options.ChannelName,
+        options.ChannelKind,
+        options.FifthSampleNonEmpty,
+        options.IncludePyramidIfd,
+        options.LayerCompression,
+        options.CmykSamples,
+        options.PixelWidth,
+        options.PixelHeight,
+        options.W1VerticalBands,
+        options.FifthSampleEverywhere,
+        options.PhotometricInterpretation);
 }

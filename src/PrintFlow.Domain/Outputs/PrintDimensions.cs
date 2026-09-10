@@ -154,6 +154,35 @@ public readonly record struct PrintDimensions
             : throw new ArgumentOutOfRangeException(
                 nameof(millimetres), millimetres, "A pixel conversion needs positive finite millimetres.");
 
+    /// <summary>
+    /// Converts a whole pixel count back to the physical millimetres it occupies at the fixed
+    /// production resolution (SCRUM-11097, SCRUM-11129).
+    /// </summary>
+    /// <remarks>
+    /// The inverse of <see cref="PixelsFromMillimetres"/> and the same constant, made public for
+    /// the same reason that one was: three private copies of this expression already existed —
+    /// in <see cref="FitWithinBounds"/>, in <c>TargetEdgePrintPreparationPlan</c> and implicitly
+    /// in the stored dimensions — and saved-TIFF validation needed a fourth. Both callers now
+    /// name this method, so "what physical canvas do these pixels resolve to" has exactly one
+    /// answer.
+    /// <para>
+    /// It is deliberately not rounded. Rounding belongs where a value is presented or stored, not
+    /// where a canvas is derived, and a tolerance applied to an already-rounded millimetre would
+    /// silently widen with the canvas.
+    /// </para>
+    /// <para>
+    /// This is why PrintFlow has no independent physical-size assertion over a saved TIFF: at the
+    /// fixed 300 PPI the pixel grid and the resolution together <i>define</i> the physical canvas,
+    /// so a file whose pixels match the preparation and whose resolution is exactly 300 PPI cannot
+    /// have a wrong physical size, and a file that fails either check already has one.
+    /// </para>
+    /// </remarks>
+    public static double MillimetresFromPixels(int pixels) =>
+        pixels > 0
+            ? pixels * MillimetresPerInch / ProductionDpi
+            : throw new ArgumentOutOfRangeException(
+                nameof(pixels), pixels, "A millimetre conversion needs a positive pixel count.");
+
     private static bool IsUsableMillimetres(double millimetres) =>
         double.IsFinite(millimetres) && millimetres > 0;
 

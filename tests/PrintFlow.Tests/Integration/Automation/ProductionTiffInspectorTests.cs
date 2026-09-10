@@ -58,6 +58,7 @@ public sealed class ProductionTiffInspectorTests : IDisposable
         { new(Compression: 5), "compression" },
         { new(LittleEndian: false), "byte order" },
         { new(SamplesPerPixel: 4), "five 8-bit" },
+        { new(PhotometricInterpretation: 2), "separated CMYK" },
         { new(PlanarConfiguration: 2), "interleaved" },
         { new(ExtraSample: 2), "alpha" },
         { new(Dpi: 72), "300" },

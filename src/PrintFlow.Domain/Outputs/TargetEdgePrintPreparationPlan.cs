@@ -182,10 +182,9 @@ public sealed record TargetEdgePrintPreparationPlan
     /// </remarks>
     public PrintDimensions AsRecordedDimensions()
     {
-        const double MillimetresPerInch = 25.4;
         double requested = (double)Projection.RequestedMillimetres;
-        double derivedWidth = Projection.ProjectedPixelWidth * MillimetresPerInch / ProductionDpi;
-        double derivedHeight = Projection.ProjectedPixelHeight * MillimetresPerInch / ProductionDpi;
+        double derivedWidth = PrintDimensions.MillimetresFromPixels(Projection.ProjectedPixelWidth);
+        double derivedHeight = PrintDimensions.MillimetresFromPixels(Projection.ProjectedPixelHeight);
 
         return Projection.PhotoshopTargetEdge == LimitingEdge.Width
             ? PrintDimensions.FromMillimetres(requested, derivedHeight, SizePreset.Custom)

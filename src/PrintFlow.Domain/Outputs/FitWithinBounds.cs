@@ -107,8 +107,6 @@ public readonly record struct FitWithinBoundsResult(
 /// </summary>
 public static class FitWithinBounds
 {
-    private const double MillimetresPerInch = 25.4;
-
     /// <summary>Calculates a maximum-width/maximum-height fit.</summary>
     public static FitWithinBoundsResult Calculate(
         int sourceWidthPixels,
@@ -307,8 +305,8 @@ public static class FitWithinBounds
 
     private static (double WidthMm, double HeightMm) SourceMillimetres(int widthPixels, int heightPixels) =>
         (
-            widthPixels * MillimetresPerInch / PrintDimensions.ProductionDpi,
-            heightPixels * MillimetresPerInch / PrintDimensions.ProductionDpi);
+            PrintDimensions.MillimetresFromPixels(widthPixels),
+            PrintDimensions.MillimetresFromPixels(heightPixels));
 
     private static FitWithinBoundsResult NoResize(
         int sourceWidthPixels,

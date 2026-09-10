@@ -10,11 +10,19 @@ namespace PrintFlow.Tests.Fixtures;
 /// </summary>
 /// <remarks>
 /// <see cref="Infrastructure.Adapters.Fake.FakePhotoshopOutputProcessor"/> copies the approved
-/// input to the reserved output path, which is exactly right for the workflow mechanics it was
-/// built for — a PNG named <c>.tif</c> proves that a Revision, a <c>PrintOutput</c> and a review
-/// step are created — and exactly wrong for a final-review test, because the file it leaves
-/// behind is not separated CMYK, has no W1 spot channel, and could never be the thing an operator
-/// inspects.
+/// input to the reserved output path <i>by default</i>, which is exactly right for the workflow
+/// mechanics it was built for — a PNG named <c>.tif</c> proves that a Revision, a
+/// <c>PrintOutput</c> and a review step are created — and exactly wrong for a final-review test,
+/// because the file it leaves behind is not separated CMYK, has no W1 spot channel, and could
+/// never be the thing an operator inspects.
+/// <para>
+/// Since SCRUM-11097 that fake can also emit a genuine accepted production TIFF
+/// (<c>FakePhotoshopTiffOutput.ValidTiff</c>), which subsumes the plain "write a real TIFF at the
+/// projected geometry" half of this double's job. Two things keep this one alive: <see cref="Bands"/>,
+/// the known 0% / partial / 100% W1 pattern a preview assertion is checked against — the fake's
+/// valid output is deliberately flat full ink — and <see cref="GenerateCount"/>, which restart and
+/// retention tests use to prove no TIFF was produced. Neither belongs in a shipped adapter.
+/// </para>
 /// <para>
 /// So this writes one instead: five 8-bit interleaved samples, uncompressed, PhotometricInterpretation
 /// 5, ExtraSamples 0, 300 PPI, a Photoshop W1 spot resource and an RLE <c>Layr</c> block — the
