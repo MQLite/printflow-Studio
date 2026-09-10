@@ -1784,3 +1784,43 @@ Full detail:
 SCRUM-11123 REMAIN PARTIAL PENDING LIVE ACCEPTANCE.**
 
 Local implementation commits: `579c41c`, `378c848`. Nothing was pushed.
+
+---
+
+# Delta — 10 September 2026: SCRUM-11094/11095 Print Dimensions preflight
+
+*Append-only reassessment from exact original CSV Work Items 11401, 11402 and parent 11400.
+Historical rows and their 11,712 / 11,735 evidence remain unchanged. No Jira service mutation.*
+
+| Item | Previous position | Reassessed current Product position |
+|---|---|---|
+| SCRUM-11094 | PARTIAL, accepted sizing supersession with a bounds-display gap | **SUPERSEDED_BY_DESIGN.** Print Dimensions now shows exact source pixels, detected content or manually selected artwork, final canvas including the approved margin, projected print size/pixels and 300-PPI output. The accepted fit-box/one-target-edge contract keeps proportions constrained and automatically derives the paired dimension. The literal lock-toggle interaction was not implemented and is not claimed FULL |
+| SCRUM-11095 | PARTIAL; effective DPI only at Final Review, no Print Dimensions bounds | **SUPERSEDED_BY_DESIGN.** Preflight and Final Review reuse the same source-resolution formula over the same preparation authority. Preflight now supplies mm, pixels, bounds, effective source PPI and distinct 300-PPI output. Existing enlargement authority remains the gate, tightened so only the current displayed offer is valid. Empirical sufficient/warning/blocking bands remain literally undelivered and deliberately superseded; no accepted print-test thresholds exist |
+| Parent SCRUM-11093 | Historical PARTIAL, including then-absent PSD/PDF routes | **FULL for current Product functional clauses**, assessed independently. Current approved raster paths cover PNG/JPEG and accepted prepared PSD/single-page PDF; proportional sizing, replaceable guarded adapter, Action/colour-setting authority, production TIFF validation, exact-hash Final Review, independent sizes and no-overwrite/multipage/invalid-output safeguards are delivered. Source white channels are read under the accepted visual-only contract, with production W1 generated later. This is not a rollup of child statuses or a new live-workstation acceptance claim |
+
+The Workflow-owned preflight is derived, not persisted. Automatic/manual geometry comes from the
+exact producing attempt of the approved preparation source. Keep Original Extent reports the full
+approved canvas truthfully. Draft edits perform no processing, produce no Revision/output/attempt,
+and record no enlargement authorization. New size/upstream state clears stale facts; late draft
+responses cannot overwrite the new screen. Existing Add Another Size and immutable final-review
+preparations retain independent size and authorization context.
+
+English/Chinese rendered WPF proof reads visible values and stable `Session.PrintDimensions.*`
+AutomationIds through normal bindings/UIA, including real keyboard traversal and no binding errors.
+Independent fresh review found the stale-offer-handle issue, which was reproduced and fixed;
+re-review reported no remaining actionable findings. Focused evidence: 132/0/0 Debug, 787/0/0
+affected Release, and 67/0/0 final offer/UI/review Release. Final clean build/full-suite and local
+Git evidence are recorded in the completion report linked below.
+
+No Photoshop, Meitu or Maintop was launched for this slice. The existing 300-PPI TIFF contract,
+W1 behavior, preset 1.17.0, regression assets and ProductionRevalidation were not changed.
+SCRUM-11132/11133 live acceptance, SCRUM-11065, SCRUM-11123, SCRUM-11136 and physical print
+thresholds are not completed by this Product reassessment. Nothing pushed or deployed.
+
+Full exact ACs, clause matrices, calculation/geometry authority, tests, review and Git evidence:
+[Print Dimensions preflight completion](scrum-11094-11095-print-dimensions-preflight-completion.md).
+
+Final-source validation: Release clean/build both passed with **0 warnings and 0 errors**.
+The single final full Product suite passed **11,745 tests, 0 failed, 0 skipped**; all 19 changed
+Product/test file hashes remained unchanged through the run. Local implementation commit:
+`bbe89bfd8cfe2855f708b2a6d61b03ea061ba338`. Documentation follows in a separate local commit.
