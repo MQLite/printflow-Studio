@@ -250,7 +250,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     /// a same-named control elsewhere on the screen from being accepted.
     /// </remarks>
     private OperationResult<UiElementRef> FindSignedControl(
-        MeituTarget target, WindowHandle window, MeituControlSignature signature)
+        MeituTarget target,
+        WindowHandle window,
+        MeituControlSignature signature,
+        IReadOnlyCollection<UiPatternKind>? additionalRequiredPatterns = null)
     {
         OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
             window,
@@ -268,6 +271,12 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         {
             OperationResult<UiElementIdentity> identity = _elements.Describe(candidate);
             if (identity.IsFailure)
+            {
+                continue;
+            }
+
+            if (additionalRequiredPatterns is not null &&
+                additionalRequiredPatterns.Any(pattern => !identity.Value.Supports(pattern)))
             {
                 continue;
             }
@@ -3308,12 +3317,10 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         }
 
         // Format first, because it is the check most likely to refuse and the one §11 will not
-        // let PrintFlow infer. The value is set and then read back: on this build the selector
-        // already reads png, so the write is ordinarily a no-op, and the read-back is what turns
-        // "it was probably still png" into a fact.
-        OperationResult<string> format = await SetAndReadBackAsync(
-            target, surface.Handle, signature.FormatControl, signature.RequiredFormatValue,
-            StringComparison.OrdinalIgnoreCase, "format", cancellationToken).ConfigureAwait(false);
+        // let PrintFlow infer. PNG continues without opening the dropdown. A JPG default uses
+        // only the supplemental, signed popup route and still has to survive a fresh read-back.
+        OperationResult<string> format = await EnsureExportFormatAsync(
+            target, surface, signature, cancellationToken).ConfigureAwait(false);
         if (format.IsFailure)
         {
             return await CancelExportSurfaceAsync<MeituExportEvidence>(
@@ -3644,6 +3651,463 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 "description of the surface it would name a destination on. Nothing was invoked and no " +
                 "output was produced.");
     }
+
+    /// <summary>
+    /// Confirms PNG without opening the combo when it is already selected, otherwise follows
+    /// the separately signed JPG popup route and trusts only the final read-back.
+    /// </summary>
+    private async Task<OperationResult<string>> EnsureExportFormatAsync(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        MeituExportSignature signature,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        OperationResult<UiElementRef> field = FindSignedControl(
+            target, surface.Handle, signature.FormatControl);
+        if (field.IsFailure)
+        {
+            return OperationResult.Fail<string>(field.Failure);
+        }
+
+        OperationResult<string> current = _elements.GetValue(field.Value);
+        if (current.IsFailure)
+        {
+            return OperationResult.Fail<string>(current.Failure);
+        }
+
+        if (string.Equals(current.Value, signature.RequiredFormatValue, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Ok(current.Value);
+        }
+
+        if (signature.FormatSelection is not { } selection)
+        {
+            return OperationResult.Fail<string>(FormatSelectionFailure(
+                $"The Save surface's format reads '{current.Value}', and the verified evidence chain " +
+                "contains no signed popup route for changing it."));
+        }
+
+        if (!string.Equals(current.Value, selection.InitialFormatValue, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<string>(FormatSelectionFailure(
+                $"The Save surface's format reads '{current.Value}', not the signed initial value " +
+                $"'{selection.InitialFormatValue}'. The unknown format state is not changed."));
+        }
+
+        return await SelectExportFormatAsync(target, surface, signature, selection, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task<OperationResult<string>> SelectExportFormatAsync(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        MeituExportSignature export,
+        MeituExportFormatSelectionSignature selection,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<ExternalWindowRef> verified = VerifyExportSurface(
+            target, surface.Handle, export);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<string>(verified.Failure);
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> before =
+            _locator.FindTopLevelWindows(target.Process);
+        if (before.IsFailure)
+        {
+            return OperationResult.Fail<string>(before.Failure);
+        }
+
+        ExternalWindowRef[] unknownBefore =
+        [
+            .. before.Value.Where(window =>
+                window.Handle != target.Window.Handle && window.Handle != surface.Handle),
+        ];
+        if (unknownBefore.Length > 0)
+        {
+            return OperationResult.Fail<string>(FormatSelectionFailure(
+                $"The accepted Meitu process already had {unknownBefore.Length} unrecognised visible " +
+                "top-level window(s) before the format combo was opened. The popup route was not entered."));
+        }
+
+        OperationResult<UiElementRef> combo = FindSignedControl(
+            target,
+            surface.Handle,
+            selection.FormatControl,
+            selection.FormatControlRequiredPatterns);
+        if (combo.IsFailure)
+        {
+            return OperationResult.Fail<string>(combo.Failure);
+        }
+
+        verified = VerifyExportSurface(target, surface.Handle, export);
+        if (verified.IsFailure)
+        {
+            return OperationResult.Fail<string>(verified.Failure);
+        }
+
+        combo = FindSignedControl(
+            target,
+            surface.Handle,
+            selection.FormatControl,
+            selection.FormatControlRequiredPatterns);
+        if (combo.IsFailure)
+        {
+            return OperationResult.Fail<string>(combo.Failure);
+        }
+
+        OperationResult<Unit> opened = _elements.Invoke(combo.Value);
+        if (opened.IsFailure)
+        {
+            return OperationResult.Fail<string>(opened.Failure);
+        }
+
+        OperationResult<ExternalWindowRef> popup = await WaitForFormatPopupAsync(
+            target,
+            [.. before.Value.Select(window => window.Handle)],
+            selection,
+            cancellationToken).ConfigureAwait(false);
+        if (popup.IsFailure)
+        {
+            return OperationResult.Fail<string>(popup.Failure);
+        }
+
+        OperationResult<UiElementRef> item = FindFormatPopupItem(target, popup.Value, selection);
+        if (item.IsFailure)
+        {
+            return OperationResult.Fail<string>(item.Failure);
+        }
+
+        // Re-check both windows and reacquire the item at the last possible point. The popup is
+        // transient and its runtime element can be replaced without its old reference throwing.
+        OperationResult<Unit> fresh = VerifyFormatPopupBoundary(
+            target, surface, popup.Value, export, selection);
+        if (fresh.IsFailure)
+        {
+            return OperationResult.Fail<string>(fresh.Failure);
+        }
+
+        item = FindFormatPopupItem(target, popup.Value, selection);
+        if (item.IsFailure)
+        {
+            return OperationResult.Fail<string>(item.Failure);
+        }
+
+        fresh = VerifyFormatPopupBoundary(target, surface, popup.Value, export, selection);
+        if (fresh.IsFailure)
+        {
+            return OperationResult.Fail<string>(fresh.Failure);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        if (selection.RequiredActivation != MeituExportFormatActivation.RuntimeDerivedClickablePoint)
+        {
+            return OperationResult.Fail<string>(FormatSelectionFailure(
+                "The signed popup route does not require the one supported runtime-derived activation. " +
+                "No item was clicked."));
+        }
+
+        OperationResult<Unit> clicked = _elements.ClickAtLiveClickablePoint(
+            item.Value, target.Process, surface.Handle);
+        if (clicked.IsFailure)
+        {
+            return OperationResult.Fail<string>(clicked.Failure);
+        }
+
+        return await WaitForSelectedFormatAsync(
+            target, surface, popup.Value, export, selection, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<OperationResult<ExternalWindowRef>> WaitForFormatPopupAsync(
+        MeituTarget target,
+        IReadOnlyCollection<WindowHandle> windowsBeforeOpen,
+        MeituExportFormatSelectionSignature selection,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        HashSet<WindowHandle> previous = [.. windowsBeforeOpen];
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+                _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(windows.Failure);
+            }
+
+            ExternalWindowRef[] appeared =
+                [.. windows.Value.Where(window => !previous.Contains(window.Handle))];
+            if (appeared.Length > 0)
+            {
+                if (appeared.Length != 1 || !MatchesFormatPopup(target, appeared[0], selection))
+                {
+                    return OperationResult.Fail<ExternalWindowRef>(FormatSelectionFailure(
+                        $"Opening the signed format combo produced {appeared.Length} new top-level " +
+                        "window(s), but not exactly one recognised Meitu format popup. No item was clicked."));
+                }
+
+                return OperationResult.Ok(appeared[0]);
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<ExternalWindowRef>(FormatSelectionFailure(
+                    $"The signed format combo presented no recognised popup within " +
+                    $"{_options.DialogTimeout.TotalSeconds:0} s. No item was clicked."));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private bool MatchesFormatPopup(
+        MeituTarget target,
+        ExternalWindowRef popup,
+        MeituExportFormatSelectionSignature selection)
+    {
+        if (popup.OwningProcessId != target.Process.ProcessId ||
+            !popup.IsVisible || popup.IsMinimised || !popup.IsEnabled || popup.Bounds.IsEmpty ||
+            !string.Equals(popup.Title, selection.PopupTitle, StringComparison.Ordinal) ||
+            !string.Equals(popup.ClassName, selection.PopupWindowClassName, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        OperationResult<UiElementIdentity> identity = _elements.DescribeWindow(popup.Handle);
+        return identity.IsSuccess &&
+            identity.Value.ProcessId == target.Process.ProcessId &&
+            identity.Value.IsEnabled && !identity.Value.IsOffscreen && !identity.Value.Bounds.IsEmpty &&
+            string.Equals(identity.Value.Name, selection.PopupTitle, StringComparison.Ordinal) &&
+            string.Equals(identity.Value.ClassName, selection.PopupUiaClassName, StringComparison.Ordinal) &&
+            string.Equals(identity.Value.ControlTypeName, selection.PopupControlType, StringComparison.Ordinal) &&
+            selection.PopupRequiredPatterns.All(identity.Value.Supports);
+    }
+
+    private OperationResult<UiElementRef> FindFormatPopupItem(
+        MeituTarget target,
+        ExternalWindowRef popup,
+        MeituExportFormatSelectionSignature selection)
+    {
+        OperationResult<IReadOnlyList<UiElementRef>> found = _elements.FindAll(
+            popup.Handle, new UiElementQuery(UiControlKind.ListItem, Name: selection.ItemName));
+        if (found.IsFailure)
+        {
+            return OperationResult.Fail<UiElementRef>(found.Failure);
+        }
+
+        List<UiElementRef> matches = [];
+        foreach (UiElementRef candidate in found.Value)
+        {
+            OperationResult<UiElementIdentity> item = _elements.Describe(candidate);
+            if (item.IsFailure || item.Value.ProcessId != target.Process.ProcessId ||
+                !item.Value.IsEnabled || item.Value.IsOffscreen || item.Value.Bounds.IsEmpty ||
+                !string.Equals(item.Value.Name, selection.ItemName, StringComparison.Ordinal) ||
+                !string.Equals(item.Value.ControlTypeName, selection.ItemControlType, StringComparison.Ordinal) ||
+                !string.Equals(item.Value.ClassName, selection.ItemClassName, StringComparison.Ordinal) ||
+                !string.Equals(item.Value.AutomationId, selection.ItemAutomationId, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            UiElementRef current = candidate;
+            bool ancestryMatches = true;
+            for (int depth = 1; depth <= selection.ComboAncestorDepth; depth++)
+            {
+                OperationResult<UiElementRef> parent = _elements.GetParent(current);
+                if (parent.IsFailure)
+                {
+                    ancestryMatches = false;
+                    break;
+                }
+
+                OperationResult<UiElementIdentity> identity = _elements.Describe(parent.Value);
+                if (identity.IsFailure || identity.Value.ProcessId != target.Process.ProcessId)
+                {
+                    ancestryMatches = false;
+                    break;
+                }
+
+                bool expected = depth == 1
+                    ? string.Equals(identity.Value.ControlTypeName, selection.RequiredParentControlType, StringComparison.Ordinal) &&
+                      string.Equals(identity.Value.ClassName, selection.RequiredParentClassName, StringComparison.Ordinal)
+                    : depth == selection.ComboAncestorDepth &&
+                      string.Equals(identity.Value.ControlTypeName, selection.RequiredComboAncestorControlType, StringComparison.Ordinal) &&
+                      string.Equals(identity.Value.ClassName, selection.RequiredComboAncestorClassName, StringComparison.Ordinal);
+                if (!expected)
+                {
+                    ancestryMatches = false;
+                    break;
+                }
+
+                current = parent.Value;
+            }
+
+            if (ancestryMatches)
+            {
+                matches.Add(candidate);
+            }
+        }
+
+        return matches.Count == 1
+            ? OperationResult.Ok(matches[0])
+            : OperationResult.Fail<UiElementRef>(FormatSelectionFailure(
+                $"The recognised format popup contains {matches.Count} enabled, visible '{selection.ItemName}' " +
+                "item(s) with the signed ancestry; exactly one is required. No item was clicked."));
+    }
+
+    private OperationResult<Unit> VerifyFormatPopupBoundary(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        ExternalWindowRef popup,
+        MeituExportSignature export,
+        MeituExportFormatSelectionSignature selection)
+    {
+        if (!_locator.IsAlive(target.Process))
+        {
+            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+                "The accepted Meitu process exited while the format popup was open."));
+        }
+
+        OperationResult<ExternalWindowRef> currentSurface = _locator.Refresh(surface.Handle);
+        if (currentSurface.IsFailure || currentSurface.Value.OwningProcessId != target.Process.ProcessId ||
+            !currentSurface.Value.IsVisible || currentSurface.Value.IsMinimised ||
+            !currentSurface.Value.IsEnabled || currentSurface.Value.Bounds.IsEmpty ||
+            !string.Equals(currentSurface.Value.Title, export.SurfaceTitle, StringComparison.Ordinal) ||
+            !string.Equals(currentSurface.Value.ClassName, export.SurfaceClassName, StringComparison.Ordinal) ||
+            FindSignedControl(target, surface.Handle, export.FormatControl).IsFailure ||
+            FindSignedControl(
+                target,
+                surface.Handle,
+                selection.FormatControl,
+                selection.FormatControlRequiredPatterns).IsFailure)
+        {
+            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+                "The signed Save surface or format control was replaced while the popup was open."));
+        }
+
+        OperationResult<ExternalWindowRef> currentPopup = _locator.Refresh(popup.Handle);
+        if (currentPopup.IsFailure || currentPopup.Value.Handle != popup.Handle ||
+            !MatchesFormatPopup(target, currentPopup.Value, selection))
+        {
+            return OperationResult.Fail<Unit>(FormatSelectionFailure(
+                "The recognised format popup disappeared or was replaced before input."));
+        }
+
+        OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+        if (foreground.IsFailure)
+        {
+            return OperationResult.Fail<Unit>(foreground.Failure);
+        }
+
+        return selection.SaveSurfaceMustRemainForeground &&
+               foreground.Value.Handle == surface.Handle &&
+               foreground.Value.ProcessId == target.Process.ProcessId
+            ? OperationResult.Ok()
+            : OperationResult.Fail<Unit>(FormatSelectionFailure(
+                "The signed Save surface is no longer the exact same-process foreground window while " +
+                "the recognised non-activating format popup is open. No item was clicked."));
+    }
+
+    private async Task<OperationResult<string>> WaitForSelectedFormatAsync(
+        MeituTarget target,
+        ExternalWindowRef surface,
+        ExternalWindowRef popup,
+        MeituExportSignature export,
+        MeituExportFormatSelectionSignature selection,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+        string observed = selection.InitialFormatValue;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+                _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure)
+            {
+                return OperationResult.Fail<string>(FormatSelectionFailure(
+                    "The Meitu window set could not be read after the png item was clicked; popup " +
+                    "disappearance is therefore unknown."));
+            }
+
+            ExternalWindowRef[] unknown =
+            [
+                .. windows.Value.Where(window =>
+                    window.Handle != target.Window.Handle &&
+                    window.Handle != surface.Handle &&
+                    window.Handle != popup.Handle),
+            ];
+            if (unknown.Length > 0)
+            {
+                return OperationResult.Fail<string>(FormatSelectionFailure(
+                    $"The accepted Meitu process presented {unknown.Length} unrecognised visible " +
+                    "top-level window(s) after the png item was clicked."));
+            }
+
+            ExternalWindowRef[] currentPopup =
+                [.. windows.Value.Where(window => window.Handle == popup.Handle)];
+            if (currentPopup.Length > 1 ||
+                currentPopup.Length == 1 && !MatchesFormatPopup(target, currentPopup[0], selection))
+            {
+                return OperationResult.Fail<string>(FormatSelectionFailure(
+                    "The recognised format popup was replaced while its selection was settling."));
+            }
+
+            bool popupGone = currentPopup.Length == 0;
+            if (!selection.PopupMustDisappear || popupGone)
+            {
+                OperationResult<ExternalWindowRef> verified = VerifyExportSurface(
+                    target, surface.Handle, export);
+                if (verified.IsSuccess)
+                {
+                    OperationResult<UiElementRef> field = FindSignedControl(
+                        target, surface.Handle, export.FormatControl);
+                    if (field.IsSuccess)
+                    {
+                        OperationResult<string> value = _elements.GetValue(field.Value);
+                        if (value.IsSuccess)
+                        {
+                            observed = value.Value;
+                            if (string.Equals(
+                                    observed, selection.RequiredFormatValue,
+                                    StringComparison.OrdinalIgnoreCase))
+                            {
+                                return OperationResult.Ok(observed);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<string>(FormatSelectionFailure(
+                    $"The recognised png item was clicked, but the popup did not disappear and the " +
+                    $"Save format did not freshly read '{selection.RequiredFormatValue}' within " +
+                    $"{_options.DialogTimeout.TotalSeconds:0} s (last read '{observed}')."));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private static OperationFailure FormatSelectionFailure(string detail) =>
+        OperationFailure.Create(
+            FailureCode.MeituOpenInputFailed,
+            detail + " Neither Save nor Save As was invoked, so no file was written.",
+            isRetryable: false,
+            context: new Dictionary<string, string>
+            {
+                ["control"] = "format",
+                ["exportInvoked"] = "false",
+                ["inputRoute"] = "signed-format-popup",
+            });
 
     /// <summary>
     /// Writes one signed control's value and confirms it reads back exactly (§8).

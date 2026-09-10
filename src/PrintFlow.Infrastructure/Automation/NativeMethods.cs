@@ -13,10 +13,10 @@ namespace PrintFlow.Infrastructure.Automation;
 /// that <c>DllImport</c>/<c>LibraryImport</c> appears nowhere outside
 /// <c>PrintFlow.Infrastructure</c> (Epic 11300 Part A §26).
 ///
-/// Note what is absent and must stay absent: <c>mouse_event</c>, <c>SetCursorPos</c>, and any
-/// screen-coordinate click primitive. The only input primitive declared is <c>SendInput</c>,
-/// and its single caller re-verifies the foreground window immediately beforehand
-/// (Epic 11300 Part A §3).
+/// Blind pointer APIs such as <c>mouse_event</c> and <c>SetCursorPos</c> remain absent. The one
+/// pointer-capable <c>SendInput</c> overload is consumed only by <c>UiaElementProvider</c> after
+/// a live UIA clickable point has been derived, hit-tested back to the same element and checked
+/// against its signed same-process foreground surface. No caller can supply a coordinate.
 /// </remarks>
 internal static partial class NativeMethods
 {
@@ -44,7 +44,18 @@ internal static partial class NativeMethods
     internal const int SW_RESTORE = 9;
 
     internal const uint INPUT_KEYBOARD = 1;
+    internal const uint INPUT_MOUSE = 0;
     internal const uint KEYEVENTF_KEYUP = 0x0002;
+    internal const uint MOUSEEVENTF_MOVE = 0x0001;
+    internal const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+    internal const uint MOUSEEVENTF_LEFTUP = 0x0004;
+    internal const uint MOUSEEVENTF_VIRTUALDESK = 0x4000;
+    internal const uint MOUSEEVENTF_ABSOLUTE = 0x8000;
+
+    internal const int SM_XVIRTUALSCREEN = 76;
+    internal const int SM_YVIRTUALSCREEN = 77;
+    internal const int SM_CXVIRTUALSCREEN = 78;
+    internal const int SM_CYVIRTUALSCREEN = 79;
 
     internal const int GWL_STYLE = -16;
     internal const long WS_VISIBLE = 0x10000000L;
@@ -117,6 +128,25 @@ internal static partial class NativeMethods
         internal KEYBDINPUT ki;
         private readonly int _padding0;
         private readonly int _padding1;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct POINTERINPUTDATA
+    {
+        internal int dx;
+        internal int dy;
+        internal uint mouseData;
+        internal uint dwFlags;
+        internal uint time;
+        internal nint dwExtraInfo;
+    }
+
+    /// <summary>A pointer <c>INPUT</c>; populated only from a freshly hit-tested UIA element.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct POINTERINPUT
+    {
+        internal uint type;
+        internal POINTERINPUTDATA mi;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -224,6 +254,9 @@ internal static partial class NativeMethods
 
     [LibraryImport("user32.dll")]
     internal static partial uint SendInput(uint count, [In] KEYBOARDINPUT[] inputs, int size);
+
+    [LibraryImport("user32.dll", EntryPoint = "SendInput")]
+    internal static partial uint SendPointerInput(uint count, [In] POINTERINPUT[] inputs, int size);
 
     // -- evidence capture ---------------------------------------------------------------
 

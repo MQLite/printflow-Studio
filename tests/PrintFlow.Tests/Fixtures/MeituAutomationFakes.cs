@@ -221,7 +221,33 @@ internal static class MeituFakes
             MinimumRequiredMarkers: 2,
             CloseControl: new MeituControlSignature(
                 ExportCloseGlyph, ".SaveResultMaskWidget.titleFrame.closeButton", "Button",
-                "IconFontButton", UiPatternKind.Invoke)));
+                "IconFontButton", UiPatternKind.Invoke)),
+        FormatSelection: ExportFormatSelection());
+
+    internal static MeituExportFormatSelectionSignature ExportFormatSelection() => new(
+        InitialFormatValue: "jpg",
+        RequiredFormatValue: ExportFormatValue,
+        FormatControl: new MeituControlSignature(
+            "", ".SaveMaskWidget.wName.formatCombo", "ComboBox", "NoAnimationComboBox",
+            UiPatternKind.Invoke),
+        FormatControlRequiredPatterns: [UiPatternKind.Invoke, UiPatternKind.Value],
+        PopupTitle: "XiuXiu",
+        PopupWindowClassName: "Qt51517QWindowPopupSaveBits",
+        PopupUiaClassName: "QComboBoxPrivateContainer",
+        PopupControlType: "Window",
+        PopupRequiredPatterns: [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Window],
+        ItemName: ExportFormatValue,
+        ItemControlType: "ListItem",
+        ItemClassName: string.Empty,
+        ItemAutomationId: string.Empty,
+        RequiredParentControlType: "List",
+        RequiredParentClassName: "QListView",
+        RequiredComboAncestorControlType: "ComboBox",
+        RequiredComboAncestorClassName: "NoAnimationComboBox",
+        ComboAncestorDepth: 2,
+        RequiredActivation: MeituExportFormatActivation.RuntimeDerivedClickablePoint,
+        SaveSurfaceMustRemainForeground: true,
+        PopupMustDisappear: true);
 
     /// <summary>The icon-font glyph both Meitu title-bar close controls carry as their name.</summary>
     /// <remarks>
@@ -514,12 +540,20 @@ internal sealed class FakeUiElement
 internal sealed class RecordingUiElementProvider : IUiElementProvider
 {
     private readonly Dictionary<nint, List<FakeUiElement>> _tree = [];
+    private readonly Dictionary<nint, UiElementIdentity> _roots = [];
 
     /// <summary>Automation names each window reports, keyed by handle.</summary>
     public Dictionary<nint, List<string>> Texts { get; } = [];
 
     /// <summary>What was invoked, by automation id where there is one. Asserted <i>empty</i> more often than not.</summary>
     public List<string> Invocations { get; } = [];
+
+    /// <summary>Elements activated through the live-clickable-point fallback.</summary>
+    public List<string> Clicks { get; } = [];
+
+    public List<ExternalProcessRef> ClickAcceptedProcesses { get; } = [];
+
+    public List<WindowHandle> ClickExpectedForegroundWindows { get; } = [];
 
     public List<(string Element, string Value)> ValueWrites { get; } = [];
 
@@ -537,6 +571,18 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
 
         elements.Add(element);
         return element;
+    }
+
+    public void SetRootIdentity(WindowHandle window, UiElementIdentity identity) =>
+        _roots[window.Value] = identity;
+
+    public void Remove(WindowHandle window, string automationId)
+    {
+        if (_tree.TryGetValue(window.Value, out List<FakeUiElement>? elements))
+        {
+            elements.RemoveAll(element =>
+                string.Equals(element.Identity.AutomationId, automationId, StringComparison.Ordinal));
+        }
     }
 
     /// <summary>
@@ -797,7 +843,7 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
 
         FakeUiElement format = Add(surface, new UiElementIdentity(
             "ComboBox", "MainWindow.MaskDialog.SaveMaskWidget.wName.formatCombo", string.Empty,
-            "NoAnimationComboBox", processId, [UiPatternKind.Value],
+            "NoAnimationComboBox", processId, [UiPatternKind.Invoke, UiPatternKind.Value],
             new UiBounds(200, 10, 64, 28), true, false));
 
         Add(surface, new UiElementIdentity(
@@ -805,6 +851,26 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
             "QPushButton", processId, [UiPatternKind.Invoke], new UiBounds(10, 60, 84, 36), true, false));
 
         SetReadValue(format.Identity.AutomationId, MeituFakes.ExportFormatValue);
+    }
+
+    /// <summary>Adds the transient format popup and its signed png-item ancestry.</summary>
+    public FakeUiElement? AddExportFormatPopupControls(
+        WindowHandle popup,
+        int processId = 4242,
+        bool includePngItem = true,
+        bool pngItemEnabled = true,
+        int? pngItemProcessId = null)
+    {
+        FakeUiElement combo = Add(popup, new UiElementIdentity(
+            "ComboBox", string.Empty, string.Empty, "NoAnimationComboBox", processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value], new UiBounds(200, 38, 72, 134), true, false));
+        FakeUiElement list = Add(popup, new UiElementIdentity(
+            "List", string.Empty, string.Empty, "QListView", processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value], new UiBounds(207, 45, 58, 120), true, false), combo);
+        return includePngItem ? Add(popup, new UiElementIdentity(
+            "ListItem", string.Empty, MeituFakes.ExportFormatValue, string.Empty, pngItemProcessId ?? processId,
+            [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.SelectionItem],
+            new UiBounds(207, 69, 58, 24), pngItemEnabled, false), list) : null;
     }
 
     /// <summary>
@@ -879,6 +945,12 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         OperationResult.Ok<IReadOnlyList<UiElementRef>>(
             [.. Matching(root, query).Select(e => Reference(e, root))]);
 
+    public OperationResult<UiElementIdentity> DescribeWindow(WindowHandle root) =>
+        _roots.TryGetValue(root.Value, out UiElementIdentity? identity)
+            ? OperationResult.Ok(identity)
+            : OperationResult.Fail<UiElementIdentity>(
+                FailureCode.MeituOpenInputFailed, $"No root identity was scripted for {root}.");
+
     public OperationResult<UiElementIdentity> Describe(UiElementRef element) =>
         element.Native is FakeUiElement fake
             ? OperationResult.Ok(fake.Identity)
@@ -916,6 +988,21 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         string description = Describes(element);
         Invocations.Add(description);
         OnInvoke?.Invoke(description);
+        return OperationResult.Ok();
+    }
+
+    public Action<string>? OnClickAtLiveClickablePoint { get; set; }
+
+    public OperationResult<Unit> ClickAtLiveClickablePoint(
+        UiElementRef element,
+        ExternalProcessRef acceptedProcess,
+        WindowHandle expectedForegroundWindow)
+    {
+        string description = Describes(element);
+        Clicks.Add(description);
+        ClickAcceptedProcesses.Add(acceptedProcess);
+        ClickExpectedForegroundWindows.Add(expectedForegroundWindow);
+        OnClickAtLiveClickablePoint?.Invoke(description);
         return OperationResult.Ok();
     }
 

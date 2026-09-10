@@ -63,6 +63,8 @@ public sealed class GuardedMeituExportTests
 
         public required ExternalWindowRef DestinationDialog { get; init; }
 
+        public required ExternalWindowRef FormatPopup { get; init; }
+
         public required ExternalProcessRef Process { get; init; }
 
         public int Invocations(string automationId) =>
@@ -88,6 +90,15 @@ public sealed class GuardedMeituExportTests
         bool destinationDialogCloses = true,
         string? formatValue = null,
         bool dropWrites = false,
+        bool raiseFormatPopup = false,
+        string formatPopupClass = "Qt51517QWindowPopupSaveBits",
+        string formatPopupUiaClass = "QComboBoxPrivateContainer",
+        int? formatPopupProcessId = null,
+        bool includePngItem = true,
+        bool pngItemEnabled = true,
+        int? pngItemProcessId = null,
+        bool clickChangesFormat = true,
+        bool popupDisappearsAfterClick = true,
         bool showResultSurfaceAfterConfirm = true,
         MeituBaseline? baseline = null)
     {
@@ -99,6 +110,9 @@ public sealed class GuardedMeituExportTests
         ExternalWindowRef resultSurface = MeituFakes.Window(
             handle: 0x6100, owningProcessId: process.ProcessId, title: "Form",
             className: MeituFakes.ExportSurfaceClass);
+        ExternalWindowRef formatPopup = MeituFakes.Window(
+            handle: 0x6200, owningProcessId: formatPopupProcessId ?? process.ProcessId, title: "XiuXiu",
+            className: formatPopupClass);
         ExternalWindowRef destination = MeituFakes.Window(
             handle: 0x7000, owningProcessId: process.ProcessId, title: "另存为", className: "#32770");
 
@@ -121,6 +135,17 @@ public sealed class GuardedMeituExportTests
         elements.SetReadValue(SurfaceFormatId, formatValue ?? MeituFakes.ExportFormatValue);
 
         elements.AddExportResultControls(resultSurface.Handle, process.ProcessId);
+        elements.SetRootIdentity(formatPopup.Handle, new UiElementIdentity(
+            "Window", string.Empty, "XiuXiu", formatPopupUiaClass,
+            formatPopupProcessId ?? process.ProcessId,
+            [UiPatternKind.Invoke, UiPatternKind.Value, UiPatternKind.Window],
+            new UiBounds(200, 38, 72, 134), true, false));
+        elements.AddExportFormatPopupControls(
+            formatPopup.Handle,
+            process.ProcessId,
+            includePngItem,
+            pngItemEnabled,
+            pngItemProcessId);
         elements.AddDestinationDialogControls(destination.Handle, process.ProcessId);
 
         elements.SilentlyDropValueWrites = dropWrites;
@@ -138,6 +163,7 @@ public sealed class GuardedMeituExportTests
             Editor = new MeituTarget(process, editorWindow),
             Surface = surface,
             DestinationDialog = destination,
+            FormatPopup = formatPopup,
             Process = process,
         };
 
@@ -152,6 +178,11 @@ public sealed class GuardedMeituExportTests
             {
                 locator.OwnedDialogs.Remove(surface);
                 locator.PutInForeground(editorWindow);
+            }
+            else if (invoked == SurfaceFormatId && raiseFormatPopup)
+            {
+                locator.Replace(process, editorWindow, formatPopup);
+                locator.PutInForeground(surface);
             }
             else if (invoked == SaveAsId && raiseDestinationDialog)
             {
@@ -177,6 +208,23 @@ public sealed class GuardedMeituExportTests
             else if (invoked == ResultCloseId)
             {
                 locator.OwnedDialogs.Remove(resultSurface);
+            }
+        };
+
+        elements.OnClickAtLiveClickablePoint = clicked =>
+        {
+            if (clicked == MeituFakes.ExportFormatValue && raiseFormatPopup)
+            {
+                if (clickChangesFormat)
+                {
+                    elements.SetReadValue(SurfaceFormatId, MeituFakes.ExportFormatValue);
+                }
+
+                if (popupDisappearsAfterClick)
+                {
+                    locator.Replace(process, editorWindow);
+                    locator.PutInForeground(surface);
+                }
             }
         };
 
@@ -231,7 +279,7 @@ public sealed class GuardedMeituExportTests
     }
 
     /// <summary>
-    /// The order is: fields, then Save As, then the destination, then confirm.
+    /// The order is: confirm the existing PNG, set/read the name, then Save As and confirm.
     /// </summary>
     /// <remarks>
     /// Checkable rather than a matter of reading the code. If Save As were invoked before the
@@ -240,23 +288,26 @@ public sealed class GuardedMeituExportTests
     /// read-back check proving nothing.
     /// </remarks>
     [Fact]
-    public async Task The_fields_are_set_and_read_back_before_Save_As_is_invoked()
+    public async Task Existing_PNG_is_read_without_a_write_or_popup_before_Save_As()
     {
         Scenario s = Build();
 
         await ExportAsync(s);
 
         int nameWrite = s.Elements.ValueWrites.FindIndex(w => w.Element == SurfaceFileNameId);
-        int formatWrite = s.Elements.ValueWrites.FindIndex(w => w.Element == SurfaceFormatId);
+        int formatRead = s.Elements.ValueReads.IndexOf(SurfaceFormatId);
         int nameRead = s.Elements.ValueReads.IndexOf(SurfaceFileNameId);
         int saveAs = s.Elements.Invocations.IndexOf(SaveAsId);
         int confirm = s.Elements.Invocations.IndexOf(DestinationConfirmId);
 
         nameWrite.ShouldBeGreaterThanOrEqualTo(0);
-        formatWrite.ShouldBeGreaterThanOrEqualTo(0);
+        formatRead.ShouldBeGreaterThanOrEqualTo(0);
         nameRead.ShouldBeGreaterThanOrEqualTo(0);
         saveAs.ShouldBeGreaterThanOrEqualTo(0);
         confirm.ShouldBeGreaterThan(saveAs);
+        s.Elements.ValueWrites.ShouldNotContain(write => write.Element == SurfaceFormatId);
+        s.Invocations(SurfaceFormatId).ShouldBe(0);
+        s.Elements.Clicks.ShouldBeEmpty();
     }
 
     /// <summary>
@@ -275,7 +326,7 @@ public sealed class GuardedMeituExportTests
         await ExportAsync(s);
 
         s.Elements.ValueWrites.ShouldAllBe(w => !w.Element.Contains("folder", StringComparison.OrdinalIgnoreCase));
-        s.Elements.ValueWrites.Count.ShouldBe(3);
+        s.Elements.ValueWrites.Count.ShouldBe(2);
     }
 
     // -----------------------------------------------------------------------------
@@ -337,6 +388,226 @@ public sealed class GuardedMeituExportTests
         s.Invocations(SaveAsId).ShouldBe(0);
         s.Invocations(DestinationConfirmId).ShouldBe(0);
         s.Invocations(CancelId).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task A_JPG_default_uses_the_recognised_popup_then_reads_PNG_before_Save_As()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsSuccess.ShouldBeTrue(export.IsFailure ? export.Failure.TechnicalDetail : string.Empty);
+        export.Value.ConfirmedFormatValue.ShouldBe("png");
+        s.Invocations(SurfaceFormatId).ShouldBe(1);
+        s.Elements.Clicks.ShouldBe(["png"]);
+        s.Elements.ClickAcceptedProcesses.ShouldBe([s.Process]);
+        s.Elements.ClickExpectedForegroundWindows.ShouldBe([s.Surface.Handle]);
+        s.Invocations(SaveAsId).ShouldBe(1);
+        s.Invocations(DestinationConfirmId).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task An_unknown_popup_stops_before_Save_As()
+    {
+        Scenario s = Build(
+            formatValue: "jpg", raiseFormatPopup: true, formatPopupClass: "UnknownPopup");
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+        s.Invocations(DestinationConfirmId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_preexisting_unknown_same_process_window_stops_before_the_popup_route()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        ExternalWindowRef unknown = MeituFakes.Window(
+            handle: 0x6300,
+            owningProcessId: s.Process.ProcessId,
+            title: "Unknown",
+            className: "UnknownPopup");
+        s.Locator.Replace(s.Process, s.Editor.Window, unknown);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Invocations(SurfaceFormatId).ShouldBe(0);
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Format_read_and_popup_open_cannot_use_two_different_partial_combo_matches()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        s.Elements.Remove(s.Surface.Handle, SurfaceFormatId);
+        s.Elements.AddIdentityDialogControl(
+            s.Surface.Handle,
+            SurfaceFormatId,
+            string.Empty,
+            "ComboBox",
+            "NoAnimationComboBox",
+            UiPatternKind.Value,
+            s.Process.ProcessId);
+        s.Elements.AddIdentityDialogControl(
+            s.Surface.Handle,
+            SurfaceFormatId,
+            string.Empty,
+            "ComboBox",
+            "NoAnimationComboBox",
+            UiPatternKind.Invoke,
+            s.Process.ProcessId);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Invocations(SurfaceFormatId).ShouldBe(0);
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_popup_with_the_wrong_UIA_class_stops_before_Save_As()
+    {
+        Scenario s = Build(
+            formatValue: "jpg", raiseFormatPopup: true, formatPopupUiaClass: "UnknownPopup");
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_foreground_change_while_the_non_activating_popup_is_open_stops_before_input()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        s.Elements.OnInvoke += invoked =>
+        {
+            if (invoked == SurfaceFormatId)
+            {
+                s.Locator.Foreground = new ForegroundIdentity(
+                    new WindowHandle(0xDEAD), 9999, "other");
+            }
+        };
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_popup_owned_by_another_process_stops_before_input()
+    {
+        Scenario s = Build(
+            formatValue: "jpg", raiseFormatPopup: true, formatPopupProcessId: 9999);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false, true, null)]
+    [InlineData(true, false, null)]
+    [InlineData(true, true, 9999)]
+    public async Task A_missing_disabled_or_wrong_process_PNG_item_stops_before_input(
+        bool includeItem,
+        bool enabled,
+        int? itemProcessId)
+    {
+        Scenario s = Build(
+            formatValue: "jpg",
+            raiseFormatPopup: true,
+            includePngItem: includeItem,
+            pngItemEnabled: enabled,
+            pngItemProcessId: itemProcessId);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+        s.Invocations(DestinationConfirmId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_click_whose_fresh_read_back_remains_JPG_stops_before_Save_As()
+    {
+        Scenario s = Build(
+            formatValue: "jpg", raiseFormatPopup: true, clickChangesFormat: false);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBe(["png"]);
+        s.Invocations(SaveAsId).ShouldBe(0);
+        s.Invocations(DestinationConfirmId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_popup_that_does_not_disappear_after_the_click_stops_before_Save_As()
+    {
+        Scenario s = Build(
+            formatValue: "jpg", raiseFormatPopup: true, popupDisappearsAfterClick: false);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBe(["png"]);
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_popup_replaced_between_recognition_and_input_is_not_clicked()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        bool popupOpened = false;
+        bool replaced = false;
+        s.Elements.OnInvoke += invoked => popupOpened |= invoked == SurfaceFormatId;
+        s.Locator.OnRefresh = handle =>
+        {
+            if (popupOpened && !replaced && handle == s.Surface.Handle)
+            {
+                replaced = true;
+                ExternalWindowRef unknown = s.FormatPopup with { ClassName = "ReplacementPopup" };
+                s.Locator.Replace(s.Process, s.Editor.Window, unknown);
+            }
+        };
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task A_format_control_replaced_while_the_popup_is_open_is_not_clicked()
+    {
+        Scenario s = Build(formatValue: "jpg", raiseFormatPopup: true);
+        s.Elements.OnInvoke += invoked =>
+        {
+            if (invoked == SurfaceFormatId)
+            {
+                s.Elements.Remove(s.Surface.Handle, SurfaceFormatId);
+            }
+        };
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsFailure.ShouldBeTrue();
+        s.Elements.Clicks.ShouldBeEmpty();
+        s.Invocations(SaveAsId).ShouldBe(0);
     }
 
     /// <summary>

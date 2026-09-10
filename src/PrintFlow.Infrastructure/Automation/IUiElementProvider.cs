@@ -57,8 +57,9 @@ public enum UiPatternKind
 
 /// <summary>An element rectangle in screen coordinates, recorded as evidence.</summary>
 /// <remarks>
-/// Never a click target. Nothing in this solution synthesises a pointer event and no code path
-/// turns these numbers back into a coordinate. They exist so a structural rule can assert that
+/// Never a stored click target. The one pointer route derives its point afresh from the native
+/// UIA element and does not accept or turn these copied values back into a coordinate. They exist
+/// so a structural rule can assert that
 /// a candidate owner actually <i>encloses</i> the marker it claims to own — one of the checks
 /// that separates the real owning control from a same-shaped decoy elsewhere in the tree
 /// (Epic 11300 Part B1 §4).
@@ -153,6 +154,9 @@ public interface IUiElementProvider
     /// </remarks>
     OperationResult<IReadOnlyList<UiElementRef>> FindAll(WindowHandle root, UiElementQuery query);
 
+    /// <summary>Reads the UIA identity of the already-verified root window itself.</summary>
+    OperationResult<UiElementIdentity> DescribeWindow(WindowHandle root);
+
     /// <summary>Reads the structural facts of a located element.</summary>
     /// <remarks>
     /// A read, and a fresh one: the identity returned describes the element now, not when it was
@@ -174,6 +178,22 @@ public interface IUiElementProvider
 
     /// <summary>Invokes an element that has been located beneath a verified window.</summary>
     OperationResult<Unit> Invoke(UiElementRef element);
+
+    /// <summary>
+    /// Clicks the live UIA clickable point of one already-located element, or sends nothing.
+    /// </summary>
+    /// <remarks>
+    /// This narrow fallback accepts no caller-supplied point. The implementation freshly checks
+    /// the element, its root window, the separately named foreground window, bounds and hit-test
+    /// identity before a single pointer sequence is sent. Qt combo popups do not activate, so
+    /// the foreground remains their signed Save surface; both windows must belong to the same
+    /// accepted process instance (PID plus start time). The only Product caller is Meitu's signed
+    /// export-format popup route, whose own rule first constrains the popup, item and ancestry.
+    /// </remarks>
+    OperationResult<Unit> ClickAtLiveClickablePoint(
+        UiElementRef element,
+        ExternalProcessRef acceptedProcess,
+        WindowHandle expectedForegroundWindow);
 
     /// <summary>Reads an element's value through the value pattern.</summary>
     /// <remarks>

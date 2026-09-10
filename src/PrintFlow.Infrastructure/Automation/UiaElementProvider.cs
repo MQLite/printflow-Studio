@@ -1,6 +1,10 @@
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using System.Windows.Automation;
 using PrintFlow.Domain.Results;
+
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace PrintFlow.Infrastructure.Automation;
 
@@ -113,6 +117,15 @@ public sealed class UiaElementProvider : IUiElementProvider
             return OperationResult.Fail<IReadOnlyList<UiElementRef>>(
                 FailureCode.MeituOpenInputFailed, $"Searching for {query} failed: {ex.Message}");
         }
+    }
+
+    /// <inheritdoc />
+    public OperationResult<UiElementIdentity> DescribeWindow(WindowHandle root)
+    {
+        OperationResult<AutomationElement> element = RootOf(root);
+        return element.IsFailure
+            ? OperationResult.Fail<UiElementIdentity>(element.Failure)
+            : Describe(new UiElementRef(element.Value, NameOf(element.Value), root));
     }
 
     /// <inheritdoc />
@@ -291,6 +304,170 @@ public sealed class UiaElementProvider : IUiElementProvider
                 FailureCode.MeituOpenInputFailed, $"Invoking '{element.Name}' failed: {ex.Message}");
         }
     }
+
+    /// <inheritdoc />
+    public OperationResult<Unit> ClickAtLiveClickablePoint(
+        UiElementRef element,
+        ExternalProcessRef acceptedProcess,
+        WindowHandle expectedForegroundWindow)
+    {
+        ArgumentNullException.ThrowIfNull(element);
+        ArgumentNullException.ThrowIfNull(acceptedProcess);
+
+        if (element.Native is not AutomationElement native || element.RootWindow.IsNone)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.MeituOpenInputFailed,
+                $"'{element.Name}' is not a live UI Automation element inside a verified window; " +
+                "no pointer input was sent.");
+        }
+
+        try
+        {
+            AutomationElement.AutomationElementInformation current = native.Current;
+            System.Windows.Rect bounds = current.BoundingRectangle;
+            if (!current.IsEnabled || current.IsOffscreen || bounds.IsEmpty)
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituTargetLost,
+                    $"'{element.Name}' is disabled, offscreen or has no live bounds; no pointer input was sent.");
+            }
+
+            if (expectedForegroundWindow.IsNone)
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituTargetLost,
+                    $"'{element.Name}' has no expected foreground window; no pointer input was sent.");
+            }
+
+            OperationResult<AutomationElement> root = RootOf(element.RootWindow);
+            if (root.IsFailure)
+            {
+                return OperationResult.Fail<Unit>(root.Failure);
+            }
+
+            OperationResult<AutomationElement> foregroundRoot = RootOf(expectedForegroundWindow);
+            if (foregroundRoot.IsFailure)
+            {
+                return OperationResult.Fail<Unit>(foregroundRoot.Failure);
+            }
+
+            if (!IsSameProcessInstance(acceptedProcess) ||
+                current.ProcessId != acceptedProcess.ProcessId ||
+                root.Value.Current.ProcessId != acceptedProcess.ProcessId ||
+                foregroundRoot.Value.Current.ProcessId != acceptedProcess.ProcessId ||
+                NativeMethods.GetForegroundWindow() != expectedForegroundWindow.Value)
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituTargetLost,
+                    $"'{element.Name}', its popup and the expected foreground window no longer belong " +
+                    "to the accepted process instance, or the expected window lost the foreground; " +
+                    "no pointer input was sent.");
+            }
+
+            if (!native.TryGetClickablePoint(out System.Windows.Point point) ||
+                !bounds.Contains(point))
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"'{element.Name}' exposes no live clickable point inside its current bounds; " +
+                    "no pointer input was sent.");
+            }
+
+            AutomationElement hit = AutomationElement.FromPoint(point);
+            if (!System.Windows.Automation.Automation.Compare(hit, native))
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituTargetLost,
+                    $"The live clickable point for '{element.Name}' now resolves to another element; " +
+                    "no pointer input was sent.");
+            }
+
+            int left = NativeMethods.GetSystemMetrics(NativeMethods.SM_XVIRTUALSCREEN);
+            int top = NativeMethods.GetSystemMetrics(NativeMethods.SM_YVIRTUALSCREEN);
+            int width = NativeMethods.GetSystemMetrics(NativeMethods.SM_CXVIRTUALSCREEN);
+            int height = NativeMethods.GetSystemMetrics(NativeMethods.SM_CYVIRTUALSCREEN);
+            if (width <= 1 || height <= 1 ||
+                point.X < left || point.X >= left + width ||
+                point.Y < top || point.Y >= top + height)
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"The live clickable point for '{element.Name}' is outside the active virtual desktop; " +
+                    "no pointer input was sent.");
+            }
+
+            int normalizedX = (int)Math.Round((point.X - left) * 65535d / (width - 1));
+            int normalizedY = (int)Math.Round((point.Y - top) * 65535d / (height - 1));
+            NativeMethods.POINTERINPUT[] sequence =
+            [
+                Pointer(normalizedX, normalizedY,
+                    NativeMethods.MOUSEEVENTF_MOVE |
+                    NativeMethods.MOUSEEVENTF_ABSOLUTE |
+                    NativeMethods.MOUSEEVENTF_VIRTUALDESK),
+                Pointer(normalizedX, normalizedY, NativeMethods.MOUSEEVENTF_LEFTDOWN),
+                Pointer(normalizedX, normalizedY, NativeMethods.MOUSEEVENTF_LEFTUP),
+            ];
+
+            // The foreground check and hit test are deliberately repeated at the last possible
+            // point. SendInput is not atomic with these reads, but no input is sent on an assumed
+            // or cached target.
+            if (!IsSameProcessInstance(acceptedProcess) ||
+                NativeMethods.GetForegroundWindow() != expectedForegroundWindow.Value ||
+                !System.Windows.Automation.Automation.Compare(AutomationElement.FromPoint(point), native))
+            {
+                return OperationResult.Fail<Unit>(
+                    FailureCode.MeituTargetLost,
+                    $"'{element.Name}' changed after validation; no pointer input was sent.");
+            }
+
+            uint sent = NativeMethods.SendPointerInput(
+                (uint)sequence.Length, sequence, Marshal.SizeOf<NativeMethods.POINTERINPUT>());
+            return sent == sequence.Length
+                ? OperationResult.Ok()
+                : OperationResult.Fail<Unit>(
+                    FailureCode.MeituOpenInputFailed,
+                    $"Windows accepted {sent} of {sequence.Length} pointer events for the freshly " +
+                    $"validated '{element.Name}' item.");
+        }
+        catch (ElementNotAvailableException ex)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.MeituTargetLost,
+                $"'{element.Name}' disappeared before its live clickable point could be used: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return OperationResult.Fail<Unit>(
+                FailureCode.MeituOpenInputFailed,
+                $"Reading the live clickable point for '{element.Name}' failed: {ex.Message}");
+        }
+    }
+
+    private static bool IsSameProcessInstance(ExternalProcessRef acceptedProcess)
+    {
+        try
+        {
+            using Process live = Process.GetProcessById(acceptedProcess.ProcessId);
+            return !live.HasExited && live.StartTime.ToUniversalTime() == acceptedProcess.StartedUtc;
+        }
+        catch (Exception ex) when (
+            ex is ArgumentException or InvalidOperationException or Win32Exception)
+        {
+            return false;
+        }
+    }
+
+    private static NativeMethods.POINTERINPUT Pointer(int x, int y, uint flags) => new()
+    {
+        type = NativeMethods.INPUT_MOUSE,
+        mi = new NativeMethods.POINTERINPUTDATA
+        {
+            dx = x,
+            dy = y,
+            dwFlags = flags,
+        },
+    };
 
     /// <inheritdoc />
     public OperationResult<string> GetValue(UiElementRef element)
