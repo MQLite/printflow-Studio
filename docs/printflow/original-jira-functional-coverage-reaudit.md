@@ -1881,3 +1881,34 @@ Final-source validation: Release build passed with **0 warnings and 0 errors**. 
 Product suite passed **11,778 tests, 0 failed, 0 skipped**, a +33 delta against the 11,745 baseline
 fully accounted for by the 33 tests this slice adds. Local implementation and documentation commits
 are recorded in the completion report.
+
+---
+
+# Delta — 10 September 2026: SCRUM-11130 Prepare Design Asset fixed-workstation E2E attempt
+
+*Append-only reassessment from exact CSV Work Item 11706 and related standing rows. Historical
+evidence is preserved. No Jira service was mutated.*
+
+| Item | Previous position | Reassessed current position |
+|---|---|---|
+| SCRUM-11130 | PARTIAL; the AC's real fixed-workstation run and six variants had not been executed | **PARTIAL.** A real portrait run exposed and drove a bounded fix for the retained-Meitu-welcome export defect; all 40 guarded-export tests and the 11,779-test full Release suite pass. Supporting reject/retry/manual/restart/unknown/output-validation contracts pass, including three live synthetic WPF/UIA restart phases. The required post-fix Product golden path did not run because the signed Photoshop readiness round trip failed, so no completed approved PNG or reviewed-hash binding exists |
+| SCRUM-11065 | PARTIAL; no seven-category passing run | **PARTIAL, unchanged.** The first live run passed transparent trim and reference TIFF only (2/7); later attempts were blocked at readiness before categories executed |
+| SCRUM-11123 | PARTIAL; no passed set or revalidation | **PARTIAL, unchanged.** No complete run passed, no revalidation writer was invoked and the ordinary Production gate remains closed |
+| SCRUM-11136 | PARTIAL / not executed | **PARTIAL / not executed, unchanged.** No repeated automation-success measurement is claimed |
+| Parent SCRUM-11124 | Open release gate | **Not closed.** Other fixed E2Es, Maintop, physical-print and benchmark clauses are separate and unexecuted here |
+
+The live Meitu failure invoked neither Save nor Save As and wrote no output. The source and working
+copy remained byte-identical. Post-fix attempts b/c/d/e were correctly stopped by
+`PhotoshopTestImageRoundTrip`: Adobe's built-in Generator presented its known problem state or the
+owned probe remained open. No unknown dialog, signed preset, evidence authority, Photoshop setting,
+revalidation record, push or deployment was altered to force a pass.
+
+Full evidence, exact AC, chronology, harness classification and safety boundary:
+[SCRUM-11130 fixed-workstation E2E report](scrum-11130-prepare-design-asset-fixed-workstation-e2e.md).
+
+Final-source validation: Release build passed with **0 warnings and 0 errors**. The full Product
+suite passed **11,779 tests, 0 failed, 0 skipped**. Local implementation commit: `fee557e`.
+Documentation follows separately. Nothing was pushed.
+
+**PARTIAL — PRODUCT DEFECT FIXED AND SUPPORTING VARIANTS PASS; THE REAL OPERATOR-FACING GOLDEN PATH
+REMAINS BLOCKED BY PHOTOSHOP READINESS, SO SCRUM-11130 IS NOT FULL.**
