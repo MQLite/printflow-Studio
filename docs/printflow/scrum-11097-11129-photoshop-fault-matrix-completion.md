@@ -655,8 +655,15 @@ added to two theories (+2), and the behavioural theory gained a blocking-dialog 
 
 **Git state.** Local `master` only. Started from `456cb842b0b5c87a31b9ccdd562151ebd2c392aa`. No
 branch, worktree, alternate clone or alternate checkout was created; nothing was amended, rebased,
-pushed or deployed; no AI-attribution trailer was added. Two local commits, recorded in the re-audit
-delta.
+pushed or deployed; no AI-attribution trailer was added.
+
+| Commit | Subject |
+|---|---|
+| `72d1401` | `test: extend fake Photoshop structural fault scenarios` — the twelve Product and test files |
+| `4d06218` | `docs: record Photoshop validation matrix closure` — this report and the re-audit delta |
+
+The working tree is clean at `4d06218` and this line, recording the hashes, follows in one further
+local commit.
 
 **Environment.** No Photoshop, Meitu or Maintop process was launched at any point. No COM, no UI
 automation, no dependency on the verified workstation. The existing 300-PPI TIFF contract, W1
