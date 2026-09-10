@@ -45,12 +45,22 @@ namespace PrintFlow.Tests.Smoke;
 /// installation reports itself Blocked rather than producing a green result that means nothing.
 /// </para>
 /// <para>
+/// <b>Why it is in the environment-variable collection.</b> Everything about an invocation of this
+/// run arrives through process environment variables, and those are process-global. The protocol
+/// tests in <c>RegressionEvidenceIntegrityTests</c> set the same variables, so without a shared
+/// collection xUnit could start this run against another test's values — which on this workstation
+/// would mean driving Meitu and Photoshop because a unit test happened to be running. The claim
+/// staked at the top of the run refuses that case before anything is composed; the collection makes
+/// sure it never arises.
+/// </para>
+/// <para>
 /// <b>The bootstrap.</b> The one thing this run does not require of the workstation is the
 /// revalidation record whose existence depends on this run — see
 /// <see cref="RegressionBootstrapWorkstationVerifier"/>, which suppresses that single check and
 /// only when it is the sole thing blocking. Whether it was needed is recorded in the run result.
 /// </para>
 /// </remarks>
+[Collection(PrintFlow.Tests.Fixtures.EnvironmentVariableCollection.Name)]
 public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper output)
 {
     private const string EnableVariable = "PRINTFLOW_STANDARD_REGRESSION_SET";
@@ -59,6 +69,12 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
     private const string RunIdVariable = "PRINTFLOW_REGRESSION_RUN_ID";
     private const string ReaggregateVariable = "PRINTFLOW_REGRESSION_REAGGREGATE";
     private const string DecisionsVariable = "PRINTFLOW_REGRESSION_VISUAL_DECISIONS";
+    private const string InvocationIdVariable = "PRINTFLOW_REGRESSION_INVOCATION_ID";
+    private const string CandidateVariable = "PRINTFLOW_REGRESSION_CANDIDATE_INSTALL_FOLDER";
+
+    /// <summary>Where the installation this run attests is expected to be.</summary>
+    private static readonly string DefaultCandidateInstallFolder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PrintFlow Studio");
 
     private const string DefaultSetRoot = @"D:\PrintFlowStudio\TestData\v1";
 
@@ -110,9 +126,33 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         review.DecidedBy.ShouldNotBeNullOrWhiteSpace(
             "A visual acceptance with no named decider is not an acceptance.");
 
+        string reviewedAt = review.DecidedAtLocal ?? DateTimeOffset.Now.ToString("o");
         Dictionary<string, RecordedVisualDecision> byId = review.Decisions
             .ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
 
+        // A decision may only conclude a check that is genuinely outstanding. Re-deciding one that
+        // already carries an outcome would let a second pass over the same run replace a recorded
+        // Failed with a Passed, which is not a review — it is an edit.
+        HashSet<string> outstanding = new(
+            previous.Cases
+                .SelectMany(c => c.ManualDecisions)
+                .Where(d => d.Outcome == RegressionOutcome.Pending)
+                .Select(d => d.Id),
+            StringComparer.OrdinalIgnoreCase);
+
+        ImmutableArray<string> notOutstanding =
+            [.. byId.Keys.Where(id => !outstanding.Contains(id)).Order(StringComparer.OrdinalIgnoreCase)];
+
+        if (!notOutstanding.IsEmpty)
+        {
+            throw new InvalidOperationException(
+                "These decisions answer nothing this run left open: " +
+                string.Join(", ", notOutstanding) +
+                ". A review concludes outstanding qualitative checks; it does not revise decided " +
+                "ones, and it cannot turn a Blocked, Failed or unexecuted case into a success.");
+        }
+
+        List<RegressionReviewDecision> recorded = [];
         List<RegressionCaseResult> updated = [];
         foreach (RegressionCaseResult existing in previous.Cases)
         {
@@ -121,15 +161,34 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 ManualDecisions =
                 [
                     .. existing.ManualDecisions.Select(pending =>
-                        byId.TryGetValue(pending.Id, out RecordedVisualDecision? decision)
-                            ? pending with
-                            {
-                                Outcome = Enum.Parse<RegressionOutcome>(decision.Outcome, ignoreCase: true),
-                                DecidedBy = review.DecidedBy,
-                                DecidedAtLocal = review.DecidedAtLocal ?? DateTimeOffset.Now.ToString("o"),
-                                Notes = decision.Notes,
-                            }
-                            : pending),
+                    {
+                        if (!byId.TryGetValue(pending.Id, out RecordedVisualDecision? decision))
+                        {
+                            return pending;
+                        }
+
+                        // The decision is about a picture, so it is bound to that picture as this
+                        // run hashed it. An artefact that no longer hashes to what the run recorded
+                        // is not the thing the reviewer looked at, and a decision about it cannot
+                        // be carried into the run's verdict.
+                        RegressionArtefact? artefact = ArtefactFor(existing, pending);
+                        VerifyArtefactUnchanged(existing, pending, artefact);
+
+                        RegressionOutcome outcome =
+                            Enum.Parse<RegressionOutcome>(decision.Outcome, ignoreCase: true);
+
+                        recorded.Add(new RegressionReviewDecision(
+                            pending.Id, outcome, artefact?.Path, artefact?.Sha256, decision.Notes));
+
+                        return pending with
+                        {
+                            Outcome = outcome,
+                            DecidedBy = review.DecidedBy,
+                            DecidedAtLocal = reviewedAt,
+                            EvidencePath = artefact?.Path ?? pending.EvidencePath,
+                            Notes = decision.Notes,
+                        };
+                    }),
                 ],
             };
 
@@ -142,15 +201,76 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             }
         }
 
+        // The execution's own facts are carried across untouched: its id, when it started, when it
+        // *completed*, the workstation, the candidate and preset it ran against, and every
+        // assertion and artefact digest its cases recorded. Only the outstanding decisions change.
+        // Re-stamping completedAtLocal to now, which this path used to do, made an old run look as
+        // though it had just executed — the reviewer's time belongs to the review, and it is
+        // recorded there (PF-AUDIT-R1).
         StandardRegressionSetRunResult rederived = StandardRegressionSetRunResult.From(
             previous.SetId, previous.RunId, previous.StartedAtLocal,
-            DateTimeOffset.Now.ToString("o"), previous.EvidencePath, previous.Workstation,
+            previous.CompletedAtLocal, previous.EvidencePath, previous.Workstation,
             previous.ProductVersion, previous.PresetId, previous.PresetVersion, previous.AdapterMode,
-            updated);
+            updated,
+            previous.Binding,
+            [
+                // Appended, never replaced: a run that has been looked at twice has two reviews,
+                // and the earlier one is part of what happened to it.
+                .. previous.Reviews.IsDefault ? [] : previous.Reviews,
+                new RegressionReviewRecord(
+                    Guid.NewGuid().ToString(),
+                    review.DecidedBy,
+                    reviewedAt,
+                    review.Synthetic,
+                    [.. recorded]),
+            ]);
 
         WriteResult(runFolder, rederived);
         output.WriteLine(string.Empty);
         output.WriteLine(rederived.Verdict);
+    }
+
+    /// <summary>The artefact a manual check was recorded against, if the run named one.</summary>
+    private static RegressionArtefact? ArtefactFor(
+        RegressionCaseResult existing, RegressionManualDecision pending) =>
+        pending.EvidencePath is { } named && !string.IsNullOrWhiteSpace(named)
+            ? existing.ProducedArtefacts.FirstOrDefault(a =>
+                string.Equals(a.Path, named, StringComparison.OrdinalIgnoreCase))
+            : null;
+
+    /// <summary>Refuses a decision whose artefact is not the one the run produced.</summary>
+    private static void VerifyArtefactUnchanged(
+        RegressionCaseResult existing, RegressionManualDecision pending, RegressionArtefact? artefact)
+    {
+        if (artefact is null)
+        {
+            throw new InvalidOperationException(
+                $"{existing.Category} / {pending.Id}: the run recorded no artefact for this check, " +
+                "so there is nothing a decision about it could be bound to.");
+        }
+
+        if (string.IsNullOrWhiteSpace(artefact.Sha256))
+        {
+            throw new InvalidOperationException(
+                $"{existing.Category} / {pending.Id}: '{artefact.Path}' was recorded without a " +
+                "digest, so a decision about it cannot be bound to what was actually produced.");
+        }
+
+        if (!File.Exists(artefact.Path))
+        {
+            throw new InvalidOperationException(
+                $"{existing.Category} / {pending.Id}: '{artefact.Path}' is gone. A decision is " +
+                "about an artefact; this one can no longer be shown.");
+        }
+
+        string actual = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(artefact.Path)));
+        if (!string.Equals(actual, artefact.Sha256, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"{existing.Category} / {pending.Id}: '{artefact.Path}' now hashes to {actual}; the " +
+                $"run recorded {artefact.Sha256}. This is not the artefact the run produced, so a " +
+                "decision about it is not a decision about this run.");
+        }
     }
 
     [Fact]
@@ -165,11 +285,24 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         string runId = Environment.GetEnvironmentVariable(RunIdVariable)
             ?? DateTime.Now.ToString("yyyyMMdd-HHmmss");
         string runFolder = Path.Combine(setRoot, "runs", runId);
-        Directory.CreateDirectory(runFolder);
+
+        // The claim is the first thing this run does — before configuration is read, before the
+        // graph is composed, before anything looks at an external application. A run identity that
+        // is already claimed, or a destination that already holds a completed run, stops here at no
+        // cost and destroys nothing (PF-AUDIT-R1, finding F4). The wrapper mints the invocation id;
+        // a direct invocation of this test mints its own, so the seam cannot be used to inherit
+        // somebody else's identity.
+        string invocationId = Environment.GetEnvironmentVariable(InvocationIdVariable) is { } supplied &&
+            !string.IsNullOrWhiteSpace(supplied)
+                ? supplied
+                : Guid.NewGuid().ToString();
+
+        RegressionExecutionClaim claim = RegressionExecutionClaim.Stake(runFolder, runId, invocationId);
 
         DateTimeOffset startedAt = DateTimeOffset.Now;
         output.WriteLine($"Set root : {setRoot}");
         output.WriteLine($"Run      : {runFolder}");
+        output.WriteLine($"Claim    : invocation {claim.InvocationId} by {claim.ClaimedBy}");
 
         // ------------------------------------------------------------------------------
         // Layer 1, re-asserted here
@@ -187,6 +320,19 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         PrintFlowConfiguration configuration = LoadConfiguration();
         string workstation = Environment.MachineName;
 
+        // Everything this run is about to test, captured now, by the thing testing it. Built before
+        // the first result can be written so that every exit from here — preflight refusal, wrong
+        // adapter mode, blocked environment, or a completed run — carries the same bound facts and
+        // no path can produce a result a reader has to guess about (PF-AUDIT-R1, finding F3).
+        RegressionEvidenceBinding binding = Bind(set, configuration, invocationId, output);
+        output.WriteLine(
+            $"Candidate: {binding.CandidateInstallFolder ?? "(none named)"} " +
+            $"[{ProductBuildIdentity.Fingerprint(binding.CandidateProductAssemblies)[..12]}…]");
+        foreach (string problem in binding.CandidateProblems)
+        {
+            output.WriteLine("CANDIDATE " + problem);
+        }
+
         if (!problems.IsEmpty)
         {
             WriteResult(runFolder, StandardRegressionSetRunResult.From(
@@ -195,7 +341,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 configuration.Adapters.Mode,
                 [.. StandardRegressionCategories.Required.Select(category => Blocked(
                     "(preflight)", category,
-                    "The set did not pass static validation, so no case was started."))]));
+                    "The set did not pass static validation, so no case was started."))],
+                binding));
             Assert.Fail("The regression set failed preflight validation; no case was run. See result.json.");
         }
 
@@ -208,7 +355,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 [.. StandardRegressionCategories.Required.Select(category => Blocked(
                     "(configuration)", category,
                     $"Adapters:Mode is '{configuration.Adapters.Mode}'. Fake adapters cannot stand as " +
-                    "fixed-workstation regression evidence, so nothing was run."))]));
+                    "fixed-workstation regression evidence, so nothing was run."))],
+                binding));
             Assert.Fail($"Adapters:Mode is '{configuration.Adapters.Mode}', not Production. Nothing was run.");
         }
 
@@ -285,7 +433,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 [.. StandardRegressionCategories.Required.Select(category => Blocked(
                     "(environment)", category,
                     "The required live environment checks did not all pass, so no external " +
-                    "application was driven: " + Truncate(why, 400)))]));
+                    "application was driven: " + Truncate(why, 400)))],
+                binding));
             Assert.Fail("Live environment checks did not all pass. Nothing was run. See readiness.json.");
         }
 
@@ -302,7 +451,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 configuration.Adapters.Mode,
                 [.. StandardRegressionCategories.Required.Select(category => Blocked(
                     "(environment)", category,
-                    "The workstation did not verify, so no case was started: " + Truncate(why, 400)))]));
+                    "The workstation did not verify, so no case was started: " + Truncate(why, 400)))],
+                binding));
             Assert.Fail("The workstation did not verify. Nothing was run. See result.json and readiness.json.");
         }
 
@@ -364,7 +514,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         StandardRegressionSetRunResult run = StandardRegressionSetRunResult.From(
             set.SetId!, runId, Iso(startedAt), Iso(DateTimeOffset.Now), runFolder,
             workstation, ProductVersion(), configuration.Preset.Id, configuration.Preset.Version,
-            configuration.Adapters.Mode, results);
+            configuration.Adapters.Mode, results, binding);
 
         WriteResult(runFolder, run);
         output.WriteLine(string.Empty);
@@ -930,6 +1080,123 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         return version is null ? "(unreadable)" : $"{version.Major}.{version.Minor}.{version.Build}";
     }
 
+    /// <summary>
+    /// Captures what this run is testing, at the time it tests it (PF-AUDIT-R1, finding F3).
+    /// </summary>
+    /// <remarks>
+    /// <b>Read here and nowhere later.</b> The defect this closes was a writer that read the
+    /// machine at publication time and paired those facts with a status it had copied from a run.
+    /// Every fact below is read by the process that is about to drive the set, so a record built
+    /// from it describes an environment something actually ran in. A fact that cannot be read is
+    /// left null and reported; nothing is filled in from the machine afterwards.
+    /// <para>
+    /// <b>Harness and candidate.</b> The harness is the PrintFlow code this test host loaded — the
+    /// bytes actually exercised. The candidate is the installation the resulting record will speak
+    /// for. They are not the same bytes even for one commit, because an installation carries a
+    /// RID-specific self-contained publish, so they are checked against each other by build
+    /// identity and each is pinned by its own digests. A candidate that cannot be read, or that was
+    /// built from different source than the harness, is recorded as a problem rather than
+    /// quietly omitted: a run whose candidate is unbound can still produce evidence of what
+    /// happened, but no publication may follow from it.
+    /// </para>
+    /// </remarks>
+    private static RegressionEvidenceBinding Bind(
+        StandardRegressionSet set,
+        PrintFlowConfiguration configuration,
+        string invocationId,
+        ITestOutputHelper output)
+    {
+        ImmutableArray<ProductAssemblyIdentity> harness = ProductBuildIdentity.Running();
+
+        string candidateFolder = Environment.GetEnvironmentVariable(CandidateVariable) is { } named &&
+            !string.IsNullOrWhiteSpace(named)
+                ? named
+                : DefaultCandidateInstallFolder;
+
+        List<string> candidateProblems = [];
+        ImmutableArray<ProductAssemblyIdentity> candidate = Directory.Exists(candidateFolder)
+            ? ProductBuildIdentity.FromFolder(candidateFolder)
+            : [];
+
+        if (!Directory.Exists(candidateFolder))
+        {
+            candidateProblems.Add(
+                $"No installation at '{candidateFolder}', so this run attests no installed " +
+                "candidate. Its evidence stands, but no revalidation can be published from it.");
+        }
+        else
+        {
+            candidateProblems.AddRange(
+                ProductBuildIdentity.CompareBuildIdentity(candidate, harness)
+                    .Select(difference =>
+                        "The installed candidate was not built from the source this run exercised. " +
+                        difference));
+        }
+
+        string workspaceRoot = Path.GetFullPath(configuration.Workspace.Root);
+        string presetPath = Path.Combine(workspaceRoot, configuration.Preset.Path);
+        string? presetSha = File.Exists(presetPath)
+            ? Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(presetPath)))
+            : null;
+
+        // The accepted external-binary digests come from the preset through the same reader the
+        // application uses, so the run binds the identities the gate enforces rather than a second
+        // reading of the same JSON.
+        string? meitu = null;
+        string? photoshop = null;
+        if (presetSha is null)
+        {
+            candidateProblems.Add(
+                $"The configured preset manifest '{presetPath}' could not be read, so this run " +
+                "established neither its digest nor the accepted external-binary identities.");
+        }
+        else
+        {
+            OperationResult<WorkstationRequirements> requirements = PresetWorkstationRequirements.Read(
+                presetPath, configuration.Preset.Id, configuration.Preset.Version,
+                Sha256.Parse(configuration.Preset.ExpectedSha256));
+
+            if (requirements.IsSuccess)
+            {
+                meitu = requirements.Value.Meitu.Sha256.ToString();
+                photoshop = requirements.Value.Photoshop.Sha256.ToString();
+            }
+            else
+            {
+                // Recorded as a problem, not only narrated. A fact this run failed to establish must
+                // reach the writer as a refusal; leaving it null and mentioning it in the log is how
+                // the publication step comes to fill it in from the machine instead.
+                candidateProblems.Add(
+                    "The accepted preset could not be read, so this run established no accepted " +
+                    $"Meitu or Photoshop identity: {requirements.Failure}");
+            }
+        }
+
+        ImmutableArray<RegressionSetManifestIdentity> manifests =
+        [
+            .. set.Assets
+                .Where(a => a.ManifestSha256 is not null)
+                .OrderBy(a => a.FixtureId, StringComparer.OrdinalIgnoreCase)
+                .Select(a => new RegressionSetManifestIdentity(
+                    a.FixtureId, a.Category, a.ManifestSha256!, a.Sha256)),
+        ];
+
+        return new RegressionEvidenceBinding(
+            RegressionEvidenceBinding.CurrentVersion,
+            invocationId,
+            harness,
+            typeof(StandardRegressionSetWorkstationSmoke).Assembly.GetName().Name,
+            candidateFolder,
+            candidate,
+            [.. candidateProblems],
+            presetSha,
+            Environment.OSVersion.Version.Build.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            meitu,
+            photoshop,
+            RegressionEvidenceBinding.DigestOfSet(manifests),
+            manifests);
+    }
+
     private static void WriteResult(string runFolder, StandardRegressionSetRunResult run) =>
         File.WriteAllText(Path.Combine(runFolder, "result.json"), run.ToJson());
 
@@ -937,8 +1204,16 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
     /// <param name="DecidedBy">Who looked. Required, and written into every decision it carries.</param>
     /// <param name="DecidedAtLocal">When, if the file states it; otherwise the moment of merging.</param>
     /// <param name="Decisions">One entry per manual-check id.</param>
+    /// <param name="Synthetic">
+    /// Set by a test of this protocol, and by nothing else. A synthetic decision is recorded as
+    /// synthetic in the run's review history: this path does not invent a human reviewer, and a
+    /// decision made by a test must never read later as one made by a person.
+    /// </param>
     private sealed record RecordedVisualReview(
-        string DecidedBy, string? DecidedAtLocal, ImmutableArray<RecordedVisualDecision> Decisions);
+        string DecidedBy,
+        string? DecidedAtLocal,
+        ImmutableArray<RecordedVisualDecision> Decisions,
+        bool Synthetic = false);
 
     private sealed record RecordedVisualDecision(string Id, string Outcome, string? Notes);
 

@@ -35,6 +35,22 @@
 .PARAMETER RunId
     Name the run folder. Defaults to a local timestamp.
 
+    A run identity belongs to one execution. If the folder already exists this script refuses and
+    stops: it does not reuse the destination and it does not delete what is there. Before
+    PF-AUDIT-R1 a reused identity meant a previous run's result.json was still on disk when a new
+    invocation failed before writing its own, and this script reported that old Passed as this
+    invocation's success. Pick a different -RunId; the default timestamp already differs.
+
+.PARAMETER CandidateInstallFolder
+    The PrintFlow Studio installation this run is testing on behalf of. Defaults to
+    %ProgramFiles%\PrintFlow Studio.
+
+    Recorded with the run so that the revalidation written afterwards is about an installation this
+    run actually attested. The run drives PrintFlow from the built repository, not from the
+    installed executable, so the two are bound by build identity: a candidate built from different
+    source than the harness is recorded as unbound and no revalidation can be published from that
+    run.
+
 .PARAMETER RecordVisualReview
     A JSON file of decisions for the qualitative checks a completed run left open. With
     -RunId, re-derives that run's verdict from evidence already on disk; nothing is re-run, and a
@@ -67,7 +83,8 @@ param(
     [string[]] $Categories,
     [string] $RunId,
     [string] $RecordVisualReview,
-    [string] $Configuration = 'Release'
+    [string] $Configuration = 'Release',
+    [string] $CandidateInstallFolder = (Join-Path $env:ProgramFiles 'PrintFlow Studio')
 )
 
 Set-StrictMode -Version Latest
@@ -256,6 +273,14 @@ $runFolder = Join-Path $SetRoot "runs\$RunId"
 $env:PRINTFLOW_REGRESSION_SET_ROOT = $SetRoot
 $env:PRINTFLOW_REGRESSION_RUN_ID = $RunId
 
+# One invocation, one identity, minted here before anything is started. The run stamps it into the
+# result it writes, and the Report stage below refuses any result that does not carry it. That is
+# what makes "this file was produced by this invocation" a checkable claim rather than an
+# assumption about file timestamps (PF-AUDIT-R1, finding F4).
+$InvocationId = [guid]::NewGuid().ToString()
+$env:PRINTFLOW_REGRESSION_INVOCATION_ID = $InvocationId
+$env:PRINTFLOW_REGRESSION_CANDIDATE_INSTALL_FOLDER = $CandidateInstallFolder
+
 if ($RecordVisualReview) {
     # Re-derivation, not a run. The artefacts already exist and the reviewer has looked at them.
     if (-not (Test-Path -LiteralPath (Join-Path $runFolder 'result.json'))) {
@@ -268,9 +293,25 @@ if ($RecordVisualReview) {
     $env:PRINTFLOW_STANDARD_REGRESSION_SET = $null
     $filter = 'FullyQualifiedName~StandardRegressionSetWorkstationSmoke.Re_derive_a_completed_run'
 } else {
+    # A new execution claims its destination before the host can operate. An existing run folder is
+    # refused, never reused and never cleared: what is in it is evidence that this identity has
+    # already been used, and deleting it to make room would destroy the one fact this refusal
+    # exists to report.
+    if (Test-Path -LiteralPath $runFolder) {
+        Write-Host ''
+        Write-Host "Run identity '$RunId' already has a destination at '$runFolder'." -ForegroundColor Red
+        Write-Host ('A new execution does not reuse a run identity and nothing here was deleted. ' +
+                    'Start again with a different -RunId.') -ForegroundColor Red
+        Write-Host ('To record a visual review of that existing run instead, use ' +
+                    "-RunId $RunId -RecordVisualReview <decisions.json>.") -ForegroundColor Yellow
+        exit 4
+    }
+
     Write-Host ''
     Write-Host '== Layer 2: fixed-workstation run ==' -ForegroundColor Cyan
     Write-Host "Run: $runFolder"
+    Write-Host "Invocation: $InvocationId"
+    Write-Host "Candidate : $CandidateInstallFolder"
     Write-Host 'Real Meitu and real Photoshop are driven for the categories whose recorded path names them.'
     $env:PRINTFLOW_STANDARD_REGRESSION_SET = '1'
     $env:PRINTFLOW_REGRESSION_REAGGREGATE = $null
@@ -293,12 +334,67 @@ $testExit = $LASTEXITCODE
 # ==========================================================================================
 $resultPath = Join-Path $runFolder 'result.json'
 Write-Host ''
+
+# The host's exit status is a fact about this invocation and it is read first. Before PF-AUDIT-R1
+# this script read result.json and reported Passed from it whatever the host had done, so a build
+# or host failure that wrote no result at all was reported as a success on the strength of a file a
+# previous run had left behind. A result can add to the host's verdict; it cannot overrule it.
+if ($testExit -ne 0) {
+    Write-Host "The test host exited $testExit." -ForegroundColor Red
+    if (Test-Path -LiteralPath $resultPath) {
+        Write-Host ('A result.json is present at this destination. It is not this invocation''s ' +
+                    'success: the host did not complete.') -ForegroundColor Red
+    }
+    Write-Host ''
+    Write-Host 'THE RUN DID NOT COMPLETE. No regression evidence was produced by this invocation.' -ForegroundColor Red
+    exit $testExit
+}
+
 if (-not (Test-Path -LiteralPath $resultPath)) {
     Write-Host "No result was written at '$resultPath'." -ForegroundColor Red
     exit 3
 }
 
 $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
+
+# The result has to belong to the run this invocation addressed, be complete, and be internally
+# consistent. Each of these is a way a file on disk can fail to be evidence of what just happened,
+# and none of them is answered by the file existing or by its timestamp.
+#
+# Both paths check the run identity and the presence of a binding, because both paths go on to print
+# a verdict and, for a pass, an instruction to publish it. Only a NEW EXECUTION checks the invocation
+# identity: a review deliberately updates a run some earlier invocation produced, so requiring this
+# invocation's id there would make reviewing a run impossible.
+$bindingProblems = New-Object System.Collections.Generic.List[string]
+
+if ($null -eq $result.PSObject.Properties['RunId'] -or $result.RunId -ne $RunId) {
+    $bindingProblems.Add("The result names run '$($result.RunId)'; this invocation addressed '$RunId'.")
+}
+
+# Checked for shape before it is read: under StrictMode an absent property throws, and a check whose
+# job is to refuse malformed output must report it rather than fail on it.
+if ($null -eq $result.PSObject.Properties['Binding'] -or $null -eq $result.Binding) {
+    $bindingProblems.Add('The result carries no evidence binding, so nothing ties it to a tested candidate.')
+} elseif ($null -eq $result.Binding.PSObject.Properties['InvocationId'] -or
+          [string]::IsNullOrWhiteSpace([string] $result.Binding.InvocationId)) {
+    $bindingProblems.Add('The result records no invocation identity.')
+} elseif (-not $RecordVisualReview -and $result.Binding.InvocationId -ne $InvocationId) {
+    $bindingProblems.Add(("The result was produced by invocation '$($result.Binding.InvocationId)'; " +
+                          "this one is '$InvocationId'."))
+}
+
+if ($bindingProblems.Count -gt 0) {
+    foreach ($problem in $bindingProblems) { Write-Host "  FAIL $problem" -ForegroundColor Red }
+    Write-Host ''
+    if ($RecordVisualReview) {
+        Write-Host ('THIS RESULT IS NOT EVIDENCE ABOUT THE RUN THAT WAS REVIEWED. Its decisions were ' +
+                    'recorded, but no verdict is reported from it.') -ForegroundColor Red
+    } else {
+        Write-Host ('THIS INVOCATION PRODUCED NO RESULT OF ITS OWN. What is on disk belongs to ' +
+                    'another execution and is not reported as this one''s outcome.') -ForegroundColor Red
+    }
+    exit 5
+}
 Write-Host '== Result ==' -ForegroundColor Cyan
 Write-Host ("  setId  : {0}" -f $result.SetId)
 Write-Host ("  status : {0}" -f $result.Status) -ForegroundColor $(if ($result.Status -eq 'Passed') { 'Green' } else { 'Red' })
@@ -313,7 +409,26 @@ Write-Host ''
 Write-Host "Evidence: $runFolder"
 
 if ($result.Status -eq 'Passed') {
+    # Shape-guarded: the binding is known to exist by now, but a binding from a future version of the
+    # contract might not carry this field, and StrictMode would terminate on it.
+    $candidateProblems = @()
+    if ($null -ne $result.Binding.PSObject.Properties['CandidateProblems']) {
+        $candidateProblems = @($result.Binding.CandidateProblems)
+    }
+
     Write-Host ''
+    if ($candidateProblems.Count -gt 0) {
+        # The set passed and that is what it says. What it cannot do is produce a revalidation,
+        # because this run could not bind the installation such a record would speak for. Said here
+        # rather than left for the writer to discover, so the operator is not sent to a command that
+        # will refuse.
+        Write-Host 'The set passed, but this run attests no installed candidate:' -ForegroundColor Yellow
+        foreach ($problem in $candidateProblems) { Write-Host "  - $problem" -ForegroundColor Yellow }
+        Write-Host ('No revalidation can be recorded from this run. Install the candidate built from ' +
+                    'this source and run the set again.') -ForegroundColor Yellow
+        exit 0
+    }
+
     Write-Host 'The set passed. Record the revalidation with:' -ForegroundColor Green
     Write-Host ("  tools\installer\Set-PrintFlowProductionRevalidation.ps1 -EnvironmentReadinessPassed " +
                 "-StandardRegressionSetPath '$SetRoot\manifests' -StandardRegressionSetResult '$resultPath'")
@@ -325,4 +440,6 @@ if ($result.Cases | Where-Object { $_.Outcome -eq 'Pending' }) {
     Write-Host 'Some cases are waiting on a recorded visual review. Nothing marks those passed automatically.' -ForegroundColor Yellow
     Write-Host ("  Re-run with: -RunId $RunId -RecordVisualReview <decisions.json>")
 }
-exit $(if ($testExit -ne 0) { $testExit } else { 1 })
+
+# The host completed and the result is this invocation's own; the set simply did not pass.
+exit 1

@@ -285,6 +285,10 @@ internal sealed class WorkstationVerificationFixture : IDisposable
     public ProductionRevalidationRecord MatchingRevalidationRecord() =>
         new(ProductionRevalidationRecord.CurrentSchemaVersion,
             ProductionRevalidationEvaluator.RunningProductVersion,
+            // The assemblies this test host is running, for the same reason the digests below are
+            // the fixture's own: a literal candidate identity would drift the moment anything was
+            // rebuilt, and the matrix would then be testing that the check tolerates drift.
+            ProductBuildIdentity.Running(),
             PresetId,
             PresetVersion,
             ManifestSha256.ToString(),
@@ -296,7 +300,11 @@ internal sealed class WorkstationVerificationFixture : IDisposable
                 "synthetic-regression-set-v1",
                 StandardRegressionSetStatus.Passed,
                 "2026-09-01T09:00:00+12:00",
-                Path.Combine(WorkspaceRoot, "Revalidation", "synthetic-run")),
+                Path.Combine(WorkspaceRoot, "Revalidation", "synthetic-run"),
+                RunId: "synthetic-20260901-090000",
+                InvocationId: "00000000-0000-4000-8000-00000000f1x7",
+                EvidenceBindingVersion: 1,
+                SetContentDigest: "SYNTHETIC-SET-CONTENT-DIGEST"),
             "SYNTHETIC\\operator",
             "2026-09-01T09:05:00+12:00");
 

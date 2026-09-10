@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -41,15 +42,42 @@ public enum StandardRegressionSetStatus
 /// <summary>
 /// The standard-regression-set half of a revalidation record.
 /// </summary>
+/// <remarks>
+/// <b>The identity fields are not decoration.</b> Before PF-AUDIT-R1 this carried a status and
+/// three descriptive strings, and a status with nothing behind it is what let a genuine pass from
+/// one environment be recorded against another. <see cref="RunId"/> and
+/// <see cref="InvocationId"/> name the one execution this outcome came from, and
+/// <see cref="EvidenceBindingVersion"/> states that a writer which checks the binding produced it.
+/// A <see cref="StandardRegressionSetStatus.Passed"/> outcome without them is refused by
+/// <see cref="ProductionRevalidationEvaluator"/> rather than trusted.
+/// </remarks>
 /// <param name="SetId">Which regression set was run, as the set itself names it.</param>
 /// <param name="Status">The verdict. Anything but <see cref="StandardRegressionSetStatus.Passed"/> blocks.</param>
 /// <param name="CompletedAtLocal">When the run finished, in the operator's local time.</param>
 /// <param name="EvidencePath">Where the run's evidence was written, for an auditor to open.</param>
+/// <param name="RunId">The run folder's identity, as the run named itself.</param>
+/// <param name="InvocationId">
+/// The single invocation that produced the result this outcome was derived from. Minted per
+/// invocation, so a result left behind by an earlier run cannot speak for a later one.
+/// </param>
+/// <param name="EvidenceBindingVersion">
+/// The version of the evidence contract the run wrote and the writer validated. Zero means an
+/// outcome recorded before that contract existed, which cannot be promoted to a current approval.
+/// </param>
+/// <param name="SetContentDigest">
+/// A digest over the set's manifests and inputs, so "the same set id" and "the same set content"
+/// are not the same claim. Derived by the run; the writer validates the per-manifest digests it
+/// summarises.
+/// </param>
 public sealed record StandardRegressionSetOutcome(
     string? SetId,
     StandardRegressionSetStatus Status,
     string? CompletedAtLocal,
-    string? EvidencePath);
+    string? EvidencePath,
+    string? RunId = null,
+    string? InvocationId = null,
+    int EvidenceBindingVersion = 0,
+    string? SetContentDigest = null);
 
 /// <summary>
 /// The operator's record that this exact environment was revalidated and may run Production
@@ -90,6 +118,11 @@ public sealed record StandardRegressionSetOutcome(
 /// </remarks>
 /// <param name="SchemaVersion">Bumped only by a breaking change; an unknown version blocks.</param>
 /// <param name="ProductVersion">The PrintFlow Studio version that was revalidated.</param>
+/// <param name="ProductAssemblies">
+/// Which PrintFlow bytes were revalidated, not merely which version string they claim
+/// (PF-AUDIT-R1). Empty in a record written before this contract existed, which blocks: see
+/// <see cref="ProductBuildIdentity"/> for why a three-part version cannot answer the question.
+/// </param>
 /// <param name="PresetId">The workstation preset the revalidated environment ran against.</param>
 /// <param name="PresetVersion">That preset's version.</param>
 /// <param name="PresetSha256">That preset manifest's digest.</param>
@@ -103,6 +136,7 @@ public sealed record StandardRegressionSetOutcome(
 public sealed record ProductionRevalidationRecord(
     int SchemaVersion,
     string? ProductVersion,
+    ImmutableArray<ProductAssemblyIdentity> ProductAssemblies,
     string? PresetId,
     string? PresetVersion,
     string? PresetSha256,
@@ -115,7 +149,17 @@ public sealed record ProductionRevalidationRecord(
     string? AttestedAtLocal)
 {
     /// <summary>The only schema this build accepts.</summary>
-    public const int CurrentSchemaVersion = 1;
+    /// <remarks>
+    /// Raised to 2 by PF-AUDIT-R1, which added the candidate and run binding without which a
+    /// recorded pass cannot be shown to be about this installation. A schema-1 record is still
+    /// parsed and still readable — it is a historical fact about what an operator did — but it
+    /// blocks with <see cref="HistoricalSchemaVersion"/>'s own diagnostic and is never enriched
+    /// into a passing schema-2 record.
+    /// </remarks>
+    public const int CurrentSchemaVersion = 2;
+
+    /// <summary>The pre-binding schema, readable and blocking (PF-AUDIT-R1).</summary>
+    public const int HistoricalSchemaVersion = 1;
 
     /// <summary>
     /// Where the record lives, relative to the workspace root.
@@ -258,12 +302,18 @@ internal static class ProductionRevalidationEvaluator
     /// <param name="presetSha256">The digest this installation requires the manifest to hash to.</param>
     /// <param name="observedOsBuild">The Windows build as observed right now.</param>
     /// <param name="runningProductVersion">The running PrintFlow version.</param>
+    /// <param name="observedProductAssemblies">
+    /// The identity of the PrintFlow assemblies this process actually loaded, read by the caller so
+    /// this method stays free of file access. <see cref="ProductBuildIdentity.Running"/> is what
+    /// the application passes.
+    /// </param>
     internal static WorkstationCheckResult Evaluate(
         ProductionRevalidationRecord? record,
         WorkstationRequirements requirements,
         Sha256 presetSha256,
         string observedOsBuild,
-        string runningProductVersion)
+        string runningProductVersion,
+        ImmutableArray<ProductAssemblyIdentity> observedProductAssemblies)
     {
         string expected = Describe(
             runningProductVersion,
@@ -277,6 +327,20 @@ internal static class ProductionRevalidationEvaluator
                 "This workstation has no production revalidation record. Production stays closed " +
                 "until Environment Readiness and the standard regression set have both been run " +
                 "against this installation and the result recorded.");
+        }
+
+        // Schema first, and a historical record gets its own sentence rather than the generic
+        // unknown-version one. A schema-1 record states honestly what an operator did before the
+        // evidence binding existed; what it cannot state is that the run behind it tested these
+        // bytes, so it is readable, blocking, and never topped up into a schema-2 pass.
+        if (record.SchemaVersion == ProductionRevalidationRecord.HistoricalSchemaVersion)
+        {
+            return Fail(expected, "schema 1 (pre-binding)",
+                "The production revalidation record predates the regression evidence binding: it " +
+                "records a status without the run and candidate identity that show the run tested " +
+                "this installation. It stays readable as history, and Production stays closed " +
+                "until Environment Readiness and the standard regression set have been run again " +
+                "and recorded with the current tooling.");
         }
 
         if (record.SchemaVersion != ProductionRevalidationRecord.CurrentSchemaVersion)
@@ -294,6 +358,24 @@ internal static class ProductionRevalidationEvaluator
                 $"revalidation covers {Or(record.ProductVersion)}. A PrintFlow upgrade does not " +
                 "inherit the previous build's production approval: rerun Environment Readiness " +
                 "and the standard regression set before returning to Production.");
+        }
+
+        // The bytes as well as the version string. A version is a name two different builds can
+        // share, and replacing the installed payload with a different build of "0.1.0" used to
+        // inherit this record silently — the audit's F3. The record names the assemblies that were
+        // revalidated; these are the assemblies this process loaded.
+        ImmutableArray<string> candidateDifferences =
+            ProductBuildIdentity.CompareBytes(record.ProductAssemblies, observedProductAssemblies);
+
+        if (!candidateDifferences.IsEmpty)
+        {
+            return Fail(expected,
+                $"candidate {ProductBuildIdentity.Fingerprint(observedProductAssemblies)[..12]}…",
+                "The PrintFlow assemblies running here are not the ones the recorded revalidation " +
+                "was run against, although the version string matches. A rebuilt or replaced " +
+                "payload does not inherit the previous one's production approval: rerun " +
+                "Environment Readiness and the standard regression set. " +
+                string.Join(" ", candidateDifferences));
         }
 
         if (!Matches(record.PresetId, requirements.Preset.PresetId) ||
@@ -370,13 +452,31 @@ internal static class ProductionRevalidationEvaluator
                       "Production stays closed until it passes against this installation.");
         }
 
+        // A pass has to have an execution behind it. The status alone is what F3 exploited: it was
+        // copied from a run result without anything tying it to a run, so the record could not be
+        // asked which execution it meant. It can now, and a record that cannot answer is refused.
+        StandardRegressionSetOutcome outcome = record.StandardRegressionSet!;
+
+        if (string.IsNullOrWhiteSpace(outcome.RunId) ||
+            string.IsNullOrWhiteSpace(outcome.InvocationId) ||
+            outcome.EvidenceBindingVersion <= 0)
+        {
+            return Fail(expected, "standard regression set: Passed, unbound",
+                "The record states that the standard regression set passed but names no execution " +
+                "it passed in. A status with no run and invocation identity behind it cannot be " +
+                "shown to be about this installation, so Production stays closed until the set is " +
+                "run and recorded with the current tooling.");
+        }
+
         return WorkstationCheckResult.Passed(
             WorkstationVerificationCheck.ProductionRevalidation,
             WorkstationCheckKind.Dynamic,
             expected,
-            $"PrintFlow Studio {runningProductVersion} on this preset and Windows build was " +
-            $"revalidated by {Or(record.AttestedBy)} at {Or(record.AttestedAtLocal)}, with " +
-            "Environment Readiness and the standard regression set both passing.");
+            $"PrintFlow Studio {runningProductVersion} (candidate " +
+            $"{ProductBuildIdentity.Fingerprint(record.ProductAssemblies)[..12]}…) on this preset " +
+            $"and Windows build was revalidated by {Or(record.AttestedBy)} at " +
+            $"{Or(record.AttestedAtLocal)}, with Environment Readiness passing and the standard " +
+            $"regression set passing in run {Or(outcome.RunId)}.");
     }
 
     private static WorkstationCheckResult Fail(string expected, string observed, string explanation) =>

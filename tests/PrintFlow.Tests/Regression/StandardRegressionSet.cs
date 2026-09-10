@@ -36,6 +36,11 @@ public static class StandardRegressionCategories
 /// per-category expected properties that only a person reads; this type models the fields the
 /// runner has to act on, and the loader keeps the rest as raw JSON so nothing is silently lost
 /// when a manifest is read and re-read.
+/// <para>
+/// <c>ManifestPath</c> and <c>ManifestSha256</c> are the manifest file's own identity, so a run can
+/// bind the set's <i>content</i> and not merely its id: a set re-issued under one name is a
+/// different set, and "the same set passed" would otherwise be a claim about a name (PF-AUDIT-R1).
+/// </para>
 /// </remarks>
 public sealed record RegressionAssetManifest(
     int SchemaVersion,
@@ -50,7 +55,9 @@ public sealed record RegressionAssetManifest(
     ImmutableArray<string> ExpectedProcessingPath,
     ImmutableArray<string> ExpectedExternalApplications,
     string ComparisonMode,
-    ImmutableArray<RegressionManualCheck> ManualChecks)
+    ImmutableArray<RegressionManualCheck> ManualChecks,
+    string? ManifestPath = null,
+    string? ManifestSha256 = null)
 {
     /// <summary>The schema this build reads.</summary>
     public const int CurrentSchemaVersion = 2;
@@ -128,7 +135,13 @@ public sealed record StandardRegressionSet(
                     continue;
                 }
 
-                assets.Add(manifest);
+                // The manifest's own bytes, digested here where the file is already open, so a run
+                // can record which set content it read.
+                assets.Add(manifest with
+                {
+                    ManifestPath = file,
+                    ManifestSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(file))),
+                });
             }
             catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
             {

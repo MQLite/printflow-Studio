@@ -505,7 +505,11 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
                 requirements,
                 _expectedManifestSha256,
                 _facts.ReadOperatingSystem().Build,
-                ProductionRevalidationEvaluator.RunningProductVersion)],
+                ProductionRevalidationEvaluator.RunningProductVersion,
+                // Read here rather than inside the evaluator, which stays free of file access.
+                // Re-read on every call like the record itself: an operator who reinstalls
+                // PrintFlow under a running application must not keep the approval either.
+                ProductBuildIdentity.Running())],
     ];
 
     /// <summary>

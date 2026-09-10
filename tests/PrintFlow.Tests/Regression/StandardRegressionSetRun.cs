@@ -1,6 +1,9 @@
 using System.Collections.Immutable;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using PrintFlow.Infrastructure.Verification;
 
 namespace PrintFlow.Tests.Regression;
 
@@ -121,6 +124,146 @@ public sealed record RegressionCaseResult(
 /// <summary>A file the run produced, named so an auditor can open it.</summary>
 public sealed record RegressionArtefact(string Role, string Path, string? Sha256, long Length);
 
+/// <summary>One manifest of the set as this run actually read it.</summary>
+/// <remarks>
+/// Per-file digests rather than one composite, because the revalidation writer has to check them
+/// from PowerShell and <c>Get-FileHash</c> is the same function as <c>SHA256.HashData</c>. A
+/// composite would need a second implementation in a second language, and two implementations of
+/// one identity is how the two sides come to disagree about whether the set changed.
+/// </remarks>
+/// <param name="FixtureId">The manifest's fixture id.</param>
+/// <param name="Category">Which of the seven it claims.</param>
+/// <param name="ManifestSha256">The manifest file's own digest.</param>
+/// <param name="InputSha256">The digest the manifest records for its input file.</param>
+public sealed record RegressionSetManifestIdentity(
+    string FixtureId,
+    string Category,
+    string ManifestSha256,
+    string InputSha256);
+
+/// <summary>
+/// The facts a run tested, captured by the run that tested them (PF-AUDIT-R1, findings F3 and F4).
+/// </summary>
+/// <remarks>
+/// <b>Why the run captures these and not the writer.</b> The revalidation writer used to read the
+/// current installation, the current preset and the current Windows build, and then take a
+/// <c>Passed</c> label from a run result — so a genuine pass from one environment became a record
+/// about another. The facts a record binds have to come from the run, at the time of the run.
+/// Nothing here is filled in later from the machine: a missing fact stays missing, and a writer
+/// which cannot bind refuses rather than helping.
+/// <para>
+/// <b>Harness and candidate are different facts.</b> <see cref="HarnessProductAssemblies"/> is the
+/// PrintFlow code this test host actually loaded and drove — the provenance of the evidence.
+/// <see cref="CandidateProductAssemblies"/> is the installed payload the run is attesting, read
+/// from <see cref="CandidateInstallFolder"/>. They are not the same bytes even for one commit,
+/// because an installation carries a RID-specific self-contained publish and a test host does not,
+/// so they are bound to each other by build identity and each pinned by its own digests. See
+/// <see cref="ProductBuildIdentity"/>.
+/// </para>
+/// </remarks>
+/// <param name="Version">The contract version. A reader that does not know it must refuse it.</param>
+/// <param name="InvocationId">The invocation that produced this result, from the claim it staked.</param>
+/// <param name="HarnessProductAssemblies">The Product assemblies this run loaded and exercised.</param>
+/// <param name="HarnessAssembly">The test assembly that drove the run, as provenance only.</param>
+/// <param name="CandidateInstallFolder">The installation this run attests, or null when none was named.</param>
+/// <param name="CandidateProductAssemblies">That installation's Product assemblies as the run read them.</param>
+/// <param name="CandidateProblems">
+/// Why the candidate could not be bound, when it could not. Non-empty means no publication may
+/// follow from this run, and the run says so in its own evidence rather than leaving a reader to
+/// notice an absence.
+/// </param>
+/// <param name="PresetSha256">The preset manifest's digest as this run verified it.</param>
+/// <param name="OperatingSystemBuild">The Windows build this run observed.</param>
+/// <param name="MeituSha256">The Meitu digest the accepted preset required during this run.</param>
+/// <param name="PhotoshopSha256">The Photoshop digest the accepted preset required during this run.</param>
+/// <param name="SetContentDigest">A digest over <paramref name="SetManifests"/>, for a diagnostic line.</param>
+/// <param name="SetManifests">Every manifest of the set, with its digests.</param>
+public sealed record RegressionEvidenceBinding(
+    int Version,
+    string InvocationId,
+    ImmutableArray<ProductAssemblyIdentity> HarnessProductAssemblies,
+    string? HarnessAssembly,
+    string? CandidateInstallFolder,
+    ImmutableArray<ProductAssemblyIdentity> CandidateProductAssemblies,
+    ImmutableArray<string> CandidateProblems,
+    string? PresetSha256,
+    string? OperatingSystemBuild,
+    string? MeituSha256,
+    string? PhotoshopSha256,
+    string? SetContentDigest,
+    ImmutableArray<RegressionSetManifestIdentity> SetManifests)
+{
+    /// <summary>The contract version this build writes and reads.</summary>
+    public const int CurrentVersion = 1;
+
+    /// <summary>A digest over the set's manifests and inputs, in a fixed order.</summary>
+    /// <remarks>
+    /// Derived and never authoritative, exactly like
+    /// <see cref="ProductBuildIdentity.Fingerprint"/>: the per-manifest digests underneath it are
+    /// what any checker compares, and this exists so "the same set content" is one short string in
+    /// a record and a report.
+    /// </remarks>
+    public static string DigestOfSet(IEnumerable<RegressionSetManifestIdentity> manifests)
+    {
+        ArgumentNullException.ThrowIfNull(manifests);
+
+        StringBuilder canonical = new();
+        foreach (RegressionSetManifestIdentity manifest in manifests
+            .OrderBy(m => m.FixtureId, StringComparer.OrdinalIgnoreCase))
+        {
+            canonical
+                .Append(manifest.FixtureId).Append(':')
+                .Append(manifest.Category.ToUpperInvariant()).Append(':')
+                .Append(manifest.ManifestSha256.ToUpperInvariant()).Append(':')
+                .Append(manifest.InputSha256.ToUpperInvariant()).Append('\n');
+        }
+
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(canonical.ToString())));
+    }
+}
+
+/// <summary>One decision a reviewer recorded against one qualitative check.</summary>
+/// <param name="Id">The manual check's stable id.</param>
+/// <param name="Outcome">What was decided. Only Passed or Failed conclude anything.</param>
+/// <param name="EvidencePath">The artefact that was looked at.</param>
+/// <param name="EvidenceSha256">
+/// That artefact's digest as the run recorded it. A decision is about a picture, and a decision
+/// that does not say which picture is not reviewable evidence.
+/// </param>
+/// <param name="Notes">What the reviewer saw.</param>
+public sealed record RegressionReviewDecision(
+    string Id,
+    RegressionOutcome Outcome,
+    string? EvidencePath,
+    string? EvidenceSha256,
+    string? Notes);
+
+/// <summary>
+/// One review of an existing run, appended to the run's own evidence.
+/// </summary>
+/// <remarks>
+/// <b>Why a history and not a field.</b> A review is an event that happened to a run at a time,
+/// separate from the run's execution. Overwriting the previous review would delete the record that
+/// somebody had already looked and decided — and re-stamping the run's completion time to the
+/// moment of review, which the re-derivation used to do, makes an old run look as though it had
+/// just executed. An appended list is the smallest mechanism the existing result shape can carry
+/// that keeps both facts.
+/// </remarks>
+/// <param name="ReviewId">Identity of this review, so two reviews are two entries.</param>
+/// <param name="DecidedBy">Who looked. Never blank and never a role.</param>
+/// <param name="DecidedAtLocal">When they looked — the review's time, not the run's.</param>
+/// <param name="Synthetic">
+/// True when the decisions came from a test of this protocol rather than from a person. A synthetic
+/// decision stays labelled synthetic: nothing here invents a human reviewer.
+/// </param>
+/// <param name="Decisions">What was decided.</param>
+public sealed record RegressionReviewRecord(
+    string ReviewId,
+    string DecidedBy,
+    string DecidedAtLocal,
+    bool Synthetic,
+    ImmutableArray<RegressionReviewDecision> Decisions);
+
 /// <summary>
 /// The whole run, in the shape the existing revalidation tooling already reads.
 /// </summary>
@@ -128,9 +271,15 @@ public sealed record RegressionArtefact(string Role, string Path, string? Sha256
 /// <b>The four fields at the top are a contract.</b> <c>setId</c>, <c>status</c>,
 /// <c>completedAtLocal</c> and <c>evidencePath</c> are what
 /// <c>Set-PrintFlowProductionRevalidation.ps1</c> reads, and they are spelled and cased exactly
-/// as it reads them. Everything else on this record is additional and that script ignores it,
-/// which is the point: the per-case evidence SCRUM-11065 asks for is added without changing a
-/// contract that already works.
+/// as it reads them. Everything else on this record is additional, which is the point: the
+/// per-case evidence SCRUM-11065 asks for is added without changing a contract that already works.
+/// <para>
+/// <b>Those four are no longer sufficient, and that is deliberate</b> (PF-AUDIT-R1). The writer
+/// used to read only them, so a status could be lifted out of one run and recorded against a
+/// different installation. It now reads <see cref="Binding"/> as well and refuses to publish a pass
+/// it cannot bind. A result written before that contract existed has no binding, is still readable
+/// as the history of what ran, and cannot produce a current approval.
+/// </para>
 /// </remarks>
 public sealed record StandardRegressionSetRunResult(
     string SetId,
@@ -147,7 +296,9 @@ public sealed record StandardRegressionSetRunResult(
     ImmutableArray<string> RequiredCategories,
     ImmutableArray<string> MissingCategories,
     ImmutableArray<RegressionCaseResult> Cases,
-    string Verdict)
+    string Verdict,
+    RegressionEvidenceBinding? Binding = null,
+    ImmutableArray<RegressionReviewRecord> Reviews = default)
 {
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -176,7 +327,9 @@ public sealed record StandardRegressionSetRunResult(
         string presetId,
         string presetVersion,
         string adapterMode,
-        IEnumerable<RegressionCaseResult> cases)
+        IEnumerable<RegressionCaseResult> cases,
+        RegressionEvidenceBinding? binding = null,
+        ImmutableArray<RegressionReviewRecord> reviews = default)
     {
         ImmutableArray<RegressionCaseResult> concluded = [.. cases.Select(c => c.Conclude())];
 
@@ -186,11 +339,25 @@ public sealed record StandardRegressionSetRunResult(
                 !concluded.Any(c => string.Equals(c.Category, required, StringComparison.OrdinalIgnoreCase))),
         ];
 
+        // A category claimed twice is a contradiction, not extra coverage: two cases can disagree,
+        // and "six of seven plus one of them twice" would otherwise satisfy a count of seven. The
+        // revalidation writer checks this independently from the cases it reads, so neither side
+        // has to trust the other's arithmetic.
+        ImmutableArray<string> duplicates =
+        [
+            .. concluded
+                .GroupBy(c => c.Category, StringComparer.OrdinalIgnoreCase)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .Order(StringComparer.OrdinalIgnoreCase),
+        ];
+
         bool everyCasePassed = concluded.Length > 0 && concluded.All(c => c.Outcome == RegressionOutcome.Passed);
-        bool complete = missing.IsEmpty;
+        bool complete = missing.IsEmpty && duplicates.IsEmpty;
 
         RegressionOutcome overall =
             complete && everyCasePassed ? RegressionOutcome.Passed
+            : !duplicates.IsEmpty ? RegressionOutcome.Failed
             : concluded.Any(c => c.Outcome == RegressionOutcome.Failed) ? RegressionOutcome.Failed
             : concluded.Any(c => c.Outcome == RegressionOutcome.Cancelled) ? RegressionOutcome.Cancelled
             : concluded.Any(c => c.Outcome == RegressionOutcome.Blocked) ? RegressionOutcome.Blocked
@@ -211,7 +378,9 @@ public sealed record StandardRegressionSetRunResult(
             StandardRegressionCategories.Required,
             missing,
             concluded,
-            Describe(overall, concluded, missing));
+            Describe(overall, concluded, missing, duplicates),
+            binding,
+            reviews.IsDefault ? [] : reviews);
     }
 
     /// <summary>Renders the result as the run writes it.</summary>
@@ -220,10 +389,17 @@ public sealed record StandardRegressionSetRunResult(
     private static string Describe(
         RegressionOutcome overall,
         ImmutableArray<RegressionCaseResult> cases,
-        ImmutableArray<string> missing)
+        ImmutableArray<string> missing,
+        ImmutableArray<string> duplicates)
     {
         int passed = cases.Count(c => c.Outcome == RegressionOutcome.Passed);
         string summary = $"{passed}/{StandardRegressionCategories.Required.Length} required categories passed.";
+
+        if (!duplicates.IsEmpty)
+        {
+            return $"{overall}. {summary} Claimed more than once, which cannot be resolved into one " +
+                   $"verdict: {string.Join(", ", duplicates)}.";
+        }
 
         if (!missing.IsEmpty)
         {
