@@ -20,6 +20,25 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_PreflightHeading => Get(nameof(Session_PreflightHeading));
+    internal static string Session_PreflightSourcePixels => Get(nameof(Session_PreflightSourcePixels));
+    internal static string Session_PreflightArtworkContent => Get(nameof(Session_PreflightArtworkContent));
+    internal static string Session_PreflightSelectedArtwork => Get(nameof(Session_PreflightSelectedArtwork));
+    internal static string Session_PreflightFinalCanvas => Get(nameof(Session_PreflightFinalCanvas));
+    internal static string Session_PreflightGraphicBounds => Get(nameof(Session_PreflightGraphicBounds));
+    internal static string Session_PreflightFullOriginalCanvas => Get(nameof(Session_PreflightFullOriginalCanvas));
+    internal static string Session_PreflightNoCrop => Get(nameof(Session_PreflightNoCrop));
+    internal static string Session_PreflightGeometryUnavailable => Get(nameof(Session_PreflightGeometryUnavailable));
+    internal static string Session_PreflightPrintSize => Get(nameof(Session_PreflightPrintSize));
+    internal static string Session_PreflightOutputPixels => Get(nameof(Session_PreflightOutputPixels));
+    internal static string Session_PreflightOutputDpi => Get(nameof(Session_PreflightOutputDpi));
+    internal static string Session_PreflightStatus => Get(nameof(Session_PreflightStatus));
+    internal static string Session_PreflightNoEnlargement => Get(nameof(Session_PreflightNoEnlargement));
+    internal static string Session_PreflightEnlargementRequired => Get(nameof(Session_PreflightEnlargementRequired));
+    internal static string Session_PreflightEnlargementAuthorised => Get(nameof(Session_PreflightEnlargementAuthorised));
+    internal static string Session_PreflightDraftHint => Get(nameof(Session_PreflightDraftHint));
+    internal static string Session_PreflightPpi => Get(nameof(Session_PreflightPpi));
+    internal static string Session_PreflightOutputPpi => Get(nameof(Session_PreflightOutputPpi));
     internal static string ErrorDetails_ExportDiagnosticPackage => Get(nameof(ErrorDetails_ExportDiagnosticPackage));
     internal static string DiagnosticPackage_Heading => Get(nameof(DiagnosticPackage_Heading));
     internal static string DiagnosticPackage_LocalOnlyNotice => Get(nameof(DiagnosticPackage_LocalOnlyNotice));

@@ -14,7 +14,6 @@ using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Effects;
 using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Ports;
-using System.Collections.Concurrent;
 
 namespace PrintFlow.Workflow.Services;
 
@@ -128,13 +127,16 @@ public sealed partial class SessionService : ISessionService
     private readonly AutomationRunRegistry _runs = new();
 
     /// <summary>
-    /// Opaque, single-use handles for enlargement warnings this service returned to a screen.
-    /// The shell sees only the Guid; the exact Revision/hash/target command stays here.
+    /// The one opaque, single-use enlargement offer this service currently exposes per session.
+    /// The shell sees only the Guid; the exact Revision/hash/target command stays here. Access is
+    /// kept under one short lock so replacing a displayed offer and accepting that exact display
+    /// have a single order even when a refresh and a click arrive together.
     /// </summary>
-    private readonly ConcurrentDictionary<Guid, EnlargementOffer> _enlargementOffers = new();
+    private readonly object _enlargementOfferGate = new();
+    private readonly Dictionary<SessionId, EnlargementOffer> _enlargementOffers = [];
 
     private sealed record EnlargementOffer(
-        SessionId SessionId, WorkflowCommand.AuthoriseEnlargement Command);
+        Guid Id, WorkflowCommand.AuthoriseEnlargement Command);
 
     private readonly int _processId;
     private readonly string _machineName;
@@ -534,12 +536,19 @@ public sealed partial class SessionService : ISessionService
         string? operatorName,
         CancellationToken cancellationToken)
     {
-        if (!_enlargementOffers.TryRemove(enlargementOfferId, out EnlargementOffer? offer) ||
-            offer.SessionId != id)
+        EnlargementOffer offer;
+        lock (_enlargementOfferGate)
         {
-            return OperationResult.Fail<SessionView>(
-                FailureCode.PreconditionNotMet,
-                "That enlargement offer is no longer current. Review the refreshed size before continuing.");
+            if (!_enlargementOffers.TryGetValue(id, out offer!) || offer.Id != enlargementOfferId)
+            {
+                return OperationResult.Fail<SessionView>(
+                    FailureCode.PreconditionNotMet,
+                    "That enlargement offer is no longer current. Review the refreshed size before continuing.");
+            }
+
+            // Acceptance linearises here. A stale click never consumes the replacement offer,
+            // while a second click on this exact handle is refused as already consumed.
+            _enlargementOffers.Remove(id);
         }
 
         // ExecuteAsync loads again, re-verifies the source bytes and asks the engine to match
@@ -550,6 +559,40 @@ public sealed partial class SessionService : ISessionService
             offer.Command,
             operatorName,
             cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<PrintDimensionsPreflight>> PreviewPrintDimensionsAsync(
+        SessionId id, WorkflowCommand sizingCommand, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(sizingCommand);
+
+        OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
+        if (loaded.IsFailure)
+        {
+            return OperationResult.Fail<PrintDimensionsPreflight>(loaded.Failure);
+        }
+
+        if (loaded.Value is not { } aggregate)
+        {
+            return OperationResult.Fail<PrintDimensionsPreflight>(
+                FailureCode.PreconditionNotMet, $"No session {id} exists.");
+        }
+
+        WorkflowSnapshot snapshot = aggregate.ToSnapshot(ConfiguredRecommendations());
+        OperationResult<RecordedSize> planned = PlanSize(aggregate, snapshot, sizingCommand);
+        if (planned.IsFailure)
+        {
+            return OperationResult.Fail<PrintDimensionsPreflight>(planned.Failure);
+        }
+
+        return OperationResult.Ok(PreflightFrom(
+            planned.Value,
+            aggregate.Revisions,
+            aggregate.Attempts,
+            snapshot,
+            enlargementAuthorised: false,
+            enlargementOfferId: null));
     }
 
     /// <summary>
@@ -990,16 +1033,28 @@ public sealed partial class SessionService : ISessionService
             state.NeedsEnlargementAuthority)
         {
             enlargementOfferId = Guid.NewGuid();
-            _enlargementOffers[enlargementOfferId.Value] = new EnlargementOffer(
-                state.SessionId,
-                new WorkflowCommand.AuthoriseEnlargement(
-                    offered.SourceRevisionId,
-                    offered.SourceSha256,
-                    offered.Projection.SelectedTargetEdge,
-                    offered.Projection.RequestedMillimetres));
+            lock (_enlargementOfferGate)
+            {
+                _enlargementOffers[state.SessionId] = new EnlargementOffer(
+                    enlargementOfferId.Value,
+                    new WorkflowCommand.AuthoriseEnlargement(
+                        offered.SourceRevisionId,
+                        offered.SourceSha256,
+                        offered.Projection.SelectedTargetEdge,
+                        offered.Projection.RequestedMillimetres));
+            }
+        }
+        else
+        {
+            // Any view which no longer presents a confirmation also withdraws its handle. This
+            // covers an accepted authority, a changed/cleared plan and a return upstream.
+            lock (_enlargementOfferGate)
+            {
+                _enlargementOffers.Remove(state.SessionId);
+            }
         }
 
-        return OperationResult.Ok(SessionView.From(
+        SessionView view = SessionView.From(
             state, _engine.AvailableCommands(state), revisions, outputs, attempts, ProcessingMode,
             _engine.AvailableReturnTargets(state),
 
@@ -1011,7 +1066,141 @@ public sealed partial class SessionService : ISessionService
             _presetProvider.GetPrintSizeRecommendations() is { IsSuccess: true } configured
                 ? configured.Value.All
                 : [],
-            enlargementOfferId));
+            enlargementOfferId);
+
+        RecordedSize? currentSize = CurrentRecordedSize(state);
+        if (currentSize is not null)
+        {
+            view = view with
+            {
+                Preflight = PreflightFrom(
+                    currentSize,
+                    revisions,
+                    attempts,
+                    state,
+                    state.HasUsableEnlargementAuthority,
+                    enlargementOfferId),
+            };
+        }
+
+        return OperationResult.Ok(view);
+    }
+
+    private static RecordedSize? CurrentRecordedSize(WorkflowSnapshot snapshot)
+    {
+        if (snapshot.UsablePrintPreparationPlan is { } bounds)
+        {
+            return new RecordedSize(
+                snapshot.Dimensions!.Value, snapshot.SizeSelection, bounds, TargetEdgePlan: null);
+        }
+
+        if (snapshot.UsableTargetEdgePlan is { } target)
+        {
+            return new RecordedSize(
+                target.AsRecordedDimensions(), snapshot.SizeSelection, BoundsPlan: null, target);
+        }
+
+        return null;
+    }
+
+    private static PrintDimensionsPreflight PreflightFrom(
+        RecordedSize size,
+        IReadOnlyList<Revision> revisions,
+        IReadOnlyList<ProcessingAttempt> attempts,
+        WorkflowSnapshot snapshot,
+        bool enlargementAuthorised,
+        Guid? enlargementOfferId)
+    {
+        const double MillimetresPerInch = 25.4;
+
+        RevisionId sourceRevisionId;
+        int sourcePixelWidth;
+        int sourcePixelHeight;
+        int outputPixelWidth;
+        int outputPixelHeight;
+        int productionOutputPpi;
+        bool requiresEnlargement;
+
+        if (size.BoundsPlan is { } bounds)
+        {
+            sourceRevisionId = bounds.SourceRevisionId;
+            sourcePixelWidth = bounds.SourcePixelWidth;
+            sourcePixelHeight = bounds.SourcePixelHeight;
+            outputPixelWidth = bounds.ProjectedPixelWidth;
+            outputPixelHeight = bounds.ProjectedPixelHeight;
+            productionOutputPpi = bounds.ProductionDpi;
+            requiresEnlargement = false;
+        }
+        else
+        {
+            TargetEdgePrintPreparationPlan target = size.TargetEdgePlan!;
+            sourceRevisionId = target.SourceRevisionId;
+            sourcePixelWidth = target.SourcePixelWidth;
+            sourcePixelHeight = target.SourcePixelHeight;
+            outputPixelWidth = target.Projection.ProjectedPixelWidth;
+            outputPixelHeight = target.Projection.ProjectedPixelHeight;
+            productionOutputPpi = target.ProductionDpi;
+            requiresEnlargement = target.RequiresEnlargementAuthority;
+        }
+
+        double widthMm = outputPixelWidth * MillimetresPerInch / productionOutputPpi;
+        double heightMm = outputPixelHeight * MillimetresPerInch / productionOutputPpi;
+        (GraphicBoundsKind kind, TrimBounds? artwork, TrimBounds? canvas) =
+            GraphicBoundsFor(sourceRevisionId, revisions, attempts, snapshot);
+
+        return new PrintDimensionsPreflight(
+            sourceRevisionId,
+            sourcePixelWidth,
+            sourcePixelHeight,
+            kind,
+            artwork,
+            canvas,
+            widthMm,
+            heightMm,
+            outputPixelWidth,
+            outputPixelHeight,
+            productionOutputPpi,
+            TiffEffectiveResolution.EffectiveDpi(sourcePixelWidth, widthMm),
+            TiffEffectiveResolution.EffectiveDpi(sourcePixelHeight, heightMm),
+            requiresEnlargement,
+            enlargementAuthorised)
+        {
+            EnlargementOfferId = enlargementOfferId,
+        };
+    }
+
+    private static (GraphicBoundsKind Kind, TrimBounds? Artwork, TrimBounds? Canvas) GraphicBoundsFor(
+        RevisionId sourceRevisionId,
+        IReadOnlyList<Revision> revisions,
+        IReadOnlyList<ProcessingAttempt> attempts,
+        WorkflowSnapshot snapshot)
+    {
+        ProcessingAttempt? producingAttempt =
+            attempts.FirstOrDefault(attempt => attempt.OutputRevisionId == sourceRevisionId);
+
+        if (producingAttempt?.TrimGeometry is { } automatic)
+        {
+            return (GraphicBoundsKind.AutomaticTrim, automatic.ContentBounds, automatic.AppliedBounds);
+        }
+
+        if (producingAttempt?.ManualCropGeometry is { } manual)
+        {
+            return (GraphicBoundsKind.ManualCrop, manual.SelectedBounds, manual.AppliedBounds);
+        }
+
+        if (snapshot.Step(StepKind.Trim)?.State == StepState.Skipped)
+        {
+            return (GraphicBoundsKind.FullOriginalCanvas, null, null);
+        }
+
+        Revision? source = revisions.FirstOrDefault(revision => revision.Id == sourceRevisionId);
+        if (producingAttempt?.Step == StepKind.Trim &&
+            source?.Operation is OperationKind.Trim or OperationKind.ManualImport)
+        {
+            return (GraphicBoundsKind.GeometryUnavailable, null, null);
+        }
+
+        return (GraphicBoundsKind.NoRelevantGeometry, null, null);
     }
 
     /// <summary>

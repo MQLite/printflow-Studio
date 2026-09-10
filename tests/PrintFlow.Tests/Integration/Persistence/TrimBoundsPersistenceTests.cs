@@ -560,6 +560,19 @@ public sealed class TrimBoundsPersistenceTests
         sizing.HasDetectedGraphicBounds.ShouldBeTrue();
         sizing.ArtefactTrimGeometry!.ContentBounds.ShouldBe(Content);
         sizing.ArtefactTrimGeometry.AppliedBounds.ShouldBe(TrimBounds.FromEdges(1, 0, 10, 9));
+
+        SessionView sized = (await service.ExecuteAsync(
+            id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox),
+            "tester", CancellationToken.None)).Value;
+        PrintDimensionsPreflight preflight = sized.Preflight.ShouldNotBeNull();
+        preflight.SourceRevisionId.ShouldBe(sizing.CurrentArtefact.RevisionId);
+        preflight.GraphicBoundsKind.ShouldBe(GraphicBoundsKind.AutomaticTrim);
+        preflight.ArtworkBounds.ShouldBe(Content);
+        preflight.FinalCanvasBounds.ShouldBe(TrimBounds.FromEdges(1, 0, 10, 9));
+
+        SessionView restarted = (await harness.CreateService().LoadAsync(id, CancellationToken.None)).Value;
+        restarted.Preflight.ShouldBe(preflight,
+            "the projection must reconstruct from SQLite attempt geometry and the stored plan");
     }
 
     // -----------------------------------------------------------------------------

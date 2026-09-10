@@ -1048,6 +1048,7 @@
                             </ItemsControl>
                             <Button Content="{Binding CustomSizeLabel}"
                                     Command="{Binding ChooseCustomSizeCommand}"
+                                    AutomationProperties.AutomationId="Session.PrintDimensions.CustomSize"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
                                     Margin="0,4,0,0" />
@@ -1081,19 +1082,55 @@
                                         <ComboBox Grid.Row="1" Grid.Column="0"
                                                   ItemsSource="{Binding TargetEdgeChoices}"
                                                   SelectedItem="{Binding SelectedTargetEdgeChoice}"
+                                                  AutomationProperties.AutomationId="Session.PrintDimensions.TargetEdge"
+                                                  AutomationProperties.Name="{Binding TargetEdgeLabel}"
                                                   DisplayMemberPath="Label" />
                                         <TextBlock Grid.Row="0" Grid.Column="2"
                                                    Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
                                         <TextBox Grid.Row="1" Grid.Column="2"
+                                                 AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
+                                                 AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
                                     </Grid>
                                     <Button Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
+                                            AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
                                             HorizontalAlignment="Left"
                                             Padding="14,6"
                                             Margin="0,10,0,0" />
                                 </StackPanel>
                             </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="#22000000"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12"
+                            Margin="0,12,0,0"
+                            AutomationProperties.AutomationId="Session.PrintDimensions.Preflight"
+                            Visibility="{Binding HasPrintDimensionsPreflight, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding PreflightHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding PreflightDraftHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,6"
+                                       Visibility="{Binding IsDraftPreflight, Converter={StaticResource BoolToVisibility}}" />
+                            <ItemsControl ItemsSource="{Binding PreflightRows}" IsTabStop="False"
+                                          HorizontalContentAlignment="Stretch">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}" Opacity="0.7" Margin="0,0,10,0" TextWrapping="Wrap" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap"
+                                                       AutomationProperties.AutomationId="{Binding AutomationId}"
+                                                       AutomationProperties.Name="{Binding AccessibleName}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
 

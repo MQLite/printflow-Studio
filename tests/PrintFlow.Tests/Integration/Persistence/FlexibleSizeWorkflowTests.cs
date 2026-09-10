@@ -1,8 +1,10 @@
+using System.IO;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
@@ -454,6 +456,114 @@ public sealed class FlexibleSizeWorkflowTests
     // -------------------------------------------------------------------------------------
     // §10, §14: the enlargement authority lifecycle
     // -------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Draft_preflight_is_side_effect_free_and_never_inherits_committed_authority()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await AtDimensionsAsync(
+            harness, service, Source(harness, 2000, 1000));
+        SessionAggregate before = await LoadAsync(harness, id);
+        Revision source = before.Revisions.Single(r => r.Id ==
+            before.ToSnapshot().UpstreamRevisionOf(StepKind.PhotoshopOutput));
+        string[] filesBefore = Directory.GetFiles(
+            harness.Workspace.Root, "*", SearchOption.AllDirectories).Order().ToArray();
+
+        PrintDimensionsPreflight ordinary = (await service.PreviewPrintDimensionsAsync(
+            id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 50m),
+            CancellationToken.None)).Value;
+        PrintDimensionsPreflight enlargement = (await service.PreviewPrintDimensionsAsync(
+            id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 300m),
+            CancellationToken.None)).Value;
+
+        ordinary.SourceRevisionId.ShouldBe(source.Id);
+        ordinary.SourcePixelWidth.ShouldBe(2000);
+        ordinary.SourcePixelHeight.ShouldBe(1000);
+        ordinary.RequiresEnlargement.ShouldBeFalse();
+        ordinary.EnlargementAuthorised.ShouldBeFalse();
+        ordinary.EnlargementOfferId.ShouldBeNull();
+        enlargement.RequiresEnlargement.ShouldBeTrue();
+        enlargement.EffectiveSourcePpiX.ShouldBeLessThan(ordinary.EffectiveSourcePpiX);
+        enlargement.EnlargementAuthorised.ShouldBeFalse();
+        enlargement.EnlargementOfferId.ShouldBeNull();
+
+        SessionAggregate afterPreview = await LoadAsync(harness, id);
+        afterPreview.Session.ShouldBe(before.Session);
+        afterPreview.Steps.ShouldBe(before.Steps);
+        afterPreview.Revisions.ShouldBe(before.Revisions);
+        afterPreview.Attempts.ShouldBe(before.Attempts);
+        afterPreview.Outputs.ShouldBe(before.Outputs);
+        afterPreview.Reviews.ShouldBe(before.Reviews);
+        Directory.GetFiles(harness.Workspace.Root, "*", SearchOption.AllDirectories)
+            .Order().ShouldBe(filesBefore);
+
+        SessionView committed = (await service.ExecuteAsync(
+            id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 300m),
+            "tester",
+            CancellationToken.None)).Value;
+        Guid offer = committed.Preflight!.EnlargementOfferId.ShouldNotBeNull();
+        SessionView authorised = (await service.AuthoriseCurrentEnlargementAsync(
+            id, offer, "tester", CancellationToken.None)).Value;
+        authorised.Preflight!.EnlargementAuthorised.ShouldBeTrue();
+        ProcessingSession persistedBeforeChangedDraft = (await LoadAsync(harness, id)).Session;
+
+        PrintDimensionsPreflight changedDraft = (await service.PreviewPrintDimensionsAsync(
+            id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 300.00001m),
+            CancellationToken.None)).Value;
+
+        changedDraft.OutputPixelWidth.ShouldBe(authorised.Preflight.OutputPixelWidth,
+            "the two exact requests deliberately round to the same production pixel width");
+        changedDraft.RequiresEnlargement.ShouldBeTrue();
+        changedDraft.EnlargementAuthorised.ShouldBeFalse(
+            "authority for one exact requested size cannot flow onto a different draft");
+        changedDraft.EnlargementOfferId.ShouldBeNull();
+        (await LoadAsync(harness, id)).Session.ShouldBe(persistedBeforeChangedDraft,
+            "previewing the changed draft must not replace the committed size or authority");
+    }
+
+    /// <summary>
+    /// An enlargement warning is authority to confirm the exact offer currently on screen, not
+    /// any earlier warning this service happened to render for the same persisted plan (§13).
+    /// </summary>
+    [Fact]
+    public async Task Only_the_latest_displayed_enlargement_offer_can_be_authorised()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        SessionId id = await AtDimensionsAsync(
+            harness, service, Source(harness, 2000, 1000));
+
+        await Must(service.ExecuteAsync(
+            id,
+            new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 300m),
+            "tester",
+            CancellationToken.None));
+
+        SessionView firstDisplay = (await service.LoadAsync(id, CancellationToken.None)).Value;
+        Guid offerA = firstDisplay.Preflight!.EnlargementOfferId.ShouldNotBeNull();
+        SessionView refreshedDisplay = (await service.LoadAsync(id, CancellationToken.None)).Value;
+        Guid offerB = refreshedDisplay.Preflight!.EnlargementOfferId.ShouldNotBeNull();
+        offerB.ShouldNotBe(offerA);
+
+        OperationResult<SessionView> stale = await service.AuthoriseCurrentEnlargementAsync(
+            id, offerA, "tester", CancellationToken.None);
+
+        stale.IsFailure.ShouldBeTrue();
+        stale.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
+        stale.Failure.TechnicalDetail.ShouldContain("no longer current");
+        (await LoadAsync(harness, id)).Session.EnlargementAuthority.ShouldBeNull();
+
+        SessionView authorised = (await service.AuthoriseCurrentEnlargementAsync(
+            id, offerB, "tester", CancellationToken.None)).Value;
+
+        authorised.Preflight!.EnlargementAuthorised.ShouldBeTrue();
+        (await LoadAsync(harness, id)).Session.EnlargementAuthority.ShouldNotBeNull();
+    }
 
     /// <summary>
     /// A shrink and a resolution-only run start with no enlargement authority (§10, §33.10–11).
@@ -907,6 +1017,7 @@ public sealed class FlexibleSizeWorkflowTests
         fresh.Session.TargetEdgePlan.ShouldBeNull();
         fresh.Session.EnlargementAuthority.ShouldBeNull();
         fresh.ToSnapshot().UsablePhotoshopPreparation.ShouldBeNull();
+        (await service.LoadAsync(id, CancellationToken.None)).Value.Preflight.ShouldBeNull();
 
         // The completed sibling's audit is untouched.
         fresh.Attempts.Single(a => a.Id == firstAttempt).Preparation

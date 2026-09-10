@@ -140,6 +140,10 @@ public sealed class PsdPreparationWorkflowTests
             var sized = await restarted.ExecuteAsync(id,
                 new WorkflowCommand.SetPrintDimensions(PrintDimensions.FromMillimetres(50, 50, SizePreset.Custom)), "qa", CancellationToken.None);
             sized.IsSuccess.ShouldBeTrue(sized.IsFailure ? sized.Failure.ToString() : "");
+            PrintDimensionsPreflight preflight = sized.Value.Preflight.ShouldNotBeNull();
+            preflight.SourceRevisionId.ShouldBe(raster.Id);
+            preflight.SourcePixelWidth.ShouldBe(raster.Facts.PixelWidth!.Value);
+            preflight.SourcePixelHeight.ShouldBe(raster.Facts.PixelHeight!.Value);
             (await h.Repository.LoadAsync(id, CancellationToken.None)).Value!.Session.PrintPreparationPlan!.SourceRevisionId.ShouldBe(raster.Id);
         }
         adapter.Calls.ShouldBe(1);

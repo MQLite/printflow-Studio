@@ -25,9 +25,17 @@ public sealed class ProductionTiffReviewServiceTests
     [Fact]
     public async Task A_validated_production_output_yields_a_payload_bound_to_its_own_identity()
     {
-        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out SyntheticProductionTiffProcessor photoshop);
+        PrintDimensionsPreflight? beforeProduction = null;
         TiffFinalReviewFixture.Review review =
-            await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "service-ok.png");
+            await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "service-ok.png",
+                maxWidthMm: 10.16, maxHeightMm: 7.62, observePreflight: facts =>
+            {
+                photoshop.GenerateCount.ShouldBe(0);
+                facts.EffectiveSourcePpiX.ShouldBe(600, 0.000001);
+                facts.ProductionOutputPpi.ShouldBe(300);
+                beforeProduction = facts;
+            });
 
         SessionAggregate persisted = await review.ReloadAsync();
         PrintOutput output = persisted.Outputs.ShouldHaveSingleItem();
@@ -44,6 +52,19 @@ public sealed class ProductionTiffReviewServiceTests
         payload.Value.OutputPath.ShouldBe(harness.Inner.FileWorkspace.ResolveAbsolute(output.File));
         payload.Value.Branch.ShouldBe(output.Branch);
         payload.Value.ByteLength.ShouldBe(output.ByteLength);
+
+        PrintDimensionsPreflight preflight = beforeProduction.ShouldNotBeNull();
+        TiffEffectiveResolution effective = payload.Value.EffectiveResolution.ShouldNotBeNull();
+        preflight.SourceRevisionId.ShouldBe(effective.SourceRevisionId);
+        preflight.SourcePixelWidth.ShouldBe(effective.SourcePixelWidth);
+        preflight.SourcePixelHeight.ShouldBe(effective.SourcePixelHeight);
+        preflight.PhysicalWidthMm.ShouldBe(effective.PhysicalWidthMm);
+        preflight.PhysicalHeightMm.ShouldBe(effective.PhysicalHeightMm);
+        preflight.EffectiveSourcePpiX.ShouldBe(effective.EffectiveDpiX);
+        preflight.EffectiveSourcePpiY.ShouldBe(effective.EffectiveDpiY);
+        preflight.ProductionOutputPpi.ShouldBe(effective.OutputDpi);
+        preflight.RequiresEnlargement.ShouldBe(effective.EnlargementAuthorityRequired);
+        preflight.EnlargementAuthorised.ShouldBe(effective.EnlargementAuthorised);
     }
 
     /// <summary>

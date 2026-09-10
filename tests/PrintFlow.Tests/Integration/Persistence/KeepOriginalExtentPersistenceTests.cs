@@ -134,7 +134,16 @@ public sealed class KeepOriginalExtentPersistenceTests
             resumed.CurrentArtefact!.RevisionId.ShouldBe(upstream.Id);
             resumed.CurrentArtefact.Facts.PixelWidth.ShouldBe(upstream.Facts.PixelWidth);
             resumed.CurrentArtefact.Facts.PixelHeight.ShouldBe(upstream.Facts.PixelHeight);
-            await Execute(service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
+            SessionView sized = await Execute(
+                service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
+            PrintDimensionsPreflight preflight = sized.Preflight.ShouldNotBeNull();
+            preflight.SourceRevisionId.ShouldBe(upstream.Id);
+            preflight.SourcePixelWidth.ShouldBe(upstream.Facts.PixelWidth!.Value);
+            preflight.SourcePixelHeight.ShouldBe(upstream.Facts.PixelHeight!.Value);
+            preflight.GraphicBoundsKind.ShouldBe(GraphicBoundsKind.FullOriginalCanvas);
+            preflight.ArtworkBounds.ShouldBeNull();
+            preflight.FinalCanvasBounds.ShouldBeNull();
+            (await h.CreateService().LoadAsync(id, CancellationToken.None)).Value.Preflight.ShouldBe(preflight);
             after = await Load(h, id);
             after.Session.PrintPreparationPlan!.SourceRevisionId.ShouldBe(upstream.Id);
             after.ToSnapshot().UpstreamRevisionOf(StepKind.PhotoshopOutput).ShouldBe(upstream.Id);
@@ -154,8 +163,13 @@ public sealed class KeepOriginalExtentPersistenceTests
             ? new WorkflowCommand.Approve(StepKind.Trim, offered.CurrentArtefact!.Sha256)
             : new WorkflowCommand.KeepOriginalExtent());
         SessionAggregate before = await Load(h, id);
-        await Execute(service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
-        await Execute(service, id, new WorkflowCommand.ReturnToStep(StepKind.Trim));
+        SessionView sized = await Execute(
+            service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
+        sized.Preflight.ShouldNotBeNull();
+        SessionView returned = await Execute(
+            service, id, new WorkflowCommand.ReturnToStep(StepKind.Trim));
+        returned.Preflight.ShouldBeNull(
+            "returning upstream removes the old source-bound sizing projection immediately");
         SessionAggregate reset = await Load(h, id);
         reset.Steps.Single(s => s.Step == StepKind.Trim).SkipReason.ShouldBeNull();
         reset.Session.Dimensions.ShouldBeNull();

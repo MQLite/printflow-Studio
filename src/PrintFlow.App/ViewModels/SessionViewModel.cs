@@ -2546,6 +2546,7 @@ public sealed partial class SessionViewModel : ObservableObject
         WidthMmText = preset.WidthMm.ToString(CultureInfo.CurrentCulture);
         HeightMmText = preset.HeightMm.ToString(CultureInfo.CurrentCulture);
         _pendingPreset = preset.Preset;
+        RequestDraftPreflight();
     }
 
     /// <summary>Uses one configured named recommendation without asking for millimetres.</summary>
@@ -2649,17 +2650,13 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task ConfirmCustomSizeAsync(CancellationToken cancellationToken)
     {
         if (_session?.Sizing.CanSetCustomTargetEdgeSize != true ||
-            SelectedTargetEdgeChoice is not { } edge ||
-            !TryReadCustomMillimetres(out decimal millimetres))
+            ReadCustomSizeCommand() is not { } command)
         {
             Notice = Strings.Session_TargetSizeInvalid;
             return;
         }
 
-        await RunAsync(
-            new WorkflowCommand.SetCustomTargetEdgeSize(
-                edge.Edge, millimetres, _customPresetContext?.Preset),
-            cancellationToken).ConfigureAwait(true);
+        await RunAsync(command, cancellationToken).ConfigureAwait(true);
 
         if (_session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
         {
@@ -2728,19 +2725,25 @@ public sealed partial class SessionViewModel : ObservableObject
         // come from the verified preset rather than from this screen's text boxes. Editing either
         // box clears the pending preset to Custom through the change handlers below, and a custom
         // box goes the custom route (Epic 11400 Part B1A.2D §3, §19).
-        if (_pendingPreset != SizePreset.Custom)
-        {
-            return RunAsync(new WorkflowCommand.SetPresetFitSize(_pendingPreset), cancellationToken);
-        }
-
-        if (!TryReadTypedDimensions(out PrintDimensions bounds))
+        if (ReadMaximumBoundsCommand() is not { } command)
         {
             Notice = Strings.Session_MaxBoundsInvalid;
             return Task.CompletedTask;
         }
 
-        return RunAsync(new WorkflowCommand.SetPrintDimensions(bounds), cancellationToken);
+        return RunAsync(command, cancellationToken);
     }
+
+    // Draft queries and confirmation interpret the same input through one command builder.
+    private WorkflowCommand? ReadMaximumBoundsCommand() => _pendingPreset != SizePreset.Custom
+        ? new WorkflowCommand.SetPresetFitSize(_pendingPreset)
+        : TryReadTypedDimensions(out PrintDimensions bounds)
+            ? new WorkflowCommand.SetPrintDimensions(bounds) : null;
+
+    private WorkflowCommand? ReadCustomSizeCommand() =>
+        SelectedTargetEdgeChoice is { } edge && TryReadCustomMillimetres(out decimal millimetres)
+            ? new WorkflowCommand.SetCustomTargetEdgeSize(edge.Edge, millimetres, _customPresetContext?.Preset)
+            : null;
 
     /// <summary>
     /// Opens the ordinary return confirmation, aimed at the size step (§12, §13).
@@ -3202,6 +3205,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasCustomPresetContext));
         OnPropertyChanged(nameof(CustomPresetContext));
         OnPropertyChanged(nameof(CustomPresetRecommendation));
+        RequestDraftPreflight();
     }
 
     /// <summary>Editing either box means the limits are the operator's, not a preset's.</summary>
@@ -3209,6 +3213,7 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         _pendingPreset = SizePreset.Custom;
         OnPropertyChanged(nameof(PendingMaximumBounds));
+        RequestDraftPreflight();
     }
 
     /// <inheritdoc cref="OnWidthMmTextChanged" />
@@ -3216,6 +3221,7 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         _pendingPreset = SizePreset.Custom;
         OnPropertyChanged(nameof(PendingMaximumBounds));
+        RequestDraftPreflight();
     }
 
     partial void OnSelectedWhiteUnderbaseChoiceChanged(WhiteUnderbaseChoice? value) =>
@@ -3363,6 +3369,7 @@ public sealed partial class SessionViewModel : ObservableObject
         if (session.CompletionCleanup is { IsComplete: false })
             Notice = Strings.Session_CompletionCleanupPending;
         _session = session;
+        ShowCommittedPreflight(session);
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
         ResetZoom();

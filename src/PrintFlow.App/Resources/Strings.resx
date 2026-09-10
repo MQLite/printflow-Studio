@@ -990,4 +990,23 @@
   <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>Failure screenshot: {0}</value></data>
   <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>Local diagnostic database: {0}</value></data>
   <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>Failure screenshot folder: {0}</value></data>
+  <data name="Session_PreflightHeading" xml:space="preserve"><value>Print size preflight</value></data>
+  <data name="Session_PreflightSourcePixels" xml:space="preserve"><value>Source pixels</value></data>
+  <data name="Session_PreflightArtworkContent" xml:space="preserve"><value>Artwork content</value></data>
+  <data name="Session_PreflightSelectedArtwork" xml:space="preserve"><value>Selected artwork</value></data>
+  <data name="Session_PreflightFinalCanvas" xml:space="preserve"><value>Final canvas</value></data>
+  <data name="Session_PreflightGraphicBounds" xml:space="preserve"><value>Artwork extent</value></data>
+  <data name="Session_PreflightFullOriginalCanvas" xml:space="preserve"><value>Full original canvas</value></data>
+  <data name="Session_PreflightNoCrop" xml:space="preserve"><value>No crop or trim applied</value></data>
+  <data name="Session_PreflightGeometryUnavailable" xml:space="preserve"><value>Crop details unavailable</value></data>
+  <data name="Session_PreflightPrintSize" xml:space="preserve"><value>Print size</value></data>
+  <data name="Session_PreflightOutputPixels" xml:space="preserve"><value>Projected output pixels</value></data>
+  <data name="Session_PreflightOutputDpi" xml:space="preserve"><value>Production output resolution</value></data>
+  <data name="Session_PreflightStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="Session_PreflightNoEnlargement" xml:space="preserve"><value>No enlargement required</value></data>
+  <data name="Session_PreflightEnlargementRequired" xml:space="preserve"><value>Enlargement required</value></data>
+  <data name="Session_PreflightEnlargementAuthorised" xml:space="preserve"><value>Enlargement authorised</value></data>
+  <data name="Session_PreflightDraftHint" xml:space="preserve"><value>Size proposal · confirm the size to continue</value></data>
+  <data name="Session_PreflightPpi" xml:space="preserve"><value>{0:0} × {1:0} PPI</value></data>
+  <data name="Session_PreflightOutputPpi" xml:space="preserve"><value>{0} PPI</value></data>
 </root>

@@ -92,7 +92,14 @@ public sealed class ManualCropGeometryPersistenceTests
             var dimensions = (await service.LoadAsync(id, CancellationToken.None)).Value;
             dimensions.CurrentStep!.Step.ShouldBe(StepKind.PrintDimensions);
             dimensions.CurrentArtefact!.RevisionId.ShouldBe(revision.Id);
-            await Execute(service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
+            SessionView sized = await Execute(
+                service, id, new WorkflowCommand.SetPrintDimensions(WorkflowScenario.CustomBox));
+            PrintDimensionsPreflight preflight = sized.Preflight.ShouldNotBeNull();
+            preflight.SourceRevisionId.ShouldBe(revision.Id);
+            preflight.GraphicBoundsKind.ShouldBe(GraphicBoundsKind.ManualCrop);
+            preflight.ArtworkBounds.ShouldBe(expected.SelectedBounds);
+            preflight.FinalCanvasBounds.ShouldBe(expected.AppliedBounds);
+            (await h.CreateService().LoadAsync(id, CancellationToken.None)).Value.Preflight.ShouldBe(preflight);
             (await Load(h, id)).Session.PrintPreparationPlan!.SourceRevisionId.ShouldBe(revision.Id);
             await Execute(service, id, new WorkflowCommand.SelectWhiteUnderbaseBranch(
                 WhiteUnderbaseBranch.W1_1px, "synthetic retention test"));

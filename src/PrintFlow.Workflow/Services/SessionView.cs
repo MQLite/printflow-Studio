@@ -635,6 +635,12 @@ public sealed record SessionView(
     /// <summary>The exact terminal attempt represented by the current failure surface.</summary>
     public AttemptId? CurrentFailureAttemptId { get; init; }
 
+    /// <summary>
+    /// The current committed print-dimensions projection, reconstructed from the usable plan and
+    /// the exact attempt that produced its source Revision. Null while no current plan exists.
+    /// </summary>
+    public PrintDimensionsPreflight? Preflight { get; init; }
+
     public ManualCropGeometry? ArtefactManualCropGeometry { get; init; }
     public ManualCropGeometry? CurrentManualCropGeometry =>
         CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactManualCropGeometry : null;

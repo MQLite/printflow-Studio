@@ -979,4 +979,23 @@
   <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>故障截图：{0}</value></data>
   <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>本机诊断数据库：{0}</value></data>
   <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>故障截图文件夹：{0}</value></data>
+  <data name="Session_PreflightHeading" xml:space="preserve"><value>打印尺寸预检</value></data>
+  <data name="Session_PreflightSourcePixels" xml:space="preserve"><value>源图像像素</value></data>
+  <data name="Session_PreflightArtworkContent" xml:space="preserve"><value>图稿内容</value></data>
+  <data name="Session_PreflightSelectedArtwork" xml:space="preserve"><value>所选图稿</value></data>
+  <data name="Session_PreflightFinalCanvas" xml:space="preserve"><value>最终画布</value></data>
+  <data name="Session_PreflightGraphicBounds" xml:space="preserve"><value>图稿范围</value></data>
+  <data name="Session_PreflightFullOriginalCanvas" xml:space="preserve"><value>完整原始画布</value></data>
+  <data name="Session_PreflightNoCrop" xml:space="preserve"><value>未应用裁剪或修边</value></data>
+  <data name="Session_PreflightGeometryUnavailable" xml:space="preserve"><value>裁剪详情不可用</value></data>
+  <data name="Session_PreflightPrintSize" xml:space="preserve"><value>打印尺寸</value></data>
+  <data name="Session_PreflightOutputPixels" xml:space="preserve"><value>预计输出像素</value></data>
+  <data name="Session_PreflightOutputDpi" xml:space="preserve"><value>生产输出分辨率</value></data>
+  <data name="Session_PreflightStatus" xml:space="preserve"><value>状态</value></data>
+  <data name="Session_PreflightNoEnlargement" xml:space="preserve"><value>无需放大</value></data>
+  <data name="Session_PreflightEnlargementRequired" xml:space="preserve"><value>需要放大</value></data>
+  <data name="Session_PreflightEnlargementAuthorised" xml:space="preserve"><value>已授权放大</value></data>
+  <data name="Session_PreflightDraftHint" xml:space="preserve"><value>尺寸预览 · 确认尺寸后继续</value></data>
+  <data name="Session_PreflightPpi" xml:space="preserve"><value>{0:0} × {1:0} PPI</value></data>
+  <data name="Session_PreflightOutputPpi" xml:space="preserve"><value>{0} PPI</value></data>
 </root>

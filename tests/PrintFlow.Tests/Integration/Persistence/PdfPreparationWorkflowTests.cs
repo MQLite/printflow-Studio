@@ -135,8 +135,16 @@ public sealed class PdfPreparationWorkflowTests
         resumed.Value.CurrentArtefact.Sha256.ShouldBe(raster.Sha256);
         (await restarted.ExecuteAsync(imported.Value.Id, new WorkflowCommand.Approve(StepKind.OriginalConfirmation, raster.Sha256), "qa", default))
             .IsSuccess.ShouldBeTrue();
-        (await restarted.ExecuteAsync(imported.Value.Id, new WorkflowCommand.SetPrintDimensions(PrintDimensions.FromMillimetres(50, 25, SizePreset.Custom)), "qa", default))
-            .IsSuccess.ShouldBeTrue();
+        OperationResult<SessionView> sized = await restarted.ExecuteAsync(
+            imported.Value.Id,
+            new WorkflowCommand.SetPrintDimensions(PrintDimensions.FromMillimetres(50, 25, SizePreset.Custom)),
+            "qa",
+            default);
+        sized.IsSuccess.ShouldBeTrue();
+        PrintDimensionsPreflight preflight = sized.Value.Preflight.ShouldNotBeNull();
+        preflight.SourceRevisionId.ShouldBe(raster.Id);
+        preflight.SourcePixelWidth.ShouldBe(width);
+        preflight.SourcePixelHeight.ShouldBe(height);
         (await h.Repository.LoadAsync(imported.Value.Id, default)).Value!.Session.PrintPreparationPlan!.SourceRevisionId.ShouldBe(raster.Id);
         authority.Opens.ShouldBe(1); authority.Renders.ShouldBe(1);
         (await h.Repository.GetAutomationLockAsync(default)).Value.IsHeld.ShouldBeFalse();

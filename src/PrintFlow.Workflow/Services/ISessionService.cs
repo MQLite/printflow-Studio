@@ -47,6 +47,16 @@ public interface ISessionService
     /// <summary>Loads a session's current view without changing anything.</summary>
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Calculates one sizing proposal from the session's exact current upstream Revision without
+    /// recording the size or creating an attempt, Revision, output or enlargement offer.
+    /// </summary>
+    Task<OperationResult<PrintDimensionsPreflight>> PreviewPrintDimensionsAsync(
+        SessionId id, WorkflowCommand sizingCommand, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<PrintDimensionsPreflight>(
+            FailureCode.PreconditionNotMet,
+            "This session service does not support print-dimensions preview."));
+
     /// <summary>Loads one exact terminal attempt as operator-facing Error Details.</summary>
     Task<OperationResult<ErrorDetailsView>> LoadErrorDetailsAsync(
         SessionId sessionId, AttemptId attemptId, CancellationToken cancellationToken);

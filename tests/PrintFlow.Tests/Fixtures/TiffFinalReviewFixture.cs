@@ -64,7 +64,8 @@ internal static class TiffFinalReviewFixture
         int sourceWidth = 240,
         int sourceHeight = 180,
         double maxWidthMm = 200,
-        double maxHeightMm = 150)
+        double maxHeightMm = 150,
+        Action<PrintDimensionsPreflight>? observePreflight = null)
     {
         Review review = await OpenAsync(
             harness, fileName, WorkflowType.GeneratePrintTiff, sourceWidth, sourceHeight);
@@ -77,6 +78,7 @@ internal static class TiffFinalReviewFixture
         screen.HeightMmText = maxHeightMm.ToString(CultureInfo.CurrentCulture);
         await screen.SetMaximumBoundsCommand.ExecuteAsync(null);
         screen.Notice.ShouldBeNull();
+        observePreflight?.Invoke(screen.Preflight.ShouldNotBeNull());
 
         await ChooseBranchAsync(screen);
         await screen.RunStepCommand.ExecuteAsync(null);
