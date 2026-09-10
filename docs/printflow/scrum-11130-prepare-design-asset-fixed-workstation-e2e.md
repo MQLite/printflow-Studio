@@ -1,7 +1,9 @@
 # SCRUM-11130 — Prepare Design Asset fixed-workstation E2E
 
-Date: 10 September 2026  
-Work item: SCRUM-11130 / CSV Work Item 11706  
+Date: 10 September 2026
+
+Work item: SCRUM-11130 / CSV Work Item 11706
+
 Verdict: **PARTIAL — the required real operator-facing golden path did not complete**
 
 ## 1. Acceptance authority
