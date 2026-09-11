@@ -1653,11 +1653,16 @@ public sealed partial class SessionService : ISessionService
         }
 
         AdapterExecutionMode adapterMode = AdapterModeFor(work.Adapter);
-        if (adapterMode != AdapterExecutionMode.Production)
+        bool drivesWorkstationAutomation =
+            work.Adapter is AdapterKind.Meitu or AdapterKind.Photoshop;
+        if (adapterMode != AdapterExecutionMode.Production || !drivesWorkstationAutomation)
         {
-            OperationResult<Unit> fakeGate = _environmentGate.Verify(adapterMode);
-            return fakeGate.IsFailure
-                ? OperationResult.Fail<SessionView>(fakeGate.Failure)
+            OperationResult<Unit> gate = work.Adapter == AdapterKind.Pdf &&
+                                         _environmentGate is IInternalProductionEnvironmentGate internalGate
+                ? internalGate.VerifyForInternalWork(adapterMode)
+                : _environmentGate.Verify(adapterMode);
+            return gate.IsFailure
+                ? OperationResult.Fail<SessionView>(gate.Failure)
                 : await RunProducingStepWithinLeaseAsync(
                     aggregate, started, context, work, definition, drivesExternalApplication,
                     cancellationToken).ConfigureAwait(false);

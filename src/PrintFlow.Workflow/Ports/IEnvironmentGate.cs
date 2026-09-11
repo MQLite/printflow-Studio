@@ -47,3 +47,17 @@ public interface IWorkstationScopedEnvironmentGate : IEnvironmentGate
         AdapterExecutionMode mode,
         IWorkstationAutomationLease workstationLease);
 }
+
+/// <summary>
+/// Production gate extension for work that uses the verified workstation configuration but does
+/// not control the shared Meitu/Photoshop automation domain.
+/// </summary>
+/// <remarks>
+/// This is an explicit invocation context, not an ownership capability. It may omit only the
+/// physical automation-availability condition; every other production workstation check remains
+/// required. Today the sole caller is in-process PDF inspection and raster preparation.
+/// </remarks>
+public interface IInternalProductionEnvironmentGate : IEnvironmentGate
+{
+    OperationResult<Unit> VerifyForInternalWork(AdapterExecutionMode mode);
+}

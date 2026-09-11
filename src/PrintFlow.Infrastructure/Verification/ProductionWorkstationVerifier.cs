@@ -40,6 +40,18 @@ public interface IProductionWorkstationVerifier
 }
 
 /// <summary>
+/// Narrow verifier route for production work that does not control an external application.
+/// </summary>
+/// <remarks>
+/// Internal to the gate/verifier collaboration so a workflow caller cannot turn factual
+/// verification into its own authorization surface.
+/// </remarks>
+internal interface IInternalProductionWorkstationVerifier
+{
+    WorkstationVerificationResult VerifyForInternalWork();
+}
+
+/// <summary>
 /// The factual workstation verifier Epic 11500's environment gate will later consult.
 /// </summary>
 /// <remarks>
@@ -56,7 +68,9 @@ public interface IProductionWorkstationVerifier
 /// production steps (§16).
 /// </para>
 /// </remarks>
-public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifier
+public sealed class ProductionWorkstationVerifier :
+    IProductionWorkstationVerifier,
+    IInternalProductionWorkstationVerifier
 {
     private readonly string _manifestAbsolutePath;
     private readonly string _presetId;
@@ -270,9 +284,18 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     }
 
     /// <inheritdoc />
-    public WorkstationVerificationResult Verify() => Verify(ownLease: null);
+    public WorkstationVerificationResult Verify() =>
+        VerifyCore(ownLease: null, requireAutomationAvailability: true);
 
-    public WorkstationVerificationResult Verify(IWorkstationAutomationLease? ownLease)
+    public WorkstationVerificationResult Verify(IWorkstationAutomationLease? ownLease) =>
+        VerifyCore(ownLease, requireAutomationAvailability: true);
+
+    WorkstationVerificationResult IInternalProductionWorkstationVerifier.VerifyForInternalWork() =>
+        VerifyCore(ownLease: null, requireAutomationAvailability: false);
+
+    private WorkstationVerificationResult VerifyCore(
+        IWorkstationAutomationLease? ownLease,
+        bool requireAutomationAvailability)
     {
         WorkstationVerificationResult automatic = VerifyAutomatic();
         if (_live is null || automatic.Preset is null || !automatic.Verified)
@@ -282,8 +305,9 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
 
         WorkstationLiveEvidence? evidence;
         lock (_liveEvidenceSync) evidence = _liveEvidence;
-        WorkstationLiveVerification live = _live.Reobserve(
-            _rootOfTrust.Value.Requirements!, evidence, ownLease);
+        WorkstationLiveVerification live = requireAutomationAvailability
+            ? _live.Reobserve(_rootOfTrust.Value.Requirements!, evidence, ownLease)
+            : _live.ReobserveForInternalWork(_rootOfTrust.Value.Requirements!, evidence);
         if (live.Evidence is null)
         {
             lock (_liveEvidenceSync) _liveEvidence = null;

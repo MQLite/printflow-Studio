@@ -30,6 +30,10 @@ internal interface IProductionLiveWorkstationVerifier
         WorkstationRequirements requirements,
         WorkstationLiveEvidence? evidence,
         IWorkstationAutomationLease? ownLease) => Reobserve(requirements, evidence);
+
+    WorkstationLiveVerification ReobserveForInternalWork(
+        WorkstationRequirements requirements,
+        WorkstationLiveEvidence? evidence) => Reobserve(requirements, evidence);
 }
 
 /// <summary>
@@ -260,12 +264,24 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
 
     public WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements, WorkstationLiveEvidence? evidence) =>
-        Reobserve(requirements, evidence, ownLease: null);
+        Reobserve(requirements, evidence, ownLease: null, requireAutomationAvailability: true);
 
     public WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements,
         WorkstationLiveEvidence? evidence,
-        IWorkstationAutomationLease? ownLease)
+        IWorkstationAutomationLease? ownLease) =>
+        Reobserve(requirements, evidence, ownLease, requireAutomationAvailability: true);
+
+    public WorkstationLiveVerification ReobserveForInternalWork(
+        WorkstationRequirements requirements,
+        WorkstationLiveEvidence? evidence) =>
+        Reobserve(requirements, evidence, ownLease: null, requireAutomationAvailability: false);
+
+    private WorkstationLiveVerification Reobserve(
+        WorkstationRequirements requirements,
+        WorkstationLiveEvidence? evidence,
+        IWorkstationAutomationLease? ownLease,
+        bool requireAutomationAvailability)
     {
         if (evidence is null)
         {
@@ -276,26 +292,46 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         List<WorkstationCheckResult> checks = [];
         try
         {
-            WorkstationAutomationLeaseObservation lockState = _automationLeases
-                .ObserveAsync(ownLease, CancellationToken.None).GetAwaiter().GetResult();
-            if (lockState.Status is WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Unknown)
+            if (requireAutomationAvailability)
             {
-                checks.Add(WorkstationCheckResult.Failed(
+                WorkstationAutomationLeaseObservation lockState = _automationLeases
+                    .ObserveAsync(ownLease, CancellationToken.None).GetAwaiter().GetResult();
+                if (lockState.Status is WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Unknown)
+                {
+                    checks.Add(WorkstationCheckResult.Failed(
+                        WorkstationVerificationCheck.ExternalApplicationAutomationLock,
+                        WorkstationCheckKind.Live,
+                        FailureCode.AdapterUnavailable,
+                        "Available or owned by this operation",
+                        lockState.Status.ToString(),
+                        lockState.Description));
+                    AddRemainingBlocked(checks, "The shared automation lock is currently unavailable.");
+                    // Known contention refuses this external operation but does not invalidate the
+                    // already-certified application identities. Internal work can immediately
+                    // re-use that evidence and re-inspect every applicable runtime fact. An
+                    // unreadable authority is still Unknown and still invalidates the evidence.
+                    return new WorkstationLiveVerification(
+                        [.. checks],
+                        lockState.Status == WorkstationAutomationLeaseStatus.Busy ? evidence : null);
+                }
+
+                checks.Add(WorkstationCheckResult.Passed(
                     WorkstationVerificationCheck.ExternalApplicationAutomationLock,
                     WorkstationCheckKind.Live,
-                    FailureCode.AdapterUnavailable,
-                    "Available or owned by this operation",
-                    lockState.Status.ToString(),
+                    lockState.Status == WorkstationAutomationLeaseStatus.Owned
+                        ? "Owned by this operation"
+                        : "Available",
                     lockState.Description));
-                AddRemainingBlocked(checks, "The shared automation lock is currently unavailable.");
-                return new WorkstationLiveVerification([.. checks], null);
             }
-
-            checks.Add(WorkstationCheckResult.Passed(
-                WorkstationVerificationCheck.ExternalApplicationAutomationLock,
-                WorkstationCheckKind.Live,
-                lockState.Status == WorkstationAutomationLeaseStatus.Owned ? "Owned by this operation" : "Available",
-                lockState.Description));
+            else
+            {
+                checks.Add(WorkstationCheckResult.Advisory(
+                    WorkstationVerificationCheck.ExternalApplicationAutomationLock,
+                    WorkstationCheckKind.Live,
+                    "Not required",
+                    "This in-process operation does not control Meitu or Photoshop, so physical " +
+                    "automation availability is outside its admission decision."));
+            }
 
             OperationResult<MeituReadiness> meitu = _meitu
                 .ReinspectAsync(evidence.Meitu, CancellationToken.None).GetAwaiter().GetResult();

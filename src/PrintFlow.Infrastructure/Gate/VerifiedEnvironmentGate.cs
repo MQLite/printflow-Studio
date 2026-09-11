@@ -40,7 +40,10 @@ namespace PrintFlow.Infrastructure.Gate;
 /// operation (§16), including foreground ownership through <c>PhotoshopTargetLost</c> (§17).
 /// </para>
 /// </remarks>
-public sealed class VerifiedEnvironmentGate : IWorkstationScopedEnvironmentGate, IEnvironmentDiagnostics
+public sealed class VerifiedEnvironmentGate :
+    IWorkstationScopedEnvironmentGate,
+    IInternalProductionEnvironmentGate,
+    IEnvironmentDiagnostics
 {
     /// <summary>The resource key shown when nothing more specific can be named.</summary>
     internal const string GeneralMessageKey = "Failure_EnvironmentNotVerified";
@@ -107,6 +110,15 @@ public sealed class VerifiedEnvironmentGate : IWorkstationScopedEnvironmentGate,
                 FailureCode.EnvironmentNotVerified, $"Unknown adapter execution mode '{mode}'."),
         };
     }
+
+    /// <inheritdoc />
+    public OperationResult<Unit> VerifyForInternalWork(AdapterExecutionMode mode) => mode switch
+    {
+        AdapterExecutionMode.Fake => OperationResult.Ok(),
+        AdapterExecutionMode.Production => AuthoriseInternalProduction(),
+        _ => OperationResult.Fail<Unit>(
+            FailureCode.EnvironmentNotVerified, $"Unknown adapter execution mode '{mode}'."),
+    };
 
     /// <inheritdoc />
     public EnvironmentReadinessReport Read()
@@ -176,7 +188,20 @@ public sealed class VerifiedEnvironmentGate : IWorkstationScopedEnvironmentGate,
         // Authorisation reads Verified, which the result derives from its own checks and which
         // no advisory can influence. An advisory is carried into diagnostics and into the log,
         // and it changes nothing about permission (§8).
-        return result.Verified
+        return Authorise(result);
+    }
+
+    private OperationResult<Unit> AuthoriseInternalProduction()
+    {
+        WorkstationVerificationResult result = _verifier is IInternalProductionWorkstationVerifier internalVerifier
+            ? internalVerifier.VerifyForInternalWork()
+            : _verifier.Verify();
+
+        return Authorise(result);
+    }
+
+    private static OperationResult<Unit> Authorise(WorkstationVerificationResult result) =>
+        result.Verified
             ? OperationResult.Ok()
             : OperationResult.Fail<Unit>(OperationFailure.Create(
                 FailureCode.EnvironmentNotVerified,
@@ -184,7 +209,6 @@ public sealed class VerifiedEnvironmentGate : IWorkstationScopedEnvironmentGate,
                 isRetryable: false,
                 context: ContextFor(result),
                 messageKey: PrimaryMessageKeyFor(result)));
-    }
 
     /// <summary>
     /// The most specific message key the failure can honestly claim (§22).

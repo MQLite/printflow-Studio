@@ -42,7 +42,9 @@ namespace PrintFlow.Tests.Regression;
 /// still have to pass before a single external application is driven.
 /// </para>
 /// </remarks>
-internal sealed class RegressionBootstrapWorkstationVerifier : IProductionWorkstationVerifier
+internal sealed class RegressionBootstrapWorkstationVerifier :
+    IProductionWorkstationVerifier,
+    IInternalProductionWorkstationVerifier
 {
     private readonly IProductionWorkstationVerifier _real;
     private readonly IProductionWorkstationVerifier _withoutRevalidationCheck;
@@ -83,6 +85,14 @@ internal sealed class RegressionBootstrapWorkstationVerifier : IProductionWorkst
             : real;
     }
 
+    WorkstationVerificationResult IInternalProductionWorkstationVerifier.VerifyForInternalWork()
+    {
+        WorkstationVerificationResult real = InternalVerify(_real);
+        return OnlyRevalidationBlocks(real)
+            ? Bootstrapped(InternalVerify(_withoutRevalidationCheck))
+            : real;
+    }
+
     /// <inheritdoc />
     public async Task<WorkstationVerificationResult> RunLiveChecksAsync(CancellationToken cancellationToken)
     {
@@ -99,6 +109,11 @@ internal sealed class RegressionBootstrapWorkstationVerifier : IProductionWorkst
         return Bootstrapped(
             await _withoutRevalidationCheck.RunLiveChecksAsync(cancellationToken).ConfigureAwait(false));
     }
+
+    private static WorkstationVerificationResult InternalVerify(IProductionWorkstationVerifier verifier) =>
+        verifier is IInternalProductionWorkstationVerifier internalVerifier
+            ? internalVerifier.VerifyForInternalWork()
+            : verifier.Verify();
 
     /// <summary>
     /// True when the revalidation check is the only thing standing in the way.

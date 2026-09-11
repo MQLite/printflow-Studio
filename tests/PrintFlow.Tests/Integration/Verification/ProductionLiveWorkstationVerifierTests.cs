@@ -2,14 +2,17 @@ using System.Collections.Immutable;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
+using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Infrastructure.Sqlite;
@@ -57,7 +60,7 @@ public sealed class ProductionLiveWorkstationVerifierTests
             configuration, application.WorkspaceRoot, business, services =>
             {
                 services.AddSingleton<IWorkstationAutomationLeaseManager>(authority);
-                services.AddSingleton<IEnvironmentGate>(new ScopedAllowGate());
+                services.AddSingleton<IEnvironmentGate>(new VerifiedEnvironmentGate(bootstrap));
                 services.AddSingleton<IPhotoshopOutputProcessor>(appPhotoshop);
             });
         ISessionService app = provider.GetRequiredService<ISessionService>();
@@ -86,10 +89,54 @@ public sealed class ProductionLiveWorkstationVerifierTests
             .RunLiveChecksAsync(CancellationToken.None);
         bootstrappedLive.Verified.ShouldBeTrue();
         bootstrap.BootstrapWasUsed.ShouldBeTrue();
+        VerifiedEnvironmentGate appGate = provider.GetRequiredService<IEnvironmentGate>()
+            .ShouldBeOfType<VerifiedEnvironmentGate>();
+        int probeOpens = photoshop.OpenCalls;
+        int probeCloses = photoshop.CloseCalls;
 
         await using (WorkstationAutomationLeaseScope direct =
                      await WorkstationAutomationLeaseScope.AcquireAsync(authority))
         {
+            appGate.Verify(AdapterExecutionMode.Production).IsFailure.ShouldBeTrue(
+                "ordinary external admission must still fail while another scope owns automation");
+            photoshop.OpenCalls.ShouldBe(probeOpens);
+            photoshop.CloseCalls.ShouldBe(probeCloses);
+
+            WorkstationVerificationResult internalVerification =
+                ((IInternalProductionWorkstationVerifier)bootstrap).VerifyForInternalWork();
+            internalVerification.Verified.ShouldBeTrue(
+                string.Join(" | ", internalVerification.Checks.Select(check =>
+                    $"{check.Check}={check.Outcome}/{check.Observed}/{check.Explanation}")));
+            internalVerification.Checks.Single(check =>
+                    check.Check == WorkstationVerificationCheck.ExternalApplicationAutomationLock)
+                .Outcome.ShouldBe(WorkstationCheckOutcome.Advisory);
+            internalVerification.Checks
+                .Where(check => check.Check != WorkstationVerificationCheck.ExternalApplicationAutomationLock)
+                .ShouldAllBe(check => check.Outcome == WorkstationCheckOutcome.Passed ||
+                                      check.Outcome == WorkstationCheckOutcome.Advisory);
+            ((IInternalProductionEnvironmentGate)appGate)
+                .VerifyForInternalWork(AdapterExecutionMode.Production).IsSuccess.ShouldBeTrue();
+
+            string pdfSource = Path.Combine(leaseFiles.Root, "in-process.pdf");
+            File.WriteAllBytes(pdfSource, PdfFixtures.Read("single"));
+            SessionView pdf = (await app.ImportAsync(
+                WorkflowType.GeneratePrintTiff, pdfSource, null, "qa", CancellationToken.None)).Value;
+            OperationResult<SessionView> preparedPdf = await app.ExecuteAsync(
+                pdf.Id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation),
+                "qa", CancellationToken.None);
+            preparedPdf.IsSuccess.ShouldBeTrue(
+                preparedPdf.IsFailure ? preparedPdf.Failure.ToString() : "");
+            SessionAggregate persistedPdf = (await provider.GetRequiredService<ISessionRepository>()
+                .LoadAsync(pdf.Id, CancellationToken.None)).Value!;
+            persistedPdf.Attempts.Single(attempt => attempt.Operation == OperationKind.PreparePdf)
+                .Status.ShouldBe(AttemptStatus.Succeeded);
+            (await provider.GetRequiredService<ISessionRepository>()
+                .GetAutomationLockAsync(CancellationToken.None)).Value.IsHeld.ShouldBeFalse();
+            (await authority.ObserveAsync(null, CancellationToken.None)).Status
+                .ShouldBe(WorkstationAutomationLeaseStatus.Busy);
+            photoshop.OpenCalls.ShouldBe(probeOpens);
+            photoshop.CloseCalls.ShouldBe(probeCloses);
+
             WorkstationVerificationResult scoped = bootstrap.Verify(direct.Lease);
             scoped.Verified.ShouldBeTrue(
                 "the bootstrap must forward the exact owner to the real scoped live reobservation: " +
@@ -398,22 +445,6 @@ public sealed class ProductionLiveWorkstationVerifierTests
 
     private static PhotoshopColourSettingsContract MatchingSettings() =>
         new("Synthetic RGB", "Synthetic CMYK", "Synthetic Gray", "Synthetic Spot");
-
-    private sealed class ScopedAllowGate : IWorkstationScopedEnvironmentGate
-    {
-        public OperationResult<PrintFlow.Domain.Results.Unit> Verify(AdapterExecutionMode mode) =>
-            OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
-                FailureCode.EnvironmentNotVerified,
-                "Production must be reinspected through the explicit owner scope.");
-
-        public OperationResult<PrintFlow.Domain.Results.Unit> Verify(
-            AdapterExecutionMode mode,
-            IWorkstationAutomationLease workstationLease) =>
-            workstationLease.IsActive
-                ? OperationResult.Ok()
-                : OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
-                    FailureCode.AdapterUnavailable, "The supplied test owner is inactive.");
-    }
 
     private sealed class RecordingPsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
     {
