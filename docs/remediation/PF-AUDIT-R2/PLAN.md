@@ -8,6 +8,8 @@
 **Untracked state at start:** operator-owned `printflow-remediation-prompts\` only; it remains untouched  
 **Previous settled evidence:** Release build 0 warnings / 0 errors; Product suite 11,804 passed / 0 failed / 0 skipped. The full suite is not rerun at startup.
 
+**Current status (2026-09-11): PASS WITH NOTES — PF-AUDIT-R2 FINAL-SOURCE QA VERIFIED; HISTORICAL ISOLATION DEVIATION RETAINED.** See section 9 for the final-source closure; earlier delivery limits below are historical.
+
 ## 1. Scope and preserved contracts
 
 This slice repairs the mismatch between the physical resource and its current authority. Every real
@@ -219,3 +221,36 @@ execution deviation. All scoped work is committed locally in two code commits an
 documentation commit; tracked state is clean and only the operator prompt bundle is untracked.
 Nothing was pushed. Real external applications NOT RUN; real production revalidation NOT WRITTEN;
 Jira acceptance statuses unchanged. Stop before R3.
+
+## 9. Current final-source QA closure — 2026-09-11
+
+**PASS WITH NOTES — PF-AUDIT-R2 FINAL-SOURCE QA VERIFIED;
+HISTORICAL ISOLATION DEVIATION RETAINED.** This current result supersedes the historical
+PARTIAL/missing-full-suite status in section 8 under the user's corrected authorization.
+
+- Verified/tested HEAD `2f3d830f90489bd243e96f6888c76332d591e785`, `master`; no reset.
+- Complete-tree acquisition/fixture/owned-child isolation audit passed without changes.
+  Reused corrected synthetic stores/resources/workspaces and serialized environment fixtures.
+  Cleared inherited live controls process-locally and retained the child PowerShell module path.
+  No actual default-store inspection or operation; no shipped authority or locking change.
+- Fresh clean Release build, SDK 10.0.400: 0 warnings / 0 errors, clean/build exits 0.
+  Prior build lacked a saved binary fingerprint for demonstrable reuse.
+- Unfiltered complete Release Product suite: **11,819 passed / 0 failed / 0 skipped**, host
+  exit **0**. Independent TRX counters and individual results agree. Input/test/assembly hashes
+  and HEAD are unchanged across execution. No additional 228-case rerun or unchanged-code retry.
+- New ignored evidence `artifacts/pf-audit-r2/final-source-qa-20260911/` includes complete logs,
+  fresh TRX, actual exit, SDK/source identity, launcher, isolation audit and drift/parser results.
+- Preserve R1 historical 11,804/0/0; initial R2 11,788/31/0; corrected affected 228/0/0;
+  corrected Release build 0 warnings/0 errors. Earlier failed full-suite hashes unchanged.
+  The two actual-default acquisitions remain historical unwaived isolation deviations.
+- **No Product source, test or fixture changes in this continuation.** Documentation-only local
+  delivery; no material correction requiring narrow re-review, no repeat of the full independent
+  review. Operator prompt bundle remains untouched and untracked; no push or deployment.
+- Busy preservation, internal-PDF admission and exact own-scope semantics unchanged. R1's open
+  build-origin condition before A1/A2 remains open. Jira acceptance statuses unchanged.
+  Real apps/standard-set execution/production-revalidation writes **NOT EXECUTED**.
+
+Routing reevaluation: policy 2.3; NormalRoute/RequestedRoute QA Sol High, docs Luna Low;
+RouteOffset 0 (user); AdjustmentResult UNCHANGED; CONTINUE. In-place switch unavailable:
+MODEL_SWITCH_UNAVAILABLE; safe current-runtime fallback, ActualRoute UNVERIFIED. No real switch
+or new review context claimed. Completion condition met for R2 QA; stop before R3/live acceptance.

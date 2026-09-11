@@ -296,3 +296,78 @@ not rewrite the original finding, grant live acceptance or mark an Epic FULL.
 R1 binding/schema/run-claim contracts and the open pre-A1/A2 build-origin condition remain as
 stated above. R3/live diagnostics were not started. Opted-out live tests are **NOT EXECUTED**,
 irrespective of the runner counting their guarded returns as passes.
+
+## Final-source QA closure — 2026-09-11
+
+**PASS WITH NOTES — PF-AUDIT-R2 FINAL-SOURCE QA VERIFIED;
+HISTORICAL ISOLATION DEVIATION RETAINED.**
+
+This continuation explicitly supersedes the earlier interpretation of “one final full suite”
+as a lifetime attempt limit. Earlier statements that no second full suite had run describe
+that historical delivery, not the current status. The failed initial suite and the two actual
+default-workstation-lease acquisitions remain historical evidence and are not waived or erased.
+
+Verified starting/tested HEAD: `2f3d830f90489bd243e96f6888c76332d591e785`, `master`, canonical
+`D:\Repositories\printflow-Studio`. This continuation changed **no Product source, tests or
+fixtures**. The only difference from corrected code commit `99caa61` before testing was the
+three R2 documentation files. No reset was performed; the operator prompt bundle was preserved.
+
+Before execution, the audit searched acquisition and composition callers across the complete
+test tree, not only the previous 228-case filter. The shared SessionServiceHarness and corrected
+production-gate/startup/composition fixtures inject temporary stores and synthetic resource
+identities before acquisition. The real App/live/bootstrap/direct-helper integration uses one
+explicit isolated authority; other live-verifier tests use recording authorities and synthetic
+workspaces. Owned lease children receive explicit temporary store/resource/business-DB/barrier
+paths after inherited controls are cleared. Direct live smoke guards precede acquisition.
+Synthetic standard-runner claim refusal occurs before composition; its environment mutation is
+serialized in the existing EnvironmentVariableCollection. Fake/manual/internal-PDF paths do not
+acquire physical ownership. No remaining isolation gap was found and no fixture was changed.
+The audit did not inspect, acquire, initialize, release, reset or delete the actual default store.
+
+The launcher cleared inherited `PRINTFLOW_*` and `PF_R2_*` variables process-locally and retained
+the Windows PowerShell child module-path correction to
+`%WINDIR%\System32\WindowsPowerShell\v1.0\Modules`. Relevant tests supply their own explicit
+synthetic controls. Persistent environment settings and the shipped default authority were
+unchanged; locking was not disabled. The unchanged 228-case set was not rerun ceremonially.
+
+A fresh clean Release build was chosen because the prior build evidence did not include a
+saved binary fingerprint sufficient to demonstrate reuse. SDK **10.0.400**, local Windows
+`win-x64`; clean exit **0**, build exit **0**, **0 warnings / 0 errors**. The complete Release
+Product suite then ran with no class filter or exclusions, using `--no-build --no-restore`.
+
+| Evidence | Passed | Failed | Skipped | Meaning |
+|---|---:|---:|---:|---|
+| R1 historical baseline | 11,804 | 0 | 0 | Not an R2 result |
+| R2 initial full suite, `689770a` | 11,788 | 31 | 0 | Preserved failed run on superseded source |
+| Corrected R2 affected set, `99caa61` | 228 | 0 | 0 | Existing focused proof; not rerun here |
+| R2 final-source full suite, `2f3d830` | **11,819** | **0** | **0** | Fresh complete run; host exit **0** |
+
+The full runner reported 6.4585 minutes; captured host interval was
+2026-09-11 14:26:17–14:32:47 +12:00. Independent XML parsing found 11,819 individual Passed
+results, matching total/executed/passed counters, with zero non-Passed results and zero skipped.
+Before/after SHA-256 manifests match for tracked non-document inputs and tested PrintFlow
+assemblies; HEAD and tracked status also remained unchanged. The earlier failed full TRX and
+log hashes match before/after. No unchanged-code retry was performed.
+
+New ignored raw evidence: `artifacts/pf-audit-r2/final-source-qa-20260911/`:
+`runner.ps1` contains exact clean/build/test commands and environment handling;
+`isolation-audit.txt`, `sdk.txt`, `source-commit.txt`, `clean.log`, `build.log`,
+`full.log`, `full-exit.txt`, `pf-audit-r2-final-source-full.trx`, `parse-results.ps1`,
+`independent-summary.json`, and before/after input, assembly and historical-evidence manifests.
+The historical `artifacts/pf-audit-r2/final/` and `correction-final/` evidence remains distinct.
+
+No material code/isolation change required narrow re-review; the existing independent reviews
+were retained and the entire review was not repeated for evidence/docs alone. Policy 2.3,
+route offset 0: QA NormalRoute/RequestedRoute Sol High, documentation Luna Low;
+AdjustmentResult UNCHANGED; context CONTINUE. No supported in-place runtime switch was available
+(`MODEL_SWITCH_UNAVAILABLE`); execution continued safely in the current runtime, ActualRoute
+UNVERIFIED. No model downgrade, independent review or new context is falsely claimed.
+
+Busy preserves existing live evidence without refreshing it; Unknown invalidates it. Internal
+PDF admission and explicit own-scope checks retain all other required facts. These delivered R2
+semantics are unchanged. R1's unresolved harness/candidate build-origin condition remains open
+before A1/A2; this synthetic QA does not resolve or waive it. Jira acceptance statuses are
+unchanged. Real external applications, real standard-set execution, production DB/preset/customer
+artwork operations and production-revalidation writes: **NOT EXECUTED**, regardless of guarded
+no-op runner pass counts. No R3 or live acceptance started. Delivery is a local documentation-only
+commit; no push, install, deploy, branch/worktree/clone, amend/rebase or attribution trailer.

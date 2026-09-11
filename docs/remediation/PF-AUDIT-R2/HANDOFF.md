@@ -1,8 +1,6 @@
 # PF-AUDIT-R2 — Handoff
 
-**Status: PARTIAL.** The shared lease and subsequent internal-PDF correction are implemented
-and independently reviewed. The corrected source lacks a passing full Product suite under the
-one-full-run limit. The earlier production-lease test-isolation violation also remains recorded.
+**Status: PASS WITH NOTES — PF-AUDIT-R2 FINAL-SOURCE QA VERIFIED; HISTORICAL ISOLATION DEVIATION RETAINED.** The final-source full suite now passes. The earlier two default-lease acquisitions remain an unwaived historical deviation. The validation narrative below is historical; the final-source closure section supersedes its missing-full-suite limitation. Stop before R3 and live acceptance.
 
 | Item | State |
 |---|---|
@@ -102,3 +100,32 @@ The two code commits are followed by a separate local documentation commit for P
 this HANDOFF. Final tracked state is clean; only the untouched operator-owned
 `printflow-remediation-prompts/` is untracked. Raw evidence is ignored local output. Nothing
 was pushed, and R3 or live diagnostics must not start without a new user instruction.
+
+## Current final-source closure — 2026-09-11
+
+Full QA verified on `2f3d830f90489bd243e96f6888c76332d591e785`, `master`:
+**11,819 passed / 0 failed / 0 skipped**, actual host exit **0**. Fresh clean Release build
+with SDK 10.0.400: **0 warnings / 0 errors**, clean/build exits **0**. This continuation
+changed **no Product source, tests or fixtures**; only R2 evidence/docs changed.
+
+Complete-tree acquisition isolation review found no remaining gap. Corrected isolated fixtures
+and owned-child controls were reused; live opt-ins were cleared process-locally with the existing
+child PowerShell module-path correction. No default-store inspection or operation occurred.
+No additional targeted run or independent-review repeat was needed. Independent TRX parsing
+matched all individual outcomes, and before/after source/test inputs, assembly hashes and HEAD
+matched. Historical failed-suite TRX/log hashes also matched.
+
+Evidence: `artifacts/pf-audit-r2/final-source-qa-20260911/` (fresh TRX, complete log, exit,
+SDK/source identity, launcher, isolation audit, independent parser/summary and drift manifests).
+The report's final-source closure section records exact distinctions from R1 **11,804/0/0**,
+initial R2 **11,788/31/0**, corrected affected **228/0/0** and corrected clean build **0/0**.
+The authorization correction permits final settled-source proof; it does not erase earlier failures
+or the two actual-default acquisitions. This run is the final-source proof previously missing.
+
+Busy preservation, internal-PDF admission and exact own-scope semantics remain delivered.
+R1 build-origin before A1/A2 remains unresolved; Jira acceptance statuses unchanged.
+Real apps, real standard-set execution and production-revalidation writes **NOT EXECUTED**.
+Policy 2.3 / offset 0 / CONTINUE; requested QA Sol High, docs Luna Low; ActualRoute UNVERIFIED,
+MODEL_SWITCH_UNAVAILABLE; no runtime switch claimed. Local documentation-only commit follows;
+operator prompt bundle preserved, no push/install/deploy. R2 complete with historical notes;
+no next execution authorized. **Stop before R3 and live acceptance.**
