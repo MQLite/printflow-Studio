@@ -108,6 +108,9 @@ public sealed class MeituWorkstationSmoke
             return;
         }
 
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+
         StringBuilder transcript = new();
         void Log(string line)
         {
@@ -447,6 +450,9 @@ public sealed class MeituWorkstationSmoke
         {
             return;
         }
+
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
 
         StringBuilder transcript = new();
         void Log(string line)
@@ -1133,6 +1139,9 @@ public sealed class MeituWorkstationSmoke
             return;
         }
 
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+
         StringBuilder transcript = new();
         void Log(string line)
         {
@@ -1231,6 +1240,9 @@ public sealed class MeituWorkstationSmoke
         {
             return;
         }
+
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
 
         StringBuilder transcript = new();
         void Log(string line)
@@ -1357,6 +1369,9 @@ public sealed class MeituWorkstationSmoke
         {
             return;
         }
+
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
 
         StringBuilder transcript = new();
         void Log(string line)
@@ -1578,6 +1593,9 @@ public sealed class MeituWorkstationSmoke
         {
             return;
         }
+
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
 
         AutomationStopMode mode = stop ? AutomationStopMode.StopOperation : AutomationStopMode.TakeOver;
         bool background = string.Equals(

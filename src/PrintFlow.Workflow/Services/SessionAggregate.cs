@@ -159,7 +159,10 @@ public sealed record SessionListItem(
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
 }
 
-/// <summary>The global automation lock's current holder, if any (MVP design invariant 7).</summary>
+/// <summary>
+/// The current holder of this business database's automation correlation/recovery row, if any.
+/// It is not the shared workstation automation lease.
+/// </summary>
 public enum AutomationLockPurpose
 {
     Session,

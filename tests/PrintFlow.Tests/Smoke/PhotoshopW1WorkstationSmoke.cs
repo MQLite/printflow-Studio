@@ -28,6 +28,9 @@ public sealed class PhotoshopW1WorkstationSmoke
             return;
         }
 
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+
         string root = Path.Combine(
             Path.GetTempPath(), "PrintFlowPhotoshopW1Smoke", Guid.NewGuid().ToString("N"));
         string evidence = Path.Combine(root, "Evidence");

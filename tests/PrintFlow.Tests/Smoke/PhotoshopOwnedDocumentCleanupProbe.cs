@@ -5,6 +5,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Workspace;
+using PrintFlow.Tests.Fixtures;
 using Xunit.Abstractions;
 
 using static PrintFlow.Tests.Fixtures.WorkstationObservation;
@@ -51,6 +52,9 @@ public sealed class PhotoshopOwnedDocumentCleanupProbe(ITestOutputHelper output)
             // Inert by design; see the class remarks.
             return;
         }
+
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
 
         PrintFlowConfiguration configuration =
             PrintFlowConfiguration.LoadFromFile(RepositoryFile("appsettings.json"));

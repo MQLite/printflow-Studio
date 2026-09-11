@@ -9,6 +9,7 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
@@ -413,7 +414,14 @@ public sealed class ApplicationStartupTests
         TempApplication application,
         ISingleInstanceGuard guard,
         Action<IServiceCollection>? overrides = null) =>
-        new ApplicationStartup(guard, application.ConfigurationFilePath, overrides)
+        new ApplicationStartup(guard, application.ConfigurationFilePath, services =>
+        {
+            services.AddSingleton<IWorkstationAutomationLeaseManager>(
+                new SqliteWorkstationAutomationLeaseManager(
+                    Path.Combine(application.WorkspaceRoot, "TestAuthority", "workstation-lease.db"),
+                    "test.application-startup." + Guid.NewGuid().ToString("N")));
+            overrides?.Invoke(services);
+        })
             .RunAsync(CancellationToken.None);
 
     private static Action<IServiceCollection> Substitute(IStartupRecoveryService recovery) =>

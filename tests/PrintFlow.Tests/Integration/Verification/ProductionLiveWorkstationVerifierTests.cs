@@ -1,16 +1,23 @@
 using System.Collections.Immutable;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using PrintFlow.App.Composition;
 using PrintFlow.Domain.Files;
+using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Infrastructure.Sqlite;
 using Microsoft.Data.Sqlite;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Tests.Integration.Ui;
+using PrintFlow.Tests.Regression;
+using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -18,6 +25,85 @@ namespace PrintFlow.Tests.Integration.Verification;
 
 public sealed class ProductionLiveWorkstationVerifierTests
 {
+    [Fact]
+    public async Task App_live_verifier_bootstrap_and_direct_scope_compete_on_one_real_isolated_authority()
+    {
+        using TempWorkspace leaseFiles = new();
+        string store = Path.Combine(leaseFiles.Root, "shared-authority", "lease.db");
+        string resource = "test.compositions." + Guid.NewGuid().ToString("N");
+        SqliteWorkstationAutomationLeaseManager authority = new(store, resource);
+
+        using WorkstationVerificationFixture workstation = new();
+        workstation.RemoveRevalidationRecord();
+        FileWorkspace liveWorkspace = new(workstation.WorkspaceRoot);
+        ScriptedMeitu meitu = new(workstation.MeituPath);
+        ScriptedPhotoshop photoshop = new(workstation.PhotoshopPath, liveWorkspace);
+        ProductionLiveWorkstationVerifier live = new(
+            meitu, photoshop, new ScriptedRuntimeFacts(MatchingSettings(), []),
+            authority, liveWorkspace, workstation.Clock);
+        ProductionWorkstationVerifier real = FullVerifier(workstation, live, omitRevalidation: false);
+        ProductionWorkstationVerifier withoutRevalidation =
+            FullVerifier(workstation, live, omitRevalidation: true);
+        RegressionBootstrapWorkstationVerifier bootstrap = new(real, withoutRevalidation);
+
+        using TempApplication application = new("Production");
+        PrintFlowConfiguration configuration =
+            PrintFlowConfiguration.LoadFromFile(application.ConfigurationFilePath);
+        SqliteConnectionFactory business = new(application.DatabasePath);
+        using (SqliteConnection connection = business.Open())
+            MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
+        RecordingPsdProcessor appPhotoshop = new(new FileWorkspace(application.WorkspaceRoot));
+        using ServiceProvider provider = ServiceRegistration.BuildServiceProvider(
+            configuration, application.WorkspaceRoot, business, services =>
+            {
+                services.AddSingleton<IWorkstationAutomationLeaseManager>(authority);
+                services.AddSingleton<IEnvironmentGate>(new ScopedAllowGate());
+                services.AddSingleton<IPhotoshopOutputProcessor>(appPhotoshop);
+            });
+        ISessionService app = provider.GetRequiredService<ISessionService>();
+        string source = Path.Combine(application.WorkspaceRoot, "composition.psd");
+        File.WriteAllBytes(source, PsdInputPreparationTests.RgbCompositePsd());
+        SessionId session = (await app.ImportAsync(
+            WorkflowType.GeneratePrintTiff, source, null, "qa", CancellationToken.None)).Value.Id;
+
+        await using (WorkstationAutomationLeaseScope direct =
+                     await WorkstationAutomationLeaseScope.AcquireAsync(authority))
+        {
+            OperationResult<SessionView> refused = await app.ExecuteAsync(
+                session, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation),
+                "qa", CancellationToken.None);
+            refused.IsFailure.ShouldBeTrue();
+            refused.Failure.Code.ShouldBe(FailureCode.AdapterUnavailable);
+            appPhotoshop.Calls.ShouldBe(0);
+
+            WorkstationLiveVerification liveRefused = await live.RunAsync(
+                Requirements(workstation), CancellationToken.None);
+            liveRefused.Checks[0].Outcome.ShouldBe(WorkstationCheckOutcome.Failed);
+            meitu.EnsureCalls.ShouldBe(0);
+        }
+
+        WorkstationVerificationResult bootstrappedLive = await bootstrap
+            .RunLiveChecksAsync(CancellationToken.None);
+        bootstrappedLive.Verified.ShouldBeTrue();
+        bootstrap.BootstrapWasUsed.ShouldBeTrue();
+
+        await using (WorkstationAutomationLeaseScope direct =
+                     await WorkstationAutomationLeaseScope.AcquireAsync(authority))
+        {
+            WorkstationVerificationResult scoped = bootstrap.Verify(direct.Lease);
+            scoped.Verified.ShouldBeTrue(
+                "the bootstrap must forward the exact owner to the real scoped live reobservation: " +
+                string.Join(" | ", scoped.Checks.Select(check =>
+                    $"{check.Check}={check.Outcome}/{check.Observed}/{check.Explanation}")));
+        }
+
+        OperationResult<SessionView> succeeded = await app.ExecuteAsync(
+            session, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation),
+            "qa", CancellationToken.None);
+        succeeded.IsSuccess.ShouldBeTrue(succeeded.IsFailure ? succeeded.Failure.ToString() : "");
+        appPhotoshop.Calls.ShouldBe(1);
+    }
+
     [Fact]
     public async Task Three_successful_runs_restore_state_clean_the_probe_and_release_the_lock()
     {
@@ -294,8 +380,65 @@ public sealed class ProductionLiveWorkstationVerifierTests
             fixture.ManifestPath, WorkstationVerificationFixture.PresetId,
             WorkstationVerificationFixture.PresetVersion, fixture.ManifestSha256).Value;
 
+    private static ProductionWorkstationVerifier FullVerifier(
+        WorkstationVerificationFixture fixture,
+        IProductionLiveWorkstationVerifier live,
+        bool omitRevalidation) => new(
+        fixture.ManifestPath,
+        WorkstationVerificationFixture.PresetId,
+        WorkstationVerificationFixture.PresetVersion,
+        fixture.ManifestSha256,
+        fixture.WorkspaceRoot,
+        fixture.Facts,
+        fixture.Artifacts,
+        fixture.Clock,
+        live,
+        revalidation: null,
+        omitProductionRevalidation: omitRevalidation);
+
     private static PhotoshopColourSettingsContract MatchingSettings() =>
         new("Synthetic RGB", "Synthetic CMYK", "Synthetic Gray", "Synthetic Spot");
+
+    private sealed class ScopedAllowGate : IWorkstationScopedEnvironmentGate
+    {
+        public OperationResult<PrintFlow.Domain.Results.Unit> Verify(AdapterExecutionMode mode) =>
+            OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
+                FailureCode.EnvironmentNotVerified,
+                "Production must be reinspected through the explicit owner scope.");
+
+        public OperationResult<PrintFlow.Domain.Results.Unit> Verify(
+            AdapterExecutionMode mode,
+            IWorkstationAutomationLease workstationLease) =>
+            workstationLease.IsActive
+                ? OperationResult.Ok()
+                : OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
+                    FailureCode.AdapterUnavailable, "The supplied test owner is inactive.");
+    }
+
+    private sealed class RecordingPsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
+    {
+        public string AdapterId => "recording-app-photoshop";
+        public AdapterExecutionMode Mode => AdapterExecutionMode.Production;
+        public int Calls { get; private set; }
+
+        public Task<OperationResult<AdapterOutput>> GenerateAsync(
+            PhotoshopRequest request, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<OperationResult<AdapterOutput>> PreparePsdAsync(
+            PsdPreparationRequest request, CancellationToken cancellationToken)
+        {
+            Calls++;
+            File.WriteAllBytes(workspace.ResolveAbsolute(request.ExpectedOutput), SyntheticImages.Png(4, 3));
+            return Task.FromResult(OperationResult.Ok(new AdapterOutput(
+                request.ExpectedOutput, TimeSpan.Zero, "recorded app boundary")
+            {
+                PsdInspection = new PsdInspection(
+                    4, 3, "RGB", 8, true, true,
+                    [new("Red", "COMPONENT"), new("Green", "COMPONENT"), new("Blue", "COMPONENT")],
+                    "recorded-composition"),
+            }));
+        }
+    }
 
     private sealed class RecordingLiveVerifier : IProductionLiveWorkstationVerifier
     {
@@ -313,37 +456,53 @@ public sealed class ProductionLiveWorkstationVerifierTests
             new(ProductionLiveWorkstationVerifier.BlockedChecks("not run"), null);
     }
 
-    private sealed class RecordingLock : IEnvironmentAutomationLock
+    private sealed class RecordingLock : IWorkstationAutomationLeaseManager
     {
+        public string ResourceId => "test.live-verifier";
         public bool Contended { get; init; }
         public bool IsHeld { get; private set; }
         public int AcquireCalls { get; private set; }
         public int ReleaseCalls { get; private set; }
 
-        public Task<OperationResult<EnvironmentAutomationLease>> TryAcquireAsync(
-            DateTimeOffset atUtc, CancellationToken cancellationToken)
+        public Task<OperationResult<IWorkstationAutomationLease>> TryAcquireAsync(
+            IWorkstationAutomationLease? enclosingLease, CancellationToken cancellationToken)
         {
             AcquireCalls++;
             if (Contended)
-                return Task.FromResult(OperationResult.Fail<EnvironmentAutomationLease>(
+                return Task.FromResult(OperationResult.Fail<IWorkstationAutomationLease>(
                     FailureCode.AdapterUnavailable, "held"));
             IsHeld = true;
-            return Task.FromResult(OperationResult.Ok(new EnvironmentAutomationLease("owned")));
+            return Task.FromResult(OperationResult.Ok<IWorkstationAutomationLease>(new RecordingLease(this)));
         }
 
-        public Task<OperationResult<PrintFlow.Domain.Results.Unit>> ReleaseAsync(
-            EnvironmentAutomationLease lease, CancellationToken cancellationToken)
+        public Task<WorkstationAutomationLeaseObservation> ObserveAsync(
+            IWorkstationAutomationLease? ownLease, CancellationToken cancellationToken) =>
+            Task.FromResult(new WorkstationAutomationLeaseObservation(
+                ownLease is RecordingLease { IsActive: true }
+                    ? WorkstationAutomationLeaseStatus.Owned
+                    : IsHeld ? WorkstationAutomationLeaseStatus.Busy : WorkstationAutomationLeaseStatus.Free,
+                ResourceId,
+                IsHeld ? "held" : "free"));
+
+        private sealed class RecordingLease(RecordingLock owner) : IWorkstationAutomationLease
         {
-            ReleaseCalls++;
-            IsHeld = false;
-            return Task.FromResult(OperationResult.Ok());
-        }
+            public string ResourceId => owner.ResourceId;
+            public string OwnerToken => "owned";
+            public bool IsActive { get; private set; } = true;
 
-        public Task<OperationResult<AutomationLockState>> ReadAsync(CancellationToken cancellationToken) =>
-            Task.FromResult(OperationResult.Ok(new AutomationLockState(
-                null, null, null, null,
-                IsHeld ? AutomationLockPurpose.EnvironmentVerification : null,
-                IsHeld ? "owned" : null)));
+            public Task<OperationResult<PrintFlow.Domain.Results.Unit>> ReleaseAsync(
+                CancellationToken cancellationToken)
+            {
+                if (IsActive)
+                {
+                    owner.ReleaseCalls++;
+                    owner.IsHeld = false;
+                    IsActive = false;
+                }
+
+                return Task.FromResult(OperationResult.Ok());
+            }
+        }
     }
 
     private sealed class ScriptedRuntimeFacts(

@@ -109,6 +109,8 @@ public sealed partial class SessionService : ISessionService
 
     private readonly IWorkstationPresetProvider _presetProvider;
     private readonly IEnvironmentGate _environmentGate;
+    private readonly IWorkstationAutomationLeaseManager? _automationLeases;
+    private readonly IWorkstationAutomationLease? _enclosingAutomationLease;
     private readonly RevisionIntegrityGuard _integrityGuard;
     private readonly IIdGenerator _idGenerator;
     private readonly TimeProvider _timeProvider;
@@ -158,7 +160,9 @@ public sealed partial class SessionService : ISessionService
         IPdfPreparationProcessor? pdf = null,
         IManualResultImporter? manualResults = null,
         ISettingsRepository? settings = null,
-        IDiagnosticImagePreviewDecoder? diagnosticImages = null)
+        IDiagnosticImagePreviewDecoder? diagnosticImages = null,
+        IWorkstationAutomationLease? enclosingAutomationLease = null,
+        IWorkstationAutomationLeaseManager? automationLeases = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -189,6 +193,8 @@ public sealed partial class SessionService : ISessionService
         _diagnosticImages = diagnosticImages;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
+        _automationLeases = automationLeases;
+        _enclosingAutomationLease = enclosingAutomationLease;
         _idGenerator = idGenerator;
         _timeProvider = timeProvider;
         _integrityGuard = new RevisionIntegrityGuard(workspace, fileInspector);
@@ -1639,19 +1645,90 @@ public sealed partial class SessionService : ISessionService
 
         bool drivesExternalApplication = definition.IsAdapterBacked && work.ManualResultPath is null;
 
-        if (drivesExternalApplication)
+        if (!drivesExternalApplication)
         {
-            OperationResult<Unit> gate = _environmentGate.Verify(AdapterModeFor(work.Adapter));
-            if (gate.IsFailure)
-            {
-                return OperationResult.Fail<SessionView>(gate.Failure);
-            }
+            return await RunProducingStepWithinLeaseAsync(
+                aggregate, started, context, work, definition, drivesExternalApplication,
+                cancellationToken).ConfigureAwait(false);
         }
 
+        AdapterExecutionMode adapterMode = AdapterModeFor(work.Adapter);
+        if (adapterMode != AdapterExecutionMode.Production)
+        {
+            OperationResult<Unit> fakeGate = _environmentGate.Verify(adapterMode);
+            return fakeGate.IsFailure
+                ? OperationResult.Fail<SessionView>(fakeGate.Failure)
+                : await RunProducingStepWithinLeaseAsync(
+                    aggregate, started, context, work, definition, drivesExternalApplication,
+                    cancellationToken).ConfigureAwait(false);
+        }
+
+        if (_automationLeases is null)
+        {
+            return OperationResult.Fail<SessionView>(
+                FailureCode.AdapterUnavailable,
+                "No workstation automation lease authority was composed for this external operation.");
+        }
+
+        OperationResult<IWorkstationAutomationLease> acquired = await _automationLeases
+            .TryAcquireAsync(_enclosingAutomationLease, cancellationToken)
+            .ConfigureAwait(false);
+        if (acquired.IsFailure)
+        {
+            return OperationResult.Fail<SessionView>(acquired.Failure);
+        }
+
+        IWorkstationAutomationLease lease = acquired.Value;
+        OperationResult<SessionView> result;
+        try
+        {
+            OperationResult<Unit> gate = _environmentGate is IWorkstationScopedEnvironmentGate scoped
+                ? scoped.Verify(adapterMode, lease)
+                : _environmentGate.Verify(adapterMode);
+            result = gate.IsFailure
+                ? OperationResult.Fail<SessionView>(gate.Failure)
+                : await RunProducingStepWithinLeaseAsync(
+                    aggregate, started, context, work, definition, drivesExternalApplication,
+                    cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            OperationResult<Unit> exceptionalRelease = await lease
+                .ReleaseAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            if (exceptionalRelease.IsFailure)
+            {
+                throw new InvalidOperationException(
+                    $"The operation faulted and its workstation lease could not be released: " +
+                    exceptionalRelease.Failure.TechnicalDetail);
+            }
+
+            throw;
+        }
+
+        OperationResult<Unit> released = await lease
+            .ReleaseAsync(CancellationToken.None)
+            .ConfigureAwait(false);
+        return released.IsFailure
+            ? OperationResult.Fail<SessionView>(released.Failure)
+            : result;
+    }
+
+    private async Task<OperationResult<SessionView>> RunProducingStepWithinLeaseAsync(
+        SessionAggregate aggregate,
+        WorkflowTransition started,
+        CommandContext context,
+        ProducingWork work,
+        StepDefinition definition,
+        bool drivesExternalApplication,
+        CancellationToken cancellationToken)
+    {
         AutomationLockChange? acquire = null;
         if (drivesExternalApplication)
         {
-            OperationResult<AutomationLockState> lockState = await _repository.GetAutomationLockAsync(cancellationToken);
+            OperationResult<AutomationLockState> lockState = await _repository
+                .GetAutomationLockAsync(cancellationToken)
+                .ConfigureAwait(false);
             if (lockState.IsFailure)
             {
                 return OperationResult.Fail<SessionView>(lockState.Failure);
@@ -1664,7 +1741,7 @@ public sealed partial class SessionService : ISessionService
                     : "the Production Readiness live verification";
                 return OperationResult.Fail<SessionView>(
                     FailureCode.AdapterUnavailable,
-                    $"Meitu/Photoshop is already controlled by {holder}.");
+                    $"Meitu/Photoshop is already correlated with {holder} in this business database.");
             }
 
             acquire = new AutomationLockChange(
@@ -1887,7 +1964,7 @@ public sealed partial class SessionService : ISessionService
         // Cancellation is the one failure whose caller token cannot be used to close the
         // attempt: it is already cancelled. The adapter has stopped receiving input, while
         // this short metadata transaction truthfully ends the attempt and releases the
-        // global automation lock. A process crash before this commit is still covered by
+        // per-database automation correlation row. A process crash before this commit is still covered by
         // startup Running -> Interrupted recovery.
         //
         // A contained fault is closed the same way and for the same reason (Epic 11600 Part A

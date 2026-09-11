@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using PrintFlow.Infrastructure.Verification;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Regression;
 
@@ -71,10 +72,15 @@ internal sealed class RegressionBootstrapWorkstationVerifier : IProductionWorkst
     internal bool BootstrapWasUsed { get; private set; }
 
     /// <inheritdoc />
-    public WorkstationVerificationResult Verify()
+    public WorkstationVerificationResult Verify() => Verify(ownLease: null);
+
+    /// <inheritdoc />
+    public WorkstationVerificationResult Verify(IWorkstationAutomationLease? ownLease)
     {
-        WorkstationVerificationResult real = _real.Verify();
-        return OnlyRevalidationBlocks(real) ? Bootstrapped(_withoutRevalidationCheck.Verify()) : real;
+        WorkstationVerificationResult real = _real.Verify(ownLease);
+        return OnlyRevalidationBlocks(real)
+            ? Bootstrapped(_withoutRevalidationCheck.Verify(ownLease))
+            : real;
     }
 
     /// <inheritdoc />

@@ -25,6 +25,11 @@ internal interface IProductionLiveWorkstationVerifier
 
     WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements, WorkstationLiveEvidence? evidence);
+
+    WorkstationLiveVerification Reobserve(
+        WorkstationRequirements requirements,
+        WorkstationLiveEvidence? evidence,
+        IWorkstationAutomationLease? ownLease) => Reobserve(requirements, evidence);
 }
 
 /// <summary>
@@ -51,7 +56,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
     private readonly IMeituAutomationFoundation _meitu;
     private readonly IPhotoshopAutomationFoundation _photoshop;
     private readonly IPhotoshopRuntimeFactReader _photoshopFacts;
-    private readonly IEnvironmentAutomationLock _automationLock;
+    private readonly IWorkstationAutomationLeaseManager _automationLeases;
     private readonly IWorkspace _workspace;
     private readonly TimeProvider _clock;
 
@@ -59,14 +64,14 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         IMeituAutomationFoundation meitu,
         IPhotoshopAutomationFoundation photoshop,
         IPhotoshopRuntimeFactReader photoshopFacts,
-        IEnvironmentAutomationLock automationLock,
+        IWorkstationAutomationLeaseManager automationLeases,
         IWorkspace workspace,
         TimeProvider clock)
     {
         _meitu = meitu ?? throw new ArgumentNullException(nameof(meitu));
         _photoshop = photoshop ?? throw new ArgumentNullException(nameof(photoshop));
         _photoshopFacts = photoshopFacts ?? throw new ArgumentNullException(nameof(photoshopFacts));
-        _automationLock = automationLock ?? throw new ArgumentNullException(nameof(automationLock));
+        _automationLeases = automationLeases ?? throw new ArgumentNullException(nameof(automationLeases));
         _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
@@ -75,14 +80,14 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         WorkstationRequirements requirements, CancellationToken cancellationToken)
     {
         List<WorkstationCheckResult> checks = [];
-        EnvironmentAutomationLease? lease = null;
+        IWorkstationAutomationLease? lease = null;
         WorkstationLiveEvidence? evidence = null;
         OperationResult<Unit>? release = null;
 
         try
         {
-            OperationResult<EnvironmentAutomationLease> acquired = await _automationLock
-                .TryAcquireAsync(_clock.GetUtcNow(), cancellationToken)
+            OperationResult<IWorkstationAutomationLease> acquired = await _automationLeases
+                .TryAcquireAsync(enclosingLease: null, cancellationToken)
                 .ConfigureAwait(false);
             if (acquired.IsFailure)
             {
@@ -229,7 +234,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         {
             if (lease is not null)
             {
-                release = await _automationLock.ReleaseAsync(lease, CancellationToken.None)
+                release = await lease.ReleaseAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
         }
@@ -254,7 +259,13 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
     }
 
     public WorkstationLiveVerification Reobserve(
-        WorkstationRequirements requirements, WorkstationLiveEvidence? evidence)
+        WorkstationRequirements requirements, WorkstationLiveEvidence? evidence) =>
+        Reobserve(requirements, evidence, ownLease: null);
+
+    public WorkstationLiveVerification Reobserve(
+        WorkstationRequirements requirements,
+        WorkstationLiveEvidence? evidence,
+        IWorkstationAutomationLease? ownLease)
     {
         if (evidence is null)
         {
@@ -265,27 +276,26 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         List<WorkstationCheckResult> checks = [];
         try
         {
-            OperationResult<PrintFlow.Workflow.Services.AutomationLockState> lockState = _automationLock
-                .ReadAsync(CancellationToken.None).GetAwaiter().GetResult();
-            if (lockState.IsFailure || lockState.Value.IsHeld)
+            WorkstationAutomationLeaseObservation lockState = _automationLeases
+                .ObserveAsync(ownLease, CancellationToken.None).GetAwaiter().GetResult();
+            if (lockState.Status is WorkstationAutomationLeaseStatus.Busy or WorkstationAutomationLeaseStatus.Unknown)
             {
-                checks.Add(lockState.IsFailure
-                    ? Failed(WorkstationVerificationCheck.ExternalApplicationAutomationLock,
-                        WorkstationCheckKind.Live, "Available", null, lockState.Failure)
-                    : WorkstationCheckResult.Failed(
-                        WorkstationVerificationCheck.ExternalApplicationAutomationLock,
-                        WorkstationCheckKind.Live,
-                        FailureCode.AdapterUnavailable,
-                        "Available",
-                        "Held by another operation",
-                        "The global automation lock is currently held; Production cannot start."));
+                checks.Add(WorkstationCheckResult.Failed(
+                    WorkstationVerificationCheck.ExternalApplicationAutomationLock,
+                    WorkstationCheckKind.Live,
+                    FailureCode.AdapterUnavailable,
+                    "Available or owned by this operation",
+                    lockState.Status.ToString(),
+                    lockState.Description));
                 AddRemainingBlocked(checks, "The shared automation lock is currently unavailable.");
                 return new WorkstationLiveVerification([.. checks], null);
             }
 
             checks.Add(WorkstationCheckResult.Passed(
                 WorkstationVerificationCheck.ExternalApplicationAutomationLock,
-                WorkstationCheckKind.Live, "Available", "The global automation lock is available."));
+                WorkstationCheckKind.Live,
+                lockState.Status == WorkstationAutomationLeaseStatus.Owned ? "Owned by this operation" : "Available",
+                lockState.Description));
 
             OperationResult<MeituReadiness> meitu = _meitu
                 .ReinspectAsync(evidence.Meitu, CancellationToken.None).GetAwaiter().GetResult();

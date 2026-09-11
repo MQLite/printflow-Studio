@@ -31,6 +31,8 @@ public interface IProductionWorkstationVerifier
     /// </remarks>
     WorkstationVerificationResult Verify();
 
+    WorkstationVerificationResult Verify(IWorkstationAutomationLease? ownLease) => Verify();
+
     /// <summary>
     /// Runs the explicit, bounded external-application verification phase after static trust passes.
     /// </summary>
@@ -167,11 +169,11 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         Sha256 expectedManifestSha256,
         string configuredWorkspaceRoot,
         IWorkspace workspace,
-        SqliteConnectionFactory connections,
+        IWorkstationAutomationLeaseManager automationLeases,
         string evidenceDirectory,
         TimeProvider clock) =>
         Compose(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
-            configuredWorkspaceRoot, workspace, connections, evidenceDirectory, clock,
+            configuredWorkspaceRoot, workspace, automationLeases, evidenceDirectory, clock,
             omitProductionRevalidation: false);
 
     /// <summary>
@@ -193,7 +195,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     /// build, both accepted binaries, the Action artefact, the workspace root, the interactive
     /// session, the display topology, the UI culture, and the entire live application phase —
     /// launchability, safe starting states, Photoshop's colour settings, the test-image round
-    /// trip and the global automation lock. A workstation failing any of those still fails here.
+    /// trip and the shared workstation automation lease. A workstation failing any of those still fails here.
     /// </para>
     /// <para>
     /// <b>Why the application cannot use it.</b> <c>internal</c>, and this assembly grants its
@@ -210,11 +212,11 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         Sha256 expectedManifestSha256,
         string configuredWorkspaceRoot,
         IWorkspace workspace,
-        SqliteConnectionFactory connections,
+        IWorkstationAutomationLeaseManager automationLeases,
         string evidenceDirectory,
         TimeProvider clock) =>
         Compose(manifestAbsolutePath, presetId, presetVersion, expectedManifestSha256,
-            configuredWorkspaceRoot, workspace, connections, evidenceDirectory, clock,
+            configuredWorkspaceRoot, workspace, automationLeases, evidenceDirectory, clock,
             omitProductionRevalidation: true);
 
     /// <summary>
@@ -232,13 +234,13 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         Sha256 expectedManifestSha256,
         string configuredWorkspaceRoot,
         IWorkspace workspace,
-        SqliteConnectionFactory connections,
+        IWorkstationAutomationLeaseManager automationLeases,
         string evidenceDirectory,
         TimeProvider clock,
         bool omitProductionRevalidation)
     {
         ArgumentNullException.ThrowIfNull(workspace);
-        ArgumentNullException.ThrowIfNull(connections);
+        ArgumentNullException.ThrowIfNull(automationLeases);
         ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
 
         IMeituAutomationFoundation meitu = MeituAutomationComposition.CreateFoundation(
@@ -249,7 +251,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
             meitu,
             photoshop,
             new RotPhotoshopRuntimeFactReader(),
-            new SqliteEnvironmentAutomationLock(connections, Environment.ProcessId, Environment.MachineName),
+            automationLeases,
             workspace,
             clock);
 
@@ -268,7 +270,9 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
     }
 
     /// <inheritdoc />
-    public WorkstationVerificationResult Verify()
+    public WorkstationVerificationResult Verify() => Verify(ownLease: null);
+
+    public WorkstationVerificationResult Verify(IWorkstationAutomationLease? ownLease)
     {
         WorkstationVerificationResult automatic = VerifyAutomatic();
         if (_live is null || automatic.Preset is null || !automatic.Verified)
@@ -279,7 +283,7 @@ public sealed class ProductionWorkstationVerifier : IProductionWorkstationVerifi
         WorkstationLiveEvidence? evidence;
         lock (_liveEvidenceSync) evidence = _liveEvidence;
         WorkstationLiveVerification live = _live.Reobserve(
-            _rootOfTrust.Value.Requirements!, evidence);
+            _rootOfTrust.Value.Requirements!, evidence, ownLease);
         if (live.Evidence is null)
         {
             lock (_liveEvidenceSync) _liveEvidence = null;

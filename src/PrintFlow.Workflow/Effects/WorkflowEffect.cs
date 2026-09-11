@@ -169,7 +169,7 @@ public abstract record WorkflowEffect
     /// <summary>Open the working copy for the operator and end automated progression.</summary>
     public sealed record OpenForManualWork(StepKind Step, string Reason) : WorkflowEffect;
 
-    /// <summary>Release the global automation lock (MVP design invariant 7).</summary>
+    /// <summary>Release this business database's automation correlation/recovery row.</summary>
     public sealed record ReleaseAutomationLock : WorkflowEffect;
 
     /// <summary>Remove safe-to-delete working copies once a session concludes (MVP design §10).</summary>

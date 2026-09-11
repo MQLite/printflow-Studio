@@ -68,7 +68,7 @@ public interface ISessionRepository
     /// <summary>Every completed session, without the Home screen's age/count retention limits.</summary>
     Task<OperationResult<IReadOnlyList<SessionId>>> FindCompletedSessionsAsync(CancellationToken cancellationToken);
 
-    /// <summary>Reads the current holder of the singleton global automation lock, if any.</summary>
+    /// <summary>Reads this business database's automation correlation/recovery holder, if any.</summary>
     Task<OperationResult<AutomationLockState>> GetAutomationLockAsync(CancellationToken cancellationToken);
 
     /// <summary>

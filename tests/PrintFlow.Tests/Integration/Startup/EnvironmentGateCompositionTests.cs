@@ -6,6 +6,7 @@ using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Configuration;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Infrastructure.Startup;
 using PrintFlow.Tests.Fixtures;
@@ -242,7 +243,12 @@ public sealed class EnvironmentGateCompositionTests
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
 
         using ServiceProvider services =
-            ServiceRegistration.BuildServiceProvider(configuration, application.WorkspaceRoot, factory);
+            ServiceRegistration.BuildServiceProvider(
+                configuration, application.WorkspaceRoot, factory, testServices =>
+                    testServices.AddSingleton<IWorkstationAutomationLeaseManager>(
+                        new SqliteWorkstationAutomationLeaseManager(
+                            Path.Combine(application.WorkspaceRoot, "TestAuthority", "workstation-lease.db"),
+                            "test.environment-gate-composition." + Guid.NewGuid().ToString("N"))));
 
         services.GetRequiredService<IMeituProcessor>().Mode.ShouldBe(AdapterExecutionMode.Production);
         services.GetRequiredService<IPhotoshopOutputProcessor>().Mode
@@ -266,7 +272,11 @@ public sealed class EnvironmentGateCompositionTests
         MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
 
         return ServiceRegistration.BuildServiceProvider(
-            configuration, application.WorkspaceRoot, factory);
+            configuration, application.WorkspaceRoot, factory, services =>
+                services.AddSingleton<IWorkstationAutomationLeaseManager>(
+                    new SqliteWorkstationAutomationLeaseManager(
+                        Path.Combine(application.WorkspaceRoot, "TestAuthority", "workstation-lease.db"),
+                        "test.environment-gate-composition." + Guid.NewGuid().ToString("N"))));
     }
 
     private static string RepositoryRoot()

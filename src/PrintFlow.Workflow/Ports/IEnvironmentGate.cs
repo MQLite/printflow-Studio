@@ -35,3 +35,15 @@ public interface IEnvironmentGate
     /// <summary>Decides whether a step backed by an adapter in <paramref name="mode"/> may proceed.</summary>
     OperationResult<Unit> Verify(AdapterExecutionMode mode);
 }
+
+/// <summary>
+/// Production gate extension used after an operation has atomically acquired the workstation
+/// lease. The explicit capability lets reinspection recognise its own owner without weakening
+/// any other workstation check.
+/// </summary>
+public interface IWorkstationScopedEnvironmentGate : IEnvironmentGate
+{
+    OperationResult<Unit> Verify(
+        AdapterExecutionMode mode,
+        IWorkstationAutomationLease workstationLease);
+}

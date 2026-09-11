@@ -59,6 +59,9 @@ public sealed class PhotoshopWorkstationSmoke
             return;
         }
 
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+
         StringBuilder transcript = new();
         void Log(string line)
         {

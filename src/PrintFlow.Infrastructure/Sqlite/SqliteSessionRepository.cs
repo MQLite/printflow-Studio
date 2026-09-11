@@ -269,7 +269,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
                     transaction.Rollback();
                     return OperationResult.Fail<Unit>(
                         FailureCode.AdapterUnavailable,
-                        "The global automation lock changed ownership before this session could update it.");
+                        "The per-database automation correlation row changed ownership before this session could update it.");
                 }
             }
 

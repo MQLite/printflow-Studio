@@ -7,6 +7,7 @@ using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Sqlite;
+using PrintFlow.Tests.Fixtures;
 using PrintFlow.Tests.Integration.Ui;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Ports;
@@ -37,14 +38,10 @@ public sealed class PsdPreparationWorkstationSmoke(ITestOutputHelper output)
         var factory = new SqliteConnectionFactory(Path.Combine(qa, "psd-smoke.db"));
         using (var connection = factory.Open()) MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
         using var provider = ServiceRegistration.BuildServiceProvider(configuration, configuration.Workspace.Root, factory);
-        var gate = provider.GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production);
-        output.WriteLine("VerifiedEnvironmentGate: " + (gate.IsSuccess ? "ALLOWED" : gate.Failure.ToString()));
-        gate.IsSuccess.ShouldBeTrue(gate.IsFailure ? gate.Failure.ToString() : "");
         var processor = provider.GetRequiredService<IPhotoshopOutputProcessor>().ShouldBeOfType<ProductionPhotoshopOutputProcessor>();
-        var before = await processor.EnsureReadyAsync(CancellationToken.None);
-        before.IsSuccess.ShouldBeTrue(before.IsFailure ? before.Failure.ToString() : "");
-        output.WriteLine("Photoshop starting state: " + before.Value.State.State);
-        (before.Value.State.State is PhotoshopStartingState.KnownStartScreen or PhotoshopStartingState.KnownEditorNoDocument)
+        PhotoshopReadiness before = await EnsureReadyUnderLeaseAsync(provider, processor, verifyGate: true);
+        output.WriteLine("Photoshop starting state: " + before.State.State);
+        (before.State.State is PhotoshopStartingState.KnownStartScreen or PhotoshopStartingState.KnownEditorNoDocument)
             .ShouldBeTrue("The controlled smoke requires an accepted clean Photoshop starting state.");
         var service = provider.GetRequiredService<ISessionService>();
         var repository = provider.GetRequiredService<ISessionRepository>();
@@ -78,9 +75,8 @@ public sealed class PsdPreparationWorkstationSmoke(ITestOutputHelper output)
             var facts = refused.Attempts.Single(a => a.Operation == OperationKind.PreparePsd).PsdInspection!;
             output.WriteLine("Refused inspection: " + System.Text.Json.JsonSerializer.Serialize(facts));
             facts.OriginalMode.ShouldBe("CMYK");
-            var clean = await processor.EnsureReadyAsync(CancellationToken.None);
-            clean.IsSuccess.ShouldBeTrue();
-            clean.Value.State.State.ShouldBe(before.Value.State.State);
+            PhotoshopReadiness clean = await EnsureReadyUnderLeaseAsync(provider, processor, verifyGate: false);
+            clean.State.State.ShouldBe(before.State.State);
             output.WriteLine("Unsupported PSD colour mode refused; no prepared Revision; Photoshop clean.");
             return;
         }
@@ -106,10 +102,31 @@ public sealed class PsdPreparationWorkstationSmoke(ITestOutputHelper output)
         }
         output.WriteLine("Adapter: " + attempt.AdapterId + " / " + attempt.AdapterNotes);
         state.ToSnapshot().CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
-        var after = await processor.EnsureReadyAsync(CancellationToken.None);
-        after.IsSuccess.ShouldBeTrue(after.IsFailure ? after.Failure.ToString() : "");
-        output.WriteLine("Photoshop final state: " + after.Value.State.State);
-        after.Value.State.State.ShouldBe(before.Value.State.State);
+        PhotoshopReadiness after = await EnsureReadyUnderLeaseAsync(provider, processor, verifyGate: false);
+        output.WriteLine("Photoshop final state: " + after.State.State);
+        after.State.State.ShouldBe(before.State.State);
         output.WriteLine("Smoke ends at prepared-raster review. No TIFF production was run.");
+    }
+
+    private async Task<PhotoshopReadiness> EnsureReadyUnderLeaseAsync(
+        ServiceProvider provider,
+        ProductionPhotoshopOutputProcessor processor,
+        bool verifyGate)
+    {
+        await using WorkstationAutomationLeaseScope admission =
+            await WorkstationAutomationLeaseScope.AcquireAsync(
+                provider.GetRequiredService<IWorkstationAutomationLeaseManager>());
+        if (verifyGate)
+        {
+            var gate = ((IWorkstationScopedEnvironmentGate)provider.GetRequiredService<IEnvironmentGate>())
+                .Verify(AdapterExecutionMode.Production, admission.Lease);
+            output.WriteLine("VerifiedEnvironmentGate: " +
+                             (gate.IsSuccess ? "ALLOWED" : gate.Failure.ToString()));
+            gate.IsSuccess.ShouldBeTrue(gate.IsFailure ? gate.Failure.ToString() : "");
+        }
+
+        var ready = await processor.EnsureReadyAsync(CancellationToken.None);
+        ready.IsSuccess.ShouldBeTrue(ready.IsFailure ? ready.Failure.ToString() : "");
+        return ready.Value;
     }
 }

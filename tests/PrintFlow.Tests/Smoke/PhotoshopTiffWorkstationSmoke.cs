@@ -21,6 +21,9 @@ public sealed class PhotoshopTiffWorkstationSmoke
     {
         if (Environment.GetEnvironmentVariable(EnableVariable) != "1") return;
 
+        await using WorkstationAutomationLeaseScope automationLease =
+            await WorkstationAutomationLeaseScope.AcquireDefaultAsync();
+
         PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(
             RepositoryFile("appsettings.json"));
         string token = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss") + "-" +

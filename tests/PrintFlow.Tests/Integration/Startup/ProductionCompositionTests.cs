@@ -7,6 +7,7 @@ using PrintFlow.App.ViewModels;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Tests.Fixtures;
@@ -244,6 +245,25 @@ public sealed class ProductionCompositionTests
         Directory.Exists(Path.Combine(application.WorkspaceRoot, "Evidence")).ShouldBeFalse();
     }
 
+    [Fact]
+    public void Composing_and_resolving_the_lease_manager_does_not_initialize_its_store()
+    {
+        using TempApplication application = new("Production");
+        string authorityDirectory = Path.Combine(application.WorkspaceRoot, "lease-authority", "nested");
+        SqliteWorkstationAutomationLeaseManager manager = new(
+            Path.Combine(authorityDirectory, "lease.db"),
+            "test.composition." + Guid.NewGuid().ToString("N"));
+
+        // Reading the production default is safe; the test never opens, removes or modifies it.
+        SqliteWorkstationAutomationLeaseManager.DefaultDatabasePath.ShouldNotBeNullOrWhiteSpace();
+        using ServiceProvider services = Compose(application, collection =>
+            collection.AddSingleton<IWorkstationAutomationLeaseManager>(manager));
+
+        services.GetRequiredService<IWorkstationAutomationLeaseManager>().ShouldBeSameAs(manager);
+        services.GetRequiredService<IEnvironmentDiagnostics>().Read();
+        Directory.Exists(authorityDirectory).ShouldBeFalse();
+    }
+
     /// <summary>
     /// Composing Production reads no workstation file at all (§4.4, §5).
     /// </summary>
@@ -407,6 +427,11 @@ public sealed class ProductionCompositionTests
     private static ServiceProvider Compose(TempApplication application) =>
         Build(application, PrintFlowConfiguration.LoadFromFile(application.ConfigurationFilePath));
 
+    private static ServiceProvider Compose(
+        TempApplication application,
+        Action<IServiceCollection> overrides) =>
+        Build(application, PrintFlowConfiguration.LoadFromFile(application.ConfigurationFilePath), overrides);
+
     private static ServiceProvider Build(
         TempApplication application,
         PrintFlowConfiguration configuration,
@@ -419,6 +444,13 @@ public sealed class ProductionCompositionTests
         }
 
         return ServiceRegistration.BuildServiceProvider(
-            configuration, application.WorkspaceRoot, factory, overrides);
+            configuration, application.WorkspaceRoot, factory, services =>
+            {
+                services.AddSingleton<IWorkstationAutomationLeaseManager>(
+                    new SqliteWorkstationAutomationLeaseManager(
+                        Path.Combine(application.WorkspaceRoot, "TestAuthority", "workstation-lease.db"),
+                        "test.production-composition." + Guid.NewGuid().ToString("N")));
+                overrides?.Invoke(services);
+            });
     }
 }

@@ -9,6 +9,7 @@ using PrintFlow.Domain.Ids;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Diagnostics;
 using PrintFlow.Infrastructure.Gate;
@@ -86,6 +87,8 @@ public static class ServiceRegistration
         services.AddSingleton<IManualCropProcessor, WicManualCropProcessor>();
 
         services.AddSingleton<IRecycleBin, RecycleBin>();
+        services.AddSingleton<IWorkstationAutomationLeaseManager>(
+            _ => new SqliteWorkstationAutomationLeaseManager());
         RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath,
             expectedPresetHash, connectionFactory);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
@@ -252,7 +255,7 @@ public static class ServiceRegistration
                 expectedPresetHash,
                 workspaceRootAbsolute,
                 provider.GetRequiredService<IWorkspace>(),
-                connectionFactory,
+                provider.GetRequiredService<IWorkstationAutomationLeaseManager>(),
                 System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName),
                 provider.GetRequiredService<TimeProvider>()));
 

@@ -6,6 +6,10 @@ using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.Infrastructure.Verification;
 
+/// <summary>
+/// Legacy token for the per-business-database verification correlation row. This is recovery
+/// metadata only; it is not permission to drive the workstation automation domain.
+/// </summary>
 internal sealed record EnvironmentAutomationLease(string OwnerToken);
 
 internal interface IEnvironmentAutomationLock
@@ -19,7 +23,11 @@ internal interface IEnvironmentAutomationLock
     Task<OperationResult<AutomationLockState>> ReadAsync(CancellationToken cancellationToken);
 }
 
-/// <summary>Uses the same singleton database row that serialises production adapter work.</summary>
+/// <summary>
+/// Legacy writer retained for startup-recovery compatibility and its migration tests. Runtime
+/// live verification now uses <c>IWorkstationAutomationLeaseManager</c>; this row records only
+/// historical correlation within one business database and is never physical admission.
+/// </summary>
 internal sealed class SqliteEnvironmentAutomationLock : IEnvironmentAutomationLock
 {
     private readonly SqliteConnectionFactory _connections;
@@ -65,7 +73,7 @@ internal sealed class SqliteEnvironmentAutomationLock : IEnvironmentAutomationLo
         {
             return OperationResult.Fail<EnvironmentAutomationLease>(
                 FailureCode.PersistenceError,
-                $"The global automation lock could not be acquired: {ex.Message}");
+                $"The per-database verification correlation row could not be acquired: {ex.Message}");
         }
     }
 
@@ -86,13 +94,13 @@ internal sealed class SqliteEnvironmentAutomationLock : IEnvironmentAutomationLo
                 ? OperationResult.Ok()
                 : OperationResult.Fail<Unit>(
                     FailureCode.PersistenceError,
-                    "The live verification no longer owns the global automation lock; it was not released.");
+                    "The live verification no longer owns this per-database correlation token; it was not released.");
         }
         catch (SqliteException ex)
         {
             return OperationResult.Fail<Unit>(
                 FailureCode.PersistenceError,
-                $"The global automation lock could not be released: {ex.Message}");
+                $"The per-database verification correlation row could not be released: {ex.Message}");
         }
     }
 
@@ -125,7 +133,7 @@ internal sealed class SqliteEnvironmentAutomationLock : IEnvironmentAutomationLo
         {
             return OperationResult.Fail<AutomationLockState>(
                 FailureCode.PersistenceError,
-                $"The global automation lock could not be read: {ex.Message}");
+                $"The per-database automation correlation row could not be read: {ex.Message}");
         }
     }
 }

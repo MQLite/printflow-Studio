@@ -71,14 +71,19 @@ public sealed class VisualOnlyProductionWhiteInkSmoke(ITestOutputHelper output)
         using var provider = ServiceRegistration.BuildServiceProvider(
             configuration, configuration.Workspace.Root, factory);
 
-        var gate = provider.GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production);
-        gate.IsSuccess.ShouldBeTrue(gate.IsFailure ? gate.Failure.ToString() : "");
-
         var processor = provider.GetRequiredService<IPhotoshopOutputProcessor>()
             .ShouldBeOfType<ProductionPhotoshopOutputProcessor>();
-        var before = await processor.EnsureReadyAsync(CancellationToken.None);
-        before.IsSuccess.ShouldBeTrue(before.IsFailure ? before.Failure.ToString() : "");
-        output.WriteLine("Photoshop before     : " + before.Value.State.State);
+        await using (WorkstationAutomationLeaseScope directAdmission =
+                     await WorkstationAutomationLeaseScope.AcquireAsync(
+                         provider.GetRequiredService<IWorkstationAutomationLeaseManager>()))
+        {
+            var gate = ((IWorkstationScopedEnvironmentGate)provider.GetRequiredService<IEnvironmentGate>())
+                .Verify(AdapterExecutionMode.Production, directAdmission.Lease);
+            gate.IsSuccess.ShouldBeTrue(gate.IsFailure ? gate.Failure.ToString() : "");
+            var before = await processor.EnsureReadyAsync(CancellationToken.None);
+            before.IsSuccess.ShouldBeTrue(before.IsFailure ? before.Failure.ToString() : "");
+            output.WriteLine("Photoshop before     : " + before.Value.State.State);
+        }
 
         byte[] bytes = SpotChannelPsdFixtures.QuadrantW1Psd();
         string source = Path.Combine(qa, "PF_11101_VISUAL_W1.psd");
@@ -150,9 +155,14 @@ public sealed class VisualOnlyProductionWhiteInkSmoke(ITestOutputHelper output)
         sourceShaAfter.ShouldBe(sourceShaBefore);
         output.WriteLine("source SHA-256 after : " + sourceShaAfter + "  (unchanged)");
 
-        var after = await processor.EnsureReadyAsync(CancellationToken.None);
-        after.IsSuccess.ShouldBeTrue(after.IsFailure ? after.Failure.ToString() : "");
-        output.WriteLine("Photoshop after      : " + after.Value.State.State);
+        await using (WorkstationAutomationLeaseScope directAdmission =
+                     await WorkstationAutomationLeaseScope.AcquireAsync(
+                         provider.GetRequiredService<IWorkstationAutomationLeaseManager>()))
+        {
+            var after = await processor.EnsureReadyAsync(CancellationToken.None);
+            after.IsSuccess.ShouldBeTrue(after.IsFailure ? after.Failure.ToString() : "");
+            output.WriteLine("Photoshop after      : " + after.Value.State.State);
+        }
     }
 
     /// <summary>
@@ -186,8 +196,14 @@ public sealed class VisualOnlyProductionWhiteInkSmoke(ITestOutputHelper output)
         using (var connection = factory.Open()) MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
         using var provider = ServiceRegistration.BuildServiceProvider(
             configuration, configuration.Workspace.Root, factory);
-        provider.GetRequiredService<IEnvironmentGate>().Verify(AdapterExecutionMode.Production)
-            .IsSuccess.ShouldBeTrue();
+        await using (WorkstationAutomationLeaseScope initialAdmission =
+                     await WorkstationAutomationLeaseScope.AcquireAsync(
+                         provider.GetRequiredService<IWorkstationAutomationLeaseManager>()))
+        {
+            ((IWorkstationScopedEnvironmentGate)provider.GetRequiredService<IEnvironmentGate>())
+                .Verify(AdapterExecutionMode.Production, initialAdmission.Lease)
+                .IsSuccess.ShouldBeTrue();
+        }
 
         byte[] bytes = SpotChannelPsdFixtures.QuadrantW1Psd();
         string source = Path.Combine(qa, "PF_11101_TIFF_W1.psd");
@@ -223,6 +239,9 @@ public sealed class VisualOnlyProductionWhiteInkSmoke(ITestOutputHelper output)
             Path.Combine(configuration.Workspace.Root, configuration.Preset.Path),
             Sha256.Parse(configuration.Preset.ExpectedSha256), workspace,
             Path.Combine(root, "Evidence"), TimeProvider.System);
+        await using WorkstationAutomationLeaseScope directAdmission =
+            await WorkstationAutomationLeaseScope.AcquireAsync(
+                provider.GetRequiredService<IWorkstationAutomationLeaseManager>());
 
         WorkspaceFileRef managed = WorkspaceFileRef.Create(
             $"Sessions/S_11101V/Working/A_{token}/PF_11101_APPROVED_{token}.png", WorkspaceArea.Working);

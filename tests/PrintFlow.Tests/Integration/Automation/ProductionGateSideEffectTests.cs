@@ -9,6 +9,7 @@ using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
@@ -669,7 +670,12 @@ public sealed class ProductionGateSideEffectTests
             MigrationRunner.Migrate(connection).IsSuccess.ShouldBeTrue();
         }
 
+        string leaseStore = Path.Combine(
+            application.WorkspaceRoot, "TestAuthority", "workstation-lease.db");
         return ServiceRegistration.BuildServiceProvider(
-            configuration, application.WorkspaceRoot, factory);
+            configuration, application.WorkspaceRoot, factory, services =>
+                services.AddSingleton<IWorkstationAutomationLeaseManager>(
+                    new SqliteWorkstationAutomationLeaseManager(
+                        leaseStore, "test.gate-side-effect." + Guid.NewGuid().ToString("N"))));
     }
 }

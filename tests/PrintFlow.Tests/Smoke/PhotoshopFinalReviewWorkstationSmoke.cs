@@ -9,6 +9,7 @@ using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Configuration;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
@@ -101,7 +102,8 @@ public sealed class PhotoshopFinalReviewWorkstationSmoke
                 manifest, configuration.Preset.Id, configuration.Preset.Version, presetSha),
             new ControlledSeamEnvironmentGate(),
             SystemIdGenerator.Instance,
-            TimeProvider.System);
+            TimeProvider.System,
+            automationLeases: new SqliteWorkstationAutomationLeaseManager());
 
         // A fresh synthetic source, never customer artwork.
         string sourcePath = Path.Combine(root, $"PF_C2B_{token}.png");
@@ -226,10 +228,18 @@ public sealed class PhotoshopFinalReviewWorkstationSmoke
     }
 
     /// <summary>The controlled seam's gate, used by this smoke and nothing else (§39).</summary>
-    private sealed class ControlledSeamEnvironmentGate : IEnvironmentGate
+    private sealed class ControlledSeamEnvironmentGate : IWorkstationScopedEnvironmentGate
     {
         public OperationResult<PrintFlow.Domain.Results.Unit> Verify(AdapterExecutionMode mode) =>
             OperationResult.Ok();
+
+        public OperationResult<PrintFlow.Domain.Results.Unit> Verify(
+            AdapterExecutionMode mode,
+            IWorkstationAutomationLease workstationLease) =>
+            workstationLease.IsActive
+                ? OperationResult.Ok()
+                : OperationResult.Fail<PrintFlow.Domain.Results.Unit>(
+                    FailureCode.AdapterUnavailable, "The controlled live seam has no active workstation lease.");
     }
 
     private static T Accept<T>(OperationResult<T> result)

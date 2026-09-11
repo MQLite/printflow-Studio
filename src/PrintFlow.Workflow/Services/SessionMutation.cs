@@ -24,7 +24,10 @@ public enum AutomationLockAction
     Release,
 }
 
-/// <summary>A change to the singleton global automation lock (MVP design invariant 7).</summary>
+/// <summary>
+/// A change to this business database's automation correlation/recovery row. Physical admission
+/// is owned separately by <c>IWorkstationAutomationLeaseManager</c>.
+/// </summary>
 public sealed record AutomationLockChange(
     AutomationLockAction Action, SessionId SessionId, DateTimeOffset AtUtc, int ProcessId, string MachineName);
 

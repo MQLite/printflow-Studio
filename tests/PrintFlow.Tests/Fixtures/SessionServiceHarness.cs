@@ -6,6 +6,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Infrastructure.Adapters.Fake;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Imaging;
 using PrintFlow.Infrastructure.Preset;
@@ -57,6 +58,8 @@ internal sealed class SessionServiceHarness : IDisposable
     public ISettingsRepository Settings { get; }
 
     public IEnvironmentGate EnvironmentGate { get; } = new UnverifiedEnvironmentGate();
+
+    public IWorkstationAutomationLeaseManager AutomationLeases { get; }
 
     /// <summary>
     /// The recording stand-in for the Windows Recycle Bin every service built here uses
@@ -111,6 +114,9 @@ internal sealed class SessionServiceHarness : IDisposable
         Database = new TempDatabase();
         Clock = new FakeTimeProvider(new DateTimeOffset(2026, 8, 19, 9, 0, 0, TimeSpan.Zero));
         FileWorkspace = new FileWorkspace(Workspace.Root);
+        AutomationLeases = new SqliteWorkstationAutomationLeaseManager(
+            System.IO.Path.Combine(Workspace.Root, "workstation-lease.db"),
+            "test." + Guid.NewGuid().ToString("N"));
         RecycleBin = new FakeRecycleBin(Path.Combine(Workspace.Root, "RecycleBin"));
 
         (string presetPath, Sha256 hash) = PresetFixture.Write(Workspace.Root);
@@ -156,7 +162,9 @@ internal sealed class SessionServiceHarness : IDisposable
         IWorkstationPresetProvider? preset = null,
         IWorkspace? workspace = null,
         ISessionRepository? repository = null,
-        IPhotoshopOutputProcessor? photoshop = null) => new SessionService(
+        IPhotoshopOutputProcessor? photoshop = null,
+        IWorkstationAutomationLeaseManager? automationLeases = null,
+        IWorkstationAutomationLease? enclosingAutomationLease = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         workspace ?? FileWorkspace,
@@ -172,7 +180,9 @@ internal sealed class SessionServiceHarness : IDisposable
         Clock,
         manualResults: new WicManualResultImporter(workspace ?? FileWorkspace, FileInspector),
         settings: Settings,
-        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder);
+        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
+        enclosingAutomationLease: enclosingAutomationLease,
+        automationLeases: automationLeases ?? AutomationLeases);
 
     /// <summary>
     /// Builds a fresh <see cref="IStartupRecoveryService"/> against the same workspace and
@@ -208,7 +218,9 @@ internal sealed class SessionServiceHarness : IDisposable
         IWorkstationPresetProvider? preset = null,
         IEnvironmentGate? environmentGate = null,
         ISessionRepository? repository = null,
-        IPhotoshopOutputProcessor? photoshop = null) => new SessionService(
+        IPhotoshopOutputProcessor? photoshop = null,
+        IWorkstationAutomationLeaseManager? automationLeases = null,
+        IWorkstationAutomationLease? enclosingAutomationLease = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         FileWorkspace,
@@ -224,7 +236,9 @@ internal sealed class SessionServiceHarness : IDisposable
         Clock,
         manualResults: new WicManualResultImporter(FileWorkspace, FileInspector),
         settings: Settings,
-        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder);
+        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
+        enclosingAutomationLease: enclosingAutomationLease,
+        automationLeases: automationLeases ?? AutomationLeases);
 
     /// <summary>
     /// Builds a service with a caller-supplied Photoshop adapter, and optionally a caller-supplied
@@ -245,7 +259,9 @@ internal sealed class SessionServiceHarness : IDisposable
         IPhotoshopOutputProcessor photoshop,
         IEnvironmentGate? environmentGate = null,
         IWorkstationPresetProvider? preset = null,
-        ISessionRepository? repository = null) => new SessionService(
+        ISessionRepository? repository = null,
+        IWorkstationAutomationLeaseManager? automationLeases = null,
+        IWorkstationAutomationLease? enclosingAutomationLease = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         FileWorkspace,
@@ -261,7 +277,9 @@ internal sealed class SessionServiceHarness : IDisposable
         Clock,
         manualResults: new WicManualResultImporter(FileWorkspace, FileInspector),
         settings: Settings,
-        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder);
+        diagnosticImages: (IDiagnosticImagePreviewDecoder)PreviewDecoder,
+        enclosingAutomationLease: enclosingAutomationLease,
+        automationLeases: automationLeases ?? AutomationLeases);
 
     /// <summary>
     /// Records the reviewed-content authority for whatever Background Removal is currently about

@@ -40,7 +40,7 @@ namespace PrintFlow.Infrastructure.Gate;
 /// operation (§16), including foreground ownership through <c>PhotoshopTargetLost</c> (§17).
 /// </para>
 /// </remarks>
-public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiagnostics
+public sealed class VerifiedEnvironmentGate : IWorkstationScopedEnvironmentGate, IEnvironmentDiagnostics
 {
     /// <summary>The resource key shown when nothing more specific can be named.</summary>
     internal const string GeneralMessageKey = "Failure_EnvironmentNotVerified";
@@ -92,6 +92,21 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
         _ => OperationResult.Fail<Unit>(
             FailureCode.EnvironmentNotVerified, $"Unknown adapter execution mode '{mode}'."),
     };
+
+    /// <inheritdoc />
+    public OperationResult<Unit> Verify(
+        AdapterExecutionMode mode,
+        IWorkstationAutomationLease workstationLease)
+    {
+        ArgumentNullException.ThrowIfNull(workstationLease);
+        return mode switch
+        {
+            AdapterExecutionMode.Fake => OperationResult.Ok(),
+            AdapterExecutionMode.Production => AuthoriseProduction(workstationLease),
+            _ => OperationResult.Fail<Unit>(
+                FailureCode.EnvironmentNotVerified, $"Unknown adapter execution mode '{mode}'."),
+        };
+    }
 
     /// <inheritdoc />
     public EnvironmentReadinessReport Read()
@@ -153,9 +168,10 @@ public sealed class VerifiedEnvironmentGate : IEnvironmentGate, IEnvironmentDiag
         WorkstationVerificationResult result, WorkstationVerificationCheck check) =>
         result.Checks.FirstOrDefault(candidate => candidate.Check == check);
 
-    private OperationResult<Unit> AuthoriseProduction()
+    private OperationResult<Unit> AuthoriseProduction(
+        IWorkstationAutomationLease? workstationLease = null)
     {
-        WorkstationVerificationResult result = _verifier.Verify();
+        WorkstationVerificationResult result = _verifier.Verify(workstationLease);
 
         // Authorisation reads Verified, which the result derives from its own checks and which
         // no advisory can influence. An advisory is carried into diagnostics and into the log,

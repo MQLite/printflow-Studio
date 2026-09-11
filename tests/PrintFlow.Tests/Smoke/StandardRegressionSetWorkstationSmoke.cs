@@ -392,7 +392,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                             Sha256.Parse(configuration.Preset.ExpectedSha256),
                             workspaceRoot,
                             provider.GetRequiredService<IWorkspace>(),
-                            connections,
+                            provider.GetRequiredService<IWorkstationAutomationLeaseManager>(),
                             Path.Combine(workspaceRoot, "Evidence"),
                             provider.GetRequiredService<TimeProvider>())));
             });
