@@ -54,7 +54,11 @@ public sealed record EnvironmentCheckReport(
     string Detail,
     string? Expected = null,
     string? Current = null,
-    EnvironmentCheckPhase Phase = EnvironmentCheckPhase.Automatic);
+    EnvironmentCheckPhase Phase = EnvironmentCheckPhase.Automatic)
+{
+    /// <summary>Optional support facts assigned by the report producer, never a classification rule.</summary>
+    public ReadinessEvidenceLifecycle? Lifecycle { get; init; }
+}
 
 /// <summary>
 /// A bounded account of whether this workstation may run Production right now

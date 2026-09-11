@@ -39,3 +39,23 @@ SDK, source and assembly/input hashes; no source edits during full run, no uncha
 Local logical commits only. Complete report and HANDOFF with source-verified R4 entry/prerequisites.
 R1 build-origin condition remains open; no attestation or publication contract change.
 Stop before R4/live acceptance; real external operations and production revalidation NOT EXECUTED.
+
+## Implementation and QA checkpoint
+
+Implementation commit bfbcbb1 completes typed probe progress, historical/latest lifecycle,
+guarded request callbacks, primary/secondary unwind outcomes, real report/JSON/detail projection
+and both passive/live interleaving corrections. One fresh read-only reviewer checked material
+corrections. Targeted and affected results are retained in the report.
+
+First settled-source full run: 11,834 passed / 2 failed / 0 skipped, host exit 1; Release clean/build
+0 warnings/errors. All source/input/assembly/operator-bundle/historical-evidence fingerprints
+matched. Two architecture findings require a material report boundary correction: Infrastructure
+assigns optional row Lifecycle; screen renders it generically. Timestamp identity locals avoid a
+launch-token false positive. Architecture assertions remain unchanged. Corrected focused union
+(all Architecture, live verifier/report/JSON, screen) passed 499/0/0, host exit 0. Narrow re-review
+and corrected settled-source full QA pending; original failed evidence retained.
+
+Boundary routing reassessment: QA/correction NormalRoute and RequestedRoute Sol High, docs Luna
+Low, offset 0 UNCHANGED, CONTINUE. Existing localized display logic is unchanged; the correction
+removes screen knowledge of a concrete check. ActualRoute UNVERIFIED; in-place
+MODEL_SWITCH_UNAVAILABLE, safe current-runtime fallback, no live downgrade claimed.

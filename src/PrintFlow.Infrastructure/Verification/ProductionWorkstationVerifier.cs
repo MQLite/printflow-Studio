@@ -405,14 +405,12 @@ public sealed class ProductionWorkstationVerifier :
     {
         lock (_liveEvidenceSync)
         {
+            var meitu = _lastSuccessfulLiveEvidence?.Meitu.Target.Process;
+            var photoshop = _lastSuccessfulLiveEvidence?.Photoshop.Target.Process;
             return new ReadinessEvidenceLifecycle(
                 _lastSuccessfulLiveAt,
-                _lastSuccessfulLiveEvidence is { } previous
-                    ? new(previous.Meitu.Target.Process.ProcessId, previous.Meitu.Target.Process.ExecutablePath,
-                        previous.Meitu.Target.Process.StartedUtc) : null,
-                _lastSuccessfulLiveEvidence is { } prior
-                    ? new(prior.Photoshop.Target.Process.ProcessId, prior.Photoshop.Target.Process.ExecutablePath,
-                        prior.Photoshop.Target.Process.StartedUtc) : null,
+                meitu is not null ? new(meitu.ProcessId, meitu.ExecutablePath, meitu.StartedUtc) : null,
+                photoshop is not null ? new(photoshop.ProcessId, photoshop.ExecutablePath, photoshop.StartedUtc) : null,
                 _liveEvidence is not null, observationDeferred, _latestAttemptAt, _latestProbe);
         }
     }

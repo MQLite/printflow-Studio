@@ -151,7 +151,12 @@ public sealed class ProductionLiveWorkstationVerifierTests
         authority.ReleaseCalls.ShouldBe(1);
 
         EnvironmentCheckReport check = report.Checks.Single(check => check.CheckKey == "PhotoshopTestImageRoundTrip");
-        EnvironmentCheckRow row = new(check, report.Lifecycle);
+        check.Lifecycle.ShouldBe(report.Lifecycle);
+        restored.Checks.Single(item => item.CheckKey == check.CheckKey).Lifecycle!.LatestProbe!
+            .OperationId.ShouldBe(probe.OperationId);
+        report.Checks.Where(item => item.CheckKey != check.CheckKey)
+            .ShouldAllBe(item => item.Lifecycle == null);
+        EnvironmentCheckRow row = new(check with { CheckKey = "FutureDiagnosticCheck" });
         row.Detail.ShouldContain(probe.OperationId);
         row.Detail.ShouldContain(probe.PrimaryFailure!.Code.ToString());
         row.IsFailure.ShouldBeTrue();

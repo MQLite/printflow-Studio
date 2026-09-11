@@ -30,7 +30,7 @@ public sealed class EnvironmentCheckRow
     /// <summary>The resource-key prefix for a check's neutral localised subject (§3).</summary>
     private const string NamePrefix = "EnvironmentCheckName_";
 
-    internal EnvironmentCheckRow(EnvironmentCheckReport report, ReadinessEvidenceLifecycle? lifecycle = null)
+    internal EnvironmentCheckRow(EnvironmentCheckReport report)
     {
         ArgumentNullException.ThrowIfNull(report);
 
@@ -53,7 +53,7 @@ public sealed class EnvironmentCheckRow
         Classification = IsBlocking ? Strings.Environment_Blocking : Strings.Environment_Advisory;
         Explanation = IsFailure || IsBlocked || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
         Detail = report.Detail;
-        if (report.CheckKey == "PhotoshopTestImageRoundTrip" && lifecycle is not null)
+        if (report.Lifecycle is { } lifecycle)
         {
             string unknown = Strings.Resolve("Environment_ProbeNotRecorded");
             Detail += Environment.NewLine + string.Format(CultureInfo.CurrentCulture,
@@ -379,7 +379,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
 
         foreach (EnvironmentCheckReport check in report.Checks)
         {
-            EnvironmentCheckRow row = new(check, report.Lifecycle);
+            EnvironmentCheckRow row = new(check);
             Checks.Add(row);
             if (check.Phase == EnvironmentCheckPhase.LiveApplication)
                 LiveApplicationChecks.Add(row);
@@ -391,7 +391,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         // already separates what closes production from what merely reports (§5).
         foreach (EnvironmentCheckReport failure in report.BlockingFailures)
         {
-            BlockingFailures.Add(new EnvironmentCheckRow(failure, report.Lifecycle));
+            BlockingFailures.Add(new EnvironmentCheckRow(failure));
         }
 
         foreach (EnvironmentCheckReport advisory in report.Advisories)

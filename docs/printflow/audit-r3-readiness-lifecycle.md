@@ -151,7 +151,9 @@ default-store inspection/operation, real application or real production revalida
 | Corrected focused | 84 / 0 / 0 | Correction plus live/gate/screen cases |
 | Architecture correction | 108 / 0 / 0 | Exact interface multiset and diagnostic-signature constraints |
 | Dispatch boundary | 168 / 0 / 0 | Final native-dispatch guard, partial-send, architecture/live/screen checks |
-| Settled-source Release/full Product | Pending | Required because shared behavior changed |
+| First settled-source Release/full Product | 11,834 / 2 / 0 | Architecture failures retained; source bfbcbb1, host exit 1 |
+| Full-suite correction focused union | 499 / 0 / 0 | All Architecture plus real live/report/JSON and screen tests |
+| Corrected settled-source Release/full Product | Pending | Required after the material report-projection correction |
 
 Raw logs/TRX/host exits live under ignored `artifacts/pf-audit-r3/`; all counted live smokes remain
 opted out and NOT EXECUTED even where xUnit counts their guarded return as Passed. No dependency
@@ -166,6 +168,17 @@ reviewer also checked the final dispatch correction past the primitive's last gu
 recording native delegate that keeps even failed guard tests incapable of sending real input.
 Final review outcome: no remaining actionable findings; clear for settled-source QA. Reviewer
 performed no edits, tests or external operations. Actual model selection remains UNVERIFIED.
+
+The first full suite then exposed two additional architecture failures: ViewModel's concrete
+probe check name violated the established report-only screen boundary, and timestamp expressions
+containing `Process.StartedUtc` matched the launch-token scan. The former is corrected by assigning
+optional row Lifecycle metadata in the Infrastructure report producer; the screen renders that
+metadata without knowing any check name. The integrated matrix now asserts row JSON preservation,
+absence on unrelated rows, and rendering under an unknown future check key. Process identities
+are projected through local variables, with no launch behavior changed. Both architecture tests
+remain unchanged. The first run's 11,834/2/0, host exit 1, clean Release build 0/0 and matching
+source/input/assembly/protected-evidence fingerprints remain under `artifacts/pf-audit-r3/final/`.
+No unchanged-source full retry was made; the corrected source requires a new settled-source run.
 
 ## R4 entry and prerequisites — documented, not executed
 

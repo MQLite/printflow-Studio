@@ -165,7 +165,11 @@ public sealed class VerifiedEnvironmentGate :
             result.Verified,
             result.Preset?.ToString(),
             result.ObservedAt,
-            [.. result.Checks.Select(ToReport)])
+            [.. result.Checks.Select(check => ToReport(check) with
+            {
+                Lifecycle = check.Check == WorkstationVerificationCheck.PhotoshopTestImageRoundTrip
+                    ? result.Lifecycle : null,
+            })])
         {
             // The accepted value, never the observed one: this is the root the signed preset
             // requires, which is what "the output location" means to an operator.
