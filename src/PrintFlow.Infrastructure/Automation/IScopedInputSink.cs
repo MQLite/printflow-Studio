@@ -74,4 +74,12 @@ public interface IScopedInputSink
     /// implementation checks that it also currently holds the foreground.
     /// </param>
     OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut);
+
+    /// <summary>Observes dispatch after the final foreground guard. Legacy failures leave it unknown.</summary>
+    OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut, Action? dispatching)
+    {
+        OperationResult<Unit> result = SendShortcut(verifiedTarget, shortcut);
+        if (result.IsSuccess) dispatching?.Invoke();
+        return result;
+    }
 }

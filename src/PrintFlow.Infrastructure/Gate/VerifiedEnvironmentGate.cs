@@ -173,6 +173,7 @@ public sealed class VerifiedEnvironmentGate :
                 ? null
                 : workspaceRoot.Expected ?? workspaceRoot.Observed,
             PhotoshopColourSetup = colourSetup is null ? null : ToStatus(colourSetup.Outcome),
+            Lifecycle = result.Lifecycle,
         };
     }
 

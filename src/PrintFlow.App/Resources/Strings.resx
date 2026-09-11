@@ -1009,4 +1009,7 @@
   <data name="Session_PreflightDraftHint" xml:space="preserve"><value>Size proposal · confirm the size to continue</value></data>
   <data name="Session_PreflightPpi" xml:space="preserve"><value>{0:0} × {1:0} PPI</value></data>
   <data name="Session_PreflightOutputPpi" xml:space="preserve"><value>{0} PPI</value></data>
+  <data name="Environment_ProbeNotRecorded" xml:space="preserve"><value>Not recorded</value></data>
+  <data name="Environment_LiveEvidenceDetail" xml:space="preserve"><value>Last complete live verification: {0}; retained evidence: {1}; current runtime observation deferred: {2}. Historical observations do not authorize production.</value></data>
+  <data name="Environment_ProbeProgressDetail" xml:space="preserve"><value>Latest diagnostic attempt: {0}; probe: {1}. Recorded stages (unlisted stages are not confirmed): {2}. Last attempted: {3}; last confirmed: {4}; cleanup outcome: {5}. Primary failure: {6}; secondary failures: {7}.</value></data>
 </root>

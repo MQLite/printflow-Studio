@@ -395,10 +395,14 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
     }
 
     /// <inheritdoc />
-    public async Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
-        WorkspaceFileRef workingFile, CancellationToken cancellationToken)
-    {
+    public Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+        WorkspaceFileRef workingFile, CancellationToken cancellationToken) =>
+        OpenManagedWorkingFileAsync(workingFile, observe: null, cancellationToken);
 
+    public async Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+        WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
+    {
+        observe?.Invoke(ReadinessProbeStage.OpenGuard);
         // The managed-area boundary, checked before anything is resolved to a path and long
         // before Photoshop is asked to open anything. A Source, Approved or Rejected reference is
         // refused here, so there is no route by which the customer's original could be handed to
@@ -470,7 +474,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
                 or PhotoshopStartingState.KnownEditorWithExpectedDocument;
 
         OperationResult<PhotoshopTarget> opened = await _driver
-            .OpenManagedDocumentAsync(ready.Value.Target, absolutePath, cancellationToken)
+            .OpenManagedDocumentAsync(ready.Value.Target, absolutePath, observe, cancellationToken)
             .ConfigureAwait(false);
         if (opened.IsFailure)
         {
@@ -478,7 +482,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         }
 
         return await ConfirmOpenedDocumentAsync(
-            opened.Value, workingFile, absolutePath, otherDocumentsOpen, cancellationToken)
+            opened.Value, workingFile, absolutePath, otherDocumentsOpen, cancellationToken, observe)
             .ConfigureAwait(false);
     }
 
@@ -498,7 +502,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         WorkspaceFileRef workingFile,
         string absolutePath,
         bool otherDocumentsOpen,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<ReadinessProbeStage>? observe = null)
     {
         DateTimeOffset deadline = _clock.GetUtcNow() + _options.OpenConfirmationTimeout;
         PhotoshopStateSnapshot? last = null;
@@ -524,8 +529,10 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
                 or PhotoshopStartingState.KnownEditorWithExpectedDocument &&
                 TitleNamesExpected(state.Value, workingFile.FileName))
             {
+                observe?.Invoke(ReadinessProbeStage.OpenConfirmed);
+                observe?.Invoke(ReadinessProbeStage.IdentityCheck);
                 return await ProveIdentityAsync(
-                    target, workingFile, absolutePath, otherDocumentsOpen, state.Value, cancellationToken)
+                    target, workingFile, absolutePath, otherDocumentsOpen, state.Value, cancellationToken, observe)
                     .ConfigureAwait(false);
             }
 
@@ -563,7 +570,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         string absolutePath,
         bool otherDocumentsOpen,
         PhotoshopStateSnapshot titleState,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<ReadinessProbeStage>? observe = null)
     {
         OperationResult<PhotoshopDocumentIdentity> identity = await _driver
             .ProbeDocumentIdentityAsync(target, cancellationToken).ConfigureAwait(false);
@@ -593,6 +601,8 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
                 }), "identity-mismatch");
         }
 
+        observe?.Invoke(ReadinessProbeStage.IdentityConfirmed);
+
         // Re-observed with the probe's answer in hand, so the recorded state is the one the
         // identity actually supports rather than the weaker one seen a moment earlier.
         OperationResult<PhotoshopStateSnapshot> confirmed = await _driver
@@ -617,10 +627,16 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
     }
 
     /// <inheritdoc />
+    public Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
+        PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile, CancellationToken cancellationToken) =>
+        CloseExactDocumentAsync(opened, workingFile, observe: null, cancellationToken);
+
     public async Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
-        PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile, CancellationToken cancellationToken)
+        PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(opened);
+        observe?.Invoke(ReadinessProbeStage.CloseGuard);
 
         // Restated rather than inherited from the open path. "The caller already checked" is
         // exactly the reasoning that lets a non-managed reference through once someone adds a
@@ -634,7 +650,7 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         }
 
         string absolutePath = _workspace.ResolveAbsolute(workingFile);
-        return await _driver.CloseExactDocumentAsync(opened.Target, absolutePath, cancellationToken)
+        return await _driver.CloseExactDocumentAsync(opened.Target, absolutePath, observe, cancellationToken)
             .ConfigureAwait(false);
     }
 

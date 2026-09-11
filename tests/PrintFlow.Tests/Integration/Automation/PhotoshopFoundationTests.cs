@@ -445,12 +445,14 @@ public sealed class PhotoshopFoundationTests : IDisposable
         Harness h = Build(BaselineForRealFile());
         WorkspaceFileRef reference = WorkspaceFileRef.Create($"Sessions/S1/x/CUSTOMER.png", area);
 
+        List<PrintFlow.Workflow.Ports.ReadinessProbeStage> progress = [];
         OperationResult<PhotoshopOpenedDocument> opened =
-            await h.Adapter.OpenManagedWorkingFileAsync(reference, CancellationToken.None);
+            await h.Adapter.OpenManagedWorkingFileAsync(reference, progress.Add, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.PreconditionNotMet);
         opened.Failure.Context["inputSent"].ShouldBe("false");
+        progress.ShouldBe(new[] { PrintFlow.Workflow.Ports.ReadinessProbeStage.OpenGuard });
 
         h.Input.Sends.ShouldBeEmpty();
         h.Controls.Writes.ShouldBeEmpty();
@@ -474,8 +476,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
         methods.ShouldNotContain(method => method.GetParameters()
             .Any(parameter => parameter.ParameterType == typeof(string)));
 
-        methods.Single(m => m.Name == nameof(IPhotoshopAutomationFoundation.OpenManagedWorkingFileAsync))
-            .GetParameters()[0].ParameterType.ShouldBe(typeof(WorkspaceFileRef));
+        methods.Where(m => m.Name == nameof(IPhotoshopAutomationFoundation.OpenManagedWorkingFileAsync))
+            .ShouldAllBe(method => method.GetParameters()[0].ParameterType == typeof(WorkspaceFileRef));
     }
 
     // -----------------------------------------------------------------------------------
@@ -503,11 +505,16 @@ public sealed class PhotoshopFoundationTests : IDisposable
         StageOpenThenDocument(
             h, managed.FileName, identityFolder: @"C:\Users\admin\Downloads");
 
+        List<PrintFlow.Workflow.Ports.ReadinessProbeStage> progress = [];
         OperationResult<PhotoshopOpenedDocument> opened =
-            await h.Adapter.OpenManagedWorkingFileAsync(managed, CancellationToken.None);
+            await h.Adapter.OpenManagedWorkingFileAsync(managed, progress.Add, CancellationToken.None);
 
         opened.IsFailure.ShouldBeTrue();
         opened.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        progress.ShouldContain(PrintFlow.Workflow.Ports.ReadinessProbeStage.OpenRequested);
+        progress.ShouldContain(PrintFlow.Workflow.Ports.ReadinessProbeStage.OpenConfirmed);
+        progress.ShouldContain(PrintFlow.Workflow.Ports.ReadinessProbeStage.IdentityCheck);
+        progress.ShouldNotContain(PrintFlow.Workflow.Ports.ReadinessProbeStage.IdentityConfirmed);
         opened.Failure.Context["w1ActionInvoked"].ShouldBe("false");
         opened.Failure.Context["tiffWritten"].ShouldBe("false");
         opened.Failure.Context["observedDocument"].ShouldBe(

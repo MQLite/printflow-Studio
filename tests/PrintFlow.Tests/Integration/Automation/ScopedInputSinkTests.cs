@@ -14,9 +14,8 @@ using Unit = PrintFlow.Domain.Results.Unit;
 /// <remarks>
 /// The class under test is the real <see cref="Win32ScopedInputSink"/> — the only thing in the
 /// solution that can call <c>SendInput</c>. Each case scripts a foreground that is not the
-/// target, so the guard returns before the OS call is reached; a regression that removed the
-/// guard would not merely fail these assertions, it would fire a real Ctrl+O at whatever window
-/// the test host happens to be under, which is exactly the accident being prevented.
+/// target, so the guard returns before dispatch. The native boundary is explicitly replaced
+/// with a recording delegate, so even a guard regression cannot send real desktop input.
 ///
 /// There is deliberately no "happy path" test here that actually sends a keystroke. Proving the
 /// send works means typing into a live window from a test run, and the workstation smoke — run
@@ -27,7 +26,8 @@ public sealed class ScopedInputSinkTests
     private static Win32ScopedInputSink SinkWithForeground(ForegroundIdentity foreground)
     {
         FakeWindowLocator locator = new() { Foreground = foreground };
-        return new Win32ScopedInputSink(locator);
+        return new Win32ScopedInputSink(locator, (_, _, _) =>
+            throw new InvalidOperationException("A refused synthetic send must never reach native dispatch."));
     }
 
     [Fact]
@@ -36,12 +36,35 @@ public sealed class ScopedInputSinkTests
         Win32ScopedInputSink sink = SinkWithForeground(
             new ForegroundIdentity(new WindowHandle(0xE1E1), 777, "explorer"));
 
-        OperationResult<Unit> sent = sink.SendShortcut(new WindowHandle(0x1000), KnownShortcut.OpenFile);
+        bool dispatched = false;
+        OperationResult<Unit> sent = sink.SendShortcut(new WindowHandle(0x1000), KnownShortcut.OpenFile,
+            () => dispatched = true);
 
         sent.IsFailure.ShouldBeTrue();
         sent.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
         sent.Failure.Context["inputSent"].ShouldBe("false");
         sent.Failure.Context["actualProcess"].ShouldBe("explorer");
+        dispatched.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Partial_dispatch_is_observed_without_claiming_success()
+    {
+        WindowHandle target = new(0x1000);
+        FakeWindowLocator locator = new() { Foreground = new(target, 777, "synthetic") };
+        bool dispatched = false;
+        int calls = 0;
+        Win32ScopedInputSink sink = new(locator, (count, _, _) =>
+        {
+            dispatched.ShouldBeTrue("the milestone is recorded at dispatch, before its result");
+            calls++;
+            return count - 1;
+        });
+        OperationResult<Unit> result = sink.SendShortcut(target, KnownShortcut.CloseActiveDocument,
+            () => dispatched = true);
+        result.IsFailure.ShouldBeTrue();
+        calls.ShouldBe(1);
+        result.Failure.Code.ShouldBe(FailureCode.MeituOpenInputFailed);
     }
 
     [Fact]

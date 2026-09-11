@@ -177,7 +177,10 @@ public sealed class Win32VerifiedControlSink : IVerifiedControlSink
     }
 
     /// <inheritdoc />
-    public OperationResult<Unit> Press(ExternalProcessRef owner, VerifiedControlRef control)
+    public OperationResult<Unit> Press(ExternalProcessRef owner, VerifiedControlRef control) =>
+        Press(owner, control, dispatching: null);
+
+    public OperationResult<Unit> Press(ExternalProcessRef owner, VerifiedControlRef control, Action? dispatching)
     {
         OperationResult<Unit> verified = Verify(owner, control);
         if (verified.IsFailure)
@@ -185,6 +188,7 @@ public sealed class Win32VerifiedControlSink : IVerifiedControlSink
             return verified;
         }
 
+        dispatching?.Invoke();
         NativeMethods.SendControlMessage(control.Handle.Value, NativeMethods.BM_CLICK, 0, 0);
         return OperationResult.Ok();
     }

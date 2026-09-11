@@ -2,6 +2,7 @@ using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Tests.Fixtures;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Tests.Integration.Automation;
 
@@ -22,6 +23,21 @@ using Unit = PrintFlow.Domain.Results.Unit;
 /// </remarks>
 public sealed class GuardedPhotoshopUiDriverTests
 {
+    [Fact]
+    public async Task Open_control_seam_refusal_does_not_claim_an_open_request()
+    {
+        Harness h = Build();
+        StageOpenDialog(h);
+        h.Controls.PressFailures.Add(1);
+        List<ReadinessProbeStage> progress = [];
+        OperationResult<PhotoshopTarget> result = await h.Driver.OpenManagedDocumentAsync(
+            h.Target, PhotoshopFakes.ExpectedPath, progress.Add, CancellationToken.None);
+        result.IsFailure.ShouldBeTrue();
+        h.Controls.Presses.ShouldNotContain(press => press.ControlId == 1);
+        progress.ShouldNotContain(ReadinessProbeStage.OpenRequested);
+        progress.ShouldNotContain(ReadinessProbeStage.OpenConfirmed);
+    }
+
     private static readonly PhotoshopAutomationOptions FastOptions = new()
     {
         PollInterval = TimeSpan.FromMilliseconds(5),
@@ -560,12 +576,14 @@ public sealed class GuardedPhotoshopUiDriverTests
             KnownShortcut.CloseActiveDocument,
             () => h.Locator.Replace(h.Target.Process, PhotoshopFakes.Window()));
 
+        List<ReadinessProbeStage> progress = [];
         OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
-            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+            h.Target, PhotoshopFakes.ExpectedPath, progress.Add, CancellationToken.None);
 
         closed.IsSuccess.ShouldBeTrue();
         h.Input.Sends.ShouldContain(s => s.Shortcut == KnownShortcut.CloseActiveDocument);
         closed.Value.Window.Title.ShouldBe(PhotoshopFakes.NoDocumentTitle);
+        progress.ShouldBe(new[] { ReadinessProbeStage.CloseRequested, ReadinessProbeStage.CloseConfirmed });
     }
 
     /// <summary>
@@ -582,12 +600,14 @@ public sealed class GuardedPhotoshopUiDriverTests
         Harness h = Build(windowTitle: PhotoshopFakes.TitleFor("SOMEONE-ELSES-WORK.psd"));
         StageIdentityDialog(h, "SOMEONE-ELSES-WORK.psd", @"C:\Users\admin\Desktop");
 
+        List<ReadinessProbeStage> progress = [];
         OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
-            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+            h.Target, PhotoshopFakes.ExpectedPath, progress.Add, CancellationToken.None);
 
         closed.IsFailure.ShouldBeTrue();
         closed.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
         closed.Failure.Context["inputSent"].ShouldBe("false");
+        progress.ShouldBeEmpty("entering the close helper is not a close request");
 
         h.Input.Sends.ShouldNotContain(s => s.Shortcut == KnownShortcut.CloseActiveDocument);
     }
@@ -858,12 +878,14 @@ public sealed class GuardedPhotoshopUiDriverTests
                 h.Target.Process,
                 PhotoshopFakes.Window(title: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName))));
 
+        List<ReadinessProbeStage> progress = [];
         OperationResult<PhotoshopTarget> closed = await h.Driver.CloseExactDocumentAsync(
-            h.Target, PhotoshopFakes.ExpectedPath, CancellationToken.None);
+            h.Target, PhotoshopFakes.ExpectedPath, progress.Add, CancellationToken.None);
 
         closed.IsFailure.ShouldBeTrue("the document is still loaded, so the close did not finish.");
         closed.Failure.Code.ShouldBe(FailureCode.Timeout);
         closed.Failure.TechnicalDetail.ShouldContain("still shows the document");
+        progress.ShouldBe(new[] { ReadinessProbeStage.CloseRequested });
     }
 
     /// <summary>

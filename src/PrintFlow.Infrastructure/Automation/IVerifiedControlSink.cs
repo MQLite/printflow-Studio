@@ -109,4 +109,12 @@ public interface IVerifiedControlSink
     /// computed, so there is no arrangement of windows in which this can press something else.
     /// </remarks>
     OperationResult<Unit> Press(ExternalProcessRef owner, VerifiedControlRef control);
+
+    /// <summary>Observes click dispatch after the final control guard. Legacy failures leave it unknown.</summary>
+    OperationResult<Unit> Press(ExternalProcessRef owner, VerifiedControlRef control, Action? dispatching)
+    {
+        OperationResult<Unit> result = Press(owner, control);
+        if (result.IsSuccess) dispatching?.Invoke();
+        return result;
+    }
 }

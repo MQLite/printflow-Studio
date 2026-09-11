@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 
@@ -98,4 +99,15 @@ public interface IPhotoshopUiDriver
 
     /// <summary>Captures the verified window for a failure record. Local only, never uploaded.</summary>
     OperationResult<EvidenceRef> CaptureEvidence(PhotoshopTarget target, string reason);
+
+    /// <summary>Probe request boundaries; default implementations leave request progress unrecorded.</summary>
+    Task<OperationResult<PhotoshopTarget>> OpenManagedDocumentAsync(
+        PhotoshopTarget target, string managedAbsolutePath,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        OpenManagedDocumentAsync(target, managedAbsolutePath, cancellationToken);
+
+    Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
+        PhotoshopTarget target, string expectedAbsolutePath,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        CloseExactDocumentAsync(target, expectedAbsolutePath, cancellationToken);
 }

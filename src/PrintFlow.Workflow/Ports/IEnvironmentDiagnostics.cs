@@ -83,6 +83,9 @@ public sealed record EnvironmentReadinessReport(
     DateTimeOffset ObservedAt,
     IReadOnlyList<EnvironmentCheckReport> Checks)
 {
+    /// <summary>Absent in historical reports; absence never means a probe completed.</summary>
+    public ReadinessEvidenceLifecycle? Lifecycle { get; init; }
+
     /// <summary>
     /// The output location this workstation was verified against, or null when the accepted
     /// preset states none (SCRUM-11118).

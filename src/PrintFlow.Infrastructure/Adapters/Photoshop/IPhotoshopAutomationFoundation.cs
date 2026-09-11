@@ -1,5 +1,6 @@
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 
@@ -89,6 +90,11 @@ public interface IPhotoshopAutomationFoundation
     Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
         WorkspaceFileRef workingFile, CancellationToken cancellationToken);
 
+    /// <summary>Optional bounded probe observations. An uninstrumented implementation records nothing.</summary>
+    Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+        WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        OpenManagedWorkingFileAsync(workingFile, cancellationToken);
+
     /// <summary>
     /// Closes exactly the document named by <paramref name="workingFile"/>, and nothing else.
     /// </summary>
@@ -100,4 +106,9 @@ public interface IPhotoshopAutomationFoundation
     /// </remarks>
     Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
         PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile, CancellationToken cancellationToken);
+
+    Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
+        PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        CloseExactDocumentAsync(opened, workingFile, cancellationToken);
 }

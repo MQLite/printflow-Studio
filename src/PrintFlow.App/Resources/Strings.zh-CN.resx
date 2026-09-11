@@ -998,4 +998,7 @@
   <data name="Session_PreflightDraftHint" xml:space="preserve"><value>尺寸预览 · 确认尺寸后继续</value></data>
   <data name="Session_PreflightPpi" xml:space="preserve"><value>{0:0} × {1:0} PPI</value></data>
   <data name="Session_PreflightOutputPpi" xml:space="preserve"><value>{0} PPI</value></data>
+  <data name="Environment_ProbeNotRecorded" xml:space="preserve"><value>未记录</value></data>
+  <data name="Environment_LiveEvidenceDetail" xml:space="preserve"><value>上次完整的实时验证：{0}；保留的验证证据：{1}；当前运行状态观察已推迟：{2}。历史观察结果不授权生产操作。</value></data>
+  <data name="Environment_ProbeProgressDetail" xml:space="preserve"><value>最近的诊断尝试：{0}；探测编号：{1}。已记录的阶段（未列出的阶段未经确认）：{2}。最后尝试：{3}；最后确认：{4}；清理结果：{5}。主要失败：{6}；次要失败：{7}。</value></data>
 </root>

@@ -160,7 +160,12 @@ public sealed class PhotoshopBoundaryTests
             nameof(IPhotoshopUiDriver.ProbeDocumentIdentityAsync),
             nameof(IPhotoshopUiDriver.CloseExactDocumentAsync),
             nameof(IPhotoshopUiDriver.CaptureEvidence),
+            // R3 adds only bounded diagnostic overloads of these existing operations.
+            nameof(IPhotoshopUiDriver.OpenManagedDocumentAsync),
+            nameof(IPhotoshopUiDriver.CloseExactDocumentAsync),
         ], ignoreOrder: true);
+
+        AssertDiagnosticOverloads(typeof(IPhotoshopUiDriver));
 
         foreach (string banned in new[]
                  {
@@ -174,7 +179,7 @@ public sealed class PhotoshopBoundaryTests
         }
     }
 
-    /// <summary>The foundation seam offers exactly three operations and no output surface.</summary>
+    /// <summary>The foundation seam offers four operations, bounded observations, and no output surface.</summary>
     [Fact]
     public void The_Photoshop_foundation_exposes_no_output_producing_operation()
     {
@@ -186,7 +191,28 @@ public sealed class PhotoshopBoundaryTests
             nameof(IPhotoshopAutomationFoundation.ReinspectAsync),
             nameof(IPhotoshopAutomationFoundation.OpenManagedWorkingFileAsync),
             nameof(IPhotoshopAutomationFoundation.CloseExactDocumentAsync),
+            nameof(IPhotoshopAutomationFoundation.OpenManagedWorkingFileAsync),
+            nameof(IPhotoshopAutomationFoundation.CloseExactDocumentAsync),
         ], ignoreOrder: true);
+        AssertDiagnosticOverloads(typeof(IPhotoshopAutomationFoundation));
+    }
+
+    private static void AssertDiagnosticOverloads(Type contract)
+    {
+        Type observation = typeof(Action<PrintFlow.Workflow.Ports.ReadinessProbeStage>);
+        var observed = contract.GetMethods().Where(method =>
+            method.GetParameters().Any(parameter => parameter.ParameterType == observation)).ToArray();
+        observed.Length.ShouldBe(2);
+        foreach (var method in observed)
+        {
+            Type[] parameters = [.. method.GetParameters().Select(parameter => parameter.ParameterType)];
+            parameters[^2].ShouldBe(observation);
+            parameters[^1].ShouldBe(typeof(CancellationToken));
+            Type[] ordinaryParameters = [.. parameters.Where(parameter => parameter != observation)];
+            contract.GetMethods().ShouldContain(ordinary => ordinary.Name == method.Name &&
+                ordinary.GetParameters().Select(parameter => parameter.ParameterType).SequenceEqual(ordinaryParameters),
+                "the diagnostic overload may add only a bounded observation callback to an existing guarded operation");
+        }
     }
 
     /// <summary>

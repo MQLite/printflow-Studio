@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 
@@ -192,8 +193,13 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     // -----------------------------------------------------------------------------------
 
     /// <inheritdoc />
+    public Task<OperationResult<PhotoshopTarget>> OpenManagedDocumentAsync(
+        PhotoshopTarget target, string managedAbsolutePath, CancellationToken cancellationToken) =>
+        OpenManagedDocumentAsync(target, managedAbsolutePath, observe: null, cancellationToken);
+
     public async Task<OperationResult<PhotoshopTarget>> OpenManagedDocumentAsync(
-        PhotoshopTarget target, string managedAbsolutePath, CancellationToken cancellationToken)
+        PhotoshopTarget target, string managedAbsolutePath,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentException.ThrowIfNullOrWhiteSpace(managedAbsolutePath);
@@ -235,7 +241,7 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
         }
 
         OperationResult<Unit> driven = await DriveOpenDialogAsync(
-            ready.Value, dialog.Value, signature, managedAbsolutePath, cancellationToken)
+            ready.Value, dialog.Value, signature, managedAbsolutePath, cancellationToken, observe)
             .ConfigureAwait(false);
         if (driven.IsFailure)
         {
@@ -256,7 +262,8 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
         ExternalWindowRef dialog,
         PhotoshopOpenDialogSignature signature,
         string managedAbsolutePath,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<ReadinessProbeStage>? observe = null)
     {
         OperationResult<VerifiedControlRef> fileName = _controls.Locate(
             target.Process, dialog.Handle, signature.FileNameControlId, signature.FileNameControlClass);
@@ -320,7 +327,10 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
                 }));
         }
 
-        OperationResult<Unit> pressed = _controls.Press(target.Process, confirm.Value);
+        // The control sink has its own last guard. Observe actual dispatch past that guard,
+        // without treating a successful message return as document-open confirmation.
+        OperationResult<Unit> pressed = _controls.Press(target.Process, confirm.Value,
+            observe is null ? null : () => observe(ReadinessProbeStage.OpenRequested));
         if (pressed.IsFailure)
         {
             await CancelDialogAsync(
@@ -498,8 +508,13 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     // -----------------------------------------------------------------------------------
 
     /// <inheritdoc />
+    public Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
+        PhotoshopTarget target, string expectedAbsolutePath, CancellationToken cancellationToken) =>
+        CloseExactDocumentAsync(target, expectedAbsolutePath, observe: null, cancellationToken);
+
     public async Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
-        PhotoshopTarget target, string expectedAbsolutePath, CancellationToken cancellationToken)
+        PhotoshopTarget target, string expectedAbsolutePath,
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedAbsolutePath);
@@ -562,18 +577,21 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             return ready;
         }
 
-        OperationResult<Unit> sent = SendGuarded(ready.Value, KnownShortcut.CloseActiveDocument);
+        OperationResult<Unit> sent = SendGuarded(ready.Value, KnownShortcut.CloseActiveDocument,
+            observe is null ? null : () => observe(ReadinessProbeStage.CloseRequested));
         if (sent.IsFailure)
         {
             return OperationResult.Fail<PhotoshopTarget>(sent.Failure);
         }
 
-        return await AwaitDocumentClosedAsync(
+        OperationResult<PhotoshopTarget> closed = await AwaitDocumentClosedAsync(
                 ready.Value,
                 identity.Value,
                 baseline.Value.OwnedDocumentCleanup,
                 cancellationToken)
             .ConfigureAwait(false);
+        if (closed.IsSuccess) observe?.Invoke(ReadinessProbeStage.CloseConfirmed);
+        return closed;
     }
 
     /// <summary>Requires an enabled host and no titled owned surface before Ctrl+W is sent.</summary>
@@ -1036,7 +1054,8 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     /// immediately before, and the translation of the shared seam's failure vocabulary into the
     /// Photoshop one.
     /// </remarks>
-    private OperationResult<Unit> SendGuarded(PhotoshopTarget target, KnownShortcut shortcut)
+    private OperationResult<Unit> SendGuarded(
+        PhotoshopTarget target, KnownShortcut shortcut, Action? requesting = null)
     {
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(target.Window.Handle);
         if (refreshed.IsFailure)
@@ -1055,7 +1074,7 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
                 context: new Dictionary<string, string> { ["inputSent"] = "false" }));
         }
 
-        OperationResult<Unit> sent = _input.SendShortcut(target.Window.Handle, shortcut);
+        OperationResult<Unit> sent = _input.SendShortcut(target.Window.Handle, shortcut, requesting);
         return sent.IsFailure ? OperationResult.Fail<Unit>(AsPhotoshop(sent.Failure)) : sent;
     }
 

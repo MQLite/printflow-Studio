@@ -16,7 +16,11 @@ internal sealed record WorkstationLiveEvidence(
 
 internal sealed record WorkstationLiveVerification(
     ImmutableArray<WorkstationCheckResult> Checks,
-    WorkstationLiveEvidence? Evidence);
+    WorkstationLiveEvidence? Evidence)
+{
+    public ReadinessProbeDiagnostics? Probe { get; init; }
+    public bool ObservationDeferred { get; init; }
+}
 
 internal interface IProductionLiveWorkstationVerifier
 {
@@ -87,6 +91,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         IWorkstationAutomationLease? lease = null;
         WorkstationLiveEvidence? evidence = null;
         OperationResult<Unit>? release = null;
+        ReadinessProbeDiagnostics? probe = null;
 
         try
         {
@@ -199,16 +204,17 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                                 facts.Value.ColourSettings.ToString(),
                                 "Photoshop's four active working spaces match the accepted preset."));
 
-                            OperationResult<Unit> roundTrip = await RunProbeAsync(
+                            ProbeRunResult roundTrip = await RunProbeAsync(
                                 photoshop.Value, facts.Value, requirements.Workspace.Root, cancellationToken)
                                 .ConfigureAwait(false);
-                            if (roundTrip.IsFailure)
+                            probe = roundTrip.Diagnostics;
+                            if (roundTrip.Failure is { } probeFailure)
                             {
                                 checks.Add(Failed(WorkstationVerificationCheck.PhotoshopTestImageRoundTrip,
                                     WorkstationCheckKind.Smoke,
                                     "Open, identify, close without saving, and restore the prior state",
                                     null,
-                                    roundTrip.Failure));
+                                    probeFailure));
                             }
                             else
                             {
@@ -229,7 +235,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
             AddCancellation(checks);
             evidence = null;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             AddUnexpectedFailure(checks, ex.Message);
             evidence = null;
@@ -238,13 +244,28 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         {
             if (lease is not null)
             {
-                release = await lease.ReleaseAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
+                try
+                {
+                    release = await lease.ReleaseAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    release = OperationResult.Fail<Unit>(FailureCode.AdapterUnavailable,
+                        $"The workstation lease release did not complete: {ex.Message}");
+                }
             }
         }
 
         if (release is { IsFailure: true })
         {
+            if (probe is not null)
+            {
+                ReadinessProbeFailure releaseFailure = ReadinessProbeProgress.ProjectFailure(
+                    "LeaseRelease", release.Value.Failure);
+                probe = probe.PrimaryFailure is null
+                    ? probe with { PrimaryFailure = releaseFailure }
+                    : probe with { SecondaryFailures = [.. probe.SecondaryFailures, releaseFailure] };
+            }
             int index = checks.FindIndex(check =>
                 check.Check == WorkstationVerificationCheck.ExternalApplicationAutomationLock);
             WorkstationCheckResult failedRelease = Failed(
@@ -259,7 +280,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         }
 
         AddMissingBlocked(checks, "The preceding live verification step did not complete.");
-        return new WorkstationLiveVerification([.. checks], evidence);
+        return new WorkstationLiveVerification([.. checks], evidence) { Probe = probe };
     }
 
     public WorkstationLiveVerification Reobserve(
@@ -305,14 +326,19 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                         "Available or owned by this operation",
                         lockState.Status.ToString(),
                         lockState.Description));
-                    AddRemainingBlocked(checks, "The shared automation lock is currently unavailable.");
+                    AddRemainingBlocked(checks, lockState.Status == WorkstationAutomationLeaseStatus.Busy
+                        ? "Current runtime observations are deferred while automation is busy; prior live evidence was not renewed."
+                        : "The shared automation lock is currently unavailable.");
                     // Known contention refuses this external operation but does not invalidate the
                     // already-certified application identities. Internal work can immediately
                     // re-use that evidence and re-inspect every applicable runtime fact. An
                     // unreadable authority is still Unknown and still invalidates the evidence.
                     return new WorkstationLiveVerification(
                         [.. checks],
-                        lockState.Status == WorkstationAutomationLeaseStatus.Busy ? evidence : null);
+                        lockState.Status == WorkstationAutomationLeaseStatus.Busy ? evidence : null)
+                    {
+                        ObservationDeferred = lockState.Status == WorkstationAutomationLeaseStatus.Busy,
+                    };
                 }
 
                 checks.Add(WorkstationCheckResult.Passed(
@@ -424,7 +450,9 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                 : WorkstationCheckKind.Live,
             reason))];
 
-    private async Task<OperationResult<Unit>> RunProbeAsync(
+    private sealed record ProbeRunResult(OperationFailure? Failure, ReadinessProbeDiagnostics Diagnostics);
+
+    private async Task<ProbeRunResult> RunProbeAsync(
         PhotoshopReadiness readiness,
         PhotoshopRuntimeFacts before,
         string workspaceRoot,
@@ -434,68 +462,125 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         WorkspaceFileRef probe = WorkspaceFileRef.Create(
             $"EnvironmentVerification/{token}/Working/PF_ENV_PROBE_{token}.png",
             WorkspaceArea.Working);
-        string absolute = _workspace.ResolveAbsolute(probe);
+        ReadinessProbeProgress progress = new(token, readiness.Target.Process);
+        string? absolute = null;
         PhotoshopOpenedDocument? opened = null;
         bool closed = false;
         bool openAttempted = false;
+        string phase = "Create";
 
         try
         {
+            OperationResult<Unit> result = await ExecuteAsync().ConfigureAwait(false);
+            if (result.IsFailure) progress.Fail(phase, result.Failure);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            progress.Fail(phase, OperationFailure.Create(FailureCode.Cancelled,
+                "Live application verification was cancelled; bounded exact-probe unwind follows."));
+            if (opened is not null && !closed)
+            {
+                using CancellationTokenSource cleanup = new(TimeSpan.FromSeconds(15));
+                try
+                {
+                    progress.Observe(ReadinessProbeStage.CloseGuard);
+                    OperationResult<PhotoshopTarget> close = await _photoshop
+                        .CloseExactDocumentAsync(opened, probe, progress.Observe, cleanup.Token)
+                        .ConfigureAwait(false);
+                    closed = close.IsSuccess;
+                    if (closed) progress.Observe(ReadinessProbeStage.CloseConfirmed);
+                    else progress.Fail("CancellationClose", close.Failure);
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    progress.Fail("CancellationClose", OperationFailure.Create(
+                        ex is OperationCanceledException ? FailureCode.Cancelled : FailureCode.EnvironmentNotVerified,
+                        $"The bounded exact-probe close did not complete: {ex.Message}"));
+                }
+            }
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            progress.Fail(phase, OperationFailure.Create(FailureCode.EnvironmentNotVerified,
+                $"Live verification stopped safely: {ex.Message}"));
+        }
+        finally
+        {
+            if (absolute is not null && (closed || !openAttempted))
+            {
+                progress.CleanupReason = closed
+                    ? "The exact probe close was confirmed."
+                    : "The open helper was never entered.";
+                progress.Observe(ReadinessProbeStage.CleanupAttempted);
+                try
+                {
+                    OperationResult<Unit> cleanup = DeleteProbe(absolute, workspaceRoot);
+                    progress.CleanupOutcome = cleanup.IsSuccess ? ProbeCleanupOutcome.Succeeded : ProbeCleanupOutcome.Failed;
+                    if (cleanup.IsSuccess) progress.Observe(ReadinessProbeStage.CleanupCompleted);
+                    else progress.Fail("Cleanup", cleanup.Failure);
+                }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    progress.CleanupOutcome = ProbeCleanupOutcome.Unknown;
+                    progress.Fail("Cleanup", OperationFailure.Create(FailureCode.WorkspaceError,
+                        $"Probe cleanup did not return an outcome: {ex.Message}"));
+                }
+            }
+            else
+            {
+                progress.CleanupReason = absolute is null
+                    ? "No contained managed probe path was established."
+                    : "Open was entered and close is unconfirmed; existing ownership rules retain the backing file.";
+            }
+        }
+
+        return new ProbeRunResult(progress.Failure, progress.Snapshot());
+
+        async Task<OperationResult<Unit>> ExecuteAsync()
+        {
+            progress.Observe(ReadinessProbeStage.ProbeCreation);
+            absolute = RequireContainedProbePath(_workspace.ResolveAbsolute(probe), workspaceRoot);
+            progress.ManagedPath = absolute;
             OperationResult<Unit> created = await CreateProbeAsync(absolute, workspaceRoot, cancellationToken)
                 .ConfigureAwait(false);
             if (created.IsFailure) return created;
+            progress.Observe(ReadinessProbeStage.ProbeCreated);
 
+            phase = "Open";
             openAttempted = true;
+            progress.Observe(ReadinessProbeStage.OpenGuard);
             OperationResult<PhotoshopOpenedDocument> open = await _photoshop
-                .OpenManagedWorkingFileAsync(probe, cancellationToken)
+                .OpenManagedWorkingFileAsync(probe, progress.Observe, cancellationToken)
                 .ConfigureAwait(false);
             if (open.IsFailure) return OperationResult.Fail<Unit>(open.Failure);
             opened = open.Value;
+            // A successful foundation result already contracts both confirmations, even for a
+            // legacy implementation without request instrumentation. Requests remain unrecorded.
+            progress.Observe(ReadinessProbeStage.OpenConfirmed);
+            progress.Observe(ReadinessProbeStage.IdentityConfirmed);
 
+            phase = "Close";
+            progress.Observe(ReadinessProbeStage.CloseGuard);
             OperationResult<PhotoshopTarget> close = await _photoshop
-                .CloseExactDocumentAsync(opened, probe, cancellationToken)
+                .CloseExactDocumentAsync(opened, probe, progress.Observe, cancellationToken)
                 .ConfigureAwait(false);
             if (close.IsFailure) return OperationResult.Fail<Unit>(close.Failure);
             closed = true;
+            progress.Observe(ReadinessProbeStage.CloseConfirmed);
 
+            phase = "PriorState";
+            progress.Observe(ReadinessProbeStage.PriorStateCheck);
             OperationResult<PhotoshopReadiness> restored = await _photoshop
                 .ReinspectAsync(readiness with { Target = close.Value }, cancellationToken)
                 .ConfigureAwait(false);
             if (restored.IsFailure) return OperationResult.Fail<Unit>(restored.Failure);
-
-            OperationResult<PhotoshopRuntimeFacts> after = _photoshopFacts.Read(
-                readiness.Target.Process.ExecutablePath);
+            OperationResult<PhotoshopRuntimeFacts> after = _photoshopFacts.Read(readiness.Target.Process.ExecutablePath);
             if (after.IsFailure) return OperationResult.Fail<Unit>(after.Failure);
             if (!DocumentsRestored(before.Documents, after.Value.Documents))
-            {
-                return OperationResult.Fail<Unit>(
-                    FailureCode.PhotoshopUnknownState,
+                return OperationResult.Fail<Unit>(FailureCode.PhotoshopUnknownState,
                     "The synthetic document closed, but Photoshop did not return to the same prior document state.");
-            }
-
-            OperationResult<Unit> cleanup = DeleteProbe(absolute, workspaceRoot);
-            closed = false;
-            return cleanup;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            if (opened is not null && !closed)
-            {
-                using CancellationTokenSource cleanup = new(TimeSpan.FromSeconds(15));
-                OperationResult<PhotoshopTarget> close = await _photoshop
-                    .CloseExactDocumentAsync(opened, probe, cleanup.Token)
-                    .ConfigureAwait(false);
-                closed = close.IsSuccess;
-            }
-
-            throw;
-        }
-        finally
-        {
-            if (closed || !openAttempted)
-            {
-                _ = DeleteProbe(absolute, workspaceRoot);
-            }
+            progress.Observe(ReadinessProbeStage.PriorStateRestored);
+            return OperationResult.Ok();
         }
     }
 

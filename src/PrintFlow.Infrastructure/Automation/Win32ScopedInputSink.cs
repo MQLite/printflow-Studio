@@ -29,15 +29,28 @@ public sealed class Win32ScopedInputSink : IScopedInputSink
     private const ushort VkW = 0x57;
 
     private readonly IExternalAppWindowLocator _locator;
+    private readonly Func<uint, NativeMethods.KEYBOARDINPUT[], int, uint> _sendInput;
 
     public Win32ScopedInputSink(IExternalAppWindowLocator locator)
+        : this(locator, NativeMethods.SendInput)
+    {
+    }
+
+    /// <summary>Recording native boundary for isolated guard/partial-dispatch verification.</summary>
+    internal Win32ScopedInputSink(
+        IExternalAppWindowLocator locator, Func<uint, NativeMethods.KEYBOARDINPUT[], int, uint> sendInput)
     {
         ArgumentNullException.ThrowIfNull(locator);
+        ArgumentNullException.ThrowIfNull(sendInput);
         _locator = locator;
+        _sendInput = sendInput;
     }
 
     /// <inheritdoc />
-    public OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut)
+    public OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut) =>
+        SendShortcut(verifiedTarget, shortcut, dispatching: null);
+
+    public OperationResult<Unit> SendShortcut(WindowHandle verifiedTarget, KnownShortcut shortcut, Action? dispatching)
     {
         if (verifiedTarget.IsNone)
         {
@@ -69,7 +82,8 @@ public sealed class Win32ScopedInputSink : IScopedInputSink
         }
 
         NativeMethods.KEYBOARDINPUT[] sequence = Build(shortcut);
-        uint sent = NativeMethods.SendInput(
+        dispatching?.Invoke();
+        uint sent = _sendInput(
             (uint)sequence.Length, sequence, Marshal.SizeOf<NativeMethods.KEYBOARDINPUT>());
 
         return sent == sequence.Length

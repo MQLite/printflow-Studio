@@ -113,6 +113,15 @@ public sealed class WorkstationVerificationSmoke(ITestOutputHelper output)
             IEnvironmentDiagnostics diagnostics = services.GetRequiredService<IEnvironmentDiagnostics>();
             EnvironmentReadinessReport report = await diagnostics.RunLiveChecksAsync(CancellationToken.None);
 
+            // The same additive report serialized by the standard runner's readiness.json.
+            // Kept in test output so a refused diagnostic also retains its partial probe facts.
+            output.WriteLine(System.Text.Json.JsonSerializer.Serialize(report,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },
+                }));
+
             output.WriteLine($"verified          : {report.Verified}");
             output.WriteLine($"preset            : {report.PresetIdentity ?? "(unverified)"}");
             output.WriteLine($"observed           : {report.ObservedAt:u}");
@@ -126,8 +135,8 @@ public sealed class WorkstationVerificationSmoke(ITestOutputHelper output)
 
             AutomationLockState lockState = (await services.GetRequiredService<ISessionRepository>()
                 .GetAutomationLockAsync(CancellationToken.None)).Value;
-            output.WriteLine($"lock free          : {!lockState.IsHeld}");
-            lockState.IsHeld.ShouldBeFalse("every terminal live-verification path must release the shared lock");
+            output.WriteLine($"business lock free : {!lockState.IsHeld}");
+            lockState.IsHeld.ShouldBeFalse("live verification does not own the business correlation lock");
         }
         finally
         {

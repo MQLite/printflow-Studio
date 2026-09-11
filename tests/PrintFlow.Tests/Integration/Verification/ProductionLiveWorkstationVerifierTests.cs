@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using PrintFlow.App.Composition;
+using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -28,6 +29,283 @@ namespace PrintFlow.Tests.Integration.Verification;
 
 public sealed class ProductionLiveWorkstationVerifierTests
 {
+    [Theory]
+    [InlineData("before-open")]
+    [InlineData("identity")]
+    [InlineData("close-unconfirmed")]
+    [InlineData("cleanup")]
+    [InlineData("restore-and-cleanup")]
+    [InlineData("primary-and-release")]
+    [InlineData("close-exception")]
+    public async Task Failed_real_probe_reaches_readiness_json_with_partial_diagnostics(string scenario)
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        bool openFailure = scenario is "before-open" or "identity" or "primary-and-release";
+        bool corruptProbe = scenario is "cleanup" or "restore-and-cleanup";
+        ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace)
+        {
+            OpenFailure = openFailure ? OperationFailure.Create(
+                scenario == "before-open" ? FailureCode.PreconditionNotMet : FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "synthetic open/identity refusal", context: new Dictionary<string, string>
+                {
+                    ["inputSent"] = scenario == "before-open" ? "false" : "true",
+                    ["unrelatedInventory"] = "must not be projected",
+                }) : null,
+            FailureOpenProgress = scenario == "before-open"
+                ? ReadinessProbeStage.OpenGuard : ReadinessProbeStage.IdentityCheck,
+            CloseFailure = scenario == "close-unconfirmed"
+                ? OperationFailure.Create(FailureCode.Timeout, "synthetic close unconfirmed") : null,
+            RestorationFailure = scenario == "restore-and-cleanup"
+                ? OperationFailure.Create(FailureCode.PhotoshopUnknownState, "synthetic restoration refusal") : null,
+            CorruptProbeOnClose = corruptProbe,
+            ThrowOnClose = scenario == "close-exception",
+        };
+        RecordingLock authority = new()
+        {
+            ReleaseFailure = scenario == "primary-and-release"
+                ? OperationFailure.Create(FailureCode.AdapterUnavailable, "synthetic release refusal") : null,
+        };
+        ProductionLiveWorkstationVerifier live = new(
+            new ScriptedMeitu(fixture.MeituPath), photoshop,
+            new ScriptedRuntimeFacts(MatchingSettings(), []), authority, workspace, fixture.Clock);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, live, omitRevalidation: false));
+
+        EnvironmentReadinessReport report = await gate.RunLiveChecksAsync(CancellationToken.None);
+        report.Verified.ShouldBeFalse();
+        System.Text.Json.JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+            Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },
+        };
+        string reportPath = Path.Combine(fixture.WorkspaceRoot, "readiness.json");
+        File.WriteAllText(reportPath, System.Text.Json.JsonSerializer.Serialize(report, options));
+        using System.Text.Json.JsonDocument json = System.Text.Json.JsonDocument.Parse(File.ReadAllText(reportPath));
+        json.RootElement.TryGetProperty("Lifecycle", out _).ShouldBeTrue(
+            "the real probe currently loses all stage/cleanup facts at its normal report boundary");
+        ReadinessProbeDiagnostics probe = report.Lifecycle!.LatestProbe.ShouldNotBeNull();
+        EnvironmentReadinessReport restored = System.Text.Json.JsonSerializer.Deserialize<EnvironmentReadinessReport>(
+            json.RootElement.GetRawText(), options)!;
+        ReadinessProbeDiagnostics projected = restored.Lifecycle!.LatestProbe.ShouldNotBeNull();
+        projected.OperationId.ShouldBe(probe.OperationId);
+        projected.ManagedPath.ShouldBe(probe.ManagedPath);
+        projected.Process.ShouldBe(probe.Process);
+        projected.PrimaryFailure.ShouldBe(probe.PrimaryFailure);
+        projected.Stages.ShouldBe(probe.Stages);
+        projected.SecondaryFailures.ShouldBe(probe.SecondaryFailures);
+        projected.Process.ProcessId.ShouldBe(707);
+        projected.Process.ExecutablePath.ShouldBe(fixture.PhotoshopPath);
+        projected.ManagedPath!.ShouldContain(probe.OperationId);
+        projected.Stages.ShouldContain(ReadinessProbeStage.ProbeCreated);
+        projected.PrimaryFailure.ShouldNotBeNull();
+        report.Lifecycle.LastSuccessfulLiveAt.ShouldBeNull();
+        report.Lifecycle.EvidenceAvailable.ShouldBeFalse();
+        report.Lifecycle.LatestAttemptAt.ShouldBe(fixture.Clock.GetUtcNow());
+        json.RootElement.GetRawText().ShouldNotContain("unrelatedInventory");
+        json.RootElement.GetRawText().ShouldNotContain("OwnerToken");
+
+        if (openFailure)
+        {
+            probe.PrimaryFailure!.Code.ShouldBe(photoshop.OpenFailure!.Code);
+            probe.PrimaryFailure.InputSent.ShouldBe(scenario == "before-open" ? "false" : "true");
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.CloseRequested);
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.IdentityConfirmed);
+            photoshop.CloseCalls.ShouldBe(0);
+            if (scenario == "before-open") probe.Stages.ShouldNotContain(ReadinessProbeStage.OpenRequested);
+            else probe.Stages.ShouldContain(ReadinessProbeStage.OpenConfirmed);
+        }
+        if (corruptProbe)
+        {
+            probe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.Failed);
+            probe.Stages.ShouldContain(ReadinessProbeStage.CloseConfirmed);
+            probe.Stages.ShouldContain(ReadinessProbeStage.CleanupAttempted);
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.CleanupCompleted);
+            if (scenario == "cleanup")
+            {
+                probe.PrimaryFailure!.Code.ShouldBe(FailureCode.WorkspaceError);
+                probe.Stages.ShouldContain(ReadinessProbeStage.PriorStateRestored);
+            }
+            else
+            {
+                probe.PrimaryFailure!.Code.ShouldBe(FailureCode.PhotoshopUnknownState);
+                probe.SecondaryFailures.ShouldHaveSingleItem().Code.ShouldBe(FailureCode.WorkspaceError);
+                probe.Stages.ShouldNotContain(ReadinessProbeStage.PriorStateRestored);
+            }
+        }
+        else
+        {
+            probe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.NotRun);
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.CleanupAttempted);
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.PriorStateRestored);
+            probe.Stages.ShouldNotContain(ReadinessProbeStage.CloseConfirmed);
+        }
+        if (scenario is "close-unconfirmed" or "close-exception")
+        {
+            probe.Stages.ShouldContain(ReadinessProbeStage.CloseRequested);
+            probe.PrimaryFailure!.Code.ShouldBe(scenario == "close-unconfirmed"
+                ? FailureCode.Timeout : FailureCode.EnvironmentNotVerified);
+        }
+        if (scenario == "primary-and-release")
+            probe.SecondaryFailures.ShouldHaveSingleItem().Phase.ShouldBe("LeaseRelease");
+        File.Exists(probe.ManagedPath).ShouldBeTrue("uncertain or changed backing files remain retained");
+        authority.ReleaseCalls.ShouldBe(1);
+
+        EnvironmentCheckReport check = report.Checks.Single(check => check.CheckKey == "PhotoshopTestImageRoundTrip");
+        EnvironmentCheckRow row = new(check, report.Lifecycle);
+        row.Detail.ShouldContain(probe.OperationId);
+        row.Detail.ShouldContain(probe.PrimaryFailure!.Code.ToString());
+        row.IsFailure.ShouldBeTrue();
+        gate.Read().Lifecycle!.LatestProbe!.OperationId.ShouldBe(probe.OperationId,
+            "passive refresh must retain the latest diagnostic without certifying it");
+    }
+
+    [Fact]
+    public void Historical_readiness_json_has_no_invented_lifecycle()
+    {
+        const string historical = """{"Verified":false,"PresetIdentity":null,"ObservedAt":"2026-09-01T00:00:00Z","Checks":[]}""";
+        System.Text.Json.JsonSerializer.Deserialize<EnvironmentReadinessReport>(historical)!
+            .Lifecycle.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData("unknown")]
+    [InlineData("drift")]
+    [InlineData("failed-probe")]
+    public async Task Evidence_history_is_separate_from_current_admission_and_latest_attempt(string invalidation)
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace);
+        ScriptedMeitu meitu = new(fixture.MeituPath);
+        ScriptedRuntimeFacts facts = new(MatchingSettings(), []);
+        RecordingLock authority = new();
+        ProductionLiveWorkstationVerifier live = new(meitu, photoshop, facts, authority, workspace, fixture.Clock);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, live, omitRevalidation: false));
+
+        gate.Read().Lifecycle!.LastSuccessfulLiveAt.ShouldBeNull();
+        authority.AcquireCalls.ShouldBe(0);
+        EnvironmentReadinessReport complete = await gate.RunLiveChecksAsync(CancellationToken.None);
+        complete.Verified.ShouldBeTrue();
+        DateTimeOffset completedAt = complete.Lifecycle!.LastSuccessfulLiveAt!.Value;
+        string originalProbe = complete.Lifecycle.LatestProbe!.OperationId;
+        fixture.Clock.Advance(TimeSpan.FromMinutes(5));
+        IWorkstationAutomationLease owner = (await authority.TryAcquireAsync(null, CancellationToken.None)).Value;
+        int factsBeforeBusy = facts.ReadCalls;
+        int inspectionsBeforeBusy = photoshop.ReinspectCalls;
+        for (int index = 0; index < 2; index++)
+        {
+            EnvironmentReadinessReport busy = gate.Read();
+            busy.Verified.ShouldBeFalse();
+            busy.Lifecycle!.CurrentObservationDeferred.ShouldBeTrue();
+            busy.Lifecycle.EvidenceAvailable.ShouldBeTrue();
+            busy.Lifecycle.LastSuccessfulLiveAt.ShouldBe(completedAt);
+            busy.Lifecycle.LatestProbe!.OperationId.ShouldBe(originalProbe);
+            busy.Checks.Single(check => check.CheckKey == "PhotoshopTestImageRoundTrip")
+                .Status.ShouldBe(EnvironmentCheckStatus.Blocked);
+        }
+        facts.ReadCalls.ShouldBe(factsBeforeBusy);
+        photoshop.ReinspectCalls.ShouldBe(inspectionsBeforeBusy);
+        authority.AcquireCalls.ShouldBe(2);
+        photoshop.OpenCalls.ShouldBe(1);
+        (await owner.ReleaseAsync(CancellationToken.None)).IsSuccess.ShouldBeTrue();
+        EnvironmentReadinessReport fresh = gate.Read();
+        fresh.Verified.ShouldBeTrue();
+        fresh.Lifecycle!.CurrentObservationDeferred.ShouldBeFalse();
+        fresh.Lifecycle.LastSuccessfulLiveAt.ShouldBe(completedAt);
+        photoshop.ReinspectCalls.ShouldBeGreaterThan(inspectionsBeforeBusy);
+        facts.ReadCalls.ShouldBeGreaterThan(factsBeforeBusy);
+        photoshop.OpenCalls.ShouldBe(1);
+
+        EnvironmentReadinessReport invalid;
+        if (invalidation == "unknown")
+        {
+            authority.ObservationOverride = WorkstationAutomationLeaseStatus.Unknown;
+            invalid = gate.Read();
+            authority.ObservationOverride = null;
+        }
+        else if (invalidation == "drift")
+        {
+            photoshop.RestorationFailure = OperationFailure.Create(FailureCode.PhotoshopTargetLost,
+                "synthetic certified process was replaced");
+            invalid = gate.Read();
+            photoshop.RestorationFailure = null;
+        }
+        else
+        {
+            photoshop.OpenFailure = OperationFailure.Create(FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "synthetic later probe failed");
+            invalid = await gate.RunLiveChecksAsync(CancellationToken.None);
+            invalid.Lifecycle!.LatestProbe!.OperationId.ShouldNotBe(originalProbe);
+            invalid.Lifecycle.LatestAttemptAt.ShouldBe(fixture.Clock.GetUtcNow());
+            photoshop.OpenFailure = null;
+        }
+        invalid.Verified.ShouldBeFalse();
+        invalid.Lifecycle!.EvidenceAvailable.ShouldBeFalse();
+        invalid.Lifecycle.LastSuccessfulLiveAt.ShouldBe(completedAt);
+        invalid.Lifecycle.Photoshop!.ProcessId.ShouldBe(707);
+        gate.Read().Verified.ShouldBeFalse("restored facts alone cannot revive invalidated live evidence");
+
+        fixture.Clock.Advance(TimeSpan.FromMinutes(1));
+        EnvironmentReadinessReport rerun = await gate.RunLiveChecksAsync(CancellationToken.None);
+        rerun.Verified.ShouldBeTrue();
+        rerun.Lifecycle!.LastSuccessfulLiveAt.ShouldBe(fixture.Clock.GetUtcNow());
+        rerun.Lifecycle.LatestProbe!.OperationId.ShouldNotBe(originalProbe);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Passive_observation_cannot_cross_a_new_live_evidence_revision(bool oldObservationPassed)
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace);
+        ProductionLiveWorkstationVerifier live = new(new ScriptedMeitu(fixture.MeituPath),
+            photoshop, new ScriptedRuntimeFacts(MatchingSettings(), []),
+            new RecordingLock(), workspace, fixture.Clock);
+        PausingReobserver interleaving = new(live);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, interleaving, omitRevalidation: false));
+        if (oldObservationPassed)
+        {
+            (await gate.RunLiveChecksAsync(CancellationToken.None)).Verified.ShouldBeTrue();
+            photoshop.OpenFailure = OperationFailure.Create(FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "synthetic replacement attempt failed");
+        }
+        Task<EnvironmentReadinessReport> old = Task.Run(gate.Read);
+        try
+        {
+            await interleaving.Observed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            (await gate.RunLiveChecksAsync(CancellationToken.None)).Verified.ShouldBe(!oldObservationPassed);
+        }
+        finally
+        {
+            interleaving.ReturnObservation.TrySetResult(true);
+        }
+        (await old.WaitAsync(TimeSpan.FromSeconds(10))).Verified.ShouldBeFalse();
+        gate.Read().Verified.ShouldBe(!oldObservationPassed,
+            "an old observation cannot clear newer evidence or authorize from evidence invalidated by a later attempt");
+    }
+
+    [Fact]
+    public async Task Release_exception_cannot_erase_completed_probe_progress_or_certify_evidence()
+    {
+        using WorkstationVerificationFixture fixture = new();
+        FileWorkspace workspace = new(fixture.WorkspaceRoot);
+        RecordingLock authority = new() { ThrowOnRelease = true };
+        ProductionLiveWorkstationVerifier live = new(new ScriptedMeitu(fixture.MeituPath),
+            new ScriptedPhotoshop(fixture.PhotoshopPath, workspace), new ScriptedRuntimeFacts(MatchingSettings(), []),
+            authority, workspace, fixture.Clock);
+        VerifiedEnvironmentGate gate = new(FullVerifier(fixture, live, omitRevalidation: false));
+        EnvironmentReadinessReport report = await gate.RunLiveChecksAsync(CancellationToken.None);
+        report.Verified.ShouldBeFalse();
+        report.Lifecycle!.EvidenceAvailable.ShouldBeFalse();
+        report.Lifecycle.LastSuccessfulLiveAt.ShouldBeNull();
+        report.Lifecycle.LatestProbe!.PrimaryFailure!.Phase.ShouldBe("LeaseRelease");
+        report.Lifecycle.LatestProbe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.Succeeded);
+        report.Lifecycle.LatestProbe.Stages.ShouldContain(ReadinessProbeStage.PriorStateRestored);
+        authority.IsHeld.ShouldBeTrue();
+    }
+
     [Fact]
     public async Task App_live_verifier_bootstrap_and_direct_scope_compete_on_one_real_isolated_authority()
     {
@@ -169,6 +447,22 @@ public sealed class ProductionLiveWorkstationVerifierTests
                 Requirements(fixture), CancellationToken.None);
             result.Checks.ShouldAllBe(check => check.Outcome == WorkstationCheckOutcome.Passed);
             result.Evidence.ShouldNotBeNull();
+            ReadinessProbeDiagnostics probe = result.Probe.ShouldNotBeNull();
+            probe.Stages.ShouldBe(new[]
+            {
+                ReadinessProbeStage.ProbeCreation, ReadinessProbeStage.ProbeCreated,
+                ReadinessProbeStage.OpenGuard, ReadinessProbeStage.OpenRequested,
+                ReadinessProbeStage.OpenConfirmed, ReadinessProbeStage.IdentityCheck,
+                ReadinessProbeStage.IdentityConfirmed, ReadinessProbeStage.CloseGuard,
+                ReadinessProbeStage.CloseRequested, ReadinessProbeStage.CloseConfirmed,
+                ReadinessProbeStage.PriorStateCheck, ReadinessProbeStage.PriorStateRestored,
+                ReadinessProbeStage.CleanupAttempted, ReadinessProbeStage.CleanupCompleted,
+            });
+            probe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.Succeeded);
+            probe.LastAttemptedStage.ShouldBe(ReadinessProbeStage.CleanupAttempted);
+            probe.LastConfirmedStage.ShouldBe(ReadinessProbeStage.CleanupCompleted);
+            probe.PrimaryFailure.ShouldBeNull();
+            probe.SecondaryFailures.ShouldBeEmpty();
         }
 
         meitu.EnsureCalls.ShouldBe(3);
@@ -342,15 +636,25 @@ public sealed class ProductionLiveWorkstationVerifierTests
         secondLock.ReleaseCalls.ShouldBe(1);
     }
 
-    [Fact]
-    public async Task Cancellation_during_close_retries_only_the_exact_probe_then_cleans_and_unlocks()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Cancellation_during_close_keeps_ownership_through_bounded_unwind(bool unwindFails)
     {
         using WorkstationVerificationFixture fixture = new();
         FileWorkspace workspace = new(fixture.WorkspaceRoot);
         using CancellationTokenSource cancellation = new();
+        TaskCompletionSource<bool> unwinding = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource<bool> finishUnwind = new(TaskCreationOptions.RunContinuationsAsynchronously);
         ScriptedPhotoshop photoshop = new(fixture.PhotoshopPath, workspace)
         {
             CancelFirstClose = cancellation,
+            CloseFailure = unwindFails ? OperationFailure.Create(FailureCode.Timeout, "synthetic unwind timeout") : null,
+            CloseUnwind = async () =>
+            {
+                unwinding.TrySetResult(true);
+                await finishUnwind.Task;
+            },
         };
         RecordingLock automationLock = new();
         ProductionLiveWorkstationVerifier verifier = new(
@@ -358,13 +662,40 @@ public sealed class ProductionLiveWorkstationVerifierTests
             new ScriptedRuntimeFacts(MatchingSettings(), []), automationLock,
             workspace, fixture.Clock);
 
-        WorkstationLiveVerification result = await verifier.RunAsync(
-            Requirements(fixture), cancellation.Token);
+        Task<WorkstationLiveVerification> running = verifier.RunAsync(Requirements(fixture), cancellation.Token);
+        try
+        {
+            await unwinding.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            cancellation.IsCancellationRequested.ShouldBeTrue();
+            automationLock.IsHeld.ShouldBeTrue();
+            automationLock.ReleaseCalls.ShouldBe(0);
+            (await automationLock.TryAcquireAsync(null, CancellationToken.None)).IsFailure.ShouldBeTrue();
+        }
+        finally
+        {
+            finishUnwind.TrySetResult(true);
+        }
+        WorkstationLiveVerification result = await running.WaitAsync(TimeSpan.FromSeconds(10));
 
         result.Checks.ShouldContain(check => check.FailureCode == FailureCode.Cancelled);
         photoshop.CloseCalls.ShouldBe(2);
-        Directory.EnumerateFiles(fixture.WorkspaceRoot, "PF_ENV_PROBE_*", SearchOption.AllDirectories)
-            .ShouldBeEmpty();
+        result.Evidence.ShouldBeNull();
+        result.Probe!.PrimaryFailure!.Code.ShouldBe(FailureCode.Cancelled);
+        result.Probe.Stages.ShouldNotContain(ReadinessProbeStage.PriorStateRestored,
+            "the existing cancellation unwind closes the exact probe but does not reobserve prior state");
+        if (unwindFails)
+        {
+            result.Probe.SecondaryFailures.ShouldHaveSingleItem().Code.ShouldBe(FailureCode.Timeout);
+            result.Probe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.NotRun);
+            result.Probe.Stages.ShouldNotContain(ReadinessProbeStage.CloseConfirmed);
+            File.Exists(result.Probe.ManagedPath).ShouldBeTrue();
+        }
+        else
+        {
+            result.Probe.SecondaryFailures.ShouldBeEmpty();
+            result.Probe.CleanupOutcome.ShouldBe(ProbeCleanupOutcome.Succeeded);
+            File.Exists(result.Probe.ManagedPath).ShouldBeFalse();
+        }
         automationLock.ReleaseCalls.ShouldBe(1);
     }
 
@@ -487,6 +818,27 @@ public sealed class ProductionLiveWorkstationVerifierTests
             new(ProductionLiveWorkstationVerifier.BlockedChecks("not run"), null);
     }
 
+    private sealed class PausingReobserver(IProductionLiveWorkstationVerifier inner) : IProductionLiveWorkstationVerifier
+    {
+        private int _pause = 1;
+        public TaskCompletionSource<bool> Observed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource<bool> ReturnObservation { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Task<WorkstationLiveVerification> RunAsync(WorkstationRequirements requirements, CancellationToken cancellationToken) =>
+            inner.RunAsync(requirements, cancellationToken);
+
+        public WorkstationLiveVerification Reobserve(WorkstationRequirements requirements, WorkstationLiveEvidence? evidence)
+        {
+            WorkstationLiveVerification observed = inner.Reobserve(requirements, evidence);
+            if (Interlocked.Exchange(ref _pause, 0) == 1)
+            {
+                Observed.TrySetResult(true);
+                ReturnObservation.Task.GetAwaiter().GetResult();
+            }
+            return observed;
+        }
+    }
+
     private sealed class RecordingLock : IWorkstationAutomationLeaseManager
     {
         public string ResourceId => "test.live-verifier";
@@ -494,12 +846,15 @@ public sealed class ProductionLiveWorkstationVerifierTests
         public bool IsHeld { get; private set; }
         public int AcquireCalls { get; private set; }
         public int ReleaseCalls { get; private set; }
+        public OperationFailure? ReleaseFailure { get; init; }
+        public bool ThrowOnRelease { get; init; }
+        public WorkstationAutomationLeaseStatus? ObservationOverride { get; set; }
 
         public Task<OperationResult<IWorkstationAutomationLease>> TryAcquireAsync(
             IWorkstationAutomationLease? enclosingLease, CancellationToken cancellationToken)
         {
             AcquireCalls++;
-            if (Contended)
+            if (Contended || IsHeld)
                 return Task.FromResult(OperationResult.Fail<IWorkstationAutomationLease>(
                     FailureCode.AdapterUnavailable, "held"));
             IsHeld = true;
@@ -509,9 +864,9 @@ public sealed class ProductionLiveWorkstationVerifierTests
         public Task<WorkstationAutomationLeaseObservation> ObserveAsync(
             IWorkstationAutomationLease? ownLease, CancellationToken cancellationToken) =>
             Task.FromResult(new WorkstationAutomationLeaseObservation(
-                ownLease is RecordingLease { IsActive: true }
+                ObservationOverride ?? (ownLease is RecordingLease { IsActive: true }
                     ? WorkstationAutomationLeaseStatus.Owned
-                    : IsHeld ? WorkstationAutomationLeaseStatus.Busy : WorkstationAutomationLeaseStatus.Free,
+                    : IsHeld ? WorkstationAutomationLeaseStatus.Busy : WorkstationAutomationLeaseStatus.Free),
                 ResourceId,
                 IsHeld ? "held" : "free"));
 
@@ -527,6 +882,9 @@ public sealed class ProductionLiveWorkstationVerifierTests
                 if (IsActive)
                 {
                     owner.ReleaseCalls++;
+                    if (owner.ThrowOnRelease) throw new IOException("synthetic release exception");
+                    if (owner.ReleaseFailure is { } failure)
+                        return Task.FromResult(OperationResult.Fail<PrintFlow.Domain.Results.Unit>(failure));
                     owner.IsHeld = false;
                     IsActive = false;
                 }
@@ -541,9 +899,13 @@ public sealed class ProductionLiveWorkstationVerifierTests
         ImmutableArray<PhotoshopRuntimeDocument> documents) : IPhotoshopRuntimeFactReader
     {
         public int Writes => 0;
+        public int ReadCalls { get; private set; }
 
-        public OperationResult<PhotoshopRuntimeFacts> Read(string acceptedExecutablePath) =>
-            OperationResult.Ok(new PhotoshopRuntimeFacts(settings, documents));
+        public OperationResult<PhotoshopRuntimeFacts> Read(string acceptedExecutablePath)
+        {
+            ReadCalls++;
+            return OperationResult.Ok(new PhotoshopRuntimeFacts(settings, documents));
+        }
     }
 
     private sealed class ScriptedPhotoshop(string executable, IWorkspace workspace)
@@ -553,13 +915,20 @@ public sealed class ProductionLiveWorkstationVerifierTests
             new ExternalProcessRef(707, executable, DateTimeOffset.UnixEpoch),
             PhotoshopFakes.Window(owningProcessId: 707));
 
-        public bool FailClose { get; init; }
+        public bool FailClose { get; set; }
         public OperationFailure? EnsureFailure { get; init; }
-        public OperationFailure? OpenFailure { get; init; }
+        public OperationFailure? OpenFailure { get; set; }
+        public ReadinessProbeStage FailureOpenProgress { get; init; } = ReadinessProbeStage.OpenRequested;
+        public OperationFailure? CloseFailure { get; init; }
+        public OperationFailure? RestorationFailure { get; set; }
+        public bool CorruptProbeOnClose { get; init; }
+        public bool ThrowOnClose { get; init; }
+        public Func<Task>? CloseUnwind { get; init; }
         public CancellationTokenSource? CancelFirstClose { get; init; }
         public int EnsureCalls { get; private set; }
         public int OpenCalls { get; private set; }
         public int CloseCalls { get; private set; }
+        public int ReinspectCalls { get; private set; }
 
         public Task<OperationResult<PhotoshopReadiness>> EnsureReadyAsync(CancellationToken cancellationToken)
         {
@@ -570,8 +939,23 @@ public sealed class ProductionLiveWorkstationVerifierTests
         }
 
         public Task<OperationResult<PhotoshopReadiness>> ReinspectAsync(
-            PhotoshopReadiness previous, CancellationToken cancellationToken) =>
-            Task.FromResult(OperationResult.Ok(Readiness()));
+            PhotoshopReadiness previous, CancellationToken cancellationToken)
+        {
+            ReinspectCalls++;
+            return Task.FromResult(RestorationFailure is { } failure
+                ? OperationResult.Fail<PhotoshopReadiness>(failure) : OperationResult.Ok(Readiness()));
+        }
+
+        public Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
+            WorkspaceFileRef workingFile, Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
+        {
+            ReadinessProbeStage until = OpenFailure is null ? ReadinessProbeStage.IdentityConfirmed : FailureOpenProgress;
+            foreach (ReadinessProbeStage stage in new[] { ReadinessProbeStage.OpenGuard,
+                         ReadinessProbeStage.OpenRequested, ReadinessProbeStage.OpenConfirmed,
+                         ReadinessProbeStage.IdentityCheck, ReadinessProbeStage.IdentityConfirmed })
+                if ((int)stage <= (int)until) observe?.Invoke(stage);
+            return OpenManagedWorkingFileAsync(workingFile, cancellationToken);
+        }
 
         public Task<OperationResult<PhotoshopOpenedDocument>> OpenManagedWorkingFileAsync(
             WorkspaceFileRef workingFile, CancellationToken cancellationToken)
@@ -591,15 +975,33 @@ public sealed class ProductionLiveWorkstationVerifierTests
             PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile, CancellationToken cancellationToken)
         {
             CloseCalls++;
+            if (ThrowOnClose) throw new IOException("synthetic close exception");
             if (CancelFirstClose is { } cancellation && CloseCalls == 1)
             {
                 cancellation.Cancel();
                 throw new OperationCanceledException(cancellation.Token);
             }
-            return Task.FromResult(FailClose
+            return Task.FromResult(CloseFailure is { } failure
+                ? OperationResult.Fail<PhotoshopTarget>(failure) : FailClose
                 ? OperationResult.Fail<PhotoshopTarget>(
                     FailureCode.PhotoshopDocumentIdentityUnconfirmed, "identity moved")
                 : OperationResult.Ok(_target));
+        }
+
+        public async Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
+            PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile,
+            Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
+        {
+            observe?.Invoke(ReadinessProbeStage.CloseGuard);
+            if (!FailClose) observe?.Invoke(ReadinessProbeStage.CloseRequested);
+            OperationResult<PhotoshopTarget> result = await CloseExactDocumentAsync(opened, workingFile, cancellationToken);
+            if (CloseCalls > 1 && CloseUnwind is { } unwind) await unwind();
+            if (result.IsSuccess)
+            {
+                observe?.Invoke(ReadinessProbeStage.CloseConfirmed);
+                if (CorruptProbeOnClose) File.WriteAllText(workspace.ResolveAbsolute(workingFile), "synthetic changed bytes");
+            }
+            return result;
         }
 
         private PhotoshopReadiness Readiness() =>

@@ -91,6 +91,11 @@ public sealed class ProductionWorkstationVerifier :
 
     private readonly object _liveEvidenceSync = new();
     private WorkstationLiveEvidence? _liveEvidence;
+    private long _liveEvidenceRevision;
+    private WorkstationLiveEvidence? _lastSuccessfulLiveEvidence;
+    private DateTimeOffset? _lastSuccessfulLiveAt;
+    private DateTimeOffset? _latestAttemptAt;
+    private ReadinessProbeDiagnostics? _latestProbe;
 
     private readonly Lazy<RootOfTrust> _rootOfTrust;
     private ImmutableArray<WorkstationCheckResult>? _baselineChecks;
@@ -300,27 +305,60 @@ public sealed class ProductionWorkstationVerifier :
         WorkstationVerificationResult automatic = VerifyAutomatic();
         if (_live is null || automatic.Preset is null || !automatic.Verified)
         {
-            return automatic;
+            return automatic with { Lifecycle = Lifecycle(observationDeferred: false) };
         }
 
         WorkstationLiveEvidence? evidence;
-        lock (_liveEvidenceSync) evidence = _liveEvidence;
+        long evidenceRevision;
+        lock (_liveEvidenceSync)
+        {
+            evidence = _liveEvidence;
+            evidenceRevision = _liveEvidenceRevision;
+        }
         WorkstationLiveVerification live = requireAutomationAvailability
             ? _live.Reobserve(_rootOfTrust.Value.Requirements!, evidence, ownLease)
             : _live.ReobserveForInternalWork(_rootOfTrust.Value.Requirements!, evidence);
-        if (live.Evidence is null)
+        ReadinessEvidenceLifecycle lifecycle;
+        lock (_liveEvidenceSync)
         {
-            lock (_liveEvidenceSync) _liveEvidence = null;
+            if (_liveEvidenceRevision != evidenceRevision)
+            {
+                // An old observation neither clears a newer run nor grants admission using
+                // evidence a concurrent attempt invalidated. Keep its concrete failures, but
+                // withdraw any passing round-trip claim until a new passive observation.
+                if (live.Evidence is not null)
+                {
+                    live = live with
+                    {
+                        Checks = [.. live.Checks.Where(check =>
+                                check.Check != WorkstationVerificationCheck.PhotoshopTestImageRoundTrip),
+                            WorkstationCheckResult.Blocked(
+                                WorkstationVerificationCheck.PhotoshopTestImageRoundTrip,
+                                WorkstationCheckKind.Smoke, "Current live evidence",
+                                "Live evidence changed during this observation. A fresh observation is required before admission.")],
+                    };
+                }
+            }
+            else if (live.Evidence is null && _liveEvidence is not null)
+            {
+                _liveEvidence = null;
+                _liveEvidenceRevision++;
+            }
+            lifecycle = Lifecycle(live.ObservationDeferred);
         }
 
         return WorkstationVerificationResult.From(
-            automatic.Preset, [.. automatic.Checks, .. live.Checks], automatic.ObservedAt);
+            automatic.Preset, [.. automatic.Checks, .. live.Checks], automatic.ObservedAt) with
+        {
+            Lifecycle = lifecycle,
+        };
     }
 
     /// <inheritdoc />
     public async Task<WorkstationVerificationResult> RunLiveChecksAsync(
         CancellationToken cancellationToken)
     {
+        DateTimeOffset attemptedAt = _clock.GetUtcNow();
         WorkstationVerificationResult automatic = VerifyAutomatic();
         if (_live is null)
         {
@@ -340,11 +378,43 @@ public sealed class ProductionWorkstationVerifier :
                 .ConfigureAwait(false);
         }
 
-        lock (_liveEvidenceSync) _liveEvidence = live.Evidence;
+        ReadinessEvidenceLifecycle lifecycle;
+        lock (_liveEvidenceSync)
+        {
+            _liveEvidence = live.Evidence;
+            _liveEvidenceRevision++;
+            _latestAttemptAt = attemptedAt;
+            _latestProbe = live.Probe;
+            if (live.Evidence is not null)
+            {
+                _lastSuccessfulLiveEvidence = live.Evidence;
+                _lastSuccessfulLiveAt = _clock.GetUtcNow();
+            }
+            lifecycle = Lifecycle(observationDeferred: false);
+        }
         return WorkstationVerificationResult.From(
             automatic.Preset,
             [.. automatic.Checks, .. live.Checks],
-            _clock.GetUtcNow());
+            _clock.GetUtcNow()) with
+        {
+            Lifecycle = lifecycle,
+        };
+    }
+
+    private ReadinessEvidenceLifecycle Lifecycle(bool observationDeferred)
+    {
+        lock (_liveEvidenceSync)
+        {
+            return new ReadinessEvidenceLifecycle(
+                _lastSuccessfulLiveAt,
+                _lastSuccessfulLiveEvidence is { } previous
+                    ? new(previous.Meitu.Target.Process.ProcessId, previous.Meitu.Target.Process.ExecutablePath,
+                        previous.Meitu.Target.Process.StartedUtc) : null,
+                _lastSuccessfulLiveEvidence is { } prior
+                    ? new(prior.Photoshop.Target.Process.ProcessId, prior.Photoshop.Target.Process.ExecutablePath,
+                        prior.Photoshop.Target.Process.StartedUtc) : null,
+                _liveEvidence is not null, observationDeferred, _latestAttemptAt, _latestProbe);
+        }
     }
 
     private WorkstationVerificationResult VerifyAutomatic()

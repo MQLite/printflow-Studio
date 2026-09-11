@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
+using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Verification;
 
@@ -89,6 +90,9 @@ public sealed record WorkstationVerificationResult(
     ImmutableArray<WorkstationCheckResult> Checks,
     DateTimeOffset ObservedAt)
 {
+    /// <summary>Optional observation history; never consulted to authorize a request.</summary>
+    public ReadinessEvidenceLifecycle? Lifecycle { get; init; }
+
     /// <summary>The checks that closed verification.</summary>
     public IEnumerable<WorkstationCheckResult> Failures =>
         Checks.Where(c => c.Outcome == WorkstationCheckOutcome.Failed);
