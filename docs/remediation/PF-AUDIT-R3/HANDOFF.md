@@ -1,6 +1,6 @@
 # PF-AUDIT-R3 — Handoff
 
-Status: final review/QA closure pending; do not infer PASS from this draft.
+Status: **PASS WITH NOTES — PF-AUDIT-R3 VERIFIED; LIVE DIAGNOSIS REMAINS R4**.
 
 - Authorized task: R3 only, canonical `D:\Repositories\printflow-Studio`, `master`.
 - Starting HEAD: `519be2421e6dc6ec968caa5e550700231a3a57b1`; SDK selected/reported 10.0.400.
@@ -11,6 +11,32 @@ Status: final review/QA closure pending; do not infer PASS from this draft.
   later docs commit 519be24. Not rerun at startup. Historical R2 failed run/default-store
   acquisitions remain in the unchanged R2 records.
 - Operator-owned untracked `printflow-remediation-prompts/` preserved and excluded from commits.
+- Implementation commit: `bfbcbb1fcfdc22c4d04dfeed59458ea6f9364cdd`.
+- Corrected and tested source: `ea12201dfd515708a5d3a5d36be38625c71a2894`.
+  The subsequent closure commit changes only the three R3 documents; tested inputs are identical.
+
+## Accepted final-source proof
+
+Local Windows host, SDK 10.0.400. Clean/Release build host exits 0, 0 warnings / 0 errors.
+Unfiltered Product suite: **11,836 passed / 0 failed / 0 skipped**, host exit 0; individual TRX
+outcomes agree with counters. Evidence: `artifacts/pf-audit-r3/final-corrected/summary.json`,
+`pf-audit-r3-full.trx`, raw logs, host exits and SHA-256 manifests. Source HEAD and all tracked
+non-doc inputs, relevant assemblies, operator bundle and historical R2 failed-run evidence
+matched before/after. Live-smoke guarded no-op Passed results are NOT EXECUTED live operations.
+
+First full run on bfbcbb1 remains preserved in `artifacts/pf-audit-r3/final/`: 11,834/2/0,
+host exit 1, build 0 warnings/errors. It found the UI's concrete check-name coupling and a
+Process.StartedUtc expression matching the launch-token scan. Correction moved optional row
+Lifecycle assignment to the Infrastructure report producer and used process identity locals;
+architecture assertions remained unchanged. Focused correction passed 499/0/0 and the same
+independent reviewer found no remaining findings before corrected full QA. No unchanged-code
+retry was used. R2 historical deviations remain unchanged as well.
+
+R3 engineering conditions and deterministic proof are complete. Tracked master is clean after
+local closure commits; only the preserved operator prompt bundle remains untracked. No push,
+install or deploy. Next action is stop before R4; no additional startup test run is needed to
+establish this same source's synthetic result. Any future authorized work must verify its actual
+HEAD and preserve the evidence and boundaries documented here.
 
 Read PLAN.md and `docs/printflow/audit-r3-readiness-lifecycle.md` for the exact residual gaps,
 stage semantics, synchronization correction, synthetic proof and source-verified R4 entry.

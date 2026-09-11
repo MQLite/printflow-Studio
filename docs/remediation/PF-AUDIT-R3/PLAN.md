@@ -40,7 +40,7 @@ Local logical commits only. Complete report and HANDOFF with source-verified R4 
 R1 build-origin condition remains open; no attestation or publication contract change.
 Stop before R4/live acceptance; real external operations and production revalidation NOT EXECUTED.
 
-## Implementation and QA checkpoint
+## Implementation and QA closure
 
 Implementation commit bfbcbb1 completes typed probe progress, historical/latest lifecycle,
 guarded request callbacks, primary/secondary unwind outcomes, real report/JSON/detail projection
@@ -53,9 +53,21 @@ matched. Two architecture findings require a material report boundary correction
 assigns optional row Lifecycle; screen renders it generically. Timestamp identity locals avoid a
 launch-token false positive. Architecture assertions remain unchanged. Corrected focused union
 (all Architecture, live verifier/report/JSON, screen) passed 499/0/0, host exit 0. Narrow re-review
-and corrected settled-source full QA pending; original failed evidence retained.
+found no remaining actionable findings; original failed evidence retained.
 
 Boundary routing reassessment: QA/correction NormalRoute and RequestedRoute Sol High, docs Luna
 Low, offset 0 UNCHANGED, CONTINUE. Existing localized display logic is unchanged; the correction
 removes screen knowledge of a concrete check. ActualRoute UNVERIFIED; in-place
 MODEL_SWITCH_UNAVAILABLE, safe current-runtime fallback, no live downgrade claimed.
+
+Corrected source `ea12201dfd515708a5d3a5d36be38625c71a2894` passed the unfiltered Product suite:
+11,836 passed / 0 failed / 0 skipped, host exit 0; SDK 10.0.400, clean/Release build exits 0,
+0 warnings / 0 errors. Individual TRX outcomes agree with counters. Before/after source HEAD,
+tracked non-doc inputs, assemblies, operator bundle and historical R2 evidence matched.
+Evidence: `artifacts/pf-audit-r3/final-corrected/summary.json` and adjacent raw logs/TRX/manifests.
+The final documentation-only closure does not alter tested inputs. All planned R3 steps complete.
+
+Verdict: **PASS WITH NOTES — PF-AUDIT-R3 VERIFIED; LIVE DIAGNOSIS REMAINS R4**.
+Next stage: stop. Separate R4 authorization is required; HANDOFF documents its existing entry
+and prerequisites. R2 preserved; deterministic proof complete; real external operations
+NOT EXECUTED; real production revalidation NOT WRITTEN; Jira unchanged; R1 pre-A1/A2 still open.

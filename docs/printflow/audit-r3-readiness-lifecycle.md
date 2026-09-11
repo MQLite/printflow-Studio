@@ -1,7 +1,7 @@
 # PF-AUDIT-R3 — Readiness evidence lifecycle and truthful probe diagnostics
 
-Status: implementation, focused proof and independent review complete; final-source QA pending.
-This report will be closed against the settled source before delivery.
+Status: **PASS WITH NOTES — PF-AUDIT-R3 VERIFIED; LIVE DIAGNOSIS REMAINS R4**.
+Implementation, deterministic proof, independent review and corrected final-source QA complete.
 
 ## Authority and inherited evidence
 
@@ -153,12 +153,11 @@ default-store inspection/operation, real application or real production revalida
 | Dispatch boundary | 168 / 0 / 0 | Final native-dispatch guard, partial-send, architecture/live/screen checks |
 | First settled-source Release/full Product | 11,834 / 2 / 0 | Architecture failures retained; source bfbcbb1, host exit 1 |
 | Full-suite correction focused union | 499 / 0 / 0 | All Architecture plus real live/report/JSON and screen tests |
-| Corrected settled-source Release/full Product | Pending | Required after the material report-projection correction |
+| Corrected settled-source Release/full Product | 11,836 / 0 / 0 | Source ea12201; host exit 0, clean Release build 0 warnings/errors |
 
 Raw logs/TRX/host exits live under ignored `artifacts/pf-audit-r3/`; all counted live smokes remain
 opted out and NOT EXECUTED even where xUnit counts their guarded return as Passed. No dependency
-files changed, so no repeat dependency scan was needed. Review and final fingerprint/QA closure
-will be recorded here before delivery.
+files changed, so no repeat dependency scan was needed. Final fingerprint/QA closure follows.
 
 One fresh no-history native read-only reviewer independently identified the stale-success race
 and the two exact interface-shape tests omitted from the earlier affected filter. Both were
@@ -178,7 +177,41 @@ absence on unrelated rows, and rendering under an unknown future check key. Proc
 are projected through local variables, with no launch behavior changed. Both architecture tests
 remain unchanged. The first run's 11,834/2/0, host exit 1, clean Release build 0/0 and matching
 source/input/assembly/protected-evidence fingerprints remain under `artifacts/pf-audit-r3/final/`.
-No unchanged-source full retry was made; the corrected source requires a new settled-source run.
+No unchanged-source full retry was made; the corrected source required the new settled-source
+run recorded below.
+
+## Corrected final-source closure
+
+Accepted source: `ea12201dfd515708a5d3a5d36be38625c71a2894`, after implementation commit
+`bfbcbb1fcfdc22c4d04dfeed59458ea6f9364cdd`. The same fresh reviewer narrowly re-reviewed the final
+report-producer correction and found no remaining actionable findings. The 499/0/0 focused
+correction union preceded the new full run; the failed first full run remains unchanged.
+
+On this local Windows host, SDK `10.0.400`: clean and Release build of `PrintFlowStudio.sln`
+both exited 0; build reported 0 warnings / 0 errors. The unfiltered Product test project ran
+with `-c Release --no-build --no-restore`, exited 0 and completed in 7.5635 minutes. TRX counters
+and all 11,836 individual results agree: **11,836 passed / 0 failed / 0 skipped**, with zero
+error, timeout, abort or unexecuted outcomes. Opted-out live-smoke bodies remain NOT EXECUTED
+despite their guarded return counting as Passed.
+
+Direct evidence is in `artifacts/pf-audit-r3/final-corrected/`: `sdk.txt`, `clean.log`, `build.log`,
+their exit files, `full.log`, `full-exit.txt`, `pf-audit-r3-full.trx`, and parsed `summary.json`.
+Source HEAD matched before/after. SHA-256 manifests of every tracked non-doc input matched
+before build, before test and after test; PrintFlow test-output assemblies matched before/after.
+Operator prompt-bundle and historical R2 failed-run log/TRX fingerprints also matched. No source
+edits occurred during the run. Final closure edits affect only this report, PLAN and HANDOFF;
+they do not change tested Product/test inputs and require no further suite.
+
+Original R3 engineering conditions are satisfied: R2 semantics preserved; deterministic proof
+completed; stage requests remain distinct from confirmations; primary/secondary failures and
+unexecuted cleanup remain truthful through the actual consumer path. Real external operations
+NOT EXECUTED; real production revalidation NOT WRITTEN; Jira acceptance statuses unchanged;
+R1 pre-A1/A2 build-origin condition still open. Operator readiness attestation is unchanged.
+Only local commits on master were created; no push/install/deploy or next-slice execution.
+
+Final boundary routing: QA NormalRoute/RequestedRoute Sol High, factual docs Luna Low, explicit
+offset 0 UNCHANGED; CONTINUE on the same local host. ActualRoute remains UNVERIFIED with
+MODEL_SWITCH_UNAVAILABLE and safe current-runtime fallback. No real model downgrade is claimed.
 
 ## R4 entry and prerequisites — documented, not executed
 
