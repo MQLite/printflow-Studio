@@ -299,6 +299,20 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
 
         RegressionExecutionClaim claim = RegressionExecutionClaim.Stake(runFolder, runId, invocationId);
 
+        // The permanent claim stays first. Origin validation is read-only and precedes even
+        // configuration/composition; an explicitly publishable request must fail before real work.
+        string? receiptPath = Environment.GetEnvironmentVariable("PRINTFLOW_REGRESSION_BUILD_PAIR_RECEIPT");
+        RegressionBuildOrigin? origin = null;
+        if (!string.IsNullOrWhiteSpace(receiptPath))
+        {
+            origin = RegressionBuildOrigin.Capture(receiptPath,
+                Environment.GetEnvironmentVariable(CandidateVariable) ?? DefaultCandidateInstallFolder);
+        }
+        else if (Environment.GetEnvironmentVariable("PRINTFLOW_REGRESSION_DIAGNOSTIC_UNBOUND") != "1")
+        {
+            throw new InvalidDataException("Build origin: a completed build-pair receipt is required before operational setup.");
+        }
+
         DateTimeOffset startedAt = DateTimeOffset.Now;
         output.WriteLine($"Set root : {setRoot}");
         output.WriteLine($"Run      : {runFolder}");
@@ -324,7 +338,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         // the first result can be written so that every exit from here — preflight refusal, wrong
         // adapter mode, blocked environment, or a completed run — carries the same bound facts and
         // no path can produce a result a reader has to guess about (PF-AUDIT-R1, finding F3).
-        RegressionEvidenceBinding binding = Bind(set, configuration, invocationId, output);
+        RegressionEvidenceBinding binding = Bind(set, configuration, invocationId, origin);
         output.WriteLine(
             $"Candidate: {binding.CandidateInstallFolder ?? "(none named)"} " +
             $"[{ProductBuildIdentity.Fingerprint(binding.CandidateProductAssemblies)[..12]}…]");
@@ -1093,9 +1107,9 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
     /// <b>Harness and candidate.</b> The harness is the PrintFlow code this test host loaded — the
     /// bytes actually exercised. The candidate is the installation the resulting record will speak
     /// for. They are not the same bytes even for one commit, because an installation carries a
-    /// RID-specific self-contained publish, so they are checked against each other by build
-    /// identity and each is pinned by its own digests. A candidate that cannot be read, or that was
-    /// built from different source than the harness, is recorded as a problem rather than
+    /// RID-specific self-contained publish, so the controlled receipt checks each against its own
+    /// recorded bytes before this method. Labels remain diagnostic only. A candidate that cannot
+    /// be read is recorded as a problem rather than
     /// quietly omitted: a run whose candidate is unbound can still produce evidence of what
     /// happened, but no publication may follow from it.
     /// </para>
@@ -1104,7 +1118,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         StandardRegressionSet set,
         PrintFlowConfiguration configuration,
         string invocationId,
-        ITestOutputHelper output)
+        RegressionBuildOrigin? origin)
     {
         ImmutableArray<ProductAssemblyIdentity> harness = ProductBuildIdentity.Running();
 
@@ -1114,6 +1128,10 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 : DefaultCandidateInstallFolder;
 
         List<string> candidateProblems = [];
+        if (origin is null)
+        {
+            candidateProblems.Add("Diagnostic unbound run: no controlled build-pair association; publication is forbidden.");
+        }
         ImmutableArray<ProductAssemblyIdentity> candidate = Directory.Exists(candidateFolder)
             ? ProductBuildIdentity.FromFolder(candidateFolder)
             : [];
@@ -1194,7 +1212,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             meitu,
             photoshop,
             RegressionEvidenceBinding.DigestOfSet(manifests),
-            manifests);
+            manifests, origin);
     }
 
     private static void WriteResult(string runFolder, StandardRegressionSetRunResult run) =>

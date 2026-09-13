@@ -388,12 +388,37 @@ are still not a substitute for it: they never touch Meitu or Photoshop.
 
 ### 7.3 Running it
 
+Prepare a controlled build pair from committed relevant inputs in the canonical checkout. This
+generates files only; it neither installs nor launches the Product. Preserve the entire pair
+directory through review and publication. A receipt is trusted local tooling evidence, not release
+acceptance. Do not retrofit an old harness/candidate from matching informational versions.
+
+```powershell
+$pair = tools\regression\New-PrintFlowBuildPair.ps1 -OutputRoot artifacts\build-pairs
+$receipt = Join-Path (Split-Path $pair.HarnessFolder) 'build-pair.json'
+tools\regression\New-PrintFlowBuildPair.ps1 -VerifyOnly -ReceiptPath $receipt
+
+# Read-only check inside that exact loaded harness; no Product service graph or applications.
+$env:PRINTFLOW_BUILD_PAIR_PROOF_RECEIPT = $receipt
+$env:PRINTFLOW_BUILD_PAIR_PROOF_CANDIDATE = $pair.CandidateFolder
+try {
+    & $pair.DotnetPath vstest (Join-Path $pair.HarnessFolder 'PrintFlow.Tests.dll') `
+        '/TestCaseFilter:FullyQualifiedName~BuildPairVerificationSmoke' `
+        "/ResultsDirectory:$(Join-Path (Split-Path $pair.HarnessFolder) 'verification-results')"
+    if ($LASTEXITCODE -ne 0) { throw 'Loaded build-pair verification failed.' }
+} finally {
+    Remove-Item Env:PRINTFLOW_BUILD_PAIR_PROOF_RECEIPT, Env:PRINTFLOW_BUILD_PAIR_PROOF_CANDIDATE -ErrorAction SilentlyContinue
+}
+```
+
 ```powershell
 # Layer 1 only — static, offline, opens no application. Seconds. Safe any time.
 tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -PreflightOnly
 
-# The full fixed-workstation run. Drives real Meitu and real Photoshop.
-tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1
+# Only after separate live authorization and workstation preparation below.
+# Executes the receipt's concrete test DLL with vstest; no restore or build occurs.
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 `
+    -BuildPairReceipt $receipt -CandidateInstallFolder $pair.CandidateFolder
 
 # Record the visual decisions a completed run left open, without re-running anything.
 tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId <run-id> -RecordVisualReview <decisions.json>
@@ -414,12 +439,24 @@ stays where it is, and remains readable.
 exits nonzero is a run that did not complete, whatever is on disk; a result left by another
 invocation is not this one's outcome. Both were reported as success before PF-AUDIT-R1.
 
-**`-CandidateInstallFolder`** names the installation the run is testing on behalf of; it defaults to
-`%ProgramFiles%\PrintFlow Studio`. The run drives PrintFlow from the built repository rather than
-from the installed executable, so it checks that the installed candidate was built from the same
-source and records its digests. If it cannot — no installation there, or one built from different
-source — the run still produces its evidence and says plainly that no revalidation can follow from
-it.
+**`-CandidateInstallFolder`** names the staged or installed candidate the run is testing on behalf
+of; it defaults to `%ProgramFiles%\PrintFlow Studio`. Its Product bytes must match the candidate
+side of `-BuildPairReceipt`. The run executes the paired harness and compares its own loaded
+Product and test-host runtime artifacts with the harness side. Same labels with different bytes
+are refused before operational setup. The two profiles need not match each other's bytes.
+
+The run records evidence binding version 2 and the original receipt path, SHA-256 and pair id.
+Publication checks that reference, both retained output sets, the run's identities and the target
+candidate. Review preserves it unchanged and accepts no replacement receipt. Historical/unbound
+runs stay readable but cannot be enriched into a publishable run. `-DiagnosticUnbound` is an
+explicit nonpublishable diagnostic mode using an already-built local test project; it still drives
+real applications and needs separate authorization. Review also uses `--no-build --no-restore`;
+prepare the local Release test project beforehand if needed.
+
+A documentation-only commit does not invalidate retained paired artifacts. A later Product or
+harness rebuild requires a fresh pair; present-day git cleanliness cannot certify old binaries.
+No receipt grants Production permission or replaces the real set, real reviews or the explicit
+`-EnvironmentReadinessPassed` operator attestation.
 
 **Before the full run**, put the workstation in the state the run needs, because it will refuse
 otherwise rather than work around you:

@@ -39,8 +39,8 @@ public sealed record ProductAssemblyIdentity(string Name, string? Sha256, string
 /// </para>
 /// <list type="bullet">
 /// <item>
-/// <see cref="ProductAssemblyIdentity.BuildIdentity"/> answers "was this built from the source the
-/// run exercised?" and spans the two build modes.
+/// <see cref="ProductAssemblyIdentity.BuildIdentity"/> is a label that spans build modes; it does not
+/// establish origin. A dirty build can share it. The controlled regression build pair pins both outputs.
 /// </item>
 /// <item>
 /// <see cref="ProductAssemblyIdentity.Sha256"/> answers "are these the same bytes?" and is what
@@ -179,13 +179,11 @@ public static class ProductBuildIdentity
         Compare(recorded, observed, a => a.Sha256, "bytes", Short);
 
     /// <summary>
-    /// Whether two candidate identities were built from the same source, and what differs when they
-    /// were not.
+    /// Whether two candidate identities carry the same informational label, not proof of source origin.
     /// </summary>
     /// <remarks>
-    /// The comparison that spans build modes. It answers "is the installed payload the same source
-    /// revision as the code the run drove?", which byte equality cannot answer because a
-    /// RID-specific publish and an ordinary build of one commit are not the same bytes.
+    /// A diagnostic comparison across build modes. The build-pair contract separately pins each
+    /// output set; neither label equality nor cross-profile byte equality establishes origin.
     /// </remarks>
     public static ImmutableArray<string> CompareBuildIdentity(
         ImmutableArray<ProductAssemblyIdentity> recorded,

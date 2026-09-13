@@ -129,7 +129,7 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         ScriptOutcome outcome = _synthetic.Run(
             Wrapper,
-            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId}",
+            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} -DiagnosticUnbound",
             SyntheticRegressionWorkstation.HostThatWrites(
                 _synthetic.PassingRun(runId, "@@INVOCATION@@").ToJson(), exitCode: 7));
 
@@ -145,7 +145,7 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         ScriptOutcome outcome = _synthetic.Run(
             Wrapper,
-            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId}",
+            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} -DiagnosticUnbound",
             SyntheticRegressionWorkstation.HostThatWrites(
                 _synthetic.PassingRun(runId, "11111111-2222-3333-4444-555555555555").ToJson()));
 
@@ -169,7 +169,9 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         ScriptOutcome outcome = _synthetic.Run(
             Wrapper,
-            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} -CandidateInstallFolder \"{_synthetic.InstallFolder}\"",
+            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} " +
+            $"-CandidateInstallFolder \"{_synthetic.InstallFolder}\" " +
+            $"-BuildPairReceipt \"{_synthetic.BuildPairReceiptPath}\"",
             SyntheticRegressionWorkstation.HostThatWrites(
                 _synthetic.PassingRun(runId, "@@INVOCATION@@").ToJson()));
 
@@ -289,7 +291,7 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         ScriptOutcome wrapper = _synthetic.Run(
             Wrapper,
-            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId}",
+            $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} -DiagnosticUnbound",
             SyntheticRegressionWorkstation.HostThatWrites(unbound.ToJson()));
 
         wrapper.ExitCode.ShouldBe(0, wrapper.Output);
@@ -330,6 +332,48 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
                 new Smoke.StandardRegressionSetWorkstationSmoke(new NullOutput())
                     .Run_the_standard_local_regression_set_on_the_fixed_workstation())
             .Message.ShouldContain("someone-elses-invocation");
+    }
+
+    /// <summary>
+    /// Matching informational labels cannot bind a loaded harness to different recorded bytes.
+    /// </summary>
+    [Fact]
+    public void The_runner_refuses_same_label_different_harness_bytes_before_configuration()
+    {
+        const string runId = "20260910-101011";
+        ImmutableArray<ProductAssemblyIdentity> loaded = ProductBuildIdentity.Running();
+        (RegressionBuildOrigin origin, ImmutableArray<ProductAssemblyIdentity> differentBytesSameLabel) =
+            _synthetic.WriteDifferentSourceHarnessReceiptWithSameLabels();
+
+        ProductAssemblyIdentity loadedInfrastructure = loaded.Single(
+            identity => identity.Name == "PrintFlow.Infrastructure.dll");
+        ProductAssemblyIdentity recordedInfrastructure = differentBytesSameLabel.Single(
+            identity => identity.Name == "PrintFlow.Infrastructure.dll");
+        recordedInfrastructure.BuildIdentity.ShouldBe(loadedInfrastructure.BuildIdentity,
+            "the counterexample keeps the informational build label unchanged");
+        recordedInfrastructure.Sha256.ShouldNotBe(loadedInfrastructure.Sha256,
+            "the isolated source build has genuinely different bytes under that same label");
+
+        using EnvironmentVariables environment = new()
+        {
+            ["PRINTFLOW_STANDARD_REGRESSION_SET"] = "1",
+            ["PRINTFLOW_REGRESSION_SET_ROOT"] = _synthetic.SetRoot,
+            ["PRINTFLOW_REGRESSION_RUN_ID"] = runId,
+            ["PRINTFLOW_REGRESSION_INVOCATION_ID"] = "same-label-different-bytes",
+            ["PRINTFLOW_REGRESSION_CANDIDATE_INSTALL_FOLDER"] = _synthetic.InstallFolder,
+            ["PRINTFLOW_REGRESSION_BUILD_PAIR_RECEIPT"] = origin.ReceiptPath,
+            ["PRINTFLOW_REGRESSION_DIAGNOSTIC_UNBOUND"] = null,
+        };
+
+        InvalidDataException refused = Should.Throw<InvalidDataException>(() =>
+            new Smoke.StandardRegressionSetWorkstationSmoke(new NullOutput())
+                .Run_the_standard_local_regression_set_on_the_fixed_workstation());
+
+        refused.Message.ShouldContain("harness");
+        refused.Message.ShouldContain("bytes");
+        RegressionExecutionClaim.Read(_synthetic.RunFolder(runId))!.InvocationId
+            .ShouldBe("same-label-different-bytes",
+                "the permanent claim remains first, while origin refusal precedes configuration and composition");
     }
 
     // ==========================================================================================
@@ -394,6 +438,8 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
             "read as one that had just finished.");
         reviewed.ProductVersion.ShouldBe(pending.ProductVersion);
         reviewed.Binding.CandidateProductAssemblies.ShouldBe(pending.Binding.CandidateProductAssemblies);
+        reviewed.Binding.BuildOrigin.ShouldBe(pending.Binding.BuildOrigin,
+            "review re-derives a historical result; it must not attach the reviewer's current origin");
 
         RegressionReviewRecord review = reviewed.Reviews.ShouldHaveSingleItem();
         review.DecidedBy.ShouldBe(@"SYNTHETIC\protocol-test");
@@ -425,13 +471,17 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
         ScriptOutcome outcome = _synthetic.Run(
             Wrapper,
             $"-SetRoot \"{_synthetic.SetRoot}\" -RunId {runId} -RecordVisualReview \"{decisions}\"",
-            SyntheticRegressionWorkstation.HostThatFails(0));
+            SyntheticRegressionWorkstation.HostThatEchoesArguments());
 
         outcome.ExitCode.ShouldBe(0, outcome.Output);
         outcome.Says("Recording the visual review").ShouldBeTrue();
         outcome.Says("already has a destination").ShouldBeFalse("A review's destination is meant to exist.");
         outcome.Says("PRODUCED NO RESULT OF ITS OWN").ShouldBeFalse(
             "A review is not a new execution, so it does not owe a new invocation's result.");
+        outcome.Says("vstest").ShouldBeTrue(outcome.Output);
+        outcome.Says(Path.Combine(_synthetic.HarnessFolder, "PrintFlow.Tests.dll")).ShouldBeTrue(outcome.Output);
+        outcome.Says("PrintFlow.Tests.csproj").ShouldBeFalse(
+            "review must use the original receipt's no-build harness rather than conventional project output");
     }
 
     /// <summary>
@@ -566,8 +616,138 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         outcome.ExitCode.ShouldNotBe(0);
         outcome.Says("THE PROPOSED REVALIDATION WAS REFUSED").ShouldBeTrue();
-        outcome.Says("the bytes are not").ShouldBeTrue();
+        outcome.Says("bytes do not match").ShouldBeTrue();
         File.Exists(_synthetic.RecordPath).ShouldBeFalse("Nothing may be written from refused input.");
+    }
+
+    /// <summary>
+    /// The pre-origin writer accepted a different-source harness under matching labels; the current
+    /// writer requires the run's exact harness to be one side of its captured build pair.
+    /// </summary>
+    [Fact]
+    public void Publication_closes_the_same_label_different_source_counterexample()
+    {
+        const string runId = "20260910-120050";
+        (RegressionBuildOrigin _, ImmutableArray<ProductAssemblyIdentity> differentSourceHarness) =
+            _synthetic.WriteDifferentSourceHarnessReceiptWithSameLabels();
+        ImmutableArray<ProductAssemblyIdentity> candidate =
+            ProductBuildIdentity.FromFolder(_synthetic.InstallFolder);
+
+        ProductBuildIdentity.CompareBuildIdentity(differentSourceHarness, candidate).ShouldBeEmpty(
+            "the counterexample keeps every informational label equal");
+        ProductBuildIdentity.CompareBytes(differentSourceHarness, candidate).Length.ShouldBeGreaterThan(0,
+            "the generated Infrastructure source produces different bytes");
+
+        StandardRegressionSetRunResult proposed = _synthetic.PassingRun(runId, Guid.NewGuid().ToString());
+        proposed = proposed with
+        {
+            Binding = proposed.Binding! with
+            {
+                Version = 1,
+                HarnessProductAssemblies = differentSourceHarness,
+            },
+        };
+        string resultPath = _synthetic.WriteResult(proposed);
+
+        string oldWriter = AuditedScript(
+            "tools/installer/Set-PrintFlowProductionRevalidation.ps1",
+            "1c591e986472644446d1112462b688e9c11e022b").ShouldNotBeNull(
+                "The pre-A0 writer commit must be reachable to prove the consumer counterexample.");
+        ScriptOutcome before = _synthetic.Run(
+            oldWriter,
+            $"-InstallFolder \"{_synthetic.InstallFolder}\" -EnvironmentReadinessPassed " +
+            $"-StandardRegressionSetPath \"{_synthetic.ManifestFolder}\" " +
+            $"-StandardRegressionSetResult \"{resultPath}\"");
+        before.ExitCode.ShouldBe(0, before.Output);
+        string active = File.ReadAllText(_synthetic.RecordPath);
+
+        proposed = proposed with
+        {
+            Binding = proposed.Binding! with
+            {
+                Version = RegressionEvidenceBinding.CurrentVersion,
+                BuildOrigin = _synthetic.BuildOrigin,
+            },
+        };
+        _synthetic.WriteResult(proposed);
+
+        ScriptOutcome after = Publish(resultPath);
+        after.ExitCode.ShouldBe(3, after.Output);
+        after.Says("recorded harness").ShouldBeTrue(after.Output);
+        File.ReadAllText(_synthetic.RecordPath).ShouldBe(active,
+            "origin refusal must preserve the active record the installation already had");
+    }
+
+    /// <summary>
+    /// Publication rechecks both sides of the pair and preserves the active record when either
+    /// output has been substituted after the run.
+    /// </summary>
+    [Fact]
+    public void Publication_refuses_substituted_pair_outputs_and_preserves_the_active_record()
+    {
+        Publish(_synthetic.WriteResult(
+            _synthetic.PassingRun("20260910-120100", Guid.NewGuid().ToString()))).ExitCode.ShouldBe(0);
+        string active = File.ReadAllText(_synthetic.RecordPath);
+
+        string harnessResult = _synthetic.WriteResult(
+            _synthetic.PassingRun("20260910-120101", Guid.NewGuid().ToString()));
+        string harnessAssembly = Path.Combine(_synthetic.HarnessFolder, "PrintFlow.Infrastructure.dll");
+        byte[] harnessBytes = File.ReadAllBytes(harnessAssembly);
+        try
+        {
+            File.WriteAllBytes(harnessAssembly, [.. harnessBytes, 0xA0]);
+            ScriptOutcome refused = Publish(harnessResult);
+            refused.ExitCode.ShouldBe(3, refused.Output);
+            refused.Says("harness").ShouldBeTrue(refused.Output);
+            File.ReadAllText(_synthetic.RecordPath).ShouldBe(active);
+        }
+        finally
+        {
+            File.WriteAllBytes(harnessAssembly, harnessBytes);
+        }
+
+        string candidateResult = _synthetic.WriteResult(
+            _synthetic.PassingRun("20260910-120102", Guid.NewGuid().ToString()));
+        string candidateAssembly = Path.Combine(_synthetic.InstallFolder, "PrintFlow.Infrastructure.dll");
+        byte[] candidateBytes = File.ReadAllBytes(candidateAssembly);
+        try
+        {
+            File.WriteAllBytes(candidateAssembly, [.. candidateBytes, 0xA0]);
+            ScriptOutcome refused = Publish(candidateResult);
+            refused.ExitCode.ShouldBe(3, refused.Output);
+            refused.Says("candidate").ShouldBeTrue(refused.Output);
+            File.ReadAllText(_synthetic.RecordPath).ShouldBe(active);
+        }
+        finally
+        {
+            File.WriteAllBytes(candidateAssembly, candidateBytes);
+        }
+    }
+
+    /// <summary>A run remains bound to the exact receipt bytes it captured.</summary>
+    [Fact]
+    public void Publication_refuses_a_substituted_receipt_and_preserves_the_active_record()
+    {
+        Publish(_synthetic.WriteResult(
+            _synthetic.PassingRun("20260910-120110", Guid.NewGuid().ToString()))).ExitCode.ShouldBe(0);
+        string active = File.ReadAllText(_synthetic.RecordPath);
+        string proposed = _synthetic.WriteResult(
+            _synthetic.PassingRun("20260910-120111", Guid.NewGuid().ToString()));
+
+        byte[] receipt = File.ReadAllBytes(_synthetic.BuildPairReceiptPath);
+        try
+        {
+            File.WriteAllBytes(_synthetic.BuildPairReceiptPath, [.. receipt, (byte)' ']);
+            ScriptOutcome refused = Publish(proposed);
+            refused.ExitCode.ShouldBe(3, refused.Output);
+            refused.Says("receipt").ShouldBeTrue(refused.Output);
+            refused.Says("substituted").ShouldBeTrue(refused.Output);
+            File.ReadAllText(_synthetic.RecordPath).ShouldBe(active);
+        }
+        finally
+        {
+            File.WriteAllBytes(_synthetic.BuildPairReceiptPath, receipt);
+        }
     }
 
     /// <summary>
@@ -695,6 +875,27 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
 
         outcome.ExitCode.ShouldNotBe(0);
         outcome.Says("carries no evidence binding").ShouldBeTrue();
+        File.Exists(_synthetic.RecordPath).ShouldBeFalse();
+
+        StandardRegressionSetRunResult versionOne = _synthetic.PassingRun(
+            "20260910-124501", Guid.NewGuid().ToString());
+        versionOne = versionOne with
+        {
+            Binding = versionOne.Binding! with { Version = 1, BuildOrigin = null },
+        };
+        ScriptOutcome oldBinding = Publish(_synthetic.WriteResult(versionOne));
+        oldBinding.ExitCode.ShouldBe(3, oldBinding.Output);
+        oldBinding.Says("evidence binding is version 1").ShouldBeTrue(oldBinding.Output);
+
+        StandardRegressionSetRunResult missingOrigin = _synthetic.PassingRun(
+            "20260910-124502", Guid.NewGuid().ToString());
+        missingOrigin = missingOrigin with
+        {
+            Binding = missingOrigin.Binding! with { BuildOrigin = null },
+        };
+        ScriptOutcome unbound = Publish(_synthetic.WriteResult(missingOrigin));
+        unbound.ExitCode.ShouldBe(3, unbound.Output);
+        unbound.Says("cannot enrich historical evidence").ShouldBeTrue(unbound.Output);
         File.Exists(_synthetic.RecordPath).ShouldBeFalse();
     }
 
@@ -1024,9 +1225,11 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
     /// cannot reach the commit fails these two with a stated reason, which is the honest outcome: the
     /// alternative is a test that passes while proving nothing.
     /// </remarks>
-    private string? AuditedScript(string repositoryPath)
+    private string? AuditedScript(
+        string repositoryPath,
+        string revision = "3f83863521c9b682f02b19ede1bcdb3a86dc60aa")
     {
-        string spec = $"3f83863521c9b682f02b19ede1bcdb3a86dc60aa:{repositoryPath}";
+        string spec = $"{revision}:{repositoryPath}";
         byte[] content;
 
         try

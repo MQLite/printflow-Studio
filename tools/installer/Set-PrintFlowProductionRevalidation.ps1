@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Records that this PrintFlow Studio installation has been revalidated (SCRUM-11123 Part H).
 
@@ -85,6 +85,8 @@ param(
     [string] $StandardRegressionSetPath,
     [string] $StandardRegressionSetResult
 )
+
+. (Join-Path $PSScriptRoot '../regression/PrintFlowBuildPair.ps1')
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -196,7 +198,7 @@ $missingCategories = @($RequiredCategories)
 # The evidence contract this script knows how to check. A run result written against a version it
 # does not know is refused rather than read optimistically: the whole failure being repaired here is
 # a reader that took what it recognised and ignored the rest.
-$KnownEvidenceBindingVersion = 1
+$KnownEvidenceBindingVersion = 2
 
 <#
 .SYNOPSIS
@@ -262,6 +264,9 @@ function Test-ProposedAttestation {
         }
     }
     if ($problems.Count -gt 0) { return ,$problems }
+
+    try { Assert-PrintFlowRunBuildOrigin -Binding $binding }
+    catch { $problems.Add($_.Exception.Message); return ,$problems }
 
     # --- the environment the run tested is the one in front of us -----------------------------
     if ($Result.ProductVersion -ne $productVersion) {

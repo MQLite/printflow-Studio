@@ -157,7 +157,7 @@ public sealed record RegressionSetManifestIdentity(
 /// <see cref="CandidateProductAssemblies"/> is the installed payload the run is attesting, read
 /// from <see cref="CandidateInstallFolder"/>. They are not the same bytes even for one commit,
 /// because an installation carries a RID-specific self-contained publish and a test host does not,
-/// so they are bound to each other by build identity and each pinned by its own digests. See
+/// so a controlled build-pair receipt associates them and each is pinned by its own digests. See
 /// <see cref="ProductBuildIdentity"/>.
 /// </para>
 /// </remarks>
@@ -191,10 +191,11 @@ public sealed record RegressionEvidenceBinding(
     string? MeituSha256,
     string? PhotoshopSha256,
     string? SetContentDigest,
-    ImmutableArray<RegressionSetManifestIdentity> SetManifests)
+    ImmutableArray<RegressionSetManifestIdentity> SetManifests,
+    RegressionBuildOrigin? BuildOrigin = null)
 {
     /// <summary>The contract version this build writes and reads.</summary>
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
     /// <summary>A digest over the set's manifests and inputs, in a fixed order.</summary>
     /// <remarks>

@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Runs the standard local regression set on the fixed workstation (SCRUM-11065).
 
@@ -51,6 +51,14 @@
     source than the harness is recorded as unbound and no revalidation can be published from that
     run.
 
+.PARAMETER BuildPairReceipt
+    Completed receipt from New-PrintFlowBuildPair.ps1. Selects its exact test DLL for no-build
+    execution. Required for publishable evidence; both sides are checked before operational setup.
+
+.PARAMETER DiagnosticUnbound
+    Explicit diagnostic execution using the already-built local test project. Cannot produce
+    publishable evidence. This still operates external applications and requires live authorization.
+
 .PARAMETER RecordVisualReview
     A JSON file of decisions for the qualitative checks a completed run left open. With
     -RunId, re-derives that run's verdict from evidence already on disk; nothing is re-run, and a
@@ -84,8 +92,12 @@ param(
     [string] $RunId,
     [string] $RecordVisualReview,
     [string] $Configuration = 'Release',
+    [string] $BuildPairReceipt,
+    [switch] $DiagnosticUnbound,
     [string] $CandidateInstallFolder = (Join-Path $env:ProgramFiles 'PrintFlow Studio')
 )
+
+. (Join-Path $PSScriptRoot 'PrintFlowBuildPair.ps1')
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -280,11 +292,25 @@ $env:PRINTFLOW_REGRESSION_RUN_ID = $RunId
 $InvocationId = [guid]::NewGuid().ToString()
 $env:PRINTFLOW_REGRESSION_INVOCATION_ID = $InvocationId
 $env:PRINTFLOW_REGRESSION_CANDIDATE_INSTALL_FOLDER = $CandidateInstallFolder
+$env:PRINTFLOW_REGRESSION_BUILD_PAIR_RECEIPT = $null
+$env:PRINTFLOW_REGRESSION_DIAGNOSTIC_UNBOUND = $null
+$pair = $null
 
 if ($RecordVisualReview) {
+    if ($BuildPairReceipt -or $DiagnosticUnbound) {
+        throw 'Visual review preserves the original association; do not supply a new receipt or diagnostic mode.'
+    }
     # Re-derivation, not a run. The artefacts already exist and the reviewer has looked at them.
     if (-not (Test-Path -LiteralPath (Join-Path $runFolder 'result.json'))) {
         throw "No completed run at '$runFolder'. Run the set before recording a visual review of it."
+    }
+    $originalRun = Get-Content -LiteralPath (Join-Path $runFolder 'result.json') -Raw | ConvertFrom-Json
+    if ($null -ne $originalRun.PSObject.Properties['Binding'] -and $null -ne $originalRun.Binding -and
+        $null -ne $originalRun.Binding.PSObject.Properties['BuildOrigin'] -and $null -ne $originalRun.Binding.BuildOrigin) {
+        # Conventional bin may contain an older reviewer that discards unknown binding fields.
+        # Use the original run's verified reviewer, never a newly supplied receipt or stale bin.
+        Assert-PrintFlowRunBuildOrigin -Binding $originalRun.Binding
+        $pair = Read-PrintFlowBuildPair -ReceiptPath $originalRun.Binding.BuildOrigin.ReceiptPath
     }
     Write-Host ''
     Write-Host '== Recording the visual review ==' -ForegroundColor Cyan
@@ -308,6 +334,24 @@ if ($RecordVisualReview) {
     }
 
     Write-Host ''
+    try {
+        if ($BuildPairReceipt) {
+            if ($DiagnosticUnbound) { throw 'Choose a build pair or diagnostic unbound execution, not both.' }
+            $pair = Read-PrintFlowBuildPair -ReceiptPath $BuildPairReceipt
+            $names = @(Get-PrintFlowProductAssemblyNames)
+            Assert-PrintFlowPairInventory $pair.CandidateProductAssemblies `
+                @(Read-PrintFlowPairFiles $CandidateInstallFolder $names) $names 'selected candidate'
+            $env:PRINTFLOW_REGRESSION_BUILD_PAIR_RECEIPT = (Resolve-Path -LiteralPath $BuildPairReceipt).Path
+        } elseif ($DiagnosticUnbound) {
+            $env:PRINTFLOW_REGRESSION_DIAGNOSTIC_UNBOUND = '1'
+            Write-Host 'DIAGNOSTIC UNBOUND: this execution cannot support production revalidation.' -ForegroundColor Yellow
+        } else {
+            throw 'Build origin: supply -BuildPairReceipt from New-PrintFlowBuildPair.ps1. No host was started.'
+        }
+    } catch {
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        exit 2
+    }
     Write-Host '== Layer 2: fixed-workstation run ==' -ForegroundColor Cyan
     Write-Host "Run: $runFolder"
     Write-Host "Invocation: $InvocationId"
@@ -326,7 +370,14 @@ if ($RecordVisualReview) {
 }
 
 Write-Host ''
-& $dotnet test $testProject -c $Configuration --nologo --filter $filter --logger 'console;verbosity=detailed'
+if ($null -ne $pair) {
+    # A DLL invocation cannot restore/rebuild a project or silently select another harness.
+    & $dotnet vstest (Join-Path $pair.HarnessFolder 'PrintFlow.Tests.dll') `
+        "/TestCaseFilter:$filter" '/Logger:console;verbosity=detailed' `
+        "/ResultsDirectory:$(Join-Path $SetRoot ('host-results/' + $InvocationId))"
+} else {
+    & $dotnet test $testProject -c $Configuration --no-build --no-restore --nologo --filter $filter --logger 'console;verbosity=detailed'
+}
 $testExit = $LASTEXITCODE
 
 # ==========================================================================================

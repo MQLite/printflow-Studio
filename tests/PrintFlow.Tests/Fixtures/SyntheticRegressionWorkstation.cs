@@ -96,6 +96,15 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
             File.Copy(Path.Combine(AppContext.BaseDirectory, name), Path.Combine(InstallFolder, name));
         }
 
+        HarnessFolder = Path.Combine(_root, "harness");
+        Directory.CreateDirectory(HarnessFolder);
+        foreach (string name in ProductBuildIdentity.ProductAssemblyFileNames.AddRange(
+                     new[] { "PrintFlow.Tests.dll", "PrintFlow.Tests.deps.json",
+                         "PrintFlow.Tests.runtimeconfig.json", "testhost.dll" }))
+        {
+            File.Copy(Path.Combine(AppContext.BaseDirectory, name), Path.Combine(HarnessFolder, name));
+        }
+
         File.WriteAllText(Path.Combine(InstallFolder, "appsettings.json"), JsonSerializer.Serialize(new
         {
             Workspace = new { Root = WorkspaceRoot },
@@ -110,6 +119,11 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
         }, new JsonSerializerOptions { WriteIndented = true }));
 
         WriteSet();
+
+        BuildOrigin = WriteBuildPairReceipt(
+            Path.Combine(_root, "synthetic-build-pair.json"),
+            HarnessFolder,
+            ProductBuildIdentity.FromFolder(HarnessFolder));
     }
 
     /// <summary>The synthetic regression set's root.</summary>
@@ -120,6 +134,18 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
 
     /// <summary>The synthetic installation the scripts read.</summary>
     public string InstallFolder { get; }
+
+    /// <summary>A minimal copied test-host output used by this fixture's synthetic build receipt.</summary>
+    public string HarnessFolder { get; }
+
+    /// <summary>
+    /// Explicitly synthetic origin evidence for the copied test and candidate files in this fixture.
+    /// It proves only the evidence protocol and is never an authorization to run the real set.
+    /// </summary>
+    public RegressionBuildOrigin BuildOrigin { get; }
+
+    /// <summary>The synthetic receipt named by <see cref="BuildOrigin"/>.</summary>
+    public string BuildPairReceiptPath => BuildOrigin.ReceiptPath;
 
     /// <summary>The synthetic production workspace, where the revalidation record lands.</summary>
     public string WorkspaceRoot { get; }
@@ -175,6 +201,15 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
             WorkingDirectory = _root,
         };
 
+        // The test host may itself have been launched from PowerShell 7, whose PSModulePath does
+        // not guarantee Windows PowerShell can auto-load Microsoft.PowerShell.Utility. The real
+        // operator scripts use Get-FileHash, so give this child the built-in 5.1 module location.
+        string windowsPowerShellModules = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            "System32", "WindowsPowerShell", "v1.0", "Modules");
+        start.Environment["PSModulePath"] = windowsPowerShellModules + Path.PathSeparator +
+            Environment.GetEnvironmentVariable("PSModulePath");
+
         if (host is not null)
         {
             string scenario = Path.Combine(_stubDirectory, "host.ps1");
@@ -183,7 +218,7 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
             File.WriteAllText(
                 Path.Combine(_stubDirectory, "dotnet.cmd"),
                 $"@echo off{Environment.NewLine}" +
-                $"\"{PowerShell}\" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{scenario}\"{Environment.NewLine}" +
+                $"\"{PowerShell}\" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{scenario}\" %*{Environment.NewLine}" +
                 $"exit /b %ERRORLEVEL%{Environment.NewLine}");
 
             // LOCALAPPDATA holds no dotnet.exe, so the script falls back to PATH, which holds the
@@ -205,6 +240,10 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
 
     /// <summary>A stand-in host that fails the way a build or host failure does: nonzero, no result.</summary>
     public static string HostThatFails(int exitCode) => $"exit {exitCode}";
+
+    /// <summary>A stand-in host that exposes the exact no-build command selected by the wrapper.</summary>
+    public static string HostThatEchoesArguments() =>
+        "Write-Output ($args -join [Environment]::NewLine); exit 0";
 
     /// <summary>
     /// A stand-in host that writes a run result and exits with <paramref name="exitCode"/>.
@@ -271,7 +310,37 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
                 _meituSha256,
                 _photoshopSha256,
                 RegressionEvidenceBinding.DigestOfSet(SetManifests()),
-                SetManifests()));
+                SetManifests(),
+                BuildOrigin));
+    }
+
+    /// <summary>
+    /// Builds a tiny assembly from different source under the loaded Product's informational label,
+    /// then writes a self-consistent receipt whose harness contains that assembly.
+    /// </summary>
+    public (RegressionBuildOrigin Origin, ImmutableArray<ProductAssemblyIdentity> HarnessProductAssemblies)
+        WriteDifferentSourceHarnessReceiptWithSameLabels()
+    {
+        ProductAssemblyIdentity loadedInfrastructure = ProductBuildIdentity.Running().Single(
+            identity => identity.Name == "PrintFlow.Infrastructure.dll");
+        string buildIdentity = loadedInfrastructure.BuildIdentity
+            ?? throw new InvalidOperationException("The loaded Infrastructure build identity is unavailable.");
+
+        string firstAssembly = BuildSyntheticInfrastructure("FirstSource", buildIdentity);
+
+        string folder = Path.Combine(_root, $"different-source-harness-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(folder);
+        foreach (string path in Directory.EnumerateFiles(HarnessFolder))
+        {
+            File.Copy(path, Path.Combine(folder, Path.GetFileName(path)));
+        }
+
+        string changed = Path.Combine(folder, "PrintFlow.Infrastructure.dll");
+        File.Copy(firstAssembly, changed, overwrite: true);
+        ImmutableArray<ProductAssemblyIdentity> identities = ProductBuildIdentity.FromFolder(folder);
+        RegressionBuildOrigin origin = WriteBuildPairReceipt(
+            Path.Combine(_root, $"different-harness-{Guid.NewGuid():N}.json"), folder, identities);
+        return (origin, identities);
     }
 
     /// <summary>The set's manifests as a run reads them.</summary>
@@ -310,6 +379,92 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
 
     private static string DigestOf(string path) =>
         Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+
+    private RegressionBuildOrigin WriteBuildPairReceipt(
+        string receiptPath,
+        string harnessFolder,
+        ImmutableArray<ProductAssemblyIdentity> harnessProductAssemblies)
+    {
+        string pairId = Guid.NewGuid().ToString();
+        object[] harnessArtifacts =
+        [
+            .. Directory.EnumerateFiles(harnessFolder, "*", SearchOption.AllDirectories)
+                .Select(path => new
+                {
+                    Name = Path.GetRelativePath(harnessFolder, path).Replace('\\', '/'),
+                    Sha256 = DigestOf(path),
+                }),
+        ];
+
+        File.WriteAllText(receiptPath, JsonSerializer.Serialize(new
+        {
+            Version = 1,
+            PairId = pairId,
+            SourceRevision = "SYNTHETIC-PROTOCOL-TEST",
+            InputDigest = PresetSha256,
+            Inputs = new[] { new { Name = "synthetic-workstation-preset.json", Sha256 = PresetSha256 } },
+            SdkVersion = Environment.Version.ToString(),
+            DotnetPath = Environment.ProcessPath ?? "SYNTHETIC-DOTNET",
+            HarnessCommand = new[] { "SYNTHETIC", "copy-test-host" },
+            CandidateCommand = new[] { "SYNTHETIC", "copy-candidate" },
+            HarnessFolder = harnessFolder,
+            CandidateFolder = InstallFolder,
+            HarnessProductAssemblies = harnessProductAssemblies,
+            CandidateProductAssemblies = ProductBuildIdentity.FromFolder(InstallFolder),
+            HarnessArtifacts = harnessArtifacts,
+            CompletedAtUtc = DateTimeOffset.UtcNow.ToString("O"),
+        }, new JsonSerializerOptions { WriteIndented = true }));
+
+        return new RegressionBuildOrigin(receiptPath, DigestOf(receiptPath), pairId);
+    }
+
+    private string BuildSyntheticInfrastructure(string typeName, string buildIdentity)
+    {
+        string projectFolder = Path.Combine(_root, "synthetic-source", typeName);
+        string outputFolder = Path.Combine(projectFolder, "output");
+        Directory.CreateDirectory(projectFolder);
+        File.WriteAllText(Path.Combine(projectFolder, "Synthetic.cs"),
+            $"namespace SyntheticOrigin; public sealed class {typeName} {{ public string Value => nameof({typeName}); }}");
+        File.WriteAllText(Path.Combine(projectFolder, "Synthetic.csproj"), $$"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+                <AssemblyName>PrintFlow.Infrastructure</AssemblyName>
+                <Version>{{System.Security.SecurityElement.Escape(buildIdentity)}}</Version>
+                <AssemblyInformationalVersion>{{System.Security.SecurityElement.Escape(buildIdentity)}}</AssemblyInformationalVersion>
+                <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+                <Deterministic>true</Deterministic>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        string dotnet = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Microsoft", "dotnet", "dotnet.exe");
+        ProcessStartInfo start = new()
+        {
+            FileName = File.Exists(dotnet) ? dotnet : "dotnet",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            WorkingDirectory = projectFolder,
+        };
+        foreach (string argument in new[] { "build", "Synthetic.csproj", "-c", "Release", "--nologo", "-o", outputFolder })
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        using Process process = Process.Start(start)
+            ?? throw new InvalidOperationException("The synthetic compiler did not start.");
+        string output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException("The synthetic origin assembly did not build: " + output);
+        }
+
+        return Path.Combine(outputFolder, "PrintFlow.Infrastructure.dll");
+    }
 
     // ------------------------------------------------------------------------------------------
     // The set
