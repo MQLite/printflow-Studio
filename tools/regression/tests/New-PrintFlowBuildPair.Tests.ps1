@@ -23,7 +23,11 @@ function New-SyntheticProducerLayout {
     '<configuration />' | Set-Content -LiteralPath (Join-Path $root 'nuget.config') -Encoding utf8
     '{}' | Set-Content -LiteralPath (Join-Path $root 'appsettings.json') -Encoding utf8
     '<Project />' | Set-Content -LiteralPath (Join-Path $root 'src\PrintFlow.App\PrintFlow.App.csproj') -Encoding utf8
-    '<Project />' | Set-Content -LiteralPath (Join-Path $root 'tests\PrintFlow.Tests\PrintFlow.Tests.csproj') -Encoding utf8
+    '<Project><ItemGroup><EmbeddedResource Update="Strings.resx" /></ItemGroup></Project>' |
+        Set-Content -LiteralPath (Join-Path $root 'tests\PrintFlow.Tests\PrintFlow.Tests.csproj') -Encoding utf8
+    New-Item -ItemType Directory -Path (Join-Path $root 'tests\PrintFlow.Tests\TestResults') | Out-Null
+    'synthetic historical log, not a compile input' |
+        Set-Content -LiteralPath (Join-Path $root 'tests\PrintFlow.Tests\TestResults\old.trx') -Encoding utf8
     'internal sealed class OriginInput { }' |
         Set-Content -LiteralPath (Join-Path $root 'src\PrintFlow.App\OriginInput.cs') -Encoding utf8
     @'

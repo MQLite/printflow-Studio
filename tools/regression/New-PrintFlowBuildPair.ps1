@@ -156,6 +156,12 @@ function Get-BuildInputSnapshot {
             if ($isProjectOutput) {
                 continue
             }
+            # Existing test result logs are neither compiled nor copied by the current project
+            # graph. Exclude only these .trx files, never a whole TestResults directory: a .cs
+            # file there still enters SDK Compile globs and must be refused.
+            if ($relative -like 'tests/PrintFlow.Tests/TestResults/*.trx') {
+                continue
+            }
             if (-not $trackedSet.Contains($relative)) {
                 $unexpected.Add($relative)
             }
@@ -230,7 +236,7 @@ function Get-BuildInputSnapshot {
             foreach ($itemName in @('Compile', 'EmbeddedResource', 'Content', 'Resource', 'Page',
                     'ApplicationDefinition', 'AdditionalFiles', 'Analyzer')) {
                 foreach ($item in @($projectXml.SelectNodes("//*[local-name()='$itemName']"))) {
-                    $include = [string] $item.Include
+                    $include = $item.GetAttribute('Include')
                     if ([string]::IsNullOrWhiteSpace($include)) { continue }
                     foreach ($part in $include.Split(';')) {
                         if ($part.Contains('$(')) {
