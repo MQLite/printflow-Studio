@@ -393,3 +393,31 @@ Appended to the record, not rewriting it.
 Neither finding asserted that a historical false approval had actually occurred, and this report
 asserts none either. Both were statically reachable defects; both are now closed with
 counterexamples that fail before the fix and pass after it.
+
+## 14 September 2026 — A0 follow-up: build-origin limitation closed within local trust
+
+Historical R1 results and the original limitation above remain unchanged as historical statements.
+PF-AUDIT-A0 replaces label-only harness-to-candidate association with a controlled local build-pair
+receipt. Its producer creates both concrete outputs from stable committed relevant inputs, using
+explicit profiles, SDK and locked restore; its run, original-harness review and publication consumers
+check the recorded pair and actual corresponding output bytes. Evidence binding is now version 2;
+legacy/unbound runs remain readable and cannot be enriched. R1's other integrity findings stay fixed.
+
+Correction to §8.1: the claim that closing this condition would require signing was unsupported.
+No signature, certificate or PKI is necessary for the scoped accidental dirty/stale/mixed local-build
+threat model. Unsigned trusted local tooling is the explicit remaining assumption; malicious rewriting
+of tools and evidence by an administrator is not addressed.
+
+A0 code commits are `8f94f98` and `ce29954`. The real pair built from `ce29954` is
+`ef6182db-6f48-4ed2-ae8f-c4e52307ca9e`, receipt SHA-256
+`E0373C56D015FED9E09D8B0F77C55B026CAE40ED3B685ABFB899709944077FBF`.
+All four Product DLLs differ across the two legitimate profiles while each side matches its own
+receipt. The actual pre-A0 writer accepts the separately compiled same-label source counterexample;
+current consumers refuse it. See `audit-a0-build-origin-closure.md` for commands, evidence and limits.
+
+A1's build-origin prerequisite is satisfied for this retained pair, not for arbitrary existing or
+later rebuilt folders. A documentation-only commit does not invalidate unchanged artifacts; a
+Product/harness change or rebuild requires a fresh pair and matching run. This is not release
+acceptance or an A1 candidate freeze. A0 ran no live operations or standard set, wrote no real
+production revalidation, and did not alter Operator/Jira decisions. R4's fresh-launch finding remains
+unreproduced and unrepaired; A1/A2/A3 were not started.

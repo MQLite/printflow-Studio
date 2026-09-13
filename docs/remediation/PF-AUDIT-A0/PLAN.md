@@ -36,3 +36,20 @@ actual pre-A0 writer acceptance/current writer refusal, with active-record prese
 Execution remains CONTINUE. Shared Product source changed only documentation comments: no runtime
 identity/schema/evaluator change, no full-suite rerun justified. Affected union and post-commit real
 controlled pair are the remaining checks. R3 11,836/0/0 and R4 18/18, 758/758 remain historical only.
+
+## Completion checkpoint
+
+Affected union: 777 passed / 0 failed / 0 skipped; full suite NOT RUN by the scope decision above.
+Code committed as 8f94f98, then producer preparation correction ce29954. The initial real attempt
+refused old non-input .trx logs before building and remains incomplete; correction was behaviorally
+tested (4/4) and independently re-reviewed before the next commit/build.
+
+Real controlled pair from ce29954: ef6182db-6f48-4ed2-ae8f-c4e52307ca9e, 601 committed input identities,
+182 harness files. Receipt SHA-256 E0373C56D015FED9E09D8B0F77C55B026CAE40ED3B685ABFB899709944077FBF.
+Both builds exit 0, read-only receipt check exit 0, loaded paired-harness proof 1/1. All four Product
+profile pairs have same labels and different bytes, accepted against their respective inventories.
+Independent reviewer checked the actual files/hashes and logs, with no remaining actionable findings.
+
+Completion: build-origin mechanism and A1's origin prerequisite verified for preserved artifacts,
+subject to the explicit local trust assumptions in the report. Documentation-only closure does not
+rebuild or invalidate the pair. No release acceptance earned. Stop before A1/A2/A3.
