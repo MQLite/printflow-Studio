@@ -1,5 +1,58 @@
 # PF-DIAG-MEITU-INPUT — Click Tool vs Product Input Capability
 
+## Current execution checkpoint — notice not observed
+
+14 September 2026; canonical master HEAD `d40e905652277955d3a00eb4d3b92a701852998b`.
+Read the latest A1 report, PLAN and HANDOFF before inspecting local providers and callers.
+The comparison below remains valid at this HEAD: the intervening commit changed only diagnostic
+documents. Provider/caller files were nevertheless reread locally; fresh hashes are retained.
+
+Unlike the earlier execution below, this execution exposes callable `node_repl` and successfully
+initialized the skill's supported `@oai/sky` API. The separate cua_repl native restriction was not
+bypassed. No direct PowerShell UIA, alternate input helper or permission change was used.
+
+Evidence root: `artifacts/pf-diag-meitu-input/20260914-current-observation-1789356920563/`.
+`accessibility.json` and `reacquired.json` retain two fresh readable observations and timestamps;
+`capture-error.txt` and `capture-retry-error.txt` retain the initial and single recovery failure;
+`source-evidence.json` records this HEAD and local source hashes.
+
+| Capability | Current observation / local implementation | Same-notice proof |
+|---|---|---|
+| Computer Use mapping/tree | One returned Meitu window, opaque id 2431250, title 美图秀秀, process path ending XiuXiu/7.8.8.2/XiuXiu.exe. Both reads show StartupWidget; no NoviceGuideWidget, MessageGuideWidget, AI助手来啦 or 我知道了 matches. | Target absent from returned trees; no claim about hidden/unexposed windows. |
+| Computer Use capture/geometry | Both screenshot attempts fail `SetIsBorderRequired failed: 不支持此接口 (0x80004002)`. No screenshot dimensions or geometry acquired. | Current capture failure, not a current click failure or demonstrated cause of historical geometry failure. |
+| Native ownership/rectangles | Locator verifies PID ownership and reads GetWindowRect, class, visibility, minimized/enabled state. | Not measured live; opaque tool id is not treated as an HWND. No notice exists in the observed tree to measure. |
+| UIA ancestry/bounds/point/patterns | Product FromHandle/FindAll/Describe/GetParent supply identity and patterns; pointer route obtains TryGetClickablePoint. | Historical ancestry only; current target bounds, point, native ancestry and patterns unavailable. Tool text does not expose these measurements. |
+| Product Invoke | InvokePattern, then SelectionItem fallback; independent of Computer Use screenshot metadata. | Not dispatched; neither pattern support nor dismissal proven. |
+| Product pointer / native button | Pointer validates process instance, foreground, bounds, point and exact hit before SendInput; native Press revalidates control before BM_CLICK. | Neither invoked. No compatible notice native child established; no guard refusal bypassed. |
+| Product callers | FindSignedControl requires a unique signature including class/type/PID/pattern/enabled/onscreen; pointer caller is the verified export-format popup path. No notice identifiers/text found in src. | No integrated notice action or current classifier invocation demonstrated. |
+
+Selected action: **no input**, because the historical target is not observed. Reacquisition again
+shows the startup page with zero target matches; this is an observation after a read-only probe,
+not a dismissal postcondition. No successful raw-native or Product-path execution is claimed.
+No app activation, launch/restart, document action, onboarding reset or unrelated-window action.
+
+No current live-window confirmation was requested because no real input or canonical-lease
+operation became warranted. Historical confirmation was not reused. Lease acquire/read/release:
+**NOT EXECUTED**, task never held it, current availability **UNKNOWN**. Its actual canonical
+manager/scope and required lifecycle remain documented below; Photoshop readiness was irrelevant.
+
+Confidence: high that the source routes have distinct geometry dependencies and that the returned
+current trees lack the target; inconclusive about same-notice native/Product capability and the
+historical failure's cause. The smallest next implementation remains narrow operator-help guidance
+at the existing unknown-state stop, contingent on fresh exact notice detection evidence. No
+automated dismissal rule or provider change is justified by this missing target. Follow-up not
+implemented; no watcher or recreation requested.
+
+Plan completed through the authorized absent-notice branch; same-target live comparison/dismissal
+proof remains missing. Docs/evidence only; no build or tests needed or run, no full suite. Scoped
+validation: `git diff --check`; self-review only, no agents. Policy v2.3, EXECUTE_HANDOFF, CONTINUE,
+route_offset -1: normal Sol Medium, requested Sol Low; ActualRoute UNVERIFIED,
+MODEL_SWITCH_UNAVAILABLE. Post-comparison routing check retains that recommendation and disclosed
+same-context fallback. All prior results, claims, build pairs, operator bundle and Product inputs
+remain untouched. Local documentation commit only; stop after this diagnostic.
+
+## Earlier execution (historical limitations below are superseded where stated above)
+
 DIAGNOSIS PARTIAL — current same-target native/UIA measurements and dismissal proof unavailable.
 
 14 September 2026, DESKTOP-0BG8884. Canonical master started at

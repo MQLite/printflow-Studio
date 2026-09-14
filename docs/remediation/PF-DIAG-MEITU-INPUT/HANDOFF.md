@@ -1,5 +1,30 @@
 # PF-DIAG-MEITU-INPUT — Handoff
 
+## Latest execution — absent-notice branch completed
+
+Canonical master started at `d40e905652277955d3a00eb4d3b92a701852998b` on 14 September 2026.
+See the capability report's current checkpoint for the updated table and compact executed plan.
+Supported node_repl/@oai/sky was available this time: two read-only Meitu trees show StartupWidget,
+opaque tool window 2431250, with zero historical notice identifier/title/button matches.
+Screenshot capture and one recovery attempt both failed SetIsBorderRequired / 0x80004002.
+Evidence: `artifacts/pf-diag-meitu-input/20260914-current-observation-1789356920563/`.
+Current local providers/callers reread and hashed; no notice rule found. Native rectangles,
+target UIA patterns/clickable point and same-target dismissal remain unproved.
+
+Selected action: no input because target not observed. No real-input confirmation needed/requested;
+no canonical lease operation, task held no lease, current availability unknown. No native/provider
+dispatch, activation, classifier call or Photoshop readiness check. No raw-native/Product success.
+Do not recreate the notice or resume A1. Future real input still requires current confirmation,
+exact live evidence, a permitted channel and the real shared lease through verification/release.
+
+Docs/evidence only, git diff --check; no tests/build/rerun. Self-review only, no child agents.
+Policy v2.3 offset -1, normal Sol Medium to requested Sol Low, ActualRoute UNVERIFIED,
+MODEL_SWITCH_UNAVAILABLE, CONTINUE. Minimal operator-help follow-up remains unimplemented.
+Preserve all earlier artifacts, both pairs, untracked operator bundle and Product behavior.
+Stop this task after local documentation commit; no push/install/deploy/Jira change.
+
+## Earlier execution checkpoint
+
 DIAGNOSIS PARTIAL — no current same-target native/UIA observation or dismissal proof.
 
 Read [capability report](../../printflow/meitu-notice-input-capability-diagnosis.md), including
