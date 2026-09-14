@@ -2,12 +2,27 @@
 
 ## Status
 
-**PARTIAL — correction and paired recovery executable complete; one current live association
-confirmation is required before Save/export input.**
+**PARTIAL — correction and paired recovery executable complete; the confirmed pre-restart result
+is no longer present as a byte-complete export source.**
 
 No live Meitu input was sent in this task. The retained cutout, original A1 database and prior
-evidence remain unchanged. The exact pending question is whether the current Meitu 7.8.8.2 editor
-window still shows the accepted `FIX-FINE-HAIR-001` cutout on its checkerboard result screen.
+evidence remain unchanged. The operator confirmed that the pre-restart Meitu 7.8.8.2 editor was
+showing the accepted `FIX-FINE-HAIR-001` cutout on its checkerboard result screen, but also reported
+that the computer was restarted before this task's export request was seen.
+
+Read-only follow-up on 15 September confirms the machine booted at 10:27 NZST and the new Meitu
+process started at 10:34 on the clean welcome page. The controlled cutout output is absent. Meitu's
+cache retains only a 60×80 opaque thumbnail of the exact cutout
+(`thumbnailtNWzrR.png`, SHA-256
+`630ABE82809A4D5D97DF576168F1999FB1560DABAD5D2B06ADA839CF2BDA5FBA`); its cache database records
+that thumbnail as 60×60 metadata created at 14:40:44 on 14 September, and no other Meitu file was
+written in the corresponding 14:39–14:45 interval. The thumbnail is not the 1200×1600 transparent
+result and is therefore ineligible for export, import or registration.
+
+The A1 database remains unchanged: the session is Active at BackgroundRemoval, the original step
+is Failed with one attempt, and there are zero ManualResultImport Revisions and zero
+BackgroundRemoval review decisions. Both the A1 business lock and the canonical workstation lease
+row are free.
 
 ## Diagnosis and correction
 
@@ -65,7 +80,19 @@ existing manual-import boundary, and the 909-test affected set and fresh paired 
 that scope. No seven-category run, notice investigation, A2/A3, install, deploy, publish, push,
 preset acceptance, `CandidateProblems` change or Production revalidation occurred.
 
-## Exact continuation after confirmation
+## Exact remaining gap and continuation
+
+The missing item is not proof that processing happened; the operator evidence, the A1 Busy
+captures, the completed-result capture and Meitu's exact cached thumbnail establish that. The
+missing item is the full-resolution, byte-complete output that existed only in the pre-restart
+Meitu process. A screenshot or opaque 60×80 thumbnail cannot satisfy guarded export, decoded output
+validation or hash-bound Revision registration.
+
+Do not run the command below against the current welcome page. It remains the correct continuation
+only if the exact processed result is restored as a live `BackgroundRemovalResult`, or if the exact
+full-resolution PNG exported from that pre-restart result is found. Re-running cutout would create
+a new output requiring its own execution observation and operator review; the prior acceptance
+cannot be transferred to it.
 
 Run only `MeituObservedResultRecoverySmoke` from the retained harness with:
 
