@@ -1164,9 +1164,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituStateSnapshot>(verified.Failure);
         }
 
-        OperationResult<MeituStateSnapshot> beforeSave = await InspectStateCoreAsync(
-            verified.Value, expectedWorkingCopyFileName, observedDocumentIdentity: null, cancellationToken)
-            .ConfigureAwait(false);
+        OperationResult<MeituStateSnapshot> beforeSave = await AwaitIdentityProbeSurfaceAsync(
+            verified.Value, expectedWorkingCopyFileName, observedDocumentIdentity: null,
+            baseline.Value, cancellationToken).ConfigureAwait(false);
         if (beforeSave.IsFailure)
         {
             return beforeSave;
@@ -1223,9 +1223,9 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<MeituStateSnapshot>(observed.Failure);
         }
 
-        OperationResult<MeituStateSnapshot> confirmed = await InspectStateCoreAsync(
-            verified.Value, expectedWorkingCopyFileName, observed.Value, cancellationToken)
-            .ConfigureAwait(false);
+        OperationResult<MeituStateSnapshot> confirmed = await AwaitIdentityProbeSurfaceAsync(
+            verified.Value, expectedWorkingCopyFileName, observed.Value,
+            baseline.Value, cancellationToken).ConfigureAwait(false);
         if (confirmed.IsFailure)
         {
             return confirmed;
@@ -1284,6 +1284,52 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 ["observedIdentity"] = observed.Value,
                 ["inputSent"] = "cancel-only",
             }));
+    }
+
+    /// <summary>
+    /// Waits out a markerless repaint only while the exact accepted editor remains enabled and
+    /// unblocked; every other unknown state is returned immediately for refusal.
+    /// </summary>
+    private async Task<OperationResult<MeituStateSnapshot>> AwaitIdentityProbeSurfaceAsync(
+        MeituTarget target,
+        string expectedWorkingCopyFileName,
+        string? observedDocumentIdentity,
+        MeituBaseline baseline,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.DialogTimeout;
+
+        while (true)
+        {
+            OperationResult<MeituStateSnapshot> snapshot = await InspectStateCoreAsync(
+                target, expectedWorkingCopyFileName, observedDocumentIdentity, cancellationToken)
+                .ConfigureAwait(false);
+            if (snapshot.IsFailure)
+            {
+                return snapshot;
+            }
+
+            MeituDocumentSurfacePhase phase =
+                MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(
+                    baseline, snapshot.Value.Observation);
+            if (phase != MeituDocumentSurfacePhase.Unknown)
+            {
+                return snapshot;
+            }
+
+            MeituObservation observation = snapshot.Value.Observation;
+            bool exactUnblockedEditor = baseline.DocumentIdentity is { } identity &&
+                string.Equals(
+                    observation.WindowTitle, identity.Editor.WindowTitle, StringComparison.Ordinal) &&
+                observation.MainWindowEnabled &&
+                observation.OwnedDialogTitles.IsDefaultOrEmpty;
+            if (!exactUnblockedEditor || _clock.GetUtcNow() >= deadline)
+            {
+                return snapshot;
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private OperationResult<string> ReadIdentityValue(

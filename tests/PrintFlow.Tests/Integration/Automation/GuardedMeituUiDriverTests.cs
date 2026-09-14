@@ -806,6 +806,32 @@ public sealed class GuardedMeituUiDriverTests
     }
 
     [Fact]
+    public async Task Identity_probe_waits_out_one_transient_markerless_editor_read_before_Save()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, _) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_A_副本");
+        int editorReads = 0;
+        h.Elements.OnReadTextSnapshot = handle =>
+        {
+            if (handle == editor.Window.Handle)
+            {
+                h.Elements.SetTexts(
+                    handle,
+                    ++editorReads == 1 ? [] : [.. MeituFakes.EditorMarkers]);
+            }
+        };
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsSuccess.ShouldBeTrue(confirmed.IsFailure ? confirmed.Failure.TechnicalDetail : string.Empty);
+        editorReads.ShouldBeGreaterThan(1);
+        h.Elements.Invocations.ShouldContain("MainWindow.editorPage.saveButton");
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+    }
+
+    [Fact]
     public async Task Observed_B_cannot_validate_expected_A_and_the_dialog_is_still_cancelled()
     {
         Harness h = Build(meituInForeground: true);

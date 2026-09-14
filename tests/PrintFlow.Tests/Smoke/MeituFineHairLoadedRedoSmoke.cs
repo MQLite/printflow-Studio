@@ -22,9 +22,10 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.Tests.Smoke;
 
 /// <summary>
-/// Resumes the one exact fine-hair Working copy retained after a post-open target loss. It does
-/// not open another document: one signed ordinary editor and the exact Save-default identity are
-/// mandatory before Background Removal can be invoked.
+/// Recovers the one exact fine-hair cutout retained after the redo completed but its terminal
+/// identity confirmation failed. It neither opens another document nor invokes processing: one
+/// signed ordinary editor, the exact Save-default identity and the preserved before/result
+/// captures are mandatory before guarded export.
 /// </summary>
 public sealed class MeituFineHairLoadedRedoSmoke
 {
@@ -42,9 +43,15 @@ public sealed class MeituFineHairLoadedRedoSmoke
         string workspaceRoot = Path.Combine(root, "workspace");
         string databasePath = Path.Combine(root, "redo.db");
         string evidenceDirectory = Path.Combine(root, "loaded-resume-evidence");
+        string beforeEvidence = Path.Combine(
+            root, "evidence", "20260914T230940Z_open-unsettled_61F76.png");
+        string resultEvidence = Path.Combine(
+            evidenceDirectory, "20260914T233151Z_loaded-redo-action-refused_61F76.png");
 
         Directory.Exists(workspaceRoot).ShouldBeTrue($"Missing retained workspace '{workspaceRoot}'.");
         File.Exists(databasePath).ShouldBeTrue($"Missing retained database '{databasePath}'.");
+        File.Exists(beforeEvidence).ShouldBeTrue("The preserved pre-processing editor capture is required.");
+        File.Exists(resultEvidence).ShouldBeTrue("The preserved current cutout capture is required.");
         Directory.CreateDirectory(evidenceDirectory);
 
         PrintFlowConfiguration configuration = PrintFlowConfiguration.LoadFromFile(
@@ -95,7 +102,7 @@ public sealed class MeituFineHairLoadedRedoSmoke
 
         MeituExportedOutput exported;
         MeituReadiness ready;
-        MeituBackgroundRemovalOutcome processed;
+        string observedDocumentIdentity;
         await using (WorkstationAutomationLeaseScope automationLease =
             await WorkstationAutomationLeaseScope.AcquireDefaultAsync())
         {
@@ -137,45 +144,43 @@ public sealed class MeituFineHairLoadedRedoSmoke
             }
 
             candidates.Count.ShouldBe(1,
-                "Expected one signed ordinary editor retaining the exact redo input; observed " +
+                "Expected one signed ordinary editor retaining the exact observed cutout; observed " +
                 string.Join(" | ", observed));
 
             Console.WriteLine("Retained editor candidates: " + string.Join(" | ", observed));
-            OperationResult<MeituBackgroundRemovalOutcome> processing =
-                await driver.RunBackgroundRemovalAsync(
+            MeituStateSnapshot identity = await Must(driver.ConfirmWorkingCopyIdentityAsync(
+                candidates[0], workingCopy.FileName, CancellationToken.None));
+            observedDocumentIdentity = identity.Observation.ObservedDocumentIdentity!;
+            observedDocumentIdentity.ShouldBe("FIX-FINE-HAIR-001_副本");
+
+            MeituCutoutOutputRule.ValidateDestination(workingCopy, output).IsSuccess.ShouldBeTrue();
+            string destination = workspace.ResolveAbsolute(output);
+            MeituExportEvidence exportEvidence = await Must(driver.ExportResultAsync(
                 candidates[0],
                 workingCopy.FileName,
-                BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
-                InertAutomationStopSignal.Instance,
-                CancellationToken.None);
-            if (processing.IsFailure)
-            {
-                OperationResult<EvidenceRef> capture = driver.CaptureEvidence(
-                    candidates[0], "loaded-redo-action-refused");
-                Console.WriteLine("Processing refusal: " + processing.Failure);
-                Console.WriteLine("Processing refusal context: " + JsonSerializer.Serialize(
-                    processing.Failure.Context));
-                Console.WriteLine(capture.IsSuccess
-                    ? "Processing refusal evidence: " + capture.Value.AbsolutePath
-                    : "Processing refusal evidence capture failed: " + capture.Failure);
-            }
-
-            processing.IsSuccess.ShouldBeTrue(
-                processing.IsFailure ? processing.Failure.ToString() : string.Empty);
-            processed = processing.Value;
-            processed.ObservedDocumentIdentity.ShouldBe("FIX-FINE-HAIR-001_副本");
-
-            exported = await Must(adapter.ExportBackgroundRemovalResultAsync(
-                processed,
-                workingCopy,
-                sourceBefore,
-                output,
+                observedDocumentIdentity,
+                destination,
                 InertAutomationStopSignal.Instance,
                 CancellationToken.None));
+            int stabilityObservations = await AwaitSettledOutputAsync(
+                destination, options, CancellationToken.None);
+            FileFacts outputFacts = await Must(adapter.InspectManagedFileAsync(
+                output, CancellationToken.None));
+            MeituTransparencyFacts transparency = await Must(
+                new WicMeituTransparencyInspector().InspectAsync(
+                    destination, CancellationToken.None));
+            MeituCutoutOutputRule.Validate(
+                sourceBefore, outputFacts, transparency).IsSuccess.ShouldBeTrue();
+            FileFacts sourceAfter = await Must(adapter.InspectManagedFileAsync(
+                workingCopy, CancellationToken.None));
+            MeituEnhancementOutputRule.ConfirmSourceUnchanged(
+                sourceBefore, sourceAfter, workingCopy.FileName).IsSuccess.ShouldBeTrue();
+            exported = new MeituExportedOutput(
+                output, outputFacts, exportEvidence, stabilityObservations, transparency);
 
             await Must(driver.DismissExportResultSurfaceAsync(
-                processed.Target, CancellationToken.None));
-            await Must(driver.CloseDocumentAsync(processed.Target, CancellationToken.None));
+                candidates[0], CancellationToken.None));
+            await Must(driver.CloseDocumentAsync(candidates[0], CancellationToken.None));
             ready = await Must(adapter.EnsureReadyAsync(CancellationToken.None));
             ready.State.IsSafeStartingState.ShouldBeTrue();
         }
@@ -190,7 +195,7 @@ public sealed class MeituFineHairLoadedRedoSmoke
             session.Session.Id,
             new WorkflowCommand.HandOff(
                 StepKind.BackgroundRemoval,
-                "Exact retained loaded redo input processed, exported and validated for fresh review."),
+                "Exact retained redo cutout observed, guarded-exported and validated for fresh review."),
             "PF-FIX-MEITU-CONFIRM",
             CancellationToken.None));
         SessionView submitted = await Must(sessions.ExecuteAsync(
@@ -233,9 +238,14 @@ public sealed class MeituFineHairLoadedRedoSmoke
             exported.Facts.PixelWidth,
             exported.Facts.PixelHeight,
             Transparency = exported.Transparency,
-            processed.ObservedDocumentIdentity,
-            BusyObserved = true,
-            CompletionObserved = true,
+            ObservedDocumentIdentity = observedDocumentIdentity,
+            BeforeProcessingEvidence = beforeEvidence,
+            BeforeProcessingEvidenceSha256 = FileSha256(beforeEvidence).ToString(),
+            ResultObservationEvidence = resultEvidence,
+            ResultObservationEvidenceSha256 = FileSha256(resultEvidence).ToString(),
+            ExternalProcessingAndResultObserved = true,
+            BusyObservationPersisted = false,
+            ProcessingInvokedDuringRecovery = false,
             GuardedExport = true,
             ReviewState = manual.ReviewState.ToString(),
             MeituReadiness = ready.State.State.ToString(),
@@ -244,6 +254,38 @@ public sealed class MeituFineHairLoadedRedoSmoke
             PresetPublicationAllowed = false,
         }, new JsonSerializerOptions { WriteIndented = true }));
         Console.WriteLine(receipt);
+    }
+
+    private static async Task<int> AwaitSettledOutputAsync(
+        string destination,
+        MeituAutomationOptions options,
+        CancellationToken cancellationToken)
+    {
+        FileSystemMeituOutputProbe probe = new();
+        List<MeituOutputObservation> observations = [];
+        DateTimeOffset deadline = DateTimeOffset.UtcNow + options.OutputStabilityTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            observations.Add(probe.Probe(destination));
+            if (MeituOutputStabilityRule.IsSettled(observations))
+            {
+                return observations.Count;
+            }
+
+            DateTimeOffset.UtcNow.ShouldBeLessThan(
+                deadline,
+                "The controlled output did not appear and settle; no Revision may be created.");
+            await Task.Delay(options.OutputPollInterval, cancellationToken);
+        }
+    }
+
+    private static Sha256 FileSha256(string path)
+    {
+        using FileStream stream = new(
+            path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            bufferSize: 1 << 20, useAsync: false);
+        return Sha256.FromBytes(SHA256.HashData(stream));
     }
 
     private static async Task<MeituBaseline> VerifiedBaselineAsync(
