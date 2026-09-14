@@ -77,5 +77,9 @@ The finished cutout was preserved before further action, then recovered without 
 Enhancement again. It was guarded-exported as a decoded 1200×1600 PNG with real transparency and
 registered as manual-result Revision `01a0a248-d7eb-7d20-ad5d-389610b1287a`, SHA-256
 `731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`.
-The Revision remains `ReviewRequired`/`NotReviewed`; fresh quality approval is the only remaining
-operator decision.
+The operator approved exactly that Revision/hash. The append-only review is persisted,
+Background Removal is `Approved`, and the workflow is now at `Trim`/`Waiting`. The first
+post-command reload exposed a stale Revision review-state cache; the transactional propagation fix
+in `522fca31d7b76a779cc0ce4ab7d1b339f7e57ce5` and an exact-review-bound reconciliation brought the
+cache into agreement without issuing a second decision. Enhancement remains unapproved. No
+further confirmation gap remains for this task.

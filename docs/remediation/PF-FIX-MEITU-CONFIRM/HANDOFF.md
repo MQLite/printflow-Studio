@@ -2,8 +2,42 @@
 
 ## Status
 
-**COMPLETE FOR CORRECTION, REDO, EXPORT AND REGISTRATION — fresh cutout quality review remains
-intentionally open.**
+**COMPLETE — correction, redo, guarded export, registration and exact-object approval are all
+verified.**
+
+## Exact-object approval completion
+
+The operator approved only fresh redo Revision `01a0a248-d7eb-7d20-ad5d-389610b1287a`, SHA-256
+`731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`. The normal
+`WorkflowCommand.Approve` path created append-only review
+`01a0a251-d660-78c0-8b72-7ea614cdc107` and advanced the session to `Trim`/`Waiting`.
+
+The first independent reload then exposed a separate persistence defect: the authoritative review
+and approved step had committed, but the reviewed Revision's cached `ReviewState` still read
+`NotReviewed`. No second approval was issued and no earlier state was rolled back. Commit
+`522fca31d7b76a779cc0ce4ab7d1b339f7e57ce5` now propagates Revision review-state changes in the
+same SQLite transaction as the exact hash-bound `ReviewDecision`; its update is guarded by
+Revision ID, session ID, reviewed hash and validity. The already-committed exact review was used
+only to reconcile that stale cache to `Approved`.
+
+Independent repository, decoded-file and read-only SQLite checks now agree:
+
+- the exact registered Revision/hash is `Approved`;
+- Background Removal is `Approved`, and the next step is `Trim`/`Waiting`;
+- the registered and exported PNGs both decode and hash to the recorded 1200×1600,
+  1,430,946-byte object with 764,826 transparent and 1,545,347 visible pixels;
+- failed staging attempt `01a0a22e-e3e7-7f59-b2cf-75e2737d3e37` remains `Failed`;
+- there are zero Enhancement reviews and no held session automation lock;
+- Meitu was not touched, processing was not invoked and export was not repeated.
+
+Approval receipt:
+`D:\PrintFlowStudio\QA\PF-FIX-MEITU-CONFIRM\redo-20260915-110930\loaded-redo-approval-receipt.json`
+(`BDB7331565564C2FB9671FD8F2FEB452A065947ADF02651629BA1D739E509050`). Final source-bound
+pair `ecadbf13-a74a-4b90-9a18-e9a26479b6bb` was built from
+`522fca31d7b76a779cc0ce4ab7d1b339f7e57ce5` with SDK 10.0.400, zero warnings/errors and receipt
+SHA-256 `2A4BBD9EE6DEC53C01D123AEB4C4354097C34795CCB8EDA8268CF39A0A4C7844`. The focused
+regression was red before the transactional correction and green after it; the final persistence
+and workflow scope passed 9,450/9,450.
 
 ## 15 September redo completion
 
@@ -145,11 +179,10 @@ preset acceptance, `CandidateProblems` change or Production revalidation occurre
 
 ## Exact remaining confirmation gap
 
-Only the fresh redo's visual quality remains for the operator to accept or reject. No approval was
-manufactured from the pre-restart decision. Review exact Revision
+None for this task. The fresh decision is bound only to Revision
 `01a0a248-d7eb-7d20-ad5d-389610b1287a` / SHA-256
-`731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`.
-No further Meitu processing or export is required for that decision.
+`731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`. Enhancement quality
+remains unapproved as required, but it is not a blocker for the completed redo-only task.
 
 ## Routing
 
