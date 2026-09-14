@@ -54,6 +54,16 @@ public sealed record MeituExportedOutput(
     MeituTransparencyFacts? Transparency);
 
 /// <summary>
+/// A retained operation-result surface correlated to an exact Working copy and exported through
+/// the normal validated output boundary.
+/// </summary>
+public sealed record MeituObservedResultExport(
+    MeituTarget Target,
+    MeituDocumentSurfacePhase SurfacePhase,
+    string ObservedDocumentIdentity,
+    MeituExportedOutput Output);
+
+/// <summary>
 /// The Epic 11300 Part A foundation: get to a verified Meitu in a known safe state, and hand it
 /// a PrintFlow-created working copy. Nothing beyond that.
 /// </summary>
@@ -174,6 +184,27 @@ public interface IMeituAutomationFoundation
     /// </summary>
     Task<OperationResult<MeituExportedOutput>> ExportBackgroundRemovalResultAsync(
         MeituBackgroundRemovalOutcome backgroundRemoval,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        IAutomationStopSignal stop,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Recovers an operation result that an operator has already observed finish, without opening
+    /// a file or invoking Enhancement or Background Removal again.
+    /// </summary>
+    /// <remarks>
+    /// This is deliberately narrower than a retry. It attaches only to one already-running
+    /// accepted process, requires exactly one live result surface for the requested operation,
+    /// confirms the exact Save-default identity of <paramref name="workingCopy"/>, and then uses
+    /// the ordinary guarded export and decoded-output validation. Operator evidence establishes
+    /// that processing happened; this method independently establishes current machine
+    /// completion, document identity, export and output validity. It never turns a generic editor
+    /// or an unrelated visible result into operation evidence.
+    /// </remarks>
+    Task<OperationResult<MeituObservedResultExport>> ExportObservedResultAsync(
+        MeituOperation operation,
         WorkspaceFileRef workingCopy,
         FileFacts workingCopyFactsBefore,
         WorkspaceFileRef output,

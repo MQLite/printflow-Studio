@@ -671,6 +671,41 @@ public sealed class GuardedMeituUiDriverTests
     }
 
     [Fact]
+    public async Task Exact_Save_identity_is_accepted_from_the_signed_cutout_result_screen()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, _) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.SetTexts(editor.Window.Handle, [.. MeituFakes.BackgroundCompletedTexts()]);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_A_副本");
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsSuccess.ShouldBeTrue(confirmed.IsFailure ? confirmed.Failure.TechnicalDetail : string.Empty);
+        confirmed.Value.State.ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+        h.Elements.Invocations.ShouldContain("MainWindow.editorPage.saveButton");
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Unrelated_Save_identity_is_refused_from_the_signed_cutout_result_screen()
+    {
+        Harness h = Build(meituInForeground: true);
+        (MeituTarget editor, _) = ShowLoadedEditorAndIdentityDialog(h);
+        h.Elements.SetTexts(editor.Window.Handle, [.. MeituFakes.BackgroundCompletedTexts()]);
+        h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "OTHER_IMAGE_副本");
+
+        OperationResult<MeituStateSnapshot> confirmed = await h.Driver.ConfirmWorkingCopyIdentityAsync(
+            editor, "PF_IDENTITY_A.png", CancellationToken.None);
+
+        confirmed.IsFailure.ShouldBeTrue();
+        confirmed.Failure.Context["observedIdentity"].ShouldBe("OTHER_IMAGE_副本");
+        h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
+        h.Elements.ValueWrites.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task A_wrong_owner_Save_dialog_is_never_read_or_cancelled()
     {
         Harness h = Build(meituInForeground: true);

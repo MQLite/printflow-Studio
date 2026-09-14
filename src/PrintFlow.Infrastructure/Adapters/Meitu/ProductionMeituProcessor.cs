@@ -326,6 +326,170 @@ public sealed class ProductionMeituProcessor : IMeituProcessor, IMeituAutomation
             .ConfigureAwait(false);
 
     /// <inheritdoc />
+    public async Task<OperationResult<MeituObservedResultExport>> ExportObservedResultAsync(
+        MeituOperation operation,
+        WorkspaceFileRef workingCopy,
+        FileFacts workingCopyFactsBefore,
+        WorkspaceFileRef output,
+        IAutomationStopSignal stop,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(workingCopyFactsBefore);
+        ArgumentNullException.ThrowIfNull(stop);
+
+        if (operation is not MeituOperation.Enhance and not MeituOperation.RemoveBackground)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(
+                FailureCode.PreconditionNotMet,
+                $"'{operation}' is not a recoverable Meitu result operation. Nothing was invoked.");
+        }
+
+        if (workingCopy.Area != WorkspaceArea.Working || output.Area != WorkspaceArea.Working ||
+            string.Equals(workingCopy.RelativePath, output.RelativePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(
+                FailureCode.PreconditionNotMet,
+                "Observed-result recovery requires distinct Working input and output references. " +
+                "Nothing was invoked.");
+        }
+
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(baseline.Failure);
+        }
+
+        OperationResult<Unit> executable = VerifyExecutableIdentity(baseline.Value);
+        if (executable.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(executable.Failure);
+        }
+
+        OperationResult<IReadOnlyList<ExternalProcessRef>> running =
+            _locator.FindProcessesByExecutable(baseline.Value.ExecutablePath);
+        if (running.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(running.Failure);
+        }
+
+        if (running.Value.Count != 1)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Observed-result recovery found {running.Value.Count} accepted Meitu processes; exactly one " +
+                "already-running process is required and none will be launched or chosen.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["candidateProcesses"] = running.Value.Count.ToString(),
+                    ["processingInvoked"] = "false",
+                    ["exportInvoked"] = "false",
+                }));
+        }
+
+        OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+            _locator.FindTopLevelWindows(running.Value[0]);
+        if (windows.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(windows.Failure);
+        }
+
+        MeituDocumentSurfacePhase requiredPhase = operation == MeituOperation.Enhance
+            ? MeituDocumentSurfacePhase.EnhancementResult
+            : MeituDocumentSurfacePhase.BackgroundRemovalResult;
+        List<(MeituTarget Target, MeituStateSnapshot Snapshot)> candidates = [];
+        List<string> observations = [];
+        foreach (ExternalWindowRef window in windows.Value.Where(window => window.IsVisible))
+        {
+            MeituTarget target = new(running.Value[0], window);
+            OperationResult<MeituStateSnapshot> inspected = await _driver
+                .InspectStateAsync(target, workingCopy.FileName, cancellationToken)
+                .ConfigureAwait(false);
+            if (inspected.IsFailure)
+            {
+                observations.Add($"{window.Handle}:inspection-{inspected.Failure.Code}");
+                continue;
+            }
+
+            MeituDocumentSurfacePhase phase = MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(
+                baseline.Value, inspected.Value.Observation);
+            observations.Add($"{window.Handle}:{phase}");
+            if (phase == requiredPhase)
+            {
+                candidates.Add((target, inspected.Value));
+            }
+        }
+
+        if (candidates.Count != 1)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Observed-result recovery found {candidates.Count} '{requiredPhase}' surfaces; exactly one " +
+                "is required. No Save or processing control was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["requiredSurfacePhase"] = requiredPhase.ToString(),
+                    ["observedSurfaces"] = observations.Count == 0 ? "(none)" : string.Join(" | ", observations),
+                    ["processingInvoked"] = "false",
+                    ["exportInvoked"] = "false",
+                }));
+        }
+
+        OperationResult<MeituTarget> activated = await _driver
+            .ActivateAsync(candidates[0].Target, cancellationToken).ConfigureAwait(false);
+        if (activated.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(activated.Failure);
+        }
+
+        OperationResult<MeituStateSnapshot> confirmed = await _driver
+            .ConfirmWorkingCopyIdentityAsync(activated.Value, workingCopy.FileName, cancellationToken)
+            .ConfigureAwait(false);
+        if (confirmed.IsFailure)
+        {
+            return Capture<MeituObservedResultExport>(
+                activated.Value, confirmed.Failure, "observed-result-identity-failed");
+        }
+
+        MeituDocumentSurfacePhase confirmedPhase = MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(
+            baseline.Value, confirmed.Value.Observation);
+        if (confirmedPhase != requiredPhase ||
+            confirmed.Value.Observation.ObservedDocumentIdentity is not { Length: > 0 } observedIdentity)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"The identity probe ended on '{confirmedPhase}', not the required '{requiredPhase}'. " +
+                "No export was invoked.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["requiredSurfacePhase"] = requiredPhase.ToString(),
+                    ["confirmedSurfacePhase"] = confirmedPhase.ToString(),
+                    ["processingInvoked"] = "false",
+                    ["exportInvoked"] = "false",
+                }));
+        }
+
+        OperationResult<MeituExportedOutput> exported = await ExportValidatedResultAsync(
+            operation,
+            activated.Value,
+            observedIdentity,
+            workingCopy,
+            workingCopyFactsBefore,
+            output,
+            stop,
+            cancellationToken).ConfigureAwait(false);
+        if (exported.IsFailure)
+        {
+            return OperationResult.Fail<MeituObservedResultExport>(exported.Failure);
+        }
+
+        return OperationResult.Ok(new MeituObservedResultExport(
+            activated.Value, confirmedPhase, observedIdentity, exported.Value));
+    }
+
+    /// <inheritdoc />
     public async Task<OperationResult<MeituExportedOutput>> ExportEnhancedResultAsync(
         MeituEnhancementOutcome enhancement,
         WorkspaceFileRef workingCopy,

@@ -1059,6 +1059,10 @@ public sealed class ProductionLiveWorkstationVerifierTests
             MeituBackgroundRemovalOutcome backgroundRemoval, WorkspaceFileRef workingCopy,
             FileFacts workingCopyFactsBefore, WorkspaceFileRef output, IAutomationStopSignal stop,
             CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<OperationResult<MeituObservedResultExport>> ExportObservedResultAsync(
+            MeituOperation operation, WorkspaceFileRef workingCopy, FileFacts workingCopyFactsBefore,
+            WorkspaceFileRef output, IAutomationStopSignal stop, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
         public Task<OperationResult<FileFacts>> InspectManagedFileAsync(
             WorkspaceFileRef file, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OperationResult<bool>> DismissExportResultSurfaceAsync(

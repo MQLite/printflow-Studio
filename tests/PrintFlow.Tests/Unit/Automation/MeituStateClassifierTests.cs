@@ -439,6 +439,19 @@ public sealed class MeituStateClassifierTests
     }
 
     [Fact]
+    public void Enhancement_result_with_exact_identity_does_not_require_generic_editor_markers()
+    {
+        MeituObservation finished = Observe(
+            title: MeituFakes.EditorTitle,
+            texts: [.. MeituFakes.CompletionMarkers],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), finished).State
+            .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+    }
+
+    [Fact]
     public void Background_Removal_Busy_outranks_the_loaded_editor()
     {
         MeituObservation busy = Observe(
@@ -466,6 +479,36 @@ public sealed class MeituStateClassifierTests
 
         MeituStateClassifier.Classify(MeituFakes.Baseline(), complete).State
             .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+    }
+
+    [Fact]
+    public void Background_Removal_result_with_exact_identity_does_not_require_generic_editor_markers()
+    {
+        MeituObservation complete = Observe(
+            title: MeituFakes.EditorTitle,
+            texts: [.. MeituFakes.BackgroundCompletedTexts()],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), complete).State
+            .ShouldBe(MeituStartingState.KnownEditorWithExpectedWorkingCopy);
+    }
+
+    [Fact]
+    public void Ambiguous_result_markers_remain_unknown_even_with_exact_identity()
+    {
+        MeituObservation ambiguous = Observe(
+            title: MeituFakes.EditorTitle,
+            texts:
+            [
+                .. MeituFakes.CompletionMarkers,
+                .. MeituFakes.BackgroundCompletedTexts(),
+            ],
+            expectedFile: "A.png",
+            observedIdentity: "A_副本");
+
+        MeituStateClassifier.Classify(MeituFakes.Baseline(), ambiguous).State
+            .ShouldBe(MeituStartingState.Unknown);
     }
 
     [Fact]

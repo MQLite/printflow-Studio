@@ -74,13 +74,16 @@ public static class MeituStateClassifier
         }
 
         // 4. The working copy PrintFlow handed over, identified by the name PrintFlow chose and
-        //    only on the screen the signed editor evidence describes. Three things must hold
-        //    together: the editor's exact title, enough of its positive markers, and the
-        //    expected name where the evidence says a document name appears. "Some document is
-        //    open" is never sufficient, and a name PrintFlow did not choose proves nothing (§14).
+        //    only on a signed settled document surface. That surface can be the ordinary editor,
+        //    the Enhancement result, or the Background Removal result; result modules can hide
+        //    the ordinary toolbar markers. The exact Save-default identity is still mandatory,
+        //    so "some result is visible" and an unrelated document both remain insufficient.
         if (observation.ExpectedWorkingCopyFileName is { Length: > 0 } expected &&
             baseline.DocumentIdentity is { } identity &&
-            MatchesEditor(identity.Editor, observation) &&
+            MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(baseline, observation) is
+                MeituDocumentSurfacePhase.LoadedEditor or
+                MeituDocumentSurfacePhase.EnhancementResult or
+                MeituDocumentSurfacePhase.BackgroundRemovalResult &&
             MeituDocumentIdentityRule.MatchesExpectedWorkingCopy(
                 identity, expected, observation.ObservedDocumentIdentity))
         {

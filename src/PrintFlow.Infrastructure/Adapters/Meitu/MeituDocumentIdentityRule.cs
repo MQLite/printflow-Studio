@@ -3,6 +3,16 @@ using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Infrastructure.Adapters.Meitu;
 
+/// <summary>The signed document surface from which Save may be used as an identity probe.</summary>
+public enum MeituDocumentSurfacePhase
+{
+    Unknown,
+    LoadedEditor,
+    EnhancementResult,
+    BackgroundRemovalResult,
+    AmbiguousResult,
+}
+
 /// <summary>
 /// Compares Meitu's signed Save-default identity with the Working-copy filename PrintFlow chose.
 /// </summary>
@@ -13,6 +23,58 @@ namespace PrintFlow.Infrastructure.Adapters.Meitu;
 /// </remarks>
 public static class MeituDocumentIdentityRule
 {
+    /// <summary>
+    /// Classifies a settled document surface on which the signed Save control may be invoked only
+    /// to read and cancel its default-name identity.
+    /// </summary>
+    /// <remarks>
+    /// Enhancement and cutout completion screens are legitimate document surfaces even when the
+    /// ordinary editor toolbar markers are hidden. Operation-specific completion markers are
+    /// therefore alternatives to, not substitutes for, the common exact-title, enabled-window
+    /// and no-owned-dialog guards. If both result signatures match, the screen is ambiguous and
+    /// remains ineligible for input.
+    /// </remarks>
+    public static MeituDocumentSurfacePhase ClassifyIdentityProbeSurface(
+        MeituBaseline baseline,
+        MeituObservation observation)
+    {
+        ArgumentNullException.ThrowIfNull(baseline);
+        ArgumentNullException.ThrowIfNull(observation);
+
+        if (baseline.DocumentIdentity is not { } identity ||
+            !string.Equals(observation.WindowTitle, identity.Editor.WindowTitle, StringComparison.Ordinal) ||
+            !observation.OwnedDialogTitles.IsDefaultOrEmpty ||
+            !observation.MainWindowEnabled)
+        {
+            return MeituDocumentSurfacePhase.Unknown;
+        }
+
+        bool enhancementResult = baseline.Enhancement is { } enhancement &&
+            MeituEnhancementRule.Classify(enhancement, observation) == MeituEnhancementPhase.Complete;
+        bool backgroundRemovalResult = baseline.BackgroundRemoval is { } backgroundRemoval &&
+            MeituBackgroundRemovalRule.Classify(backgroundRemoval, observation) ==
+                MeituBackgroundRemovalPhase.Complete;
+
+        if (enhancementResult && backgroundRemovalResult)
+        {
+            return MeituDocumentSurfacePhase.AmbiguousResult;
+        }
+
+        if (enhancementResult)
+        {
+            return MeituDocumentSurfacePhase.EnhancementResult;
+        }
+
+        if (backgroundRemovalResult)
+        {
+            return MeituDocumentSurfacePhase.BackgroundRemovalResult;
+        }
+
+        return MatchesLoadedEditor(identity, observation)
+            ? MeituDocumentSurfacePhase.LoadedEditor
+            : MeituDocumentSurfacePhase.Unknown;
+    }
+
     /// <summary>Whether positive signed markers identify the loaded editor before Save.</summary>
     public static bool MatchesLoadedEditor(
         MeituDocumentIdentitySignature signature, MeituObservation observation)

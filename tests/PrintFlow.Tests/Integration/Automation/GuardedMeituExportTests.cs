@@ -257,6 +257,19 @@ public sealed class GuardedMeituExportTests
         s.Input.Sends.ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task The_export_accepts_the_exact_working_copy_on_the_signed_cutout_result_screen()
+    {
+        Scenario s = Build();
+        s.Elements.SetTexts(s.Editor.Window.Handle, [.. MeituFakes.BackgroundCompletedTexts()]);
+
+        OperationResult<MeituExportEvidence> export = await ExportAsync(s);
+
+        export.IsSuccess.ShouldBeTrue(export.IsFailure ? export.Failure.TechnicalDetail : string.Empty);
+        s.Invocations(DestinationConfirmId).ShouldBe(1);
+        s.Input.Sends.ShouldBeEmpty();
+    }
+
     /// <summary>
     /// The base name goes to the Save surface and the full path goes to the destination dialog.
     /// </summary>

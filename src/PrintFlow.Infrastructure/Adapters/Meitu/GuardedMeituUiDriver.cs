@@ -995,6 +995,12 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         ArgumentNullException.ThrowIfNull(target);
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedWorkingCopyFileName);
 
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituStateSnapshot>(baseline.Failure);
+        }
+
         OperationResult<MeituDocumentIdentitySignature> signature = DocumentIdentitySignature();
         if (signature.IsFailure)
         {
@@ -1019,12 +1025,21 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return beforeSave;
         }
 
-        if (!MeituDocumentIdentityRule.MatchesLoadedEditor(signature.Value, beforeSave.Value.Observation))
+        MeituDocumentSurfacePhase beforePhase =
+            MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(baseline.Value, beforeSave.Value.Observation);
+        if (beforePhase is MeituDocumentSurfacePhase.Unknown or MeituDocumentSurfacePhase.AmbiguousResult)
         {
-            return OperationResult.Fail<MeituStateSnapshot>(
+            return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                 FailureCode.MeituUnknownState,
-                "The verified editor does not match the signed loaded-document structure, so Save was not " +
-                "invoked and no document identity is claimed.");
+                "The verified window is not one unambiguous signed loaded-editor, Enhancement-result, or " +
+                "Background-Removal-result surface, so Save was not invoked as a document-identity probe.",
+                isRetryable: false,
+                context: new Dictionary<string, string>
+                {
+                    ["surfacePhase"] = beforePhase.ToString(),
+                    ["savePurpose"] = "document-identity-probe",
+                    ["inputSent"] = "false",
+                }));
         }
 
         OperationResult<Unit> requested = await InvokeKnownElementAsync(
@@ -1071,7 +1086,25 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
         if (confirmed.Value.State == MeituStartingState.KnownEditorWithExpectedWorkingCopy)
         {
-            return confirmed;
+            MeituDocumentSurfacePhase afterPhase = MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(
+                baseline.Value, confirmed.Value.Observation);
+            if (afterPhase == beforePhase)
+            {
+                return confirmed;
+            }
+
+            return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                FailureCode.MeituUnknownState,
+                $"Meitu changed from the signed '{beforePhase}' surface to '{afterPhase}' while the " +
+                "document identity was being probed. The Save surface was canceled and no identity is claimed.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["surfacePhaseBefore"] = beforePhase.ToString(),
+                    ["surfacePhaseAfter"] = afterPhase.ToString(),
+                    ["savePurpose"] = "document-identity-probe",
+                    ["inputSent"] = "cancel-only",
+                }));
         }
 
         // Which of several things went wrong, named rather than assumed. The state can miss
@@ -2836,7 +2869,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                     : OperationFailure.Create(
                         FailureCode.MeituUnknownState,
                         $"The Meitu editor is on '{state.Value.State}' rather than showing the expected " +
-                        "working copy. No Enhancement input was produced.",
+                        "working copy on a signed settled document surface. No editor input was produced.",
                         isRetryable: true,
                         context: new Dictionary<string, string>
                         {
