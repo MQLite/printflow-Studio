@@ -109,3 +109,21 @@ Sol High, offset -1, requested Sol Medium; actual metadata UNVERIFIED. Parent re
 MODEL_SWITCH_UNAVAILABLE. Commit reviewed source, create a fresh controlled pair in the ignored A1
 artifact root, freeze it, reobserve current windows, then run the seven-category wrapper once with
 the explicit 7.8.8.2 selection. Capture truthful version-exception and actual case/readiness results.
+
+## Executed checkpoint — stop after the failed exception run
+
+Code 920304f produced verified pair b5f2e3b8-d47a-4ece-b914-9260f5eb9fc1; identities frozen in
+artifacts/pf-accept-a1/override-freeze.json before execution. One live RunId
+a1-meitu-7882-20260914-143954-d12383c8, InvocationId 0e65070b-cf80-464e-aeb3-b6321ae25f41.
+Host exit 0, wrapper 1, set Failed: 2 passed / 5 failed. Initial readiness attached Meitu21884 and
+Photoshop25696, probe cleanup succeeded; downstream readiness was lost after unknown Meitu cutout
+state. Canonical physical lease observed Free after the run. No blind retry or manual unwind.
+Full outcome and exact Operator checklist are linked from HANDOFF; source/assets/old pair verified.
+
+The independent evidence review found stale hard-coded 7.8.7.5 application labels in two case
+returns. Source strings were corrected to generic Meitu XiuXiu for future runs only; no raw result,
+retained harness, pair or outcome was changed. This low-impact string correction did not warrant
+a build/full-suite/live rerun. Future corrected-code execution requires its own controlled pair.
+The report also discloses the reviewer's excess child-review contexts; none operated the desktop.
+SCRUM-11065 remains PARTIAL, production revalidation NOT WRITTEN, normal-App E2E NOT EXECUTED,
+A2/A3 not begun. Completion here is runner change plus truthful failed-run handoff, not A1 acceptance.

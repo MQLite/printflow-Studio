@@ -1017,3 +1017,20 @@ LIVE PORTRAIT/FINE-HAIR PROOF AND SCRUM-11065 ACCEPTANCE AWAIT A SAFE ZERO-DOCUM
 
 Local commits before this documentation commit: `579c41c` (accepted preset authority/configuration)
 and `378c848` (guarded Product adapter and tests). Nothing was pushed.
+
+## 14 September 2026 — A1 Meitu version-exception execution
+
+The original A0 pair remains verified and retained. After the operator explicitly requested a
+runner change to use Meitu 7.8.8.2, code 920304f and fresh controlled pair
+b5f2e3b8-d47a-4ece-b914-9260f5eb9fc1 executed one bound unfiltered set:
+a1-meitu-7882-20260914-143954-d12383c8. Host exit 0, wrapper exit 1, set Failed: transparent PNG
+and reference TIFF passed; portrait failed its enlargement assertion; fine-hair failed on unknown
+Meitu cutout state; customer design/PSD/PDF then failed on readiness prerequisites. Initial live
+readiness attached both prestarted apps and completed the Photoshop probe; post-run physical lease
+was Free. One portrait visual decision remains unresolved but cannot erase the structural failure.
+
+The run uses a marked, run-local derived preset and records actual 7.8.8.2 bytes. The accepted
+1.17.0 preset and original assets are unchanged. Its version exception prevents publication, even
+independently of the failed set. No real production revalidation, normal-App E2E or Jira change.
+SCRUM-11065 remains PARTIAL. Exact identities, artifacts and limitations are in
+audit-a1-standard-regression-set-acceptance.md and ../remediation/PF-ACCEPT-A1/HANDOFF.md.

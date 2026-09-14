@@ -1,6 +1,68 @@
 # PF-ACCEPT-A1 — Handoff
 
-**RUN INCOMPLETE — PF-ACCEPT-A1: accepted Meitu 7.8.7.5 is not the running instance**
+**RUN INCOMPLETE — PF-ACCEPT-A1: 2 passed / 5 failed under authorized Meitu 7.8.8.2 exception**
+
+## Current result supersedes the preparation stops below
+
+User explicitly requested changing the runner to continue on 7.8.8.2. Implemented and committed
+920304f, focused tests 66/0/0, fresh controlled pair b5f2e3b8-d47a-4ece-b914-9260f5eb9fc1.
+Full evidence and exact case table: ../../printflow/audit-a1-standard-regression-set-acceptance.md.
+Original ef6182db pair preserved and reverified; no source/preset inputs were silently substituted.
+
+Executed exactly once via the supported wrapper's paired vstest route with -MeituExecutablePath
+C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.8.2\XiuXiu.exe. This option removes the old
+executable selection restriction for an explicit new bound run, creates a run-local derived preset,
+and records actual bytes plus a publication prohibition. Other guards remain; src/ is unchanged.
+The new pair is under artifacts/pf-accept-a1/build-pairs/b5f2e3b8-d47a-4ece-b914-9260f5eb9fc1/;
+keep its original build-pair.json, harness/ and candidate/ with the original A0 pair.
+Receipt SHA-256 189A0E5C0B1FF12ED3AB565FB80F912075E3B762DD0F3833813CDDADCDC813DF.
+
+RunId a1-meitu-7882-20260914-143954-d12383c8;
+InvocationId 0e65070b-cf80-464e-aeb3-b6321ae25f41.
+Run root D:\PrintFlowStudio\TestData\v1\runs\a1-meitu-7882-20260914-143954-d12383c8.
+Host exit 0 (runner Fact completed); wrapper exit 1; result.json Failed. No TRX produced by the
+console-only logger. Initial readiness attached both existing processes and completed the full
+Photoshop probe cleanup successfully. No cold start. Canonical lease observed Free after execution.
+
+Portrait failed size assertion (1200x1600 was not larger than source), fine-hair failed on unknown
+Meitu state, customer design/PSD/PDF then failed on readiness prerequisites. Transparent PNG and
+reference TIFF passed. Do not describe downstream prerequisite failures as completed output tests.
+Meitu was left on its editor/cutout page; do not claim restoration to a clean welcome screen.
+
+One actual pending visual check: PORTRAIT-VISUAL-001. Exact artifact/question/hash and passed
+structural assertions are in artifacts/pf-accept-a1/operator-review.md (unsubmitted checklist).
+Human review cannot erase the portrait structural failure. No other reviewable failed-case outputs
+exist. No decisions supplied, no review file submitted; no synthetic reviewer.
+Later actual decisions use the original run's -RunId and -RecordVisualReview only, omitting new
+receipt/MeituExecutablePath. Review retains the original exception and cannot grant publication.
+
+Preserve result.json, readiness.json, case files, claim, derived snapshot and outputs. Local logs:
+artifacts/pf-accept-a1/live-command.json, live-run.log, override-freeze.json,
+post-run-verification.json, lease-after.json and pre/post UI/process observations.
+Portrait ExternalApplications retains the manifest's expected 7.8.7.5 text; actual 7.8.8.2 identity
+is in readiness and binding. Keep this label limitation explicit; do not patch historical JSON.
+After evidence review, two hard-coded version labels were changed to the generic "Meitu XiuXiu"
+in source for future runs only. No rebuild/rerun followed that string correction. Retained live
+harness/source remains 920304f; a future run using newer code must use a new controlled pair.
+
+Stop: no retry, further repair, publication/revalidation command, normal-App E2E, A2/A3 or Jira
+change. SCRUM-11065 remains PARTIAL. Next work would need a separately scoped examination of the
+portrait size expectation and changed cutout state, not automatic rebaseline or another blind run.
+Read the report's reviewer-cap deviation disclosure; no final release approval is claimed.
+
+## Operator guidance received after execution
+
+User authorized dismissing unpredictable informational notices with "我知道了" and continuing.
+Current Meitu UIA then revealed MainWindow.NoviceGuideWidget.MessageGuideWidget with title
+"AI助手来啦", text "选中底图，在图片编辑里也能随时和AI对话改图啦，快试试吧~", and okButton "我知道了".
+The supported Computer Use click failed with "coordinate input geometry is unavailable"; dismissal
+was not confirmed. Before/after-error trees are retained under artifacts/pf-accept-a1/meitu-notice-*.
+This is a concrete candidate explanation for an unexpected state, not proven causation or a repaired
+runner. No blanket unknown-dialog handler was added and no failed RunId was resumed or rewritten.
+The user's authorization to dismiss this informational notice is recorded; it is not an Operator
+acceptance of artwork. The portrait enlargement assertion remains an independent failed boundary.
+
+## Historical preparation checkpoint
 
 Latest checkpoint supersedes the missing-confirmation text below: user said "Please continue.
 Meitu open and ps ready." This was accepted as the current attach-start window confirmation.
