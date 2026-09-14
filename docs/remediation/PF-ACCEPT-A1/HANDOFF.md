@@ -1,6 +1,19 @@
 # PF-ACCEPT-A1 — Handoff
 
-**PREPARED — PF-ACCEPT-A1 AWAITS WORKSTATION WINDOW**
+**RUN INCOMPLETE — PF-ACCEPT-A1: accepted Meitu 7.8.7.5 is not the running instance**
+
+Latest checkpoint supersedes the missing-confirmation text below: user said "Please continue.
+Meitu open and ps ready." This was accepted as the current attach-start window confirmation.
+Passive observation found Meitu 7.8.8.2 (PID 21884), not preset-required 7.8.7.5. The accepted
+executable exists at C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.7.5\XiuXiu.exe.
+Operator must prepare that accepted instance normally and settle at its clean page before resuming.
+Do not change the preset, install/downgrade software, close apps or invoke a cold-launch workaround.
+Photoshop PID 25696 has a titled window; full clean-state observation remains to be completed.
+No live wrapper/host/run/lease occurred. Pair verified again; raw observations are retained in
+artifacts/pf-accept-a1/pre-run-processes.json and meitu-identity-mismatch.json. Resume with fresh
+current process/window observations; the confirmation is already supplied for this execution.
+
+## Earlier preparation handoff (historical)
 
 A1 preparation is complete; live execution and human acceptance are incomplete. Read PLAN.md and
 ../../printflow/audit-a1-standard-regression-set-acceptance.md. Current-session confirmation has

@@ -1,6 +1,16 @@
 # PF-ACCEPT-A1 — Standard set acceptance
 
-**PREPARED — PF-ACCEPT-A1 AWAITS WORKSTATION WINDOW**
+**RUN INCOMPLETE — PF-ACCEPT-A1: accepted Meitu 7.8.7.5 is not the running instance**
+
+Latest update: user supplied the current window confirmation ("Please continue. Meitu open and ps
+ready."). Passive inventory found version 7.8.8.2, PID 21884, at its 7.8.8.2 executable path.
+The accepted preset requires 7.8.7.5; its executable exists but is not running. Stopped before
+operational setup to preserve attach-start scope. No lease acquired, no RunId claimed, no host or
+case executed. This is a pre-run prerequisite mismatch, not seven automated output failures.
+Original pair reverified successfully. No Operator result decisions were supplied. See PLAN's
+latest checkpoint and local artifacts/pf-accept-a1/meitu-identity-mismatch.json.
+
+The preparation snapshot below predates that confirmation; its no-run facts remain current.
 
 14 September 2026, DESKTOP-0BG8884. Selected freeze and verified identities are recorded in
 ../remediation/PF-ACCEPT-A1/PLAN.md. Pair ef6182db-6f48-4ed2-ae8f-c4e52307ca9e remains intact;

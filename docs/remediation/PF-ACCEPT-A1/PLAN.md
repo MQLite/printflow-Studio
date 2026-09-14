@@ -66,3 +66,22 @@ at this preparation checkpoint, no independent acceptance approval.
 No full suite, build/restore, production revalidation, publication script invocation, normal Product
 launch, A2/A3, Adobe repair, preset/assets changes, process cleanup, branch/worktree/clone, reset,
 amend/rebase, push/install/deploy, attribution trailer or Jira mutation. Historical failures remain.
+
+## Current live-window attempt — prerequisite mismatch
+
+The user replied, "Please continue. Meitu open and ps ready." Accepted as confirmation of the
+preceding exclusive attach-start window question; no repeated permission request is needed.
+Passive process/window inventory then found Meitu PID 21884 running from
+C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.8.2\XiuXiu.exe, started
+2026-09-14T14:22:42.5489744+12:00. The preset requires version 7.8.7.5 at the corresponding
+7.8.7.5 path. That executable exists, but no running accepted instance was observed.
+Photoshop PID 25696 at D:\Adobe Photoshop CC 2019\Photoshop.exe started
+2026-09-14T11:46:41.877468+12:00; a titled window exists. Its settled/document-free state was
+not fully inspected after the earlier Meitu identity prerequisite failed.
+
+Stopped before wrapper invocation, RunId claim, readiness or lease acquisition. A wrapper start
+could launch the absent accepted instance, which would not meet the selected attach-start procedure.
+No app was activated, closed, launched or repaired. The pair reverified successfully after this
+observation. Raw local evidence: pre-run-processes.json and meitu-identity-mismatch.json under
+artifacts/pf-accept-a1/. Operator next action: prepare the accepted 7.8.7.5 executable normally,
+settled at its clean page, and report ready. Do not change preset authority to accept 7.8.8.2.
