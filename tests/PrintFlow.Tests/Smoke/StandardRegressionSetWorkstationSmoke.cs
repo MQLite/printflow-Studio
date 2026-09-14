@@ -332,13 +332,20 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         }
 
         PrintFlowConfiguration configuration = LoadConfiguration();
+        string? meituExecutable = Environment.GetEnvironmentVariable(RegressionMeituOverride.EnvironmentVariable);
+        bool usesMeituOverride = !string.IsNullOrWhiteSpace(meituExecutable);
+        if (usesMeituOverride)
+        {
+            configuration = RegressionMeituOverride.Apply(configuration, meituExecutable!, runFolder);
+            output.WriteLine(RegressionMeituOverride.PublicationProblem);
+        }
         string workstation = Environment.MachineName;
 
         // Everything this run is about to test, captured now, by the thing testing it. Built before
         // the first result can be written so that every exit from here — preflight refusal, wrong
         // adapter mode, blocked environment, or a completed run — carries the same bound facts and
         // no path can produce a result a reader has to guess about (PF-AUDIT-R1, finding F3).
-        RegressionEvidenceBinding binding = Bind(set, configuration, invocationId, origin);
+        RegressionEvidenceBinding binding = Bind(set, configuration, invocationId, origin, usesMeituOverride);
         output.WriteLine(
             $"Candidate: {binding.CandidateInstallFolder ?? "(none named)"} " +
             $"[{ProductBuildIdentity.Fingerprint(binding.CandidateProductAssemblies)[..12]}…]");
@@ -1118,7 +1125,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         StandardRegressionSet set,
         PrintFlowConfiguration configuration,
         string invocationId,
-        RegressionBuildOrigin? origin)
+        RegressionBuildOrigin? origin,
+        bool usesMeituOverride = false)
     {
         ImmutableArray<ProductAssemblyIdentity> harness = ProductBuildIdentity.Running();
 
@@ -1128,6 +1136,10 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
                 : DefaultCandidateInstallFolder;
 
         List<string> candidateProblems = [];
+        if (usesMeituOverride)
+        {
+            candidateProblems.Add(RegressionMeituOverride.PublicationProblem);
+        }
         if (origin is null)
         {
             candidateProblems.Add("Diagnostic unbound run: no controlled build-pair association; publication is forbidden.");

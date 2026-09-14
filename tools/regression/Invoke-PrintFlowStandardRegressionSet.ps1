@@ -59,6 +59,12 @@
     Explicit diagnostic execution using the already-built local test project. Cannot produce
     publishable evidence. This still operates external applications and requires live authorization.
 
+.PARAMETER MeituExecutablePath
+    Explicit Meitu executable for an operator-authorized version exception. The paired harness
+    records a run-local derived preset and the selected bytes. The accepted preset is untouched.
+    All existing UI/ownership/readiness checks remain; this run cannot authorize publication.
+    Omit during visual review, which preserves the original run's exception and binding.
+
 .PARAMETER RecordVisualReview
     A JSON file of decisions for the qualitative checks a completed run left open. With
     -RunId, re-derives that run's verdict from evidence already on disk; nothing is re-run, and a
@@ -93,6 +99,7 @@ param(
     [string] $RecordVisualReview,
     [string] $Configuration = 'Release',
     [string] $BuildPairReceipt,
+    [string] $MeituExecutablePath,
     [switch] $DiagnosticUnbound,
     [string] $CandidateInstallFolder = (Join-Path $env:ProgramFiles 'PrintFlow Studio')
 )
@@ -295,6 +302,13 @@ $env:PRINTFLOW_REGRESSION_CANDIDATE_INSTALL_FOLDER = $CandidateInstallFolder
 $env:PRINTFLOW_REGRESSION_BUILD_PAIR_RECEIPT = $null
 $env:PRINTFLOW_REGRESSION_DIAGNOSTIC_UNBOUND = $null
 $pair = $null
+$env:PRINTFLOW_REGRESSION_MEITU_EXECUTABLE = $null
+if ($MeituExecutablePath) {
+    if ($RecordVisualReview -or $DiagnosticUnbound -or -not $BuildPairReceipt) {
+        throw 'MeituExecutablePath requires a new bound run, not review or diagnostic unbound mode.'
+    }
+    $env:PRINTFLOW_REGRESSION_MEITU_EXECUTABLE = (Resolve-Path -LiteralPath $MeituExecutablePath).Path
+}
 
 if ($RecordVisualReview) {
     if ($BuildPairReceipt -or $DiagnosticUnbound) {
@@ -338,6 +352,11 @@ if ($RecordVisualReview) {
         if ($BuildPairReceipt) {
             if ($DiagnosticUnbound) { throw 'Choose a build pair or diagnostic unbound execution, not both.' }
             $pair = Read-PrintFlowBuildPair -ReceiptPath $BuildPairReceipt
+            if ($MeituExecutablePath -and -not ($pair.Inputs | Where-Object {
+                $_.Name -eq 'tests/PrintFlow.Tests/Regression/RegressionMeituOverride.cs'
+            })) {
+                throw 'This retained harness predates MeituExecutablePath support. Create a new controlled pair; preserve the old pair.'
+            }
             $names = @(Get-PrintFlowProductAssemblyNames)
             Assert-PrintFlowPairInventory $pair.CandidateProductAssemblies `
                 @(Read-PrintFlowPairFiles $CandidateInstallFolder $names) $names 'selected candidate'

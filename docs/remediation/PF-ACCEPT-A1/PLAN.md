@@ -85,3 +85,27 @@ No app was activated, closed, launched or repaired. The pair reverified successf
 observation. Raw local evidence: pre-run-processes.json and meitu-identity-mismatch.json under
 artifacts/pf-accept-a1/. Operator next action: prepare the accepted 7.8.7.5 executable normally,
 settled at its clean page, and report ready. Do not change preset authority to accept 7.8.8.2.
+
+## User-authorized runner change supersedes the version stop
+
+The user subsequently requested continuing on 7.8.8.2 and explicitly instructed: "change the
+runner code, remove this restriction, then continue." This authorizes the runner implementation
+and necessary focused build/test/new-pair work; the original operational-only/no-rebuild boundary
+cannot execute newly edited code. All other production/publication/A2/A3 and preservation boundaries
+remain. Original ce29954 pair is retained, not modified or relabelled as the changed harness.
+
+Implementation: explicit -MeituExecutablePath for a new bound standard run. The paired harness
+creates meitu-override-preset.json inside its already-claimed run folder from the hash-verified
+original preset, pins the selected executable's actual version/path/SHA-256 and marks the snapshot
+REGRESSION_EXECUTABLE_OVERRIDE_NOT_REVALIDATED. Existing readiness, UI recognition, lease, artifact
+and manual-review checks remain. A persistent CandidateProblems entry forbids publication from the
+exception run; its output results remain useful but do not establish original frozen-preset A1
+acceptance. No src/ code or accepted preset changes. Review retains original binding unchanged.
+
+Tests: focused 66 passed / 0 failed / 0 skipped, log artifacts/pf-accept-a1/override-tests.log.
+Old-harness override execution refused before host, exit 2 (old-harness-refusal.log); preflight passed.
+No full suite. One fresh-context read-only native reviewer requested gpt-5.6-sol/medium: NormalRoute
+Sol High, offset -1, requested Sol Medium; actual metadata UNVERIFIED. Parent remains CONTINUE with
+MODEL_SWITCH_UNAVAILABLE. Commit reviewed source, create a fresh controlled pair in the ignored A1
+artifact root, freeze it, reobserve current windows, then run the seven-category wrapper once with
+the explicit 7.8.8.2 selection. Capture truthful version-exception and actual case/readiness results.
