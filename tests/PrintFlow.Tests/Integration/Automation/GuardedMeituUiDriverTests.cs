@@ -239,6 +239,13 @@ public sealed class GuardedMeituUiDriverTests
         h.Locator.Replace(h.Target.Process, editor, dialog);
         h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
         h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.OnInvoke = description =>
+        {
+            if (description == "1")
+            {
+                h.Elements.SetTexts(editor.Handle, [.. MeituFakes.EditorMarkers]);
+            }
+        };
 
         OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
             h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
@@ -250,6 +257,150 @@ public sealed class GuardedMeituUiDriverTests
         // The window handed back is the one the file went into, because that is the window a
         // caller must confirm against (§13).
         opened.Value.Window.Title.ShouldBe(MeituFakes.EditorTitle);
+    }
+
+    /// <summary>
+    /// Meitu may replace its editor top-level window while committing an Open. The target
+    /// returned to the caller must be the signed successor, not the destroyed pre-open handle.
+    /// </summary>
+    [Fact]
+    public async Task Opening_a_working_copy_rebinds_to_the_single_signed_successor_editor()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: h.Target.Process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef loaded = MeituFakes.Window(
+            handle: 0x3000, owningProcessId: h.Target.Process.ProcessId, title: MeituFakes.EditorTitle);
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.SetTexts(loaded.Handle, [.. MeituFakes.EditorMarkers]);
+        bool opening = false;
+        int postOpenEditorReads = 0;
+        h.Elements.OnInvoke = description =>
+        {
+            if (description == "1")
+            {
+                opening = true;
+            }
+        };
+        h.Locator.OnRefresh = handle =>
+        {
+            if (opening && handle == editor.Handle && ++postOpenEditorReads == 2)
+            {
+                h.Locator.Replace(h.Target.Process, loaded);
+                h.Locator.PutInForeground(loaded);
+            }
+        };
+
+        OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
+            h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.TechnicalDetail : string.Empty);
+        opened.Value.Process.ShouldBe(h.Target.Process);
+        opened.Value.Window.Handle.ShouldBe(loaded.Handle);
+        postOpenEditorReads.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Opening_a_working_copy_refuses_two_signed_successor_editors()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: h.Target.Process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef first = MeituFakes.Window(
+            handle: 0x3000, owningProcessId: h.Target.Process.ProcessId, title: MeituFakes.EditorTitle);
+        ExternalWindowRef second = MeituFakes.Window(
+            handle: 0x4000, owningProcessId: h.Target.Process.ProcessId, title: MeituFakes.EditorTitle);
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.SetTexts(first.Handle, [.. MeituFakes.EditorMarkers]);
+        h.Elements.SetTexts(second.Handle, [.. MeituFakes.EditorMarkers]);
+        h.Elements.OnInvoke = description =>
+        {
+            if (description == "1")
+            {
+                h.Locator.Replace(h.Target.Process, first, second);
+                h.Locator.PutInForeground(first);
+            }
+        };
+
+        OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
+            h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        opened.Failure.Context["candidateCount"].ShouldBe("2");
+    }
+
+    [Fact]
+    public async Task Opening_a_working_copy_rebinds_to_one_signed_busy_successor_for_observation()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: h.Target.Process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef busy = MeituFakes.Window(
+            handle: 0x3000, owningProcessId: h.Target.Process.ProcessId, title: MeituFakes.EditorTitle);
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.SetTexts(busy.Handle, MeituFakes.BusyTexts());
+        h.Elements.OnInvoke = description =>
+        {
+            if (description == "1")
+            {
+                h.Locator.Replace(h.Target.Process, busy);
+                h.Locator.PutInForeground(busy);
+            }
+        };
+
+        OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
+            h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.TechnicalDetail : string.Empty);
+        opened.Value.Window.Handle.ShouldBe(busy.Handle);
+    }
+
+    [Fact]
+    public async Task Opening_a_working_copy_never_binds_a_signed_lookalike_owned_by_another_process()
+    {
+        Harness h = Build(meituInForeground: true);
+        ShowEmptyEditor(h);
+
+        ExternalWindowRef editor = h.Target.Window with { Title = MeituFakes.EditorTitle };
+        ExternalWindowRef dialog = MeituFakes.Window(
+            handle: 0x2000, owningProcessId: h.Target.Process.ProcessId, title: "打开", className: "#32770");
+        ExternalWindowRef impostor = MeituFakes.Window(
+            handle: 0x3000, owningProcessId: 5150, title: MeituFakes.EditorTitle);
+        h.Locator.Replace(h.Target.Process, editor, dialog);
+        h.Elements.AddDialogControl(dialog.Handle, "1148", "Edit");
+        h.Elements.AddDialogControl(dialog.Handle, "1", "Button");
+        h.Elements.SetTexts(impostor.Handle, [.. MeituFakes.EditorMarkers]);
+        h.Elements.OnInvoke = description =>
+        {
+            if (description == "1")
+            {
+                h.Locator.Replace(h.Target.Process, impostor);
+                h.Locator.Foreground = new ForegroundIdentity(impostor.Handle, 5150, "impostor");
+            }
+        };
+
+        OperationResult<MeituTarget> opened = await h.Driver.OpenWorkingCopyAsync(
+            h.Target, @"C:\Temp\printflow\working.png", CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.MeituOpenInputFailed);
+        opened.Failure.Context["candidateCount"].ShouldBe("0");
     }
 
     /// <summary>

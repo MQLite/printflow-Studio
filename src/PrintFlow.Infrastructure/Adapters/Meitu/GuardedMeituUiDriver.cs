@@ -818,9 +818,156 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         OperationResult<Unit> filled = FillAndConfirmDialog(
             editor.Value, dialog.Value, workingCopyAbsolutePath);
 
-        return filled.IsFailure
-            ? OperationResult.Fail<MeituTarget>(filled.Failure)
-            : OperationResult.Ok(editor.Value);
+        if (filled.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(filled.Failure);
+        }
+
+        // Committing the picker can replace Meitu's editor top-level window. Returning the
+        // pre-open handle makes the caller's first read fail with MeituTargetLost even though
+        // the requested document is visibly loaded in a legitimate successor editor. Rebind
+        // read-only to exactly one signed document or Busy surface of the same verified process;
+        // never choose by title alone or carry an arbitrary same-process window forward.
+        return await WaitForOpenedDocumentWindowAsync(editor.Value, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Rebinds an accepted Open to the single signed post-open surface created by that Open.
+    /// </summary>
+    /// <remarks>
+    /// This is deliberately narrower than general target recovery. It runs only after the
+    /// verified picker accepted PrintFlow's exact Working-copy path, retains the verified
+    /// process identity, requires a signed loaded-editor, result, or operation-Busy surface,
+    /// and refuses ambiguity. Busy is included because Enhancement may auto-start on load and
+    /// hide ordinary editor markers; the caller must observe that execution before it finishes.
+    /// This sends no input, and document identity is still proved separately through the exact
+    /// Save-default probe before any processing action.
+    /// </remarks>
+    private async Task<OperationResult<MeituTarget>> WaitForOpenedDocumentWindowAsync(
+        MeituTarget target, CancellationToken cancellationToken)
+    {
+        OperationResult<MeituBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+        {
+            return OperationResult.Fail<MeituTarget>(baseline.Failure);
+        }
+
+        if (baseline.Value.DocumentIdentity is null)
+        {
+            // The production caller owns the explicit missing-evidence refusal and reports its
+            // stable context. Preserve that boundary: without a signature this helper cannot
+            // rebind, but it also must not replace the caller's more precise refusal.
+            return OperationResult.Ok(target);
+        }
+
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.OpenConfirmationTimeout;
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (!_locator.IsAlive(target.Process))
+            {
+                return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                    FailureCode.MeituTargetLost,
+                    $"Meitu process {target.Process.ProcessId} exited after Open was invoked; no " +
+                    "successor editor was accepted and no further input was produced.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["targetLoss"] = "process-exited-after-open",
+                        ["processId"] = target.Process.ProcessId.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["inputSent"] = "false",
+                    }));
+            }
+
+            OperationResult<IReadOnlyList<ExternalWindowRef>> windows =
+                _locator.FindTopLevelWindows(target.Process);
+            if (windows.IsFailure)
+            {
+                return OperationResult.Fail<MeituTarget>(windows.Failure);
+            }
+
+            List<MeituTarget> matches = [];
+            foreach (ExternalWindowRef window in windows.Value)
+            {
+                if (window.OwningProcessId != target.Process.ProcessId)
+                {
+                    continue;
+                }
+
+                MeituTarget candidate = target with { Window = window };
+                OperationResult<MeituStateSnapshot> inspected = await InspectStateCoreAsync(
+                    candidate, expectedWorkingCopyFileName: null, observedDocumentIdentity: null,
+                    cancellationToken).ConfigureAwait(false);
+                if (inspected.IsFailure)
+                {
+                    continue;
+                }
+
+                MeituDocumentSurfacePhase phase =
+                    MeituDocumentIdentityRule.ClassifyIdentityProbeSurface(
+                        baseline.Value, inspected.Value.Observation);
+                if (inspected.Value.State == MeituStartingState.Busy ||
+                    phase is MeituDocumentSurfacePhase.LoadedEditor or
+                    MeituDocumentSurfacePhase.EnhancementResult or
+                    MeituDocumentSurfacePhase.BackgroundRemovalResult)
+                {
+                    matches.Add(candidate with { Window = window });
+                }
+            }
+
+            if (matches.Count == 1)
+            {
+                return OperationResult.Ok(matches[0]);
+            }
+
+            if (matches.Count > 1)
+            {
+                return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                    FailureCode.MeituUnknownState,
+                    $"Open produced {matches.Count} same-process windows matching signed document " +
+                    "surfaces; PrintFlow will not choose between them.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string>
+                    {
+                        ["candidateCount"] = matches.Count.ToString(
+                            System.Globalization.CultureInfo.InvariantCulture),
+                        ["inputSent"] = "false",
+                        ["phase"] = "post-open-rebind",
+                    }));
+            }
+
+            if (_clock.GetUtcNow() >= deadline)
+            {
+                // Some builds keep the same editor handle throughout Open. If it still belongs
+                // to the verified process, hand it back for the caller's read-only observation
+                // and exact identity probe; those retain the established failure semantics when
+                // the loaded-document signature itself never arrives.
+                OperationResult<ExternalWindowRef> original = _locator.Refresh(target.Window.Handle);
+                if (original.IsSuccess &&
+                    original.Value.OwningProcessId == target.Process.ProcessId)
+                {
+                    return OperationResult.Ok(target with { Window = original.Value });
+                }
+
+                return OperationResult.Fail<MeituTarget>(OperationFailure.Create(
+                    FailureCode.MeituOpenInputFailed,
+                    $"No window of verified Meitu process {target.Process.ProcessId} reached one " +
+                    $"signed post-open document or Busy surface within " +
+                    $"{_options.OpenConfirmationTimeout.TotalSeconds:0} s.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["candidateCount"] = "0",
+                        ["inputSent"] = "false",
+                        ["phase"] = "post-open-rebind",
+                    }));
+            }
+
+            await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />
