@@ -140,12 +140,29 @@ public sealed class MeituFineHairLoadedRedoSmoke
                 "Expected one signed ordinary editor retaining the exact redo input; observed " +
                 string.Join(" | ", observed));
 
-            processed = await Must(driver.RunBackgroundRemovalAsync(
+            Console.WriteLine("Retained editor candidates: " + string.Join(" | ", observed));
+            OperationResult<MeituBackgroundRemovalOutcome> processing =
+                await driver.RunBackgroundRemovalAsync(
                 candidates[0],
                 workingCopy.FileName,
                 BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
                 InertAutomationStopSignal.Instance,
-                CancellationToken.None));
+                CancellationToken.None);
+            if (processing.IsFailure)
+            {
+                OperationResult<EvidenceRef> capture = driver.CaptureEvidence(
+                    candidates[0], "loaded-redo-action-refused");
+                Console.WriteLine("Processing refusal: " + processing.Failure);
+                Console.WriteLine("Processing refusal context: " + JsonSerializer.Serialize(
+                    processing.Failure.Context));
+                Console.WriteLine(capture.IsSuccess
+                    ? "Processing refusal evidence: " + capture.Value.AbsolutePath
+                    : "Processing refusal evidence capture failed: " + capture.Failure);
+            }
+
+            processing.IsSuccess.ShouldBeTrue(
+                processing.IsFailure ? processing.Failure.ToString() : string.Empty);
+            processed = processing.Value;
             processed.ObservedDocumentIdentity.ShouldBe("FIX-FINE-HAIR-001_副本");
 
             exported = await Must(adapter.ExportBackgroundRemovalResultAsync(
