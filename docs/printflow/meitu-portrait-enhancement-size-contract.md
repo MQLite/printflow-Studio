@@ -120,3 +120,14 @@ in-thread model switch or verified execution metadata: `MODEL_SWITCH_UNAVAILABLE
 `UNVERIFIED`; the available context remained safe for read-only analysis and documentation.
 
 **CONTRACT RESOLVED — SAME-SIZE ENHANCEMENT PERMITTED; EXPECTATION UPDATE STATUS EXPLICIT**
+
+## 14 September 2026 — approved v2 correction completed
+
+The separately authorized correction is complete at code commit `df162aa`. A fresh
+`D:\PrintFlowStudio\TestData\v2` preserves the current seven category bytes and two required fixed
+reference outputs, while its portrait manifest alone adopts
+`enhancedOutputIsNotSmallerThanSource: true`. Both preflight layers and the actual runner consume
+that property and compare the managed input and Enhancement Revision on width and height. Focused
+tests, Release build, v2 static preflight and one new controlled pair passed. v1 and its historical
+A1 failure/review semantics remain unchanged; no live acceptance or Production revalidation ran.
+See [the completion report](regression-v2-portrait-expectation-correction.md).

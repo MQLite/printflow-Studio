@@ -1034,3 +1034,12 @@ The run uses a marked, run-local derived preset and records actual 7.8.8.2 bytes
 independently of the failed set. No real production revalidation, normal-App E2E or Jira change.
 SCRUM-11065 remains PARTIAL. Exact identities, artifacts and limitations are in
 audit-a1-standard-regression-set-acceptance.md and ../remediation/PF-ACCEPT-A1/HANDOFF.md.
+
+## 14 September 2026 — regression-v2 portrait expectation delta
+
+The approved tooling-only correction now provides `printflow-regression-v2` with unchanged current
+category/reference bytes and the approved two-axis non-shrinking portrait expectation. Generator,
+preflight, loader and actual caller coverage passed in focused tests, and one fresh controlled pair
+is ready for a separately authorized future run. No live set body or Operator review ran; the Meitu
+7.8.8.2 publication prohibition and all Jira acceptance statuses remain unchanged. Details:
+[regression-v2 portrait expectation correction](regression-v2-portrait-expectation-correction.md).
