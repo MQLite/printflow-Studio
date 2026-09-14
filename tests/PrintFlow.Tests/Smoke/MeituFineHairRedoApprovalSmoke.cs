@@ -93,7 +93,6 @@ public sealed class MeituFineHairRedoApprovalSmoke
         result.SessionId.ShouldBe(sessionId);
         result.Operation.ShouldBe(OperationKind.ManualResultImport);
         result.IsValid.ShouldBeTrue();
-        result.ReviewState.ShouldBe(ReviewState.NotReviewed);
         result.Sha256.ShouldBe(outputHash);
         result.Facts.Format.ShouldBe(ImageFormat.Png);
         result.Facts.ByteLength.ShouldBe(1_430_946);
@@ -121,25 +120,58 @@ public sealed class MeituFineHairRedoApprovalSmoke
         transparency.ShouldBe(new MeituTransparencyFacts(1_920_000, 764_826, 1_545_347));
         MeituTransparencyRule.Validate(transparency).IsSuccess.ShouldBeTrue();
 
-        SessionStep background = before.Steps.Single(step => step.Step == StepKind.BackgroundRemoval);
-        background.State.ShouldBe(StepState.ReviewRequired);
-        background.CurrentRevisionId.ShouldBe(revisionId);
-        background.CurrentRevisionSha256.ShouldBe(outputHash);
-        before.Session.CurrentStep.ShouldBe(StepKind.BackgroundRemoval);
         before.Steps.Single(step => step.Step == StepKind.Enhancement).State.ShouldBe(StepState.Skipped);
         before.Reviews.ShouldNotContain(review => review.Step == StepKind.Enhancement);
-        before.Reviews.ShouldNotContain(review => review.SubjectId == revisionId.Value);
 
-        SessionView approved = await Must(sessions.ExecuteAsync(
-            sessionId,
-            new WorkflowCommand.Approve(
-                StepKind.BackgroundRemoval,
-                outputHash,
-                "Operator approved the displayed fresh redo for PF-FIX-MEITU-CONFIRM."),
-            "PF-FIX-MEITU-CONFIRM",
-            CancellationToken.None));
-        approved.CurrentStep!.Step.ShouldBe(StepKind.Trim);
-        approved.CurrentStep.State.ShouldBe(StepState.Waiting);
+        bool approvalCommandInvoked = false;
+        bool revisionCacheRepaired = false;
+        ReviewDecision? existingReview = before.Reviews.SingleOrDefault(
+            review => review.SubjectId == revisionId.Value);
+        if (existingReview is null)
+        {
+            result.ReviewState.ShouldBe(ReviewState.NotReviewed);
+            SessionStep background = before.Steps.Single(
+                step => step.Step == StepKind.BackgroundRemoval);
+            background.State.ShouldBe(StepState.ReviewRequired);
+            background.CurrentRevisionId.ShouldBe(revisionId);
+            background.CurrentRevisionSha256.ShouldBe(outputHash);
+            before.Session.CurrentStep.ShouldBe(StepKind.BackgroundRemoval);
+
+            SessionView approved = await Must(sessions.ExecuteAsync(
+                sessionId,
+                new WorkflowCommand.Approve(
+                    StepKind.BackgroundRemoval,
+                    outputHash,
+                    "Operator approved the displayed fresh redo for PF-FIX-MEITU-CONFIRM."),
+                "PF-FIX-MEITU-CONFIRM",
+                CancellationToken.None));
+            approved.CurrentStep!.Step.ShouldBe(StepKind.Trim);
+            approved.CurrentStep.State.ShouldBe(StepState.Waiting);
+            approvalCommandInvoked = true;
+        }
+        else
+        {
+            AssertExactApproval(existingReview, sessionId, revisionId, outputHash);
+            before.Steps.Single(step => step.Step == StepKind.BackgroundRemoval).State
+                .ShouldBe(StepState.Approved);
+            before.Session.CurrentStep.ShouldBe(StepKind.Trim);
+            before.Steps.Single(step => step.Step == StepKind.Trim).State.ShouldBe(StepState.Waiting);
+
+            if (result.ReviewState == ReviewState.NotReviewed)
+            {
+                SessionMutation cacheRepair = SessionMutation.Empty(before.Session) with
+                {
+                    RevisionReviewStateChanges =
+                    [new RevisionReviewStateChange(revisionId, outputHash, ReviewState.Approved)],
+                };
+                await Must(repository.CommitAsync(cacheRepair, CancellationToken.None));
+                revisionCacheRepaired = true;
+            }
+            else
+            {
+                result.ReviewState.ShouldBe(ReviewState.Approved);
+            }
+        }
 
         SessionAggregate after = (await Must(repository.LoadAsync(
             sessionId, CancellationToken.None)))!;
@@ -151,11 +183,7 @@ public sealed class MeituFineHairRedoApprovalSmoke
         after.Steps.Single(step => step.Step == StepKind.Trim).State.ShouldBe(StepState.Waiting);
 
         ReviewDecision review = after.Reviews.Single(review => review.SubjectId == revisionId.Value);
-        review.Step.ShouldBe(StepKind.BackgroundRemoval);
-        review.SubjectKind.ShouldBe(ReviewSubjectKind.Revision);
-        review.ReviewedSha256.ShouldBe(outputHash);
-        review.IsApproved.ShouldBeTrue();
-        review.QuickReason.ShouldBeNull();
+        AssertExactApproval(review, sessionId, revisionId, outputHash);
         after.Reviews.ShouldNotContain(item => item.Step == StepKind.Enhancement);
         after.Attempts.Single(attempt => attempt.Id == failedAttemptId).ShouldBe(failed);
         (await Must(repository.GetAutomationLockAsync(CancellationToken.None))).IsHeld.ShouldBeFalse();
@@ -179,6 +207,8 @@ public sealed class MeituFineHairRedoApprovalSmoke
             FailedStagingAttemptId = failedAttemptId.ToString(),
             FailedStagingAttemptState = AttemptStatus.Failed.ToString(),
             EnhancementReviewCreated = false,
+            ApprovalCommandInvoked = approvalCommandInvoked,
+            RevisionCacheRepaired = revisionCacheRepaired,
             MeituTouched = false,
             ProcessingInvoked = false,
             ExportInvoked = false,
@@ -188,6 +218,19 @@ public sealed class MeituFineHairRedoApprovalSmoke
         }, new JsonSerializerOptions { WriteIndented = true }));
 
         Console.WriteLine(approvalReceipt);
+    }
+
+    private static void AssertExactApproval(
+        ReviewDecision review, SessionId sessionId, RevisionId revisionId, Sha256 outputHash)
+    {
+        review.SessionId.ShouldBe(sessionId);
+        review.Step.ShouldBe(StepKind.BackgroundRemoval);
+        review.SubjectKind.ShouldBe(ReviewSubjectKind.Revision);
+        review.SubjectId.ShouldBe(revisionId.Value);
+        review.ReviewedSha256.ShouldBe(outputHash);
+        review.IsApproved.ShouldBeTrue();
+        review.QuickReason.ShouldBeNull();
+        review.Notes.ShouldBe("Operator approved the displayed fresh redo for PF-FIX-MEITU-CONFIRM.");
     }
 
     private static async Task<T> Must<T>(Task<OperationResult<T>> pending)

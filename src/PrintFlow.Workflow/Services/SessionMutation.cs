@@ -12,6 +12,10 @@ namespace PrintFlow.Workflow.Services;
 /// <summary>One <c>Revision</c> being marked invalid, as part of a mutation.</summary>
 public sealed record RevisionInvalidation(RevisionId RevisionId, InvalidationReason Reason, DateTimeOffset AtUtc);
 
+/// <summary>Synchronises a Revision's cached review state with its authoritative review decision.</summary>
+public sealed record RevisionReviewStateChange(
+    RevisionId RevisionId, Sha256 ReviewedHash, ReviewState ReviewState);
+
 /// <summary>One verified location switch or explicit end of rejected-result retention.</summary>
 public sealed record RevisionRetentionChange(
     RevisionId RevisionId, WorkspaceFileRef ExpectedFile, Sha256 ExpectedHash,
@@ -53,6 +57,13 @@ public sealed record SessionMutation(
     InputSnapshot? NewSnapshot,
     AutomationLockChange? LockChange)
 {
+    /// <summary>
+    /// Cached Revision review-state changes committed atomically with the append-only decision.
+    /// The ReviewDecision remains authority; the hash guard prevents an unrelated Revision from
+    /// inheriting the cache update.
+    /// </summary>
+    public IReadOnlyList<RevisionReviewStateChange> RevisionReviewStateChanges { get; init; } = [];
+
     public IReadOnlyList<RevisionRetentionChange> RevisionRetentionChanges { get; init; } = [];
 
     /// <summary>

@@ -99,6 +99,34 @@ public sealed class SessionServiceTests
     }
 
     [Fact]
+    public async Task Approving_an_intermediate_revision_updates_its_cached_review_state()
+    {
+        using SessionServiceHarness harness = new();
+        ISessionService service = harness.CreateService();
+        string source = harness.WriteSourcePng();
+
+        SessionId id = (await service.ImportAsync(
+            WorkflowType.PrepareAsset, source, "review-cache", "tester", CancellationToken.None)).Value.Id;
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.ConfirmOriginal(), "tester", CancellationToken.None));
+        OperationResult<SessionView> started = await service.ExecuteAsync(
+            id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None);
+        started.IsSuccess.ShouldBeTrue(started.IsFailure ? started.Failure.ToString() : "");
+        SessionView produced = started.Value;
+        RevisionId revisionId = produced.CurrentStep!.CurrentRevisionId!.Value;
+        Sha256 hash = produced.CurrentStep.CurrentRevisionSha256!.Value;
+
+        await Must(service.ExecuteAsync(
+            id, new WorkflowCommand.Approve(StepKind.Enhancement, hash), "tester", CancellationToken.None));
+
+        SessionAggregate reloaded = (await harness.Repository.LoadAsync(id, CancellationToken.None)).Value!;
+        reloaded.Revisions.Single(revision => revision.Id == revisionId).ReviewState
+            .ShouldBe(ReviewState.Approved);
+        reloaded.Reviews.Single(review => review.SubjectId == revisionId.Value).ReviewedSha256
+            .ShouldBe(hash);
+    }
+
+    [Fact]
     public async Task Mutating_an_approved_file_on_disk_invalidates_it_and_refuses_consumption()
     {
         using SessionServiceHarness harness = new();

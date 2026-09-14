@@ -3015,6 +3015,7 @@ public sealed partial class SessionService : ISessionService
         IReadOnlyList<ProcessingAttempt>? upsertAttempts = null, IReadOnlyList<PrintOutput>? upsertOutputs = null)
     {
         List<ReviewDecision> reviews = [];
+        List<RevisionReviewStateChange> revisionReviewStateChanges = [];
         List<RevisionInvalidation> revisionInvalidations = [];
         List<PrintOutput> outputUpdates = upsertOutputs is null ? [] : [.. upsertOutputs];
         AutomationLockChange? lockChange = null;
@@ -3028,6 +3029,14 @@ public sealed partial class SessionService : ISessionService
                         review.ReviewId, aggregate.Session.Id, review.Step, review.SubjectKind, review.SubjectId,
                         review.ReviewedHash, context.Operator, context.NowUtc, review.IsApproved,
                         review.QuickReason, review.Notes));
+
+                    if (review.SubjectKind == ReviewSubjectKind.Revision)
+                    {
+                        revisionReviewStateChanges.Add(new RevisionReviewStateChange(
+                            RevisionId.From(review.SubjectId),
+                            review.ReviewedHash,
+                            review.IsApproved ? ReviewState.Approved : ReviewState.Rejected));
+                    }
 
                     // A PrintOutput's cached ReviewState is a query convenience only — the
                     // ReviewDecision row above remains the authority — but it must still track
@@ -3067,6 +3076,7 @@ public sealed partial class SessionService : ISessionService
             updatedSession, newSnapshot.Steps, newRevisions ?? [], revisionInvalidations,
             upsertAttempts ?? [], reviews, outputUpdates, newInputSnapshot, lockChange)
         {
+            RevisionReviewStateChanges = revisionReviewStateChanges,
             RemoveSteps = StepsNoLongerInWorkflow(aggregate, newSnapshot),
         };
     }

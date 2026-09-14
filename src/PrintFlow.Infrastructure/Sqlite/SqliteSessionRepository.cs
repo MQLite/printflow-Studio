@@ -136,6 +136,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
 
         if (mutation.IsRetentionMaintenance && (mutation.UpsertSteps.Count != 0 || mutation.RemoveSteps.Count != 0 ||
             mutation.NewRevisions.Count != 0 || mutation.RevisionInvalidations.Count != 0 ||
+            mutation.RevisionReviewStateChanges.Count != 0 ||
             mutation.UpsertAttempts.Count != 0 || mutation.NewReviews.Count != 0 || mutation.NewSnapshot is not null ||
             mutation.LockChange is not null))
             return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
@@ -246,6 +247,19 @@ public sealed class SqliteSessionRepository : ISessionRepository
             foreach (ReviewDecision review in mutation.NewReviews)
             {
                 await InsertReviewAsync(connection, transaction, review);
+            }
+
+            foreach (RevisionReviewStateChange change in mutation.RevisionReviewStateChanges)
+            {
+                int changed = await UpdateRevisionReviewStateAsync(
+                    connection, transaction, mutation.Session.Id, change);
+                if (changed != 1)
+                {
+                    transaction.Rollback();
+                    return OperationResult.Fail<Unit>(
+                        FailureCode.PersistenceError,
+                        "The reviewed Revision changed before its cached review state could be recorded.");
+                }
             }
 
             foreach (Domain.Outputs.PrintOutput output in mutation.UpsertOutputs)
@@ -685,6 +699,33 @@ public sealed class SqliteSessionRepository : ISessionRepository
             id = invalidation.RevisionId.ToString(),
             atUtc = Mappers.ToText(invalidation.AtUtc),
             reason = Mappers.ToText(invalidation.Reason),
+        }, transaction);
+    }
+
+    private static Task<int> UpdateRevisionReviewStateAsync(
+        SqliteConnection connection,
+        SqliteTransaction transaction,
+        SessionId sessionId,
+        RevisionReviewStateChange change)
+    {
+        if (change.ReviewState is not (Domain.Revisions.ReviewState.Approved or
+            Domain.Revisions.ReviewState.Rejected))
+        {
+            throw new InvalidOperationException("A review decision cannot cache NotReviewed.");
+        }
+
+        const string sql =
+            """
+            UPDATE Revision
+               SET ReviewState = @reviewState
+             WHERE Id = @id AND SessionId = @sessionId AND Sha256 = @reviewedHash AND IsValid = 1;
+            """;
+        return connection.ExecuteAsync(sql, new
+        {
+            id = change.RevisionId.ToString(),
+            sessionId = sessionId.ToString(),
+            reviewedHash = change.ReviewedHash.Value,
+            reviewState = Mappers.ToText(change.ReviewState),
         }, transaction);
     }
 
