@@ -2,16 +2,79 @@
 
 ## Status
 
-**PARTIAL — correction and paired recovery executable complete; the confirmed pre-restart result
-is no longer present as a byte-complete export source.**
+**COMPLETE FOR CORRECTION, REDO, EXPORT AND REGISTRATION — fresh cutout quality review remains
+intentionally open.**
 
-No live Meitu input was sent in this task. The retained cutout, original A1 database and prior
+## 15 September redo completion
+
+The reboot made the previously accepted live result unrecoverable, so the operator's request to
+redo this part was treated as authority for one new `FIX-FINE-HAIR-001` Background Removal run,
+not as approval of its future output. The new run is now exported and registered. Its Revision is
+`ReviewRequired`/`NotReviewed`; the earlier acceptance was not transferred.
+
+The first paired redo exposed a real post-open target defect: Meitu replaced editor handle
+`0x61F76` after accepting the exact Working-copy path, while `OpenWorkingCopyAsync` returned that
+destroyed handle to `ObserveLoadedDocumentAsync`. Commit
+`7de898b107ec74c3f24c507b7cae498d4738930a` now waits read-only for exactly one signed
+same-process successor document or Busy surface and refuses zero/wrong-owner/ambiguous candidates.
+
+The retained exact document was then resumed without another Open. Background Removal executed
+and returned a visible cutout to the ordinary editor, but its terminal identity confirmation hit
+one markerless UIA repaint and reported failure even though the finished effect was visible.
+The preserved before/result captures are:
+
+- `D:\PrintFlowStudio\QA\PF-FIX-MEITU-CONFIRM\redo-20260915-110930\evidence\20260914T230940Z_open-unsettled_61F76.png`
+  (`A3945859AE76E4322DC1E2E9CAE4F8D347559FB48FBE82D1B6D301C1265AA0E9`), showing the
+  original green background;
+- `D:\PrintFlowStudio\QA\PF-FIX-MEITU-CONFIRM\redo-20260915-110930\loaded-resume-evidence\20260914T233151Z_loaded-redo-action-refused_61F76.png`
+  (`6BD366125978B7743B4F86E97BCFBD2A20FD456A204EEDEC1A08A4BBA91C0C4B`), showing the same
+  object cut out on checkerboard in the ordinary editor.
+
+Commit `ac3e27f5d0069c8f65275e80680f1c908b6c746e` makes the identity probe wait out only that
+markerless repaint while the exact accepted editor title remains enabled and unblocked. An
+unaccepted title, owned dialog, disabled surface or ambiguous result still returns immediately
+for refusal. The recovery then invoked no processing: it confirmed exact Save-default identity
+`FIX-FINE-HAIR-001_副本`, used the guarded Save/另存为 route once, waited for stable bytes,
+decoded and validated the PNG, imported the exact hash, dismissed the signed result surface and
+closed the correlated document.
+
+Final result:
+
+- session: `01a0a22e-e1a5-77c8-bb67-19543bfc0a33`;
+- preserved failed staging attempt: `01a0a22e-e3e7-7f59-b2cf-75e2737d3e37`;
+- manual-result Revision: `01a0a248-d7eb-7d20-ad5d-389610b1287a`;
+- output: `D:\PrintFlowStudio\QA\PF-FIX-MEITU-CONFIRM\redo-20260915-110930\workspace\Sessions\S_20260914T230936Z_3bfc0a33\Working\01a0a22e-e3e7-7f59-b2cf-75e2737d3e37\FIX-FINE-HAIR-001-REDO_CUTOUT.png`;
+- output SHA-256: `731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`;
+- decoded size: 1200×1600, 1,430,946 bytes;
+- alpha: 764,826 transparent pixels and 1,545,347 visible pixels;
+- unchanged source SHA-256:
+  `5A705FE390AF87D1D48A0554D4908C425D4703A8807CA78EC73AC0E55E3C8D8E`;
+- review state: `NotReviewed`; workflow state: `ReviewRequired`;
+- cleanup: `KnownEditorEmpty`; business lock free; canonical lease released and reacquired as an
+  independent release check;
+- receipt:
+  `D:\PrintFlowStudio\QA\PF-FIX-MEITU-CONFIRM\redo-20260915-110930\loaded-redo-receipt.json`.
+
+Final source-bound pair `82f8d5fc-9318-473d-a72a-3d551902a523` was built from
+`ac3e27f5d0069c8f65275e80680f1c908b6c746e` with SDK 10.0.400, zero warnings/errors and
+receipt SHA-256 `2B61DC4C65B08D1D7F292C2DA2FF570C7A4005F4EBDCDFBE3C30E6481B334220`.
+The focused transient regression was red before the fix and green after it; the affected Meitu
+set passed 79/79 and the full Automation integration scope passed 473/473. No full suite or
+seven-category regression was run because the final diff stayed inside the Meitu open/identity
+and task-scoped recovery seams.
+
+## Pre-redo recovery history
+
+The following preserved history describes the state after the reboot and before the operator
+authorized the new redo; it is not the current completion status above.
+
+Before the redo was authorized, no live Meitu input had been sent. The retained cutout, original A1 database and prior
 evidence remain unchanged. The operator confirmed that the pre-restart Meitu 7.8.8.2 editor was
 showing the accepted `FIX-FINE-HAIR-001` cutout on its checkerboard result screen, but also reported
 that the computer was restarted before this task's export request was seen.
 
 Read-only follow-up on 15 September confirms the machine booted at 10:27 NZST and the new Meitu
-process started at 10:34 on the clean welcome page. The controlled cutout output is absent. Meitu's
+process started at 10:34 on the clean welcome page. The earlier controlled cutout output was absent. Meitu's
 cache retains only a 60×80 opaque thumbnail of the exact cutout
 (`thumbnailtNWzrR.png`, SHA-256
 `630ABE82809A4D5D97DF576168F1999FB1560DABAD5D2B06ADA839CF2BDA5FBA`); its cache database records
@@ -80,36 +143,13 @@ existing manual-import boundary, and the 909-test affected set and fresh paired 
 that scope. No seven-category run, notice investigation, A2/A3, install, deploy, publish, push,
 preset acceptance, `CandidateProblems` change or Production revalidation occurred.
 
-## Exact remaining gap and continuation
+## Exact remaining confirmation gap
 
-The missing item is not proof that processing happened; the operator evidence, the A1 Busy
-captures, the completed-result capture and Meitu's exact cached thumbnail establish that. The
-missing item is the full-resolution, byte-complete output that existed only in the pre-restart
-Meitu process. A screenshot or opaque 60×80 thumbnail cannot satisfy guarded export, decoded output
-validation or hash-bound Revision registration.
-
-Do not run the command below against the current welcome page. It remains the correct continuation
-only if the exact processed result is restored as a live `BackgroundRemovalResult`, or if the exact
-full-resolution PNG exported from that pre-restart result is found. Re-running cutout would create
-a new output requiring its own execution observation and operator review; the prior acceptance
-cannot be transferred to it.
-
-Run only `MeituObservedResultRecoverySmoke` from the retained harness with:
-
-- workspace `D:\PrintFlowStudio`;
-- A1 database
-  `D:\PrintFlowStudio\TestData\v1\runs\a1-meitu-7882-20260914-143954-d12383c8\regression-run.db`;
-- session `01a09dc9-d68f-7f44-8f03-b1bd33cd06d1`;
-- working input
-  `Sessions/S_20260914T024045Z_33cd06d1/Working/01a09dc9-d787-7e7a-a96e-a9f10557911e/FIX-FINE-HAIR-001.jpg`;
-- output on the same attempt-owned directory named `FIX-FINE-HAIR-001_CUTOUT.png`;
-- the existing run-local override preset and hash above;
-- a new task-owned evidence directory.
-
-The smoke acquires the canonical shared lease before touching Meitu. The live route must stop if
-the current phase is not exactly `BackgroundRemovalResult`, if the Save basename is not exactly
-`FIX-FINE-HAIR-001_副本`, if any output already occupies the destination, or if decoded validation
-fails. It must not substitute another PNG or another visible image.
+Only the fresh redo's visual quality remains for the operator to accept or reject. No approval was
+manufactured from the pre-restart decision. Review exact Revision
+`01a0a248-d7eb-7d20-ad5d-389610b1287a` / SHA-256
+`731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`.
+No further Meitu processing or export is required for that decision.
 
 ## Routing
 

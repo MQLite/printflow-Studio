@@ -63,3 +63,19 @@ Meitu 7.8.8.2 evidence remains nonpublishable. This task does not change an acce
 - ActualRoute: `UNVERIFIED`; `MODEL_SWITCH_UNAVAILABLE`; continue in the current context.
 - Independent agent review is unavailable because this task did not authorize delegation; use
   focused automated checks plus self-review.
+
+## Redo outcome after reboot
+
+The operator requested a fresh redo after the reboot made the previously accepted live result
+unexportable. The redo completed on the exact task-owned Working copy. Two additional live defects
+were fixed at their real callers: post-picker editor-handle replacement and a markerless repaint
+between foreground reacquisition and the Save identity probe. Both fixes retain exact process,
+window ownership, signed-surface, ambiguity, Save-default identity, managed destination and source
+hash guards.
+
+The finished cutout was preserved before further action, then recovered without invoking cutout or
+Enhancement again. It was guarded-exported as a decoded 1200×1600 PNG with real transparency and
+registered as manual-result Revision `01a0a248-d7eb-7d20-ad5d-389610b1287a`, SHA-256
+`731BE2E042A3FA47EFDD21254FA8F774E97F39E046BFFCE73BF63DEA0918DB19`.
+The Revision remains `ReviewRequired`/`NotReviewed`; fresh quality approval is the only remaining
+operator decision.
