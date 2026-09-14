@@ -51,6 +51,60 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
         _synthetic = new SyntheticRegressionWorkstation(_workstation);
 
     // ==========================================================================================
+    // v2 set selection and portrait expectation preflight
+    // ==========================================================================================
+
+    [Fact]
+    public void Explicit_v2_root_passes_the_actual_non_live_preflight_with_seven_bound_categories()
+    {
+        _synthetic.ConfigureSetVersion("v2",
+            "{ \"importAccepted\": true, \"enhancedOutputIsNotSmallerThanSource\": true }");
+
+        ScriptOutcome outcome = _synthetic.Run(
+            Wrapper, $"-SetRoot \"{_synthetic.SetRoot}\" -PreflightOnly");
+
+        outcome.ExitCode.ShouldBe(0);
+        outcome.Says(_synthetic.SetRoot).ShouldBeTrue();
+        outcome.Says("7 categories").ShouldBeTrue();
+
+        StandardRegressionSet loaded = StandardRegressionSet.Load(_synthetic.SetRoot);
+        loaded.SetId.ShouldBe("printflow-regression-v2");
+        loaded.Assets.Length.ShouldBe(7);
+        RegressionEvidenceBinding.DigestOfSet(_synthetic.SetManifests()).ShouldNotBeNullOrWhiteSpace();
+    }
+
+    [Theory]
+    [InlineData("{ \"importAccepted\": true }", "does not declare")]
+    [InlineData("{ \"enhancedOutputIsNotSmallerThanSource\": true, \"enhancedOutputIsLargerThanSource\": true }", "conflicts")]
+    public void Actual_preflight_refuses_missing_or_conflicting_v2_portrait_expectations(
+        string expectedProperties,
+        string expectedProblem)
+    {
+        _synthetic.ConfigureSetVersion("v2", expectedProperties);
+
+        ScriptOutcome outcome = _synthetic.Run(
+            Wrapper, $"-SetRoot \"{_synthetic.SetRoot}\" -PreflightOnly");
+
+        outcome.ExitCode.ShouldBe(2);
+        outcome.Says(expectedProblem).ShouldBeTrue();
+        outcome.Says("nothing was started").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Actual_preflight_refuses_a_new_v1_execution_without_reinterpreting_its_expectation()
+    {
+        _synthetic.ConfigureSetVersion("v1",
+            "{ \"importAccepted\": true, \"enhancedOutputIsLargerThanSource\": true }");
+
+        ScriptOutcome outcome = _synthetic.Run(
+            Wrapper, $"-SetRoot \"{_synthetic.SetRoot}\" -PreflightOnly");
+
+        outcome.ExitCode.ShouldBe(2);
+        outcome.Says("incompatible with a new execution").ShouldBeTrue();
+        outcome.Says("printflow-regression-v2").ShouldBeTrue();
+    }
+
+    // ==========================================================================================
     // F4 — an execution's verdict is its own
     // ==========================================================================================
 

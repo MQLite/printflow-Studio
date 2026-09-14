@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Regression;
 
@@ -158,6 +159,25 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
 
     /// <summary>Where the revalidation record is written.</summary>
     public string RecordPath => ProductionRevalidationRecord.PathFor(WorkspaceRoot);
+
+    /// <summary>Rewrites only set metadata/portrait expectations for v2 preflight protocol tests.</summary>
+    public void ConfigureSetVersion(string setVersion, string portraitExpectedPropertiesJson)
+    {
+        string setId = $"printflow-regression-{setVersion}";
+        foreach (string path in Directory.EnumerateFiles(ManifestFolder, "*.json"))
+        {
+            JsonObject manifest = JsonNode.Parse(File.ReadAllText(path))!.AsObject();
+            manifest["setId"] = setId;
+            manifest["fixtureSetVersion"] = setVersion;
+            if (string.Equals((string?) manifest["category"], "NORMAL_JPG_PORTRAIT",
+                    StringComparison.Ordinal))
+            {
+                manifest["expectedProperties"] = JsonNode.Parse(portraitExpectedPropertiesJson);
+            }
+
+            File.WriteAllText(path, manifest.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        }
+    }
 
     /// <summary>A scratch path inside this workstation, so nothing is left in the system temp root.</summary>
     public string Scratch(string name) => Path.Combine(_root, name);

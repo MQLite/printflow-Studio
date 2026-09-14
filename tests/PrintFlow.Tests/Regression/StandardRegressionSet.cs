@@ -45,6 +45,7 @@ public static class StandardRegressionCategories
 public sealed record RegressionAssetManifest(
     int SchemaVersion,
     string? SetId,
+    string? FixtureSetVersion,
     string FixtureId,
     string Category,
     string SourcePath,
@@ -56,6 +57,8 @@ public sealed record RegressionAssetManifest(
     ImmutableArray<string> ExpectedExternalApplications,
     string ComparisonMode,
     ImmutableArray<RegressionManualCheck> ManualChecks,
+    RegressionBooleanExpectation EnhancedOutputIsNotSmallerThanSource,
+    RegressionBooleanExpectation EnhancedOutputIsLargerThanSource,
     string? ManifestPath = null,
     string? ManifestSha256 = null)
 {
@@ -65,6 +68,14 @@ public sealed record RegressionAssetManifest(
     /// <summary>Whether this asset's expected path involves an external application at all.</summary>
     public bool RequiresExternalApplication => ExpectedExternalApplications.Length > 0;
 }
+
+/// <summary>A named boolean exactly as a manifest supplied it.</summary>
+/// <remarks>
+/// Presence is separate from value so preflight can distinguish a missing property, a false
+/// property and a property whose JSON type is not boolean. Those are three different authoring
+/// failures and none may silently default to the v2 Enhancement contract.
+/// </remarks>
+public sealed record RegressionBooleanExpectation(bool Present, bool? Value);
 
 /// <summary>A qualitative check the manifest states a person has to make.</summary>
 /// <param name="Id">Stable identifier, so a decision can be recorded against it later.</param>
@@ -166,7 +177,7 @@ public sealed record StandardRegressionSet(
     /// used for upgrade regression exists to catch.
     /// </para>
     /// </remarks>
-    public ImmutableArray<RegressionSetProblem> Validate()
+    public ImmutableArray<RegressionSetProblem> Validate(bool requireExecutableExpectations = false)
     {
         List<RegressionSetProblem> problems = [.. LoadProblems];
 
@@ -183,6 +194,20 @@ public sealed record StandardRegressionSet(
             {
                 problems.Add(new RegressionSetProblem(asset.FixtureId,
                     $"Manifest names set '{asset.SetId}' but the set is '{SetId}'."));
+            }
+
+            string? expectedFixtureVersion = asset.SetId switch
+            {
+                "printflow-regression-v1" => "v1",
+                "printflow-regression-v2" => "v2",
+                _ => null,
+            };
+            if (expectedFixtureVersion is not null &&
+                !string.Equals(asset.FixtureSetVersion, expectedFixtureVersion, StringComparison.Ordinal))
+            {
+                problems.Add(new RegressionSetProblem(asset.FixtureId,
+                    $"Manifest set '{asset.SetId}' requires fixtureSetVersion " +
+                    $"'{expectedFixtureVersion}', not '{asset.FixtureSetVersion ?? "(missing)"}'."));
             }
 
             if (!File.Exists(asset.SourcePath))
@@ -219,6 +244,13 @@ public sealed record StandardRegressionSet(
                 problems.Add(new RegressionSetProblem(asset.FixtureId,
                     "The manifest records no expected processing path, which the requirement asks for by name."));
             }
+
+
+            if (requireExecutableExpectations &&
+                string.Equals(asset.Category, "NORMAL_JPG_PORTRAIT", StringComparison.OrdinalIgnoreCase))
+            {
+                ValidatePortraitExecutionExpectation(asset, problems);
+            }
         }
 
         foreach (string category in StandardRegressionCategories.Required)
@@ -239,6 +271,49 @@ public sealed record StandardRegressionSet(
         }
 
         return [.. problems];
+    }
+
+    private static void ValidatePortraitExecutionExpectation(
+        RegressionAssetManifest asset,
+        List<RegressionSetProblem> problems)
+    {
+        if (string.Equals(asset.SetId, "printflow-regression-v1", StringComparison.Ordinal))
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v1 portrait uses the historical enhancedOutputIsLargerThanSource contract. " +
+                "It remains readable for historical review but is incompatible with a new execution; " +
+                "select printflow-regression-v2 explicitly."));
+            return;
+        }
+
+        if (!string.Equals(asset.SetId, "printflow-regression-v2", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        RegressionBooleanExpectation expected = asset.EnhancedOutputIsNotSmallerThanSource;
+        if (!expected.Present)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v2 portrait does not declare enhancedOutputIsNotSmallerThanSource."));
+        }
+        else if (expected.Value is null)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v2 portrait expectation enhancedOutputIsNotSmallerThanSource must be boolean true."));
+        }
+        else if (expected.Value is false)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v2 portrait expectation enhancedOutputIsNotSmallerThanSource is false; true is required."));
+        }
+
+        if (asset.EnhancedOutputIsLargerThanSource.Present)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v2 portrait conflicts with the approved contract because it also declares " +
+                "enhancedOutputIsLargerThanSource."));
+        }
     }
 
     private static readonly ImmutableArray<string> ComparisonModes =
@@ -282,6 +357,7 @@ public sealed record StandardRegressionSet(
         return new RegressionAssetManifest(
             SchemaVersion: Int(root, "schemaVersion") ?? 0,
             SetId: String(root, "setId"),
+            FixtureSetVersion: String(root, "fixtureSetVersion"),
             FixtureId: String(root, "fixtureId") ?? fallbackId,
             Category: category!.ToUpperInvariant(),
             SourcePath: path!,
@@ -294,7 +370,28 @@ public sealed record StandardRegressionSet(
             ComparisonMode: root.TryGetProperty("comparisonPolicy", out JsonElement policy)
                 ? String(policy, "mode") ?? "(unstated)"
                 : "(unstated)",
-            ManualChecks: ManualChecks(root));
+            ManualChecks: ManualChecks(root),
+            EnhancedOutputIsNotSmallerThanSource: BooleanExpectation(
+                root, "enhancedOutputIsNotSmallerThanSource"),
+            EnhancedOutputIsLargerThanSource: BooleanExpectation(
+                root, "enhancedOutputIsLargerThanSource"));
+    }
+
+    private static RegressionBooleanExpectation BooleanExpectation(JsonElement root, string name)
+    {
+        if (!root.TryGetProperty("expectedProperties", out JsonElement properties) ||
+            properties.ValueKind != JsonValueKind.Object ||
+            !properties.TryGetProperty(name, out JsonElement value))
+        {
+            return new RegressionBooleanExpectation(false, null);
+        }
+
+        return new RegressionBooleanExpectation(true, value.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            _ => null,
+        });
     }
 
     private static ImmutableArray<RegressionManualCheck> ManualChecks(JsonElement root)

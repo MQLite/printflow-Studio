@@ -3,11 +3,13 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Regression;
+using PrintFlow.Tests.Smoke;
 
 namespace PrintFlow.Tests.Unit.Regression;
 
@@ -172,6 +174,112 @@ public sealed class StandardRegressionSetTests
 
         StandardRegressionSet.Load(set.Root).Validate()
             .ShouldContain(p => p.Detail.Contains("Unknown comparison mode"));
+    }
+
+    [Fact]
+    public void V2_is_executable_only_with_its_explicit_non_shrinking_portrait_expectation()
+    {
+        using TemporarySet v2 = TemporarySet.Complete("v2");
+        StandardRegressionSet loaded = StandardRegressionSet.Load(v2.Root);
+
+        loaded.SetId.ShouldBe("printflow-regression-v2");
+        loaded.Assets.ShouldAllBe(asset => asset.FixtureSetVersion == "v2");
+        loaded.Validate(requireExecutableExpectations: true).ShouldBeEmpty();
+
+        RegressionAssetManifest portrait = loaded.Assets.Single(a => a.Category == "NORMAL_JPG_PORTRAIT");
+        portrait.EnhancedOutputIsNotSmallerThanSource.ShouldBe(new RegressionBooleanExpectation(true, true));
+        portrait.EnhancedOutputIsLargerThanSource.Present.ShouldBeFalse();
+
+        using TemporarySet v1 = TemporarySet.Complete("v1");
+        StandardRegressionSet historical = StandardRegressionSet.Load(v1.Root);
+        historical.Validate().ShouldBeEmpty("v1 remains readable as historical evidence.");
+        historical.Validate(requireExecutableExpectations: true)
+            .ShouldContain(problem => problem.Detail.Contains("incompatible with a new execution"));
+    }
+
+    [Theory]
+    [InlineData("{ \"importAccepted\": true }", "does not declare")]
+    [InlineData("{ \"enhancedOutputIsNotSmallerThanSource\": false }", "is false")]
+    [InlineData("{ \"enhancedOutputIsNotSmallerThanSource\": \"true\" }", "must be boolean true")]
+    [InlineData("{ \"enhancedOutputIsNotSmallerThanSource\": true, \"enhancedOutputIsLargerThanSource\": true }", "conflicts")]
+    public void V2_refuses_missing_false_wrongly_typed_or_conflicting_portrait_expectations(
+        string expectedProperties,
+        string expectedProblem)
+    {
+        using TemporarySet set = TemporarySet.Complete("v2");
+        set.SetExpectedProperties("FIX-PORTRAIT-001", expectedProperties);
+
+        StandardRegressionSet.Load(set.Root).Validate(requireExecutableExpectations: true)
+            .ShouldContain(problem => problem.Detail.Contains(expectedProblem, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData(713, 997, 713, 997, true)]
+    [InlineData(713, 997, 1401, 1803, true)]
+    [InlineData(713, 997, 713, 1201, true)]
+    [InlineData(713, 997, 712, 1201, false)]
+    [InlineData(713, 997, 900, 996, false)]
+    public void Actual_portrait_caller_compares_both_managed_input_and_output_axes(
+        int inputWidth,
+        int inputHeight,
+        int outputWidth,
+        int outputHeight,
+        bool expected)
+    {
+        using TemporarySet set = TemporarySet.Complete("v2");
+        RegressionAssetManifest portrait = StandardRegressionSet.Load(set.Root).Assets
+            .Single(asset => asset.Category == "NORMAL_JPG_PORTRAIT");
+
+        RegressionAssertion assertion = StandardRegressionSetWorkstationSmoke.EnhancedOutputSizeAssertion(
+            portrait, inputWidth, inputHeight, outputWidth, outputHeight);
+
+        assertion.Name.ShouldBe("enhancedOutputIsNotSmallerThanSource");
+        assertion.Held.ShouldBe(expected);
+        assertion.Detail.ShouldContain($"input is {inputWidth}x{inputHeight}");
+        assertion.Detail.ShouldContain($"Revision is {outputWidth}x{outputHeight}");
+    }
+
+    [Fact]
+    public void Actual_portrait_caller_refuses_missing_decoded_dimensions()
+    {
+        using TemporarySet set = TemporarySet.Complete("v2");
+        RegressionAssetManifest portrait = StandardRegressionSet.Load(set.Root).Assets
+            .Single(asset => asset.Category == "NORMAL_JPG_PORTRAIT");
+
+        RegressionAssertion assertion = StandardRegressionSetWorkstationSmoke.EnhancedOutputSizeAssertion(
+            portrait, 713, 997, null, 1201);
+
+        assertion.Held.ShouldBeFalse();
+        assertion.Detail.ShouldContain("output (missing)x1201");
+    }
+
+    [Fact]
+    public void Loaded_v2_portrait_assertion_serializes_without_concluding_operator_review()
+    {
+        using TemporarySet set = TemporarySet.Complete("v2");
+        StandardRegressionSet loaded = StandardRegressionSet.Load(set.Root);
+        RegressionAssetManifest portrait = loaded.Assets.Single(a => a.Category == "NORMAL_JPG_PORTRAIT");
+        RegressionAssertion size = StandardRegressionSetWorkstationSmoke.EnhancedOutputSizeAssertion(
+            portrait, 713, 997, 713, 997);
+
+        RegressionCaseResult result = new(
+            portrait.FixtureId, portrait.Category, RegressionOutcome.Pending, portrait.ExpectedWorkflow,
+            ["Enhancement"], ["Meitu XiuXiu"], ["production-meitu"], [], [size],
+            [new RegressionManualDecision("PORTRAIT-VISUAL-001", "Does the portrait look correct?",
+                RegressionOutcome.Pending, null, null, null, null)],
+            set.Root, "Synthetic caller-boundary record; no external application was driven.");
+
+        result.Conclude().Outcome.ShouldBe(RegressionOutcome.Pending);
+        StandardRegressionSetRunResult run = StandardRegressionSetRunResult.From(
+            loaded.SetId!, "synthetic-v2", "2026-09-14T00:00:00+12:00", "2026-09-14T00:00:01+12:00",
+            set.Root, "SYNTHETIC", "0.1.0", "printflow-workstation-v1", "1.17.0", "Fake", [result]);
+        using JsonDocument serialized = JsonDocument.Parse(run.ToJson());
+        JsonElement recorded = serialized.RootElement.GetProperty("Cases")[0];
+
+        serialized.RootElement.GetProperty("SetId").GetString().ShouldBe("printflow-regression-v2");
+        recorded.GetProperty("Outcome").GetString().ShouldBe("Pending");
+        recorded.GetProperty("Assertions")[0].GetProperty("Name").GetString()
+            .ShouldBe("enhancedOutputIsNotSmallerThanSource");
     }
 
     // ------------------------------------------------------------------------------------------
@@ -639,7 +747,13 @@ public sealed class StandardRegressionSetTests
     /// <summary>A whole regression set in a temporary folder, built to be broken in one way.</summary>
     private sealed class TemporarySet : IDisposable
     {
-        private TemporarySet(string root) => Root = root;
+        private readonly string _setVersion;
+
+        private TemporarySet(string root, string setVersion)
+        {
+            Root = root;
+            _setVersion = setVersion;
+        }
 
         public string Root { get; }
 
@@ -655,13 +769,13 @@ public sealed class StandardRegressionSetTests
             ["REFERENCE_PRODUCTION_TIFF"] = "FIX-REFERENCE-TIFF-001",
         };
 
-        public static TemporarySet Complete()
+        public static TemporarySet Complete(string setVersion = "v1")
         {
             string root = Path.Combine(Path.GetTempPath(), $"printflow-regression-set-{Guid.NewGuid():N}");
             Directory.CreateDirectory(Path.Combine(root, "inputs"));
             Directory.CreateDirectory(Path.Combine(root, "manifests"));
 
-            TemporarySet set = new(root);
+            TemporarySet set = new(root, setVersion);
             foreach (string category in StandardRegressionCategories.Required)
             {
                 set.Add(IdsByCategory[category], category);
@@ -676,10 +790,16 @@ public sealed class StandardRegressionSetTests
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes($"synthetic content for {id}");
             File.WriteAllBytes(input, bytes);
 
+            string expectedProperties = category == "NORMAL_JPG_PORTRAIT"
+                ? _setVersion == "v2"
+                    ? "{ \"importAccepted\": true, \"enhancedOutputIsNotSmallerThanSource\": true }"
+                    : "{ \"importAccepted\": true, \"enhancedOutputIsLargerThanSource\": true }"
+                : "{ \"importAccepted\": true }";
             string manifest = $$"""
             {
               "schemaVersion": 2,
-              "setId": "printflow-regression-v1",
+              "setId": "printflow-regression-{{_setVersion}}",
+              "fixtureSetVersion": "{{_setVersion}}",
               "fixtureId": "{{id}}",
               "category": "{{category}}",
               "file": {
@@ -691,7 +811,7 @@ public sealed class StandardRegressionSetTests
               "expectedWorkflow": "PrepareAsset",
               "expectedProcessingPath": ["Import", "OriginalConfirmation"],
               "expectedExternalApplications": [],
-              "expectedProperties": { "importAccepted": true },
+              "expectedProperties": {{expectedProperties}},
               "comparisonPolicy": { "mode": "Structural", "reason": "test fixture" },
               "manualChecks": [],
               "notes": "test fixture"
@@ -712,6 +832,13 @@ public sealed class StandardRegressionSetTests
 
         public void SetComparisonMode(string id, string mode) => Rewrite(id, json =>
             json.Replace("\"mode\": \"Structural\"", $"\"mode\": \"{mode}\"", StringComparison.Ordinal));
+
+        public void SetExpectedProperties(string id, string json) => Rewrite(id, manifest =>
+        {
+            JsonObject root = JsonNode.Parse(manifest)!.AsObject();
+            root["expectedProperties"] = JsonNode.Parse(json);
+            return root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        });
 
         private void Rewrite(string id, Func<string, string> change)
         {

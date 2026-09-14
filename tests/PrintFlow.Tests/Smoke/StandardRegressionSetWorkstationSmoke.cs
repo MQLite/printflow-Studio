@@ -325,7 +325,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         // its own sake: this process is the one about to drive Photoshop, and "the set was valid
         // a moment ago in another process" is not the same claim as "the set is valid now".
         StandardRegressionSet set = StandardRegressionSet.Load(setRoot);
-        ImmutableArray<RegressionSetProblem> problems = set.Validate();
+        ImmutableArray<RegressionSetProblem> problems = set.Validate(requireExecutableExpectations: true);
         foreach (RegressionSetProblem problem in problems)
         {
             output.WriteLine($"PREFLIGHT {problem.AssetId}: {problem.Detail}");
@@ -583,6 +583,15 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             "Standard regression set: ordinary portrait."), "regression", CancellationToken.None));
         steps.Add("OriginalConfirmation");
 
+        // This is the exact managed Revision offered to Enhancement. Import copied the source into
+        // the attempt-owned workspace and inspected those bytes; resolving through the workflow
+        // snapshot avoids substituting the fixture path, a literal size, or the later output.
+        SessionAggregate beforeEnhancement = (await repository.LoadAsync(id, CancellationToken.None)).Value!;
+        Revision? enhancementInput = beforeEnhancement.ToSnapshot().UpstreamRevisionOf(StepKind.Enhancement)
+            is RevisionId inputId
+                ? beforeEnhancement.Revisions.SingleOrDefault(r => r.Id == inputId)
+                : null;
+
         SessionView enhanced = Accept(await service.ExecuteAsync(
             id, new WorkflowCommand.StartStep(StepKind.Enhancement), "regression", CancellationToken.None));
         steps.Add("Enhancement (Meitu)");
@@ -592,15 +601,21 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             $"Enhancement left the step at {enhanced.CurrentStep?.State}."));
 
         ArtefactView produced = enhanced.CurrentArtefact!;
+        SessionAggregate afterEnhancement = (await repository.LoadAsync(id, CancellationToken.None)).Value!;
+        Revision enhancementRevision = afterEnhancement.Revisions.Last(
+            r => r.Operation == OperationKind.Enhance);
         assertions.Add(new RegressionAssertion("enhancedOutputIsPng",
-            produced.Facts.Format == ImageFormat.Png, $"Enhanced export is {produced.Facts.Format}."));
-        assertions.Add(new RegressionAssertion("enhancedOutputIsLargerThanSource",
-            produced.Facts.PixelWidth > 1200,
-            $"Enhanced export is {produced.Facts.PixelWidth}x{produced.Facts.PixelHeight} from a 1200x1600 source."));
+            enhancementRevision.Facts.Format == ImageFormat.Png,
+            $"Enhanced export is {enhancementRevision.Facts.Format}."));
+        assertions.Add(EnhancedOutputSizeAssertion(
+            asset,
+            enhancementInput?.Facts.PixelWidth,
+            enhancementInput?.Facts.PixelHeight,
+            enhancementRevision.Facts.PixelWidth,
+            enhancementRevision.Facts.PixelHeight));
 
         string enhancedPath = services.GetRequiredService<IWorkspace>().ResolveAbsolute(
-            (await repository.LoadAsync(id, CancellationToken.None)).Value!
-                .Revisions.Last(r => r.Operation == OperationKind.Enhance).File);
+            enhancementRevision.File);
         string copied = Copy(enhancedPath, runFolder, asset.FixtureId + "-enhanced.png");
         artefacts.Add(Artefact("enhancedExport", copied));
 
@@ -641,7 +656,8 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             [.. asset.ManualChecks.Select(c => new RegressionManualDecision(
                 c.Id, c.Question, RegressionOutcome.Pending, null, null, copied, null))],
             runFolder,
-            $"Meitu enhanced the portrait to {produced.Facts.PixelWidth}x{produced.Facts.PixelHeight} " +
+            $"Meitu enhanced the portrait to {enhancementRevision.Facts.PixelWidth}x" +
+            $"{enhancementRevision.Facts.PixelHeight} " +
             "and the approved bytes were promoted unchanged.");
     }
 
@@ -1048,6 +1064,40 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
     // ==================================================================================
     // Shared
     // ==================================================================================
+    /// <summary>The v2 portrait size expectation consumed by the actual workstation caller.</summary>
+    internal static RegressionAssertion EnhancedOutputSizeAssertion(
+        RegressionAssetManifest asset,
+        int? inputWidth,
+        int? inputHeight,
+        int? outputWidth,
+        int? outputHeight)
+    {
+        const string name = "enhancedOutputIsNotSmallerThanSource";
+
+        if (asset.EnhancedOutputIsNotSmallerThanSource.Value is not true ||
+            asset.EnhancedOutputIsLargerThanSource.Present)
+        {
+            return new RegressionAssertion(name, false,
+                "The loaded portrait manifest does not carry the unambiguous v2 " +
+                "enhancedOutputIsNotSmallerThanSource=true expectation.");
+        }
+
+        if (inputWidth is not > 0 || inputHeight is not > 0 ||
+            outputWidth is not > 0 || outputHeight is not > 0)
+        {
+            return new RegressionAssertion(name, false,
+                $"Decoded dimensions are required: input {inputWidth?.ToString() ?? "(missing)"}x" +
+                $"{inputHeight?.ToString() ?? "(missing)"}; output " +
+                $"{outputWidth?.ToString() ?? "(missing)"}x{outputHeight?.ToString() ?? "(missing)"}.");
+        }
+
+        bool held = outputWidth.Value >= inputWidth.Value && outputHeight.Value >= inputHeight.Value;
+        return new RegressionAssertion(name, held,
+            $"Managed pre-Enhancement input is {inputWidth}x{inputHeight}; decoded Enhancement " +
+            $"Revision is {outputWidth}x{outputHeight}. Required: output width >= input width AND " +
+            "output height >= input height.");
+    }
+
     private static void AddCommonAssertions(
         List<RegressionAssertion> assertions,
         ISessionRepository repository,

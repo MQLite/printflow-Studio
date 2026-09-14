@@ -29,10 +29,17 @@
 
 .PARAMETER SetRoot
     The regression set root. Defaults to D:\PrintFlowStudio\TestData\v1.
+
+.PARAMETER SetVersion
+    The explicit set contract to write. v1 preserves the historical larger-only portrait
+    expectation; v2 writes the approved two-axis non-shrinking expectation. The manifest schema
+    stays at version 2 for both sets.
 #>
 [CmdletBinding()]
 param(
-    [string] $SetRoot = 'D:\PrintFlowStudio\TestData\v1'
+    [string] $SetRoot = 'D:\PrintFlowStudio\TestData\v1',
+    [ValidateSet('v1', 'v2')]
+    [string] $SetVersion = 'v1'
 )
 
 Set-StrictMode -Version Latest
@@ -40,7 +47,7 @@ $ErrorActionPreference = 'Stop'
 
 Add-Type -AssemblyName System.Drawing
 
-$SetId = 'printflow-regression-v1'
+$SetId = "printflow-regression-$SetVersion"
 $SchemaVersion = 2
 
 $inputs = Join-Path $SetRoot 'inputs'
@@ -289,14 +296,17 @@ $assets = @(
             importAccepted            = $true
             enhancementProducesRevision = $true
             enhancedOutputFormat      = 'PNG'
-            enhancedOutputIsLargerThanSource = $true
             sourceBytesUnchanged      = $true
             automationLockFreeAfterStep = $true
             terminalStepState         = 'ReviewRequired at Enhancement, then Completed after promotion'
         }
         comparisonPolicy = [ordered] @{
             mode   = 'Structural'
-            reason = 'Meitu AI enhancement is not a deterministic function of its input — the accepted preset records the feature, not a byte contract — so an exact-hash expectation would fail for a reason that is not a regression. The structural contract (a PNG revision exists, is larger than the source, the source is untouched, the lock is released) is what an upgrade can actually break.'
+            reason = if ($SetVersion -eq 'v2') {
+                'Meitu AI enhancement is not a deterministic function of its input — the accepted preset records the feature, not a byte contract — so an exact-hash expectation would fail for a reason that is not a regression. The approved structural size contract compares decoded pixels on both axes: output width must be at least the exact managed pre-Enhancement Working input width, and output height must be at least that input height. PNG, Revision, source integrity, lock release and Operator visual review remain separate requirements.'
+            } else {
+                'Meitu AI enhancement is not a deterministic function of its input — the accepted preset records the feature, not a byte contract — so an exact-hash expectation would fail for a reason that is not a regression. The structural contract (a PNG revision exists, is larger than the source, the source is untouched, the lock is released) is what an upgrade can actually break.'
+            }
         }
         manualChecks = @(
             [ordered] @{
@@ -367,7 +377,7 @@ $assets = @(
         provenance = [ordered] @{
             classification = 'ExistingValidatedReference'
             producedBy     = 'Meitu XiuXiu 7.8.7.5 smart cutout, accepted 2026-08-18'
-            derivedFrom    = 'D:\PrintFlowStudio\TestData\v1\expected\FIX-CUSTOMER-DESIGN-001_CUTOUT.png'
+            derivedFrom    = Join-Path $expected 'FIX-CUSTOMER-DESIGN-001_CUTOUT.png'
             rationale      = 'A byte-identical copy of MEITU_SMART_CUTOUT_REFERENCE, which the accepted preset 1.16.0 already lists under acceptedReferenceOutputs with this exact SHA-256. Its alpha is a real cutout''s alpha — soft, with hair edges — which a generated one would not be, and it is already approved for permanent local regression use.'
             honestLimits   = 'It is an output of this product being reused as an input. That is exactly the transparent-PNG case an operator hits when re-importing an approved asset, so the reuse is the point rather than a shortcut.'
         }
@@ -570,6 +580,12 @@ $assets = @(
     }
 )
 
+if ($SetVersion -eq 'v2') {
+    $assets[0].expectedProperties.enhancedOutputIsNotSmallerThanSource = $true
+} else {
+    $assets[0].expectedProperties.enhancedOutputIsLargerThanSource = $true
+}
+
 # ------------------------------------------------------------------------------------------
 # Emit
 # ------------------------------------------------------------------------------------------
@@ -590,7 +606,7 @@ foreach ($asset in $assets) {
     $manifest = [ordered] @{
         schemaVersion     = $SchemaVersion
         setId             = $SetId
-        fixtureSetVersion = 'v1'
+        fixtureSetVersion = $SetVersion
         fixtureId         = $asset.id
         category          = $asset.category
         status            = 'APPROVED_LOCAL_ONLY'
@@ -660,10 +676,10 @@ foreach ($asset in $assets) {
 $index = [ordered] @{
     schemaVersion = $SchemaVersion
     setId         = $SetId
-    setVersion    = 'v1'
+    setVersion    = $SetVersion
     root          = $SetRoot
     status        = 'ACCEPTED_FIXED_REGRESSION_SET'
-    immutability  = 'Accepted input bytes and their SHA-256 are regression authority. Changing what a category contains creates a new set version or is an explicit, recorded rebaseline of this one; it is never a silent edit of v1.'
+    immutability  = "Accepted input bytes and their SHA-256 are regression authority. Changing what a category contains creates a new set version or is an explicit, recorded rebaseline of this one; it is never a silent edit of $SetVersion."
     requiredCategories = @(
         'NORMAL_JPG_PORTRAIT', 'COMPLEX_BACKGROUND_FINE_HAIR', 'TRANSPARENT_PNG',
         'COMPLETE_CUSTOMER_DESIGN', 'PSD_WITH_COMPOSITE_PREVIEW', 'SINGLE_PAGE_PDF',

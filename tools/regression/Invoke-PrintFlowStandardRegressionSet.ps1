@@ -25,6 +25,10 @@
 .PARAMETER SetRoot
     The regression set. Defaults to D:\PrintFlowStudio\TestData\v1.
 
+    The default preserves historical v1 review commands. New executions must explicitly select
+    D:\PrintFlowStudio\TestData\v2; v1's larger-only portrait expectation is intentionally refused
+    for a new run rather than reinterpreted.
+
 .PARAMETER PreflightOnly
     Run Layer 1 and stop. Produces no run result, because nothing ran.
 
@@ -82,10 +86,10 @@
     Build configuration for the test host. Release by default.
 
 .EXAMPLE
-    .\Invoke-PrintFlowStandardRegressionSet.ps1 -PreflightOnly
+    .\Invoke-PrintFlowStandardRegressionSet.ps1 -SetRoot D:\PrintFlowStudio\TestData\v2 -PreflightOnly
 
 .EXAMPLE
-    .\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId 20260909-183000
+    .\Invoke-PrintFlowStandardRegressionSet.ps1 -SetRoot D:\PrintFlowStudio\TestData\v2 -RunId 20260909-183000
 
 .EXAMPLE
     .\Invoke-PrintFlowStandardRegressionSet.ps1 -RunId 20260909-183000 -RecordVisualReview .\decisions.json
@@ -133,7 +137,10 @@ if (-not (Test-Path -LiteralPath $dotnet)) { $dotnet = 'dotnet' }
 # Layer 1 — preflight
 # ==========================================================================================
 function Invoke-Preflight {
-    param([string] $Root)
+    param(
+        [string] $Root,
+        [bool] $ForNewExecution
+    )
 
     $problems = New-Object System.Collections.Generic.List[string]
     $manifestFolder = Join-Path $Root 'manifests'
@@ -169,6 +176,20 @@ function Invoke-Preflight {
 
         if ($manifest.schemaVersion -ne 2) { $problems.Add("${id}: schema $($manifest.schemaVersion); expected 2.") }
         [void] $setIds.Add([string] $manifest.setId)
+
+        $expectedFixtureVersion = switch ([string] $manifest.setId) {
+            'printflow-regression-v1' { 'v1' }
+            'printflow-regression-v2' { 'v2' }
+            default { $null }
+        }
+        if ($expectedFixtureVersion -and
+            ($null -eq $manifest.PSObject.Properties['fixtureSetVersion'] -or
+             [string] $manifest.fixtureSetVersion -ne $expectedFixtureVersion)) {
+            $actualVersion = if ($null -eq $manifest.PSObject.Properties['fixtureSetVersion']) {
+                '(missing)'
+            } else { [string] $manifest.fixtureSetVersion }
+            $problems.Add("${id}: set '$($manifest.setId)' requires fixtureSetVersion '$expectedFixtureVersion', not '$actualVersion'.")
+        }
 
         $category = ([string] $manifest.category).ToUpperInvariant()
         if ($seenCategories.ContainsKey($category)) {
@@ -206,6 +227,36 @@ function Invoke-Preflight {
         }
 
         switch ($category) {
+            'NORMAL_JPG_PORTRAIT' {
+                if ($ForNewExecution -and $manifest.setId -eq 'printflow-regression-v1') {
+                    $problems.Add(("${id}: the v1 portrait uses the historical " +
+                        "enhancedOutputIsLargerThanSource contract. It remains readable for historical review " +
+                        "but is incompatible with a new execution; select printflow-regression-v2 explicitly."))
+                }
+                if ($ForNewExecution -and $manifest.setId -eq 'printflow-regression-v2') {
+                    $properties = if ($null -ne $manifest.PSObject.Properties['expectedProperties']) {
+                        $manifest.expectedProperties
+                    } else { $null }
+                    $notSmaller = if ($null -ne $properties) {
+                        $properties.PSObject.Properties['enhancedOutputIsNotSmallerThanSource']
+                    } else { $null }
+                    $larger = if ($null -ne $properties) {
+                        $properties.PSObject.Properties['enhancedOutputIsLargerThanSource']
+                    } else { $null }
+
+                    if ($null -eq $notSmaller) {
+                        $problems.Add("${id}: the v2 portrait does not declare enhancedOutputIsNotSmallerThanSource.")
+                    } elseif ($notSmaller.Value -isnot [bool]) {
+                        $problems.Add("${id}: enhancedOutputIsNotSmallerThanSource must be boolean true.")
+                    } elseif ($notSmaller.Value -ne $true) {
+                        $problems.Add("${id}: enhancedOutputIsNotSmallerThanSource is false; true is required.")
+                    }
+                    if ($null -ne $larger) {
+                        $problems.Add(("${id}: the v2 portrait conflicts with the approved contract because it also " +
+                            "declares enhancedOutputIsLargerThanSource."))
+                    }
+                }
+            }
             'PSD_WITH_COMPOSITE_PREVIEW' {
                 if ($null -eq $manifest.file.PSObject.Properties['psd']) {
                     $problems.Add("${id}: no psd structural facts.")
@@ -267,7 +318,7 @@ Write-Host ''
 Write-Host '== Layer 1: preflight ==' -ForegroundColor Cyan
 Write-Host "Set: $SetRoot"
 
-$preflightProblems = Invoke-Preflight -Root $SetRoot
+$preflightProblems = Invoke-Preflight -Root $SetRoot -ForNewExecution (-not [bool] $RecordVisualReview)
 if ($preflightProblems.Count -gt 0) {
     foreach ($problem in $preflightProblems) { Write-Host "  FAIL $problem" -ForegroundColor Red }
     Write-Host ''
