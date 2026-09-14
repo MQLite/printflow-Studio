@@ -635,7 +635,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
 
         return new RegressionCaseResult(
             asset.FixtureId, asset.Category, RegressionOutcome.Pending, "PrepareAsset",
-            [.. steps], ["Meitu XiuXiu 7.8.7.5"],
+            [.. steps], ["Meitu XiuXiu"],
             [services.GetRequiredService<IMeituProcessor>().AdapterId],
             [.. artefacts], [.. assertions],
             [.. asset.ManualChecks.Select(c => new RegressionManualDecision(
@@ -738,7 +738,7 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
 
         return new RegressionCaseResult(
             asset.FixtureId, asset.Category, RegressionOutcome.Pending, "PrepareAsset",
-            [.. steps], ["Meitu XiuXiu 7.8.7.5"],
+            [.. steps], ["Meitu XiuXiu"],
             [services.GetRequiredService<IMeituProcessor>().AdapterId],
             [.. artefacts], [.. assertions],
             [.. asset.ManualChecks.Select(c => new RegressionManualDecision(
