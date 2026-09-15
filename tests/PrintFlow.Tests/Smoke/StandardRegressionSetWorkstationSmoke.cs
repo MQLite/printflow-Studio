@@ -728,11 +728,10 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
         steps.Add("Trim (internal alpha bounds)");
 
         ArtefactView trimmedArtefact = trimmed.CurrentArtefact!;
-        assertions.Add(new RegressionAssertion("trimBoundsInsideCanvas",
-            trimmedArtefact.Facts.PixelWidth < produced.Facts.PixelWidth ||
-            trimmedArtefact.Facts.PixelHeight < produced.Facts.PixelHeight,
-            $"Trim produced {trimmedArtefact.Facts.PixelWidth}x{trimmedArtefact.Facts.PixelHeight} " +
-            $"from {produced.Facts.PixelWidth}x{produced.Facts.PixelHeight}."));
+        SessionAggregate afterTrim = (await repository.LoadAsync(id, CancellationToken.None)).Value!;
+        assertions.Add(FineHairTrimAssertion(
+            asset, produced.Facts, trimmedArtefact.Facts,
+            afterTrim.Attempts, afterTrim.Revisions, workspace.ResolveAbsolute));
         assertions.Add(new RegressionAssertion("trimmedOutputRetainsAlpha",
             trimmedArtefact.Facts.HasAlpha == true,
             $"Trimmed output HasAlpha = {trimmedArtefact.Facts.HasAlpha?.ToString() ?? "(unstated)"}."));
@@ -1097,6 +1096,28 @@ public sealed class StandardRegressionSetWorkstationSmoke(ITestOutputHelper outp
             $"Revision is {outputWidth}x{outputHeight}. Required: output width >= input width AND " +
             "output height >= input height.");
     }
+
+    /// <summary>The fine-hair structural trim expectation consumed by the actual workstation caller.</summary>
+    /// <remarks>
+    /// Chosen by the set the manifest belongs to, never inferred. v3 verifies the exact
+    /// alpha-bounds/margin/crop contract against the session's own attempt and files; every other
+    /// set keeps its frozen strict-shrink assertion byte for byte, so a v1/v2 run is never judged by
+    /// v3's changed expectation.
+    /// </remarks>
+    internal static RegressionAssertion FineHairTrimAssertion(
+        RegressionAssetManifest asset,
+        FileFacts cutout,
+        FileFacts trimmed,
+        IReadOnlyList<ProcessingAttempt> attempts,
+        IReadOnlyList<Revision> revisions,
+        Func<WorkspaceFileRef, string> resolve) =>
+        string.Equals(asset.SetId, RegressionTrimGeometry.SetId, StringComparison.Ordinal)
+            ? RegressionTrimGeometry.Verify(asset, cutout.Sha256, trimmed.Sha256, attempts, revisions, resolve)
+            : new RegressionAssertion("trimBoundsInsideCanvas",
+                trimmed.PixelWidth < cutout.PixelWidth ||
+                trimmed.PixelHeight < cutout.PixelHeight,
+                $"Trim produced {trimmed.PixelWidth}x{trimmed.PixelHeight} " +
+                $"from {cutout.PixelWidth}x{cutout.PixelHeight}.");
 
     private static void AddCommonAssertions(
         List<RegressionAssertion> assertions,

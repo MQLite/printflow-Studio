@@ -213,6 +213,51 @@ public sealed class StandardRegressionSetTests
             .ShouldContain(problem => problem.Detail.Contains(expectedProblem, StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void V3_changes_only_the_fine_hair_trim_contract_and_keeps_v2_executable_as_it_was()
+    {
+        using TemporarySet v3 = TemporarySet.Complete("v3");
+        StandardRegressionSet loaded = StandardRegressionSet.Load(v3.Root);
+
+        loaded.SetId.ShouldBe("printflow-regression-v3");
+        loaded.Assets.Length.ShouldBe(7);
+        loaded.Assets.ShouldAllBe(asset => asset.FixtureSetVersion == "v3");
+        loaded.Validate(requireExecutableExpectations: true).ShouldBeEmpty();
+
+        RegressionAssetManifest portrait = loaded.Assets.Single(a => a.Category == "NORMAL_JPG_PORTRAIT");
+        portrait.EnhancedOutputIsNotSmallerThanSource.ShouldBe(new RegressionBooleanExpectation(true, true));
+        portrait.EnhancedOutputIsLargerThanSource.Present.ShouldBeFalse();
+
+        RegressionAssetManifest fineHair = loaded.Assets.Single(a => a.Category == "COMPLEX_BACKGROUND_FINE_HAIR");
+        fineHair.TrimMatchesAlphaBoundsAndMargins.ShouldBe(new RegressionBooleanExpectation(true, true));
+        fineHair.TrimBoundsStrictlyInsideCanvas.Present.ShouldBeFalse();
+
+        using TemporarySet v2 = TemporarySet.Complete("v2");
+        StandardRegressionSet historical = StandardRegressionSet.Load(v2.Root);
+        historical.Validate(requireExecutableExpectations: true).ShouldBeEmpty(
+            "v2 keeps its own frozen trimBoundsStrictlyInsideCanvas meaning and is not judged by v3.");
+        historical.Assets.Single(a => a.Category == "COMPLEX_BACKGROUND_FINE_HAIR")
+            .TrimBoundsStrictlyInsideCanvas.ShouldBe(new RegressionBooleanExpectation(true, true));
+    }
+
+    [Theory]
+    [InlineData("{ \"importAccepted\": true }", "does not declare")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": false }", "is false")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": \"true\" }", "must be boolean true")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": true, \"trimBoundsStrictlyInsideCanvas\": true }", "conflicts")]
+    [InlineData("{ \"trimBoundsStrictlyInsideCanvas\": true }", "does not declare")]
+    public void V3_refuses_missing_false_wrongly_typed_or_conflicting_fine_hair_trim_expectations(
+        string expectedProperties,
+        string expectedProblem)
+    {
+        using TemporarySet set = TemporarySet.Complete("v3");
+        set.SetExpectedProperties("FIX-FINE-HAIR-001", expectedProperties);
+
+        StandardRegressionSet.Load(set.Root).Validate(requireExecutableExpectations: true)
+            .ShouldContain(problem => problem.AssetId == "FIX-FINE-HAIR-001" &&
+                                      problem.Detail.Contains(expectedProblem, StringComparison.OrdinalIgnoreCase));
+    }
+
     [Theory]
     [InlineData(713, 997, 713, 997, true)]
     [InlineData(713, 997, 1401, 1803, true)]
@@ -790,11 +835,16 @@ public sealed class StandardRegressionSetTests
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes($"synthetic content for {id}");
             File.WriteAllBytes(input, bytes);
 
-            string expectedProperties = category == "NORMAL_JPG_PORTRAIT"
-                ? _setVersion == "v2"
+            string expectedProperties = category switch
+            {
+                "NORMAL_JPG_PORTRAIT" => _setVersion is "v2" or "v3"
                     ? "{ \"importAccepted\": true, \"enhancedOutputIsNotSmallerThanSource\": true }"
-                    : "{ \"importAccepted\": true, \"enhancedOutputIsLargerThanSource\": true }"
-                : "{ \"importAccepted\": true }";
+                    : "{ \"importAccepted\": true, \"enhancedOutputIsLargerThanSource\": true }",
+                "COMPLEX_BACKGROUND_FINE_HAIR" => _setVersion == "v3"
+                    ? "{ \"importAccepted\": true, \"trimMatchesAlphaBoundsAndMargins\": true }"
+                    : "{ \"importAccepted\": true, \"trimBoundsStrictlyInsideCanvas\": true }",
+                _ => "{ \"importAccepted\": true }",
+            };
             string manifest = $$"""
             {
               "schemaVersion": 2,

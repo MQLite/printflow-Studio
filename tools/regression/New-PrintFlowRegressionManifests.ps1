@@ -32,13 +32,14 @@
 
 .PARAMETER SetVersion
     The explicit set contract to write. v1 preserves the historical larger-only portrait
-    expectation; v2 writes the approved two-axis non-shrinking expectation. The manifest schema
-    stays at version 2 for both sets.
+    expectation; v2 writes the approved two-axis non-shrinking expectation. v3 keeps v2's portrait
+    and replaces only the fine-hair trimBoundsStrictlyInsideCanvas property with the approved exact
+    trimMatchesAlphaBoundsAndMargins contract. The manifest schema stays at version 2 for all sets.
 #>
 [CmdletBinding()]
 param(
     [string] $SetRoot = 'D:\PrintFlowStudio\TestData\v1',
-    [ValidateSet('v1', 'v2')]
+    [ValidateSet('v1', 'v2', 'v3')]
     [string] $SetVersion = 'v1'
 )
 
@@ -302,7 +303,7 @@ $assets = @(
         }
         comparisonPolicy = [ordered] @{
             mode   = 'Structural'
-            reason = if ($SetVersion -eq 'v2') {
+            reason = if ($SetVersion -in @('v2', 'v3')) {
                 'Meitu AI enhancement is not a deterministic function of its input — the accepted preset records the feature, not a byte contract — so an exact-hash expectation would fail for a reason that is not a regression. The approved structural size contract compares decoded pixels on both axes: output width must be at least the exact managed pre-Enhancement Working input width, and output height must be at least that input height. PNG, Revision, source integrity, lock release and Operator visual review remain separate requirements.'
             } else {
                 'Meitu AI enhancement is not a deterministic function of its input — the accepted preset records the feature, not a byte contract — so an exact-hash expectation would fail for a reason that is not a regression. The structural contract (a PNG revision exists, is larger than the source, the source is untouched, the lock is released) is what an upgrade can actually break.'
@@ -354,7 +355,11 @@ $assets = @(
         }
         comparisonPolicy = [ordered] @{
             mode   = 'Structural'
-            reason = 'The cutout is AI output. What is checked deterministically is that transparency is real (an alpha channel with genuinely varying alpha, not an opaque 32-bit image) and that the trim found bounds inside the canvas. Hair-edge quality is the manual check below, and is deliberately not reduced to a threshold.'
+            reason = if ($SetVersion -eq 'v3') {
+                'The cutout is AI output. What is checked deterministically is that transparency is real (an alpha channel with genuinely varying alpha, not an opaque 32-bit image) and that the trim geometry is exact: the smallest rectangle holding every alpha > 0 pixel of the actual pre-Trim cutout, computed independently, grown by the successful Trim attempt''s recorded margins and clamped to the canvas, equals the persisted ContentBounds and AppliedBounds, and the decoded Trim output equals exactly that region of the decoded cutout. A full-canvas output is correct only when that computed rectangle is the full canvas; an unchanged copy fails whenever a removable border exists, and matching dimensions alone never pass. This does not decide whether alpha-bearing edge pixels are desirable foreground. Hair-edge quality and background removal are the manual check below, and are deliberately not reduced to a threshold.'
+            } else {
+                'The cutout is AI output. What is checked deterministically is that transparency is real (an alpha channel with genuinely varying alpha, not an opaque 32-bit image) and that the trim found bounds inside the canvas. Hair-edge quality is the manual check below, and is deliberately not reduced to a threshold.'
+            }
         }
         manualChecks = @(
             [ordered] @{
@@ -580,10 +585,22 @@ $assets = @(
     }
 )
 
-if ($SetVersion -eq 'v2') {
+if ($SetVersion -in @('v2', 'v3')) {
     $assets[0].expectedProperties.enhancedOutputIsNotSmallerThanSource = $true
 } else {
     $assets[0].expectedProperties.enhancedOutputIsLargerThanSource = $true
+}
+
+# v3's one approved expectation change, in the same position so a manifest diff shows a swap and
+# nothing else. The v2 property is removed rather than set false: its meaning is not reinterpreted.
+if ($SetVersion -eq 'v3') {
+    $fineHair = $assets[1].expectedProperties
+    $position = @($fineHair.Keys).IndexOf('trimBoundsStrictlyInsideCanvas')
+    if ($position -lt 0) {
+        throw 'FIX-FINE-HAIR-001 no longer authors trimBoundsStrictlyInsideCanvas, so the v3 swap has nothing to replace.'
+    }
+    $fineHair.Remove('trimBoundsStrictlyInsideCanvas')
+    $fineHair.Insert($position, 'trimMatchesAlphaBoundsAndMargins', $true)
 }
 
 # ------------------------------------------------------------------------------------------

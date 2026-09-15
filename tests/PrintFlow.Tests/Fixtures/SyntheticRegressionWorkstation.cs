@@ -160,8 +160,9 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
     /// <summary>Where the revalidation record is written.</summary>
     public string RecordPath => ProductionRevalidationRecord.PathFor(WorkspaceRoot);
 
-    /// <summary>Rewrites only set metadata/portrait expectations for v2 preflight protocol tests.</summary>
-    public void ConfigureSetVersion(string setVersion, string portraitExpectedPropertiesJson)
+    /// <summary>Rewrites only set metadata and the portrait/fine-hair expectations for preflight protocol tests.</summary>
+    public void ConfigureSetVersion(
+        string setVersion, string portraitExpectedPropertiesJson, string? fineHairExpectedPropertiesJson = null)
     {
         string setId = $"printflow-regression-{setVersion}";
         foreach (string path in Directory.EnumerateFiles(ManifestFolder, "*.json"))
@@ -173,6 +174,13 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
                     StringComparison.Ordinal))
             {
                 manifest["expectedProperties"] = JsonNode.Parse(portraitExpectedPropertiesJson);
+            }
+
+            if (fineHairExpectedPropertiesJson is not null &&
+                string.Equals((string?) manifest["category"], "COMPLEX_BACKGROUND_FINE_HAIR",
+                    StringComparison.Ordinal))
+            {
+                manifest["expectedProperties"] = JsonNode.Parse(fineHairExpectedPropertiesJson);
             }
 
             File.WriteAllText(path, manifest.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
@@ -301,12 +309,13 @@ internal sealed class SyntheticRegressionWorkstation : IDisposable
         string runId,
         string invocationId,
         string? productVersion = null,
-        ImmutableArray<ProductAssemblyIdentity> candidate = default)
+        ImmutableArray<ProductAssemblyIdentity> candidate = default,
+        string? setId = null)
     {
         ImmutableArray<ProductAssemblyIdentity> harness = ProductBuildIdentity.Running();
 
         return StandardRegressionSetRunResult.From(
-            SetId,
+            setId ?? SetId,
             runId,
             "2026-09-10T09:00:00+12:00",
             "2026-09-10T10:30:00+12:00",

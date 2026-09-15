@@ -59,6 +59,8 @@ public sealed record RegressionAssetManifest(
     ImmutableArray<RegressionManualCheck> ManualChecks,
     RegressionBooleanExpectation EnhancedOutputIsNotSmallerThanSource,
     RegressionBooleanExpectation EnhancedOutputIsLargerThanSource,
+    RegressionBooleanExpectation TrimBoundsStrictlyInsideCanvas,
+    RegressionBooleanExpectation TrimMatchesAlphaBoundsAndMargins,
     string? ManifestPath = null,
     string? ManifestSha256 = null)
 {
@@ -200,6 +202,7 @@ public sealed record StandardRegressionSet(
             {
                 "printflow-regression-v1" => "v1",
                 "printflow-regression-v2" => "v2",
+                "printflow-regression-v3" => "v3",
                 _ => null,
             };
             if (expectedFixtureVersion is not null &&
@@ -251,6 +254,12 @@ public sealed record StandardRegressionSet(
             {
                 ValidatePortraitExecutionExpectation(asset, problems);
             }
+
+            if (requireExecutableExpectations &&
+                string.Equals(asset.Category, "COMPLEX_BACKGROUND_FINE_HAIR", StringComparison.OrdinalIgnoreCase))
+            {
+                ValidateFineHairExecutionExpectation(asset, problems);
+            }
         }
 
         foreach (string category in StandardRegressionCategories.Required)
@@ -286,7 +295,14 @@ public sealed record StandardRegressionSet(
             return;
         }
 
-        if (!string.Equals(asset.SetId, "printflow-regression-v2", StringComparison.Ordinal))
+        // v3 changes only the fine-hair trim expectation; its portrait keeps v2's contract exactly.
+        string? version = asset.SetId switch
+        {
+            "printflow-regression-v2" => "v2",
+            "printflow-regression-v3" => "v3",
+            _ => null,
+        };
+        if (version is null)
         {
             return;
         }
@@ -295,24 +311,66 @@ public sealed record StandardRegressionSet(
         if (!expected.Present)
         {
             problems.Add(new RegressionSetProblem(asset.FixtureId,
-                "The v2 portrait does not declare enhancedOutputIsNotSmallerThanSource."));
+                $"The {version} portrait does not declare enhancedOutputIsNotSmallerThanSource."));
         }
         else if (expected.Value is null)
         {
             problems.Add(new RegressionSetProblem(asset.FixtureId,
-                "The v2 portrait expectation enhancedOutputIsNotSmallerThanSource must be boolean true."));
+                $"The {version} portrait expectation enhancedOutputIsNotSmallerThanSource must be boolean true."));
         }
         else if (expected.Value is false)
         {
             problems.Add(new RegressionSetProblem(asset.FixtureId,
-                "The v2 portrait expectation enhancedOutputIsNotSmallerThanSource is false; true is required."));
+                $"The {version} portrait expectation enhancedOutputIsNotSmallerThanSource is false; true is required."));
         }
 
         if (asset.EnhancedOutputIsLargerThanSource.Present)
         {
             problems.Add(new RegressionSetProblem(asset.FixtureId,
-                "The v2 portrait conflicts with the approved contract because it also declares " +
+                $"The {version} portrait conflicts with the approved contract because it also declares " +
                 "enhancedOutputIsLargerThanSource."));
+        }
+    }
+
+    /// <summary>
+    /// The v3 fine-hair trim contract: exact alpha-bounds/margin/crop geometry, never the v2
+    /// unconditional shrink property under another name.
+    /// </summary>
+    /// <remarks>
+    /// Only v3 is checked. v1 and v2 manifests keep their frozen <c>trimBoundsStrictlyInsideCanvas</c>
+    /// meaning, and the caller keeps enforcing it for them; nothing here reinterprets that property.
+    /// </remarks>
+    private static void ValidateFineHairExecutionExpectation(
+        RegressionAssetManifest asset,
+        List<RegressionSetProblem> problems)
+    {
+        if (!string.Equals(asset.SetId, RegressionTrimGeometry.SetId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        RegressionBooleanExpectation expected = asset.TrimMatchesAlphaBoundsAndMargins;
+        if (!expected.Present)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v3 fine-hair manifest does not declare trimMatchesAlphaBoundsAndMargins."));
+        }
+        else if (expected.Value is null)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v3 fine-hair expectation trimMatchesAlphaBoundsAndMargins must be boolean true."));
+        }
+        else if (expected.Value is false)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v3 fine-hair expectation trimMatchesAlphaBoundsAndMargins is false; true is required."));
+        }
+
+        if (asset.TrimBoundsStrictlyInsideCanvas.Present)
+        {
+            problems.Add(new RegressionSetProblem(asset.FixtureId,
+                "The v3 fine-hair manifest conflicts with the approved trim contract because it also " +
+                "declares the v2 trimBoundsStrictlyInsideCanvas property."));
         }
     }
 
@@ -374,7 +432,11 @@ public sealed record StandardRegressionSet(
             EnhancedOutputIsNotSmallerThanSource: BooleanExpectation(
                 root, "enhancedOutputIsNotSmallerThanSource"),
             EnhancedOutputIsLargerThanSource: BooleanExpectation(
-                root, "enhancedOutputIsLargerThanSource"));
+                root, "enhancedOutputIsLargerThanSource"),
+            TrimBoundsStrictlyInsideCanvas: BooleanExpectation(
+                root, "trimBoundsStrictlyInsideCanvas"),
+            TrimMatchesAlphaBoundsAndMargins: BooleanExpectation(
+                root, RegressionTrimGeometry.AssertionName));
     }
 
     private static RegressionBooleanExpectation BooleanExpectation(JsonElement root, string name)

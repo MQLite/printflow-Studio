@@ -90,6 +90,68 @@ public sealed class RegressionEvidenceIntegrityTests : IDisposable
         outcome.Says("nothing was started").ShouldBeTrue();
     }
 
+    private const string V3Portrait =
+        "{ \"importAccepted\": true, \"enhancedOutputIsNotSmallerThanSource\": true }";
+
+    [Fact]
+    public void Explicit_v3_root_preflights_binds_publishes_and_reviews_through_the_existing_validators()
+    {
+        _synthetic.ConfigureSetVersion("v3", V3Portrait,
+            "{ \"importAccepted\": true, \"trimMatchesAlphaBoundsAndMargins\": true }");
+
+        ScriptOutcome preflight = _synthetic.Run(
+            Wrapper, $"-SetRoot \"{_synthetic.SetRoot}\" -PreflightOnly");
+        preflight.ExitCode.ShouldBe(0, preflight.Output);
+        preflight.Says("7 categories").ShouldBeTrue();
+
+        StandardRegressionSet loaded = StandardRegressionSet.Load(_synthetic.SetRoot);
+        loaded.SetId.ShouldBe("printflow-regression-v3");
+        loaded.Validate(requireExecutableExpectations: true).ShouldBeEmpty();
+
+        // Publication of a synthetic v3 pass: the writer binds the v3 set content and records its id.
+        StandardRegressionSetRunResult passed = _synthetic.PassingRun(
+            "20260916-090000", Guid.NewGuid().ToString(), setId: loaded.SetId);
+        passed.Binding!.SetManifests.Length.ShouldBe(7);
+        Publish(_synthetic.WriteResult(passed)).ExitCode.ShouldBe(0);
+        ReadRecord().StandardRegressionSet!.RunId.ShouldBe("20260916-090000");
+
+        // The paired review path reads a v3 result without reinterpreting any assertion.
+        const string runId = "20260916-091500";
+        string folder = _synthetic.RunFolder(runId);
+        Directory.CreateDirectory(folder);
+        string artefact = Path.Combine(folder, "cutout.bin");
+        File.WriteAllText(artefact, "synthetic cutout bytes");
+        string digest = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(artefact)));
+        StandardRegressionSetRunResult pending = PendingRun(runId, artefact, digest) with { SetId = loaded.SetId! };
+        _synthetic.WriteResult(pending);
+
+        Review(folder, WriteDecisions(folder, "decisions.json", "PORTRAIT-VISUAL-001", "Passed"));
+
+        StandardRegressionSetRunResult reviewed = ReadResult(folder);
+        reviewed.SetId.ShouldBe("printflow-regression-v3");
+        reviewed.Binding!.InvocationId.ShouldBe(pending.Binding!.InvocationId);
+        reviewed.Reviews.ShouldHaveSingleItem().Synthetic.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("{ \"importAccepted\": true }", "does not declare trimMatchesAlphaBoundsAndMargins")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": false }", "is false")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": \"true\" }", "must be boolean true")]
+    [InlineData("{ \"trimMatchesAlphaBoundsAndMargins\": true, \"trimBoundsStrictlyInsideCanvas\": true }", "conflicts")]
+    public void Actual_preflight_refuses_missing_false_or_conflicting_v3_fine_hair_expectations(
+        string fineHairProperties,
+        string expectedProblem)
+    {
+        _synthetic.ConfigureSetVersion("v3", V3Portrait, fineHairProperties);
+
+        ScriptOutcome outcome = _synthetic.Run(
+            Wrapper, $"-SetRoot \"{_synthetic.SetRoot}\" -PreflightOnly");
+
+        outcome.ExitCode.ShouldBe(2);
+        outcome.Says(expectedProblem).ShouldBeTrue(outcome.Output);
+        outcome.Says("nothing was started").ShouldBeTrue();
+    }
+
     [Fact]
     public void Actual_preflight_refuses_a_new_v1_execution_without_reinterpreting_its_expectation()
     {

@@ -26,8 +26,9 @@
     The regression set. Defaults to D:\PrintFlowStudio\TestData\v1.
 
     The default preserves historical v1 review commands. New executions must explicitly select
-    D:\PrintFlowStudio\TestData\v2; v1's larger-only portrait expectation is intentionally refused
-    for a new run rather than reinterpreted.
+    D:\PrintFlowStudio\TestData\v2 or D:\PrintFlowStudio\TestData\v3; v1's larger-only portrait
+    expectation is intentionally refused for a new run rather than reinterpreted. v3 differs from
+    v2 only in the fine-hair trim contract (trimMatchesAlphaBoundsAndMargins).
 
 .PARAMETER PreflightOnly
     Run Layer 1 and stop. Produces no run result, because nothing ran.
@@ -180,6 +181,7 @@ function Invoke-Preflight {
         $expectedFixtureVersion = switch ([string] $manifest.setId) {
             'printflow-regression-v1' { 'v1' }
             'printflow-regression-v2' { 'v2' }
+            'printflow-regression-v3' { 'v3' }
             default { $null }
         }
         if ($expectedFixtureVersion -and
@@ -233,7 +235,9 @@ function Invoke-Preflight {
                         "enhancedOutputIsLargerThanSource contract. It remains readable for historical review " +
                         "but is incompatible with a new execution; select printflow-regression-v2 explicitly."))
                 }
-                if ($ForNewExecution -and $manifest.setId -eq 'printflow-regression-v2') {
+                # v3 keeps v2's portrait contract exactly; only its fine-hair trim contract differs.
+                if ($ForNewExecution -and @('printflow-regression-v2', 'printflow-regression-v3') -contains [string] $manifest.setId) {
+                    $label = $expectedFixtureVersion
                     $properties = if ($null -ne $manifest.PSObject.Properties['expectedProperties']) {
                         $manifest.expectedProperties
                     } else { $null }
@@ -245,15 +249,42 @@ function Invoke-Preflight {
                     } else { $null }
 
                     if ($null -eq $notSmaller) {
-                        $problems.Add("${id}: the v2 portrait does not declare enhancedOutputIsNotSmallerThanSource.")
+                        $problems.Add("${id}: the $label portrait does not declare enhancedOutputIsNotSmallerThanSource.")
                     } elseif ($notSmaller.Value -isnot [bool]) {
                         $problems.Add("${id}: enhancedOutputIsNotSmallerThanSource must be boolean true.")
                     } elseif ($notSmaller.Value -ne $true) {
                         $problems.Add("${id}: enhancedOutputIsNotSmallerThanSource is false; true is required.")
                     }
                     if ($null -ne $larger) {
-                        $problems.Add(("${id}: the v2 portrait conflicts with the approved contract because it also " +
+                        $problems.Add(("${id}: the $label portrait conflicts with the approved contract because it also " +
                             "declares enhancedOutputIsLargerThanSource."))
+                    }
+                }
+            }
+            'COMPLEX_BACKGROUND_FINE_HAIR' {
+                # Only v3 carries the exact trim-geometry contract. v1/v2 keep their frozen
+                # trimBoundsStrictlyInsideCanvas meaning, which is not reinterpreted here.
+                if ($ForNewExecution -and $manifest.setId -eq 'printflow-regression-v3') {
+                    $properties = if ($null -ne $manifest.PSObject.Properties['expectedProperties']) {
+                        $manifest.expectedProperties
+                    } else { $null }
+                    $exact = if ($null -ne $properties) {
+                        $properties.PSObject.Properties['trimMatchesAlphaBoundsAndMargins']
+                    } else { $null }
+                    $strict = if ($null -ne $properties) {
+                        $properties.PSObject.Properties['trimBoundsStrictlyInsideCanvas']
+                    } else { $null }
+
+                    if ($null -eq $exact) {
+                        $problems.Add("${id}: the v3 fine-hair manifest does not declare trimMatchesAlphaBoundsAndMargins.")
+                    } elseif ($exact.Value -isnot [bool]) {
+                        $problems.Add("${id}: trimMatchesAlphaBoundsAndMargins must be boolean true.")
+                    } elseif ($exact.Value -ne $true) {
+                        $problems.Add("${id}: trimMatchesAlphaBoundsAndMargins is false; true is required.")
+                    }
+                    if ($null -ne $strict) {
+                        $problems.Add(("${id}: the v3 fine-hair manifest conflicts with the approved trim contract " +
+                            "because it also declares the v2 trimBoundsStrictlyInsideCanvas property."))
                     }
                 }
             }
