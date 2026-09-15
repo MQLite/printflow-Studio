@@ -20,7 +20,7 @@ Two prerequisites gate the next fresh complete v2 run:
    This is candidate QA, not A1 acceptance. Independent review was not available in this context;
    record `SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED` rather than claiming one.
 
-2. **Meitu 7.8.8.2 candidate-baseline route — RESOLVED, operator acceptance still required.**
+2. **Meitu 7.8.8.2 candidate-baseline route — PREPARED, final preset acceptance still required.**
    Another `-MeituExecutablePath` run would necessarily retain `CandidateProblems` and could not
    support A2. Do not run the complete set that way. The existing preset contract already defines
    the upgrade route: use a new versioned candidate derived from immutable 1.17.0, changing only
@@ -28,11 +28,23 @@ Two prerequisites gate the next fresh complete v2 run:
    then obtain an explicit operator decision on the exact proposed version, manifest hash and
    evidence scope. Until that decision, 1.17.0 and repository `appsettings.json` remain unchanged.
 
-Candidate qualification may reuse, without replay or transfer of approval, the already-preserved
+Candidate qualification reused, without replay or transfer of approval, the already-preserved
 7.8.8.2 compatibility facts: initial derived-baseline readiness, the completed guarded Enhancement
 export, and the exact approved Background Removal cutout from `PF-FIX-MEITU-CONFIRM`. The cutout is
-evidence about that exact object only. Enhancement quality remains a separate pending operator
-question. Any genuinely new candidate output gets a new identity and no inherited decision.
+evidence about that exact object only. The operator response `It pass. Please prepare` passes only
+the displayed Enhancement SHA-256
+`6348E70A06441930520006EA3753254664D69B43218CB7D84D75B94BD81FB776` for candidate-baseline
+qualification; it is not approval of a future output or the historical failed set. Any genuinely
+new candidate output gets a new identity and no inherited decision.
+
+Prepared local candidate `printflow-workstation-v1` `1.18.0-candidate` is frozen read-only at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0-candidate.json`,
+SHA-256 `358FE9EAC7F634CA0B09875BE4AE918110702DE112FC3F5897021491C6A4AE09`, status
+`CANDIDATE_UNACCEPTED`. It differs from exact 1.17.0 only in candidate/supersedes metadata, the
+proposed Meitu version/path/hash, and one qualification block/integrity entry. All 30 integrity
+entries match; exact-pair `WorkstationPresetProvider` and `PresetMeituBaselineProvider` loads pass.
+The qualification record is also frozen read-only, SHA-256
+`DD61BC655536300C98FC22E93E043AE9FD9FC55247C5950AEB999D96C8B35D29`.
 
 After explicit candidate-baseline acceptance only: write/freeze the new immutable preset, update
 the configured version/path/hash, perform its non-live integrity/readiness prechecks, build and
@@ -42,9 +54,9 @@ actual operator decisions for its own reviewable outputs, coherent readiness/lea
 normal evidence bindings. Return to A1 and stop at its verdict. A2 production revalidation and A3
 operator-facing workflow remain separate later stages and are not authorized by this plan update.
 
-No candidate manifest, accepted preset, appsettings pointer or operator decision was created by
-this checkpoint. No live application, recovered Session, standard-set case, A2/A3 command or Jira
-state was operated. The exact unsubmitted decision boundary is retained at
+No accepted preset, appsettings pointer or final preset-acceptance decision was created by this
+checkpoint. No live application, recovered Session, standard-set case, A2/A3 command or Jira state
+was operated. The exact unsubmitted decision boundary is retained at
 `artifacts/pf-accept-a1/meitu-7882-candidate-baseline-checklist.md`.
 
 14 September 2026; host DESKTOP-0BG8884; canonical checkout D:\Repositories\printflow-Studio,

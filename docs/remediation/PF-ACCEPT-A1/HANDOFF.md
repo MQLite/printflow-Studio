@@ -1,7 +1,7 @@
 # PF-ACCEPT-A1 — Handoff
 
-**A1 MAINLINE — ReviewState candidate QA passed; explicit 7.8.8.2 baseline acceptance is required
-before one fresh complete v2 run**
+**A1 MAINLINE — ReviewState candidate QA passed; 7.8.8.2 candidate prepared; final immutable
+baseline acceptance is required before one fresh complete v2 run**
 
 ## Current mainline checkpoint
 
@@ -16,18 +16,27 @@ Self-review only; independent review not completed.
 Do not invoke the full v2 set with `-MeituExecutablePath`: that route correctly writes a persistent
 `CandidateProblems` publication prohibition and cannot proceed to A2. Resolve 7.8.8.2 through the
 existing candidate-before-signing preset contract. Preserve 1.17.0 and `appsettings.json` until an
-operator explicitly accepts the exact proposed new version/hash/evidence scope. Existing 7.8.8.2
-readiness, Enhancement/export and exact approved cutout facts may support candidate qualification,
-but the cutout approval stays bound only to its existing Revision/hash and Enhancement quality is
-still unapproved. No new candidate output inherits either decision.
+operator explicitly accepts the exact proposed final version/hash/evidence scope. Existing 7.8.8.2
+readiness, Enhancement/export and exact approved cutout facts support candidate qualification, but
+the cutout approval stays bound only to its existing Revision/hash. The operator response
+`It pass. Please prepare` passes only the displayed Enhancement SHA-256
+`6348E70A06441930520006EA3753254664D69B43218CB7D84D75B94BD81FB776` for candidate-baseline
+qualification; no future output inherits that decision.
+
+Prepared and frozen candidate: `1.18.0-candidate`, status `CANDIDATE_UNACCEPTED`, SHA-256
+`358FE9EAC7F634CA0B09875BE4AE918110702DE112FC3F5897021491C6A4AE09`, at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0-candidate.json`.
+Its 30/30 integrity entries and exact-pair preset-provider loads pass. It is not configured or
+accepted. Next authority is preparation of the final immutable 1.18.0 bytes; their new hash must
+then receive explicit acceptance before configuration changes or A1 execution.
 
 Only after that explicit baseline decision: freeze/configure the accepted immutable preset, create
 and verify a fresh build pair, preflight v2, then execute one new complete seven-category run without
 an executable override. Return to A1 for the verdict and stop. A2 and A3 remain separate execution
 and authorization stages.
 
-No candidate/accepted preset, configuration change, live run or operator decision was made in this
-checkpoint. The exact unsubmitted operator boundary is
+No accepted preset, configuration change, live run or final preset-acceptance decision was made in
+this checkpoint. The exact unsubmitted operator boundary is
 `artifacts/pf-accept-a1/meitu-7882-candidate-baseline-checklist.md`. The failed exception run below
 remains historical and retains its `CandidateProblems`.
 
