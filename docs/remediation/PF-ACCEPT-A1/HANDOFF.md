@@ -1,5 +1,72 @@
 # PF-ACCEPT-A1 — Handoff
 
+**PHOTOSHOP IDENTITY CHECK REPAIRED AND PROVEN LIVE — BOTH RETAINED PROBES RECOVERED — ONE FRESH
+A1 COMPLETED: FAILED 4/7 (COMPLEX_BACKGROUND_FINE_HAIR TRIM ASSERTION) WITH 3 VISUAL REVIEWS
+PENDING**
+
+Started from actual HEAD `365d1267a84e6a57d24dbb4c8412f7ca6af2e5f9`; no reset. One explicit
+exclusive-desktop confirmation covered diagnosis, recovery, probes and the run. Accepted preset
+1.18.0 (`8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`) was not changed.
+
+Root cause, from a fresh reproduction observed by a read-only Win32 watcher (diagnostic probe
+`3287beea10a04d24a754d1fbe00a34c8`, refusal on control `0xD0A08`): the failing control is the
+signed Save As **filename `Edit` (id 1001)**, read by `GuardedPhotoshopUiDriver.ReadIdentity` →
+`Win32VerifiedControlSink.ReadText`/`Verify`. The failed property was `IsWindowVisible`: the
+Edit's own `WS_VISIBLE` stayed set and it stayed enabled, but its ancestor `DUIViewWndClassName`
+hid for ~70 ms about 190 ms after the dialog became visible. `WaitForOwnedDialogAsync` accepted the
+dialog as soon as the top-level window was visible, so the read landed in that re-layout. Handle
+`0x300BF6` is historical and was not reused; the same stage, message and code are consistent with
+this cause. Crop, Generator and operator activity were not involved (a 10 Sep refusal had Magic
+Wand active).
+
+Correction `0258d1af72892c39e156abf3a2c0252ea52f7abb`: read-only
+`IVerifiedControlSink.VerifyActionable` (the same single `Verify` rule), and the identity read waits,
+bounded by `IdentityDialogTimeout`, until both signed id-1001 controls are actionable on two
+consecutive observations. The read keeps its guard and the surface is always cancelled. Also an
+opt-in `RetainedReadinessProbeRecoverySmoke` for exact probe recovery under the real lease. Focused
+tests were red before the fix; focused slice 151/0/0; full suite on settled source 11,899/0/0. One
+independent read-only review found no driver defect; its recovery-smoke points were applied before
+commit.
+
+Live proof with fresh pair `fd56e834-006f-4aa8-b67a-9ef6e256353d` (receipt
+`D1B2211FD616EAF38B612D7BB7CA86FD25742D810A05A1210840C69C038C2229`): probe `3287beea…` closed by
+guarded exact close and deleted; original probe `5b90ebcc…` not held by Photoshop and its canonical
+file deleted; diagnostic probe `c31334ae…` and confirming probe `2ec39436…` both completed the full
+lifecycle through `CleanupCompleted`. In both, the watcher recorded the filename Edit hiding again
+~200 ms after the dialog appeared, and the gate read only afterwards. Diagnostic success granted no
+Production authorisation.
+
+A1 run `a1-repaired-1180-20260915-155942-a4173998`, invocation
+`ba51735b-f2b3-47b9-8644-d2f865d0c480`, unfiltered, no override/diagnostic/build/restore. Readiness
+`Verified: true` (round-trip probe `18fdb9bb…` complete). Test host completed; wrapper exit 1 on the
+set verdict. `result.json` **Failed, 4/7**: TRANSPARENT_PNG, PSD_WITH_COMPOSITE_PREVIEW,
+SINGLE_PAGE_PDF, REFERENCE_PRODUCTION_TIFF Passed; NORMAL_JPG_PORTRAIT and COMPLETE_CUSTOMER_DESIGN
+Pending visual review; COMPLEX_BACKGROUND_FINE_HAIR **Failed** on `trimBoundsInsideCanvas`: "Trim
+produced 1200x1600 from 1200x1600" (its visual decision is also Pending). That category uses Meitu
+and the internal alpha trim, not the changed Photoshop identity code. `Reviews` is empty; no
+decision was recorded or transferred.
+
+Hashes: result `3E583BB03844A09F86F5231CBB82D4AB22A4CC2E3420E064D1C60AF57D1A04AC`; readiness
+`BA3BDD228DF5ECD0C6337A2FC1F4ADCC25EA64FC5FB87B142E560F60379515F3`; claim
+`90E8CF668C6619A1FC1A2C477A2880D73F00B4C910FBEDD221EF06482CCFED6F`; fine-hair case
+`7E33472113A956F116F491777363A7544F350674223EFA3CDF62C9F303F0B7D3`; live log
+`248ACDD28BD52033268BD93B6B40792CA8EC4C58B780F041C46E0C9632A5FAA9`; command metadata
+`DD9088E30E2D8A999209D96F8A32A476E7C76F0F7E0C4F083EEBD1BFE3AFC254`; settled full-suite TRX
+`81A1FEB99FD2BB7FB546DB1B102FA907E8F47D167146DB2D7809B1C4B4C83016`. Repair evidence (watcher
+timelines, diagnostic/recovery logs, runner scripts) with hashes:
+`artifacts/pf-accept-a1/identity-check-repair/`.
+
+After the run Photoshop was document-free; Meitu showed `美图秀秀-图片编辑` beside its welcome
+window (not touched). Pairs `fd56e834…` and `ee8e0280…` reverified. The earlier Blocked run and
+its evidence are unchanged.
+
+Stop at this A1 outcome. The fine-hair trim failure needs its own authorised diagnosis; the three
+Pending visual decisions need the Operator's own review. No A2/revalidation, A3, install, deploy,
+push, signing or Jira work was done.
+
+Execution: Claude Code, Opus 5 (high effort); one scoped read-only reviewer subagent. No independent
+acceptance or release approval is claimed.
+
 **A1 BLOCKED AT PHOTOSHOP TEST-IMAGE ROUND-TRIP READINESS — ONE LIVE ATTEMPT MADE — NO CATEGORY
 EXECUTED — NO RETRY OR MANUAL UNWIND**
 

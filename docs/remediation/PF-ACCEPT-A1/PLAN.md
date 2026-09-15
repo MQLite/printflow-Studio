@@ -1,5 +1,31 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — Photoshop identity check repaired; fresh A1 failed 4/7 on fine-hair trim
+
+Task `PF-ACCEPT-A1 — Photoshop Identity-Check Repair and Return to Acceptance`, from HEAD
+`365d126`. One exclusive-desktop confirmation was obtained after observing an operator's own
+document open in Photoshop; nothing was touched before it.
+
+1. **Diagnosis.** Retained evidence (readiness, live log, failure captures) placed the refusal in
+   `ProveIdentityAsync` → `ProbeDocumentIdentityAsync` → `ReadIdentity`, with ownership and class
+   passing and only visible/enabled failing. Captures showed Crop active on 15 Sep but Magic Wand on
+   10 Sep, so tool state was not the discriminator. One fresh probe through the existing
+   `ReadinessDiagnosticSmoke` path, with a read-only watcher, reproduced the refusal and identified
+   the filename `Edit` (1001) hidden by ancestor `DUIViewWndClassName` for ~70 ms after the Save As
+   dialog became visible; `IsWindowEnabled` stayed true.
+2. **Correction** `0258d1a`: `VerifyActionable` plus a bounded two-consecutive-observation settle
+   gate before the identity read; recovery smoke for one exact retained probe. Red-first tests;
+   focused 151/0/0; full suite 11,899/0/0; scoped read-only review applied.
+3. **Recovery and proof** with fresh pair `fd56e834…`: `3287beea…` exact-closed and deleted,
+   `5b90ebcc…` confirmed not held and deleted, then diagnostic probe `c31334ae…` and confirming
+   probe `2ec39436…` passed full lifecycles while the watcher recorded the same late hide.
+4. **A1** `a1-repaired-1180-20260915-155942-a4173998`: readiness verified; result **Failed 4/7**.
+   COMPLEX_BACKGROUND_FINE_HAIR failed `trimBoundsInsideCanvas` (1200x1600 from 1200x1600);
+   NORMAL_JPG_PORTRAIT and COMPLETE_CUSTOMER_DESIGN Pending review; the other four Passed.
+
+Outcome: **A1 FAILED (complete run)**. Next work needs separate authority to diagnose the fine-hair
+trim result; Pending visual decisions remain the Operator's. Details and hashes are in HANDOFF.md.
+
 ## 15 September 2026 — one accepted-preset A1 attempt blocked at Photoshop readiness probe
 
 The user clarified that the current desktop was available; this was accepted as the one current
