@@ -1,5 +1,47 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — final-form 1.18.0 exact-hash proposal prepared
+
+Starting HEAD was verified as `bd8f2e28d48128cd9a101ab775147c415fd7c5f0`; no reset was
+performed. The frozen candidate and its qualification record rehashed exactly as supplied:
+`358FE9EAC7F634CA0B09875BE4AE918110702DE112FC3F5897021491C6A4AE09` and
+`DD61BC655536300C98FC22E93E043AE9FD9FC55247C5950AEB999D96C8B35D29`. Both remain read-only
+and unchanged, as does accepted 1.17.0.
+
+A separate final-form manifest is now frozen read-only at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json`, 26,996
+bytes, SHA-256 `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`.
+Candidate-to-final semantic comparison proves exactly three finalization changes:
+`presetVersion` `1.18.0-candidate` -> `1.18.0`, `status` `CANDIDATE_UNACCEPTED` ->
+`ACCEPTED_IMMUTABLE`, and the final-form `createdAtLocal`. The latter status is the existing
+final-manifest convention inside the proposed bytes, not an acceptance decision. The qualified
+Meitu identity, qualification state and all unrelated operating/safety contracts are unchanged.
+
+Offline validation passed: JSON serialization; 30/30 `sourceManifestIntegrity` entries; 55/55
+path-bound references across the manifest and nested qualification record; retained exact pair
+`ecadbf13-a74a-4b90-9a18-e9a26479b6bb` VerifyOnly; and direct task-local loads through that pair's
+`WorkstationPresetProvider` and `PresetMeituBaselineProvider`. The latter returned exact Meitu
+7.8.8.2 path/hash. Repository `appsettings.json` remains byte-identical at SHA-256
+`059E73E413A5EC7D1975CD87B61F540FA7F8F1DF2B0618C1FCD7F441D7B6B0F5` and still selects exact
+1.17.0. No retained build output was modified. Detailed local receipt:
+`artifacts/pf-accept-a1/final-form-1.18.0-proposal.json`, SHA-256
+`7033A5B115C4E080E2F38D16D68DC310B60B01EDEFF1C93A6986066DC097B082`.
+
+The existing checklist now carries the exact-hash request and still says
+`NO DECISION RECORDED`. Overall state is **PREPARED / UNACCEPTED / NOT CONFIGURED**. Stop here:
+no configuration, A1, live readiness, application/lease operation, standard-set run,
+revalidation, build pair, full suite, artwork decision transfer, Jira change, signing, push,
+install or deploy was authorized or performed. CandidateProblems, historical results, approvals
+and the operator prompt bundle remain unchanged.
+
+Routing: policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`. NormalRoute and RequestedRoute were
+`gpt-5.6-sol/high` for safety-sensitive exact-hash preparation; explicit RouteOffset `0`,
+AdjustmentResult `UNCHANGED`. ExecutionTarget was `gpt-5.6-sol/high`; the current context could
+not perform or verify a real model switch, so `MODEL_SWITCH_UNAVAILABLE`, ActualRoute
+`UNVERIFIED`; safe continuation was retained. Post-preparation documentation was re-evaluated as
+bounded checkpoint work, with the same correctness boundary. Self-review only; no independent
+acceptance or release review is claimed.
+
 ## 15 September 2026 — mainline anchor restored
 
 A1 is again the current mainline. `PF-FIX-MEITU-CONFIRM` is a completed A1-blocker

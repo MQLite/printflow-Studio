@@ -1,5 +1,44 @@
 # PF-ACCEPT-A1 — Handoff
 
+**FINAL-FORM 1.18.0 PREPARED — EXACT-HASH ACCEPTANCE PENDING; UNACCEPTED AND NOT CONFIGURED**
+
+Verified starting HEAD `bd8f2e28d48128cd9a101ab775147c415fd7c5f0`; no reset. Frozen
+final-form manifest:
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json`, 26,996
+bytes, read-only, SHA-256
+`8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`.
+
+Frozen inputs remain exact and read-only:
+
+- candidate `1.18.0-candidate`: `358FE9EAC7F634CA0B09875BE4AE918110702DE112FC3F5897021491C6A4AE09`;
+- qualification record: `DD61BC655536300C98FC22E93E043AE9FD9FC55247C5950AEB999D96C8B35D29`;
+- accepted/configured 1.17.0: `A2E1936B355C28CDC9905EBF63107A7B4229B71D7586B3C304B7F284B59FCFA9`.
+
+Semantic diff from candidate is limited to `presetVersion`, `status` and `createdAtLocal`.
+`ACCEPTED_IMMUTABLE` is the proposed final-form field required by existing manifest convention;
+it does not itself accept the bytes. The later authority remains outside the manifest in
+`artifacts/pf-accept-a1/meitu-7882-candidate-baseline-checklist.md`, which asks about the exact
+full hash above and records **NO DECISION RECORDED**. Acceptance, if later supplied, does not by
+itself authorize configuration or A1 execution.
+
+Offline evidence is PASS: valid serialization; 30/30 source-integrity entries and 55/55 total
+path-bound manifest/qualification references; retained pair
+`ecadbf13-a74a-4b90-9a18-e9a26479b6bb` VerifyOnly; exact-pair `WorkstationPresetProvider` load as
+`printflow-workstation-v1 1.18.0 (8484F0AA1872)`; exact-pair `PresetMeituBaselineProvider` load of
+the qualified 7.8.8.2 executable identity. Direct task-local constructor inputs were used;
+repository and retained-pair appsettings were not changed. Local receipt:
+`artifacts/pf-accept-a1/final-form-1.18.0-proposal.json`, SHA-256
+`7033A5B115C4E080E2F38D16D68DC310B60B01EDEFF1C93A6986066DC097B082`.
+
+Stop at the exact-hash request. No Product change, new build pair, full-suite rerun, live readiness,
+application/lease operation, standard-set run, revalidation, configuration, A1/A2/A3, artwork
+approval, Jira change, signing, push, install or deploy. Preserve all historical results,
+CandidateProblems, approvals and the operator prompt bundle.
+
+Policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, explicit RouteOffset 0. NormalRoute/RequestedRoute/
+ExecutionTarget `gpt-5.6-sol/high`, `UNCHANGED`; `MODEL_SWITCH_UNAVAILABLE`, ActualRoute
+`UNVERIFIED`. Self-review only; no independent acceptance/release review claimed.
+
 **A1 MAINLINE — ReviewState candidate QA passed; 7.8.8.2 candidate prepared; final immutable
 baseline acceptance is required before one fresh complete v2 run**
 
