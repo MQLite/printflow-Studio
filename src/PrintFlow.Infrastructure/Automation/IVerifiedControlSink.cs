@@ -92,6 +92,20 @@ public interface IVerifiedControlSink
     /// </remarks>
     OperationResult<string> ReadText(ExternalProcessRef owner, VerifiedControlRef control);
 
+    /// <summary>
+    /// Observes whether a located control would pass the guard every read, write and press
+    /// applies — still owned, still the located class, visible and enabled — without reading,
+    /// writing or pressing it.
+    /// </summary>
+    /// <remarks>
+    /// Exists for surfaces that are present before they are usable. The standard Save As dialog
+    /// was observed live to hide the DirectUI view above its signed filename field for a moment
+    /// after the dialog itself became visible, and a read in that moment is refused. A caller
+    /// waits on this positive observation instead of a guessed delay, and the guard inside the
+    /// eventual read still decides.
+    /// </remarks>
+    OperationResult<Unit> VerifyActionable(ExternalProcessRef owner, VerifiedControlRef control);
+
     /// <summary>Sets a located control's text.</summary>
     /// <remarks>
     /// Preferred over typing for the reason the whole seam exists: the value is delivered to a

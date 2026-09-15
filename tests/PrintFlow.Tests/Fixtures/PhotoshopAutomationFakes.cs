@@ -279,12 +279,54 @@ internal sealed class FakeVerifiedControlSink : IVerifiedControlSink
             _visibleClasses.TryGetValue(host.Value, out List<string>? classes) ? classes : []);
     }
 
+    /// <summary>
+    /// Scripted guard observations per control, keyed by host, id and class — never by handle,
+    /// because the fake gives both id-1001 controls the same one. Each guard check (an
+    /// actionability observation, a read, a write or a press) consumes one entry; a control whose
+    /// script is exhausted, or that has none, is actionable.
+    /// </summary>
+    /// <remarks>
+    /// Models the live Save As surface, whose signed filename field was present but not visible
+    /// for a moment after the dialog itself became visible (PF-ACCEPT-A1).
+    /// </remarks>
+    private readonly Dictionary<(nint Host, int ControlId, string ClassName), Queue<bool>> _actionableScript = [];
+
+    /// <summary>Controls that never become actionable.</summary>
+    public HashSet<(nint Host, int ControlId, string ClassName)> NeverActionable { get; } = [];
+
+    /// <summary>Every read that returned text, in order.</summary>
+    public List<(int ControlId, string ClassName)> Reads { get; } = [];
+
+    /// <summary>Every read the guard refused because its control was not actionable.</summary>
+    public List<(int ControlId, string ClassName)> RefusedReads { get; } = [];
+
+    public void ScriptActionable(WindowHandle host, int controlId, string className, params bool[] observations) =>
+        _actionableScript[(host.Value, controlId, className)] = new Queue<bool>(observations);
+
+    public OperationResult<Unit> VerifyActionable(ExternalProcessRef owner, VerifiedControlRef control)
+    {
+        if (Lost(owner))
+        {
+            return OperationResult.Fail<Unit>(FailureCode.MeituTargetLost, "scripted ownership loss");
+        }
+
+        return Actionable(control) ? OperationResult.Ok() : NotActionable<Unit>(control);
+    }
+
     public OperationResult<string> ReadText(ExternalProcessRef owner, VerifiedControlRef control)
     {
         if (Lost(owner))
         {
             return OperationResult.Fail<string>(FailureCode.MeituTargetLost, "scripted ownership loss");
         }
+
+        if (!Actionable(control))
+        {
+            RefusedReads.Add((control.ControlId, control.ClassName));
+            return NotActionable<string>(control);
+        }
+
+        Reads.Add((control.ControlId, control.ClassName));
 
         if (ReadBackOverride is { } scripted)
         {
@@ -300,6 +342,11 @@ internal sealed class FakeVerifiedControlSink : IVerifiedControlSink
         if (Lost(owner))
         {
             return OperationResult.Fail<Unit>(FailureCode.MeituTargetLost, "scripted ownership loss");
+        }
+
+        if (!Actionable(control))
+        {
+            return NotActionable<Unit>(control);
         }
 
         Writes.Add((control.ControlId, value));
@@ -331,12 +378,37 @@ internal sealed class FakeVerifiedControlSink : IVerifiedControlSink
                 FailureCode.MeituUnknownState, "scripted control invocation failure");
         }
 
+        if (!Actionable(control))
+        {
+            return NotActionable<Unit>(control);
+        }
+
         Presses.Add((control.Host.Value, control.ControlId, control.ClassName));
         OnPress?.Invoke(control.Host.Value, control.ControlId);
         return OperationResult.Ok();
     }
 
     private bool Lost(ExternalProcessRef owner) => LostProcessIds.Contains(owner.ProcessId);
+
+    private bool Actionable(VerifiedControlRef control)
+    {
+        (nint, int, string) key = (control.Host.Value, control.ControlId, control.ClassName);
+        if (NeverActionable.Contains(key))
+        {
+            return false;
+        }
+
+        return !_actionableScript.TryGetValue(key, out Queue<bool>? script) ||
+               script.Count == 0 ||
+               script.Dequeue();
+    }
+
+    private static OperationResult<T> NotActionable<T>(VerifiedControlRef control) =>
+        OperationResult.Fail<T>(OperationFailure.Create(
+            FailureCode.MeituTargetLost,
+            $"Control {control.Handle} is not both visible and enabled (scripted).",
+            isRetryable: true,
+            context: new Dictionary<string, string> { ["inputSent"] = "false" }));
 }
 
 /// <summary>A workspace stub that resolves managed references into the fake Working directory.</summary>

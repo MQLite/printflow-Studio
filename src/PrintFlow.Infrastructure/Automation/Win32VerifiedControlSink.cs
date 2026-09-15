@@ -161,6 +161,10 @@ public sealed class Win32VerifiedControlSink : IVerifiedControlSink
     }
 
     /// <inheritdoc />
+    public OperationResult<Unit> VerifyActionable(ExternalProcessRef owner, VerifiedControlRef control) =>
+        Verify(owner, control);
+
+    /// <inheritdoc />
     public OperationResult<Unit> WriteText(
         ExternalProcessRef owner, VerifiedControlRef control, string value)
     {

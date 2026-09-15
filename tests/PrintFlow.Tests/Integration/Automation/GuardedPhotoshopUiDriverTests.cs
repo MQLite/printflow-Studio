@@ -61,7 +61,8 @@ public sealed class GuardedPhotoshopUiDriverTests
     private static Harness Build(
         bool photoshopInForeground = true,
         string? windowTitle = null,
-        PhotoshopBaseline? baseline = null)
+        PhotoshopBaseline? baseline = null,
+        PhotoshopAutomationOptions? options = null)
     {
         FakeWindowLocator locator = new();
         FakeVerifiedControlSink controls = new();
@@ -85,7 +86,7 @@ public sealed class GuardedPhotoshopUiDriverTests
         GuardedPhotoshopUiDriver driver = new(
             locator, controls, input, evidence,
             new StubPhotoshopBaselineProvider(baseline ?? PhotoshopFakes.Baseline()),
-            FastOptions,
+            options ?? FastOptions,
             TimeProvider.System);
 
         return new Harness(driver, locator, controls, input, evidence, target);
@@ -434,6 +435,91 @@ public sealed class GuardedPhotoshopUiDriverTests
         identity.Failure.Context["inputSent"].ShouldBe("false");
         h.Input.Sends.ShouldBeEmpty();
     }
+
+    /// <summary>
+    /// A Save As surface that is up but still laying out is read only after both signed controls
+    /// have been observed actionable — and never while one of them is not.
+    /// </summary>
+    /// <remarks>
+    /// The live shape (PF-ACCEPT-A1): the dialog became visible, then the DirectUI view above the
+    /// signed filename Edit hid for about 70 ms, and a read in that moment was refused as
+    /// <c>PhotoshopTargetLost</c> after the document had already been opened. The scripted guard
+    /// answers model exactly that: present, located, and briefly not actionable.
+    /// </remarks>
+    [Fact]
+    public async Task A_save_as_surface_still_laying_out_is_read_only_after_its_signed_controls_settle()
+    {
+        Harness h = Build(
+            windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName),
+            options: SettleOptions);
+        ExternalWindowRef dialog = StageIdentityDialog(
+            h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        h.Controls.ScriptActionable(dialog.Handle, 1001, "Edit", false, false);
+
+        OperationResult<PhotoshopDocumentIdentity> identity =
+            await h.Driver.ProbeDocumentIdentityAsync(h.Target, CancellationToken.None);
+
+        identity.IsSuccess.ShouldBeTrue();
+        identity.Value.ObservedFullPath.ShouldBe(PhotoshopFakes.ExpectedPath);
+        h.Controls.RefusedReads.ShouldBeEmpty();
+        h.Controls.Reads.ShouldBe([(1001, "Edit"), (1001, "ToolbarWindow32")]);
+        h.Controls.Writes.ShouldBeEmpty();
+        h.Controls.Presses.ShouldHaveSingleItem();
+        h.Controls.Presses[0].ShouldBe((dialog.Handle.Value, 2, "Button"));
+    }
+
+    /// <summary>
+    /// One actionable observation is not a settled surface: a field that disappears again right
+    /// after first showing is not read on the strength of that first sighting.
+    /// </summary>
+    [Fact]
+    public async Task A_signed_control_that_hides_again_after_first_showing_is_not_read_on_one_sighting()
+    {
+        Harness h = Build(
+            windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName),
+            options: SettleOptions);
+        ExternalWindowRef dialog = StageIdentityDialog(
+            h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        h.Controls.ScriptActionable(dialog.Handle, 1001, "Edit", true, false);
+
+        OperationResult<PhotoshopDocumentIdentity> identity =
+            await h.Driver.ProbeDocumentIdentityAsync(h.Target, CancellationToken.None);
+
+        identity.IsSuccess.ShouldBeTrue();
+        h.Controls.RefusedReads.ShouldBeEmpty();
+        h.Controls.Presses.ShouldHaveSingleItem();
+        h.Controls.Presses[0].ControlId.ShouldBe(2);
+    }
+
+    /// <summary>
+    /// A signed identity control that never becomes actionable is refused without any read being
+    /// attempted, and the surface PrintFlow raised is still cancelled.
+    /// </summary>
+    [Fact]
+    public async Task A_signed_identity_control_that_never_settles_is_refused_unread_and_cancelled()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+        ExternalWindowRef dialog = StageIdentityDialog(
+            h, PhotoshopFakes.ExpectedFileName, PhotoshopFakes.WorkingDirectory);
+        h.Controls.NeverActionable.Add((dialog.Handle.Value, 1001, "Edit"));
+
+        OperationResult<PhotoshopDocumentIdentity> identity =
+            await h.Driver.ProbeDocumentIdentityAsync(h.Target, CancellationToken.None);
+
+        identity.IsFailure.ShouldBeTrue();
+        identity.Failure.Code.ShouldBe(FailureCode.PhotoshopTargetLost);
+        identity.Failure.Context["inputSent"].ShouldBe("false");
+        h.Controls.Reads.ShouldBeEmpty();
+        h.Controls.RefusedReads.ShouldBeEmpty();
+        h.Controls.Writes.ShouldBeEmpty();
+        h.Controls.Presses.ShouldHaveSingleItem();
+        h.Controls.Presses[0].ShouldBe((dialog.Handle.Value, 2, "Button"));
+    }
+
+    private static readonly PhotoshopAutomationOptions SettleOptions = FastOptions with
+    {
+        IdentityDialogTimeout = TimeSpan.FromSeconds(5),
+    };
 
     /// <summary>Address text that lost its signed prefix refuses rather than guessing.</summary>
     [Fact]

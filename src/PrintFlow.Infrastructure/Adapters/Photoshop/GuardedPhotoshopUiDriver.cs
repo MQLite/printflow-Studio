@@ -411,12 +411,13 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
         // Read both values, then cancel — in that order, and the cancel happens whatever the
         // reads did. A probe that left the Save As surface up on a failure would leave Photoshop
         // modal, which is a worse outcome than the failure being reported (§13).
-        OperationResult<PhotoshopDocumentIdentity> identity =
-            ReadIdentity(
+        OperationResult<PhotoshopDocumentIdentity> identity = await ReadIdentityAsync(
                 ready.Value,
                 dialog.Value,
                 signature,
-                baseline.Value.OwnedDocumentCleanup);
+                baseline.Value.OwnedDocumentCleanup,
+                cancellationToken)
+            .ConfigureAwait(false);
 
         OperationResult<Unit> cancelled = await CancelDialogAsync(
             ready.Value, dialog.Value, signature.CancelControlId, signature.CancelControlClass,
@@ -433,11 +434,12 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     }
 
     /// <summary>Reads the document's own name and folder from the raised identity surface.</summary>
-    private OperationResult<PhotoshopDocumentIdentity> ReadIdentity(
+    private async Task<OperationResult<PhotoshopDocumentIdentity>> ReadIdentityAsync(
         PhotoshopTarget target,
         ExternalWindowRef dialog,
         PhotoshopDocumentIdentitySignature signature,
-        PhotoshopOwnedDocumentCleanupSignature? cleanup)
+        PhotoshopOwnedDocumentCleanupSignature? cleanup,
+        CancellationToken cancellationToken)
     {
         OperationResult<VerifiedControlRef> fileNameControl = _controls.Locate(
             target.Process, dialog.Handle, signature.FileNameControlId, signature.FileNameControlClass);
@@ -451,6 +453,14 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
         if (addressControl.IsFailure)
         {
             return OperationResult.Fail<PhotoshopDocumentIdentity>(AsPhotoshop(addressControl.Failure));
+        }
+
+        OperationResult<Unit> settled = await AwaitControlsActionableAsync(
+                target, [fileNameControl.Value, addressControl.Value], cancellationToken)
+            .ConfigureAwait(false);
+        if (settled.IsFailure)
+        {
+            return OperationResult.Fail<PhotoshopDocumentIdentity>(settled.Failure);
         }
 
         OperationResult<string> fileName = _controls.ReadText(target.Process, fileNameControl.Value);
@@ -1150,6 +1160,71 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             }
 
             await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Waits until every located signed control on a surface this driver raised is observed
+    /// actionable on two consecutive observations.
+    /// </summary>
+    /// <remarks>
+    /// A visible dialog is not yet a readable one. Live (PF-ACCEPT-A1), the Save As surface became
+    /// visible and then hid the DirectUI view above its signed filename Edit for about 70 ms; a
+    /// read in that moment was refused by the control guard after the probe document had already
+    /// been opened, which left the probe loaded. One sighting is not enough, because the hide came
+    /// after the surface was first seen usable, so two consecutive observations one poll apart
+    /// are required.
+    /// <para>
+    /// Nothing is read, written or pressed while waiting, and the guard inside the eventual read
+    /// still decides. A surface that never settles is refused with the last guard answer after
+    /// the bounded wait, whatever the reason for the refusal. Cancellation ends the wait without
+    /// throwing, so the caller still presses the Cancel of the surface it raised; the cancelled
+    /// token then surfaces from that close confirmation.
+    /// </para>
+    /// </remarks>
+    private async Task<OperationResult<Unit>> AwaitControlsActionableAsync(
+        PhotoshopTarget target,
+        IReadOnlyList<VerifiedControlRef> controls,
+        CancellationToken cancellationToken)
+    {
+        DateTimeOffset deadline = _clock.GetUtcNow() + _options.IdentityDialogTimeout;
+        int consecutive = 0;
+        while (true)
+        {
+            OperationFailure? refused = null;
+            foreach (VerifiedControlRef control in controls)
+            {
+                OperationResult<Unit> actionable = _controls.VerifyActionable(target.Process, control);
+                if (actionable.IsFailure)
+                {
+                    refused = actionable.Failure;
+                    break;
+                }
+            }
+
+            consecutive = refused is null ? consecutive + 1 : 0;
+            if (consecutive >= 2)
+            {
+                return OperationResult.Ok();
+            }
+
+            if (refused is not null && _clock.GetUtcNow() >= deadline)
+            {
+                return OperationResult.Fail<Unit>(AsPhotoshop(refused));
+            }
+
+            try
+            {
+                await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return OperationResult.Fail<Unit>(OperationFailure.Create(
+                    FailureCode.Cancelled,
+                    "The identity read was cancelled before its signed controls settled. Nothing was read.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+            }
         }
     }
 
