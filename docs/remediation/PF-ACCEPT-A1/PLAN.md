@@ -1,5 +1,73 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — one accepted-preset A1 attempt blocked at Photoshop readiness probe
+
+The user clarified that the current desktop was available; this was accepted as the one current
+exclusive-desktop confirmation and was not requested again. At
+`2026-09-15T15:04:35.4659183+12:00`, Photoshop PID 1488 showed only
+`Adobe Photoshop CC 2019`, Meitu 7.8.8.2 PID 11484 showed `美图秀秀`, both processes were
+responding, and fresh pair `ee8e0280-4fbe-436c-953a-8d27b347d35e` reverified.
+
+Exactly one complete, unfiltered v2 invocation was then made through that pair's harness and
+candidate. It used no executable override, diagnostic-unbound mode, fake adapter, extra outer
+lease, build or restore:
+
+- RunId `a1-accepted-1180-20260915-150547-81c99cdd`;
+- InvocationId `b1a53915-d2ba-46c8-90f0-3a7d6db9abc0`;
+- execution claim: pair harness `testhost.exe` PID 33408 on `DESKTOP-0BG8884`;
+- wrapper/test-host exit `1`; no TRX was produced by the console-only live logger.
+
+The run stopped at the first readiness failure before any regression category executed. Exact
+preset 1.18.0, all 30 evidence hashes, OS, Meitu/Photoshop executable identities, Photoshop action,
+workspace, interactive session, display, UI culture, canonical lock acquisition, both recognised
+safe starting states and Photoshop colour settings all passed. `CandidateProblems` is empty. The
+read-only-attribute check remained a non-blocking advisory: 16/30 integrity-referenced files lack
+the attribute, while all 30 hashes match exactly.
+
+Blocking check `PhotoshopTestImageRoundTrip` failed at `IdentityCheck` after `OpenRequested` and
+`OpenConfirmed`: `Control 0x300BF6 is not both visible and enabled, so it is not something
+PrintFlow may read or drive. Nothing was written or pressed.` Failure code is
+`PhotoshopTargetLost`, `InputSent` is `false`. Cleanup is `NotRun` because open was entered and
+close ownership is unconfirmed; the guard retained the managed backing file rather than risking an
+unsafe close. Photoshop now shows the retained managed probe
+`PF_ENV_PROBE_5b90ebccd3dc4267b1a80c83a71c6c63.png`. No manual unwind, code change or retry was
+performed.
+
+The run-local `result.json` is `Blocked`, 0/7 passed, with all seven categories blocked by the same
+environment prerequisite and no executed steps, produced artefacts, assertions or Operator
+reviews. The wrapper correctly reports that the test host did not complete and the file is not a
+successful regression result. Canonical physical lease observation at
+`2026-09-15T15:07:57.8112751+12:00` is `Free` with no owner. Both the new pair and preserved pair
+`2851ad7b-8a02-422d-8f3f-c7b615d5f45d` reverified after the attempt; receipt hashes remain
+`52DA695226F1024DF925442EC776E2B0163FBA997CF53A09DBA8EC827996A259` and
+`AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E` respectively. Accepted
+manifest hash remains `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`.
+
+Preserved exact evidence:
+
+- command metadata `artifacts/pf-accept-a1/accepted-1.18.0-live-command.json`, SHA-256
+  `80EA0B340F1770CD578E695C91168453DABBF084A61CCFFE3C01DF2C3D65AD07`;
+- live log `artifacts/pf-accept-a1/accepted-1.18.0-live-run.log`, SHA-256
+  `56AD094B357F4F1E77472B980B1E4F5A4DBC435FF51BAEBE278BA4C16391B11A`;
+- execution claim SHA-256 `C5CBE1B11C810B09310B88A9FC65BB72C169BB833990ECB637916EE96F9FA69C`;
+- readiness SHA-256 `D75D8A5A80E5D1BC9738A967EA58B8E656112845DED722655F47AB3F6B8C5B8C`;
+- result SHA-256 `6F484673CB6ED216A8AB2E67883DF3959C9D4DEE859C5DD3E1B49C58E12ED17B`;
+- regression database SHA-256 `B943401F53A8884552CF833337530EDFE181F17E7C4CDFA1CFBEDA0F08531C47`;
+- retained probe SHA-256 `431CED6916A2A21A156E38701AFE55BBD7F88969FBBFC56D7FE099D47F265460`;
+- post-run lease observation `artifacts/pf-accept-a1/accepted-1.18.0-lease-after.json`, SHA-256
+  `E922C2FB41EBBD08FFAB2C411F46899BA19662862EF5B569F5EAA094B5A7D420`.
+
+A1 outcome is **BLOCKED / RUN DID NOT COMPLETE AT PHOTOSHOP TEST-IMAGE ROUND-TRIP READINESS**.
+This is a precise failure outside the authorized stale-test correction. Stop here: no unchanged
+retry, probe cleanup, product/test modification, visual review, A2/revalidation, A3, install,
+deploy, push, signing or Jira change. Further work requires a separately authorized diagnosis of
+the Photoshop readiness round-trip failure and ownership-safe recovery of the retained probe.
+
+Routing remains policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, RouteOffset `-1`; operational
+NormalRoute Sol High, requested Sol Medium, adjustment `APPLIED`. Actual route remains
+`UNVERIFIED`, `MODEL_SWITCH_UNAVAILABLE`. No scoped reviewer was used and no independent
+acceptance/release approval is claimed.
+
 ## 15 September 2026 — stale preset tests corrected; offline gate restored; A1 awaiting desktop availability
 
 Task `PF-ACCEPT-A1 — Align Preset Tests with Accepted 1.18.0, Then Resume A1` started from the

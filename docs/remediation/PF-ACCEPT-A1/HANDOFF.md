@@ -1,5 +1,59 @@
 # PF-ACCEPT-A1 — Handoff
 
+**A1 BLOCKED AT PHOTOSHOP TEST-IMAGE ROUND-TRIP READINESS — ONE LIVE ATTEMPT MADE — NO CATEGORY
+EXECUTED — NO RETRY OR MANUAL UNWIND**
+
+The user confirmed the current desktop was available. A fresh observation showed Photoshop PID
+1488 at its clean title and Meitu 7.8.8.2 PID 11484 at its recognised welcome window; the current
+confirmation was accepted once and not repeated. Pair
+`ee8e0280-4fbe-436c-953a-8d27b347d35e` reverified, then exactly one complete unfiltered v2 run used
+its receipt/candidate with no override, diagnostic mode, fake adapter, outer lease, build or
+restore.
+
+RunId `a1-accepted-1180-20260915-150547-81c99cdd`; InvocationId
+`b1a53915-d2ba-46c8-90f0-3a7d6db9abc0`; claimed pair testhost PID 33408; wrapper/test-host exit 1.
+All static/baseline checks passed, including exact preset 1.18.0 and all 30 evidence hashes.
+Meitu/Photoshop safe starting states, canonical lock acquisition, and Photoshop colour settings
+also passed. `CandidateProblems` is empty. The read-only-attribute observation is advisory only:
+16/30 evidence files lack the attribute, but all hashes match.
+
+The sole blocking check was `PhotoshopTestImageRoundTrip`. After the managed probe reached
+`OpenConfirmed`, `IdentityCheck` failed with `PhotoshopTargetLost`: control `0x300BF6` was not both
+visible and enabled, so the guard sent no input and pressed nothing. Cleanup is deliberately
+`NotRun` because close ownership is unconfirmed. Photoshop now shows retained managed probe
+`PF_ENV_PROBE_5b90ebccd3dc4267b1a80c83a71c6c63.png`; do not manually close or delete it under this
+authorization.
+
+Run root:
+`D:\PrintFlowStudio\TestData\v2\runs\a1-accepted-1180-20260915-150547-81c99cdd`. Its result is
+`Blocked`, 0/7 passed: all seven cases contain no executed steps, artefacts, assertions or reviews
+and identify the failed readiness prerequisite. The wrapper says the host did not complete; this
+is not successful regression evidence. Canonical lease is `Free` with no owner. Both the new pair
+and preserved 2851 pair reverified after execution.
+
+Exact hashes:
+
+- command metadata `80EA0B340F1770CD578E695C91168453DABBF084A61CCFFE3C01DF2C3D65AD07`;
+- live log `56AD094B357F4F1E77472B980B1E4F5A4DBC435FF51BAEBE278BA4C16391B11A`;
+- execution claim `C5CBE1B11C810B09310B88A9FC65BB72C169BB833990ECB637916EE96F9FA69C`;
+- readiness `D75D8A5A80E5D1BC9738A967EA58B8E656112845DED722655F47AB3F6B8C5B8C`;
+- result `6F484673CB6ED216A8AB2E67883DF3959C9D4DEE859C5DD3E1B49C58E12ED17B`;
+- regression DB `B943401F53A8884552CF833337530EDFE181F17E7C4CDFA1CFBEDA0F08531C47`;
+- retained probe `431CED6916A2A21A156E38701AFE55BBD7F88969FBBFC56D7FE099D47F265460`;
+- lease observation `E922C2FB41EBBD08FFAB2C411F46899BA19662862EF5B569F5EAA094B5A7D420`;
+- new pair receipt `52DA695226F1024DF925442EC776E2B0163FBA997CF53A09DBA8EC827996A259`;
+- preserved 2851 receipt `AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E`;
+- accepted manifest `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`.
+
+Stop at this precise outside-correction failure. Do not retry unchanged conditions, alter code,
+close/delete the retained probe, record visual decisions, or proceed to A2/revalidation, A3,
+install, deploy, push, signing or Jira. Next work needs separate authority to diagnose the
+Photoshop round-trip/identity control and perform ownership-safe recovery.
+
+Policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, RouteOffset `-1`; operational normal Sol High ->
+requested Sol Medium. Actual route `UNVERIFIED`, `MODEL_SWITCH_UNAVAILABLE`. No reviewer used; no
+independent acceptance/release approval claimed.
+
 **OFFLINE GATE RESTORED — TEST CORRECTION COMMITTED — FRESH PAIR VERIFIED — A1 AWAITING AN
 EXCLUSIVE, DOCUMENT-FREE DESKTOP WINDOW**
 
