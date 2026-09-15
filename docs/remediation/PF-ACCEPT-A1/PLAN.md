@@ -1,5 +1,80 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — stale preset tests corrected; offline gate restored; A1 awaiting desktop availability
+
+Task `PF-ACCEPT-A1 — Align Preset Tests with Accepted 1.18.0, Then Resume A1` started from the
+actual clean HEAD `c75c8dee90a747e93ecd8fba0e9e3dbe43257466`; no reset or historical checkout was
+performed. Accepted preset `printflow-workstation-v1` `1.18.0` remains unchanged at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json`, read-only,
+SHA-256 `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`. Acceptance and
+configuration were not repeated.
+
+Both failures were extracted independently from the preserved 88-pass/2-fail TRX, whose SHA-256
+remains `C47FA4B18B856DB130BD6DA014BE2E35940FA5B75634358B25D48FA8E554389C`:
+
+1. `Configured_workstation_preset_is_the_immutable_v1_17_contract` was a current-configuration
+   test with a stale expected version and path. It now independently pins exact Id, version
+   `1.18.0`, relative path and accepted SHA-256, and hashes the selected manifest bytes against
+   that literal rather than comparing configuration with itself.
+2. `Manifest_reverifies_every_inherited_and_resize_evidence_entry` was a generic integrity test.
+   Only its irrelevant 1.17.0 lineage and fixed-count coupling was removed. It still enumerates
+   every declared integrity entry, recomputes every SHA-256, requires every file to exist and
+   retains the required evidence-category/read-only assertions.
+
+Two other tests that directly read current `appsettings.json` were aligned to the same independent
+exact version/path/hash check. Historical/synthetic 1.17.0 test data and superseded manifest
+identities remain explicit and unchanged; there was no bulk replacement, skip, self-comparison or
+hash weakening. Correction commit:
+`e85f56115cc0cfb5f47c5b38573f2c15be86c88a` (`test: align preset checks with accepted 1.18.0`).
+
+Required bounded validation passed without a full suite:
+
+- source focused configuration/integrity checks: 4 passed / 0 failed / 0 skipped; TRX
+  `artifacts/pf-accept-a1/accepted-1.18.0-test-correction/focused.trx`, SHA-256
+  `DFA7A387B9B289E51A7751847CD587C4940050E322E773B4563EB1D9C87CEE5B`;
+- original source provider/configuration slice: 90/0/0; TRX
+  `artifacts/pf-accept-a1/accepted-1.18.0-test-correction/configuration-provider-corrected.trx`,
+  SHA-256 `4B9288DB6558E8212EAAFB587ADA6D4C33463E979DA0980DE2D56E2B9AB0664C`;
+- fresh controlled pair `ee8e0280-4fbe-436c-953a-8d27b347d35e`, source `e85f561`, SDK
+  `10.0.400`, input digest `FB899B0BB01B2868619F31C8310E02D367DE455292E6E1A048A778D70C7FBE6E`,
+  zero build warnings/errors, receipt SHA-256
+  `52DA695226F1024DF925442EC776E2B0163FBA997CF53A09DBA8EC827996A259`;
+- final checks through that pair's exact `harness/PrintFlow.Tests.dll` (SHA-256
+  `9CD3F752BA06B99D6BDDEC2267FF244F23D1803905082839AAB47F844F7C5F45`): focused 4/0/0,
+  TRX SHA-256 `C6E47349393551F55456B18AD61F741F8F9B9B49171BABE563EE8AFF346564EE`; provider slice
+  90/0/0, TRX SHA-256 `355E0B6FAD428139961C1E1A872342FA1EF5D3B0A3DCA87AEBFA560CFFE1F23E`;
+- explicit `D:\PrintFlowStudio\TestData\v2` preflight: PASS, seven categories and all manifest/file
+  hashes exact; no result written. Transcript
+  `artifacts/pf-accept-a1/accepted-1.18.0-v2-preflight.log`, SHA-256
+  `7BF792DAD2A5255AB9DD1BA425A02020B1F29663259349244480DE53BD5F4C62`.
+
+Pair `2851ad7b-8a02-422d-8f3f-c7b615d5f45d` reverified after the new build and remains unchanged;
+its receipt SHA-256 is still
+`AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E`.
+
+The current desktop was not eligible for the one fresh complete live run. At approximately
+`2026-09-15T15:00:42+12:00`, Meitu 7.8.8.2 PID 11484 had a responding `美图秀秀` window, but
+Photoshop PID 1488 had the unrelated document
+`Faileaso Lualua Vaeai_Lowback_A4.tif @ 33.3% (图层 1, CMYK/16)` open. The required exclusive,
+settled and document-free condition was therefore false. Nothing was closed, saved, activated,
+launched or dismissed. No live RunId/InvocationId, readiness, lease, standard-set result or
+Operator review was created. Offline gate status is **RESTORED**; A1 is **AWAITING DESKTOP
+AVAILABILITY**, not blocked by another Product defect.
+
+Resume only after one current explicit confirmation that the desktop is exclusive and both Meitu
+and Photoshop are settled, document-free and modal-free. Reobserve the windows, then use the new
+pair receipt and candidate with the normal wrapper against v2 exactly once: no category filter,
+executable override, diagnostic-unbound mode, fake adapter, extra lease, build or restore. Stop at
+the actual seven-category A1 result or genuine Operator review boundary. Earlier artwork decisions
+do not transfer.
+
+Routing: policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, explicit RouteOffset `-1`. Test correction
+NormalRoute `gpt-5.6-terra/medium`, requested target `gpt-5.6-terra/low`; operational evidence
+NormalRoute `gpt-5.6-sol/high`, requested target `gpt-5.6-sol/medium`; adjustment `APPLIED` in both
+route calculations. This context could not perform or verify a real switch, so
+`MODEL_SWITCH_UNAVAILABLE`, ActualRoute `UNVERIFIED`; the available context remained safe. No
+reviewer was used; bounded self-review only, with no independent acceptance/release approval.
+
 ## 15 September 2026 — exact baseline accepted; continuation stopped at first provider-check failure
 
 The current user instruction `PF-ACCEPT-A1 — Exact Baseline Acceptance and Authorized

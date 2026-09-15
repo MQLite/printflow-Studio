@@ -1,5 +1,68 @@
 # PF-ACCEPT-A1 — Handoff
 
+**OFFLINE GATE RESTORED — TEST CORRECTION COMMITTED — FRESH PAIR VERIFIED — A1 AWAITING AN
+EXCLUSIVE, DOCUMENT-FREE DESKTOP WINDOW**
+
+Actual starting HEAD was `c75c8dee90a747e93ecd8fba0e9e3dbe43257466`; no reset. The accepted
+read-only `printflow-workstation-v1` 1.18.0 manifest and exact SHA-256
+`8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F` remain unchanged and
+configured. Acceptance was not requested or recorded again.
+
+The preserved failure TRX (SHA-256
+`C47FA4B18B856DB130BD6DA014BE2E35940FA5B75634358B25D48FA8E554389C`) contained exactly two
+failures, classified independently: the named configured-contract test was a stale current
+configuration assertion; the manifest traversal was a generic integrity test with irrelevant
+1.17.0 lineage/count coupling. Commit `e85f56115cc0cfb5f47c5b38573f2c15be86c88a` corrects the
+current appsettings readers to exact 1.18.0 version/path/hash and removes only that generic stale
+coupling. Actual manifest hashing remains pinned to the literal accepted hash. Historical and
+synthetic 1.17.0 fixtures/identities remain explicit and unchanged; no skips, bulk replacement,
+self-comparison or integrity weakening.
+
+Offline results (no full suite): source focused 4/0/0 and original preset/provider slice 90/0/0.
+Fresh pair `ee8e0280-4fbe-436c-953a-8d27b347d35e` was built from `e85f561` with zero warnings/
+errors and verified. Its receipt SHA-256 is
+`52DA695226F1024DF925442EC776E2B0163FBA997CF53A09DBA8EC827996A259`; exact harness test DLL
+SHA-256 is `9CD3F752BA06B99D6BDDEC2267FF244F23D1803905082839AAB47F844F7C5F45`. Final vstest checks
+through that harness passed focused 4/0/0 and original provider slice 90/0/0. Paired TRX hashes:
+`C6E47349393551F55456B18AD61F741F8F9B9B49171BABE563EE8AFF346564EE` and
+`355E0B6FAD428139961C1E1A872342FA1EF5D3B0A3DCA87AEBFA560CFFE1F23E` under
+`artifacts/pf-accept-a1/accepted-1.18.0-fresh-pair-provider-checks/`.
+
+Explicit v2 preflight passed all seven categories and all recomputed hashes; it wrote no result.
+Transcript: `artifacts/pf-accept-a1/accepted-1.18.0-v2-preflight.log`, SHA-256
+`7BF792DAD2A5255AB9DD1BA425A02020B1F29663259349244480DE53BD5F4C62`. Preserved pair
+`2851ad7b-8a02-422d-8f3f-c7b615d5f45d` reverified unchanged; receipt SHA-256 remains
+`AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E`.
+
+Live execution did not start because the current workstation window is not document-free.
+Meitu 7.8.8.2 PID 11484 has a responding `美图秀秀` window; Photoshop PID 1488 is showing the
+unrelated document `Faileaso Lualua Vaeai_Lowback_A4.tif @ 33.3% (图层 1, CMYK/16)`. No app or
+document was touched. There is no new RunId/InvocationId, readiness, lease, result, claim or
+Operator review. This is **A1 AWAITING DESKTOP AVAILABILITY**, not another Product defect.
+
+Next: after one current explicit exclusive-desktop confirmation with both apps settled,
+document-free and modal-free, reobserve and run exactly once with:
+
+```powershell
+$receipt = 'D:\Repositories\printflow-Studio\artifacts\pf-accept-a1\build-pairs\ee8e0280-4fbe-436c-953a-8d27b347d35e\build-pair.json'
+$pair = tools\regression\New-PrintFlowBuildPair.ps1 -VerifyOnly -ReceiptPath $receipt
+$runId = '<fresh-unused-id>'
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 `
+    -SetRoot 'D:\PrintFlowStudio\TestData\v2' `
+    -BuildPairReceipt $receipt `
+    -CandidateInstallFolder $pair.CandidateFolder `
+    -RunId $runId
+```
+
+Do not add categories, executable override, diagnostic mode, fake adapter, outer lease, build or
+restore. Do not transfer previous artwork decisions. Stop at the A1 result or actual Operator
+review boundary. No A2/A3/revalidation/install/deploy/push/signing/Jira work is authorized.
+
+Policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, RouteOffset `-1`. Test work normal Terra Medium ->
+requested Terra Low; operational evidence normal Sol High -> requested Sol Medium. Actual route
+`UNVERIFIED`, `MODEL_SWITCH_UNAVAILABLE`; safe continuation. No scoped reviewer used and no
+independent acceptance/release approval claimed.
+
 **EXACT 1.18.0 BASELINE ACCEPTED AND CONFIGURED — STOPPED AT FIRST PROVIDER-CHECK FAILURE;
 V2 PREFLIGHT AND LIVE STANDARD SET NOT RUN**
 
