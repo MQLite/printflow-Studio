@@ -1,5 +1,38 @@
 # PF-ACCEPT-A1 — Handoff
 
+**A1 MAINLINE — ReviewState candidate QA passed; explicit 7.8.8.2 baseline acceptance is required
+before one fresh complete v2 run**
+
+## Current mainline checkpoint
+
+The shared ReviewState persistence correction at `522fca3` has passed candidate QA against exact
+retained pair `ecadbf13-a74a-4b90-9a18-e9a26479b6bb`. VerifyOnly passed and the pair's full harness
+passed 11,895/11,895 with no live opt-ins. Evidence is under
+`artifacts/pf-accept-a1/reviewstate-candidate-qa-20260915/`; `full.trx` SHA-256 is
+`F1E8BC9D02B6FEC68B8E404357F87447DCE2AC431C804FC12DF4D5440276862A`. This closes the
+candidate QA prerequisite for A1's review/reload consistency requirement. It does not accept A1.
+Self-review only; independent review not completed.
+
+Do not invoke the full v2 set with `-MeituExecutablePath`: that route correctly writes a persistent
+`CandidateProblems` publication prohibition and cannot proceed to A2. Resolve 7.8.8.2 through the
+existing candidate-before-signing preset contract. Preserve 1.17.0 and `appsettings.json` until an
+operator explicitly accepts the exact proposed new version/hash/evidence scope. Existing 7.8.8.2
+readiness, Enhancement/export and exact approved cutout facts may support candidate qualification,
+but the cutout approval stays bound only to its existing Revision/hash and Enhancement quality is
+still unapproved. No new candidate output inherits either decision.
+
+Only after that explicit baseline decision: freeze/configure the accepted immutable preset, create
+and verify a fresh build pair, preflight v2, then execute one new complete seven-category run without
+an executable override. Return to A1 for the verdict and stop. A2 and A3 remain separate execution
+and authorization stages.
+
+No candidate/accepted preset, configuration change, live run or operator decision was made in this
+checkpoint. The exact unsubmitted operator boundary is
+`artifacts/pf-accept-a1/meitu-7882-candidate-baseline-checklist.md`. The failed exception run below
+remains historical and retains its `CandidateProblems`.
+
+## Historical exception run — preserved, not current acceptance
+
 **RUN INCOMPLETE — PF-ACCEPT-A1: 2 passed / 5 failed under authorized Meitu 7.8.8.2 exception**
 
 ## Current result supersedes the preparation stops below

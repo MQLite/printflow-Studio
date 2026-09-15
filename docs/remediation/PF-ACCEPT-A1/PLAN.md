@@ -1,5 +1,52 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — mainline anchor restored
+
+A1 is again the current mainline. `PF-FIX-MEITU-CONFIRM` is a completed A1-blocker
+remediation only; its approved Revision/hash, `ManualResultImport` provenance and failed staging
+attempt remain exact historical facts. They are not a substitute for the complete standard set,
+and the unreviewed Enhancement is not accepted by implication. R1/R2/R3/R4/A0 remain closed absent
+new contradictory evidence.
+
+Two prerequisites gate the next fresh complete v2 run:
+
+1. **Shared ReviewState candidate QA — PASSED.** This correction unblocks A1's requirement that
+   hash-bound review evidence reload coherently: the append-only `ReviewDecision` and the reviewed
+   Revision's cached `ReviewState` are committed in the same guarded SQLite transaction. Retained
+   pair `ecadbf13-a74a-4b90-9a18-e9a26479b6bb`, source `522fca3`, reverified; its exact harness
+   passed 11,895/11,895 with all `PRINTFLOW_*` opt-ins cleared. Durable evidence:
+   `artifacts/pf-accept-a1/reviewstate-candidate-qa-20260915/summary.json` and `full.trx`
+   (TRX SHA-256 `F1E8BC9D02B6FEC68B8E404357F87447DCE2AC431C804FC12DF4D5440276862A`).
+   This is candidate QA, not A1 acceptance. Independent review was not available in this context;
+   record `SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED` rather than claiming one.
+
+2. **Meitu 7.8.8.2 candidate-baseline route — RESOLVED, operator acceptance still required.**
+   Another `-MeituExecutablePath` run would necessarily retain `CandidateProblems` and could not
+   support A2. Do not run the complete set that way. The existing preset contract already defines
+   the upgrade route: use a new versioned candidate derived from immutable 1.17.0, changing only
+   the explicitly justified Meitu identity/evidence values; validate the candidate before signing;
+   then obtain an explicit operator decision on the exact proposed version, manifest hash and
+   evidence scope. Until that decision, 1.17.0 and repository `appsettings.json` remain unchanged.
+
+Candidate qualification may reuse, without replay or transfer of approval, the already-preserved
+7.8.8.2 compatibility facts: initial derived-baseline readiness, the completed guarded Enhancement
+export, and the exact approved Background Removal cutout from `PF-FIX-MEITU-CONFIRM`. The cutout is
+evidence about that exact object only. Enhancement quality remains a separate pending operator
+question. Any genuinely new candidate output gets a new identity and no inherited decision.
+
+After explicit candidate-baseline acceptance only: write/freeze the new immutable preset, update
+the configured version/path/hash, perform its non-live integrity/readiness prechecks, build and
+verify one fresh source-bound pair, and execute one fresh complete `printflow-regression-v2` run
+without `-MeituExecutablePath`. That run must have no `CandidateProblems`, exactly seven cases,
+actual operator decisions for its own reviewable outputs, coherent readiness/lease cleanup and the
+normal evidence bindings. Return to A1 and stop at its verdict. A2 production revalidation and A3
+operator-facing workflow remain separate later stages and are not authorized by this plan update.
+
+No candidate manifest, accepted preset, appsettings pointer or operator decision was created by
+this checkpoint. No live application, recovered Session, standard-set case, A2/A3 command or Jira
+state was operated. The exact unsubmitted decision boundary is retained at
+`artifacts/pf-accept-a1/meitu-7882-candidate-baseline-checklist.md`.
+
 14 September 2026; host DESKTOP-0BG8884; canonical checkout D:\Repositories\printflow-Studio,
 master. Initial HEAD a2cee64872deddec17213298b58edd433079e3a7. Only the operator-owned
 printflow-remediation-prompts/ bundle was untracked; preserve it.
