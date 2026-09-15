@@ -132,9 +132,9 @@ public sealed class EnvironmentGateCompositionTests
     /// <remarks>
     /// Asserted against the committed <c>appsettings.json</c> rather than a fixture, and it was
     /// <c>Fake</c> here until Part D. That is the whole content of the activation: one value in
-    /// one file, changed once every preceding gate had passed. The preset assertion is beside it
-    /// on purpose — activation is not permitted to mint a new preset identity, so the version
-    /// this installation is verified against is the version Part A accepted.
+    /// one file, changed once every preceding gate had passed. The preset assertions are beside it
+    /// on purpose: they independently pin the exact currently accepted configuration, while tests
+    /// of historical identities select historical fixtures explicitly.
     /// </remarks>
     [Fact]
     public void The_shipped_configuration_runs_production_against_the_accepted_preset()
@@ -143,7 +143,12 @@ public sealed class EnvironmentGateCompositionTests
             PrintFlowConfiguration.LoadFromFile(Path.Combine(RepositoryRoot(), "appsettings.json"));
 
         configuration.Adapters.Mode.ShouldBe("Production");
-        configuration.Preset.Version.ShouldBe("1.17.0");
+        configuration.Preset.Version.ShouldBe("1.18.0");
+        configuration.Preset.Path.ShouldBe(
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json");
+        configuration.Preset.ExpectedSha256.ShouldBe(
+            "8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F",
+            StringCompareShould.IgnoreCase);
     }
 
     /// <summary>

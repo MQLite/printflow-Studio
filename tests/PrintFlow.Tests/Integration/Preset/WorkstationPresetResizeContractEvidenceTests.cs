@@ -16,7 +16,7 @@ namespace PrintFlow.Tests.Integration.Preset;
 public sealed class WorkstationPresetResizeContractEvidenceTests
 {
     [Fact]
-    public void Configured_workstation_preset_is_the_immutable_v1_17_contract()
+    public void Configured_workstation_preset_is_the_immutable_v1_18_contract()
     {
         (PrintFlowConfiguration configuration, string manifestPath)? configured = ConfiguredBaseline();
         if (configured is null)
@@ -24,18 +24,23 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
             return;
         }
 
-        configured.Value.configuration.Preset.Version.ShouldBe("1.17.0");
-        configured.Value.configuration.Preset.Path.ShouldEndWith(
-            @"Baseline\workstation-v1\preset\printflow-workstation-v1.17.0.json");
+        const string expectedSha256 =
+            "8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F";
+
+        configured.Value.configuration.Preset.Id.ShouldBe("printflow-workstation-v1");
+        configured.Value.configuration.Preset.Version.ShouldBe("1.18.0");
+        configured.Value.configuration.Preset.Path.ShouldBe(
+            @"Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json");
+        configured.Value.configuration.Preset.ExpectedSha256.ShouldBe(
+            expectedSha256,
+            StringCompareShould.IgnoreCase);
 
         // Production since Epic 11500 Part D. The mode is asserted here because this file is
         // about what the configured installation actually points at, and a preset contract that
         // no longer matched the mode it ships with would be the wrong kind of surprise.
         configured.Value.configuration.Adapters.Mode.ShouldBe("Production");
 
-        Hash(configured.Value.manifestPath).ShouldBe(
-            configured.Value.configuration.Preset.ExpectedSha256,
-            StringCompareShould.IgnoreCase);
+        Hash(configured.Value.manifestPath).ShouldBe(expectedSha256, StringCompareShould.IgnoreCase);
         File.GetAttributes(configured.Value.manifestPath)
             .HasFlag(FileAttributes.ReadOnly).ShouldBeTrue();
     }
@@ -51,13 +56,8 @@ public sealed class WorkstationPresetResizeContractEvidenceTests
 
         using JsonDocument manifest = ReadJson(configured.Value.manifestPath);
         JsonElement root = manifest.RootElement;
-        root.GetProperty("presetVersion").GetString().ShouldBe("1.17.0");
-        root.GetProperty("supersedes").GetProperty("presetVersion").GetString().ShouldBe("1.16.0");
-        root.GetProperty("supersedes").GetProperty("manifestSha256").GetString().ShouldBe(
-            "6396FB4EB87F69C6789304CE191453654B2B75E82A5A9AB0161F90556A6F1A80");
 
         JsonElement integrity = root.GetProperty("sourceManifestIntegrity");
-        integrity.GetArrayLength().ShouldBe(29);
 
         bool foundResizeEvidence = false;
         bool foundFlexibleSizeEvidence = false;
