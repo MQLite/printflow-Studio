@@ -1,5 +1,51 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — exact baseline accepted; continuation stopped at first provider-check failure
+
+The current user instruction `PF-ACCEPT-A1 — Exact Baseline Acceptance and Authorized
+Continuation` accepted exact preset `printflow-workstation-v1` `1.18.0` at
+`D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json`, SHA-256
+`8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`, within the existing
+qualification scope and limits. The decision and its observed source times
+`2026-09-15T14:28:53.7036758+12:00` / `2026-09-15T02:28:53.7086167Z` are recorded only in the
+existing external checklist. The frozen manifest, candidate, qualification record and accepted
+1.17.0 rehashed exactly and were not changed.
+
+Starting HEAD `7bfe8b6b96fca2db8efac7d9d7dfd95fb28a73e5` was clean and proved to descend from the
+proposal's recorded `bd8f2e28d48128cd9a101ab775147c415fd7c5f0`; the only intervening changes
+were the expected A1 PLAN/HANDOFF proposal commit. Commit
+`4fb596b320f33be5d1d662fc70da9350cd9f092c` changes only the configured preset Version, relative
+Path and ExpectedSha256 (the Id was already exact). Direct JSON/path/hash verification resolved
+the selector to the accepted read-only bytes.
+
+The controlled producer then created and VerifyOnly-verified pair
+`2851ad7b-8a02-422d-8f3f-c7b615d5f45d` from source `4fb596b`, SDK `10.0.400`, with zero build
+warnings/errors. Receipt SHA-256 is
+`AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E`; its embedded input and
+harness inventories and both product-assembly inventories are retained with the harness/candidate.
+
+Continuation stopped at the first actual configuration/provider-check failure. Paired-harness
+vstest run `2e7c4948-df3d-4b46-84af-7cb4432859b0` ran only
+`PrintFlow.Tests.Integration.Preset`: 88 passed, 2 failed, 0 skipped. The first failure was
+`WorkstationPresetResizeContractEvidenceTests.Manifest_reverifies_every_inherited_and_resize_evidence_entry`
+at line 54: the manifest actually reported `1.18.0`, while the test hard-codes `1.17.0`. The other
+failure was the same class's `Configured_workstation_preset_is_the_immutable_v1_17_contract` at
+line 27. Exact preserved TRX:
+`artifacts/pf-accept-a1/accepted-1.18.0-configuration-checks/configuration-provider.trx`, SHA-256
+`C47FA4B18B856DB130BD6DA014BE2E35940FA5B75634358B25D48FA8E554389C`.
+
+Per the acceptance boundary, no code was changed and the unchanged conditions were not retried.
+Offline v2 preflight was not run, no current live-desktop confirmation was requested, and no
+application/readiness/lease/standard-set operation occurred. The scoped configuration commit,
+fresh failed-check evidence and pair are preserved. A1 is **BLOCKED AT FIRST CHECK FAILURE**;
+standard-set status is **NOT RUN**, not Passed. Any correction to the version-specific provider
+evidence tests requires a new, separately authorized code-change cycle before acceptance resumes.
+
+Routing: policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`; explicit RouteOffset `0`. NormalRoute,
+RequestedRoute and ExecutionTarget were `gpt-5.6-sol/high` for safety-sensitive bound acceptance
+evidence, `UNCHANGED`. This context could not verify a real switch, so `MODEL_SWITCH_UNAVAILABLE`
+and ActualRoute `UNVERIFIED`. No independent acceptance or release approval is claimed.
+
 ## 15 September 2026 — final-form 1.18.0 exact-hash proposal prepared
 
 Starting HEAD was verified as `bd8f2e28d48128cd9a101ab775147c415fd7c5f0`; no reset was

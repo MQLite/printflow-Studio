@@ -1,5 +1,49 @@
 # PF-ACCEPT-A1 — Handoff
 
+**EXACT 1.18.0 BASELINE ACCEPTED AND CONFIGURED — STOPPED AT FIRST PROVIDER-CHECK FAILURE;
+V2 PREFLIGHT AND LIVE STANDARD SET NOT RUN**
+
+The current user instruction accepted exact read-only preset `printflow-workstation-v1` `1.18.0`
+at `D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json`,
+SHA-256 `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`, and separately
+authorized the scoped A1 continuation. The existing external checklist records the source and the
+observed local/UTC time. The manifest itself was not changed; the candidate, qualification record
+and accepted 1.17.0 remain exact and read-only.
+
+Verified clean starting HEAD `7bfe8b6`; committed only `appsettings.json` selector changes as
+`4fb596b320f33be5d1d662fc70da9350cd9f092c` (`config: select accepted workstation preset
+1.18.0`). The selector resolves to the exact accepted path/hash and Production mode remains
+unchanged. No push occurred.
+
+Fresh controlled pair `2851ad7b-8a02-422d-8f3f-c7b615d5f45d` was created from that commit and
+VerifyOnly passed. Pair root:
+`artifacts/pf-accept-a1/build-pairs/2851ad7b-8a02-422d-8f3f-c7b615d5f45d/`; receipt SHA-256
+`AA97C17617FB2D4BC55A47532986995D77911808ACE8C61B43BB60F96B98F70E`. Preserve the receipt,
+embedded inventories, build logs, harness and candidate without patching them.
+
+The first relevant paired-harness check failed, so execution stopped. Vstest RunId
+`2e7c4948-df3d-4b46-84af-7cb4432859b0`, filter
+`FullyQualifiedName~PrintFlow.Tests.Integration.Preset`: **88 passed / 2 failed / 0 skipped**.
+First failure:
+`WorkstationPresetResizeContractEvidenceTests.Manifest_reverifies_every_inherited_and_resize_evidence_entry`
+at `tests/PrintFlow.Tests/Integration/Preset/WorkstationPresetResizeContractEvidenceTests.cs:54`;
+expected hard-coded `1.17.0`, actual accepted manifest `1.18.0`. Second failure was the same
+version-specific contract at line 27. Preserved TRX:
+`artifacts/pf-accept-a1/accepted-1.18.0-configuration-checks/configuration-provider.trx`, SHA-256
+`C47FA4B18B856DB130BD6DA014BE2E35940FA5B75634358B25D48FA8E554389C`.
+
+Do not retry unchanged conditions or edit code during this acceptance execution. Offline preflight
+with `D:\PrintFlowStudio\TestData\v2` is **NOT RUN**. No current exclusive-desktop confirmation was
+requested because the stop preceded all real application/lease operations. No RunId/InvocationId,
+host/wrapper exit, readiness, lease or seven-category result exists for this accepted-preset
+attempt. Historical failures and CandidateProblems remain untouched; no Operator decision was
+created or transferred. A1 result: **BLOCKED AT FIRST CONFIGURATION/PROVIDER CHECK FAILURE;
+STANDARD SET NOT RUN**. A separately authorized correction cycle is required before resuming.
+
+Policy v2.3, `EXECUTE_HANDOFF`, `CONTINUE`, RouteOffset `0`; NormalRoute/RequestedRoute/
+ExecutionTarget `gpt-5.6-sol/high`, `UNCHANGED`; `MODEL_SWITCH_UNAVAILABLE`, ActualRoute
+`UNVERIFIED`. No independent acceptance/release review was performed or claimed.
+
 **FINAL-FORM 1.18.0 PREPARED — EXACT-HASH ACCEPTANCE PENDING; UNACCEPTED AND NOT CONFIGURED**
 
 Verified starting HEAD `bd8f2e28d48128cd9a101ab775147c415fd7c5f0`; no reset. Frozen
