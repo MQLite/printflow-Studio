@@ -1,5 +1,29 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 15 September 2026 — fine-hair trim diagnosed; no repairable mismatch; manifest decision needed
+
+Task `PF-ACCEPT-A1 — Diagnose Fine-Hair Trim Geometry, Repair Only a Proven Mismatch, Return to
+A1`, from HEAD `a051ce8`, offline only.
+
+1. **Resolved facts.**
+   - Trim input: Revision `01a0a339-8596…`, `A0401974…01F6`.
+   - Attempt: `01a0a339-8600…`, tight margin 0.
+   - Bounds: ContentBounds = AppliedBounds = `[0,0 → 1200,1600)`.
+   - Output: `01a0a339-86ae…`, `E579FA70…B009`, 1200×1600.
+2. **Independent decode (non-WIC).** The cutout's alpha > 0 pixels, and even its alpha ≥ 128
+   pixels, reach all four edges; the transparent border is 0 px. Expected geometry equals the
+   persisted geometry, and the output is pixel-identical. The Product is correct.
+3. **Caller.** The `trimBoundsInsideCanvas` assertion is a faithful reading of frozen v2
+   `trimBoundsStrictlyInsideCanvas: true`, and its failure is truthful. No caller defect, so no
+   change.
+4. **Comparison.** The operator-approved `PF-FIX-MEITU-CONFIRM` cutout `731BE2E0…` of the same
+   fixture also touches every edge. The requirement is unattainable without forbidden changes.
+
+Outcome: **STOPPED — FROZEN-MANIFEST REQUIREMENT ISSUE.** One Operator decision is needed: keep
+the property (the case stays Failed until a set revision exists), or authorise a new set version
+with a deterministic-geometry property. No code, commit of code, pair or live A1 run. The three
+Pending visual reviews are listed with exact paths, hashes and questions in HANDOFF.md.
+
 ## 15 September 2026 — Photoshop identity check repaired; fresh A1 failed 4/7 on fine-hair trim
 
 Task `PF-ACCEPT-A1 — Photoshop Identity-Check Repair and Return to Acceptance`, from HEAD

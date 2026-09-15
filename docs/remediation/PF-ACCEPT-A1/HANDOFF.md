@@ -1,5 +1,120 @@
 # PF-ACCEPT-A1 — Handoff
 
+**FINE-HAIR TRIM DIAGNOSED OFFLINE — PRODUCT AND CALLER BOTH CORRECT — NO REPAIRABLE MISMATCH —
+STOPPED AT A FROZEN-MANIFEST REQUIREMENT ISSUE; NO CODE CHANGE, PAIR OR LIVE A1**
+
+Started from actual HEAD `a051ce89a19bdae683ce4cf45d2596864e54480f`; no reset. Entirely offline:
+no Meitu/Photoshop operation, lease, build pair, suite or standard-set run. Accepted preset 1.18.0
+(`8484F0AA…0E8F`) and frozen v2 set unchanged.
+
+Facts for incident `a1-repaired-1180-20260915-155942-a4173998` (retained files and a read-only copy
+of `regression-run.db`, all rehashed unchanged):
+
+- Trim input: Background Removal Revision `01a0a339-8596-72a7-9898-5c7a1f9111c3`, SHA-256
+  `A04019741C8C3200E6F76A51B53ADA9008900E8EE48385C422CE421061ED01F6`, 1200×1600 RGBA8, approved by
+  the harness (`regression`) before Trim.
+- Producing attempt `01a0a339-8600-7401-85ef-2e34d380b32a`, `internal-alpha-trim-v1`, SUCCEEDED;
+  margin `TIGHT_CROP` 0/0/0/0 (session and attempt).
+- ContentBounds `[0,0 → 1200,1600)`; AppliedBounds `[0,0 → 1200,1600)`.
+- Output Revision `01a0a339-86ae-7429-839a-145bbf7f6fe3`, SHA-256
+  `E579FA70D276E69D02E3D1098AF5D51BC40EBC817D0AAB81E751724694E6B009`, 1200×1600.
+- Assertion operands: `trimmedArtefact` 1200×1600 vs `produced` (cutout) 1200×1600; rule
+  `width < || height <`.
+
+Independent decode (raw PNG chunks + zlib + unfilter, no WIC) of the pre-Trim cutout:
+- **alpha > 0 bounds are the whole canvas**;
+- fully transparent border depth is 0 on every edge;
+- the edges carry substantial, not merely stray, alpha:
+
+| Edge | Pixels with alpha > 0 | Max alpha | Contiguous runs |
+| --- | --- | --- | --- |
+| Top | 1,063 of 1,200 | 254 | `[90..1102]` |
+| Left | 535 | 247 | `[128..660]` |
+| Right | 604 | 223 | `[103..693]` |
+| Bottom | 1,129 | 255 (1,079 opaque subject pixels) | — |
+
+Even alpha ≥ 128 spans the full canvas. Expected geometry under the recorded margin and canvas
+clamp is therefore exactly the full canvas. The produced PNG is pixel-identical to the input
+(RGBA and native samples), and the persisted geometry and `NoChangeRequired` derivation agree.
+**The Product is correct.**
+
+The caller faithfully implements the frozen v2 manifest property
+`trimBoundsStrictlyInsideCanvas: true` (`FIX-FINE-HAIR-001`; manifest reason: "the trim found
+bounds inside the canvas"). It would still reject a missed removable border. Its failure is
+truthful, so **the caller is correct** and no `<`→`<=` or other change was made.
+
+The same analysis of the operator-approved `PF-FIX-MEITU-CONFIRM` cutout of the same fixture
+(Revision `01a0a248-d7eb-7d20-ad5d-389610b1287a`, SHA-256 `731BE2E0…DB19`, used only as read-only
+comparison, not substituted) gives the same result:
+- alpha > 0 on all four edges;
+- alpha ≥ 128 spans the full canvas;
+- zero transparent border.
+
+The frozen requirement is therefore not attainable for this fixture on Meitu 7.8.8.2 without
+forbidden changes (a threshold, erasing low-opacity hair, colour inference, margin changes,
+substituting another cutout, or reinterpreting the manifest).
+
+Evidence (ignored): `artifacts/pf-accept-a1/fine-hair-trim-diagnosis/`. It holds the tool
+source and `SHA256SUMS.txt`, with these hashes:
+
+| File | SHA-256 |
+| --- | --- |
+| pixels report | `7890B328…33F8D` |
+| persistence | `C6F15E96…A454` |
+| approved-cutout edges | `6E13A702…6AA6` |
+| TIFF header | `E2516F2A…A50A` |
+
+### Operator decision required (one, precise)
+
+The v2 manifest `FIX-FINE-HAIR-001.expectedProperties.trimBoundsStrictlyInsideCanvas = true`
+contradicts the actual Meitu cutouts of that fixture, which keep non-zero alpha on every canvas
+edge. Choose one:
+
+- **(a)** Keep the requirement. COMPLEX_BACKGROUND_FINE_HAIR stays Failed. A1 cannot pass on v2
+  until a fixture/set revision produces a cutout with a genuine transparent border. That needs a
+  new set version and hashes; it is not done here.
+- **(b)** Authorise a new set version whose structural trim property is the deterministic
+  contract instead: recorded ContentBounds equal independent alpha > 0 bounds, AppliedBounds
+  equal their margin/clamp expansion, and output equals that crop. Then re-run A1 on that
+  version. Edge quality stays FINE-HAIR-VISUAL-001.
+
+No manifest, harness or Product change was made under this authorisation.
+
+### Visual-review objects (unchanged, no decision recorded)
+
+`Reviews` is empty.
+
+- **FINE-HAIR-VISUAL-001** — `…\a1-repaired-1180-20260915-155942-a4173998\FIX-FINE-HAIR-001-cutout.png`,
+  `A04019741C8C3200E6F76A51B53ADA9008900E8EE48385C422CE421061ED01F6`. Question: "Are individual
+  hair strands still retained at the boundary, without a hard halo, and is the foliage background
+  fully removed rather than partly retained as coloured fringing?" Relevant fact (not a
+  classification): the top/left/right edge bands above carry partial-to-near-opaque alpha.
+- **PORTRAIT-VISUAL-001** — `…\FIX-PORTRAIT-001-enhanced.png`,
+  `1058CEBB4C7F38E5123DD7B7B390DB8F0715FD0EE89A3D71C9916E8F74F21D4C`; structural size assertion
+  held (1200×1600 ≥ input). Question: "Does the enhanced export still look like a correctly
+  enhanced portrait — subject sharp, skin tone unshifted, no visible artefact introduced along the
+  hair or shoulder edges?"
+- **CUSTOMER-DESIGN-VISUAL-001** —
+  `D:\PrintFlowStudio\Sessions\S_20260915T040052Z_2dd688de\Working\01a0a339-8d5d-7cd2-8845-84abd6d8de98\FIX-CUSTOMER-DESIGN-001_51mm_CMYK_W.tif`,
+  `15EC73357F6AA1735E10C655174FB98B3A41C145585AD56D3CBD85CE990478DA`. The header is 600×900 px,
+  300 dpi, 5 samples, uncompressed. The requested box was 50.8×100 mm (600×1181 px); the output
+  is 50.8×76.2 mm, the aspect-preserving width fit of the 1024×1536 source. Question: "Does the
+  produced TIFF show the complete design at the requested size, with the W1 channel covering the
+  intended ink region?"
+
+Images were not viewed by the agent: the fixture manifests forbid upload.
+
+Preserved and rehashed unchanged:
+- result `3E583BB0…04AC`
+- readiness `BA3BDD22…15F3`
+- claim `90E8CF66…ED6F`
+- fine-hair case `7E334721…B7D3`
+- pair receipts `fd56e834…` `D1B2211F…2229` and `ee8e0280…` `52DA6952…A259`
+
+Stop: requirement issue outside this authorisation. No A1 re-run (no correction to run), no
+desktop confirmation requested, no A2/revalidation, A3, install, deploy, push, signing or Jira.
+Execution: Claude Code, Opus 5; no reviewer used (no code change); self-review only.
+
 **PHOTOSHOP IDENTITY CHECK REPAIRED AND PROVEN LIVE — BOTH RETAINED PROBES RECOVERED — ONE FRESH
 A1 COMPLETED: FAILED 4/7 (COMPLEX_BACKGROUND_FINE_HAIR TRIM ASSERTION) WITH 3 VISUAL REVIEWS
 PENDING**
