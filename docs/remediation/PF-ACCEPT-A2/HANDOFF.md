@@ -143,3 +143,24 @@ follow-up must resolve the real CloseGuard failure and safely handle that exact 
 fresh normal-App verification can establish admission. That repair is not authorized by this A2
 publication task. No installation, deployment, push, full suite, standard-set rerun, new pair,
 customer job, online Jira transition or final whole-project release was performed.
+
+## Latest continuation — current-state reconciliation pending normal check
+
+The earlier final probe-open statement describes the earlier observation only. The current
+operator reports Photoshop empty and confirmed exclusive availability/saved work for this
+execution. After restoring the same Photoshop process's minimized window through permitted
+Computer Use, its refreshed title was `Adobe Photoshop CC 2019`, with no document surface in
+the accessibility tree. The initial minimized title named `Choppers.tif`; it is insufficient
+evidence of current documents. A complete current document read has NOT yet been obtained.
+Neither probe presence nor AlreadyAbsent is asserted from a title or retained file.
+
+The exact original candidate is now open normally on Home. Permitted `sky.click` failed with
+`coordinate input geometry is unavailable`; no alternate injection channel was used. The
+operator has been asked to open **生产就绪状态**, click **运行实时应用检查** once, and report
+completion. Resume this same task by reading its actual normal report. No new check result,
+automatic historical close, recovery success or A2 PASS is claimed. Do not repeat publication.
+
+All 29 primary hashes, four candidate assemblies and 182 harness files match. Targeted tests
+passed 88/88. The canonical lease was free at 2026-09-16T04:44:15.953Z; this is a timestamped
+observation, not a perpetual claim. Product bytes remain unchanged. See [RECOVERY.md](RECOVERY.md).
+No A3 is authorized.

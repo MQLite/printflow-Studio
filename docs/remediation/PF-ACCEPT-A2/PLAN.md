@@ -67,3 +67,23 @@ the evidence and the live completion blocker; returned runtime metadata did not 
 model/effort. No second checkout/desktop executor was used. Documentation stayed in the current
 context with MODEL_SWITCH_UNAVAILABLE disclosed rather than claiming the Luna Low target ran.
 Scoped reassessment is in ASSESSMENT.md. No A3 or broader release acceptance follows.
+
+## Recovery continuation — 16 September 2026
+
+Prompt 19 supersedes the earlier execution-only repair prohibition. Start: clean master
+`7be50a7092cbb5dacf1eb651dff132a88f821f34`. The operator confirmed exclusive checkout/desktop
+availability and saved work once in this execution. That confirmation remains applicable to
+the pending normal-App check; do not ask again unless availability changes.
+
+Read current state before mutation; retain A1/publication; use the original candidate unless a
+demonstrated Product correction requires replacement qualification. No historical probe input
+has been sent. Current window observations supersede old assertions about what is open, but
+are not a complete document census. See RECOVERY.md for evidence and the pending operator click.
+
+Routing: EXECUTE_HANDOFF, policy v2.3, NormalRoute/RequestedRoute Sol High for bounded recovery
+diagnosis, RouteOffset 0, AdjustmentResult UNCHANGED, CONTINUE. ActualRoute UNVERIFIED;
+MODEL_SWITCH_UNAVAILABLE in this active context, current safe execution retained without
+claiming a switch. No UI implementation or independent acceptance review has occurred.
+
+Targeted existing tests passed 88/88 using the installed per-user SDK. No Product/test bytes
+changed, so no full suite, candidate rebuild, A1 rerun or publication is warranted at this point.
