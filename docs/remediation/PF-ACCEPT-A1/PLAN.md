@@ -1,5 +1,37 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 16 September 2026 — regression v3 trim contract implemented; fresh A1 Pending on three reviews
+
+Task `PF-ACCEPT-A1 — Regression v3: Exact Trim Geometry, Then One Fresh A1`, from actual HEAD
+`d7d8d23` (verified, no reset). The operator chose **option (b)**: a separately versioned
+`printflow-regression-v3` set replacing the fine-hair unconditional strict-shrink requirement with
+independent alpha-bounds, recorded-margin, persisted-geometry and exact output-crop verification.
+This is a versioned expectation change, not a Product fix, artwork approval or a rewrite of v2.
+
+1. **Implementation** `a39846d`, tooling and tests only; no `src/` change, no new dependency, no
+   generic assertion framework. The generator, PowerShell preflight, C# loader and the existing
+   fine-hair caller agree on v3 and refuse missing, false, non-boolean or conflicting semantics.
+   v1 stays refused for new execution, v2 stays executable with its original `trimBoundsInsideCanvas`
+   assertion unchanged, and no historical run is re-aggregated under v3.
+2. **Offline verification.** Focused 113/0/0; clean Release build 0 warnings/0 errors; one scoped
+   independent read-only review with its actionable findings applied before the pair; controlled
+   pair `f0ac92e2-853e-4d2f-a6e4-c0af1a24e0e8` from `a39846d` verified, loaded-pair proof 1/1 and
+   paired focused 58/58; explicit v3 preflight PASS with no result written.
+3. **v3 set.** `D:\PrintFlowStudio\TestData\v3`, materialized from the current v2 bytes: 9/9 copies
+   byte-identical, no runs or host-results. Only the fine-hair property and its reason prose differ
+   from v2; portrait's two-axis rule and TRANSPARENT_PNG's x=229, y=1210, 2724x3685 crop are intact.
+4. **A1** `a1-v3-20260916-121334-903986e7` after one current exclusive-desktop confirmation:
+   readiness verified, `CandidateProblems` empty, **Pending 4/7, no failed assertion**.
+   COMPLEX_BACKGROUND_FINE_HAIR now passes `trimMatchesAlphaBoundsAndMargins` (independent content
+   bounds, expected applied rectangle, persisted geometry and decoded output all agree on the full
+   1200x1600 canvas) and is Pending only on FINE-HAIR-VISUAL-001. NORMAL_JPG_PORTRAIT and
+   COMPLETE_CUSTOMER_DESIGN are Pending on their own Operator questions.
+
+Outcome: **V3 VERIFIED — COMPLETE A1 EXECUTION AWAITS THREE OPERATOR REVIEWS.** No decision was
+recorded or transferred, no revalidation written, and no A2/A3, install, deploy, push, signing or
+Jira change performed. Exact paths, hashes and questions are in HANDOFF.md; the change report is
+`docs/printflow/regression-v3-fine-hair-trim-contract.md`.
+
 ## 15 September 2026 — fine-hair trim diagnosed; no repairable mismatch; manifest decision needed
 
 Task `PF-ACCEPT-A1 — Diagnose Fine-Hair Trim Geometry, Repair Only a Proven Mismatch, Return to

@@ -1,5 +1,96 @@
 # PF-ACCEPT-A1 — Handoff
 
+**REGRESSION V3 IMPLEMENTED AND VERIFIED — ONE FRESH COMPLETE A1 RAN: PENDING 4/7, NO FAILED
+ASSERTION — THREE OPERATOR VISUAL DECISIONS OUTSTANDING**
+
+Started from actual HEAD `d7d8d23`; no reset. Operator option **(b)** recorded. Accepted preset
+remains exactly 1.18.0 (`8484F0AA…0E8F`); no Product source, preset, image or historical result was
+changed. v1/v2 manifests, runs, claims, reviews and retained pairs are untouched.
+
+Implementation `a39846d` (tooling/tests only). v3 differs from v2 in exactly one expectation:
+fine-hair `trimBoundsStrictlyInsideCanvas: true` becomes `trimMatchesAlphaBoundsAndMargins: true`,
+with reason prose to match. The check recomputes, independently of the Product, the minimal
+`alpha > 0` rectangle of the actual pre-Trim cutout, expands it by the attempt's recorded margins,
+clamps to the canvas, compares that with the persisted ContentBounds/AppliedBounds, and requires the
+decoded output to be exactly that crop of the decoded input, bound to the approved cutout and the
+exported Trim artefact. Full canvas passes only when that is the correct crop; a no-op fails when a
+removable border exists. v2's caller assertion and v1's refusal are unchanged. Report:
+`docs/printflow/regression-v3-fine-hair-trim-contract.md`.
+
+Offline: focused 113/0/0; clean Release build 0 warnings/0 errors; one scoped read-only review
+(no blocking issues, actionable points applied before the pair); pair
+`f0ac92e2-853e-4d2f-a6e4-c0af1a24e0e8` receipt
+`BEBEDFFC235F40AE66554F13D0BD0354C20DE75F41FA654341621DA836BFBDC4`, loaded-pair proof 1/1, paired
+focused 58/58; explicit v3 preflight PASS, no result written. `D:\PrintFlowStudio\TestData\v3`
+holds 9/9 byte-identical copies of the current v2 files and no run directories. Set content digest
+`75DA6EC6306B3C4E59EB1DE8644DA1C22B214AF066DBC2555533B8B6E6ACDEE8`.
+
+A1 run `a1-v3-20260916-121334-903986e7`, invocation `cbffa3cc-ea7d-4f8b-be52-cb94d8361e17`, after
+one current exclusive-desktop confirmation. Readiness `Verified: true`, every blocking check passed,
+`CandidateProblems` empty, no override/diagnostic/build/restore, wrapper exit 1 on the Pending
+verdict. `result.json` is **Pending, 4/7**: TRANSPARENT_PNG, PSD_WITH_COMPOSITE_PREVIEW,
+SINGLE_PAGE_PDF and REFERENCE_PRODUCTION_TIFF Passed; NORMAL_JPG_PORTRAIT,
+COMPLEX_BACKGROUND_FINE_HAIR and COMPLETE_CUSTOMER_DESIGN Pending on visual review. **No structural
+assertion failed in any case.** `Reviews` is empty; no decision was recorded or transferred.
+
+Fine-hair structural result (`trimMatchesAlphaBoundsAndMargins`, held): attempt
+`01a0a790-ecaa-78c2-8705-88cc22b3a5a1`, margin `TightCrop` 0/0/0/0; input Revision
+`01a0a790-ec35-7cca-a08d-4fbc23d2a834` (`0C2932DB…5299`, 1200x1600 Bgra32); output Revision
+`01a0a790-ed7b-7ba4-b12c-87934ba0f650` (`83914805…8C7D`); independent `alpha > 0` content
+`[0,0 → 1200,1600)` equals persisted ContentBounds; expected applied rectangle equals persisted
+AppliedBounds; decoded output pixels equal that region exactly. Full extent was retained because
+alpha-bearing content reaches all four edges — the diagnosed property of these cutouts.
+
+### Operator decisions required (three; none may be inferred)
+
+Local paths only; the fixture manifests forbid upload, and the agent did not view the images.
+
+- **FINE-HAIR-VISUAL-001** — `…\a1-v3-20260916-121334-903986e7\FIX-FINE-HAIR-001-cutout.png`,
+  SHA-256 `0C2932DB64BD5745FD73D467325E2385F18A91AA790FDFDB6AED8E1D1D755299`. "Are individual hair
+  strands still retained at the boundary, without a hard halo, and is the foliage background fully
+  removed rather than partly retained as coloured fringing?" The structural pass says the crop is
+  arithmetically right; it says nothing about whether the retained edge pixels are hair or foliage.
+- **PORTRAIT-VISUAL-001** — `…\FIX-PORTRAIT-001-enhanced.png`, SHA-256
+  `1E41CF81E51B02A3243018F7271B0C1300DB1649F1E6945619326FE9410656FC`; the two-axis size expectation
+  held at 1200x1600. "Does the enhanced export still look like a correctly enhanced portrait —
+  subject sharp, skin tone unshifted, no visible artefact introduced along the hair or shoulder
+  edges?"
+- **CUSTOMER-DESIGN-VISUAL-001** —
+  `D:\PrintFlowStudio\Sessions\S_20260916T001449Z_e131feb5\Working\01a0a790-f4ee-7f34-8a57-66bf52614e04\FIX-CUSTOMER-DESIGN-001_51mm_CMYK_W.tif`,
+  SHA-256 `E53499E326EAF4A6227B32C873527BC1D37174C2542FA92993D97131FEF8C960`; validated 600x900,
+  5 samples, 300 dpi, uncompressed. "Does the produced TIFF show the complete design at the
+  requested size, with the W1 channel covering the intended ink region?"
+
+Earlier artwork approvals do not transfer to these new objects. Record actual decisions only with:
+
+```powershell
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 `
+    -RunId 'a1-v3-20260916-121334-903986e7' -RecordVisualReview '<actual-decisions-file>'
+```
+
+That is original-harness re-aggregation of this run, not a re-execution: supply no receipt, no set
+root and no category filter. If the Operator reports unacceptable fine-hair quality, that is a
+separate real issue; it must not be answered by redefining geometry or altering pixels.
+
+Run evidence hashes: result `8EEAC73F93FEE8C0B46BBBF0A0F369B06E19245A865A1052975B9A75F6746613`;
+readiness `7F746BBD507A4693B4499B126E6EDD861DBEB7538E448D7CD8487AB879742E52`; claim
+`A1C597E6F24297FED52F61552146DC32A94AEA773AD3FF9D2A6442B9C8295058`; fine-hair case
+`6BA0F08A411546CD4A3BF2A14DF640E2CE1E1A20B02D5B6E3E4332277659A66B`; regression database
+`00FB392B3DEF82AD95B3E2739082F7AA5B81879751B8E5516A4F4DEDB70686A8`; live log
+`049B329A31C826DB9EFC91542FE8A8092B7AF2143D55ED2B37CCE501F0184A89`; command metadata
+`022B44D103E0228E445015AAFEC4A2E128EFB9E277350D0EA88C7F366BDEFDE6`. Offline evidence is under
+`artifacts/pf-accept-a1/regression-v3/`.
+
+After the run every case recorded the automation lock free, the v3 inputs still hash to their
+manifests, and all three pairs (`f0ac92e2…`, `fd56e834…`, `ee8e0280…`) reverified with unchanged
+receipts. Photoshop is document-free at `Adobe Photoshop CC 2019`; Meitu shows
+`美图秀秀-图片编辑` and was not touched.
+
+Stop here: the run is complete and only genuine Operator review remains. No A2/revalidation, A3,
+Product refactor, preset change, image alteration, signing, install, deploy, push or Jira closure
+was performed. Execution: Claude Code, Opus 5; one scoped read-only reviewer; no independent
+acceptance or release approval is claimed.
+
 **FINE-HAIR TRIM DIAGNOSED OFFLINE — PRODUCT AND CALLER BOTH CORRECT — NO REPAIRABLE MISMATCH —
 STOPPED AT A FROZEN-MANIFEST REQUIREMENT ISSUE; NO CODE CHANGE, PAIR OR LIVE A1**
 
