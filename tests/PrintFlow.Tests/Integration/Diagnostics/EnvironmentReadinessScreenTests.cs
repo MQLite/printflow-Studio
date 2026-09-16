@@ -523,6 +523,52 @@ public sealed class EnvironmentReadinessScreenTests
         screen.LiveApplicationChecks[1].Status.ShouldBe(Resource("Environment_StatusBlocked"));
     }
 
+    [Theory]
+    [InlineData("en-US", "This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.")]
+    [InlineData("zh-CN", "前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。")]
+    public Task Live_checks_blocked_by_revalidation_do_not_claim_unobserved_application_failures(
+        string culture, string notRunExplanation) =>
+        InCulture(culture, async _ =>
+        {
+            EnvironmentCheckReport revalidation = new("ProductionRevalidation", EnvironmentCheckStatus.Failed,
+                true, "EnvironmentCheck_ProductionRevalidation", "The candidate has no matching revalidation.");
+            EnvironmentCheckReport[] blocked =
+            [
+                .. new[] { "ExternalApplicationAutomationLock", "PhotoshopSafeStartingState",
+                    "PhotoshopColourSettings", "PhotoshopTestImageRoundTrip" }
+                    .Select(key => new EnvironmentCheckReport(key, EnvironmentCheckStatus.Blocked, true,
+                        "EnvironmentCheck_" + key, "ProductionRevalidation did not pass.",
+                        Phase: EnvironmentCheckPhase.LiveApplication)),
+            ];
+            EnvironmentReadinessReport passive = new(false, "preset", DateTimeOffset.UnixEpoch,
+                [revalidation, .. blocked]);
+            EnvironmentCheckReport actualFailure = blocked[^1] with
+            {
+                Status = EnvironmentCheckStatus.Failed,
+                Detail = "CloseGuard was not confirmed during the attempted probe.",
+            };
+            EnvironmentReadinessReport attempted = passive with { Checks = [actualFailure] };
+            EnvironmentReadinessViewModel screen = new(new StubDiagnostics(passive, attempted),
+                new RecordingNavigation());
+
+            await screen.OpenAsync(CancellationToken.None);
+
+            screen.IsReady.ShouldBeFalse();
+            screen.AutomaticChecks.ShouldHaveSingleItem().Explanation
+                .ShouldBe(Resource("EnvironmentCheck_ProductionRevalidation"));
+            screen.BlockingFailures.Count.ShouldBe(5, "the real blocker and unexecuted required checks stay visible");
+            screen.LiveApplicationChecks.ShouldAllBe(row => row.IsBlocked && !row.IsFailure);
+            screen.LiveApplicationChecks.ShouldAllBe(row => row.Explanation == notRunExplanation);
+            screen.LiveApplicationChecks.ShouldAllBe(row => row.Status == Resource("Environment_StatusBlocked"));
+
+            await screen.RunLiveChecksCommand.ExecuteAsync(null);
+
+            screen.IsReady.ShouldBeFalse();
+            screen.LiveApplicationChecks.ShouldHaveSingleItem().Explanation
+                .ShouldBe(Resource("EnvironmentCheck_PhotoshopTestImageRoundTrip"));
+            screen.LiveApplicationChecks[0].IsFailure.ShouldBeTrue();
+        });
+
     [Fact]
     public async Task An_already_absent_reconciliation_explains_history_without_making_the_screen_ready()
     {

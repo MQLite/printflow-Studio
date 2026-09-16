@@ -22,7 +22,8 @@ namespace PrintFlow.App.ViewModels;
 /// shows. <see cref="Explanation"/> is the report's own <c>MessageKey</c>, which reads as the
 /// problem it describes and is therefore shown only where there is one: on a failure or on an
 /// advisory (§6). A passing check that displayed its failure sentence would tell the operator
-/// the opposite of the truth.
+/// the opposite of the truth. A blocked live check instead explains that it did not run;
+/// its failure sentence cannot describe an application state that was never observed.
 /// </para>
 /// </remarks>
 public sealed class EnvironmentCheckRow
@@ -51,7 +52,9 @@ public sealed class EnvironmentCheckRow
             _ => Strings.Environment_StatusAdvisory,
         };
         Classification = IsBlocking ? Strings.Environment_Blocking : Strings.Environment_Advisory;
-        Explanation = IsFailure || IsBlocked || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
+        Explanation = IsBlocked && Phase == EnvironmentCheckPhase.LiveApplication
+            ? Strings.Resolve("Environment_LiveCheckNotRun")
+            : IsFailure || IsBlocked || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
         Detail = report.Detail;
         if (report.Lifecycle is { } lifecycle)
         {

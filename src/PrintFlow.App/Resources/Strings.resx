@@ -795,6 +795,7 @@
     <value>Note</value>
   </data>
   <data name="Environment_StatusBlocked" xml:space="preserve"><value>Not run</value></data>
+  <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>Required</value>
   </data>

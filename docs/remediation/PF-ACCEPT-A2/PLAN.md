@@ -115,3 +115,22 @@ Supported Computer Use keyboard navigation was verified through a normal Tab foc
 This supplies a permitted way to navigate the ordinary app despite the mouse geometry error.
 Native screenshots remain unavailable (0x80004002 after one fresh-window retry); source-rendered
 WPF evidence is explicitly synthetic and uses the existing test fixture, not an app screenshot.
+
+### Execution outcome and remaining boundary
+
+Backend runtime identity/recovery and ordinary recovery UI were implemented and reviewed by
+the same scoped reviewer. Two final-source full suites followed actual shared Product changes:
+pair a05 passed11933 but live proof exposed the remaining initial SaveAs transition; pair fa0c
+at commit1b948b7 passed11939 and verified complete recovery/fresh round trip live. Raw failed
+attempts and both pairs remain frozen; exact chronology is in RECOVERY.md.
+
+The single authorized complete new v3 run used pairfa0c. Its own readiness passed, but the set
+FAILED2/7 at a separate Meitu Save-surface exact-foreground guard, with later external cases
+blocked. New Operator visual review is not the next step yet. No publication occurred. A final
+normal-App action still refused unqualified replacement bytes. Its unexecuted live rows exposed
+misleading failure prose, prompting one last bounded display-only correction with targeted tests;
+no shared Product logic change or additional full-suite/v3 run is warranted for that wording.
+
+Qualification remains unfulfilled. Further Meitu guarded-recovery work and another full v3 run
+must preserve this failed result and all old authority; prompt19 authorized only one new complete
+execution. Do not start A3 or treat the successful non-authorizing diagnosis as ordinary A2 PASS.

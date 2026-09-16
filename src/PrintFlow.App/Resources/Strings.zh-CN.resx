@@ -784,6 +784,7 @@
     <value>提示</value>
   </data>
   <data name="Environment_StatusBlocked" xml:space="preserve"><value>未运行</value></data>
+  <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>必须满足</value>
   </data>

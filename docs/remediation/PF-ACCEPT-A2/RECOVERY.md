@@ -1,6 +1,7 @@
 # A2 recovery continuation — 16 September 2026
 
-Status: owned-probe recovery verified live; further fresh-round-trip correction under diagnosis.
+Status: Photoshop recovery and fresh round trip verified; replacement qualification FAILED
+at a separate Meitu Save-surface foreground guard. Ordinary A2 admission remains CLOSED.
 This report appends current evidence without replacing the historical failed attempt.
 
 ## Observed state and bounded diagnosis
@@ -193,3 +194,76 @@ the existing exact-name signature rule and missing-signature refusal. Reviewer r
 no remaining blocker in this narrow scope. Related tests passed 107/107, architecture boundary
 tests 34/34. Evidence summary: `runtime-open-identity-red-green.txt`. Source is frozen for a
 new controlled pair/final suite before further live work. Pair a05 and its evidence stay intact.
+
+## Final repair verification and qualification boundary
+
+Final Product commit `1b948b7e273720ba24574b5206bcc3ce7afa7cf7` produced controlled pair
+`fa0c9a3e-987d-4b32-befb-71ed9281ddeb`; receipt SHA-256
+`8A2BED95894DAB5BFDB08FA525AC5D2FECCEB1A85601710303650B4CB569A102`.
+Final clean paired build succeeded and its complete suite passed **11,939/11,939**, zero
+failures/skips, 6m30s. Log `recovery-runtime-identity-final-suite.log`; TRX under
+`final-runtime-identity-test-results`. The same reviewer confirmed the final exact-name rule.
+
+At **06:16:56Z**, diagnostic `b8ba7c7298c840549793cd22a3cb41e9` recovered exact retained
+`b87a8bf95a02444796b8ff3f53831f9c` through Product with the real shared lease. It recorded
+ClosedExactProbe, same Photoshop process instance, complete post-close empty census and exact
+file cleanup. Fresh probe `d93d40470f944d7ca17360694aac3045` then completed every required stage
+through CloseConfirmed, PriorStateRestored and CleanupCompleted. All seven live checks passed.
+The envelope retains **NormalReport.Verified=false, DiagnosticReport.Verified=true,
+ProductionAuthorised=false**. This is repair proof, not an ordinary A2 PASS or a publishable
+qualification result. Raw log and extracted envelope: `recovery-final-live-diagnostic.log` and
+`recovery-final-live-envelope.json`.
+
+The one authorized new complete v3 execution ran as
+`a2-v3-20260916-181700-fa0c9a3e`, invocation `7f348016-68a7-4099-bf5a-2bb782a92427`, with the
+exact final pair and candidate, no category filter, version override or unbound mode. Preflight
+passed all seven categories/hashes. Its own fresh readiness probe
+`7f87d8d887bd45cf95cc7c14b6a5a97e` also completed and cleaned successfully; bootstrap readiness
+was Verified with no blocking failures at 06:17:51Z. This separately corroborates the Photoshop
+repair from an empty start; the bootstrap is not normal Product authorization.
+
+The full run is honestly **Failed, 2/7 categories passed**, not Pending artwork review.
+Portrait failed at Meitu's existing Save identity guard: expected Save surface `0x1A30E82`,
+actual foreground editor `0xB020BA`, both owned by accepted Meitu PID 5980. No dialog control
+was used. `GuardedMeituUiDriver.VerifyIdentityDialog` requires exact foreground-window equality
+before identity read or cancel; the same refusal therefore leaves the owned Save surface open.
+Fine-hair then failed Meitu live readiness; remaining external cases were blocked by lost live
+readiness. Transparent PNG and reference TIFF passed. No portrait output or manual decisions
+were produced. CandidateProblems is empty and run-origin verification passes. Result SHA-256:
+`1BCB9EBB2477201E2E06AC40A40029A40CB1F278395C6E1AC3521E971234272D`.
+
+Fresh native accessibility at 06:19Z shows Meitu's editor with nested **保存图片** SaveMaskWidget,
+its path/name/format fields and save/close controls. This establishes the actual visible surface,
+not why Windows foreground differs or authority to relax the guard. No speculative Meitu fix,
+unknown-modal input, save, discard, or second full v3 run was performed. Current evidence:
+`recovery-qualification-meitu-current.txt`, `recovery-final-v3-qualification.log`, and the run's
+seven case files. The next technical step is a scoped Meitu Save-surface/foreground diagnosis
+and guarded recovery; a further complete qualification run requires expanded authorization
+because prompt 19 section 7 authorized one new complete v3 execution. Do not reuse this Failed
+result, substitute old A1 artwork decisions, or publish either replacement pair.
+
+Final getter-only complete Photoshop census at **06:19:15.8298154Z**: PID1488, original start
+time unchanged, **zero documents**. Lease observation at **06:20:15.734Z**: canonical resource
+has all owner fields null. Both original and final pair inventories verify; all 29 preserved
+primary hashes still match, including original A1 PASS/result, original publication and preset
+1.18.0. Recovered60f/b87 and successful d93/7f probe files are absent by verified cleanup;
+original6eff and the cancelled-open310af backing files remain as historical evidence. No disk
+sweep occurred. Final evidence: `recovery-final-photoshop-census.log`, `recovery-final-lease.json`,
+`recovery-final-preservation-and-binding.json`.
+
+The ordinary new candidate's recovery button and concise Chinese UI were observed; English and
+Chinese source renders/tests cover layout and localization. Its ordinary gate correctly refuses
+unqualified replacement bytes. A nontechnical operator has the normal recovery/recheck action
+implemented, with the same Product route verified by diagnostics, but cannot currently finish
+admission in this unqualified build. Neither the old accepted candidate nor an installed copy
+has been patched. No install/deploy/push/Jira change, publication repeat, customer job or A3.
+
+The final ordinary recheck at18:23 exposed a display-only defect: live Blocked/NotRun rows
+used failure prose despite the automatic revalidation refusal preventing those checks from
+running. Their text now says the prerequisite has not passed and the check has not run, in
+English/Chinese. Actual Failed reports retain their failure/recovery wording; report status,
+blocking flags and production authority are unchanged. Two locale tests failed before the fix;
+the screen/localization slice then passed94/94 with no skips. Evidence:
+`ui-notrun-followup-tests.txt`. This last App presentation change does not justify repeating the
+shared Product full suite or the one v3 execution; it requires a separate retained build identity.
+The fa0c core repair/qualification evidence is not relabelled as evidence for those new bytes.

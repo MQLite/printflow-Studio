@@ -1,9 +1,9 @@
 # PF-ACCEPT-A2 — Handoff
 
-**Latest continuation: owned-probe recovery has been verified through the repaired Product
-path. Fresh-round-trip verification exposed a further initial-identity transition defect;
-its bounded correction is in progress. A2 has not passed. Historical A1/publication remain
-unchanged. See the appended current evidence in [RECOVERY.md](RECOVERY.md).**
+**Latest continuation: Photoshop recovery and complete fresh round trip are verified after
+Product repair. Replacement qualification FAILED at a separate Meitu Save-surface foreground
+guard (2/7 categories passed). Ordinary A2 admission is CLOSED. A1's original PASS and
+published record remain unchanged. See the final evidence in [RECOVERY.md](RECOVERY.md).**
 
 The older sections below are historical observations and authorization, not a statement that
 their named probes are still open. Prompt 19 and the current user request authorize scoped
@@ -170,3 +170,43 @@ All 29 primary hashes, four candidate assemblies and 182 harness files match. Ta
 passed 88/88. The canonical lease was free at 2026-09-16T04:44:15.953Z; this is a timestamped
 observation, not a perpetual claim. Product bytes remain unchanged. See [RECOVERY.md](RECOVERY.md).
 No A3 is authorized.
+
+## Final corrected-candidate continuation — 16 September, 18:23 local
+
+User prompt 19 superseded the old repair ban. Exclusive desktop/saved-work confirmation was
+reused within this execution. Root was the sole desktop executor. Bounded backend/UI workers
+and the same sole read-only reviewer completed the offline changes; actual route metadata is
+UNVERIFIED, offset0 unchanged. No claim of a parent model switch.
+
+The original `6eff...` probe was proved absent before the operator's repeated check; its cause
+of disappearance remains unknown. Original candidate repeated the SaveAs CloseGuard failure
+with `60f...`. Product now recovers a census-observed canonical owned probe under the actual
+shared lease and uses getter-only exact identity for runtime-backed open and close, avoiding
+the unnecessary SaveAs modal transitions. Wrong/unreadable/dirty/shared recovery targets,
+unknown modals, process changes and final exact-title mismatches still refuse input.
+
+Core repair commit `1b948b7`, pair `fa0c9a3e-987d-4b32-befb-71ed9281ddeb` (full identity in
+RECOVERY.md), passed final paired full suite **11,939/11,939**. Live diagnostic recovered b87a,
+completed fresh d93d probe through cleanup, and passed all live checks. Its normal report and
+ProductionAuthorised remained false. New v3 run `a2-v3-20260916-181700-fa0c9a3e` used this exact
+pair, passed its own fresh readiness round trip with7f87, but FAILED at Meitu portrait identity:
+the Save surface did not equal the foreground editor window, so no dialog control was used.
+Subsequent external cases were blocked. Transparent PNG/reference TIFF passed. No new artwork
+reviews are ready and no old decisions were transferred. The failed result remains Failed.
+
+The ordinary candidate's **安全恢复并重新检查** action was executed at18:23. Its automatic
+ProductionRevalidation check refused the unqualified bytes, so the seven live items were not
+run. Their generic failure descriptions were found misleading and a final bounded display-only
+correction is being applied; this does not open the gate or authorize another v3 run.
+
+Current confirmed desktop: Photoshop PID1488 has a complete zero-document census at
+06:19:15.8298154Z; Meitu PID5980 editor holds the visible **保存图片** panel from the failed
+qualification, observed by native accessibility. No save/discard/dismiss input was sent to it.
+Canonical lease all owner fields null at06:20:15.734Z. Original pair inventories and29 primary
+hashes match after the run; accepted preset1.18.0 and original production record unchanged.
+
+Next genuine boundary: scoped Meitu Save-surface foreground diagnosis/recovery, then a newly
+authorized complete qualification run after a stable correction if needed. Prompt19 section7
+authorized one new complete v3 run, which has been used; do not silently repeat it, publish the
+failed replacement or present it as Pending artwork review. No A3/install/deploy/push/Jira or
+customer work. Original A1 remains Passed for its original candidate only.
