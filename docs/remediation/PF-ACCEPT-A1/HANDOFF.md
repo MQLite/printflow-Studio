@@ -1,7 +1,7 @@
 # PF-ACCEPT-A1 — Handoff
 
-**REGRESSION V3 IMPLEMENTED AND VERIFIED — ONE FRESH COMPLETE A1 RAN: PENDING 4/7, NO FAILED
-ASSERTION — THREE OPERATOR VISUAL DECISIONS OUTSTANDING**
+**A1 COMPLETE — REGRESSION V3 RAN ONCE, AND ALL THREE REQUIRED OPERATOR VISUAL DECISIONS ARE NOW
+RECORDED: PASSED 7/7, 0 PENDING, NO FAILED ASSERTION — NOTHING WAS RE-EXECUTED**
 
 Started from actual HEAD `d7d8d23`; no reset. Operator option **(b)** recorded. Accepted preset
 remains exactly 1.18.0 (`8484F0AA…0E8F`); no Product source, preset, image or historical result was
@@ -28,10 +28,13 @@ holds 9/9 byte-identical copies of the current v2 files and no run directories. 
 A1 run `a1-v3-20260916-121334-903986e7`, invocation `cbffa3cc-ea7d-4f8b-be52-cb94d8361e17`, after
 one current exclusive-desktop confirmation. Readiness `Verified: true`, every blocking check passed,
 `CandidateProblems` empty, no override/diagnostic/build/restore, wrapper exit 1 on the Pending
-verdict. `result.json` is **Pending, 4/7**: TRANSPARENT_PNG, PSD_WITH_COMPOSITE_PREVIEW,
-SINGLE_PAGE_PDF and REFERENCE_PRODUCTION_TIFF Passed; NORMAL_JPG_PORTRAIT,
-COMPLEX_BACKGROUND_FINE_HAIR and COMPLETE_CUSTOMER_DESIGN Pending on visual review. **No structural
-assertion failed in any case.** `Reviews` is empty; no decision was recorded or transferred.
+verdict. As executed, `result.json` was **Pending, 4/7**: TRANSPARENT_PNG,
+PSD_WITH_COMPOSITE_PREVIEW, SINGLE_PAGE_PDF and REFERENCE_PRODUCTION_TIFF Passed;
+NORMAL_JPG_PORTRAIT, COMPLEX_BACKGROUND_FINE_HAIR and COMPLETE_CUSTOMER_DESIGN Pending on visual
+review. **No structural assertion failed in any case.** Three real Operator decisions have since been
+recorded against this run in two appended reviews (below), taking it to **Passed, 7/7**. Nothing
+was re-executed: every execution fact, timestamp, assertion, artefact digest and binding field is
+unchanged.
 
 Fine-hair structural result (`trimMatchesAlphaBoundsAndMargins`, held): attempt
 `01a0a790-ecaa-78c2-8705-88cc22b3a5a1`, margin `TightCrop` 0/0/0/0; input Revision
@@ -41,38 +44,107 @@ Fine-hair structural result (`trimMatchesAlphaBoundsAndMargins`, held): attempt
 AppliedBounds; decoded output pixels equal that region exactly. Full extent was retained because
 alpha-bearing content reaches all four edges — the diagnosed property of these cutouts.
 
-### Operator decisions required (three; none may be inferred)
+### Operator decision recorded first (one; FINE-HAIR-VISUAL-001)
 
-Local paths only; the fixture manifests forbid upload, and the agent did not view the images.
+Review `39449086-d161-49e2-8a8c-f1528c2c2a05`, `DecidedBy` `DESKTOP-0BG8884\admin`,
+`DecidedAtLocal` `2026-09-16T13:30:47+12:00`, `Synthetic: false`. **FINE-HAIR-VISUAL-001 = Passed**,
+bound to `…\a1-v3-20260916-121334-903986e7\FIX-FINE-HAIR-001-cutout.png` at the digest the run
+recorded, `0C2932DB64BD5745FD73D467325E2385F18A91AA790FDFDB6AED8E1D1D755299` — the harness
+re-verified those bytes before accepting the decision. Recorded note, the Operator's statement
+verbatim and unexpanded: **头发问题可接受** ("the hair problem is acceptable").
 
-- **FINE-HAIR-VISUAL-001** — `…\a1-v3-20260916-121334-903986e7\FIX-FINE-HAIR-001-cutout.png`,
-  SHA-256 `0C2932DB64BD5745FD73D467325E2385F18A91AA790FDFDB6AED8E1D1D755299`. "Are individual hair
-  strands still retained at the boundary, without a hard halo, and is the foliage background fully
-  removed rather than partly retained as coloured fringing?" The structural pass says the crop is
-  arithmetically right; it says nothing about whether the retained edge pixels are hair or foliage.
-- **PORTRAIT-VISUAL-001** — `…\FIX-PORTRAIT-001-enhanced.png`, SHA-256
-  `1E41CF81E51B02A3243018F7271B0C1300DB1649F1E6945619326FE9410656FC`; the two-axis size expectation
-  held at 1200x1600. "Does the enhanced export still look like a correctly enhanced portrait —
-  subject sharp, skin tone unshifted, no visible artefact introduced along the hair or shoulder
-  edges?"
-- **CUSTOMER-DESIGN-VISUAL-001** —
+That is an acceptance of *this exact cutout* as good enough, and nothing more. It is not a finding
+that every edge pixel is correct, and it does not certify hair-versus-foliage separation; the
+structural pass never claimed that either. COMPLEX_BACKGROUND_FINE_HAIR is now Passed with all
+seven assertions still held. Decision input:
+`artifacts/pf-accept-a1/regression-v3/fine-hair-visual-decision.json`
+(SHA-256 `E50E1B1F7DAE1F090806CDCAB10E88A308F5E395DE45885A1C9C8C4F8C647C5B`).
+
+### Operator decisions recorded second (two; PORTRAIT-VISUAL-001 and CUSTOMER-DESIGN-VISUAL-001)
+
+Review `3d17939c-c01f-42a3-bbe1-590f359e6d42`, `DecidedBy` `DESKTOP-0BG8884\admin`,
+`DecidedAtLocal` `2026-09-16T14:28:13+12:00` (the actual review-recording time, not the
+execution time), `Synthetic: false`. The Operator approved both remaining checks in one statement;
+its recorded note, verbatim and unexpanded on both decisions, is **两项都可通过** ("both items
+can pass"). One review envelope carries both decisions, which the schema permits. Local paths only;
+the fixture manifests forbid upload, and **the agent did not view either image** — these are the
+Operator's decisions, not an independent agent inspection.
+
+- **PORTRAIT-VISUAL-001 = Passed** —
+  `…\a1-v3-20260916-121334-903986e7\FIX-PORTRAIT-001-enhanced.png`, bound at the digest the run
+  recorded, `1E41CF81E51B02A3243018F7271B0C1300DB1649F1E6945619326FE9410656FC`; the harness
+  re-verified those bytes before accepting the decision. Question answered: "Does the enhanced
+  export still look like a correctly enhanced portrait — subject sharp, skin tone unshifted, no
+  visible artefact introduced along the hair or shoulder edges?" NORMAL_JPG_PORTRAIT is now Passed
+  with all six assertions still held.
+- **CUSTOMER-DESIGN-VISUAL-001 = Passed** —
   `D:\PrintFlowStudio\Sessions\S_20260916T001449Z_e131feb5\Working\01a0a790-f4ee-7f34-8a57-66bf52614e04\FIX-CUSTOMER-DESIGN-001_51mm_CMYK_W.tif`,
-  SHA-256 `E53499E326EAF4A6227B32C873527BC1D37174C2542FA92993D97131FEF8C960`; validated 600x900,
-  5 samples, 300 dpi, uncompressed. "Does the produced TIFF show the complete design at the
-  requested size, with the W1 channel covering the intended ink region?"
+  bound at `E53499E326EAF4A6227B32C873527BC1D37174C2542FA92993D97131FEF8C960`, likewise
+  re-verified. Question answered: "Does the produced TIFF show the complete design at the requested
+  size, with the W1 channel covering the intended ink region?" COMPLETE_CUSTOMER_DESIGN is now
+  Passed with all nine assertions still held.
 
-Earlier artwork approvals do not transfer to these new objects. Record actual decisions only with:
+Each acceptance is of *that exact object* and nothing more. Earlier artwork approvals did not
+transfer to them, and these do not transfer onward.
+
+Recorded through the supported review-only route, with the required `-SetRoot`:
 
 ```powershell
 tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 `
-    -RunId 'a1-v3-20260916-121334-903986e7' -RecordVisualReview '<actual-decisions-file>'
+    -SetRoot 'D:\PrintFlowStudio\TestData\v3' `
+    -RunId 'a1-v3-20260916-121334-903986e7' `
+    -RecordVisualReview 'artifacts\pf-accept-a1\regression-v3\remaining-visual-decisions.json'
 ```
 
-That is original-harness re-aggregation of this run, not a re-execution: supply no receipt, no set
-root and no category filter. If the Operator reports unacceptable fine-hair quality, that is a
-separate real issue; it must not be answered by redefining geometry or altering pixels.
+`-SetRoot` is required and was missing from the earlier form of this note, which predates the move
+to v3. The script derives the run folder as `<SetRoot>\runs\<RunId>` and defaults `SetRoot` to
+`…\TestData\v1`, so the documented command without it fails with *"No completed run at
+'D:\PrintFlowStudio\TestData\v1\runs\a1-v3-20260916-121334-903986e7'"* and writes nothing. This was
+observed, not assumed, when recording FINE-HAIR-VISUAL-001; v1 was left untouched. That argument
+names **this run's own recorded set root** (`SetId: printflow-regression-v3`, matching
+`EvidencePath`), so it preserves the original association rather than retargeting it, and it also
+keeps the review's `host-results` under v3 instead of writing into the v1 set.
 
-Run evidence hashes: result `8EEAC73F93FEE8C0B46BBBF0A0F369B06E19245A865A1052975B9A75F6746613`;
+No receipt, `MeituExecutablePath`, category filter or new `RunId` was supplied: the run's
+original binding, build origin and version exception were reused from `result.json`, and the
+original paired reviewer `f0ac92e2…` selected by the wrapper ran the re-derivation. Re-aggregation
+exits 1 while any case is Pending — the documented "host completed, set did not pass" code — so
+with none left Pending this pass **exited 0**.
+
+A decision may only conclude a check that is still `Pending`; the harness refuses to re-decide one
+that already carries an outcome, so a recorded approval cannot be duplicated or overwritten by
+running this again. Reviews are appended, never replaced. The input file for this pass listed only
+the two still-pending checks: `artifacts/pf-accept-a1/regression-v3/remaining-visual-decisions.json`
+(SHA-256 `FC7B576190FCF55678072FB0E713D25B9D6C8775BD733D148AD3AC7E3BCE57A5`, ignored, kept out of the
+commit). The fine-hair decision was not resubmitted and its input file was not overwritten. If the
+Operator later reports unacceptable fine-hair quality, that is a separate real issue; it must not be
+answered by redefining geometry or altering pixels.
+
+### Final verdict as persisted
+
+`result.json` reads **Passed**, verdict "Passed. 7/7 required categories passed.", **0 Pending**:
+NORMAL_JPG_PORTRAIT, COMPLEX_BACKGROUND_FINE_HAIR, TRANSPARENT_PNG, COMPLETE_CUSTOMER_DESIGN,
+PSD_WITH_COMPOSITE_PREVIEW, SINGLE_PAGE_PDF and REFERENCE_PRODUCTION_TIFF all Passed, with 59
+assertions across the seven cases and **0 failed**. Three distinct visual check IDs are concluded,
+each exactly once, across two appended reviews (1 + 2 decisions). Wrapper exit **0**.
+
+Preserved unchanged by the review: `StartedAtLocal` `2026-09-16T12:13:45.2666532+12:00` and
+`CompletedAtLocal` `2026-09-16T12:16:03.2981178+12:00`; invocation
+`cbffa3cc-ea7d-4f8b-be52-cb94d8361e17`; `SetId` `printflow-regression-v3` and its
+`EvidencePath`; `PresetSha256` `8484F0AA…0E8F`; `SetContentDigest` `75DA6EC6…DEE8`;
+build origin pair `f0ac92e2-853e-4d2f-a6e4-c0af1a24e0e8` receipt `BEBEDFFC…BDC4` with all eight
+harness/candidate assembly digests at `0.1.0+a39846d…`; and `CandidateProblems` **empty**.
+Every structural assertion and its detail text is byte-for-byte what the run wrote.
+
+Run evidence hashes: result **as executed**
+`8EEAC73F93FEE8C0B46BBBF0A0F369B06E19245A865A1052975B9A75F6746613`; **after the fine-hair
+review was recorded** `5463FB08505DCC9283D5EC5E0B8B9981408DAFC57900F6B857B969AE22F0495D`; and
+**final, after the two closing decisions**
+`97E422FA53002725F8222A4C38075A8E6B43C7A169442DF3F1CBBC501DB9600A`
+(`result.json` is the only file either review rewrote; every other hash below was re-verified
+unchanged after both, as were all four output PNGs — the approved cutout at `0C2932DB…5299`,
+the trimmed fine-hair PNG at `83914805…8C7D`, the approved portrait at `1E41CF81…56FC` and the
+trimmed transparent PNG at `62BFF224…76B9` — and the approved TIFF at `E53499E3…C960`);
 readiness `7F746BBD507A4693B4499B126E6EDD861DBEB7538E448D7CD8487AB879742E52`; claim
 `A1C597E6F24297FED52F61552146DC32A94AEA773AD3FF9D2A6442B9C8295058`; fine-hair case
 `6BA0F08A411546CD4A3BF2A14DF640E2CE1E1A20B02D5B6E3E4332277659A66B`; regression database
@@ -86,10 +158,23 @@ manifests, and all three pairs (`f0ac92e2…`, `fd56e834…`, `ee8e0280…`) rev
 receipts. Photoshop is document-free at `Adobe Photoshop CC 2019`; Meitu shows
 `美图秀秀-图片编辑` and was not touched.
 
-Stop here: the run is complete and only genuine Operator review remains. No A2/revalidation, A3,
-Product refactor, preset change, image alteration, signing, install, deploy, push or Jira closure
-was performed. Execution: Claude Code, Opus 5; one scoped read-only reviewer; no independent
-acceptance or release approval is claimed.
+Stop here: **A1 is complete**. The run executed once, all three genuine Operator decisions are
+recorded, and the set reads Passed 7/7 with nothing outstanding. Neither review pass launched an
+application, took a desktop confirmation, acquired a lease, processed or exported anything, or ran a
+readiness check, build, test, new pair or standard-set rerun, and neither changed code;
+`result.json` was not hand-edited. No A2/revalidation, A3, Product refactor, preset change, image
+alteration, signing, install, deploy, push or Jira closure was performed — A2 remains separately
+authorized and not started, so SCRUM-11065 stays PARTIAL. Execution: Claude Code, Opus 5; one
+scoped read-only reviewer; no independent acceptance or release approval is claimed, and the two
+closing approvals are the Operator’s, not an agent inspection.
+
+### Next (separately authorized)
+
+A2 may now proceed against this result on its own authorization. Its inputs are
+`D:\PrintFlowStudio\TestData\v3\runs\a1-v3-20260916-121334-903986e7\result.json` at
+`97E422FA53002725F8222A4C38075A8E6B43C7A169442DF3F1CBBC501DB9600A` and the manifests at
+`D:\PrintFlowStudio\TestData\v3\manifests`. The wrapper printed the revalidation command it would
+take; **it was not run**, and no revalidation record exists.
 
 **FINE-HAIR TRIM DIAGNOSED OFFLINE — PRODUCT AND CALLER BOTH CORRECT — NO REPAIRABLE MISMATCH —
 STOPPED AT A FROZEN-MANIFEST REQUIREMENT ISSUE; NO CODE CHANGE, PAIR OR LIVE A1**

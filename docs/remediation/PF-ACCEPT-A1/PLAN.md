@@ -1,5 +1,38 @@
 # PF-ACCEPT-A1 — Acceptance freeze and execution plan
 
+## 16 September 2026 — A1 COMPLETE: 7/7 Passed after the final two Operator visual approvals
+
+Task `PF-ACCEPT-A1 — Record the Final Two Operator Approvals and Close A1`, from actual HEAD
+`6b76441`; no reset. Review-only: no application launch, desktop confirmation, lease, readiness,
+processing/export, build, pair, suite or standard-set rerun, and no `src/`, preset, manifest, image
+or historical-result change. `result.json` was not hand-edited.
+
+1. **Operator decision.** The Operator approved both remaining visual checks in one statement,
+   recorded verbatim as **两项都可通过** ("both items can pass"). It is the Operator's acceptance
+   of those two exact objects; the agent did not view the images and claims no inspection of its own.
+2. **Verified before submitting.** Both artefacts still hash to what run
+   `a1-v3-20260916-121334-903986e7` recorded — `FIX-PORTRAIT-001-enhanced.png`
+   `1E41CF81…56FC`, `FIX-CUSTOMER-DESIGN-001_51mm_CMYK_W.tif` `E53499E3…C960` — and each is the
+   evidence the run itself bound to its check. Both were still `Pending`; nothing was re-decided.
+3. **Recorded** through the supported route only:
+   `Invoke-PrintFlowStandardRegressionSet.ps1 -SetRoot 'D:\PrintFlowStudio\TestData\v3'
+   -RunId 'a1-v3-20260916-121334-903986e7' -RecordVisualReview <decisions>` — no receipt, category
+   filter, executable override or new RunId; the original paired reviewer and binding were reused.
+   Review `3d17939c-c01f-42a3-bbe1-590f359e6d42`, `DESKTOP-0BG8884\admin`,
+   `2026-09-16T14:28:13+12:00`, `Synthetic: false`, carrying both decisions. Wrapper exit **0**.
+4. **Readback.** `result.json` is **Passed, 7/7**, 0 Pending, 59 assertions all held, 0 failed;
+   `CandidateProblems` empty. All three distinct visual checks are concluded exactly once —
+   FINE-HAIR-VISUAL-001 (review `39449086…`, 13:30:47, note 头发问题可接受) is unchanged and was
+   neither resubmitted nor overwritten. Execution timestamps (12:13:45 → 12:16:03), invocation
+   `cbffa3cc…`, pair `f0ac92e2…`, receipt `BEBEDFFC…`, preset `8484F0AA…0E8F` and set digest
+   `75DA6EC6…DEE8` are all preserved. `result.json` is the only file the review rewrote:
+   `97E422FA53002725F8222A4C38075A8E6B43C7A169442DF3F1CBBC501DB9600A`; readiness, claim, database,
+   case files, all four output PNGs and the TIFF re-hash unchanged, and v1/v2 were untouched.
+
+Outcome: **A1 COMPLETE — ALL SEVEN CATEGORIES AND ALL THREE REQUIRED OPERATOR REVIEWS PASSED.**
+A2 is separately authorized and not started: no revalidation record, A3, signing, install, deploy,
+push or Jira change was performed. SCRUM-11065 stays PARTIAL pending that authorization.
+
 ## 16 September 2026 — regression v3 trim contract implemented; fresh A1 Pending on three reviews
 
 Task `PF-ACCEPT-A1 — Regression v3: Exact Trim Geometry, Then One Fresh A1`, from actual HEAD
