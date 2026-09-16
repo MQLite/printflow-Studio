@@ -574,6 +574,14 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         CancellationToken cancellationToken,
         Action<ReadinessProbeStage>? observe = null)
     {
+        if (_runtimeFacts is not null)
+        {
+            return await ProveRuntimeIdentityAsync(
+                    target, workingFile, absolutePath, otherDocumentsOpen, titleState,
+                    cancellationToken, observe)
+                .ConfigureAwait(false);
+        }
+
         OperationResult<PhotoshopDocumentIdentity> identity = await _driver
             .ProbeDocumentIdentityAsync(target, cancellationToken).ConfigureAwait(false);
         if (identity.IsFailure)
@@ -625,6 +633,152 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         _ = titleState;
         return OperationResult.Ok(new PhotoshopOpenedDocument(
             target, state, identity.Value, otherDocumentsOpen));
+    }
+
+    /// <summary>
+    /// Proves the opened document through Photoshop's complete getter-only runtime census.
+    /// </summary>
+    /// <remarks>
+    /// When supplied, this reader proves the same absolute-path identity as the Save As surface
+    /// without creating and cancelling a modal immediately before the next guarded document
+    /// command. The process and window are re-checked around the census so a ROT answer from a
+    /// replacement instance or a title/modal change cannot be accepted. Reader-null construction
+    /// deliberately retains the signed Save As identity route.
+    /// </remarks>
+    private async Task<OperationResult<PhotoshopOpenedDocument>> ProveRuntimeIdentityAsync(
+        PhotoshopTarget target,
+        WorkspaceFileRef workingFile,
+        string absolutePath,
+        bool otherDocumentsOpen,
+        PhotoshopStateSnapshot titleState,
+        CancellationToken cancellationToken,
+        Action<ReadinessProbeStage>? observe)
+    {
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure)
+            return OperationResult.Fail<PhotoshopOpenedDocument>(baseline.Failure);
+        if (baseline.Value.DocumentIdentity is not { } signature)
+        {
+            return OperationResult.Fail<PhotoshopOpenedDocument>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "The verified evidence chain carries no document-title identity signature. " +
+                "Nothing further was sent.",
+                isRetryable: false));
+        }
+
+        OperationResult<Unit> before = VerifySoleProcessContinuity(target, baseline.Value);
+        if (before.IsFailure)
+            return OperationResult.Fail<PhotoshopOpenedDocument>(before.Failure);
+
+        OperationResult<PhotoshopRuntimeFacts> runtime =
+            _runtimeFacts!.Read(baseline.Value.ExecutablePath);
+        if (runtime.IsFailure)
+        {
+            return Capture<PhotoshopOpenedDocument>(
+                target, runtime.Failure, "runtime-identity-unreadable");
+        }
+
+        PhotoshopRuntimeDocument[] active =
+            [.. runtime.Value.Documents.Where(document => document.IsActive)];
+        PhotoshopRuntimeDocument? exact = active.Length == 1 &&
+                                          string.Equals(
+                                              active[0].Name,
+                                              workingFile.FileName,
+                                              StringComparison.OrdinalIgnoreCase) &&
+                                          PhotoshopDocumentIdentityRule.MatchesExpectedDocument(
+                                              absolutePath, active[0].FullPath)
+            ? active[0]
+            : null;
+        if (exact?.FullPath is null)
+        {
+            string observed = active.Length == 1
+                ? active[0].FullPath ?? "(unreadable)"
+                : $"({active.Length.ToString(CultureInfo.InvariantCulture)} active documents)";
+            return Capture<PhotoshopOpenedDocument>(target, OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "Photoshop's complete runtime observation did not identify the active document " +
+                "as the exact managed Working file. Nothing further was sent.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["expectedDocument"] = absolutePath,
+                    ["observedDocument"] = observed,
+                    ["w1ActionInvoked"] = "false",
+                    ["tiffWritten"] = "false",
+                }), "runtime-identity-mismatch");
+        }
+
+        OperationResult<Unit> after = VerifySoleProcessContinuity(target, baseline.Value);
+        if (after.IsFailure)
+            return OperationResult.Fail<PhotoshopOpenedDocument>(after.Failure);
+
+        OperationResult<PhotoshopStateSnapshot> confirmed = await _driver
+            .InspectStateAsync(target, workingFile.FileName, cancellationToken).ConfigureAwait(false);
+        if (confirmed.IsFailure)
+            return OperationResult.Fail<PhotoshopOpenedDocument>(confirmed.Failure);
+
+        if (confirmed.Value.State is PhotoshopStartingState.KnownModal)
+        {
+            return Capture<PhotoshopOpenedDocument>(target, OperationFailure.Create(
+                FailureCode.PhotoshopBlockingDialog,
+                "A dialog owned by Photoshop appeared while the opened document identity was being " +
+                "confirmed. PrintFlow did not dismiss it or send anything further.",
+                isRetryable: true,
+                context: Context(confirmed.Value)), "runtime-identity-blocked");
+        }
+
+        if (confirmed.Value.State is not (PhotoshopStartingState.KnownEditorWithOtherDocument or
+                                         PhotoshopStartingState.KnownEditorWithExpectedDocument) ||
+            !PhotoshopDocumentIdentityRule.TitleNamesExpectedDocument(
+                signature, confirmed.Value.Observation.WindowTitle, workingFile.FileName))
+        {
+            return Capture<PhotoshopOpenedDocument>(target, OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "Photoshop's window no longer names the exact runtime-observed document. Nothing " +
+                "further was sent.",
+                isRetryable: true,
+                context: Context(confirmed.Value)), "runtime-identity-title-changed");
+        }
+
+        PhotoshopDocumentIdentity identity = new(
+            exact.Name,
+            Path.GetDirectoryName(exact.FullPath)!,
+            exact.FullPath,
+            confirmed.Value.Observation.WindowTitle);
+        PhotoshopStateSnapshot state = confirmed.Value with
+        {
+            State = PhotoshopStartingState.KnownEditorWithExpectedDocument,
+            Observation = confirmed.Value.Observation with
+            {
+                ObservedDocumentFullPath = exact.FullPath,
+            },
+        };
+
+        observe?.Invoke(ReadinessProbeStage.IdentityConfirmed);
+        _ = titleState;
+        return OperationResult.Ok(new PhotoshopOpenedDocument(
+            target, state, identity, otherDocumentsOpen));
+    }
+
+    private OperationResult<Unit> VerifySoleProcessContinuity(
+        PhotoshopTarget target, PhotoshopBaseline baseline)
+    {
+        OperationResult<IReadOnlyList<ExternalProcessRef>> running =
+            _locator.FindProcessesByExecutable(baseline.ExecutablePath);
+        if (running.IsFailure)
+            return OperationResult.Fail<Unit>(Translate(running.Failure));
+
+        return running.Value.Count == 1 && running.Value[0] == target.Process
+            ? OperationResult.Ok()
+            : OperationResult.Fail<Unit>(OperationFailure.Create(
+                FailureCode.PhotoshopTargetLost,
+                "The exact accepted Photoshop process did not remain the sole running candidate " +
+                "while the opened document identity was read. Nothing further was sent.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["candidates"] = running.Value.Count.ToString(CultureInfo.InvariantCulture),
+                }));
     }
 
     /// <inheritdoc />

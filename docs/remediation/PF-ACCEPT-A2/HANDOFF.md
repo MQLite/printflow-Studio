@@ -1,7 +1,13 @@
 # PF-ACCEPT-A2 — Handoff
 
-**A2 PARTIALLY COMPLETE / BLOCKED — real revalidation published and accepted by the normal
-candidate; fresh normal-App live verification failed, so final production admission is CLOSED.**
+**Latest continuation: owned-probe recovery has been verified through the repaired Product
+path. Fresh-round-trip verification exposed a further initial-identity transition defect;
+its bounded correction is in progress. A2 has not passed. Historical A1/publication remain
+unchanged. See the appended current evidence in [RECOVERY.md](RECOVERY.md).**
+
+The older sections below are historical observations and authorization, not a statement that
+their named probes are still open. Prompt 19 and the current user request authorize scoped
+repair/recovery and corrected-candidate qualification; no A3 is authorized.
 
 ## Executor and authority
 

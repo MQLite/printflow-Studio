@@ -1,6 +1,6 @@
 # A2 recovery continuation — 16 September 2026
 
-Status: offline verification complete; normal-App live result pending operator UI action.
+Status: owned-probe recovery verified live; further fresh-round-trip correction under diagnosis.
 This report appends current evidence without replacing the historical failed attempt.
 
 ## Observed state and bounded diagnosis
@@ -150,3 +150,46 @@ The reviewed, focused-tested fix is committed before creating the isolated contr
 Its clean paired harness build will supply the final complete suite, before any live diagnostic
 or new standard-set run. This verifies the same retained build used for qualification; no
 further conventional-output rebuild or tests are needed unless a real failure requires repair.
+
+## Controlled pair and new discriminating live evidence
+
+Stable correction commit `38d102985cd1e73eec589b12f7f3a0a72eb3a07a` produced controlled pair
+`a05e8547-e10a-4154-9834-516035d29632`. Its receipt and complete harness/candidate inventories
+verified. Final paired suite: **11,933 passed, zero failed/skipped**, 5m45s; raw log
+`recovery-final-paired-suite.log`, TRX in `final-paired-test-results`. The normal candidate was
+launched without arguments and its ordinary readiness page showed ProductionRevalidation
+as the blocking check. The recovery button, plain-language status and collapsed details were
+observed through supported native accessibility. It was exited normally before live diagnosis.
+
+The first repaired diagnostic **did recover** exact probe `60f7def57ed14ae1bee7a9cc8cfbb45e`:
+Product recorded ClosedExactProbe, same accepted process 1488/start time, sole saved active
+canonical document, close plus complete empty census, then exact backing-file removal. This
+is a current automatic close observation; it does not revise the original `6eff...` history.
+However, fresh probe `310afeea7de9492a8f52185c8be701f2` failed Open-field exact readback. Product
+did not press Open, cancelled its dialog and retained the backing file. Getter-only complete
+census at **05:52:00.7358051Z** proved zero documents in the same process.
+
+One evidence-supported recheck from that confirmed settled empty state passed Open and initial
+identity but failed at CloseRequested: fresh probe `b87a8bf95a02444796b8ff3f53831f9c` remained
+after the existing close timeout. Complete getter-only census at **05:54:04.1560696Z** confirmed
+it remains the sole active saved document at its exact managed path. Native window observation
+corroborates the title with no visible modal. Thus this is a real retained document, not merely
+a stale title. Both retained fresh files have the canonical 68-byte probe hash. No blind repeat
+Close or SaveAs input was sent. Diagnosis now compares recovery's successful runtime-only close
+against the fresh route's remaining initial SaveAs identity/cancel transition. Both diagnostic
+envelopes retain ProductionAuthorised=false; neither is a readiness pass. No v3 run or new
+publication has occurred. Logs: `recovery-repaired-live-diagnostic.log`,
+`recovery-settled-live-diagnostic.log`, `recovery-post-cancel-census.log`, and
+`recovery-post-close-timeout-census.log`.
+
+The follow-up correction is confined to the runtime-backed initial-open identity boundary.
+It avoids the remaining SaveAs/cancel transition by using the existing complete getter-only
+census, verifies unique same-process continuity before/after it, exact active path/name and
+final modal/window state, and retains the legacy reader-null route. It does not claim the
+underlying Windows timing mechanism is proven. Five new red failures established the missing
+runtime-identity branch. The same independent reviewer found a coarse final title-prefix
+comparison; a dedicated staged shared-prefix drift test went red, then green after applying
+the existing exact-name signature rule and missing-signature refusal. Reviewer recheck found
+no remaining blocker in this narrow scope. Related tests passed 107/107, architecture boundary
+tests 34/34. Evidence summary: `runtime-open-identity-red-green.txt`. Source is frozen for a
+new controlled pair/final suite before further live work. Pair a05 and its evidence stay intact.

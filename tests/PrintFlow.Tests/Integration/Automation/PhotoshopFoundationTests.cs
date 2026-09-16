@@ -658,6 +658,176 @@ public sealed class PhotoshopFoundationTests : IDisposable
     }
 
     [Fact]
+    public async Task Runtime_backed_open_proves_identity_without_Save_As_before_immediate_close()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        PhotoshopBaseline baseline = BaselineForRealFile() with { ColourSettings = settings };
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        PhotoshopRuntimeDocument exact = new(
+            PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true);
+        SequencedRuntimeFacts facts = new(settings, [], [exact], [exact]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsSuccess.ShouldBeTrue(opened.IsFailure ? opened.Failure.ToString() : string.Empty);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+
+        Action<KnownShortcut>? staged = h.Input.OnSend;
+        h.Input.OnSend = shortcut =>
+        {
+            staged?.Invoke(shortcut);
+            if (shortcut == KnownShortcut.CloseActiveDocument)
+                h.Locator.Replace(h.Target.Process, PhotoshopFakes.Window());
+        };
+
+        OperationResult<PhotoshopTarget> closed = await h.Adapter.CloseExactDocumentAsync(
+            opened.Value, managed, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+        facts.ReadCalls.ShouldBe(3, "pre-open, opened-document identity, and pre-close are separate censuses");
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe(
+            [KnownShortcut.OpenFile, KnownShortcut.CloseActiveDocument]);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Runtime_backed_open_refuses_mismatched_or_unreadable_identity_without_Save_As(
+        bool unreadable)
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        PhotoshopBaseline baseline = BaselineForRealFile() with { ColourSettings = settings };
+        string observedPath = Path.Combine(_root, "Other", PhotoshopFakes.ExpectedFileName);
+        SequencedRuntimeFacts facts = new(
+            settings,
+            [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName,
+                unreadable ? null : observedPath,
+                IsSaved: true,
+                IsActive: true)]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(Path.Combine(h.ManagedDirectory, managed.FileName), [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    [Fact]
+    public async Task Runtime_backed_open_refuses_process_restart_after_identity_census()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        PhotoshopBaseline baseline = BaselineForRealFile() with { ColourSettings = settings };
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        SequencedRuntimeFacts facts = new(
+            settings,
+            [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        facts.AfterRead = call =>
+        {
+            if (call != 2) return;
+            ExternalProcessRef replacement = h.Target.Process with
+            {
+                StartedUtc = h.Target.Process.StartedUtc.AddMinutes(1),
+            };
+            h.Locator.RunningProcesses.Clear();
+            h.Locator.Register(replacement, PhotoshopFakes.Window(
+                title: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName)));
+        };
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopTargetLost);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    [Fact]
+    public async Task Runtime_backed_open_refuses_modal_raised_after_identity_census()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        PhotoshopBaseline baseline = BaselineForRealFile() with { ColourSettings = settings };
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        SequencedRuntimeFacts facts = new(
+            settings,
+            [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        facts.AfterRead = call =>
+        {
+            if (call == 2)
+                h.Locator.OwnedDialogs.Add(PhotoshopFakes.Dialog(title: "Unexpected modal"));
+        };
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopBlockingDialog);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    [Fact]
+    public async Task Runtime_backed_open_refuses_shared_prefix_title_drift_after_identity_census()
+    {
+        PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
+        PhotoshopBaseline baseline = BaselineForRealFile() with { ColourSettings = settings };
+        string expectedPath = Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName);
+        SequencedRuntimeFacts facts = new(
+            settings,
+            [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)]);
+        Harness h = Build(baseline, runtimeFacts: facts);
+        facts.AfterRead = call =>
+        {
+            if (call == 2)
+            {
+                h.Locator.Replace(h.Target.Process, PhotoshopFakes.Window(
+                    title: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName + ".customer.psd")));
+            }
+        };
+        WorkspaceFileRef managed = WorkspaceFileRef.Create(
+            $"Sessions/S1/Working/{PhotoshopFakes.ExpectedFileName}", WorkspaceArea.Working);
+        File.WriteAllBytes(expectedPath, [1, 2, 3]);
+        StageOpenThenDocument(h, managed.FileName);
+        List<ReadinessProbeStage> progress = [];
+
+        OperationResult<PhotoshopOpenedDocument> opened = await h.Adapter.OpenManagedWorkingFileAsync(
+            managed, progress.Add, CancellationToken.None);
+
+        opened.IsFailure.ShouldBeTrue();
+        opened.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        progress.ShouldNotContain(ReadinessProbeStage.IdentityConfirmed);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.OpenFile]);
+    }
+
+    [Fact]
     public async Task Foundation_close_reads_runtime_identity_immediately_and_does_not_repeat_Save_As()
     {
         PhotoshopColourSettingsContract settings = new("sRGB", "CMYK", "Gray", "Spot");
@@ -665,6 +835,11 @@ public sealed class PhotoshopFoundationTests : IDisposable
         SequencedRuntimeFacts facts = new(
             settings,
             [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName,
+                Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName),
+                IsSaved: true,
+                IsActive: true)],
             [new PhotoshopRuntimeDocument(
                 PhotoshopFakes.ExpectedFileName,
                 Path.Combine(_root, "Working", PhotoshopFakes.ExpectedFileName),
@@ -692,7 +867,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
             opened.Value, managed, CancellationToken.None);
 
         closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
-        facts.ReadCalls.ShouldBe(2, "one pre-open safety census and one fresh pre-close identity census");
+        facts.ReadCalls.ShouldBe(
+            3, "pre-open, opened-document identity, and pre-close are separate censuses");
         h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.CloseActiveDocument]);
     }
 
@@ -705,6 +881,8 @@ public sealed class PhotoshopFoundationTests : IDisposable
         SequencedRuntimeFacts facts = new(
             settings,
             [],
+            [new PhotoshopRuntimeDocument(
+                PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: true, IsActive: true)],
             [new PhotoshopRuntimeDocument(
                 PhotoshopFakes.ExpectedFileName, expectedPath, IsSaved: false, IsActive: true)]);
         Harness h = Build(baseline, runtimeFacts: facts);
@@ -821,10 +999,15 @@ public sealed class PhotoshopFoundationTests : IDisposable
 
         public int ReadCalls { get; private set; }
 
+        public Action<int>? AfterRead { get; set; }
+
         public OperationResult<PhotoshopRuntimeFacts> Read(string acceptedExecutablePath)
         {
             ReadCalls++;
-            return OperationResult.Ok(new PhotoshopRuntimeFacts(settings, _observations.Dequeue()));
+            OperationResult<PhotoshopRuntimeFacts> result =
+                OperationResult.Ok(new PhotoshopRuntimeFacts(settings, _observations.Dequeue()));
+            AfterRead?.Invoke(ReadCalls);
+            return result;
         }
     }
 }
