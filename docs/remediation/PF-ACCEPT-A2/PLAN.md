@@ -134,3 +134,9 @@ no shared Product logic change or additional full-suite/v3 run is warranted for 
 Qualification remains unfulfilled. Further Meitu guarded-recovery work and another full v3 run
 must preserve this failed result and all old authority; prompt19 authorized only one new complete
 execution. Do not start A3 or treat the successful non-authorizing diagnosis as ordinary A2 PASS.
+
+The display-only correction passed 94/94 screen/localization checks. Final source f27fce1
+has its own verified pair 0298e108-5572-47ba-a3af-9bb5592cf6ff. Its ordinary recheck at 18:30
+correctly returned failed revalidation, unrun live checks and CLOSED admission with truthful
+plain-language messages. The shared runtime source is unchanged from fa0c; no full suite or
+v3 run was repeated for this display change. Final identities and state are in HANDOFF.md.

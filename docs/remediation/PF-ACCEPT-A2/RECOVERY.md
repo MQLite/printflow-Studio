@@ -267,3 +267,16 @@ the screen/localization slice then passed94/94 with no skips. Evidence:
 `ui-notrun-followup-tests.txt`. This last App presentation change does not justify repeating the
 shared Product full suite or the one v3 execution; it requires a separate retained build identity.
 The fa0c core repair/qualification evidence is not relabelled as evidence for those new bytes.
+
+Final UI source `f27fce130d63d9db697348d4bb52eb77a6826a17` produced verified controlled pair
+`0298e108-5572-47ba-a3af-9bb5592cf6ff`, receipt SHA-256
+`7AB33AF3B5E3203C5BCBFAC12FDD890F2D61C5454845E40838602F9FA5691053`. Source-input comparison
+against fa0c confirms only the two resource files, readiness row projection and screen tests
+changed; no shared runtime source changed. At18:30 its normally launched executable PID37024
+executed the primary recheck: ProductionRevalidation Failed, live checks NotRun, admission
+CLOSED. All seven live rows use the truthful prerequisite/not-run explanation; technical
+details remain collapsed. No live probe was dispatched by this refused normal action. App is
+left on the readiness page; canonical lease remained free at06:30:57.914Z. Latest raw evidence
+is `recovery-final-ui-normal-recheck.txt`, `recovery-final-ui-identity.json`,
+`recovery-final-ui-processes.json`, `recovery-final-ui-lease.json`. This final UI candidate is
+unqualified; the prior fa0c failed run is retained rather than relabelled or rerun.

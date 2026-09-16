@@ -196,8 +196,9 @@ reviews are ready and no old decisions were transferred. The failed result remai
 
 The ordinary candidate's **安全恢复并重新检查** action was executed at18:23. Its automatic
 ProductionRevalidation check refused the unqualified bytes, so the seven live items were not
-run. Their generic failure descriptions were found misleading and a final bounded display-only
-correction is being applied; this does not open the gate or authorize another v3 run.
+run. Their generic failure descriptions were found misleading. The final display-only fix
+passed94/94 screen/localization tests and now truthfully describes them as unexecuted; this
+does not open the gate or authorize another v3 run.
 
 Current confirmed desktop: Photoshop PID1488 has a complete zero-document census at
 06:19:15.8298154Z; Meitu PID5980 editor holds the visible **保存图片** panel from the failed
@@ -210,3 +211,30 @@ authorized complete qualification run after a stable correction if needed. Promp
 authorized one new complete v3 run, which has been used; do not silently repeat it, publish the
 failed replacement or present it as Pending artwork review. No A3/install/deploy/push/Jira or
 customer work. Original A1 remains Passed for its original candidate only.
+
+### Latest retained UI candidate and actual ordinary gate
+
+Final source `f27fce130d63d9db697348d4bb52eb77a6826a17`, pair
+`0298e108-5572-47ba-a3af-9bb5592cf6ff`, receipt SHA-256
+`7AB33AF3B5E3203C5BCBFAC12FDD890F2D61C5454845E40838602F9FA5691053`.
+Candidate: `artifacts/pf-accept-a2/build-pairs/0298e108-5572-47ba-a3af-9bb5592cf6ff/candidate`.
+The complete pair inventory verifies. Relative to fa0c, bound source differences are only
+two App resource files, the readiness row projection and its screen tests. Core runtime source
+is unchanged; fa0c's full-suite/live proof and failed qualification keep their original identity.
+No complete regression run or authorizing record exists for0298, and none is implied.
+
+The actual0298 executable was launched normally, PID37024. At18:30 the ordinary primary action
+was executed and returned **ProductionRevalidation Failed / live checks NotRun / admission
+CLOSED**. All seven live rows now say, "前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。"
+Technical details remain collapsed and available. No duplicate probe input occurred because
+the automatic gate refused before live execution. App is left on this normal readiness page.
+Final lease read at06:30:57.914Z shows all owner fields null. Evidence:
+`recovery-final-ui-identity.json`, `recovery-final-ui-normal-recheck.txt`,
+`recovery-final-ui-processes.json`, `recovery-final-ui-lease.json`.
+
+Ordinary operators have a plain recovery/recheck action; actual owned-probe recovery was proved
+through the same Product route in fa0c. **They cannot yet complete production admission through
+the ordinary app**, because replacement qualification has not passed and Meitu's Save panel
+remains unresolved. Do not describe this as released/integrated into the original accepted
+candidate. The one new complete v3 authorization has been consumed; request a new bounded
+qualification authorization before another such execution. No A3.
