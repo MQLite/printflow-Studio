@@ -112,3 +112,15 @@ public interface IPhotoshopAutomationFoundation
         Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
         CloseExactDocumentAsync(opened, workingFile, cancellationToken);
 }
+
+/// <summary>
+/// Internal recovery route whose final runtime census must still show the readiness probe as the
+/// sole active, saved document. General managed-document cleanup deliberately has a wider policy.
+/// </summary>
+internal interface IPhotoshopRetainedProbeCloser
+{
+    Task<OperationResult<PhotoshopTarget>> CloseRetainedReadinessProbeAsync(
+        PhotoshopOpenedDocument opened,
+        WorkspaceFileRef workingFile,
+        CancellationToken cancellationToken);
+}

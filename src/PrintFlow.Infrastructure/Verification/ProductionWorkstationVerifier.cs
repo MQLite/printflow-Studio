@@ -96,6 +96,7 @@ public sealed class ProductionWorkstationVerifier :
     private DateTimeOffset? _lastSuccessfulLiveAt;
     private DateTimeOffset? _latestAttemptAt;
     private ReadinessProbeDiagnostics? _latestProbe;
+    private ReadinessProbeRecovery? _latestRecovery;
 
     private readonly Lazy<RootOfTrust> _rootOfTrust;
     private ImmutableArray<WorkstationCheckResult>? _baselineChecks;
@@ -374,7 +375,9 @@ public sealed class ProductionWorkstationVerifier :
         }
         else
         {
-            live = await _live.RunAsync(_rootOfTrust.Value.Requirements!, cancellationToken)
+            ReadinessProbeDiagnostics? previousProbe;
+            lock (_liveEvidenceSync) previousProbe = _latestProbe;
+            live = await _live.RunAsync(_rootOfTrust.Value.Requirements!, previousProbe, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -383,8 +386,12 @@ public sealed class ProductionWorkstationVerifier :
         {
             _liveEvidence = live.Evidence;
             _liveEvidenceRevision++;
-            _latestAttemptAt = attemptedAt;
-            _latestProbe = live.Probe;
+            if (live.Probe is not null)
+            {
+                _latestAttemptAt = attemptedAt;
+                _latestProbe = live.Probe;
+            }
+            _latestRecovery = live.Recovery;
             if (live.Evidence is not null)
             {
                 _lastSuccessfulLiveEvidence = live.Evidence;
@@ -411,7 +418,10 @@ public sealed class ProductionWorkstationVerifier :
                 _lastSuccessfulLiveAt,
                 meitu is not null ? new(meitu.ProcessId, meitu.ExecutablePath, meitu.StartedUtc) : null,
                 photoshop is not null ? new(photoshop.ProcessId, photoshop.ExecutablePath, photoshop.StartedUtc) : null,
-                _liveEvidence is not null, observationDeferred, _latestAttemptAt, _latestProbe);
+                _liveEvidence is not null, observationDeferred, _latestAttemptAt, _latestProbe)
+            {
+                Recovery = _latestRecovery,
+            };
         }
     }
 

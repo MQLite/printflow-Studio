@@ -1,5 +1,9 @@
 using System.Globalization;
+using System.IO;
+using System.Windows.Automation;
+using System.Windows.Controls;
 using PrintFlow.App.ViewModels;
+using PrintFlow.App.Views;
 using PrintFlow.Infrastructure.Gate;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Tests.Fixtures;
@@ -253,7 +257,8 @@ public sealed class EnvironmentReadinessScreenTests
         InCulture("en-US", async screen =>
         {
             screen.Heading.ShouldBe("Production readiness");
-            screen.RefreshLabel.ShouldBe("Check again");
+            screen.RefreshLabel.ShouldBe("Refresh status");
+            screen.RunLiveChecksLabel.ShouldBe("Safe recovery and recheck");
             screen.RestartRequirement.ShouldContain("restart PrintFlow", Case.Insensitive);
             screen.Checks.ShouldAllBe(row => row.Name.Length > 0);
             await Task.CompletedTask;
@@ -274,6 +279,8 @@ public sealed class EnvironmentReadinessScreenTests
             screen.Heading.ShouldNotBe("Environment_Heading");
             screen.Heading.ShouldNotBe("Production readiness");
             screen.RefreshLabel.ShouldNotBe("Environment_Refresh");
+            screen.RefreshLabel.ShouldBe("刷新状态");
+            screen.RunLiveChecksLabel.ShouldBe("安全恢复并重新检查");
             screen.RestartRequirement.ShouldNotBe("Environment_RestartRequired");
             screen.RestartRequirement.ShouldContain("PrintFlow");
             screen.RefreshScope.ShouldNotBe("Environment_RefreshScope");
@@ -515,6 +522,149 @@ public sealed class EnvironmentReadinessScreenTests
         screen.LiveApplicationChecks[1].IsBlocked.ShouldBeTrue();
         screen.LiveApplicationChecks[1].Status.ShouldBe(Resource("Environment_StatusBlocked"));
     }
+
+    [Fact]
+    public async Task An_already_absent_reconciliation_explains_history_without_making_the_screen_ready()
+    {
+        EnvironmentReadinessReport failed = new(false, "preset", DateTimeOffset.UnixEpoch,
+        [
+            new EnvironmentCheckReport("PhotoshopTestImageRoundTrip", EnvironmentCheckStatus.Failed, true,
+                "EnvironmentCheck_PhotoshopTestImageRoundTrip", "The new test did not complete.",
+                Phase: EnvironmentCheckPhase.LiveApplication),
+        ])
+        {
+            Lifecycle = new ReadinessEvidenceLifecycle(null, null, null, false, false, DateTimeOffset.UnixEpoch, null)
+            {
+                Recovery = new ReadinessProbeRecovery(ReadinessProbeRecoveryStatus.AlreadyAbsent,
+                    "ReadinessRecovery_AlreadyAbsentRecheck", "No close input was sent.", null),
+            },
+        };
+        StubDiagnostics diagnostics = new(failed);
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+
+        await screen.RunLiveChecksCommand.ExecuteAsync(null);
+
+        screen.CheckActivityText.ShouldBe(Resource("ReadinessRecovery_AlreadyAbsentRecheck"));
+        screen.IsReady.ShouldBeFalse("recovery alone is never a fresh passing check");
+        screen.StatusText.ShouldBe(Resource("Environment_NotVerified"));
+        screen.BlockingFailures.ShouldHaveSingleItem();
+        await screen.RefreshCommand.ExecuteAsync(null);
+        screen.IsReady.ShouldBeFalse();
+        diagnostics.LiveCalls.ShouldBe(1, "passive refresh must not repeat recovery or the live probe");
+    }
+
+    [Fact]
+    public async Task Cancelling_live_checks_waits_for_unwind_and_preserves_the_failed_report()
+    {
+        EnvironmentReadinessReport failed = new(false, "preset", DateTimeOffset.UnixEpoch,
+        [
+            new EnvironmentCheckReport("PhotoshopTestImageRoundTrip", EnvironmentCheckStatus.Failed, true,
+                "EnvironmentCheck_PhotoshopTestImageRoundTrip", "CloseGuard was not confirmed.",
+                Phase: EnvironmentCheckPhase.LiveApplication),
+        ]);
+        UnwindingDiagnostics diagnostics = new(failed);
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+        await screen.OpenAsync(CancellationToken.None);
+
+        Task run = screen.RunLiveChecksCommand.ExecuteAsync(null);
+        try
+        {
+            screen.IsBusy.ShouldBeTrue();
+            screen.RefreshCommand.CanExecute(null).ShouldBeFalse();
+            screen.RunLiveChecksCommand.CanExecute(null).ShouldBeFalse();
+            screen.BackToHomeCommand.CanExecute(null).ShouldBeFalse();
+
+            screen.CancelLiveChecksCommand.Execute(null);
+            diagnostics.Token.IsCancellationRequested.ShouldBeTrue();
+            screen.CheckActivityText.ShouldBe(Resource("Environment_Cancelling"));
+            screen.IsBusy.ShouldBeTrue("cancellation is not confirmation that desktop input has stopped");
+            screen.CancelLiveChecksCommand.CanExecute(null).ShouldBeFalse();
+            run.IsCompleted.ShouldBeFalse();
+            await screen.RefreshCommand.ExecuteAsync(null);
+            await screen.RunLiveChecksCommand.ExecuteAsync(null);
+            diagnostics.LiveCalls.ShouldBe(1);
+            diagnostics.ReadCalls.ShouldBe(1);
+        }
+        finally
+        {
+            diagnostics.Unwind.TrySetResult();
+            await run;
+        }
+
+        screen.IsBusy.ShouldBeFalse();
+        screen.IsReady.ShouldBeFalse();
+        screen.BlockingFailures.ShouldHaveSingleItem().Detail.ShouldBe("CloseGuard was not confirmed.");
+        screen.CheckActivityText.ShouldBe(Resource("Environment_Cancelled"));
+        screen.RefreshCommand.CanExecute(null).ShouldBeTrue();
+        screen.RunLiveChecksCommand.CanExecute(null).ShouldBeTrue();
+        screen.BackToHomeCommand.CanExecute(null).ShouldBeTrue();
+    }
+
+    private sealed class UnwindingDiagnostics(EnvironmentReadinessReport report) : IEnvironmentDiagnostics
+    {
+        public TaskCompletionSource Unwind { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public CancellationToken Token { get; private set; }
+        public int ReadCalls { get; private set; }
+        public int LiveCalls { get; private set; }
+
+        public EnvironmentReadinessReport Read()
+        {
+            ReadCalls++;
+            return report;
+        }
+
+        public async Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken)
+        {
+            LiveCalls++;
+            Token = cancellationToken;
+            await Unwind.Task;
+            cancellationToken.ThrowIfCancellationRequested();
+            return report;
+        }
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-CN")]
+    public Task The_rendered_recovery_screen_keeps_support_details_collapsed(string culture) =>
+        InCulture(culture, async _ =>
+        {
+            EnvironmentReadinessReport failed = new(false, "preset 1.0.0 (ABCDEF)", DateTimeOffset.UnixEpoch,
+            [
+                new EnvironmentCheckReport("PhotoshopTestImageRoundTrip", EnvironmentCheckStatus.Failed, true,
+                    "EnvironmentCheck_PhotoshopTestImageRoundTrip", "CloseGuard: owned Save As surface not observed.",
+                    Phase: EnvironmentCheckPhase.LiveApplication),
+            ]);
+            EnvironmentReadinessViewModel screen = new(new StubDiagnostics(failed), new RecordingNavigation());
+            await screen.OpenAsync(CancellationToken.None);
+
+            var rendered = WpfRendering.RenderExpectingNoBindingErrors(
+                () => new EnvironmentReadinessView { DataContext = screen },
+                WpfRendering.ReviewViewport,
+                tree => new
+                {
+                    Expanders = tree.OfType<Expander>()
+                        .Select(expander => (Id: AutomationProperties.GetAutomationId(expander), expander.IsExpanded))
+                        .ToArray(),
+                    RunLabel = tree.OfType<Button>()
+                        .Single(button => AutomationProperties.GetAutomationId(button) == "Environment.RunLiveChecks")
+                        .Content?.ToString(),
+                });
+
+            rendered.Facts.Expanders.ShouldContain(item =>
+                item.Id == "Environment.Check.PhotoshopTestImageRoundTrip.Details" && !item.IsExpanded);
+            rendered.Facts.Expanders.ShouldContain(item => item.Id == "Environment.AllChecks" && !item.IsExpanded);
+            rendered.Facts.Expanders.ShouldContain(item => item.Id == "Environment.ReportDetails" && !item.IsExpanded);
+            rendered.Facts.RunLabel.ShouldBe(screen.RunLiveChecksLabel);
+            rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Width);
+            rendered.DesiredSize.Height.ShouldBeLessThanOrEqualTo(WpfRendering.ReviewViewport.Height);
+
+            if (Environment.GetEnvironmentVariable("PF_ACCEPT_A2_UI_CAPTURE_ROOT") is { Length: > 0 } captureRoot)
+            {
+                WpfRendering.CapturePng(() => new EnvironmentReadinessView { DataContext = screen },
+                    WpfRendering.ReviewViewport, Path.Combine(captureRoot, $"readiness-recovery-{culture}.png"));
+            }
+        });
 
     /// <summary>
     /// The committed operator wording for a key, resolved the way the shell resolves it.

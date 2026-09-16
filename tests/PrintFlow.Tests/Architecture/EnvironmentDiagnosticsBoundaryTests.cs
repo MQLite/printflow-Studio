@@ -223,12 +223,11 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
     }
 
     /// <summary>
-    /// The readiness screen exposes no command that could change anything (§11.6, §13).
+    /// The readiness screen keeps one explicit live path and supports its cancellation.
     /// </summary>
     /// <remarks>
-    /// Two commands, by name: look again, and go back. Everything else on the screen is a string
-    /// or a list. A "repair", "install" or "enable" command would be the moment the diagnostics
-    /// surface stopped observing.
+    /// Recovery belongs to the existing live diagnostics command. Cancellation does not open
+    /// another mutation path or grant production permission.
     /// </remarks>
     [Fact]
     public void The_readiness_screen_offers_passive_refresh_explicit_live_checks_and_back()
@@ -242,7 +241,8 @@ public sealed class EnvironmentDiagnosticsBoundaryTests
         ];
 
         commands.ShouldBe(
-            ["RefreshCommand", "RunLiveChecksCommand", "BackToHomeCommand"], ignoreOrder: true);
+            ["RefreshCommand", "RunLiveChecksCommand", "CancelLiveChecksCommand", "BackToHomeCommand"],
+            ignoreOrder: true);
     }
 
     // ---------------------------------------------------------------- §11.7

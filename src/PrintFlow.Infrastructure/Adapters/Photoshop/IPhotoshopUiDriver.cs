@@ -111,3 +111,18 @@ public interface IPhotoshopUiDriver
         Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
         CloseExactDocumentAsync(target, expectedAbsolutePath, cancellationToken);
 }
+
+/// <summary>
+/// Internal close route for an identity read directly from Photoshop's complete runtime document
+/// census immediately before the action. Keeping this seam internal prevents callers above the
+/// production foundation from manufacturing an identity observation.
+/// </summary>
+internal interface IPhotoshopRuntimeIdentityCloser
+{
+    Task<OperationResult<PhotoshopTarget>> CloseRuntimeObservedExactDocumentAsync(
+        PhotoshopTarget target,
+        string expectedAbsolutePath,
+        PhotoshopRuntimeDocument observed,
+        Action<ReadinessProbeStage>? observe,
+        CancellationToken cancellationToken);
+}

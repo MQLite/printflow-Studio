@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Globalization;
+using System.IO;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Ports;
@@ -27,7 +28,7 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// operator reading <c>MeituTargetLost</c> after a Photoshop step would be told something
 /// untrue (§18).
 /// </remarks>
-public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
+public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver, IPhotoshopRuntimeIdentityCloser
 {
     private readonly IExternalAppWindowLocator _locator;
     private readonly IVerifiedControlSink _controls;
@@ -580,15 +581,85 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
             return clearBoundary;
         }
 
-        OperationResult<PhotoshopTarget> ready = await ActivateAsync(clearBoundary.Value, cancellationToken)
+        return await CloseConfirmedIdentityAsync(
+                clearBoundary.Value, identity.Value, baseline.Value.DocumentIdentity,
+                baseline.Value.OwnedDocumentCleanup, observe, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    async Task<OperationResult<PhotoshopTarget>> IPhotoshopRuntimeIdentityCloser.CloseRuntimeObservedExactDocumentAsync(
+        PhotoshopTarget target,
+        string expectedAbsolutePath,
+        PhotoshopRuntimeDocument observed,
+        Action<ReadinessProbeStage>? observe,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedAbsolutePath);
+        ArgumentNullException.ThrowIfNull(observed);
+
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure) return OperationResult.Fail<PhotoshopTarget>(baseline.Failure);
+
+        if (!observed.IsActive || string.IsNullOrWhiteSpace(observed.FullPath) ||
+            !PhotoshopDocumentIdentityRule.MatchesExpectedDocument(expectedAbsolutePath, observed.FullPath))
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "Photoshop's complete runtime document observation did not identify the active " +
+                "document as the exact managed file. Nothing was closed.",
+                isRetryable: false,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        OperationResult<PhotoshopTarget> clear = await EnsureNoBlockingDialogAsync(target).ConfigureAwait(false);
+        if (clear.IsFailure) return clear;
+
+        string fullPath = Path.GetFullPath(observed.FullPath);
+        PhotoshopDocumentIdentity identity = new(
+            observed.Name,
+            Path.GetDirectoryName(fullPath)!,
+            fullPath,
+            clear.Value.Window.Title);
+        return await CloseConfirmedIdentityAsync(
+                clear.Value, identity, baseline.Value.DocumentIdentity,
+                baseline.Value.OwnedDocumentCleanup, observe, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task<OperationResult<PhotoshopTarget>> CloseConfirmedIdentityAsync(
+        PhotoshopTarget target,
+        PhotoshopDocumentIdentity identity,
+        PhotoshopDocumentIdentitySignature? identitySignature,
+        PhotoshopOwnedDocumentCleanupSignature? cleanup,
+        Action<ReadinessProbeStage>? observe,
+        CancellationToken cancellationToken)
+    {
+        OperationResult<PhotoshopTarget> ready = await ActivateAsync(target, cancellationToken)
             .ConfigureAwait(false);
         if (ready.IsFailure)
         {
             return ready;
         }
 
-        OperationResult<Unit> sent = SendGuarded(ready.Value, KnownShortcut.CloseActiveDocument,
-            observe is null ? null : () => observe(ReadinessProbeStage.CloseRequested));
+        if (identitySignature is null ||
+            !PhotoshopDocumentIdentityRule.TitleNamesExpectedDocument(
+                identitySignature, ready.Value.Window.Title, identity.ObservedFileName))
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "Photoshop's refreshed active window no longer names the runtime-observed exact document. " +
+                "Nothing was closed.",
+                isRetryable: true,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        OperationResult<Unit> sent = SendGuarded(
+            ready.Value,
+            KnownShortcut.CloseActiveDocument,
+            observe is null ? null : () => observe(ReadinessProbeStage.CloseRequested),
+            finalWindowGuard: window => PhotoshopDocumentIdentityRule.TitleNamesExpectedDocument(
+                identitySignature, window.Title, identity.ObservedFileName));
         if (sent.IsFailure)
         {
             return OperationResult.Fail<PhotoshopTarget>(sent.Failure);
@@ -596,8 +667,8 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
 
         OperationResult<PhotoshopTarget> closed = await AwaitDocumentClosedAsync(
                 ready.Value,
-                identity.Value,
-                baseline.Value.OwnedDocumentCleanup,
+                identity,
+                cleanup,
                 cancellationToken)
             .ConfigureAwait(false);
         if (closed.IsSuccess) observe?.Invoke(ReadinessProbeStage.CloseConfirmed);
@@ -1065,7 +1136,10 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
     /// Photoshop one.
     /// </remarks>
     private OperationResult<Unit> SendGuarded(
-        PhotoshopTarget target, KnownShortcut shortcut, Action? requesting = null)
+        PhotoshopTarget target,
+        KnownShortcut shortcut,
+        Action? requesting = null,
+        Func<ExternalWindowRef, bool>? finalWindowGuard = null)
     {
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(target.Window.Handle);
         if (refreshed.IsFailure)
@@ -1080,6 +1154,16 @@ public sealed class GuardedPhotoshopUiDriver : IPhotoshopUiDriver
                 FailureCode.PhotoshopTargetLost,
                 "The Photoshop window stopped being an addressable target between verification and " +
                 "input. Nothing was sent.",
+                isRetryable: true,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        if (finalWindowGuard is not null && !finalWindowGuard(refreshed.Value))
+        {
+            return OperationResult.Fail<Unit>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                "Photoshop's final refreshed active window no longer names the exact runtime-observed " +
+                "document. Nothing was closed.",
                 isRetryable: true,
                 context: new Dictionary<string, string> { ["inputSent"] = "false" }));
         }

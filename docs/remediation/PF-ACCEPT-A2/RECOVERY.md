@@ -64,3 +64,89 @@ action completes this recovery is still unverified. No Product recovery correcti
 operator-friendly recovery capability is claimed. Continue after the narrow operator action;
 if the failure persists, diagnose its specific current condition and apply the authorized repair
 branch rather than repeating identical attempts. A3 remains out of scope.
+
+## Operator check completed — 2026-09-16 05:01:58Z
+
+The operator supplied the actual repeated-failure screenshot; supported Computer Use read and
+retained the full ordinary report as `recovery-normal-app-repeat-failed.txt`. ProductionRevalidation
+still passed for the frozen original candidate. The complete pre-probe Product runtime read
+reported `KnownStartScreen; No document is open.` This positively establishes the original
+`6eff41591db34c0b91177b34d398d103` probe was AlreadyAbsent before this attempt. Its historical
+failure is retained; the cause/time of its disappearance and any automatic close remain unproven.
+
+The new attempt `60f7def57ed14ae1bee7a9cc8cfbb45e` failed at the same CloseGuard identity-dialog
+wait. No CloseRequested or CloseConfirmed occurred. Fresh window observation named this new
+probe. A getter-only opt-in smoke using the existing Product runtime reader under the actual
+shared lease read a complete census at 05:06:44.8272459Z: accepted Photoshop PID 1488, same
+start time, exactly one document, exact new managed probe path, saved and active. No unrelated
+document was reported. This reader produced no input, cleanup or authorizing readiness result.
+The normal logger omitted successful-test output on the first read, so a second read with
+detailed logging captured the facts; neither invocation mutated Photoshop. Raw output is
+`recovery-readonly-census-detailed.log`; the lease was independently free at 05:07:32.888Z.
+
+Repeated original-gate result: FAILED, admission CLOSED. This repeat is discriminating evidence
+against treating the earlier failure as only stale display state. Candidate changes are now
+being developed separately: normal Product recovery/identity boundary and compact readiness UI.
+No frozen pair, original result, preset or publication has been patched.
+
+Routing at the natural backend/UI boundary: offset 0 unchanged; requested native backend worker
+`readiness_backend` with `gpt-5.6-sol/high` and UI worker `readiness_ui` with `gpt-6-astra/high`,
+each given bounded fresh instructions and separate file ownership. These are implementation
+workers, not independent reviewers. Runtime model/effort metadata remains UNVERIFIED. Root
+retains sole desktop/executor ownership; workers run offline work only. Root owns the getter-only
+diagnostic smoke, evidence, integration and final qualification. There is no claimed parent
+model switch. One scoped independent read-only reviewer will follow stable changes.
+
+## Product correction and independent review
+
+The normal readiness command now reconciles only one census-observed, exact canonical probe in
+the reserved workspace path; it never enumerates old probe files. It requires the real shared
+lease, sole active saved document, canonical bytes, no reparse traversal, accepted process
+continuity and known modal state. It re-proves the stricter recovery conditions at the final
+runtime census. A missing reader, unknown state, changed file, other work or contradictory
+current title refuses input. Close settlement and post-close observation remain under ownership,
+including cancellation; only the exact confirmed-unheld canonical file may be removed.
+
+The normal foundation close uses the already-supported getter-only runtime identity instead of
+raising a second Save As dialog. It retains the final refreshed-window, process, foreground and
+modal guards and existing no-save close behavior. Ordinary dirty-owned-document cleanup remains
+distinct from recovery's stricter saved/sole condition. The demonstrated defect is the repeated
+modal identity route failing before close; the underlying Windows/Photoshop timing reason for
+the missing second dialog is not claimed as proven. No timeout inflation or broad guard removal.
+
+An already-absent known probe records AlreadyAbsent, not a historical close. Missing files and
+removed empty token directories are idempotent; unreadable state is never empty. Recovery is
+separate from fresh probe success. Previous diagnostics, when available, retain their failure;
+old probe timestamps are not relabelled by a new preflight refusal. Restart recovery records
+current identity provenance rather than inventing a previous attempt.
+
+The existing ordinary action is labelled **安全恢复并重新检查 / Safe recovery and recheck**.
+Passive **刷新状态 / Refresh status** stays read-only. Processing and cancellation are visible;
+overlapping actions and Back stay disabled until awaited work settles. Operator status comes
+from typed recovery keys, and readiness only from the authoritative report. Technical detail,
+full checks and restart help start collapsed. English/Chinese offscreen source renders were
+inspected at 1000x700 with no clipping or binding error; these are not native live screenshots.
+
+One isolated native reviewer, `a2_recovery_review` (requested gpt-6-astra/high, offset 0; actual
+runtime metadata UNVERIFIED), read source and evidence without builds, tests or desktop actions.
+It found two P1s: recovery's final census initially allowed a newly dirty/shared document, and
+title corroboration initially used a pre-activation snapshot. Both were fixed with red-to-green
+sequenced tests; the same reviewer re-read the final dispatch guard and reported both closed,
+with no remaining blocker in its affected scope. This is source review, not live acceptance.
+
+Focused backend checks: 101 passed, covering lifecycle/recovery and foundation/guarded close.
+UI/localization/diagnostics boundary slice: 133 passed; final wording/render subset: 5 passed.
+The final clean build/full suite and live qualification are recorded below when completed.
+
+Clean Release build passed with zero warnings/errors. The first full suite completed with
+11,932 passed and one failure: its lexical Process.Start prohibition also matched two new
+diagnostic StartedUtc getter expressions. No launch occurred. The diagnostic code now names the
+immutable observed instance explicitly; the prohibition/assertion is unchanged. A first alias
+still contained the banned substring and failed the focused check; the final name removed the
+collision. The affected architecture/live-verifier slice then passed 67/67. Both failure logs
+remain under artifacts/pf-accept-a2. Runtime recovery behavior was not changed by this correction.
+
+The reviewed, focused-tested fix is committed before creating the isolated controlled pair.
+Its clean paired harness build will supply the final complete suite, before any live diagnostic
+or new standard-set run. This verifies the same retained build used for qualification; no
+further conventional-output rebuild or tests are needed unless a real failure requires repair.

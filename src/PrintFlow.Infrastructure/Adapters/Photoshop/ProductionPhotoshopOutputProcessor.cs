@@ -37,7 +37,8 @@ namespace PrintFlow.Infrastructure.Adapters.Photoshop;
 /// </remarks>
 public sealed partial class ProductionPhotoshopOutputProcessor :
     IPhotoshopOutputProcessor,
-    IPhotoshopTiffAutomation
+    IPhotoshopTiffAutomation,
+    IPhotoshopRetainedProbeCloser
 {
     private readonly IPhotoshopBaselineProvider _baselines;
     private readonly IExternalAppWindowLocator _locator;
@@ -633,7 +634,23 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
 
     public async Task<OperationResult<PhotoshopTarget>> CloseExactDocumentAsync(
         PhotoshopOpenedDocument opened, WorkspaceFileRef workingFile,
-        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken)
+        Action<ReadinessProbeStage>? observe, CancellationToken cancellationToken) =>
+        await CloseExactDocumentCoreAsync(
+            opened, workingFile, observe, requireSoleSavedProbe: false, cancellationToken).ConfigureAwait(false);
+
+    Task<OperationResult<PhotoshopTarget>> IPhotoshopRetainedProbeCloser.CloseRetainedReadinessProbeAsync(
+        PhotoshopOpenedDocument opened,
+        WorkspaceFileRef workingFile,
+        CancellationToken cancellationToken) =>
+        CloseExactDocumentCoreAsync(
+            opened, workingFile, observe: null, requireSoleSavedProbe: true, cancellationToken);
+
+    private async Task<OperationResult<PhotoshopTarget>> CloseExactDocumentCoreAsync(
+        PhotoshopOpenedDocument opened,
+        WorkspaceFileRef workingFile,
+        Action<ReadinessProbeStage>? observe,
+        bool requireSoleSavedProbe,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(opened);
         observe?.Invoke(ReadinessProbeStage.CloseGuard);
@@ -650,7 +667,77 @@ public sealed partial class ProductionPhotoshopOutputProcessor :
         }
 
         string absolutePath = _workspace.ResolveAbsolute(workingFile);
-        return await _driver.CloseExactDocumentAsync(opened.Target, absolutePath, observe, cancellationToken)
+        if (_runtimeFacts is null)
+        {
+            if (requireSoleSavedProbe)
+            {
+                return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                    FailureCode.AdapterUnavailable,
+                    "The complete runtime document reader required for retained-probe recovery is unavailable. " +
+                    "Nothing was closed.",
+                    isRetryable: false,
+                    context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+            }
+
+            return await _driver.CloseExactDocumentAsync(opened.Target, absolutePath, observe, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        OperationResult<PhotoshopBaseline> baseline = _baselines.GetVerifiedBaseline();
+        if (baseline.IsFailure) return OperationResult.Fail<PhotoshopTarget>(baseline.Failure);
+
+        // Re-establish one unique accepted process without using the launch-capable readiness
+        // route. A process that disappeared after open is a refusal, never a reason to start a
+        // replacement during cleanup. The getter-only census is then the final identity
+        // observation before the guarded close.
+        OperationResult<IReadOnlyList<ExternalProcessRef>> running =
+            _locator.FindProcessesByExecutable(baseline.Value.ExecutablePath);
+        if (running.IsFailure) return OperationResult.Fail<PhotoshopTarget>(Translate(running.Failure));
+        if (running.Value.Count != 1 || running.Value[0] != opened.Target.Process)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopTargetLost,
+                "The exact accepted Photoshop process is no longer the sole running candidate. Nothing was closed.",
+                isRetryable: true,
+                context: new Dictionary<string, string>
+                {
+                    ["candidates"] = running.Value.Count.ToString(CultureInfo.InvariantCulture),
+                    ["inputSent"] = "false",
+                }));
+        }
+
+        OperationResult<PhotoshopRuntimeFacts> runtime = _runtimeFacts.Read(baseline.Value.ExecutablePath);
+        if (runtime.IsFailure) return OperationResult.Fail<PhotoshopTarget>(runtime.Failure);
+
+        PhotoshopRuntimeDocument[] active = [.. runtime.Value.Documents.Where(document => document.IsActive)];
+        PhotoshopRuntimeDocument[] exact = [.. active.Where(document =>
+            document.FullPath is not null &&
+            PhotoshopDocumentIdentityRule.MatchesExpectedDocument(absolutePath, document.FullPath))];
+        if (active.Length != 1 || exact.Length != 1 ||
+            (requireSoleSavedProbe && (runtime.Value.Documents.Length != 1 || !exact[0].IsSaved)))
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.PhotoshopDocumentIdentityUnconfirmed,
+                requireSoleSavedProbe
+                    ? "Photoshop's final complete runtime observation did not identify the readiness probe " +
+                      "as the sole active, saved document. Nothing was closed."
+                    : "Photoshop's complete runtime document observation did not identify one active exact " +
+                      "managed document. Nothing was closed.",
+                isRetryable: true,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        if (_driver is not IPhotoshopRuntimeIdentityCloser closer)
+        {
+            return OperationResult.Fail<PhotoshopTarget>(OperationFailure.Create(
+                FailureCode.AdapterUnavailable,
+                "The Photoshop driver cannot consume the complete runtime identity observation. Nothing was closed.",
+                isRetryable: false,
+                context: new Dictionary<string, string> { ["inputSent"] = "false" }));
+        }
+
+        return await closer.CloseRuntimeObservedExactDocumentAsync(
+                opened.Target, absolutePath, exact[0], observe, cancellationToken)
             .ConfigureAwait(false);
     }
 

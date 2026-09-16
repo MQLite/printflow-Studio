@@ -647,6 +647,87 @@ public sealed class GuardedPhotoshopUiDriverTests
     // Close (§21)
     // -----------------------------------------------------------------------------------
 
+    [Fact]
+    public async Task Complete_runtime_identity_closes_without_raising_a_second_Save_As_surface()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+        OnShortcut(
+            h,
+            KnownShortcut.CloseActiveDocument,
+            () => h.Locator.Replace(h.Target.Process, PhotoshopFakes.Window()));
+        PhotoshopRuntimeDocument observed = new(
+            PhotoshopFakes.ExpectedFileName, PhotoshopFakes.ExpectedPath, IsSaved: true, IsActive: true);
+
+        OperationResult<PhotoshopTarget> closed = await ((IPhotoshopRuntimeIdentityCloser)h.Driver)
+            .CloseRuntimeObservedExactDocumentAsync(
+                h.Target, PhotoshopFakes.ExpectedPath, observed, observe: null, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.CloseActiveDocument]);
+    }
+
+    [Fact]
+    public async Task Complete_runtime_identity_preserves_dirty_owned_discard_cleanup()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName) + " *");
+        StageDiscardPrompt(h);
+        PhotoshopRuntimeDocument observed = new(
+            PhotoshopFakes.ExpectedFileName, PhotoshopFakes.ExpectedPath, IsSaved: false, IsActive: true);
+
+        OperationResult<PhotoshopTarget> closed = await ((IPhotoshopRuntimeIdentityCloser)h.Driver)
+            .CloseRuntimeObservedExactDocumentAsync(
+                h.Target, PhotoshopFakes.ExpectedPath, observed, observe: null, CancellationToken.None);
+
+        closed.IsSuccess.ShouldBeTrue(closed.IsFailure ? closed.Failure.ToString() : string.Empty);
+        h.Input.Sends.Select(send => send.Shortcut).ShouldBe([KnownShortcut.CloseActiveDocument]);
+        h.Controls.Presses.Count(press => press.ControlId == 11).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Runtime_identity_for_a_different_path_sends_no_input()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+        PhotoshopRuntimeDocument observed = new(
+            PhotoshopFakes.ExpectedFileName,
+            @"C:\SomeoneElse\Working\" + PhotoshopFakes.ExpectedFileName,
+            IsSaved: true,
+            IsActive: true);
+
+        OperationResult<PhotoshopTarget> closed = await ((IPhotoshopRuntimeIdentityCloser)h.Driver)
+            .CloseRuntimeObservedExactDocumentAsync(
+                h.Target, PhotoshopFakes.ExpectedPath, observed, observe: null, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Runtime_identity_is_refused_when_refreshed_title_names_another_document()
+    {
+        Harness h = Build(windowTitle: PhotoshopFakes.TitleFor(PhotoshopFakes.ExpectedFileName));
+        PhotoshopRuntimeDocument observed = new(
+            PhotoshopFakes.ExpectedFileName, PhotoshopFakes.ExpectedPath, IsSaved: true, IsActive: true);
+        int refreshes = 0;
+        h.Locator.OnRefresh = handle =>
+        {
+            if (handle == h.Target.Window.Handle && ++refreshes == 3)
+            {
+                h.Locator.Replace(
+                    h.Target.Process,
+                    PhotoshopFakes.Window(title: PhotoshopFakes.TitleFor("operator-work.psd")));
+            }
+        };
+
+        OperationResult<PhotoshopTarget> closed = await ((IPhotoshopRuntimeIdentityCloser)h.Driver)
+            .CloseRuntimeObservedExactDocumentAsync(
+                h.Target, PhotoshopFakes.ExpectedPath, observed, observe: null, CancellationToken.None);
+
+        closed.IsFailure.ShouldBeTrue();
+        closed.Failure.Code.ShouldBe(FailureCode.PhotoshopDocumentIdentityUnconfirmed);
+        h.Input.Sends.ShouldBeEmpty();
+    }
+
     /// <summary>
     /// Closing re-proves identity first, and closes only the exact expected document.
     /// </summary>

@@ -27,33 +27,36 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                            <!-- Stable English beside the localised name, never instead of it. -->
-                            <TextBlock Text="{Binding SupportKey}" Opacity="0.45" Margin="8,0,0,0" />
-                        </StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
 
                         <TextBlock Text="{Binding Explanation}"
                                    TextWrapping="Wrap"
                                    Margin="0,2,12,0"
                                    Visibility="{Binding HasExplanation, Converter={StaticResource BoolToVisibility}}" />
 
-                        <TextBlock Text="{Binding Detail}"
-                                   TextWrapping="Wrap"
-                                   Opacity="0.65"
-                                   Margin="0,2,12,0" />
+                        <Expander Header="{Binding DetailsLabel}" IsExpanded="False"
+                                  AutomationProperties.AutomationId="{Binding DetailsAutomationId}"
+                                  Margin="0,4,12,0">
+                            <StackPanel>
+                                <TextBlock Text="{Binding SupportKey}" Opacity="0.65" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Detail}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.65"
+                                           Margin="0,2,12,0" />
 
-                        <TextBlock Text="{Binding ExpectedDisplay}"
-                                   TextWrapping="Wrap"
-                                   Opacity="0.75"
-                                   Margin="0,2,12,0"
-                                   Visibility="{Binding HasExpected, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{Binding ExpectedDisplay}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.75"
+                                           Margin="0,2,12,0"
+                                           Visibility="{Binding HasExpected, Converter={StaticResource BoolToVisibility}}" />
 
-                        <TextBlock Text="{Binding CurrentDisplay}"
-                                   TextWrapping="Wrap"
-                                   Opacity="0.75"
-                                   Margin="0,2,12,0"
-                                   Visibility="{Binding HasCurrent, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{Binding CurrentDisplay}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.75"
+                                           Margin="0,2,12,0"
+                                           Visibility="{Binding HasCurrent, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
 
                     <TextBlock Grid.Column="1"
@@ -81,21 +84,27 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" LastChildFill="False">
+        <StackPanel Grid.Row="0">
             <TextBlock Text="{Binding Heading}" FontSize="24" FontWeight="SemiBold" />
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <WrapPanel Margin="0,10,0,0">
                 <Button Content="{Binding RunLiveChecksLabel}"
                         Command="{Binding RunLiveChecksCommand}"
                         AutomationProperties.AutomationId="Environment.RunLiveChecks"
                         ToolTip="{Binding RunLiveChecksHint}"
                         Padding="14,6"
                         Margin="0,0,8,0" />
+                <Button Content="{Binding CancelLiveChecksLabel}"
+                        Command="{Binding CancelLiveChecksCommand}"
+                        AutomationProperties.AutomationId="Environment.CancelLiveChecks"
+                        Visibility="{Binding IsRunningLiveChecks, Converter={StaticResource BoolToVisibility}}"
+                        Padding="14,6"
+                        Margin="0,0,8,0" />
                 <Button Content="{Binding RefreshLabel}"
                         Command="{Binding RefreshCommand}"
                         AutomationProperties.AutomationId="Environment.Refresh"
                         Padding="14,6" />
-            </StackPanel>
-        </DockPanel>
+            </WrapPanel>
+        </StackPanel>
 
         <TextBlock Grid.Row="1" Text="{Binding Hint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,6,0,12" />
 
@@ -107,14 +116,22 @@
                 Padding="14"
                 Margin="0,0,0,14">
             <StackPanel>
-                <TextBlock Text="{Binding StatusText}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding StatusText}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"
+                           AutomationProperties.AutomationId="Environment.Status" />
+                <TextBlock Text="{Binding CheckActivityText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                           AutomationProperties.AutomationId="Environment.Activity" />
+                <ProgressBar IsIndeterminate="True" Height="4" Margin="0,10,0,4"
+                             AutomationProperties.AutomationId="Environment.Progress"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
                 <TextBlock Text="{Binding AdvisorySummary}" Margin="0,4,0,0" Opacity="0.8" />
 
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Opacity="0.85">
-                    <TextBlock Text="{Binding PresetLabel}" />
-                    <TextBlock Text=": " />
-                    <TextBlock Text="{Binding PresetIdentity}" TextWrapping="Wrap" />
-                </StackPanel>
+                <Expander Header="{Binding DetailsLabel}" IsExpanded="False" Margin="0,6,0,0"
+                          AutomationProperties.AutomationId="Environment.ReportDetails">
+                    <StackPanel>
+                        <TextBlock Text="{Binding PresetLabel}" Opacity="0.85" />
+                        <TextBlock Text="{Binding PresetIdentity}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </StackPanel>
+                </Expander>
 
                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0" Opacity="0.85">
                     <TextBlock Text="{Binding ObservedAtLabel}" />
@@ -149,30 +166,30 @@
                               ItemTemplate="{StaticResource CheckRowTemplate}"
                               Margin="0,4,0,0" />
 
-                <TextBlock Text="{Binding AutomaticChecksHeading}"
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           Margin="0,18,0,0" />
+                <Expander Header="{Binding ChecksHeading}" IsExpanded="False" Margin="0,18,0,0"
+                          AutomationProperties.AutomationId="Environment.AllChecks">
+                    <StackPanel>
+                        <TextBlock Text="{Binding AutomaticChecksHeading}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Margin="0,10,0,0" />
 
-                <ItemsControl ItemsSource="{Binding AutomaticChecks}"
-                              AutomationProperties.AutomationId="EnvironmentAutomaticChecks"
-                              ItemTemplate="{StaticResource CheckRowTemplate}"
-                              Margin="0,4,0,0" />
+                        <ItemsControl ItemsSource="{Binding AutomaticChecks}"
+                                      AutomationProperties.AutomationId="EnvironmentAutomaticChecks"
+                                      ItemTemplate="{StaticResource CheckRowTemplate}"
+                                      Margin="0,4,0,0" />
 
-                <TextBlock Text="{Binding LiveChecksHeading}"
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           Margin="0,18,0,0" />
+                        <TextBlock Text="{Binding LiveChecksHeading}"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Margin="0,18,0,0" />
 
-                <TextBlock Text="{Binding CheckActivityText}"
-                           TextWrapping="Wrap"
-                           Opacity="0.7"
-                           Margin="0,4,0,4" />
-
-                <ItemsControl ItemsSource="{Binding LiveApplicationChecks}"
-                              AutomationProperties.AutomationId="EnvironmentLiveChecks"
-                              ItemTemplate="{StaticResource CheckRowTemplate}"
-                              Margin="0,4,0,0" />
+                        <ItemsControl ItemsSource="{Binding LiveApplicationChecks}"
+                                      AutomationProperties.AutomationId="EnvironmentLiveChecks"
+                                      ItemTemplate="{StaticResource CheckRowTemplate}"
+                                      Margin="0,4,0,0" />
+                    </StackPanel>
+                </Expander>
             </StackPanel>
         </ScrollViewer>
 
@@ -180,10 +197,12 @@
             <!-- What Refresh does, and what it does not do. The two are deliberately separate
                  sentences: dynamic facts are re-observed, accepted files are not (§8). -->
             <TextBlock Text="{Binding RefreshScope}" TextWrapping="Wrap" Opacity="0.75" />
-            <TextBlock Text="{Binding RestartRequirement}"
+            <Expander Header="{Binding RestartHelpLabel}" IsExpanded="False" Margin="0,6,0,10"
+                      AutomationProperties.AutomationId="Environment.RestartHelp">
+                <TextBlock Text="{Binding RestartRequirement}"
                        TextWrapping="Wrap"
-                       FontWeight="SemiBold"
-                       Margin="0,6,0,10" />
+                       Margin="0,4,0,0" />
+            </Expander>
 
             <Button Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"

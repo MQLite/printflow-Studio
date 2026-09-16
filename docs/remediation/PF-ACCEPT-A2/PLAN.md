@@ -87,3 +87,31 @@ claiming a switch. No UI implementation or independent acceptance review has occ
 
 Targeted existing tests passed 88/88 using the installed per-user SDK. No Product/test bytes
 changed, so no full suite, candidate rebuild, A1 rerun or publication is warranted at this point.
+
+### Revised execution after the repeated normal failure
+
+The operator's normal check at 05:01:58Z reproduced the same rejecting condition. Complete
+Product facts proved the original probe absent before it, while a later getter-only census
+proved the new exact probe present as the sole saved active document. Therefore proceed with
+the authorized corrected-candidate branch; earlier no-change test limits above are historical.
+
+1. Implement exact runtime identity/reconciliation at the existing Product readiness boundary,
+   preserve the real lease and explicit action, and add focused regression tests. Ordinary UI
+   explains the last attempt and offers safe recovery/recheck with collapsed support details.
+2. One fresh read-only native reviewer audits the stable diff; correct findings and run affected
+   focused checks. No second reviewer, no desktop delegation.
+3. Clean Release build and one settled-source full suite are justified by shared Product changes.
+   Commit only stable local work, then create a new controlled harness/candidate pair. Frozen
+   A1 pair and active publication remain untouched.
+4. Use existing ReadinessDiagnosticSmoke from the new paired harness for non-authorizing live
+   proof: the normal report remains denied for mismatched revalidation; the diagnostic must
+   recover the observed owned probe and complete a fresh whole live check under the real lease.
+5. Only after repair/QA and live proof stabilize, run one complete unchanged v3 set for the new
+   pair. Stop at actual new Operator artwork decisions. Do not import old approvals, repeat
+   publication, start A3, install, deploy or push. Observe the actual normal candidate gate and
+   report its qualification requirement separately from recovery capability.
+
+Supported Computer Use keyboard navigation was verified through a normal Tab focus change.
+This supplies a permitted way to navigate the ordinary app despite the mouse geometry error.
+Native screenshots remain unavailable (0x80004002 after one fresh-window retry); source-rendered
+WPF evidence is explicitly synthetic and uses the existing test fixture, not an app screenshot.

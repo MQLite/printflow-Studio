@@ -662,7 +662,7 @@
   <data name="EnvironmentCheck_PhotoshopLaunchability" xml:space="preserve"><value>无法安全启动或连接到 Photoshop。</value></data>
   <data name="EnvironmentCheck_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop 中有未保存的工作、未知状态或阻塞对话框。</value></data>
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop 色彩设置与已认可的预设不一致。</value></data>
-  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop 无法安全打开并关闭 PrintFlow 测试图像。</value></data>
+  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>上一次测试图像检查未完成。请点“安全恢复并重新检查”，PrintFlow 会先确认 Photoshop 的当前状态。</value></data>
   <data name="Environment_Verified" xml:space="preserve">
     <value>本工作站已通过生产环境校验。</value>
   </data>
@@ -725,17 +725,30 @@
     <value>生产就绪状态</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>本工作站已检查的内容，以及生产处理还缺少什么。本页面只报告检查结果，不会更改工作站的任何设置。</value>
+    <value>检查本工作站是否可以开始生产。安全恢复只处理 PrintFlow 测试图像，不会更改您的工作文件或应用设置。</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>生产就绪状态</value>
   </data>
   <data name="Environment_Refresh" xml:space="preserve">
-    <value>重新检查</value>
+    <value>刷新状态</value>
   </data>
-  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>运行实时应用检查</value></data>
-  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>明确启动或连接到美图秀秀和 Photoshop，检查安全状态及 Photoshop 色彩设置，然后打开并关闭一张仅由 PrintFlow 管理的测试图像。不会更改设置，也绝不会关闭操作员的工作。</value></data>
-  <data name="Environment_Checking" xml:space="preserve"><value>正在检查工作站……本次检查完成前，重复检查操作已禁用。</value></data>
+  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>安全恢复并重新检查</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>选择“安全恢复并重新检查”后，会检查美图秀秀和 Photoshop，安全处理已确认归属的 PrintFlow 测试图像，再进行一次新检查。</value></data>
+  <data name="Environment_Checking" xml:space="preserve"><value>正在检查工作站，请稍候。</value></data>
+  <data name="Environment_CheckingPhotoshop" xml:space="preserve"><value>正在检查 Photoshop 和应用当前状态，请稍候。</value></data>
+  <data name="Environment_CancelLiveChecks" xml:space="preserve"><value>取消检查</value></data>
+  <data name="Environment_Cancelling" xml:space="preserve"><value>正在安全取消，请等待当前操作结束。</value></data>
+  <data name="Environment_Cancelled" xml:space="preserve"><value>检查已取消。上次结果已保留，准备好后请点“安全恢复并重新检查”。</value></data>
+  <data name="Environment_RecheckingAfterFailure" xml:space="preserve"><value>上一次检查未完成，正在确认应用当前状态，请稍候。</value></data>
+  <data name="Environment_PreviousCheckIncomplete" xml:space="preserve"><value>上一次 Photoshop 检查未完成。请点“安全恢复并重新检查”确认当前状态。</value></data>
+  <data name="Environment_RecoveryEvidenceDetail" xml:space="preserve"><value>恢复结果：{0}。{1} 上次操作：{2}；上次失败：{3}。</value></data>
+  <data name="ReadinessRecovery_AlreadyAbsentRecheck" xml:space="preserve"><value>检查时，上一次 PrintFlow 测试图像已不在打开的文件中。本次检查结果见下方。</value></data>
+  <data name="ReadinessRecovery_ClosedExactProbeRecheck" xml:space="preserve"><value>上一次 PrintFlow 测试图像已安全关闭。本次检查结果见下方。</value></data>
+  <data name="ReadinessRecovery_BlockedUserWork" xml:space="preserve"><value>Photoshop 中还有其他工作文件。请先保存并关闭您的文件，再点“安全恢复并重新检查”。</value></data>
+  <data name="ReadinessRecovery_BlockedUnknownState" xml:space="preserve"><value>暂时无法安全确认 Photoshop 的当前状态。请查看 Photoshop 是否有需要您处理的对话框，再点“安全恢复并重新检查”。</value></data>
+  <data name="Environment_TechnicalDetails" xml:space="preserve"><value>技术详情</value></data>
+  <data name="Environment_RestartHelp" xml:space="preserve"><value>何时需要重启 PrintFlow</value></data>
   <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>自动检查</value></data>
   <data name="Environment_LiveChecksHeading" xml:space="preserve"><value>实时应用检查</value></data>
   <data name="Environment_Expected" xml:space="preserve"><value>应为</value></data>
@@ -781,7 +794,7 @@
     <value>如果已认可的 PrintFlow 工作站记录、Photoshop 安装、美图秀秀安装或已校验的动作文件被替换或更新，请先重启 PrintFlow，然后再使用生产模式。</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>“重新检查”会重新读取 PrintFlow 运行期间可能变化的项目：桌面会话、显示器配置、Windows 显示语言和工作文件夹。上面列出的已认可文件每次运行只读取一次，此处不会重新读取。</value>
+    <value>“刷新状态”只读取当前状态，不会恢复测试图像或执行新的应用检查。已认可的安装文件在重启 PrintFlow 前不会重新读取。</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>无法验证此 PSD 的兼容合成图。请在 Photoshop 中启用“最大兼容性”另存副本，再导入该副本。</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图。原始文件已保留，请检查失败原因后重试。</value></data>

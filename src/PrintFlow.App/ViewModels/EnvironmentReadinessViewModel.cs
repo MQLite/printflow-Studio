@@ -60,6 +60,13 @@ public sealed class EnvironmentCheckRow
                 Strings.Resolve("Environment_LiveEvidenceDetail"),
                 lifecycle.LastSuccessfulLiveAt?.ToString("u", CultureInfo.CurrentCulture) ?? unknown,
                 lifecycle.EvidenceAvailable, lifecycle.CurrentObservationDeferred);
+            if (lifecycle.Recovery is { } recovery)
+            {
+                Detail += Environment.NewLine + string.Format(CultureInfo.CurrentCulture,
+                    Strings.Resolve("Environment_RecoveryEvidenceDetail"), recovery.Status, recovery.Detail,
+                    recovery.PreviousProbe?.OperationId ?? unknown,
+                    recovery.PreviousProbe?.PrimaryFailure?.Code.ToString() ?? unknown);
+            }
             if (lifecycle.LatestProbe is { } probe)
             {
                 Detail += Environment.NewLine + string.Format(CultureInfo.CurrentCulture,
@@ -79,12 +86,16 @@ public sealed class EnvironmentCheckRow
     /// The stable English name of the checked fact, for a support call to quote.
     /// </summary>
     /// <remarks>
-    /// Shown beside the localised <see cref="Name"/> and never instead of it, the same rule a
-    /// <c>FailureCode</c> follows: stable identifiers are quotable, not readable (§3).
+    /// Available in technical details, while the localised <see cref="Name"/> remains the
+    /// primary label: stable identifiers are useful to support, not required operator input.
     /// </remarks>
     public string SupportKey { get; }
 
     public string AutomationId { get; }
+
+    public string DetailsAutomationId => AutomationId + ".Details";
+
+    public string DetailsLabel => Strings.Resolve("Environment_TechnicalDetails");
 
     /// <summary>The localised subject of the check, shown whatever the outcome.</summary>
     public string Name { get; }
@@ -136,10 +147,13 @@ public sealed class EnvironmentCheckRow
 /// needs (Epic 11500 Part C §3).
 /// </summary>
 /// <remarks>
-/// <b>It observes and explains. It does not repair and it does not authorise.</b> Refresh asks
+/// <b>It observes and explains; it does not authorise.</b> Refresh asks
 /// <see cref="IEnvironmentDiagnostics.Read"/> for a passive observation. The separate, explicit
 /// live-check command may launch or attach to the accepted applications and run one contained
-/// synthetic Photoshop round trip. There is no enable, continue-anyway, ignore,
+/// synthetic Photoshop round trip, including bounded recovery of identified PrintFlow probes.
+/// Recovery handles owned-probe runtime state only; it changes no application settings and
+/// grants no production permission.
+/// There is no enable, continue-anyway, ignore,
 /// retry-as-production or adapter switch on this screen (§2, §13).
 /// <para>
 /// <b>One authority, read from one seam.</b> The shell never names the workstation verifier and
@@ -162,6 +176,12 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isBusy;
+
+    [ObservableProperty]
+    private bool _isRunningLiveChecks;
+
+    private bool _cancellationRequested;
+    private bool _wasCancelled;
 
     private EnvironmentReadinessReport? _report;
 
@@ -198,7 +218,32 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
 
     public string RunLiveChecksHint => Strings.Environment_RunLiveChecksHint;
 
-    public string CheckActivityText => IsBusy ? Strings.Environment_Checking : RunLiveChecksHint;
+    public string CancelLiveChecksLabel => Strings.Resolve("Environment_CancelLiveChecks");
+
+    public string DetailsLabel => Strings.Resolve("Environment_TechnicalDetails");
+
+    public string RestartHelpLabel => Strings.Resolve("Environment_RestartHelp");
+
+    public string CheckActivityText
+    {
+        get
+        {
+            bool previousCheckIncomplete = _report?.Lifecycle?.LatestProbe?.PrimaryFailure is not null;
+            if (IsBusy)
+            {
+                if (_cancellationRequested) return Strings.Resolve("Environment_Cancelling");
+                if (!IsRunningLiveChecks) return Strings.Environment_Checking;
+                return Strings.Resolve(previousCheckIncomplete
+                    ? "Environment_RecheckingAfterFailure" : "Environment_CheckingPhotoshop");
+            }
+
+            if (_wasCancelled) return Strings.Resolve("Environment_Cancelled");
+            if (_report?.Lifecycle?.Recovery is { OperatorMessageKey.Length: > 0 } recovery)
+                return Strings.Resolve(recovery.OperatorMessageKey);
+            return previousCheckIncomplete
+                ? Strings.Resolve("Environment_PreviousCheckIncomplete") : RunLiveChecksHint;
+        }
+    }
 
     public string BackLabel => Strings.Nav_BackToHome;
 
@@ -312,16 +357,40 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     {
         if (IsBusy) return;
 
+        _cancellationRequested = false;
+        _wasCancelled = false;
+        IsRunningLiveChecks = true;
         IsBusy = true;
         try
         {
-            Apply(await _diagnostics.RunLiveChecksAsync(cancellationToken).ConfigureAwait(true));
+            EnvironmentReadinessReport report = await _diagnostics.RunLiveChecksAsync(cancellationToken)
+                .ConfigureAwait(true);
+            _wasCancelled = cancellationToken.IsCancellationRequested && !report.Verified;
+            Apply(report);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Keep the last report. A cancellation never supplies new readiness evidence.
+            _wasCancelled = true;
         }
         finally
         {
+            IsRunningLiveChecks = false;
             IsBusy = false;
         }
     }
+
+    [RelayCommand(CanExecute = nameof(CanCancelLiveChecks))]
+    private void CancelLiveChecks()
+    {
+        if (!CanCancelLiveChecks()) return;
+        _cancellationRequested = true;
+        RunLiveChecksCommand.Cancel();
+        CancelLiveChecksCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CheckActivityText));
+    }
+
+    private bool CanCancelLiveChecks() => IsBusy && IsRunningLiveChecks && !_cancellationRequested;
 
     private bool CanRunCheckCommand() => !IsBusy;
 
@@ -329,12 +398,17 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     {
         RefreshCommand.NotifyCanExecuteChanged();
         RunLiveChecksCommand.NotifyCanExecuteChanged();
+        CancelLiveChecksCommand.NotifyCanExecuteChanged();
+        BackToHomeCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CheckActivityText));
     }
 
-    [RelayCommand]
-    private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
+    [RelayCommand(CanExecute = nameof(CanRunCheckCommand))]
+    private async Task BackToHomeAsync(CancellationToken cancellationToken)
+    {
+        if (IsBusy) return;
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
 
     /// <summary>
     /// One reading, replacing the last.
@@ -352,6 +426,8 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
             return;
         }
 
+        _wasCancelled = false;
+        _cancellationRequested = false;
         IsBusy = true;
         try
         {

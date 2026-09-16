@@ -5,6 +5,7 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Adapters.Meitu;
 using PrintFlow.Infrastructure.Adapters.Photoshop;
+using PrintFlow.Infrastructure.Automation;
 using PrintFlow.Workflow.Ports;
 
 namespace PrintFlow.Infrastructure.Verification;
@@ -19,6 +20,7 @@ internal sealed record WorkstationLiveVerification(
     WorkstationLiveEvidence? Evidence)
 {
     public ReadinessProbeDiagnostics? Probe { get; init; }
+    public ReadinessProbeRecovery? Recovery { get; init; }
     public bool ObservationDeferred { get; init; }
 }
 
@@ -26,6 +28,11 @@ internal interface IProductionLiveWorkstationVerifier
 {
     Task<WorkstationLiveVerification> RunAsync(
         WorkstationRequirements requirements, CancellationToken cancellationToken);
+
+    Task<WorkstationLiveVerification> RunAsync(
+        WorkstationRequirements requirements,
+        ReadinessProbeDiagnostics? previousProbe,
+        CancellationToken cancellationToken) => RunAsync(requirements, cancellationToken);
 
     WorkstationLiveVerification Reobserve(
         WorkstationRequirements requirements, WorkstationLiveEvidence? evidence);
@@ -84,14 +91,21 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
+    public Task<WorkstationLiveVerification> RunAsync(
+        WorkstationRequirements requirements, CancellationToken cancellationToken) =>
+        RunAsync(requirements, previousProbe: null, cancellationToken);
+
     public async Task<WorkstationLiveVerification> RunAsync(
-        WorkstationRequirements requirements, CancellationToken cancellationToken)
+        WorkstationRequirements requirements,
+        ReadinessProbeDiagnostics? previousProbe,
+        CancellationToken cancellationToken)
     {
         List<WorkstationCheckResult> checks = [];
         IWorkstationAutomationLease? lease = null;
         WorkstationLiveEvidence? evidence = null;
         OperationResult<Unit>? release = null;
         ReadinessProbeDiagnostics? probe = null;
+        ReadinessProbeRecovery? recovery = null;
 
         try
         {
@@ -164,19 +178,41 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                             facts.Failure));
                         AddAfterPhotoshopStateBlocked(checks, "Photoshop's current document state could not be read.");
                     }
-                    else if (facts.Value.UnsavedDocumentCount > 0)
-                    {
-                        checks.Add(WorkstationCheckResult.Failed(
-                            WorkstationVerificationCheck.PhotoshopSafeStartingState,
-                            WorkstationCheckKind.Live,
-                            FailureCode.PhotoshopUnknownState,
-                            "Recognised state with no unsaved document",
-                            facts.Value.DocumentStateDescription,
-                            "Photoshop has unsaved operator work. PrintFlow did not save, close, or alter it."));
-                        AddAfterPhotoshopStateBlocked(checks, "An unsaved Photoshop document prevents safe live automation.");
-                    }
                     else
                     {
+                        ProbeRecoveryResult reconciled = await ReconcileRetainedProbeAsync(
+                                photoshop.Value, facts.Value, previousProbe, requirements.Workspace.Root,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                        recovery = reconciled.Recovery;
+                        facts = OperationResult.Ok(reconciled.Facts);
+                        // A close that was already dispatched settles and is re-observed under
+                        // this lease before operator cancellation is honoured. No fresh probe is
+                        // started after that cancellation.
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (reconciled.Failure is { } recoveryFailure)
+                        {
+                            checks.Add(Failed(WorkstationVerificationCheck.PhotoshopSafeStartingState,
+                                WorkstationCheckKind.Live,
+                                "Recognised state with no unresolved document",
+                                reconciled.Facts.DocumentStateDescription,
+                                recoveryFailure));
+                            AddAfterPhotoshopStateBlocked(checks,
+                                "Photoshop's current document state could not be safely reconciled.");
+                        }
+                        else if (facts.Value.UnsavedDocumentCount > 0)
+                        {
+                            checks.Add(WorkstationCheckResult.Failed(
+                                WorkstationVerificationCheck.PhotoshopSafeStartingState,
+                                WorkstationCheckKind.Live,
+                                FailureCode.PhotoshopUnknownState,
+                                "Recognised state with no unsaved document",
+                                facts.Value.DocumentStateDescription,
+                                "Photoshop has unsaved operator work. PrintFlow did not save, close, or alter it."));
+                            AddAfterPhotoshopStateBlocked(checks, "An unsaved Photoshop document prevents safe live automation.");
+                        }
+                        else
+                        {
                         checks.Add(WorkstationCheckResult.Passed(
                             WorkstationVerificationCheck.PhotoshopSafeStartingState,
                             WorkstationCheckKind.Live,
@@ -225,6 +261,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                                     "The exact PrintFlow-owned probe completed and Photoshop returned to its prior safe state."));
                                 evidence = new WorkstationLiveEvidence(meitu.Value, photoshop.Value, facts.Value);
                             }
+                        }
                         }
                     }
                 }
@@ -280,7 +317,7 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         }
 
         AddMissingBlocked(checks, "The preceding live verification step did not complete.");
-        return new WorkstationLiveVerification([.. checks], evidence) { Probe = probe };
+        return new WorkstationLiveVerification([.. checks], evidence) { Probe = probe, Recovery = recovery };
     }
 
     public WorkstationLiveVerification Reobserve(
@@ -450,6 +487,281 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
                 : WorkstationCheckKind.Live,
             reason))];
 
+    private sealed record ProbeRecoveryResult(
+        PhotoshopRuntimeFacts Facts,
+        ReadinessProbeRecovery? Recovery,
+        OperationFailure? Failure);
+
+    private async Task<ProbeRecoveryResult> ReconcileRetainedProbeAsync(
+        PhotoshopReadiness readiness,
+        PhotoshopRuntimeFacts facts,
+        ReadinessProbeDiagnostics? previousProbe,
+        string workspaceRoot,
+        CancellationToken cancellationToken)
+    {
+        ExternalProcessRef observedInstance = readiness.Target.Process;
+        List<(PhotoshopRuntimeDocument Document, string Path)> exact = [];
+        bool invalidProbeShapedDocument = false;
+        foreach (PhotoshopRuntimeDocument candidate in facts.Documents)
+        {
+            if (TryResolveExactProbe(candidate, workspaceRoot, out string? path))
+            {
+                exact.Add((candidate, path));
+            }
+            else if (LooksLikeReadinessProbe(candidate))
+            {
+                invalidProbeShapedDocument = true;
+            }
+        }
+
+        ReadinessProbeDiagnostics? retainedHistory = IsUnconfirmedOwnedProbe(previousProbe, workspaceRoot)
+            ? previousProbe
+            : null;
+
+        if (invalidProbeShapedDocument || exact.Count > 1)
+        {
+            return Blocked(
+                facts,
+                retainedHistory,
+                "ReadinessRecovery_BlockedUnknownState",
+                "Photoshop reports a probe-shaped document whose exact managed identity is ambiguous.");
+        }
+
+        if (exact.Count == 0)
+        {
+            if (retainedHistory?.ManagedPath is not { } absentPath)
+                return new ProbeRecoveryResult(facts, null, null);
+
+            OperationResult<Unit> cleanup = DeleteProbe(absentPath, workspaceRoot);
+            if (cleanup.IsFailure)
+            {
+                return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                    cleanup.Failure.TechnicalDetail, cleanup.Failure);
+            }
+
+            return new ProbeRecoveryResult(
+                facts,
+                new ReadinessProbeRecovery(
+                    ReadinessProbeRecoveryStatus.AlreadyAbsent,
+                    "ReadinessRecovery_AlreadyAbsentRecheck",
+                    $"Probe {retainedHistory.OperationId} at '{absentPath}' is absent from the complete current " +
+                    $"document census of accepted Photoshop process {observedInstance.ProcessId} " +
+                    $"started {observedInstance.StartedUtc:u}. No close or duplicate identity input was sent.",
+                    retainedHistory)
+                {
+                    OperationId = retainedHistory.OperationId,
+                    ManagedPath = absentPath,
+                    Process = ToIdentity(readiness.Target.Process),
+                },
+                null);
+        }
+
+        (PhotoshopRuntimeDocument document, string probePath) = exact[0];
+        if (facts.Documents.Length != 1)
+        {
+            return Blocked(
+                facts,
+                retainedHistory,
+                "ReadinessRecovery_BlockedUserWork",
+                "Photoshop holds the exact PrintFlow probe together with other work. Nothing was closed.");
+        }
+
+        if (!document.IsActive || !document.IsSaved)
+        {
+            return Blocked(
+                facts,
+                retainedHistory,
+                "ReadinessRecovery_BlockedUnknownState",
+                "The exact PrintFlow probe is not the sole active, unchanged document. Nothing was closed.");
+        }
+
+        OperationResult<Unit> canonical = ValidateCanonicalProbe(probePath, workspaceRoot);
+        if (canonical.IsFailure)
+        {
+            return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                canonical.Failure.TechnicalDetail, canonical.Failure);
+        }
+
+        string operationId = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(probePath))!);
+        WorkspaceFileRef probe = WorkspaceFileRef.Create(
+            $"EnvironmentVerification/{operationId}/Working/PF_ENV_PROBE_{operationId}.png",
+            WorkspaceArea.Working);
+        PhotoshopDocumentIdentity identity = new(
+            document.Name,
+            Path.GetDirectoryName(probePath)!,
+            probePath,
+            readiness.Target.Window.Title);
+        PhotoshopOpenedDocument opened = new(
+            readiness.Target,
+            readiness.State,
+            identity,
+            OtherDocumentsMayBeOpen: false);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_photoshop is not IPhotoshopRetainedProbeCloser retainedProbeCloser)
+        {
+            return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                "The Photoshop foundation cannot apply the retained-probe final safety policy. Nothing was closed.");
+        }
+
+        OperationResult<PhotoshopTarget> close = await retainedProbeCloser.CloseRetainedReadinessProbeAsync(
+                opened, probe, CancellationToken.None)
+            .ConfigureAwait(false);
+        if (close.IsFailure)
+        {
+            return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                close.Failure.TechnicalDetail, close.Failure);
+        }
+        if (close.Value.Process != readiness.Target.Process)
+        {
+            return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                "The exact close returned after input was dispatched, but the accepted Photoshop process identity " +
+                "changed. Cleanup was withheld and the backing file was retained.",
+                inputSent: null);
+        }
+
+        OperationResult<PhotoshopRuntimeFacts> after = _photoshopFacts.Read(readiness.Target.Process.ExecutablePath);
+        if (after.IsFailure)
+        {
+            return Blocked(facts, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                "The exact probe close returned, but Photoshop's document state could not be re-read.",
+                after.Failure);
+        }
+
+        if (after.Value.Documents.Length != 0)
+        {
+            return Blocked(after.Value, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                "The exact close returned after input was dispatched, but Photoshop's complete census is not empty. " +
+                "Cleanup was withheld and the backing file was retained.",
+                inputSent: null);
+        }
+
+        OperationResult<Unit> deleted = DeleteProbe(probePath, workspaceRoot);
+        if (deleted.IsFailure)
+        {
+            return Blocked(after.Value, retainedHistory, "ReadinessRecovery_BlockedUnknownState",
+                deleted.Failure.TechnicalDetail, deleted.Failure);
+        }
+
+        return new ProbeRecoveryResult(
+            after.Value,
+            new ReadinessProbeRecovery(
+                ReadinessProbeRecoveryStatus.ClosedExactProbe,
+                "ReadinessRecovery_ClosedExactProbeRecheck",
+                $"Probe {operationId} at '{probePath}' was observed as the sole active, saved, canonical " +
+                $"PrintFlow probe in accepted Photoshop process {observedInstance.ProcessId} started " +
+                $"{observedInstance.StartedUtc:u}, then closed and removed. A fresh probe is still required.",
+                retainedHistory)
+            {
+                OperationId = operationId,
+                ManagedPath = probePath,
+                Process = ToIdentity(readiness.Target.Process),
+            },
+            null);
+
+        static ProbeRecoveryResult Blocked(
+            PhotoshopRuntimeFacts current,
+            ReadinessProbeDiagnostics? previous,
+            string messageKey,
+            string detail,
+            OperationFailure? failure = null,
+            bool? inputSent = false) => new(
+            current,
+            new ReadinessProbeRecovery(ReadinessProbeRecoveryStatus.Blocked, messageKey, detail, previous),
+            failure ?? OperationFailure.Create(
+                FailureCode.PhotoshopUnknownState,
+                detail,
+                isRetryable: true,
+                context: inputSent is null
+                    ? null
+                    : new Dictionary<string, string> { ["inputSent"] = inputSent.Value ? "true" : "false" }));
+
+        static ReadinessProcessIdentity ToIdentity(ExternalProcessRef process) =>
+            new(process.ProcessId, process.ExecutablePath, process.StartedUtc);
+    }
+
+    private static bool IsUnconfirmedOwnedProbe(
+        ReadinessProbeDiagnostics? probe, string workspaceRoot) =>
+        probe is { ManagedPath: not null } &&
+        probe.Stages.Contains(ReadinessProbeStage.IdentityConfirmed) &&
+        !probe.Stages.Contains(ReadinessProbeStage.CloseConfirmed) &&
+        TryResolveExactProbe(
+            new PhotoshopRuntimeDocument(Path.GetFileName(probe.ManagedPath), probe.ManagedPath, true, true),
+            workspaceRoot,
+            out _);
+
+    private static bool TryResolveExactProbe(
+        PhotoshopRuntimeDocument document, string workspaceRoot, out string path)
+    {
+        path = string.Empty;
+        if (string.IsNullOrWhiteSpace(document.FullPath)) return false;
+
+        string root;
+        string full;
+        try
+        {
+            root = Path.GetFullPath(workspaceRoot);
+            full = Path.GetFullPath(document.FullPath);
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return false;
+        }
+
+        string relative = Path.GetRelativePath(root, full);
+        string[] segments = relative.Split([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+            StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length != 4 ||
+            !string.Equals(segments[0], "EnvironmentVerification", StringComparison.Ordinal) ||
+            !string.Equals(segments[2], "Working", StringComparison.Ordinal))
+            return false;
+
+        string operationId = segments[1];
+        if (operationId.Length != 32 || operationId.Any(character =>
+                character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f')))
+            return false;
+
+        string expectedName = $"PF_ENV_PROBE_{operationId}.png";
+        if (!string.Equals(segments[3], expectedName, StringComparison.Ordinal) ||
+            !string.Equals(document.Name, expectedName, StringComparison.Ordinal))
+            return false;
+
+        string expected = Path.Combine(root, "EnvironmentVerification", operationId, "Working", expectedName);
+        if (!string.Equals(full, expected, StringComparison.OrdinalIgnoreCase)) return false;
+        path = full;
+        return true;
+    }
+
+    private static bool LooksLikeReadinessProbe(PhotoshopRuntimeDocument document) =>
+        document.Name.StartsWith("PF_ENV_PROBE_", StringComparison.OrdinalIgnoreCase) ||
+        (document.FullPath?.Contains(
+            $"{Path.DirectorySeparatorChar}EnvironmentVerification{Path.DirectorySeparatorChar}",
+            StringComparison.OrdinalIgnoreCase) ?? false);
+
+    private static OperationResult<Unit> ValidateCanonicalProbe(string path, string workspaceRoot)
+    {
+        try
+        {
+            string full = RequireContainedProbePath(path, workspaceRoot);
+            RefuseReparseAncestry(Path.GetDirectoryName(full)!, Path.GetFullPath(workspaceRoot));
+            if (!File.Exists(full))
+                return OperationResult.Fail<Unit>(FailureCode.OutputMissing,
+                    "The exact probe Photoshop reports has no backing file. Nothing was closed.");
+
+            byte[] observed;
+            using (FileStream stream = new(full, FileMode.Open, FileAccess.Read, FileShare.Read))
+                observed = SHA256.HashData(stream);
+            return observed.AsSpan().SequenceEqual(ProbeSha256)
+                ? OperationResult.Ok()
+                : OperationResult.Fail<Unit>(FailureCode.WorkspaceError,
+                    "The exact probe backing file changed, so it was retained and nothing was closed.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return OperationResult.Fail<Unit>(FailureCode.WorkspaceError,
+                $"The exact probe could not be validated safely: {ex.Message}");
+        }
+    }
+
     private sealed record ProbeRunResult(OperationFailure? Failure, ReadinessProbeDiagnostics Diagnostics);
 
     private async Task<ProbeRunResult> RunProbeAsync(
@@ -609,7 +921,16 @@ internal sealed class ProductionLiveWorkstationVerifier : IProductionLiveWorksta
         try
         {
             string full = RequireContainedProbePath(absolute, workspaceRoot);
-            RefuseReparseAncestry(Path.GetDirectoryName(full)!, Path.GetFullPath(workspaceRoot));
+            string directory = Path.GetDirectoryName(full)!;
+            if (!File.Exists(full) && !Directory.Exists(directory))
+            {
+                // A previous exact cleanup may already have removed both empty directories.
+                // This proves only that there is no backing file to delete; the runtime census
+                // remains the authority for AlreadyAbsent.
+                return OperationResult.Ok();
+            }
+
+            RefuseReparseAncestry(directory, Path.GetFullPath(workspaceRoot));
             if (File.Exists(full))
             {
                 byte[] observed;

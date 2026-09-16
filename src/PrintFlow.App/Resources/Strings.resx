@@ -673,7 +673,7 @@
   <data name="EnvironmentCheck_PhotoshopLaunchability" xml:space="preserve"><value>Photoshop could not be launched or attached to safely.</value></data>
   <data name="EnvironmentCheck_PhotoshopSafeStartingState" xml:space="preserve"><value>Photoshop has unsaved work, an unknown state, or a blocking dialog.</value></data>
   <data name="EnvironmentCheck_PhotoshopColourSettings" xml:space="preserve"><value>Photoshop colour settings do not match the accepted preset.</value></data>
-  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>Photoshop could not safely open and close the PrintFlow test image.</value></data>
+  <data name="EnvironmentCheck_PhotoshopTestImageRoundTrip" xml:space="preserve"><value>The last test-image check did not finish. Choose Safe recovery and recheck; PrintFlow will first check Photoshop's current state.</value></data>
   <data name="Environment_Verified" xml:space="preserve">
     <value>Workstation verified for production work.</value>
   </data>
@@ -736,17 +736,30 @@
     <value>Production readiness</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>What this workstation was checked for, and what production work still needs. This screen only reports what the checks found; it changes nothing on the workstation.</value>
+    <value>Check whether this workstation is ready for production. Safe recovery handles only PrintFlow test images and leaves your work and application settings unchanged.</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>Production readiness</value>
   </data>
   <data name="Environment_Refresh" xml:space="preserve">
-    <value>Check again</value>
+    <value>Refresh status</value>
   </data>
-  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>Run live application checks</value></data>
-  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>Explicitly launches or attaches to Meitu and Photoshop, checks their safe state and Photoshop colour settings, then opens and closes one PrintFlow-owned test image. It changes no settings and never closes operator work.</value></data>
-  <data name="Environment_Checking" xml:space="preserve"><value>Checking the workstation… Duplicate check actions are disabled until this run finishes.</value></data>
+  <data name="Environment_RunLiveChecks" xml:space="preserve"><value>Safe recovery and recheck</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>Choose Safe recovery and recheck to check Meitu and Photoshop, safely handle any identified PrintFlow test image, and run a fresh check.</value></data>
+  <data name="Environment_Checking" xml:space="preserve"><value>Checking the workstation. Please wait.</value></data>
+  <data name="Environment_CheckingPhotoshop" xml:space="preserve"><value>Checking Photoshop and the current application state. Please wait.</value></data>
+  <data name="Environment_CancelLiveChecks" xml:space="preserve"><value>Cancel check</value></data>
+  <data name="Environment_Cancelling" xml:space="preserve"><value>Cancelling safely. Please wait for the current operation to finish.</value></data>
+  <data name="Environment_Cancelled" xml:space="preserve"><value>The check was cancelled. The last result is retained; use safe recovery and recheck when ready.</value></data>
+  <data name="Environment_RecheckingAfterFailure" xml:space="preserve"><value>The previous check did not finish. Checking the current application state; please wait.</value></data>
+  <data name="Environment_PreviousCheckIncomplete" xml:space="preserve"><value>The previous Photoshop check did not finish. Use safe recovery and recheck to confirm the current state.</value></data>
+  <data name="Environment_RecoveryEvidenceDetail" xml:space="preserve"><value>Recovery: {0}. {1} Previous operation: {2}; previous failure: {3}.</value></data>
+  <data name="ReadinessRecovery_AlreadyAbsentRecheck" xml:space="preserve"><value>The previous PrintFlow test image was no longer open when checked. See the latest check result below.</value></data>
+  <data name="ReadinessRecovery_ClosedExactProbeRecheck" xml:space="preserve"><value>The previous PrintFlow test image was safely closed. See the latest check result below.</value></data>
+  <data name="ReadinessRecovery_BlockedUserWork" xml:space="preserve"><value>Photoshop has other work open. Save and close your files, then choose Safe recovery and recheck.</value></data>
+  <data name="ReadinessRecovery_BlockedUnknownState" xml:space="preserve"><value>The current Photoshop state could not be confirmed safely. Check Photoshop for a dialog that needs your attention, then choose Safe recovery and recheck.</value></data>
+  <data name="Environment_TechnicalDetails" xml:space="preserve"><value>Technical details</value></data>
+  <data name="Environment_RestartHelp" xml:space="preserve"><value>When to restart PrintFlow</value></data>
   <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>Automatic checks</value></data>
   <data name="Environment_LiveChecksHeading" xml:space="preserve"><value>Live application checks</value></data>
   <data name="Environment_Expected" xml:space="preserve"><value>Expected</value></data>
@@ -792,7 +805,7 @@
     <value>If an accepted PrintFlow workstation record, the Photoshop installation, the Meitu installation or the verified action file is replaced or updated, restart PrintFlow before using production mode.</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>Check again re-reads what can change while PrintFlow runs: the desktop session, the display configuration, the Windows display language and the working folder. The accepted files listed above are read once per run and are not re-read here.</value>
+    <value>Refresh status only reads current status; it does not recover test images or run a fresh application check. Accepted installation files are not re-read until PrintFlow restarts.</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>This PSD has no verified compatible composite. Save a copy in Photoshop with Maximize Compatibility enabled, then import that copy.</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved; review the failure before retrying.</value></data>
