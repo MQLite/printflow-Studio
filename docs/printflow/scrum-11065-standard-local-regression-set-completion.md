@@ -1,5 +1,12 @@
 # SCRUM-11065 — Build the Standard Local Regression Image Set
 
+**16 September 2026, scoped A2 update:** A1 v3 remains Passed 7/7 with all three real Operator
+decisions. Its bound revalidation is now published and recognized by the original normal candidate.
+Fresh normal-App verification failed PhotoshopTestImageRoundTrip at CloseGuard; admission remains
+closed, so A2 is partially complete / BLOCKED. See the [A2 clause reassessment](../remediation/PF-ACCEPT-A2/ASSESSMENT.md)
+and [exact handoff](../remediation/PF-ACCEPT-A2/HANDOFF.md). The earlier reports below remain historical;
+no Jira transition, installer acceptance, A3 or whole-project release is implied.
+
 **Date:** 9 September 2026
 **Workstation:** DESKTOP-0BG8884, Windows 10 Pro build 19045
 **Preset:** `printflow-workstation-v1` 1.16.0 (`6396FB4EB87F…`)

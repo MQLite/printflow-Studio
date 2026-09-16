@@ -1,5 +1,12 @@
 # SCRUM-11123 — Versioned Offline Installer, Upgrade and Rollback: Completion Report
 
+**16 September 2026, scoped A2 update:** The supported writer published the completed A1 v3
+revalidation for the original candidate, and that candidate's ordinary Product check reports
+ProductionRevalidation Passed. Fresh live verification failed PhotoshopTestImageRoundTrip at
+CloseGuard; production admission is still closed. See the [A2 clause reassessment](../remediation/PF-ACCEPT-A2/ASSESSMENT.md)
+and [exact handoff](../remediation/PF-ACCEPT-A2/HANDOFF.md). No installer, install/upgrade/rollback,
+A3 or wider release evidence was added; the earlier reports below remain historical.
+
 **Date:** 2026-09-09
 **Repository:** `D:\Repositories\printflow-Studio`, branch `master`, local commits only.
 **Starting Git state:** clean `master` at `d5eb3c2` ("feat: add explicit diagnostic package export").
