@@ -86,7 +86,8 @@ public sealed class A2MeituCutoutValidationRecoverySmoke(ITestOutputHelper outpu
         output.WriteLine("RefusedCutout: " + refused + "; SHA256=" + refusedHash);
         output.WriteLine("RefusedTranscript: " + transcriptPath + "; SHA256=" + transcriptHash);
         output.WriteLine("Process: " + JsonSerializer.Serialize(process));
-        output.WriteLine("Editor: " + JsonSerializer.Serialize(editors[0]));
+        output.WriteLine($"Editor: {editors[0].Handle} '{editors[0].Title}' {editors[0].ClassName} " +
+            $"enabled={editors[0].IsEnabled}");
 
         // The signed result surface is recognised by Product's own class and marker rule; an
         // unrecognised surface is left alone and the later identity probe refuses.
