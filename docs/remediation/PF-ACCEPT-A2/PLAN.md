@@ -1,11 +1,53 @@
 # PF-ACCEPT-A2 — Publish the bound revalidation and verify the normal Product gate
 
+## Qualification outcome — 17 September (Claude): PENDING Operator visual review, no failures
+
+After the stop above, the operator gave a fresh exclusive-use confirmation. All with pair
+`d915b1a6-4c06-4b16-9a20-5e1341d1ae9c` (source `6818757`, receipt verified again before the run).
+
+**Focused real proof** `a2-focus-finehair-20260917-154626-d915b1a6`, fine-hair category only
+(partial by design; can never report Passed; not qualification): readiness allowed; Background
+Removal authorised → Meitu → ReviewRequired; PNG with real alpha; trim matches alpha bounds;
+source unchanged; automation lock free; Meitu returned to the empty editor. Cutout 1200x1600.
+The synthetic 4x refusal did not recur on the real fixture.
+
+**Complete v3 run** `a2-v3-20260917-154736-d915b1a6`, invocation
+`eb7c35c7-78fa-4881-8b4e-d43c6ab98021`, explicit `D:\PrintFlowStudio\TestData\v3`, all seven
+categories, no filter, executable override, unbound mode or in-run build. Recorded
+CandidateProblems empty (unedited). Result
+`D:\PrintFlowStudio\TestData\v3\runs\a2-v3-20260917-154736-d915b1a6\result.json`, SHA256
+`A6060D503A7AE0C79FE59E52821B995C9168E7D29E698FB10C56A0F48027B702`.
+**Status Pending: 4 Passed, 3 Pending, 0 Failed.** Lock free after every case.
+
+- Passed: TRANSPARENT_PNG, PSD_WITH_COMPOSITE_PREVIEW, SINGLE_PAGE_PDF, REFERENCE_PRODUCTION_TIFF.
+- `PORTRAIT-VISUAL-001` — `FIX-PORTRAIT-001-enhanced.png` (1200x1600), SHA256
+  `F580164E013AF13216DBFA8A5FD57A8E409BE3191930A18C867DA375AE7C5BB6`. Does the enhanced export
+  still look like a correctly enhanced portrait — subject sharp, skin tone unshifted, no visible
+  artefact introduced along the hair or shoulder edges?
+- `FINE-HAIR-VISUAL-001` — `FIX-FINE-HAIR-001-cutout.png`, SHA256
+  `F690AF0D9861773B64E0E63FD5F95104F692222B2B75501C004DF9ED33CD04C1` (trimmed
+  `83534D2F9A960E9F12FE1CD5A91C0E4FE13971B0441F3F58D99335D330D2B8B1`). Are individual hair
+  strands still retained at the boundary, without a hard halo, and is the foliage background
+  fully removed rather than partly retained as coloured fringing?
+- `CUSTOMER-DESIGN-VISUAL-001` — `D:\PrintFlowStudio\Sessions\S_20260917T034836Z_b210ba6d\Working\01a0ad7b-0b40-7f36-9ce7-2179c95eb481\FIX-CUSTOMER-DESIGN-001_51mm_CMYK_W.tif`,
+  SHA256 `FFCFABF0194CA00F92AC2C61BDC34FA353AFD74A95990946C9CB10725869D902`. Does the produced
+  TIFF show the complete design at the requested size, with the W1 channel covering the
+  intended ink region?
+
+Decisions must be the Operator's own for these exact bytes, recorded with
+`-RunId a2-v3-20260917-154736-d915b1a6 -RecordVisualReview <decisions.json>`. No old approval
+(including the 131609 portrait question) is transferred. Nothing is published; this is not a PASS.
+
+Final observations: Meitu PID 5980 on the empty editor; Photoshop now PID 37916 titled
+`Adobe Photoshop CC 2019` (differs from the 24172 seen at 14:00; restart cause not claimed).
+Preservation 34/34 (`claude-preservation-final.json`). No A3, preset/set change, install,
+deploy, push, signing or Jira change.
+
 ## Claude takeover (see RECOVERY.md for detail) — 17 September: marker-read correction, stopped at changed availability
 
 Executor: Claude Code (claude-opus-5, high effort as supplied by the host; no global settings
 changed, no Codex routing emulated). Started clean on master at actual HEAD
-`d2851415bfc892e41b71c788939ec6c9b377333d`; no reset, no startup suite rerun. **No complete
-v3 qualification was run in this continuation. Ordinary A2 admission remains CLOSED.**
+`d2851415bfc892e41b71c788939ec6c9b377333d`; no reset, no startup suite rerun. **Complete v3 qualification followed; see the outcome section above. Ordinary A2 admission remains CLOSED.**
 
 ### Diagnosis of `a2-v3-20260917-131609-d2a0a55e` fine-hair failure
 
