@@ -1,5 +1,83 @@
 # A2 recovery continuation — 16 September 2026
 
+## Claude takeover — 17 September: marker-read correction, stopped at changed availability
+
+Executor: Claude Code (claude-opus-5, high effort as supplied by the host; no global settings
+changed, no Codex routing emulated). Started clean on master at actual HEAD
+`d2851415bfc892e41b71c788939ec6c9b377333d`; no reset, no startup suite rerun. **No complete
+v3 qualification was run in this continuation. Ordinary A2 admission remains CLOSED.**
+
+### Diagnosis of `a2-v3-20260917-131609-d2a0a55e` fine-hair failure
+
+- Producer: `UiaElementProvider.ReadMatchingTextSnapshot`, catching `ElementNotAvailableException`
+  (empty Message) from `AutomationElement.FindAll(TreeScope.Descendants, OrCondition(Name==...))`
+  over the signed Background Removal Busy + Completion markers.
+- Caller/phase: `GuardedMeituUiDriver.ReadBackgroundRemovalPhaseSnapshot` inside
+  `AwaitBackgroundRemovalPhaseAsync`, after the single action invoke; `RefreshOwnedWindow` had
+  just succeeded. Phases are not persisted, so Busy-wait versus Complete-wait is not proven;
+  the capture shows the completion page.
+- Target: editor `0x1D0376`, Meitu PID 5980 (start 2026-09-16T03:38:11.2951111Z).
+- The old catch labelled any element vanishing mid-walk as "window disappeared". Discriminating
+  evidence that the root survived: two seconds later the next case's readiness freshly read the
+  same handle as an unrecognised live screen (`20260917T011711Z_unknown-state_1D0376.png`), and
+  at 02:00:46Z the same HWND/PID still existed (then on the empty editor). Signed Busy markers
+  are short-lived overlays Meitu removes when presenting the result.
+- Existing successor-editor rebinding (post-open window replacement) and markerless-repaint wait
+  (identity probe) do not apply: same handle, and this loop returned any read failure at once.
+- Historical cutout: not present in Meitu at 02:00Z and never written to disk; dismissal cause
+  unknown (not claimed). Nothing recoverable remained.
+
+### Product correction `a5cc906`
+
+`UiReadInterruption` preserves exception type, HResult and message (`(empty)`), re-reads the root
+from the same handle, and tags only a readable-root descendant change (code stays
+`MeituTargetLost`). The Background Removal wait discards such a read whole and takes a complete
+fresh observation on the next poll within the unchanged deadline. Unreadable root, window gone,
+process exit, handle reuse, modal and unknown screens still stop at once; a stop during an
+interrupted pass returns Cancelled with no input and never invokes Meitu's cancel; a timeout
+reports `lastReadInterruption`. No budget, sleep, union, stale evidence or extra action/return.
+Save-dialog exact-foreground protections untouched. Red→green: 4 red before the change; later
+review-driven regression test verified red without its guard. One scoped independent read-only
+reviewer, three passes: two medium and one low finding plus one introduced false-stop regression
+were fixed; final pass nothing blocking. Evidence `claude-marker-read-red-green.txt`,
+`claude-marker-read-review.txt`. Focused slice 1122/1122.
+
+### Pairs, suites and live proof (all preserved)
+
+| Pair | Source | Full suite | Use |
+|---|---|---|---|
+| `08f4d554-bb76-4193-a489-3f536a9086a1` | `a5cc906` | 11964/11964 | focused seam proof |
+| `393c45f8-0a1a-483f-9586-be843c681627` | `b2cb93b` (+recovery smoke) | 11965/11965 | recovery stopped on smoke logging bug before input |
+| `d915b1a6-4c06-4b16-9a20-5e1341d1ae9c` | `6818757` | 11965/11965 | current; receipt SHA256 `52E6DBC5E894EA95CB859CF9CF0BB0D6D42533B17AE26D90DAC0EB41E8DE8FBC` |
+
+The operator gave one exclusive-use confirmation for this Claude execution. Focused Background
+Removal production-seam smoke (pair 08f4, 14:20 local, synthetic 480x360) passed identity,
+action, Busy, completion, return and identity, and exported, but Product output validation
+**refused**: cutout canvas 1920x1440 (4x). This is not a proof pass. The same smoke preserved
+480x360 historically; the real v3 fine-hair and portrait fixtures are 1200x1600 and exported 1:1
+in A1 and at 13:16 today; Meitu settings files were last written 12:01. Cause of the synthetic 4x
+is unproven; the validation guard was not weakened. Transcript
+`a2-meitu-cutout-focused-20260917-08f4d554-transcript.md` (SHA256 `031A4C75...35CE3`).
+
+Adapter correctly left the synthetic document for the operator. Opt-in bound recovery smoke
+(`A2MeituCutoutValidationRecoverySmoke`) attempt 1 (pair 393c) failed on its own log line before
+input; attempt 2 (pair d915, after its full suite; log `a2-meitu-cutout-recovery-20260917-d915b1a6.log`) found no save-result surface and stopped before identity or
+close input. At 14:39 local, read-only observation: Meitu minimized on the **empty editor** (the
+synthetic document had been closed by someone else) and **CorelDRAW in the foreground with an
+open work file**. Exclusive availability therefore no longer holds; no further Meitu/Photoshop
+input or qualification was started. Synthetic workspace retained under
+`%TEMP%\PrintFlowMeituCutoutSeam\8511371b71894eb0a26239d39f2dc69f`.
+
+Preservation: 29 original hashes plus three prior failed results, the pending portrait artifact
+and active revalidation record match (34/34) at start and stop (`claude-preservation-*.json`).
+Lease was acquired only by Product/smoke scopes and released with them; no separate lease read.
+No publication, preset/set change, approval transfer, A3, install, deploy, push or Jira change.
+
+**Next boundary:** a new current exclusive-use confirmation. Then, with pair d915: focused real
+Background Removal proof on the fine-hair product path, then the complete explicit v3 run with a
+fresh RunId, no filter/override/unbound mode. If the synthetic 4x recurs on the real fixture, it
+is a new blocker to diagnose, not a guard to relax.
+
 ## Final qualification outcome — 17 September 2026
 
 **FAILED; ordinary A2 admission remains closed. Stop at this new qualification outcome.**
