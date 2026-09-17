@@ -1,5 +1,115 @@
 # A2 recovery continuation — 16 September 2026
 
+## Qualification review closed — 17 September, 17:14 local (Claude): v3 run PASSED 7/7
+
+Same Claude Code session and host-supplied configuration; offline only. No application, desktop
+input, lease, readiness, processing/export, rerun, build, pair, test or publication.
+The Pending section below is the historical pre-review state of this same run.
+
+### Operator's decision and responsibility boundary (verbatim)
+
+> Meitu产生的结果我们无法做修改，单纯接受即可，只要确保确实产生了改动；
+> 三项判断全部通过
+
+The second line approves the three checks listed below for exactly these bytes. The first
+line sets the scope: PrintFlow must invoke the intended Meitu operation, get back that
+operation's actual result and validate its technical integrity. Improving Meitu's AI output,
+or scoring hair/skin/edge quality, is not a PrintFlow repair task, and these artifacts are not
+retouched. This is the Operator accepting Meitu's output. It does not certify that every
+pixel is correct, and it does not waive the existing size, transparency, TIFF or W1
+requirements or Photoshop's production contract. It applies to this run only. No decision was
+generated for future artifacts, and no manifest, schema, preset or Product behaviour changed.
+
+### Decisions recorded (review-only route, original paired reviewer)
+
+Input `artifacts/pf-accept-a2/a2-v3-154736-visual-decisions.json` (ignored), SHA256
+`A33E04ADBF93C9D0E6ECDABFF19A1E2F6F8F5913A246AA9524B150439BD7FA73`: `DESKTOP-0BG8884\admin`
+(A1's verified convention), `2026-09-17T17:14:11+12:00` (the actual recording time), three
+decisions, note `三项判断全部通过` verbatim. Before recording, `Reviews` was empty and all three
+checks were Pending, so nothing was re-decided. The agent did not view the images.
+
+```powershell
+tools\regression\Invoke-PrintFlowStandardRegressionSet.ps1 `
+    -SetRoot 'D:\PrintFlowStudio\TestData\v3' `
+    -RunId 'a2-v3-20260917-154736-d915b1a6' `
+    -RecordVisualReview 'D:\Repositories\printflow-Studio\artifacts\pf-accept-a2\a2-v3-154736-visual-decisions.json'
+```
+
+Run under Windows PowerShell 5.1, as in A1. No receipt, category filter, executable override,
+CandidateInstallFolder or new RunId was supplied. The wrapper selected pair `d915b1a6`'s
+retained harness through the run's BuildOrigin. Review host-results invocation:
+`89834f26-e25f-40ba-93ad-9e560308e9d9`. Host test 1/1. **Wrapper exit 0.** Log:
+`a2-v3-154736-record-visual-review.log` (SHA256 `5D66CB56…6914`).
+
+### Independent disk readback
+
+Result SHA256 **`4083F1FB7F1BDA4D9B4F6A0EE7C9F95B8A4CF891087956F845D0B2CDDC5FDA1A`**
+(28,592 bytes; pre-review `A6060D50…B702`). **Status Passed, "Passed. 7/7 required categories
+passed."** Missing categories: none. Every assertion held (59/59). Pending: none.
+
+- One review `3685ceef-98ee-4bb1-9811-26bda34ebad9`, `Synthetic: false`, same identity/time.
+  It contains three distinct decisions, each concluded once, with the note above:
+  `PORTRAIT-VISUAL-001` → `F580164E…5BB6` (enhanced PNG); `FINE-HAIR-VISUAL-001` →
+  `F690AF0D…04C1` (the **pre-Trim cutout**, not trimmed `83534D2F…`);
+  `CUSTOMER-DESIGN-VISUAL-001` → `FFCFABF0…D902` (session TIFF). Evidence rehashed equal.
+- Unchanged: RunId, StartedAt `15:47:43.7904106+12:00`, CompletedAt `15:49:42.8903271+12:00`,
+  invocation `eb7c35c7…`, binding v2, pair/receipt `52E6DBC5…8FBC`, four candidate and harness
+  assembly hashes, preset, set digest `75DA6EC6…`, CandidateProblems empty. For all seven cases,
+  steps, produced artifacts and assertions match the execution-time `case-*.json` files.
+- Preservation 18/19 (`review-a2v3-preservation-{before,after}.json`). The only change is
+  result.json. Byte-identical: all four run images, seven case files, execution claim,
+  readiness, `regression-run.db`, customer TIFF, receipt, A1 result `97E422FA…600A` and the
+  active `production-revalidation.json` `78B0464C…B0FF` (still A1's candidate).
+
+### Meitu content-change observation (separate from assertions and decisions)
+
+This is a post-run, read-only observation and was not added to result.json. The run database's
+lineage gives the exact inputs. Enhancement attempt `01a0ad7a-63a0…`, SUCCEEDED, took IMPORT
+Revision `01a0ad7a-62eb…` (`Source\FIX-PORTRAIT-001.jpg`, `F4CAD2A1…4634` = v3 input) and
+produced `01a0ad7a-a9c9…` (`…_HD.png` `F580164E…`), which was promoted unchanged. Its trace
+reads "meitu:enhance … enhancement invoked by PrintFlow; … editor returned to its signed empty
+state". Background Removal attempt `01a0ad7a-ac11…`, SUCCEEDED, decision
+UseAutomaticSelectionForReviewedContent, took IMPORT Revision `01a0ad7a-ab46…`
+(`FIX-FINE-HAIR-001.jpg`, `5A705FE3…8D8E` = v3 input) and produced `01a0ad7b-025e…`
+(`…_CUTOUT.png` `F690AF0D…`). Trim then used that Revision as its input.
+
+Both sides were decoded with WPF (ignore colour profile → Bgra32), at the same 1200x1600,
+with no EXIF orientation on either side and no resampling. Sidecars:
+`review-a2v3-meitu-content-change.json`, `review-a2v3-enhancement-decoder-control.json`.
+
+- **Background Removal — verified changed content.** The input is opaque (0 pixels with
+  alpha≠255). In the output, 379,845 pixels have alpha 0, 431,254 have partial alpha and
+  1,108,901 have alpha 255. This matches the Product-recorded 811,099 transparent and 1,540,155
+  visible. Pixels still fully opaque stay close to the source (mean |ΔRGB| 1.852 per channel), so
+  the visible subject is retained. The change is in alpha/background content, not merely a PNG
+  container with an alpha channel.
+- **Enhancement — verified changed decoded RGB, modest in size.** 1,291,315 of 1,920,000
+  pixels differ. Largest channel difference per pixel: 0 → 628,685 px; 1 → 487,733; 2 → 317,978;
+  3 → 275,826; 4–7 → 207,341; 8–15 → 2,415; 16+ → 22. The mean is 0.996 and the maximum 22.
+  Output alpha is 255 everywhere, so this is not just an added opaque alpha channel. 600 of 1,900
+  32×32 blocks show a same-direction mean shift of ≥1 level (maximum 4.08). That is a local
+  tonal change, which zero-mean rounding does not produce.
+  **Limitation:** the GDI+ control decoded the JPEG identically to WPF because both use WIC,
+  so it does not give an independent measure of decoder noise. Offline, Meitu's own JPEG decode
+  cannot be separated from its enhancement; attribution rests on the recorded `meitu:enhance`
+  trace.
+- Scope of this observation: a decoded difference shows the content changed. It does not show
+  the output is better or that the AI action alone caused every difference. No threshold,
+  PSNR/SSIM or quality score was applied. Trim and export are not expected to change pixels
+  (Trim here kept the full extent with identical pixels, as recorded).
+- No contradiction and no gap found for either operation.
+
+### Next boundary
+
+Qualification review for pair `d915b1a6` is **closed: Passed**. That does **not** mean A2 passed
+or production admission is open. The wrapper printed its standard
+`Set-PrintFlowProductionRevalidation.ps1` publication command, which was **not** executed. The
+active record still names the A1 candidate. Remaining A2 work, which needs its own
+authorization: publish the replacement revalidation for this candidate from result
+`4083F1FB…DA1A`, read it back independently, then verify the ordinary Product gate for that exact
+candidate with a current normal live check (which needs exclusive desktop confirmation). Normal
+production admission was not reverified here. No A3, install, deploy, signing, push or Jira change.
+
 ## Qualification outcome — 17 September (Claude): PENDING Operator visual review, no failures
 
 After the stop above, the operator gave a fresh exclusive-use confirmation. All with pair

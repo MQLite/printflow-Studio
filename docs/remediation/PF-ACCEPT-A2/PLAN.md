@@ -1,5 +1,42 @@
 # PF-ACCEPT-A2 — Publish the bound revalidation and verify the normal Product gate
 
+## Qualification review closed — 17 September, 17:14 local (Claude): v3 run PASSED 7/7
+
+**Current mainline state.** The Pending section below is this run's historical pre-review state.
+Full evidence is in [RECOVERY.md](RECOVERY.md).
+
+**Operator's scope clarification (verbatim):** "Meitu产生的结果我们无法做修改，单纯接受即可，只要确保确实产生了改动；"
+PrintFlow must invoke the intended Meitu operation, get back that operation's actual result
+and validate its technical integrity. Improving Meitu's AI output, or scoring hair/skin/edge
+quality, is not a PrintFlow repair task, and these artifacts are not retouched. This is not an
+agent claim that every pixel is correct. It does not waive size, transparency, TIFF or W1
+requirements or Photoshop's contract, and it creates no decisions for future artifacts.
+
+**Operator decisions:** `三项判断全部通过` (verbatim) → PORTRAIT-VISUAL-001, FINE-HAIR-VISUAL-001
+(pre-Trim cutout `F690AF0D…04C1`), CUSTOMER-DESIGN-VISUAL-001 all **Passed**. Recorded as one
+non-synthetic review `3685ceef-98ee-4bb1-9811-26bda34ebad9`, `DESKTOP-0BG8884\admin`,
+`2026-09-17T17:14:11+12:00`. Route: `-SetRoot 'D:\PrintFlowStudio\TestData\v3' -RunId
+'a2-v3-20260917-154736-d915b1a6' -RecordVisualReview <artifacts\pf-accept-a2\a2-v3-154736-visual-decisions.json>`.
+Original pair `d915b1a6` reviewer, no receipt, filter or override. **Wrapper exit 0.** The agent
+did not view the images.
+
+**Readback:** result SHA256 `4083F1FB7F1BDA4D9B4F6A0EE7C9F95B8A4CF891087956F845D0B2CDDC5FDA1A`,
+**Status Passed, 7/7, 0 Pending, 59/59 assertions held**. Unchanged: CandidateProblems (empty),
+invocation, binding, timestamps and case records. Only result.json changed (18/19 preservation).
+Active revalidation record `78B0464C…` is unchanged.
+
+**Meitu actual change (post-run observation, kept outside result.json):** inputs taken from DB
+lineage. Background Removal: opaque input → 379,845 alpha-0 + 431,254 partial-alpha pixels, and
+the opaque subject is retained. **Verified.** Enhancement: decoded RGB differs in 1,291,315 of
+1,920,000 pixels (mean 0.996, max 22), with a local same-direction shift in 600/1,900 blocks.
+**Verified changed, modest.** Meitu's own JPEG decode cannot be separated offline (the GDI+
+control is not independent), so attribution rests on the `meitu:enhance` trace. No contradiction.
+
+**Next:** A2 has **not** passed and production admission is **not** open. Still to do, each
+needing its own authorization: publish the replacement revalidation from this result (the
+wrapper's printed command was not run), read it back, then verify the ordinary Product gate
+normally on candidate `d915b1a6`. No A3.
+
 ## Qualification outcome — 17 September (Claude): PENDING Operator visual review, no failures
 
 After the stop above, the operator gave a fresh exclusive-use confirmation. All with pair
