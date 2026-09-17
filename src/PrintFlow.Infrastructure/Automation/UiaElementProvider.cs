@@ -159,9 +159,8 @@ public sealed class UiaElementProvider : IUiElementProvider
         }
         catch (ElementNotAvailableException ex)
         {
-            return OperationResult.Fail<IReadOnlyList<string>>(
-                FailureCode.MeituTargetLost,
-                $"Window {root} disappeared while reading signed markers: {ex.Message}");
+            return OperationResult.Fail<IReadOnlyList<string>>(UiReadInterruption.Create(
+                root, "reading signed markers", ex, IsReadableRoot(root)));
         }
         catch (InvalidOperationException ex)
         {
@@ -565,8 +564,8 @@ public sealed class UiaElementProvider : IUiElementProvider
         }
         catch (ElementNotAvailableException ex)
         {
-            return OperationResult.Fail<IReadOnlyList<string>>(
-                FailureCode.MeituTargetLost, $"Window {root} disappeared while being read: {ex.Message}");
+            return OperationResult.Fail<IReadOnlyList<string>>(UiReadInterruption.Create(
+                root, "being read", ex, IsReadableRoot(root)));
         }
         catch (InvalidOperationException ex)
         {
@@ -599,6 +598,27 @@ public sealed class UiaElementProvider : IUiElementProvider
             }
 
             Collect(child, names, maxItems, depth + 1);
+        }
+    }
+
+    /// <summary>
+    /// Re-reads the root after a walk failed, so a removed descendant is not reported as a lost window.
+    /// </summary>
+    /// <remarks>
+    /// A fresh root must resolve from the same handle and describe that same native window. This
+    /// only labels the failure; it never turns the failed walk into an observation.
+    /// </remarks>
+    private static bool IsReadableRoot(WindowHandle root)
+    {
+        try
+        {
+            AutomationElement element = AutomationElement.FromHandle(root.Value);
+            return new IntPtr(element.Current.NativeWindowHandle) == root.Value;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            // Any failure to re-read the root means it is not proven readable, which stops the caller.
+            return false;
         }
     }
 

@@ -1048,6 +1048,12 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
         WindowHandle root, IReadOnlyCollection<string> exactNames)
     {
         OnReadTextSnapshot?.Invoke(root);
+        ReadKinds.Add("matching");
+        if (ReadFailure?.Invoke(root) is { } failure)
+        {
+            return OperationResult.Fail<IReadOnlyList<string>>(failure);
+        }
+
         HashSet<string> signed = new(exactNames, StringComparer.Ordinal);
         return OperationResult.Ok<IReadOnlyList<string>>(
             Texts.TryGetValue(root.Value, out List<string>? texts)
@@ -1057,9 +1063,24 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
 
     public Action<WindowHandle>? OnReadTextSnapshot { get; set; }
 
+    /// <summary>
+    /// Runs after <see cref="OnReadTextSnapshot"/> on both text reads; a non-null failure replaces
+    /// the read, modelling a tree that changed while it was being walked.
+    /// </summary>
+    public Func<WindowHandle, OperationFailure?>? ReadFailure { get; set; }
+
+    /// <summary>"matching" or "full" per text read, in call order.</summary>
+    public List<string> ReadKinds { get; } = [];
+
     public OperationResult<IReadOnlyList<string>> ReadTextSnapshot(WindowHandle root, int maxItems)
     {
         OnReadTextSnapshot?.Invoke(root);
+        ReadKinds.Add("full");
+        if (ReadFailure?.Invoke(root) is { } failure)
+        {
+            return OperationResult.Fail<IReadOnlyList<string>>(failure);
+        }
+
         return OperationResult.Ok<IReadOnlyList<string>>(
             Texts.TryGetValue(root.Value, out List<string>? texts) ? texts : []);
     }

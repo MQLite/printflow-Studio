@@ -380,6 +380,256 @@ public sealed class GuardedMeituBackgroundRemovalTests
         s.Elements.Invocations.ShouldBeEmpty();
     }
 
+    // Run a2-v3-20260917-131609-d2a0a55e: the signed-marker walk threw ElementNotAvailable with
+    // an empty message while Meitu replaced its processing overlay with the completion controls.
+    // The same editor handle was freshly read two seconds later.
+
+    [Fact]
+    public async Task Marker_read_interrupted_by_a_tree_change_is_reobserved_within_the_budget()
+    {
+        Scenario s = Build();
+        InterruptReads(s, readable: true, 2);
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
+        result.Value.Completion.Observation.VisibleTexts
+            .ShouldContain(MeituFakes.BackgroundCompletionMarkers[0]);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Full_completion_read_interrupted_by_a_tree_change_is_reobserved_not_reused()
+    {
+        Scenario s = Build();
+        int[] count = [0];
+        string? interruptedKind = null;
+        s.Elements.ReadFailure = handle =>
+        {
+            if (!s.ActionInvoked || ++count[0] != 4)
+            {
+                return null;
+            }
+
+            interruptedKind = s.Elements.ReadKinds[^1];
+            return Interruption(handle, readable: true);
+        };
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        interruptedKind.ShouldBe("full");
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Tree_changes_until_the_deadline_time_out_with_the_original_exception_and_no_return()
+    {
+        Scenario s = Build();
+        InterruptReads(s, readable: true, [.. Enumerable.Range(2, 10_000)]);
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Timeout);
+        result.Failure.Context["wantedPhase"].ShouldBe("Complete");
+        // Nothing from a discarded read may stand in for an observed phase.
+        result.Failure.Context["lastPhase"].ShouldBe("Unobserved");
+        result.Failure.Context["lastReadInterruption"].ShouldContain("ElementNotAvailableException");
+        result.Failure.Context["lastReadInterruption"].ShouldContain("Message=(empty)");
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Unreadable_root_window_during_the_marker_read_still_stops_immediately()
+    {
+        Scenario s = Build();
+        int[] count = [0];
+        s.Elements.ReadFailure = handle =>
+            s.ActionInvoked && ++count[0] == 2 ? Interruption(handle, readable: false) : null;
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        result.Failure.Context[UiReadInterruption.RootWindowReadableKey].ShouldBe("false");
+        count[0].ShouldBe(2);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Reobservation_after_a_tree_change_refuses_a_window_that_is_then_gone()
+    {
+        Scenario s = Build();
+        int[] count = [0];
+        s.Elements.ReadFailure = handle =>
+        {
+            if (!s.ActionInvoked || ++count[0] != 2)
+            {
+                return null;
+            }
+
+            s.Locator.Replace(s.Editor.Process);
+            return Interruption(handle, readable: true);
+        };
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituTargetLost);
+        result.Failure.Context["targetLoss"].ShouldBe("window-disappeared");
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Interruption_preserves_an_empty_exception_message_and_is_recognised_only_when_root_readable()
+    {
+        OperationFailure readable = Interruption(new WindowHandle(0x1D0376), readable: true);
+        OperationFailure lost = Interruption(new WindowHandle(0x1D0376), readable: false);
+
+        UiReadInterruption.IsDescendantChange(readable).ShouldBeTrue();
+        UiReadInterruption.IsDescendantChange(lost).ShouldBeFalse();
+        UiReadInterruption.IsDescendantChange(OperationFailure.Create(
+            FailureCode.MeituTargetLost, "Window disappeared while reading signed markers: ")).ShouldBeFalse();
+        readable.Context["exceptionMessage"].ShouldBe("(empty)");
+        readable.Context["exceptionType"].ShouldBe(typeof(System.Windows.Automation.ElementNotAvailableException).FullName);
+        readable.TechnicalDetail.ShouldNotContain("disappeared");
+        lost.TechnicalDetail.ShouldContain("disappeared");
+    }
+
+    [Fact]
+    public async Task Interrupted_full_read_of_a_generally_unrecognised_completion_page_waits_for_the_next_poll()
+    {
+        // The live completion page carries the cutout markers but not the general editor markers.
+        string[] completionPageOnly = [.. MeituFakes.BackgroundCompletedTexts()];
+        Scenario s = Build(afterAction:
+            [BackgroundBusyScreen(), BackgroundBusyScreen(), completionPageOnly]);
+        List<string> afterAction = [];
+        int[] count = [0];
+        s.Elements.ReadFailure = handle =>
+        {
+            if (!s.ActionInvoked)
+            {
+                return null;
+            }
+
+            afterAction.Add(s.Elements.ReadKinds[^1]);
+            return ++count[0] == 4 ? Interruption(handle, readable: true) : null;
+        };
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
+        afterAction.Take(6).ShouldBe(["matching", "matching", "matching", "full", "matching", "full"]);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Interruption_while_waiting_for_Busy_is_reobserved_and_Busy_is_still_required()
+    {
+        Scenario s = Build();
+        InterruptReads(s, readable: true, 1);
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsSuccess.ShouldBeTrue(result.IsFailure ? result.Failure.TechnicalDetail : "");
+        result.Value.Busy.State.ShouldBe(MeituStartingState.Busy);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Unknown_screen_after_a_tree_change_still_stops_without_navigation()
+    {
+        Scenario s = Build(afterAction:
+            [BackgroundBusyScreen(), BackgroundBusyScreen(), ["unrecognised screen"]]);
+        InterruptReads(s, readable: true, 2);
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await Run(s);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.MeituUnknownState);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(AutomationStopMode.StopOperation)]
+    [InlineData(AutomationStopMode.TakeOver)]
+    public async Task Stop_during_tree_changes_ends_orchestration_with_no_cancel_or_return(
+        AutomationStopMode mode)
+    {
+        Scenario s = Build();
+        RequestedStop stop = new();
+        int[] count = [0];
+        s.Elements.ReadFailure = handle =>
+        {
+            if (!s.ActionInvoked || ++count[0] < 2)
+            {
+                return null;
+            }
+
+            stop.RequestedMode = mode;
+            return Interruption(handle, readable: true);
+        };
+
+        OperationResult<MeituBackgroundRemovalOutcome> result = await s.Driver.RunBackgroundRemovalAsync(
+            s.Editor,
+            ExpectedFile,
+            BackgroundRemovalDecision.UseAutomaticSelectionForReviewedContent,
+            stop,
+            CancellationToken.None);
+
+        result.IsFailure.ShouldBeTrue();
+        result.Failure.Code.ShouldBe(FailureCode.Cancelled);
+        result.Failure.Context["inputSent"].ShouldBe("false");
+        result.Failure.Context["meituCancelInvoked"].ShouldBe("false");
+        count[0].ShouldBe(2);
+        s.ActionCount.ShouldBe(1);
+        s.ReturnCount.ShouldBe(0);
+        stop.OperationCancelWasInvoked.ShouldBeFalse();
+    }
+
+    private sealed class RequestedStop : IAutomationStopSignal
+    {
+        public AutomationStopMode? RequestedMode { get; set; }
+
+        public ExternalOperationPhase Phase { get; private set; } = ExternalOperationPhase.NotStarted;
+
+        public bool OperationCancelWasInvoked { get; private set; }
+
+        public bool OperationLeftBusyAfterCancel { get; private set; }
+
+        public void ReportPhase(ExternalOperationPhase phase) => Phase = phase;
+
+        public void ReportOperationCancelOutcome(bool leftBusy)
+        {
+            OperationCancelWasInvoked = true;
+            OperationLeftBusyAfterCancel = leftBusy;
+        }
+    }
+
+    private static void InterruptReads(Scenario s, bool readable, params int[] readNumbers)
+    {
+        HashSet<int> interrupted = [.. readNumbers];
+        int count = 0;
+        s.Elements.ReadFailure = handle =>
+            s.ActionInvoked && interrupted.Contains(++count) ? Interruption(handle, readable) : null;
+    }
+
+    private static OperationFailure Interruption(WindowHandle root, bool readable) =>
+        UiReadInterruption.Create(
+            root,
+            "reading signed markers",
+            new System.Windows.Automation.ElementNotAvailableException(string.Empty),
+            readable);
+
     private static Task<OperationResult<MeituBackgroundRemovalOutcome>> Run(Scenario scenario) =>
         scenario.Driver.RunBackgroundRemovalAsync(
             scenario.Editor,

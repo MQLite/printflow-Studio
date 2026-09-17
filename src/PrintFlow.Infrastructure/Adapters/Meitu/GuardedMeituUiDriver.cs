@@ -2842,131 +2842,188 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
     {
         DateTimeOffset deadline = _clock.GetUtcNow() + timeout;
         MeituBackgroundRemovalPhase last = MeituBackgroundRemovalPhase.Unobserved;
+        OperationFailure? lastReadInterruption = null;
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            bool readInterrupted = false;
             OperationResult<MeituStateSnapshot> snapshot = ReadBackgroundRemovalPhaseSnapshot(
                 target,
                 expectedWorkingCopyFileName,
                 observedDocumentIdentity,
                 signature);
+
+            // Meitu removes its processing overlay while it presents the result, and a descendant
+            // walk that reaches a removed element fails although the owned window is intact. Such
+            // a read is discarded whole: nothing from it is classified or kept, and only the next
+            // complete observation of the same verified target, within this deadline, counts.
             if (snapshot.IsFailure)
             {
-                return snapshot;
-            }
-
-            if (snapshot.Value.State == MeituStartingState.KnownModal)
-            {
-                // §20. Recorded before the refusal, so a takeover requested a moment later
-                // resolves against the blocked screen rather than the last happy phase.
-                stop.ReportPhase(ExternalOperationPhase.UnknownOrBlocked);
-                return OperationResult.Fail<MeituStateSnapshot>(
-                    FailureCode.MeituBlockingDialog,
-                    "A Meitu-owned modal appeared during Background Removal. It was not dismissed and no " +
-                    "further input was produced.");
-            }
-
-            last = MeituBackgroundRemovalRule.Classify(signature, snapshot.Value.Observation);
-
-            if (last == MeituBackgroundRemovalPhase.Busy)
-            {
-                stop.ReportPhase(ExternalOperationPhase.Busy);
-            }
-
-            // §9, checked while Busy is still true — the only phase in which the signed cancel
-            // is eligible.
-            if (await StopDuringBusyAsync(
-                    stop, target, MeituOperation.RemoveBackground, expectedWorkingCopyFileName,
-                    cancellationToken).ConfigureAwait(false) is { } stopped)
-            {
-                return OperationResult.Fail<MeituStateSnapshot>(stopped);
-            }
-
-            if (last == wanted)
-            {
-                if (wanted == MeituBackgroundRemovalPhase.Busy)
+                if (!UiReadInterruption.IsDescendantChange(snapshot.Failure))
                 {
                     return snapshot;
                 }
 
-                // Completion controls persist, unlike the short-lived progress messages. Once
-                // the fast signed-marker read sees them, take the ordinary full observation so
-                // the returned evidence still includes the editor state and modal checks.
-                OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
-                    target,
-                    expectedWorkingCopyFileName,
-                    observedDocumentIdentity,
-                    cancellationToken).ConfigureAwait(false);
-                if (full.IsFailure)
-                {
-                    return full;
-                }
-
-                if (MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation) == wanted)
-                {
-                    return full;
-                }
-
-                last = MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation);
+                lastReadInterruption = snapshot.Failure;
+                readInterrupted = true;
             }
-
-            if (last == MeituBackgroundRemovalPhase.Unobserved)
+            else
             {
-                // The fast operation-specific read intentionally sees only Busy/result markers.
-                // Distinguish an ordinary, still-recognised editor (which may legitimately take
-                // a moment to show Busy) from a genuinely Unknown screen, which must stop now.
-                OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
-                    target,
-                    expectedWorkingCopyFileName,
-                    observedDocumentIdentity,
-                    cancellationToken).ConfigureAwait(false);
-                if (full.IsFailure)
+                if (snapshot.Value.State == MeituStartingState.KnownModal)
                 {
-                    return full;
-                }
-
-                if (full.Value.State == MeituStartingState.KnownModal)
-                {
+                    // §20. Recorded before the refusal, so a takeover requested a moment later
+                    // resolves against the blocked screen rather than the last happy phase.
+                    stop.ReportPhase(ExternalOperationPhase.UnknownOrBlocked);
                     return OperationResult.Fail<MeituStateSnapshot>(
                         FailureCode.MeituBlockingDialog,
-                        "A Meitu-owned modal appeared during Background Removal. It was not " +
-                        "dismissed and no further input was produced.");
+                        "A Meitu-owned modal appeared during Background Removal. It was not dismissed and no " +
+                        "further input was produced.");
                 }
 
-                if (full.Value.State == MeituStartingState.Unknown)
+                last = MeituBackgroundRemovalRule.Classify(signature, snapshot.Value.Observation);
+
+                if (last == MeituBackgroundRemovalPhase.Busy)
                 {
-                    return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
-                        FailureCode.MeituUnknownState,
-                        "Meitu changed to an unrecognised editor state during Background Removal. " +
-                        "PrintFlow stopped without navigation, export or further input.",
-                        isRetryable: true,
-                        context: new Dictionary<string, string>
-                        {
-                            ["phase"] = last.ToString(),
-                            ["inputSent"] = "false",
-                            ["exported"] = "false",
-                            ["operatorActionRequired"] = "true",
-                        }));
+                    stop.ReportPhase(ExternalOperationPhase.Busy);
                 }
+
+                // §9, checked while Busy is still true — the only phase in which the signed cancel
+                // is eligible.
+                if (await StopDuringBusyAsync(
+                        stop, target, MeituOperation.RemoveBackground, expectedWorkingCopyFileName,
+                        cancellationToken).ConfigureAwait(false) is { } stopped)
+                {
+                    return OperationResult.Fail<MeituStateSnapshot>(stopped);
+                }
+
+                if (last == wanted)
+                {
+                    if (wanted == MeituBackgroundRemovalPhase.Busy)
+                    {
+                        return snapshot;
+                    }
+
+                    // Completion controls persist, unlike the short-lived progress messages. Once
+                    // the fast signed-marker read sees them, take the ordinary full observation so
+                    // the returned evidence still includes the editor state and modal checks.
+                    OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
+                        target,
+                        expectedWorkingCopyFileName,
+                        observedDocumentIdentity,
+                        cancellationToken).ConfigureAwait(false);
+                    if (full.IsFailure)
+                    {
+                        if (!UiReadInterruption.IsDescendantChange(full.Failure))
+                        {
+                            return full;
+                        }
+
+                        // The fast read alone is not a completion claim, so it is not kept as one.
+                        lastReadInterruption = full.Failure;
+                        readInterrupted = true;
+                        last = MeituBackgroundRemovalPhase.Unobserved;
+                    }
+                    else if (MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation) == wanted)
+                    {
+                        return full;
+                    }
+                    else
+                    {
+                        last = MeituBackgroundRemovalRule.Classify(signature, full.Value.Observation);
+                    }
+                }
+
+                // Only a completed, uninterrupted pass may judge the general editor state; a
+                // discarded completion read waits for the next poll instead.
+                if (!readInterrupted && last == MeituBackgroundRemovalPhase.Unobserved)
+                {
+                    // The fast operation-specific read intentionally sees only Busy/result markers.
+                    // Distinguish an ordinary, still-recognised editor (which may legitimately take
+                    // a moment to show Busy) from a genuinely Unknown screen, which must stop now.
+                    OperationResult<MeituStateSnapshot> full = await InspectStateCoreAsync(
+                        target,
+                        expectedWorkingCopyFileName,
+                        observedDocumentIdentity,
+                        cancellationToken).ConfigureAwait(false);
+                    if (full.IsFailure)
+                    {
+                        if (!UiReadInterruption.IsDescendantChange(full.Failure))
+                        {
+                            return full;
+                        }
+
+                        lastReadInterruption = full.Failure;
+                        readInterrupted = true;
+                    }
+                    else if (full.Value.State == MeituStartingState.KnownModal)
+                    {
+                        return OperationResult.Fail<MeituStateSnapshot>(
+                            FailureCode.MeituBlockingDialog,
+                            "A Meitu-owned modal appeared during Background Removal. It was not " +
+                            "dismissed and no further input was produced.");
+                    }
+                    else if (full.Value.State == MeituStartingState.Unknown)
+                    {
+                        return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                            FailureCode.MeituUnknownState,
+                            "Meitu changed to an unrecognised editor state during Background Removal. " +
+                            "PrintFlow stopped without navigation, export or further input.",
+                            isRetryable: true,
+                            context: new Dictionary<string, string>
+                            {
+                                ["phase"] = last.ToString(),
+                                ["inputSent"] = "false",
+                                ["exported"] = "false",
+                                ["operatorActionRequired"] = "true",
+                            }));
+                    }
+                }
+            }
+
+            // A discarded read cannot establish the Busy phase that Meitu's cancel requires, so a
+            // stop requested meanwhile ends orchestration at once with no input of any kind.
+            if (readInterrupted && stop.RequestedMode is { } requestedStop)
+            {
+                return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
+                    FailureCode.Cancelled,
+                    $"The operator requested '{requestedStop}' while Meitu's screen was changing during " +
+                    "Background Removal. PrintFlow produced no further input: nothing was cancelled, " +
+                    "dismissed or closed, and the operation may still be running.",
+                    isRetryable: true,
+                    context: new Dictionary<string, string>
+                    {
+                        ["stopMode"] = requestedStop.ToString(),
+                        ["phase"] = stop.Phase.ToString(),
+                        ["lastReadInterruption"] = lastReadInterruption!.TechnicalDetail,
+                        ["inputSent"] = "false",
+                        ["meituCancelInvoked"] = "false",
+                        ["forceTerminationInvoked"] = "false",
+                    }));
             }
 
             if (_clock.GetUtcNow() >= deadline)
             {
+                Dictionary<string, string> context = new()
+                {
+                    ["wantedPhase"] = wanted.ToString(),
+                    ["lastPhase"] = last.ToString(),
+                    ["exported"] = "false",
+                    ["revisionCreated"] = "false",
+                    ["retainedExternalState"] = wanted == MeituBackgroundRemovalPhase.Complete
+                        ? "possibly-busy"
+                        : "unknown",
+                };
+                if (lastReadInterruption is not null)
+                {
+                    context["lastReadInterruption"] = lastReadInterruption.TechnicalDetail;
+                }
+
                 return OperationResult.Fail<MeituStateSnapshot>(OperationFailure.Create(
                     FailureCode.Timeout,
                     $"Meitu did not reach the signed Background Removal '{wanted}' state within " +
                     $"{timeout.TotalSeconds:0} s; last phase was '{last}'. No export or Revision exists.",
                     isRetryable: true,
-                    context: new Dictionary<string, string>
-                    {
-                        ["wantedPhase"] = wanted.ToString(),
-                        ["lastPhase"] = last.ToString(),
-                        ["exported"] = "false",
-                        ["revisionCreated"] = "false",
-                        ["retainedExternalState"] = wanted == MeituBackgroundRemovalPhase.Complete
-                            ? "possibly-busy"
-                            : "unknown",
-                    }));
+                    context: context));
             }
 
             await Task.Delay(_options.PollInterval, _clock, cancellationToken).ConfigureAwait(false);
