@@ -1,5 +1,53 @@
 # PF-ACCEPT-A2 — Publish the bound revalidation and verify the normal Product gate
 
+## Final outcome — 17 September: qualification FAILED
+
+Current Product/test source `95bfa1bc817db7717d870fbaade2df4301b4616c`; pair
+`d2a0a55e-6f02-43f9-bd89-8e0ee3138dde`. Targeted190/190, independent safety re-review,
+incident-bound recovery, fresh focused live proof, and full suite11953/11953 passed.
+Complete v3 run `a2-v3-20260917-131609-d2a0a55e` FAILED:2 Passed,1 Pending,4 Failed.
+Portrait completed the repaired Save path and awaits its own visual review. Fine-hair failed
+in BackgroundRemoval signed-marker reading; remaining external categories were blocked.
+The retained screenshot shows a visible cutout editor, so actual process/handle destruction
+is not proven. No unchanged retry or post-outcome input. Stop at the requested new outcome.
+
+See RECOVERY.md's final section for exact result/artifact paths, hashes, pending review question,
+and unresolved failure evidence. A portrait approval cannot turn this failed run into a pass.
+Original A1 PASS/pair, both prior failed results, accepted1.18.0 and active record are preserved;
+all29 preservation hashes match and shared lease is released. No replacement publication or A3.
+Historical pending statements below describe earlier phases, not current status.
+## Current continuation — 17 September 2026: Meitu Save identity
+
+The user authorizes scoped Save-surface diagnosis, safe recovery, minimal ordinary Product/test
+correction and complete v3 requalification after demonstrated relevant correction or positively
+verified state recovery and focused proof. This supersedes historical prompt19 section7's one-run
+limit below. Every actual run needs a fresh RunId and a matched immutable pair, explicit
+`D:\PrintFlowStudio\TestData\v3`, no category filter, executable override, diagnostic-unbound
+mode, build/restore within the complete run, or outer competing lease. Preserve all earlier runs.
+
+Started clean on master at `905263abdf00bbcc2cbe069b3d1633abb4d34e37`; no reset.
+At startup, the retained pair0298 source revision had the same Product/test source as HEAD
+(intervening changes were A2 documentation only). Subsequent pairs are recorded below.
+
+Sequence: inspect retained evidence and current source; establish current exclusive availability;
+prove native/UIA Save-to-editor/document relationship and caller operation; reproduce at the
+appropriate seam; make only evidence-supported Product/test corrections; perform focused proof
+and final-source QA; then run the complete qualification using its verified pair. Stop for exact
+new Operator visual decisions when needed, with paths/hashes/questions; do not transfer approvals.
+
+Routing: EXECUTE_HANDOFF, NormalRoute/RequestedRoute Astra High for tightly coupled guarded UI
+identity/recovery diagnosis, RouteOffset0 (explicit), AdjustmentResult UNCHANGED. ActualRoute
+UNVERIFIED; MODEL_SWITCH_UNAVAILABLE in the active context. No model switch is claimed. Reassess
+at the diagnosis/implementation boundary; separable safety implementation targets Sol High and
+any required independent review needs a genuinely fresh context. This was the startup routing assessment; implementation and review are recorded below.
+
+The operator continued after the one availability request; that confirmation is reused while
+valid. Current native evidence proves a standalone directly owned Save dialog, not an embedded
+panel. Exact foreground remains required. Correction98534a4/pair680dde3e passed188 targeted
+tests and independent safety re-review; explicit retained-synthetic cancellation plus fresh
+identity/close passed, and a fresh focused enhancement/export/close passed. Full paired suite
+and complete v3 qualification followed. Pair680dde3e passed11951/11951 tests, but its complete run failed on a second-read Save activation race. The corrected source95bfa1b/paird2a0a55e passed190 targeted tests, independent safety re-review, pinned retained-fixture recovery and fresh focused enhancement/export/close. Final paired suite and complete v3 are now next. See RECOVERY.md. No A3 or publication.
+
 ## Authority and scope
 
 User-authorized A2 only, 16 September 2026. Codex is the A2 executor; Claude Code is the next

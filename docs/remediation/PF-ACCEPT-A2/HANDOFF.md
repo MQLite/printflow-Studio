@@ -1,5 +1,65 @@
 # PF-ACCEPT-A2 — Handoff
 
+## Final outcome — 17 September: qualification FAILED
+
+Current Product/test source `95bfa1bc817db7717d870fbaade2df4301b4616c`; pair
+`d2a0a55e-6f02-43f9-bd89-8e0ee3138dde`. Targeted190/190, independent safety re-review,
+incident-bound recovery, fresh focused live proof, and full suite11953/11953 passed.
+Complete v3 run `a2-v3-20260917-131609-d2a0a55e` FAILED:2 Passed,1 Pending,4 Failed.
+Portrait completed the repaired Save path and awaits its own visual review. Fine-hair failed
+in BackgroundRemoval signed-marker reading; remaining external categories were blocked.
+The retained screenshot shows a visible cutout editor, so actual process/handle destruction
+is not proven. No unchanged retry or post-outcome input. Stop at the requested new outcome.
+
+See RECOVERY.md's final section for exact result/artifact paths, hashes, pending review question,
+and unresolved failure evidence. A portrait approval cannot turn this failed run into a pass.
+Original A1 PASS/pair, both prior failed results, accepted1.18.0 and active record are preserved;
+all29 preservation hashes match and shared lease is released. No replacement publication or A3.
+Historical pending statements below describe earlier phases, not current status.
+## Current state — final transition correction under qualification
+
+Source `95bfa1bc817db7717d870fbaade2df4301b4616c`, immutable pair
+`d2a0a55e-6f02-43f9-bd89-8e0ee3138dde`. Pair680dde3e's complete run failed at a proven
+second-read discovery race and is preserved. The correction accepts only the exact Save
+foreground transition after re-verification. Targeted190/190 and independent safety re-review
+passed. Pinned recovery cancelled the retained fixture probe, then used fresh ordinary identity
+before close; a new focused enhancement/export/close passed. The full paired suite and complete
+v3 outcome remain pending. See RECOVERY.md for precise evidence. No publication or A3.
+## Latest continuation — 17 September: correction and focused proof complete
+
+The operator continued after the one availability request. Native evidence proved a standalone
+owned Save dialog; the Product correction retains exact foreground and adds exact owner checking
+plus bounded activation/reacquisition. Source98534a4, immutable pair680dde3e, targeted188/188,
+independent safety re-review without remaining blocking findings. Incident-bound cancellation,
+fresh ordinary identity probe and empty-editor close passed; a fresh full Meitu focused
+open/enhance/export/close passed. Full paired suite and v3 outcome are pending; see RECOVERY.md.
+No generic editable-Save-field recovery was accepted, no admission opened and no publication.
+
+### Earlier startup observation, preserved for chronology
+
+New user authorization supersedes all historical statements below that prompt19's numerical
+one-run limit prevents another qualification. Proceed after demonstrated relevant correction or
+positively verified recovery and focused proof; preserve prior results and use fresh RunIds and
+matched immutable pairs. A3 remains separately authorized later Claude Code work.
+
+Started at actual HEAD `905263abdf00bbcc2cbe069b3d1633abb4d34e37`, clean master, no reset.
+Read retained records/evidence and current source. All29 preservation hashes and primary failed
+result hash match. The current source has no Product/test changes relative to pair0298's source.
+Evidence: `artifacts/pf-accept-a2/meitu-save-20260917-preservation.json`.
+
+Caller identified: Save document-identity probe; both filename read and cancellation reject the
+same foreground mismatch. Not an export or format-popup call. Nested UIA SaveMaskWidget is known,
+but native embedded-vs-owned-dialog relationship is not yet proven. `FindOwnedDialogs` only
+checks a nonzero owner on same-process top-level windows, not exact editor ownership; do not use
+that as authorization to weaken the foreground requirement. Full detail is in RECOVERY.md.
+
+Current permitted Computer Use inventory returned a different, minimized Meitu window; capture
+refused until activation. No activation or input sent. Photoshop has restarted since the prior
+confirmation. One current exclusive-window/saved-customer-work confirmation was requested and
+is pending. Resume from that answer with fresh observations; do not ask again once confirmed.
+No new code/test changes, pair, live recovery, tests or complete run yet. No publication.
+Actual model/effort UNVERIFIED; no parent model switch claimed. See PLAN.md for route targets.
+
 **Latest continuation: Photoshop recovery and complete fresh round trip are verified after
 Product repair. Replacement qualification FAILED at a separate Meitu Save-surface foreground
 guard (2/7 categories passed). Ordinary A2 admission is CLOSED. A1's original PASS and

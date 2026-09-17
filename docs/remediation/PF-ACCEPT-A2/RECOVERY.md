@@ -1,5 +1,201 @@
 # A2 recovery continuation — 16 September 2026
 
+## Final qualification outcome — 17 September 2026
+
+**FAILED; ordinary A2 admission remains closed. Stop at this new qualification outcome.**
+Final source `95bfa1bc817db7717d870fbaade2df4301b4616c`, pair
+`d2a0a55e-6f02-43f9-bd89-8e0ee3138dde`. Full immutable-harness suite passed
+11953/11953, zero failures/skips (5m38s). Recovery and focused live proof passed as recorded below.
+
+Complete run `a2-v3-20260917-131609-d2a0a55e`, invocation
+`838fa069-00bc-4eae-87aa-f07bfac1be92`, explicitly selected `D:\PrintFlowStudio\TestData\v3`.
+No category filter, executable override, diagnostic-unbound mode, build/restore inside the run,
+or outer lease. Pair receipt verified; recorded CandidateProblems remains `[]`, unedited.
+Result: `D:\PrintFlowStudio\TestData\v3\runs\a2-v3-20260917-131609-d2a0a55e\result.json`.
+Result SHA256: `87637FAC27ED031646CB11997079274A0B9B6FB11179C251CE73F765603BE2FD`.
+Readiness at01:16:25Z was Verified, including the repaired Photoshop test-image round trip.
+
+- NORMAL_JPG_PORTRAIT: Pending visual review; the repaired Save identity path completed,
+  enhancement produced1200x1600 and the same bytes were promoted unchanged.
+- COMPLEX_BACKGROUND_FINE_HAIR: Failed during BackgroundRemoval signed-marker reading,
+  `MeituTargetLost: Window 0x1D0376 disappeared while reading signed markers:`.
+- TRANSPARENT_PNG and REFERENCE_PRODUCTION_TIFF: Passed.
+- COMPLETE_CUSTOMER_DESIGN, PSD_WITH_COMPOSITE_PREVIEW and SINGLE_PAGE_PDF: Failed/blocked
+  by subsequent workstation readiness checks. They did not qualify.
+
+The failed run's DB ties the error to BackgroundRemoval at01:17:09.455Z, session
+`01a0acf0-0579-791e-b293-528b18ec72d8`, attempt `01a0acf0-0657-7225-91e3-4ac80f615fe7`.
+It records expected output
+`D:\PrintFlowStudio\Sessions\S_20260917T011646Z_18ec72d8\Working\01a0acf0-0657-7225-91e3-4ac80f615fe7\FIX-FINE-HAIR-001_CUTOUT.png`.
+No fine-hair artifact was produced in the result. Retained failure screenshot:
+`D:\PrintFlowStudio\Evidence\20260917T011709Z_background-removal-c1-failed_1D0376.png`.
+Inspection shows the Meitu cutout screen and fixture still visible. The failure text therefore
+must not be promoted to proof of process crash or native HWND destruction; the exact marker-read
+failure cause remains unproven. Historical HWNDs remain evidence only. No unchanged retry,
+new input, Save/discard, cancellation or close was attempted after this outcome.
+
+### Exact pending visual decision (not sufficient to qualify this failed run)
+
+ID `PORTRAIT-VISUAL-001`; no decision recorded or old approval transferred.
+Artifact: `D:\PrintFlowStudio\TestData\v3\runs\a2-v3-20260917-131609-d2a0a55e\FIX-PORTRAIT-001-enhanced.png`.
+Recomputed SHA256: `05500FA29028CC9228800C7C477CEDC77041CE3DB2C8AD2EF9AE72D567888825`.
+Question: Does the enhanced export still look like a correctly enhanced portrait — subject sharp,
+skin tone unshifted, no visible artefact introduced along the hair or shoulder edges?
+A positive portrait decision alone cannot repair the other failed categories or authorize publication.
+
+All29 original preservation hashes still match after qualification. Both prior failed results are
+unchanged, original A1 pair inventory verifies, accepted1.18.0 and active revalidation are unchanged.
+Final read-only shared-lease observation has null owner/process/acquisition fields. Evidence:
+`artifacts/pf-accept-a2/meitu-save-final-outcome-preservation.json`,
+`meitu-save-transition-final-lease.json`, `meitu-save-transition-final-review.json`,
+`meitu-save-transition-qualification-automation-log.json`, and the fresh run log.
+Source/test commits6e97aed,98534a4,95bfa1b are retained locally. No preset/set edits, publication,
+install, deploy, push, signing, Jira changes, unrelated repair or A3. No numerical allowance is
+requested: this stop follows the requested new qualification outcome, not a lifetime run limit.
+
+Routing reassessed at outcome/recordkeeping: safety analysis remains Astra High target at offset0;
+mechanical records would target Luna Low. ActualRoute remains UNVERIFIED with
+MODEL_SWITCH_UNAVAILABLE; no downgrade or model switch is claimed. Independent review used a
+fresh reviewer context as documented; no additional agent or task was created for recordkeeping.
+## Latest continuation — 17 September: verified discovery transition
+
+The first corrected pair680dde3e passed the full paired suite (11951/11951) and focused
+live proof, then complete run `a2-v3-20260917-125900-680dde3e` FAILED (2/7). Its result
+SHA256 is `1BA3E562900AE35C11E1F4CB90762D9E87C61984EBC792FC33DBF68E62864F11`.
+It remains immutable. Binding.CandidateProblems is the recorded empty array; nothing was removed.
+The portrait failure records expected Save HWND equal to actual foreground HWND: Qt completed
+activation during signed-control discovery, between the two foreground reads. The second check
+incorrectly required the editor even after the desired exact Save transition had completed.
+Getter-only observation confirmed the same directly owned standalone native dialog, with the
+retained portrait filename. No embedded-panel exception was introduced.
+
+Final Product source `95bfa1bc817db7717d870fbaade2df4301b4616c` accepts that observed exact
+Save handle/PID transition only by rerunning the existing owner and exact-foreground verification.
+It does not relax another-foreground rejection or change timeouts. The regression reproduced the
+failure before the correction; final targeted tests passed190/190. Fresh independent safety
+re-review found no blocking findings in the change or the incident-bound recovery wrapper.
+
+New immutable pair: `d2a0a55e-6f02-43f9-bd89-8e0ee3138dde`; receipt SHA256
+`78880DAF3AF5F81F71741B7A0EAE6525FCF6FBC56F43D0326199200B84FF0BFF`.
+The gated recovery validated the failed result, its receipt, run DB, IMPORT identity and exact
+working file, plus current executable/process/native owner/control identity, under the real
+shared lease. It cancelled only that interrupted identity probe, then generated a fresh ordinary
+identity probe before closing the verified fixture to KnownEditorEmpty. No Save/discard/cleanup.
+Working file SHA256 remained `F4CAD2A1EC7994E42E2A77CC6F30E29DE91D344821E4EE7AC01C7E712D9A4634`.
+Recovery log: `artifacts/pf-accept-a2/a2-meitu-recovery-20260917-1310-d2a0a55e.log`
+(actual observation at01:09:01Z; the log label is not a timestamp authority).
+Fresh focused proof `a2-meitu-focused-20260917-1309-d2a0a55e` completed open/identity,
+enhancement completion, destination/read-back/PNG export, unchanged source, result dismissal
+and empty-editor close. Its UTF-8 transcript is retained next to the log. Full paired suite and
+fresh complete v3 qualification are in progress; no replacement revalidation has been published.
+## Current execution — 17 September: owned dialog proved and corrected
+
+The operator replied "Please continue" to the one pending availability/saved-work request;
+execution resumed within that exclusive session. No repeat confirmation is required while valid.
+Restoring the freshly returned Meitu window showed the welcome page, not the retained panel.
+Its prior dismissal cause is unknown. Current state was saved in
+`meitu-save-20260917-current-welcome.json` under `artifacts/pf-accept-a2`.
+
+Verified retained pair0298 and ran fresh synthetic focused attempt
+`a2-meitu-focused-20260917-123444-0298e108` under the canonical shared lease. Initial open/identity
+succeeded; the pre-enhancement identity probe reproduced the foreground failure. No enhancement
+or export occurred. The legacy smoke returns a passing xUnit test even for a guarded refusal;
+the transcript, not that wrapper exit code, establishes this FAILED focused operation.
+Its transcript is retained unchanged, SHA256
+`4208DE5118CED3C4C9A5CFDCA95791CA77048BB519D005616CDC18F27792E886`.
+
+Getter-only observation pair `0f848376-ffe7-4bf7-a586-a35573917eb9`, source `6e97aed`,
+at00:37:55Z proves Save HWND0x420CF0 has direct GW_OWNER0x1D0376, style0x96080000
+(WS_POPUP, not WS_CHILD), title Form, class Qt51517QWindowToolSaveBits, visible/enabled.
+The exact editor0x1D0376 was disabled; UIA shows MainWindow.MaskDialog directly under MainWindow.
+Its default filename was the exact retained synthetic `PF_BACKGROUND_C1_826D74B4797B_副本`.
+Thus this is a standalone native owned dialog even though UIA nests it beneath the editor;
+it is not authority for an embedded-panel foreground exception. These HWNDs are evidence only.
+Raw log: `a2-meitu-readonly-20260917-0037-0f848376.log`; UIA snapshot:
+`meitu-save-20260917-focused-failure-uia.json`.
+
+Product source `98534a4ba73afedfcfb2094703175dc5d02737d2` preserves exact-dialog foreground.
+It records direct native ownership, verifies the exact editor host and signed Save controls,
+and activates/reacquires only that standalone dialog while the exact editor retains foreground,
+within the original DialogTimeout. It re-enumerates replacement HWNDs and rechecks before read
+and cancel. Same-process alternate owners/foregrounds, ambiguous dialogs and failed activation
+refuse input. No timeout or preset changes; export destination/read-back/output guards unchanged.
+
+A fresh independent safety reviewer rejected an intermediate generic pending-dialog recovery:
+an editable filename must not become document identity. That branch was removed before any live
+execution. Ordinary Confirm continues to refuse unsolicited pending dialogs. Re-review found no
+remaining blocking code finding. A separate incident-bound, opt-in smoke validates the recorded
+failed transcript hash, exact synthetic source path/hash, accepted executable and process start,
+fresh native owner and signed controls; it calls Product's guarded cancellation only, then a
+fresh ordinary identity probe before close. It is not general recovery authorization or ordinary
+admission. The normal Product correction is the dialog transition handling, not that smoke.
+
+Final-source targeted tests passed188/188, including red→green regression, wrong owner, unrelated
+same-process foreground, refused activation, replacement dialog, unsolicited pending Save and
+cancelled cancellation. The independent review used an isolated native sub-agent, requested Astra
+High at offset0; actual model/effort metadata UNVERIFIED, no parent switch claimed. The UI/native
+safety work remains tightly coupled; no downgrade is claimed. Mechanical recordkeeping remains
+in this context as a disclosed fallback (MODEL_SWITCH_UNAVAILABLE).
+
+Corrected pair `680dde3e-c12a-4d10-9d8f-d19d6a625241` was built and verified from source98534a4.
+`a2-meitu-recovery-20260917-0052-680dde3e` passed at00:51:55Z: cancel-only, fresh exact identity,
+KnownEditorEmpty. Retained synthetic backing file unchanged, SHA256
+`C2BFBF036791E041BAA05E229992D84816BD5F3D9DD76997CEB386187FC20E65`; no save/discard/cleanup.
+Fresh focused attempt `a2-meitu-focused-20260917-125218-680dde3e` then completed identity,
+enhancement, PNG export1280x960, source unchanged, result dismissal and empty-editor close.
+Output hash5207F744E04267CE1AA68BEAC7C0602CF5FBA62A8D17A2EA9B3139417F643ECC is smoke proof
+only; its normal temporary cleanup ran. Raw log and UTF-8 transcript are retained in A2 artifacts.
+v3 preflight passed7/7 with explicit set root. Final paired full-suite and qualification outcome
+will be recorded below; no replacement revalidation has been published.
+
+## Earlier observation — 17 September: availability pending before operator continuation
+
+The new user authorization supersedes the one-complete-run limit in the historical entries below.
+Further complete runs are authorized after demonstrated relevant correction or positively verified
+state recovery plus focused proof, with a fresh RunId and matched immutable pair each time.
+No numerical allowance needs to be requested merely because an earlier run failed.
+
+Actual starting HEAD: `905263abdf00bbcc2cbe069b3d1633abb4d34e37`, master, clean; no reset.
+Current source was inspected after the latest RECOVERY/PLAN/HANDOFF. Relative to retained pair0298's
+source f27fce1, HEAD changes only these A2 documents, not Product/test source.
+
+Primary incident remains `a2-v3-20260916-181700-fa0c9a3e`, Failed. Its result hash still matches
+`1BCB9EBB2477201E2E06AC40A40029A40CB1F278395C6E1AC3521E971234272D`.
+All29 primary preservation hashes rechecked with zero mismatches, including original A1 evidence,
+accepted preset and active record. New local evidence:
+`artifacts/pf-accept-a2/meitu-save-20260917-preservation.json`.
+
+The exact failure text maps to `GuardedMeituUiDriver.VerifyIdentityDialog`, called by
+`ReadIdentityValue` and `CancelIdentityDialogAsync` within `ConfirmWorkingCopyIdentityAsync`.
+The operation opens Save as a document-identity probe, attempts a filename read, then attempts
+cancel even if the read failed. The same foreground mismatch rejects both before a value read or
+cancel invocation. The returned failure is the cancel failure, masking the identical earlier read
+failure. This is not evidence of an export or format-popup operation. No Save/SaveAs is invoked
+by this identity route; its initial action is the editor control that presents the Save surface.
+
+The retained UIA tree proves a nested `MainWindow.MaskDialog.MaskCenterWidget.SaveMaskWidget`
+presentation, but does not record sufficient native owner/parent/style identity to distinguish an
+embedded panel from an owned top-level dialog. Current `FindOwnedDialogs` enumerates top-level
+same-process windows having any nonzero GW_OWNER; it does not compare that owner to the expected
+editor. Therefore that lookup alone cannot authorize an embedded-surface foreground exception.
+No guard has been relaxed based on PID, title prefix or broad ancestry.
+
+Permitted Computer Use initialization and list_apps succeeded. Its currently returned unique
+Meitu window id is12455402, title 美图秀秀; read-only get_window_state refused because the window
+is minimized. No activation/input followed. Process metadata shows Meitu PID5980 still started
+16 September15:38:11 local, while Photoshop is now PID24172, started17 September10:43:52 local.
+Yesterday's desktop/empty-document observations are therefore not current proof. Historical HWNDs
+were not used as selectors. One current exclusive-window/customer-work-saved confirmation is
+pending; no duplicate request has been issued.
+
+Next: after that confirmation, freshly reacquire/observe the current Meitu target, prove the
+native/UIA relationship and exact document, and construct focused proof before any correction or
+complete run. If the retained panel is absent, record that fact without inventing its dismissal
+cause or inferring document safety. Use the real shared lease for Product execution. No lease was
+acquired in this read-only continuation; yesterday's free-lease result is not a current claim.
+No code/test change, build, test execution, recovery input, complete run or publication occurred.
+Qualification remains unresolved and admission has not been reopened. No A3.
+
 Status: Photoshop recovery and fresh round trip verified; replacement qualification FAILED
 at a separate Meitu Save-surface foreground guard. Ordinary A2 admission remains CLOSED.
 This report appends current evidence without replacing the historical failed attempt.
