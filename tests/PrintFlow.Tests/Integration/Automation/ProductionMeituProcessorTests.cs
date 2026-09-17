@@ -511,7 +511,8 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         ExternalWindowRef dialog = MeituFakes.Window(
             handle: 0x2000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
         ExternalWindowRef saveDialog = MeituFakes.Window(
-            handle: 0x6000, owningProcessId: process.ProcessId, title: "Form", className: "QtSaveDialog");
+            handle: 0x6000, owningProcessId: process.ProcessId, title: "Form", className: "QtSaveDialog")
+            with { OwnerHandle = window.Handle };
         // Only the start page exists to begin with; the editor and the picker appear as they are
         // asked for, below.
         h.Locator.Register(process, window);
@@ -521,6 +522,7 @@ public sealed class ProductionMeituProcessorTests : IDisposable
         // been invoked, exactly as on the workstation (Part B1 §7).
         ExternalWindowRef editor = MeituFakes.Window(
             handle: 0x5000, owningProcessId: process.ProcessId, title: MeituFakes.EditorTitle);
+        saveDialog = saveDialog with { OwnerHandle = editor.Handle };
 
         h.Elements.AddStartPageCard(window.Handle, "图片编辑", processId: process.ProcessId);
         h.Elements.AddEditorOpenControl(editor.Handle, process.ProcessId);

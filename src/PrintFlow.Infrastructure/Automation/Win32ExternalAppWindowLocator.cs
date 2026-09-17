@@ -303,7 +303,10 @@ public sealed class Win32ExternalAppWindowLocator : IExternalAppWindowLocator
             new WindowBounds(rect.Left, rect.Top, rect.Right, rect.Bottom),
             NativeMethods.IsWindowVisible(handle),
             NativeMethods.IsIconic(handle),
-            NativeMethods.IsWindowEnabled(handle));
+            NativeMethods.IsWindowEnabled(handle))
+        {
+            OwnerHandle = new WindowHandle(NativeMethods.GetWindow(handle, NativeMethods.GW_OWNER)),
+        };
     }
 
     private static string ReadText(Func<nint, ushort[], int, int> read, nint handle)

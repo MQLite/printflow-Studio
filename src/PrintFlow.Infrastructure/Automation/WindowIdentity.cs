@@ -62,7 +62,11 @@ public sealed record ExternalWindowRef(
     WindowBounds Bounds,
     bool IsVisible,
     bool IsMinimised,
-    bool IsEnabled);
+    bool IsEnabled)
+{
+    /// <summary>Direct native GW_OWNER, read with this snapshot; never inferred from process or ancestry.</summary>
+    public WindowHandle OwnerHandle { get; init; }
+}
 
 /// <summary>What currently holds the foreground, as read from the OS at one instant.</summary>
 /// <param name="Handle">The foreground window, or <see cref="WindowHandle.None"/> when there is none.</param>

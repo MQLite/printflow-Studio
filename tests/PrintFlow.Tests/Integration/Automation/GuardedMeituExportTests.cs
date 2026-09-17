@@ -106,7 +106,7 @@ public sealed class GuardedMeituExportTests
         ExternalWindowRef editorWindow = MeituFakes.Window(title: MeituFakes.EditorTitle);
         ExternalWindowRef surface = MeituFakes.Window(
             handle: 0x6000, owningProcessId: process.ProcessId, title: "Form",
-            className: MeituFakes.ExportSurfaceClass);
+            className: MeituFakes.ExportSurfaceClass) with { OwnerHandle = editorWindow.Handle };
         ExternalWindowRef resultSurface = MeituFakes.Window(
             handle: 0x6100, owningProcessId: process.ProcessId, title: "Form",
             className: MeituFakes.ExportSurfaceClass);

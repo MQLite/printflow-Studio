@@ -51,7 +51,7 @@ public sealed class GuardedMeituBackgroundRemovalTests
         ExternalWindowRef editorWindow = MeituFakes.Window(title: MeituFakes.EditorTitle);
         ExternalWindowRef saveSurface = MeituFakes.Window(
             handle: 0x6000, owningProcessId: process.ProcessId,
-            title: "Form", className: "QtSaveDialog");
+            title: "Form", className: "QtSaveDialog") with { OwnerHandle = editorWindow.Handle };
 
         FakeWindowLocator locator = new();
         RecordingUiElementProvider elements = new();

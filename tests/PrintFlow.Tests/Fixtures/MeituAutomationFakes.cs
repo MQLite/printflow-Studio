@@ -507,6 +507,8 @@ internal sealed class FakeWindowLocator : IExternalAppWindowLocator
     /// <summary>When true, activation is requested but the foreground never changes.</summary>
     public bool RefuseActivation { get; set; }
 
+    public Action<ExternalWindowRef>? OnActivate { get; set; }
+
     public OperationResult<Unit> Activate(ExternalWindowRef window)
     {
         ActivationRequests++;
@@ -514,6 +516,8 @@ internal sealed class FakeWindowLocator : IExternalAppWindowLocator
         {
             PutInForeground(window);
         }
+
+        OnActivate?.Invoke(window);
 
         return OperationResult.Ok();
     }

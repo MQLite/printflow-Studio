@@ -155,7 +155,7 @@ public sealed class ProductionMeituExportTests : IDisposable
             handle: 0x5000, owningProcessId: process.ProcessId, title: "打开", className: "#32770");
         ExternalWindowRef surface = MeituFakes.Window(
             handle: 0x6000, owningProcessId: process.ProcessId, title: "Form",
-            className: MeituFakes.ExportSurfaceClass);
+            className: MeituFakes.ExportSurfaceClass) with { OwnerHandle = editor.Handle };
         ExternalWindowRef result = MeituFakes.Window(
             handle: 0x6100, owningProcessId: process.ProcessId, title: "Form",
             className: MeituFakes.ExportSurfaceClass);

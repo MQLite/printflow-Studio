@@ -1353,12 +1353,13 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         return _elements.GetValue(field.Value);
     }
 
-    private async Task<OperationResult<Unit>> CancelIdentityDialogAsync(
+    internal async Task<OperationResult<Unit>> CancelIdentityDialogAsync(
         MeituTarget target,
         ExternalWindowRef dialog,
         MeituDocumentIdentitySignature signature,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         OperationResult<ExternalWindowRef> verified = VerifyIdentityDialog(target, dialog.Handle, signature);
         if (verified.IsFailure)
         {
@@ -1379,6 +1380,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
             return OperationResult.Fail<Unit>(verified.Failure);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         OperationResult<Unit> invoked = _elements.Invoke(cancel.Value);
         if (invoked.IsFailure)
         {
@@ -2167,7 +2169,44 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
 
             if (matches.Length == 1)
             {
-                return OperationResult.Ok(matches[0]);
+                if (dialogs.Value.Count != 1)
+                    return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituUnknownState,
+                        "Another dialog is present beside Save; no dialog control was used.");
+                ExternalWindowRef surface = matches[0];
+                OperationResult<ExternalWindowRef> owned = VerifyIdentityDialogOwner(target, surface.Handle, signature);
+                if (owned.IsFailure) return owned;
+
+                OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
+                if (foreground.IsFailure) return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+                if (foreground.Value.Handle == surface.Handle && foreground.Value.ProcessId == target.Process.ProcessId)
+                    return VerifyIdentityDialog(target, surface.Handle, signature);
+
+                // The observed Qt Save is a separate owned top-level dialog. Its editor can
+                // retain foreground during presentation. Do not weaken the dialog guard or
+                // activate through an unrelated foreground window, even in the same process.
+                if (foreground.Value.Handle != target.Window.Handle ||
+                    foreground.Value.ProcessId != target.Process.ProcessId)
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                        "The foreground left the exact editor while its Save dialog was appearing; no dialog control was used."));
+
+                OperationResult<UiElementRef> cancel = FindSignedControl(target, surface.Handle, signature.CancelControl);
+                if (cancel.IsFailure) return OperationResult.Fail<ExternalWindowRef>(cancel.Failure);
+                OperationResult<UiElementRef> fileName = FindSignedControl(target, surface.Handle, signature.FileNameControl);
+                if (fileName.IsFailure) return OperationResult.Fail<ExternalWindowRef>(fileName.Failure);
+                owned = VerifyIdentityDialogOwner(target, surface.Handle, signature);
+                if (owned.IsFailure) return owned;
+                foreground = _locator.ReadForeground();
+                if (foreground.IsFailure) return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+                if (foreground.Value.Handle != target.Window.Handle || foreground.Value.ProcessId != target.Process.ProcessId)
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                        "The exact editor lost foreground during Save-dialog discovery; nothing was activated."));
+                if (_clock.GetUtcNow() >= deadline)
+                    return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
+                        "The owned Save dialog did not acquire exact foreground within the existing dialog timeout; no dialog control was used."));
+                OperationResult<Unit> activated = _locator.Activate(owned.Value);
+                if (activated.IsFailure) return OperationResult.Fail<ExternalWindowRef>(activated.Failure);
+                // Re-enumerate after activation: Qt can replace its Save HWND. No old controls
+                // or handle authorize a successor; the next iteration proves it afresh.
             }
 
             if (matches.Length > 1)
@@ -2192,7 +2231,7 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
         }
     }
 
-    private OperationResult<ExternalWindowRef> VerifyIdentityDialog(
+    private OperationResult<ExternalWindowRef> VerifyIdentityDialogOwner(
         MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature)
     {
         if (!_locator.IsAlive(target.Process))
@@ -2203,17 +2242,35 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 "dialog control was used.");
         }
 
+        OperationResult<ExternalWindowRef> host = RefreshOwnedWindow(target);
+        if (host.IsFailure) return host;
+        if (!string.Equals(host.Value.Title, signature.Editor.WindowTitle, StringComparison.Ordinal) ||
+            !string.Equals(host.Value.ClassName, target.Window.ClassName, StringComparison.Ordinal))
+            return OperationResult.Fail<ExternalWindowRef>(FailureCode.MeituTargetLost,
+                "The exact editor host changed while its Save dialog was open; no dialog control was used.");
+
         OperationResult<ExternalWindowRef> refreshed = _locator.Refresh(dialog);
         if (refreshed.IsFailure ||
             refreshed.Value.OwningProcessId != target.Process.ProcessId ||
+            refreshed.Value.OwnerHandle != target.Window.Handle ||
+            !refreshed.Value.IsVisible || !refreshed.Value.IsEnabled ||
             !string.Equals(refreshed.Value.Title, signature.DialogTitle, StringComparison.Ordinal) ||
             !string.Equals(refreshed.Value.ClassName, signature.DialogClassName, StringComparison.Ordinal))
         {
             return OperationResult.Fail<ExternalWindowRef>(
                 FailureCode.MeituTargetLost,
-                "The Save surface no longer has the signed title, class and verified Meitu owner; no dialog " +
+                "The Save surface no longer has the signed title, class and exact editor owner; no dialog " +
                 "control was used.");
         }
+
+        return refreshed;
+    }
+
+    private OperationResult<ExternalWindowRef> VerifyIdentityDialog(
+        MeituTarget target, WindowHandle dialog, MeituDocumentIdentitySignature signature)
+    {
+        OperationResult<ExternalWindowRef> refreshed = VerifyIdentityDialogOwner(target, dialog, signature);
+        if (refreshed.IsFailure) return refreshed;
 
         OperationResult<ForegroundIdentity> foreground = _locator.ReadForeground();
         if (foreground.IsFailure)
