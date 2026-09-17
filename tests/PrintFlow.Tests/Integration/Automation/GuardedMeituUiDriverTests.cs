@@ -831,8 +831,10 @@ public sealed class GuardedMeituUiDriverTests
         h.Elements.Invocations.ShouldContain("MainWindow.titleFrame.closeButton");
     }
 
-    [Fact]
-    public async Task Identity_probe_activates_its_owned_Save_dialog_when_the_editor_keeps_foreground()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Identity_probe_activates_its_owned_Save_dialog_when_the_editor_keeps_foreground(bool activatesDuringDiscovery)
     {
         Harness h = Build(meituInForeground: true);
         (MeituTarget editor, ExternalWindowRef dialog) = ShowLoadedEditorAndIdentityDialog(h);
@@ -844,6 +846,11 @@ public sealed class GuardedMeituUiDriverTests
             if (invoked.EndsWith(".saveButton", StringComparison.Ordinal))
                 h.Locator.PutInForeground(editor.Window);
         };
+        if (activatesDuringDiscovery)
+            h.Elements.OnDescribe = element =>
+            {
+                if (element.RootWindow == dialog.Handle) h.Locator.PutInForeground(dialog);
+            };
 
         var result = await h.Driver.ConfirmWorkingCopyIdentityAsync(
             editor, "PF_IDENTITY_A.png", CancellationToken.None);
@@ -877,12 +884,19 @@ public sealed class GuardedMeituUiDriverTests
     [Theory]
     [InlineData("other-owner")]
     [InlineData("other-foreground")]
+    [InlineData("other-foreground-during-discovery")]
     [InlineData("activation-refused")]
     public async Task Save_activation_refuses_unproved_ownership_foreground_or_activation(string failure)
     {
         Harness h = Build(meituInForeground: true);
         (MeituTarget editor, ExternalWindowRef dialog) = ShowLoadedEditorAndIdentityDialog(h);
         h.Elements.SetReadValue("MainWindow.wName.fileNameEdit", "PF_IDENTITY_A_副本");
+        if (failure == "other-foreground-during-discovery")
+            h.Elements.OnDescribe = element =>
+            {
+                if (element.RootWindow == dialog.Handle)
+                    h.Locator.Foreground = new ForegroundIdentity(new WindowHandle(0xEEEE), editor.Process.ProcessId, "XiuXiu");
+            };
         h.Elements.OnInvoke = invoked =>
         {
             if (!invoked.EndsWith(".saveButton", StringComparison.Ordinal)) return;

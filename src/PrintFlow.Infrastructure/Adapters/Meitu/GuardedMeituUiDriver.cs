@@ -2197,6 +2197,11 @@ public sealed class GuardedMeituUiDriver : IMeituUiDriver
                 if (owned.IsFailure) return owned;
                 foreground = _locator.ReadForeground();
                 if (foreground.IsFailure) return OperationResult.Fail<ExternalWindowRef>(foreground.Failure);
+                // Qt can complete activation while the signed controls are being resolved.
+                // That is the desired transition; prove the dialog again instead of insisting
+                // that its editor still holds foreground just before requesting activation.
+                if (foreground.Value.Handle == surface.Handle && foreground.Value.ProcessId == target.Process.ProcessId)
+                    return VerifyIdentityDialog(target, surface.Handle, signature);
                 if (foreground.Value.Handle != target.Window.Handle || foreground.Value.ProcessId != target.Process.ProcessId)
                     return OperationResult.Fail<ExternalWindowRef>(TargetLost(surface.Handle, foreground.Value,
                         "The exact editor lost foreground during Save-dialog discovery; nothing was activated."));

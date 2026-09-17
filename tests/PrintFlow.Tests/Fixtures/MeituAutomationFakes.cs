@@ -955,11 +955,16 @@ internal sealed class RecordingUiElementProvider : IUiElementProvider
             : OperationResult.Fail<UiElementIdentity>(
                 FailureCode.MeituOpenInputFailed, $"No root identity was scripted for {root}.");
 
-    public OperationResult<UiElementIdentity> Describe(UiElementRef element) =>
-        element.Native is FakeUiElement fake
+    public Action<UiElementRef>? OnDescribe { get; set; }
+
+    public OperationResult<UiElementIdentity> Describe(UiElementRef element)
+    {
+        OnDescribe?.Invoke(element);
+        return element.Native is FakeUiElement fake
             ? OperationResult.Ok(fake.Identity)
             : OperationResult.Fail<UiElementIdentity>(
                 FailureCode.MeituOpenInputFailed, $"'{element.Name}' is not a scripted element.");
+    }
 
     public OperationResult<UiElementRef> GetParent(UiElementRef element)
     {
