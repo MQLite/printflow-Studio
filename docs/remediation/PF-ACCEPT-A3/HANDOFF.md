@@ -188,10 +188,21 @@ changed, and the frozen candidate was not patched.
   manager and no outer lease was used.
 - **Probes.** Nine historical probe directories, untouched; the probe created today was cleaned up
   by the Product itself.
-- **External apps left running.** PrintFlow PID 24528 on its normal screen; Photoshop PID 18604
-  document-free; **Meitu PID 21524 left on its editor page** holding PrintFlow's working copy of the
-  portrait fixture. That last state will block the next readiness run until Meitu is closed — see
-  the recovery gap above. No save, discard or dismiss input was ever sent to Meitu by the agent.
+- **External apps handed back safe.** Meitu was left holding PrintFlow's own working copy of the
+  portrait fixture on its editor page, beside its signed start page. Because the open document was
+  positively tied to this session's own
+  `Sessions\S_20260918T033038Z_f8cc3f89\Working\01a0b295-…\FIX-PORTRAIT-001.jpg` (byte-identical to
+  the untouched fixture), no PrintFlow automation was in flight and the lease was free, the editor
+  window was closed through its own caption control. It closed with no save prompt — PrintFlow had
+  never modified the document — leaving the signed start page, which is the state the Product
+  recognises. Save, discard and dismiss inputs were never used.
+- **Final state, 15:48.** One more ordinary readiness run was made so the workstation is handed back
+  verified: **本工作站已通过生产环境校验。**, "没有任何项目阻止生产处理。" PrintFlow PID 24528 on the
+  readiness screen; Photoshop PID 18604 document-free; Meitu PID 21524 at its start page; nine probe
+  directories (the run's own probe cleaned up again); canonical lease all owner fields null at
+  03:48:51Z. Evidence: `a3-final-gate.txt`, `a3-lease-handback.json`. This also confirms the recovery
+  gap above is exactly the Meitu editor state and nothing more: once that window is gone, the
+  ordinary action restores readiness by itself.
 - **Operator assistance (this was not an unattended run).** The Operator gave the exclusive-use
   confirmation; selected both fixtures in the native file dialog, which exposes no UIA patterns and
   cannot be driven by the permitted tools; closed and reopened Photoshop; and closed Meitu twice.
