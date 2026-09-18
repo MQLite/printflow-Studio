@@ -386,3 +386,25 @@ has its own verified pair 0298e108-5572-47ba-a3af-9bb5592cf6ff. Its ordinary rec
 correctly returned failed revalidation, unrun live checks and CLOSED admission with truthful
 plain-language messages. The shared runtime source is unchanged from fa0c; no full suite or
 v3 run was repeated for this display change. Final identities and state are in HANDOFF.md.
+
+## Two clarifications recorded during A3 — 18 September, 15:40 local
+
+Added by the A3 execution under prompt 24 §6. This is a clarification of wording only. No raw A2
+evidence was rewritten, no test was rerun, and no A2 result, approval or record changed.
+
+1. **"First successful CloseGuard/cleanup in A2" means the first successful *published candidate's
+   ordinary Product gate*.** Earlier diagnostic and qualification probes had already completed
+   CloseGuard and cleanup in their own runs; the phrase was never a claim that nothing had ever
+   cleaned up before. It marks the first time the published candidate's own ordinary readiness route
+   did so.
+
+2. **The Photoshop automation-availability finding stands unresolved.** External read-only
+   observation found Photoshop automation unavailable — nothing registered in the COM Running Object
+   Table — and a later ordinary check passed. Neither observation identifies the cause or the
+   mechanism of recovery. No permanent repair is claimed, and Product-side causes are **not**
+   categorically excluded on the evidence available.
+
+   A3 strengthens the reason for keeping this open rather than closing it: the same fault recurred
+   naturally on 18 September at 14:45 on a Product-launched Photoshop, and the reopened,
+   Operator-launched instance that preceded the passing gate **also** registered nothing in the ROT.
+   See [PF-ACCEPT-A3/HANDOFF.md](../PF-ACCEPT-A3/HANDOFF.md).
