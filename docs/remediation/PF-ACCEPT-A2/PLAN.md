@@ -1,5 +1,46 @@
 # PF-ACCEPT-A2 — Publish the bound revalidation and verify the normal Product gate
 
+## Publication and normal gate closed — 18 September, 11:53 local (Claude): A2 admission OPEN
+
+**Current mainline state.** The sections below are historical. Evidence in [RECOVERY.md](RECOVERY.md),
+outcome in [HANDOFF.md](HANDOFF.md). HEAD verified as `fcaa324` (documentation-only) first. One
+exclusive-window confirmation covered the replacement and every ordinary live stage.
+
+Every step of the remaining A2 procedure ran, in order, and each reached its own result:
+
+1. **Qualification and candidate re-verified offline.** Result `4083F1FB…DA1A` is Passed 7/7, 59/59
+   assertions, 0 Pending, CandidateProblems empty, one non-synthetic Operator review. The candidate
+   was resolved through the run's `Binding.BuildOrigin` and receipt `52E6DBC5…8FBC` to pair
+   `d915b1a6-4c06-4b16-9a20-5e1341d1ae9c`; its four assemblies, the seven v3 manifests and preset
+   1.18.0 `8484F0AA…C8E0F` all match. 30 comparisons, zero mismatches. No review re-recorded, no
+   re-aggregation, no content comparison redone, no standard-set rerun, no build, no new pair.
+2. **Old active record preserved**, byte-identical (`78B0464C…B0FF`), before anything was written.
+3. **Replacement published** by the existing unmodified writer under the already-supported
+   PowerShell 7 runtime, with the explicit manifests folder, explicit result and exact candidate
+   folder. Writer exit 0. No omitted result, no revocation route, no hand-edited approval.
+4. **Record read back independently** from disk: `E6A7D7EA…F3B9`, 30 fields checked against the run
+   binding, the preset file and the actual candidate bytes.
+5. **The exact candidate's own `PrintFlow.App.exe` was launched normally** (no arguments, PID 4864,
+   path confirmed from `Win32_Process`) and its ordinary readiness checks were run through the
+   normal UI. No testhost, bootstrap, diagnostic omission or fabricated result.
+6. **The gate passed on the second ordinary run**, after a diagnosed and Operator-assisted recovery
+   of a Photoshop automation-registration fault that had nothing to do with PrintFlow. Final status
+   **本工作站已通过生产环境校验。** — 7/7 live checks and 11/11 blocking automatic checks Passed.
+
+The single failure encountered was not retried unchanged and not left at a recoverable state. It was
+diagnosed to a missing Photoshop entry in the COM Running Object Table, several candidate causes
+were ruled out by evidence, the one repair that needed a stopped application was refused by the
+environment's tool restriction and was not worked around, and the Operator was asked for the exact
+plain normal action instead. Its result was then verified rather than assumed.
+
+Probe `435e5d5f…` completed through CleanupCompleted with outcome Succeeded and retained nothing;
+the nine historical probe directories are untouched. The canonical lease read all owner fields null
+before, between and after. The active record, run evidence, receipt, preset, A1 result, both pair
+inventories and the operator prompt bundle are all unchanged.
+
+No Product or preset change, new qualification cycle, A3, customer processing, MSI installation,
+deployment, push, signing or online Jira change. A3 remains unauthorized.
+
 ## Qualification review closed — 17 September, 17:14 local (Claude): v3 run PASSED 7/7
 
 **Current mainline state.** The Pending section below is this run's historical pre-review state.

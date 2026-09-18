@@ -1,5 +1,272 @@
 # A2 recovery continuation — 16 September 2026
 
+## Publication and normal gate closed — 18 September, 11:53 local (Claude): A2 admission OPEN
+
+Same Claude Code session and host-supplied configuration. HEAD verified as
+`fcaa324acfd452bd223cce022e31948b3af52bc3`, tree clean, before anything ran; the supplied commit is
+documentation-only. The 7/7 Passed section below supersedes the historical Pending instructions.
+One exclusive-window confirmation was obtained for this execution and was not requested again per
+stage. No review was re-recorded, no result re-aggregated, no content comparison redone, no standard
+set rerun, no build and no new pair.
+
+### Pre-publication verification (offline, read-only)
+
+`artifacts/pf-accept-a2/publish-prepublication-verification.json`.
+
+- Result `D:\PrintFlowStudio\TestData\v3\runs\a2-v3-20260917-154736-d915b1a6\result.json` rehashed
+  **`4083F1FB7F1BDA4D9B4F6A0EE7C9F95B8A4CF891087956F845D0B2CDDC5FDA1A`**, 28,592 bytes — equal to the
+  supplied hash. Status **Passed**, Verdict "Passed. 7/7 required categories passed.", MissingCategories
+  none, seven cases all Passed, **59/59** assertions held, `CandidateProblems` empty.
+- Three manual decisions all Passed: `PORTRAIT-VISUAL-001`, `FINE-HAIR-VISUAL-001`,
+  `CUSTOMER-DESIGN-VISUAL-001`. One review `3685ceef-98ee-4bb1-9811-26bda34ebad9`, `Synthetic: false`,
+  `DecidedBy DESKTOP-0BG8884\admin`, `DecidedAtLocal 2026-09-17T17:14:11+12:00`, evidence hashes
+  `F580164E…`, `F690AF0D…` (the pre-Trim cutout) and `FFCFABF0…`, note `三项判断全部通过`.
+- **Candidate resolved through the run's own BuildOrigin, not by assumption.**
+  `Binding.BuildOrigin` gives ReceiptPath
+  `…\artifacts\pf-accept-a2\build-pairs\d915b1a6-4c06-4b16-9a20-5e1341d1ae9c\build-pair.json`,
+  ReceiptSha256 `52E6DBC5E894EA95CB859CF9CF0BB0D6D42533B17AE26D90DAC0EB41E8DE8FBC` and PairId
+  `d915b1a6-4c06-4b16-9a20-5e1341d1ae9c`. The receipt on disk rehashed to the same value.
+  `Binding.CandidateInstallFolder` is that pair's `candidate` folder. The old A1 candidate, a
+  conventional `bin/Release` and any newly built folder were all excluded by this route.
+- All four candidate assemblies match the binding byte-for-byte on disk
+  (`PrintFlow.App.dll 20E228EE…`, `Domain 7F4808F8…`, `Infrastructure 4E77AD36…`,
+  `Workflow 1AF48C6C…`, each `0.1.0+6818757b2c11ff22857896abf2a283dd8aaf2f85`).
+  `PrintFlow.App.exe` is present, 162,304 bytes, `06FB7C7A…6BCA`.
+- All seven `Binding.SetManifests` entries equal the files in
+  `D:\PrintFlowStudio\TestData\v3\manifests` by hash.
+- Preset remains exact 1.18.0:
+  `D:\PrintFlowStudio\Baseline\workstation-v1\preset\printflow-workstation-v1.18.0.json` rehashed
+  **`8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F`**, equal to the binding's
+  `PresetSha256` and to the supplied hash.
+- Readiness basis: this run's `readiness.json`, SHA-256
+  `32CDA8ECB8AA34EAC843E54D01548177EAE4D8E1969384859965EE5C6AC47BB6`, `Verified: true`, 17 checks
+  Passed, 2 Advisory, **0 blocking failures**. The user accepted it as the basis of the existing
+  operator EnvironmentReadiness attestation; it is historical evidence and **not** the fresh
+  normal-App live checks below.
+- 30 comparisons, **zero mismatches**.
+
+### The PowerShell 7 runtime actually present
+
+`pwsh` is not on PATH and `C:\Program Files\PowerShell` does not exist. A full-drive search found
+exactly one PowerShell 7 on this workstation:
+`C:\Users\admin\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe`,
+FileVersion 7.6.5.500, ProductVersion 7.6.5, `$PSVersionTable` 7.6.5 Core, Microsoft Corporation,
+SHA-256 `362A356CE7F0940EC74F73A8FC2C990A2CC24A38A11C90BBD8ECA947110AD139`. A1 evidence
+(`test-process-observation.json`) records that exact path behind the bare `pwsh` used for the earlier
+successful publication, so this is the already-supported runtime, invoked by full path as
+[[dotnet-10-sdk-not-on-path]] requires for this repo's other off-PATH tool. It is a shell binary:
+no executor was switched and no global setting changed.
+
+### Preservation of the old active record, then publication
+
+`artifacts/pf-accept-a2/publish-prior-active-record.json` and `publish-a2v3-publication.log`.
+
+The active record existed this time, unlike the A1 publication. It was copied first and verified
+byte-identical at `78B0464C6A10F43DF8D9B2AEF669D0B429D03A02911513CBCDBA2C252030B0FF` (A1 candidate
+`a39846d8e0398e061e445fc79fe219b9bb195401`, regression run `a1-v3-20260916-121334-903986e7`, attested
+`2026-09-16T15:08:54.4314947+12:00`). Only then was the writer run:
+
+```powershell
+pwsh -NoProfile -File tools\installer\Set-PrintFlowProductionRevalidation.ps1 `
+  -InstallFolder 'D:\Repositories\printflow-Studio\artifacts\pf-accept-a2\build-pairs\d915b1a6-4c06-4b16-9a20-5e1341d1ae9c\candidate' `
+  -WorkspaceRoot 'D:\PrintFlowStudio' -EnvironmentReadinessPassed `
+  -StandardRegressionSetPath 'D:\PrintFlowStudio\TestData\v3\manifests' `
+  -StandardRegressionSetResult 'D:\PrintFlowStudio\TestData\v3\runs\a2-v3-20260917-154736-d915b1a6\result.json'
+```
+
+The writer is unmodified. `StandardRegressionSetPath` is the manifests folder, unlike the review
+wrapper's `SetRoot`. **Exit 0**, printing "Record written … Readiness: True … Regression set: Passed
+… This installation is revalidated. Production may resume." No omitted-result or revocation route,
+no fake reader, no hand-edited passing record, and revocation was not tested against real state.
+
+### Independent disk readback of the published record
+
+`artifacts/pf-accept-a2/publish-record-readback.json`.
+
+`D:\PrintFlowStudio\Revalidation\production-revalidation.json`, SHA-256
+**`E6A7D7EAA9C370AFACF0769B927B4D5AD735ADAC8203B614F3EE9320D975F3B9`**, 1,952 bytes, written
+`2026-09-18T11:26:13.4047658+12:00`, `attestedBy DESKTOP-0BG8884\admin`, `attestedAtLocal
+2026-09-18T11:26:13.3632212+12:00`. The bytes were re-read from disk and 30 fields compared against
+independent sources — the run binding, the preset file itself and the actual candidate bytes:
+schema 2; product version 0.1.0; all four assembly hashes and build identities; preset
+id/version/hash; Windows build 19045; Meitu `9276B407…`; Photoshop `81EE8930…`;
+`environmentReadinessPassed true`; and `standardRegressionSet` setId `printflow-regression-v3`,
+status Passed, runId `a2-v3-20260917-154736-d915b1a6`, invocationId
+`eb7c35c7-78fa-4881-8b4e-d43c6ab98021`, completedAtLocal `2026-09-17T15:49:42.8903271+12:00`,
+evidencePath the run folder, evidenceBindingVersion 2, setContentDigest `75DA6EC6…`. All matched.
+The single non-equal row was the comparison's own shape: `attestedBy` is `machine\user`, following
+the prior record and the review's `DecidedBy`, not the bare `Workstation` value.
+
+The record now names the qualified replacement candidate and no longer the A1 candidate. Nothing
+else changed: after publication the run result, run readiness, receipt, preset, A1 result
+`97E422FA53002725F8222A4C38075A8E6B43C7A169442DF3F1CBBC501DB9600A` and both pair inventories
+(1,273 and 1,275 files) were re-checked unchanged.
+
+### The exact candidate launched normally
+
+`artifacts/pf-accept-a2/publish-normal-app-prelive.txt`.
+
+`…\build-pairs\d915b1a6-4c06-4b16-9a20-5e1341d1ae9c\candidate\PrintFlow.App.exe` was started with no
+arguments, PID **4864**. `Win32_Process` independently reports that exact ExecutablePath, a command
+line with no arguments, creation `2026-09-18T11:28:57`, Responding true, MainWindowTitle
+`PrintFlow Studio`. It started after the record was written, so it read the new record. Home showed
+two interrupted tasks and recent sessions; none was opened, resumed, abandoned or processed.
+
+The report was read through native UI Automation on the real WPF window — no testhost identity, no
+bootstrap, no diagnostic omission and no fabricated result at any point. Before any live action, the
+passive report showed 11 blocking automatic checks Passed, 2 advisories, **ProductionRevalidation
+通过**, and the seven live checks `未运行`, which were the only items blocking. Overall not verified,
+as expected when the live checks have not run in the process.
+
+### First ordinary live run — one real failure
+
+`artifacts/pf-accept-a2/publish-normal-app-live-result.txt`, `publish-live-failure-diagnosis.json`,
+`publish-lease-after-live.json`.
+
+The ordinary action **安全恢复并重新检查** (`Environment.RunLiveChecks`) was invoked once at
+`2026-09-18T11:33:24.7316622+12:00`. The Product launched Meitu (PID 3648) and Photoshop (PID 16148),
+both the exact accepted binaries with no arguments — Meitu
+`C:\Users\admin\AppData\Local\MeituApp\XiuXiu\7.8.8.2\XiuXiu.exe` `9276B407…`, Photoshop
+`D:\Adobe Photoshop CC 2019\Photoshop.exe` `81EE8930…`, matching the preset.
+
+Result: ExternalApplicationAutomationLock, MeituLaunchability, MeituSafeStartingState and
+PhotoshopLaunchability **Passed**; **PhotoshopSafeStartingState Failed**; PhotoshopColourSettings and
+PhotoshopTestImageRoundTrip **NotRun**. The technical detail read:
+
+> PhotoshopSafeStartingState — Photoshop live settings could not be read: 操作无法使用
+> (0x800401E3 (MK_E_UNAVAILABLE)). 应为: Recognised state with no unsaved document
+
+The displayed row wording names unsaved work, unknown state or a blocking dialog. That is not what
+happened, and the distinction matters:
+
+- Photoshop was fully started and idle — Responding true, `WindowVisualState Maximized`,
+  `WindowInteractionState ReadyForUserInteraction`, 0 ms CPU over a 2 s sample, 61 threads.
+- **No blocking dialog.** The `OWL.WindowGroup` "Modal Layer" window was not visible, the UIA
+  `WindowPattern` reported `IsModal false`, and no top-level window of the process was a dialog.
+- **No document open.** The "Document Layer" group was not visible and the title was exactly
+  `Adobe Photoshop CC 2019`, with no file name and no `@ 100%` document suffix.
+- **Root cause.** A typed enumeration of the COM Running Object Table returned 13 entries
+  (OneDrive `Personal-Monikers::*` and three CLSID monikers) and **zero** Photoshop entries.
+  `Marshal.GetActiveObject("Photoshop.Application")` fails with the same `MK_E_UNAVAILABLE` the
+  Product reported. The class is registered machine-wide
+  (`HKLM\SOFTWARE\Classes\Photoshop.Application` → CLSID `{2682BB05-0A88-430F-8614-EE4E60E6D916}`),
+  so this is a running instance that never registered itself, not a missing install. The Product
+  attaches read-only by design, so it cannot pass while that registration is absent — it refused
+  rather than inventing a reading, which is correct behaviour.
+
+Ruled out by evidence, not by assumption: elevation mismatch (PowerShell, PrintFlow 4864, Photoshop
+16148 and XiuXiu 3648 all Medium integrity, same user and desktop); background launch and deferred
+activation (Photoshop was brought to the foreground, confirmed as the foreground window, and
+re-probed after 40 s — still unregistered); the CEF "Spaces" Home Screen (its `CefBrowserWindow`
+surfaces were already not visible, and a normal Esc was sent while Photoshop held the foreground —
+still unregistered); and elapsed time (probed repeatedly across roughly 12 minutes of idle uptime).
+
+The lease was read free after this run, and **no new probe directory was created**, consistent with
+the round trip never running.
+
+### Recovery through the exact normal action, then the passing run
+
+`artifacts/pf-accept-a2/publish-normal-app-final-gate.txt`, `publish-final-state.json`,
+`publish-lease-final.json`.
+
+Because a second press would have relaunched Photoshop under the same unchanged precondition, the
+action was **not** retried as-is. The intended next step — closing PID 16148, which had no documents
+open, and starting the accepted Photoshop binary directly to establish whether an instance not
+launched as PrintFlow's child registers — was refused by the environment's tool restriction
+(Interfere With Workloads) and was **not** worked around.
+
+The Operator was therefore asked for the exact plain normal action, with no technical detail: close
+Photoshop and open it again from their usual shortcut, wait until it finished loading, and say when
+done. They did so. The result was then verified rather than assumed: Photoshop PID 16148 was gone,
+PID **21768** was running the same accepted binary `81EE8930…` with no arguments, parent 8788 — not
+PrintFlow. That instance also never registered across 300 s of monitoring, so the child-process
+launch was **not** the cause; the condition is machine-wide and remains unexplained at the Photoshop
+level. This is recorded as an open environment question, not a PrintFlow defect.
+
+The precondition had nonetheless changed materially — a settled, operator-launched Photoshop present
+*before* the check rather than launched *by* it — so the ordinary action was invoked **once** more at
+`2026-09-18T11:53:06.0632903+12:00`. Overall status became **本工作站已通过生产环境校验。**
+
+| Check | Kind | Outcome |
+|---|---|---|
+| 工作站预设完整性 / 已认可的工作站记录 / Windows 版本 | blocking | Passed |
+| 美图秀秀安装 / Photoshop 安装 / Photoshop 动作文件 | blocking | Passed |
+| 工作文件夹 / 桌面会话 / 显示器配置 / Windows 显示语言 | blocking | Passed |
+| 升级后重新验证 (ProductionRevalidation) | blocking | **Passed** |
+| 已认可文件的只读标记 | advisory | 提示 |
+| 美图秀秀与 Photoshop 界面语言 | advisory | 提示 |
+| 应用自动化可用性 | live, blocking | Passed |
+| 美图秀秀启动能力 / 美图秀秀初始状态 | live, blocking | Passed |
+| Photoshop 启动能力 / Photoshop 初始状态 | live, blocking | Passed |
+| Photoshop 色彩设置 | live, blocking | Passed |
+| Photoshop 测试图像 | live, blocking | Passed |
+
+11 blocking automatic Passed, 2 advisories, **7/7 live Passed, 0 Failed, 0 NotRun**.
+
+Technical details as displayed:
+
+- **ProductionRevalidation** — "PrintFlow Studio 0.1.0 (candidate `13A73BEFAE17…`) on this preset and
+  Windows build was revalidated by `DESKTOP-0BG8884\admin` at `2026-09-18T11:26:13.3632212+12:00`,
+  with Environment Readiness passing and…"; expected and current both "PrintFlow 0.1.0, preset
+  printflow-workstation-v1 1.18.0, Windows build 19045". That composite is the derived
+  `ProductBuildIdentity.Fingerprint` — SHA-256 over the canonical ordered `name:sha256` list. It was
+  recomputed independently from the **actual candidate bytes on disk** and again from the published
+  record, giving `13A73BEFAE17B18E61E8B975CF030E7156315E9AEBDE661E391550C52BEEDD5F` both times. The
+  record binds to the exact qualified candidate, and the app is reading that binding.
+- **PhotoshopSafeStartingState** — "Photoshop has a recognised state and no unsaved document or
+  unknown dialog." Expected and current both "KnownStartScreen; No document is open."
+- **PhotoshopColourSettings** — "Photoshop's four active working spaces match the accepted preset."
+  Expected and current both "RGB: sRGB IEC61966-2.1; CMYK: Coated FOGRA39 (ISO 12647-2:2004);
+  Gray: Dot Gain 15%; Spot: Dot Gain 15%".
+- **ExternalApplicationAutomationLock** — "The same global lock used by production automation was
+  acquired", current "Acquired for this bounded live verification".
+- **PhotoshopTestImageRoundTrip** — "The exact PrintFlow-owned probe completed and Photoshop returned
+  to its prior safe state." Last complete live verification `2026-09-17T23:53:12Z`; retained
+  verification evidence True; current-run observation deferred False.
+
+### Probe cleanup and lease
+
+Probe `435e5d5f6c3f4e14b8a7186ff7b2916a`, diagnostic attempt `2026-09-17T23:53:06Z`. Recorded stages
+— unlisted stages are unconfirmed — ProbeCreation, ProbeCreated, OpenGuard, OpenRequested,
+OpenConfirmed, IdentityCheck, IdentityConfirmed, CloseGuard, CloseRequested, CloseConfirmed,
+PriorStateCheck, PriorStateRestored, CleanupAttempted, CleanupCompleted. Last attempted
+CleanupAttempted; last confirmed **CleanupCompleted**; cleanup result **Succeeded**; primary failure
+not recorded; secondary failures none. This is the first A2 run in which the round trip passed
+CloseGuard at all, and it went on to full cleanup.
+
+`D:\PrintFlowStudio\EnvironmentVerification` holds the same **nine** probe directories as before this
+run, newest still `310afeea…` from 16 September: no new directory was retained and nothing was
+manually deleted or closed. The historical `6eff41591db34c0b91177b34d398d103` directory and the other
+retained probe files are untouched. Photoshop ends with no document open, so no probe document was
+left behind.
+
+Canonical lease store `C:\Users\admin\AppData\Local\PrintFlow Studio\workstation-automation-v1.db`,
+resource `printflow-studio.external-automation.v1`, read read-only three times — before publication,
+after the first live run, and finally at `2026-09-17T23:54:55.541Z` — with `OwnerToken`, `ProcessId`,
+`MachineName`, `ProcessName`, `ProcessStartedAtUtc` and `AcquiredAtUtc` **all null** each time. These
+are timestamped observations, not perpetual claims. No synthetic lease manager or outer lease was
+used.
+
+### Final state and boundary
+
+PrintFlow PID 4864 rests on the passing Production readiness report. Photoshop PID 21768 is open at
+`Adobe Photoshop CC 2019` with no document. Meitu PID 3648 is open at `美图秀秀`. No customer job was
+processed, no interrupted work was opened, resumed or abandoned, and no unrelated unsaved work was
+touched. Two nonblocking advisories remain and neither affects production processing.
+
+Admission is **OPEN for this observation**. The evidence is the ordinary
+`EnvironmentReadinessViewModel` report from the production `VerifiedEnvironmentGate` of the exact
+published candidate — not a harness identity check, injected result or customer-operation test. Each
+later production request still re-evaluates current conditions, so publication is not perpetual
+admission, and today's Photoshop registration fault occurred on two separate instances and could
+recur.
+
+A2's authorized procedure is complete and stops here. No Product or preset change, new qualification
+cycle, A3, customer processing, MSI installation, deployment, push, signing or online Jira change was
+performed. Original evidence, approvals and the operator prompt bundle are preserved. The one genuine
+follow-up worth scoping separately is the Photoshop automation-registration fault. **No A3 is
+authorized.**
+
 ## Qualification review closed — 17 September, 17:14 local (Claude): v3 run PASSED 7/7
 
 Same Claude Code session and host-supplied configuration; offline only. No application, desktop
