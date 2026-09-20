@@ -197,3 +197,60 @@ and was not inferred from this task.
 
 **PARTIAL — PRODUCT DEFECT FIXED AND SUPPORTING VARIANTS PASS; THE REAL OPERATOR-FACING GOLDEN PATH
 REMAINS BLOCKED BY PHOTOSHOP READINESS, SO SCRUM-11130 IS NOT FULL.**
+
+---
+
+## 9. Addendum — 21 September 2026: the golden path completed
+
+Recorded under Prompt 24 Revision 3 (PF-ACCEPT-A3). Everything above is the state as of its own
+observation and is **unchanged**; this section adds one later observation and does not rewrite any
+earlier failure. Full detail, identities and evidence paths are in
+`docs/remediation/PF-ACCEPT-A3/HANDOFF.md`, section "PF-ACCEPT-A3 rerun handoff — 21 September 2026".
+
+### What changed
+
+The 18 September blocker was **not** baseline drift. Meitu's Save panel had been left on
+保存路径 = 覆盖原图, in which it pre-fills the bare document base name; in 自定义 it supplies
+`<basename>_副本`, exactly as the signed baseline
+`apps/meitu/editor-with-working-copy.json` (`outputBaseNameSuffix: "_副本"`) records. Restoring
+自定义 through Meitu's ordinary UI, verified on a disposable synthetic copy, removed the refusal.
+No preset, signed evidence or Product byte was changed.
+
+The §8 next-step sentence about restoring the accepted Photoshop installation still applies, for a
+newly observed reason: an unregistered copy of the accepted build at
+`C:\ps2019\Adobe Photoshop CC 2019\Photoshop.exe` occupied the single-instance slot and failed
+`Photoshop 启动能力`. After the Operator started the accepted `D:\Adobe Photoshop CC 2019` instance,
+the ordinary gate passed at 10:45 — 本工作站已通过生产环境校验。
+
+### Acceptance matrix rows that move
+
+| Required case | Evidence actually obtained | Status |
+|---|---|---|
+| Real JPG → enhancement → background removal → trim → approved transparent PNG | Session `A3-R3-FINE-HAIR-20260921` (`01a0c106-1035-77b2-98ae-432229bec71b`), one continuous ordinary run, five attempts all SUCCEEDED, zero retries, `State = COMPLETED`; deliverable `Approved/A3-R3-FINE-HAIR-20260921.png`, `8D94D320…80C1`, 1200 × 1600 `Format32bppArgb` with sampled real transparency | **PASS** |
+| Source remains untouched | `FIX-FINE-HAIR-001.jpg` `5A705FE3…8D8E` byte-identical before and after the completed run; the session's own Source snapshot hashes identically | **PASS** |
+| Approved PNG bound to reviewed hash | Three APPROVED `ReviewDecision` rows for this session's own revisions (`98F0136C…9F6C`, `A52512A5…10DC`, `8D94D320…80C1`), and the `PROMOTE_APPROVED` revision carries the identical SHA-256 of the reviewed Trim revision | **PASS** |
+
+Every other row in §5 is **unchanged**. `variant-contracts.trx` 53 / 53 and the three
+`recovery-live-*.trx` 1 / 1 results were not rerun and are not re-claimed.
+
+Note on the trim row: this fixture's cutout reaches all four edges, so `TIGHT_CROP` detected content
+bounds `0, 0, 1200, 1600` and applied the same, keeping the full canvas. That is a permitted outcome
+for these alpha bounds, not a trim defect — but it means this run does **not** demonstrate a
+non-trivial crop. A fixture whose subject does not touch the frame would be needed for that, and
+that is separate, separately authorised work.
+
+### Reassessment
+
+| Item | Reassessed status | Reason |
+|---|---|---|
+| SCRUM-11130 | **PARTIAL** | The operator-facing golden path and its reviewed-hash binding now have real evidence, but the variant cases still rest on harness-labelled and synthetic-live supporting evidence, and independent review is still not completed |
+
+**SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED** continues to apply and remains an
+independent reason not to claim FULL.
+
+Not performed under this addendum: no build, no suite run, no qualification, no revalidation
+publication or revocation, no preset or signed-evidence edit, no install, deploy, push or Jira
+transition. Prompt 25 was not executed.
+
+**PARTIAL — THE REAL OPERATOR-FACING GOLDEN PATH NOW PASSES WITH A REVIEWED-HASH-BOUND APPROVED PNG;
+THE VARIANT CASES AND INDEPENDENT REVIEW KEEP SCRUM-11130 SHORT OF FULL.**

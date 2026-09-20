@@ -225,3 +225,241 @@ Close the harness-versus-app difference read-only, then the bounded correction a
 authorisation. Do not re-run A1/A2, do not publish over the accepted record, and do not claim
 SCRUM-11130 FULL until one continuous ordinary run produces an approved transparent PNG bound to a
 real reviewed hash.
+
+---
+
+# PF-ACCEPT-A3 rerun handoff — 21 September 2026 (Prompt 24 Revision 3)
+
+**Verdict: PASS for the bounded SCRUM-11130 golden path.** One continuous ordinary run produced an
+approved transparent PNG bound to a real reviewed hash. The 18 September failures above are
+unchanged and preserved.
+
+Raw local evidence (git-ignored, not committed): `artifacts/pf-accept-a3/rev3-20260921/`.
+
+## Execution record
+
+| Fact | Value |
+|---|---|
+| Executor | Claude Code, VS Code extension host |
+| Policy | `C:\Users\admin\.claude\workflows\development-routing.md` v1.1 (2026-09-18), loaded via the managed `PERSONAL_DEV_ROUTING` entry in `~/.claude/CLAUDE.md` |
+| Requested / ExecutionTarget | Opus High |
+| ActualRoute | Opus High — session model reported as Opus 5 (`claude-opus-5`); per-request effort metadata is not exposed, so the effort component is `UNVERIFIED`. No Sonnet delegation was made and no switch was attempted, so `MODEL_SWITCH_UNAVAILABLE` does not apply. |
+| RouteOffset | 0 (none supplied, none inherited) |
+| Context | CONTINUE |
+| HEAD at start | `23bf90c3bcf0bd425d9330be83dbe15439e33cac`, working tree clean |
+| Candidate | `artifacts/pf-accept-a2/build-pairs/d915b1a6-4c06-4b16-9a20-5e1341d1ae9c/candidate`, receipt `52E6DBC5…8FBC` re-verified with `-VerifyOnly` |
+| Active revalidation record | `E6A7D7EA…F3B9`, unchanged |
+| Preset | `printflow-workstation-v1` 1.18.0, `8484F0AA…C8E0F`, unchanged; the app reported `printflow-workstation-v1 1.18.0 (8484F0AA1872)` |
+| Normal app process | `PrintFlow.App.exe` PID 17840, no arguments, started 10:31:29 |
+| Meitu | PID 8368, `…\MeituApp\XiuXiu\7.8.8.2\XiuXiu.exe`, `9276B407…6B0B` — byte-identical to the accepted record |
+| Photoshop | PID 8008, `D:\Adobe Photoshop CC 2019\Photoshop.exe`, `81EE8930…A80C5` |
+| Input channel | Native UI Automation `InvokePattern` / `ValuePattern` / `ExpandCollapsePattern` on visible controls only. No SendKeys, no synthetic mouse, no harness, bootstrap, Fake, direct service call, database write or injected readiness. |
+
+## Meitu save-mode setup (authorised setting change, not business evidence)
+
+The Save panel's **保存路径** row exposes `btnCustomSavePath` 自定义, `btnCoverSavePath` 覆盖原图 and
+`btnDesktopSavePath` 桌面 as toggleable `QPushButton`s inside
+`MainWindow.MaskDialog.MaskCenterWidget.SaveMaskWidget.widgetRight.wPath`. The exact label for the
+wrong mode is **覆盖原图**, not 覆盖原文件 as reported; the substance of the Operator's finding is
+confirmed and only the wording differs.
+
+A disposable synthetic 480×320 JPEG (`PF_SETUP_A3R3_7F2C.jpg`, `527BAABF…DBBD`, generated for this
+setup only, kept in the session scratchpad outside the repository and outside `D:\PrintFlowStudio`)
+was opened in the accepted instance. No customer document, no fixture and no historical
+failed-session artefact was used.
+
+1. **Found:** `btnCoverSavePath` = On. Unedited `fileNameEdit` = `PF_SETUP_A3R3_7F2C` — the bare
+   base name, exactly the shape that refused on 18 September.
+2. **Restored:** `btnCustomSavePath` invoked once. Read back: `btnCustomSavePath` = On,
+   `btnCoverSavePath` = Off, `folderEdit` = `C:/Users/admin/Downloads`, and the unedited
+   `fileNameEdit` became **`PF_SETUP_A3R3_7F2C_副本`**. Nothing was typed into the name field; the
+   suffix was supplied by Meitu.
+3. **Persistence:** the panel was cancelled through the signed
+   `…widgetRight.titleFrame.closeButton`, then raised once more from the editor `saveButton`.
+   Custom was still selected and the default name still carried the suffix. **No setup save was
+   needed**, so none was performed — zero images were written, the setup file's hash is unchanged
+   and `C:\Users\admin\Downloads` contains no `PF_SETUP*` file.
+4. **Cleared:** the setup document was closed through 关闭图片. Meitu returned to
+   `MainWindow.OpenMaskWidget`, the signed empty editor. **自定义 was left selected.**
+
+Save was never pressed while 覆盖原图 was selected. No application settings file was edited and no
+other remembered preference was changed.
+
+The three attributions stay distinct: the **Operator reported** the historical cause; the
+**executor observed** the current setting and restored it; the **Product then succeeded** at its own
+identity probe during the measured run, which is the only thing that proves the fix.
+
+## The ordinary gate: a new, different Photoshop blocker
+
+First ordinary run (10:32:50, report 10:34) **failed** at `Photoshop 启动能力`:
+
+> Process 7308 owns no visible top-level window of class 'Photoshop', so there is no target any
+> input could be addressed to.
+
+Read-only diagnosis: the preset's accepted executable is `D:\Adobe Photoshop CC 2019\Photoshop.exe`
+(the authoritative Desktop shortcut resolves there), but the instance the Operator had running was
+PID 14792 from **`C:\ps2019\Adobe Photoshop CC 2019\Photoshop.exe`** — byte-identical
+(`81EE8930…A80C5`) but a path the preset does not register, and not on its `excludedInstallations`
+list either. Photoshop is single-instance, so PrintFlow's launch of the accepted executable handed
+off to that instance and exited without ever owning a window. The Product refused rather than
+adopting an unaccepted instance. Evidence: `gate-2-photoshop-launchability-failed.txt`,
+`gate-2-diagnosis.json`.
+
+**This is not the unresolved 18 September ROT / `MK_E_UNAVAILABLE` fault.** That one failed later,
+at `PhotoshopSafeStartingState`, with a Product-launched instance present and no explanation.
+Today's failure is earlier, at launchability, and has a concrete observed cause. The ROT fault did
+not recur today and remains unresolved and unclaimed.
+
+The action was **not** retried unchanged. Starting and stopping Photoshop is outside this agent's
+permitted actions, so the Operator was asked once for the precise ordinary action and closed
+PID 14792 (document-free, title exactly `Adobe Photoshop CC 2019`) then started Photoshop from the
+accepted Desktop shortcut. The new instance was independently verified before the check: PID 8008,
+`D:\Adobe Photoshop CC 2019\Photoshop.exe`, started 10:42:40, responding, no document.
+
+With that changed precondition the ordinary action was invoked once more (10:45:44) and the gate
+passed at 10:45:
+
+**本工作站已通过生产环境校验。** — 没有任何项目阻止生产处理。 Verified preset
+`printflow-workstation-v1 1.18.0 (8484F0AA1872)`, two informational-only notices (read-only markers
+on accepted files, whose signatures still match; and the preset's recorded UI languages). The Meitu
+checks — 应用自动化可用性, 美图秀秀启动能力, 美图秀秀初始状态 — stopped appearing as blocking, i.e.
+they passed under the restored Custom mode. Canonical lease `workstation-automation-v1.db`,
+resource `printflow-studio.external-automation.v1`: all owner fields null. Evidence:
+`gate-3-passed.txt`, `gate-3-passed.json`, `lease-after-gate.json`.
+
+## The business run
+
+Session **`A3-R3-FINE-HAIR-20260921`**, SessionId `01a0c106-1035-77b2-98ae-432229bec71b`, workspace
+`Sessions/S_20260920T225315Z_29bec71b`, `WorkflowType = PREPARE_ASSET`, created 22:53:15Z,
+`State = COMPLETED` at 23:29:00Z. A new unique name was used; neither historical A3 session was
+resumed, reused or stitched in.
+
+Fixture `D:\PrintFlowStudio\TestData\v3\inputs\FIX-FINE-HAIR-001.jpg`, `5A705FE3…8D8E`, 312,309
+bytes. The session's own `Source` snapshot hashes identically.
+
+| # | Step | Adapter | Result | Started → ended (UTC) |
+|---|---|---|---|---|
+| 1 | Import | `internal-import-v1` | SUCCEEDED | 22:53:15.189 → 22:53:15.635 |
+| 2 | Enhancement | `meitu-xiuxiu-production-v1` | **SUCCEEDED** | 22:55:29.926 → 22:55:49.649 |
+| 3 | BackgroundRemoval | `meitu-xiuxiu-production-v1` | SUCCEEDED | 23:11:26.416 → 23:11:52.867 |
+| 4 | Trim | `internal-alpha-trim-v1` | SUCCEEDED | 23:19:48.406 → 23:19:48.633 |
+| 5 | ApprovedPngExport | `internal-promote-v1` | SUCCEEDED | 23:25:23.142 → 23:25:23.206 |
+
+Five attempts, **zero failures, zero retries**. The Meitu document-identity probe that refused three
+times on 18 September did not refuse once.
+
+### Revisions and the reviewed-hash binding
+
+| Operation | Revision | Artefact | SHA-256 | Bytes |
+|---|---|---|---|---|
+| IMPORT | `…693dd6b76f80` | `Source/FIX-FINE-HAIR-001.jpg` | `5A705FE3…8D8E` | 312,309 |
+| ENHANCE | `…5a1904964ab9` | `A3-R3-FINE-HAIR-20260921_HD.png` | `98F0136C…9F6C` | 1,556,380 |
+| REMOVE_BACKGROUND | `…abbc12aad5d8` | `A3-R3-FINE-HAIR-20260921_CUTOUT.png` | `A52512A5…10DC` | 1,587,578 |
+| TRIM | `…1fa86089ff92` | `trimmed.png` | `8D94D320…80C1` | 1,600,764 |
+| PROMOTE_APPROVED | `…f8f3f7354e30` | `Approved/A3-R3-FINE-HAIR-20260921.png` | `8D94D320…80C1` | 1,600,764 |
+
+Each step's input is the previous step's reviewed revision, and the exported deliverable carries the
+**identical** SHA-256 of the reviewed Trim revision, so the approved PNG is bound to reviewed
+content rather than to a re-derived artefact.
+
+### The three real review decisions
+
+All three were the Operator's own decision for this session's own revision and hash, requested with
+the exact file, pixels, revision short id and SHA-256 on screen, and recorded through the ordinary
+review control. No A1/A2 approval was transferred and nothing was pre-approved.
+
+| Step | Subject revision | Reviewed SHA-256 | Operator | Decision | Decided (UTC) |
+|---|---|---|---|---|---|
+| Enhancement | `01a0c108-6b92-7dd8-82c1-5a1904964ab9` | `98F0136C…9F6C` | admin | APPROVED | 23:08:39.725 |
+| BackgroundRemoval | `01a0c117-1e23-7da6-b376-abbc12aad5d8` | `A52512A5…10DC` | admin | APPROVED | 23:19:31.727 |
+| Trim | `01a0c11e-6099-790e-baee-1fa86089ff92` | `8D94D320…80C1` | admin | APPROVED | 23:25:08.107 |
+
+### Executor actions inside the flow, disclosed separately
+
+- **Background-removal automatic-selection authorisation.** Step 4 refuses to run until
+  对此图片使用自动选择 is confirmed for the current artefact. The executor invoked that control and
+  its 确认, immediately after the Operator approved that exact revision. The session records
+  `BackgroundRemovalDecision = USE_AUTOMATIC_SELECTION_FOR_REVIEWED_CONTENT` bound to revision
+  `01a0c108-…04964ab9` / `98F0136C…9F6C`. This is an in-flow ordinary control, **not** one of the
+  three required Operator review decisions, and it is reported here as executor assistance.
+- **Output name.** `A3-R3-FINE-HAIR-20260921` was typed into `WorkflowSelection.OutputName` through
+  `ValuePattern`, set and verified twice.
+- Every other business transition was a single `InvokePattern.Invoke()` on a visible, enabled,
+  on-screen control resolved by exact `AutomationId`.
+
+### Trim kept the full canvas, and that is the expected shape here
+
+`internal-alpha-trim-v1` reported detected content bounds `0, 0, 1200, 1600` and applied bounds
+`0, 0, 1200, 1600` under `TrimMode = TIGHT_CROP`: the cutout's non-transparent pixels reach all four
+edges, so a tight crop is a no-op and `trimmed.png` has the same dimensions as its input. The
+Operator noticed mid-run that this fixture cannot show a visible trim difference. That observation
+is correct, and the outcome is the one the prompt explicitly permits — trim may keep the full canvas
+when the alpha bounds justify it. **The fixture was not changed**, because this prompt names
+`FIX-FINE-HAIR-001.jpg` for the business session and forbids inventing additional variant testing.
+Demonstrating a non-trivial crop needs a fixture whose subject does not touch the frame; that is
+separate, separately authorised work and is **not** claimed here.
+
+### Final deliverable
+
+`D:\PrintFlowStudio\Sessions\S_20260920T225315Z_29bec71b\Approved\A3-R3-FINE-HAIR-20260921.png`
+
+SHA-256 `8D94D3207333F172D3F4F2CEB2D84F8F4ABC6B2B845556D5C7372BE013C280C1`, 1,600,764 bytes, PNG,
+1200 × 1600, `Format32bppArgb`, 96.012 DPI, alpha channel present. An independent read-only sample
+of every 7th pixel found 7,839 fully transparent and 22,674 fully opaque samples, so the
+transparency is real and not a nominal alpha channel. The destination did not exist before the run
+and nothing was overwritten.
+
+## Final state, assistance and limitations
+
+- **Handback gate.** Read-only 刷新状态 at 11:32: **本工作站已通过生产环境校验。**,
+  没有任何项目阻止生产处理。 No extra live application actions were taken for the handback.
+  Evidence: `gate-4-handback.txt`.
+- **Lease.** Canonical `workstation-automation-v1.db`, resource
+  `printflow-studio.external-automation.v1`: all owner fields null at 23:29:43Z and at handback. No
+  synthetic lease manager and no outer competing lease were used.
+- **Probes.** Nine `EnvironmentVerification` directories, newest last written 16 September — all
+  historical. This run's own probe was created and cleaned up by the Product itself.
+- **Sessions preserved.** `S_20260918T030142Z_8d760a2a` and `S_20260918T033038Z_f8cc3f89` are
+  untouched, still interrupted at `Enhancement FAILED` with zero review decisions. The two August
+  interrupted tasks were never opened.
+- **Sources.** `FIX-FINE-HAIR-001.jpg` `5A705FE3…8D8E` and `FIX-PORTRAIT-001.jpg` `F4CAD2A1…4634`
+  are byte-identical to their manifests after the run.
+- **External apps handed back safe.** Meitu PID 8368 at its signed empty editor with 自定义 still
+  selected; Photoshop PID 8008 at the accepted path, document-free; PrintFlow PID 17840 on the
+  readiness screen. Nothing was force-closed or killed.
+- **Restricted pixels.** No Product evidence screenshot was opened by the agent, and no fixture,
+  working-copy or deliverable pixels entered Git. `D:\PrintFlowStudio\Evidence\` gained nothing
+  today.
+- **Operator assistance (this was not an unattended run).** The Operator gave the exclusive-use
+  confirmation and closed a real customer document in Photoshop before any desktop input; closed the
+  `C:\ps2019` Photoshop instance and started the accepted one; selected the fixture in the native
+  选择文件… dialog, which exposes no UIA patterns and cannot be driven by the permitted tools; and
+  gave all three review decisions.
+- **Limitations that remain.**
+  1. The Photoshop ROT / `MK_E_UNAVAILABLE` registration fault of 18 September is still
+     **unresolved**. It did not recur today; today's blocker was a different, explained one.
+  2. Today's blocker is itself unresolved as a configuration question: an unregistered `C:\ps2019`
+     copy of the accepted Photoshop build exists on this workstation and will block the gate again
+     whenever it is the running instance. Deciding whether to remove it, register it or add it to
+     `excludedInstallations` is a workstation-configuration change and was **not** made.
+  3. The **Meitu recovery gap** recorded on 18 September was not exercised today, because no refusal
+     occurred. It is neither reproduced nor fixed, and remains an open gap.
+  4. Meitu's save mode is a user-level application preference with no Product-side guard. Nothing
+     prevents it being switched back to 覆盖原图, which would reproduce the 18 September refusal.
+     The Product's refusal is correct behaviour, but its message names the expected *file* rather
+     than the derived Save value, which is what made this cause hard to read. No code change is
+     proposed or authorised here.
+  5. The clause's variant cases (rejected review, automatic retry, manual takeover, restart
+     recovery, unknown dialog, output-validation failure) were out of scope and keep their existing
+     statuses.
+  6. **SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED.** No independent reviewer was engaged;
+     this prompt did not add one.
+
+## Next boundary
+
+The golden-path clause now has real evidence. SCRUM-11130 is **not** FULL: its variant cases still
+rest on harness-labelled and synthetic-live supporting evidence, and independent review is not
+completed. Prompt 25 was **not** executed and none of its proposed repairs is needed for the
+identity refusal, whose cause is now known and was a Meitu setting rather than baseline drift, a
+conditional suffix or a defective comparison. Do not rebuild, requalify or republish on the strength
+of this run.
