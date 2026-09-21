@@ -254,3 +254,101 @@ transition. Prompt 25 was not executed.
 
 **PARTIAL — THE REAL OPERATOR-FACING GOLDEN PATH NOW PASSES WITH A REVIEWED-HASH-BOUND APPROVED PNG;
 THE VARIANT CASES AND INDEPENDENT REVIEW KEEP SCRUM-11130 SHORT OF FULL.**
+
+---
+
+## 10. Addendum — 21 September 2026: evidence closure and independent review
+
+Recorded under Prompt 26. Sections 1–9 are the state as of their own observations and are
+**unchanged**; this section adds the independent review, one corrected provenance claim, one
+repaired evidence gap and one supplementary execution. It does not rewrite any earlier failure and
+it does not re-record the 21 September approvals. Full detail and the nine-column clause matrix are
+in `docs/remediation/PF-ACCEPT-A3/HANDOFF.md`, section "PF-ACCEPT-A3 closure handoff —
+21 September 2026".
+
+### What changed
+
+**The golden path was independently reviewed, not rerun.** A scoped read-only reviewer in an
+isolated context verified, from the underlying database record rather than from this report, that
+session `01a0c106-1035-77b2-98ae-432229bec71b` is one completed `PREPARE_ASSET` session with five
+SUCCEEDED attempts, zero retries and `State = COMPLETED`; that its three APPROVED `ReviewDecision`
+rows belong to this session's own revisions, with ids falling inside the session's own time window;
+and that the `PROMOTE_APPROVED` revision carries the identical SHA-256 as the reviewed Trim
+revision. The deliverable, the three intermediate revisions and the source were independently
+re-hashed and all matched, including `trimmed.png` and `Approved/A3-R3-FINE-HAIR-20260921.png` being
+byte-identical at `8D94D320…80C1`.
+
+**One provenance claim is corrected.** The 2026-09-17 full suite (11,965 / 0 / 0) was run from build
+pair `393c45f8` (`SourceRevision b2cb93b…`), **not** from the accepted candidate pair `d915b1a6`
+(`SourceRevision 6818757…`). Applicability to the candidate is established instead by an exact
+comparison of the two pairs' manifests: 614 inputs each, differing in exactly one file
+(`A2MeituCutoutValidationRecoverySmoke.cs`, an opt-in live smoke no row of the matrix cites). Every
+`src/` file and every variant test file is byte-identical.
+
+**The §5 unknown-dialog row was an evidence-staging failure, not an evidence absence.** Its
+supporting TRX, `guarded-meitu-export-regression-disabled-welcome.trx` (40 / 40), exists and its
+tests all appear as `Passed` in the retained suite. Read at assertion level, they establish that an
+unknown popup, a wrong-class popup, a foreign-process popup, a popup replaced between recognition
+and input, a mid-popup foreground change, and a missing/disabled/wrong-process item each end with
+zero clicks and zero Save As invocations — and that the 温馨提示「当前图片已修改，是否保存？」prompt,
+built with the correct surface class, is still not dismissed.
+
+**"Automatic retry" was resolved against the design rather than reinterpreted.** `自动重试` in
+`PRINTFLOW_STUDIO_MVP_DESIGN.md` §20 means the retry of an **automated step**: §7.2 makes retry a
+state transition, invariant 8 constrains only how a retry starts, and the metrics list records
+`自动化重试率` beside `人工接管率`. No automatic re-invocation policy exists anywhere in `src/`. An
+earlier reading of `IMeituUiDriver.cs:321` as a product-wide prohibition was an overstatement: that
+comment documents the cancel control under Epic 11300 Part D2A §9, whose own text says "Retry is
+available through the ordinary workflow".
+
+**One supplementary check was executed.** The opt-in synthetic-live recovery surface
+(`RecoverySurfaceLiveSmoke`, phases A/B/C) was re-run non-building from the accepted candidate
+pair's own retained `PrintFlow.Tests.dll`, 1/1 passed each, with fresh sessions, temp storage and
+the canonical lease store hash unchanged before and after. It is the first variant evidence pinned
+to the accepted candidate pair. It remains synthetic-live: the WPF window is the test's own and no
+external application is involved.
+
+### Acceptance matrix rows that move
+
+| Required case | Evidence status after this review | Status |
+|---|---|---|
+| Rejected review | Harness contracts, applicable to the candidate by manifest file identity; assertions read at source level | **HARNESS/CONTRACT SUPPORTING PASS** (unchanged tier, now verified) |
+| Automatic retry | Harness contracts; clause resolved as the retry of an automated step, which those contracts prove — fresh attempt, fresh working copy, auditable failed attempt | **HARNESS/CONTRACT SUPPORTING PASS** (clause reading now settled) |
+| Manual takeover | Harness contracts **plus** candidate-pinned synthetic-live phase B | **HARNESS + SYNTHETIC-LIVE SUPPORTING PASS** (provenance upgraded) |
+| Restart recovery | 13 harness cases **plus** candidate-pinned synthetic-live phases A and C | **HARNESS + SYNTHETIC-LIVE SUPPORTING PASS** (provenance upgraded) |
+| Unknown dialog | 40 focused `GuardedMeituExportTests` (41 in the retained suite) plus ~37 unit classifier rows, all fail-closed | **HARNESS/CONTRACT SUPPORTING PASS** (upgraded from unreadable evidence) |
+| Output-validation failure | Harness contracts plus 27 `MeituOutputValidationTests` rows; missing / unreadable / changing / invalid-alpha all covered | **HARNESS/CONTRACT SUPPORTING PASS** (the "changing" sub-claim is now evidenced) |
+
+The three §9 golden-path rows are unchanged and are not re-claimed. No test counts from different
+runs are summed.
+
+### What still keeps SCRUM-11130 short of FULL
+
+1. **Not one variant clause is an ordinary production observation on the fixed workstation.** Four
+   rest on harness/contract evidence and two add candidate-pinned synthetic-live evidence. A harness
+   test stays harness evidence and synthetic-live stays synthetic-live.
+2. **"Source remains untouched" is not provable from the Product record.** `InputSnapshot` stores
+   the original path and import time but no hash of the original file; the record hashes only the
+   session's own copy. The clause rests on file-level measurement outside the Product.
+3. **Independent *re-execution* has not occurred.** The review was read-only: it could not execute,
+   build or hash anything.
+
+Accordingly the status line for work from this task onward is **INDEPENDENT READ-ONLY RECORD REVIEW
+COMPLETED; INDEPENDENT RE-EXECUTION NOT PERFORMED.** The historical
+`SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED` banners in §7 and §9 stay as they were
+written for their own observations.
+
+### Reassessment
+
+| Item | Reassessed status | Reason |
+|---|---|---|
+| SCRUM-11130 | **PARTIAL** | Golden path and reviewed-hash binding independently reviewed and confirmed; all six variant clauses now supported but none at production-observation level; source-untouched unprovable from the record; independent re-execution not performed |
+
+Not performed under this addendum: no build, no suite run, no standard-set replay, no qualification,
+no revalidation publication or revocation, no preset or signed-evidence edit, no Product or test
+source change, no install, deploy, push or Jira transition. Prompt 24 was not rerun and Prompt 25
+was not executed.
+
+**PARTIAL — THE GOLDEN PATH IS INDEPENDENTLY REVIEWED AND HOLDS; ALL SIX VARIANT CLAUSES ARE NOW
+SUPPORTED BUT NONE AT PRODUCTION-OBSERVATION LEVEL, SO SCRUM-11130 IS NOT FULL. NOTHING FOUND HERE
+BLOCKS SCRUM-11131.**

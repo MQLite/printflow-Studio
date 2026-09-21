@@ -463,3 +463,262 @@ completed. Prompt 25 was **not** executed and none of its proposed repairs is ne
 identity refusal, whose cause is now known and was a Meitu setting rather than baseline drift, a
 conditional suffix or a defective comparison. Do not rebuild, requalify or republish on the strength
 of this run.
+
+---
+
+# PF-ACCEPT-A3 closure handoff — 21 September 2026 (Prompt 26, SCRUM-11130 evidence closure)
+
+**Verdict: SCRUM-11130 remains PARTIAL.** All six variant clauses are now supported by readable,
+applicable evidence — four at harness/contract level and two at harness plus candidate-pinned
+synthetic-live level — but none of them is an ordinary production observation on the fixed
+workstation, and independent *re-execution* has not occurred. The 21 September golden-path PASS
+above is unchanged, and every historical failure is preserved.
+
+Raw local evidence (git-ignored, not committed): `artifacts/pf-accept-a3/closure-20260921/`.
+
+## Execution record
+
+| Fact | Value |
+|---|---|
+| Executor | Claude Code, VS Code extension host |
+| Policy | `C:\Users\admin\.claude\workflows\development-routing.md` v1.1 (2026-09-18), loaded via the managed `PERSONAL_DEV_ROUTING` entry in `~/.claude/CLAUDE.md` |
+| Requested / ExecutionTarget | Opus High |
+| ActualRoute | Opus High — session model reported as Opus 5 (`claude-opus-5`); per-request effort metadata is not exposed, so the effort component is `UNVERIFIED`. `MODEL_SWITCH_UNAVAILABLE` does not apply: no switch was needed or attempted. |
+| RouteOffset | 0 (none supplied, none inherited) |
+| Context | CONTINUE for the main execution; the independent review ran in a separate isolated read-only context |
+| HEAD at start and at finish | `ac6375a5a82351b22e4743ba590d1cce29ac5b8e`, working tree clean before the documentation commit |
+| Candidate | `artifacts/pf-accept-a2/build-pairs/d915b1a6-4c06-4b16-9a20-5e1341d1ae9c`, re-verified with `New-PrintFlowBuildPair.ps1 -VerifyOnly` → "Build pair verified"; receipt SHA-256 re-measured as `52E6DBC5E894EA95CB859CF9CF0BB0D6D42533B17AE26D90DAC0EB41E8DE8FBC` |
+| Active revalidation record | re-measured `E6A7D7EAA9C370AFACF0769B927B4D5AD735ADAC8203B614F3EE9320D975F3B9` — unchanged |
+| Preset | `printflow-workstation-v1` 1.18.0, re-measured `8484F0AA18728FAC58B58ACD8E811C7058743B61271506647179CA0D0A6C8E0F` — unchanged |
+| Retained harness used for the supplementary run | `…\d915b1a6-…\harness\PrintFlow.Tests.dll`, SHA-256 `9AAC5BEB3E86DC67CEC664D5F8F0856669D69B5158138C9D749CF1B4EA07FAB9` |
+
+Not performed: no Product or test source edit, no build or restore, no new pair, no complete suite,
+no standard-set replay, no qualification, publication or revocation, no preset or signed-evidence
+edit, no install, deploy, push or Jira transition, no customer processing, no Prompt 24 rerun and no
+Prompt 25 activation.
+
+## Deliverable identities re-measured independently
+
+| Artefact | Re-measured SHA-256 | Matches the record |
+|---|---|---|
+| `Sessions/S_20260920T225315Z_29bec71b/Approved/A3-R3-FINE-HAIR-20260921.png` | `8D94D320…80C1` | yes |
+| `…/Revisions/01a0c11e-…/trimmed.png` (reviewed Trim revision) | `8D94D320…80C1` — **byte-identical to the Approved deliverable** | yes |
+| `…/Revisions/01a0c108-…/…_HD.png` | `98F0136C…9F6C` | yes |
+| `…/Revisions/01a0c117-…/…_CUTOUT.png` | `A52512A5…10DC` | yes |
+| `…/Source/FIX-FINE-HAIR-001.jpg` and `TestData/v3/inputs/FIX-FINE-HAIR-001.jpg` | both `5A705FE3…8D8E` | yes |
+
+## Source-build applicability: what actually pins the retained evidence
+
+The previously reported "full suite at the candidate's own source commit" was **wrong** and is
+corrected here. The 2026-09-17 11,965-test suite
+(`artifacts/pf-accept-a2/claude-cutout-recovery-final-test-results/claude-cutout-recovery-final.trx`)
+carries `storage=…\build-pairs\393c45f8-0a1a-483f-9586-be843c681627\harness\printflow.tests.dll`,
+i.e. it ran from pair `393c45f8` (`SourceRevision b2cb93b…`), not from the accepted candidate pair
+`d915b1a6` (`SourceRevision 6818757…`).
+
+What repairs applicability is file identity, measured exactly rather than sampled: the two pairs'
+`build-pair.json` manifests each list **614 inputs**, and they differ in **exactly one** —
+`tests/PrintFlow.Tests/Smoke/A2MeituCutoutValidationRecoverySmoke.cs`, an opt-in live smoke that no
+row of the matrix cites. Every `src/` file and every variant test file is byte-identical across the
+two pairs. So the 11,965 results are applicable to the accepted candidate for everything the matrix
+relies on, and the defensible sentence is **file identity between pairs `393c45f8` and `d915b1a6`**,
+never "run at `6818757`".
+
+## Independent review
+
+One scoped, read-only reviewer in a genuinely isolated context (a `personal-dev-reviewer` subagent
+with `Read`/`Glob`/`Grep` only — no execution, no hashing, no shell, no delegation, no access to
+this executor's reasoning). It received the verbatim criterion, an evidence index and the source
+pointers; it did not receive the implementer's conclusions. Two rounds were used: one full review,
+then one scoped recheck of the rows that moved. The same reviewer did both.
+
+Its isolation is real but **bounded**, and the bound is recorded rather than glossed: it could not
+execute, build, hash or re-run anything, so every file-level hash in this document is the
+executor's measurement, accepted by the reviewer as such. Independent verification *by execution*
+has still not happened.
+
+Findings carried forward unchanged: the session record cannot prove "source remains untouched" (it
+stores only the session's own copy, so that clause rests on the executor's file-level measurement);
+`session-record.json` contains no `AutomationLock`/`AutomationLogEntry` rows, so in-run lock state
+is not evidenced there; the golden path's trim applied no crop; operator attribution is documentary,
+not record-provable, and the executor's own in-flow invocation of 对此图片使用自动选择 is disclosed;
+the golden run's build provenance appears only as a document claim, not inside the raw A3 evidence;
+and the 10 September TRX files carry a working-tree `bin\Release` storage path rather than a pinned
+build pair.
+
+Three of the reviewer's own findings were withdrawn by the reviewer on the evidence below: the
+"automatic retry is unmet" MAJOR, the "unknown dialog is unsupported" MAJOR, and the "changing
+output sub-claim is unsupported" objection.
+
+Two corrections the reviewer made to this executor, both accepted:
+
+1. The full-suite provenance error described above.
+2. `IMeituUiDriver.cs:321` ("It invokes at most once. §9 forbids automatic retry") documents the
+   **cancel** method, and its `§9` is **Epic 11300 Part D2A §9 "Restart"** — whose own text says
+   "Retry is available through the ordinary workflow" — not MVP design §9, which is
+   输入、输出和命名. Reading it as a product-wide prohibition on retry was an overstatement.
+
+Also recorded: `guarded-meitu-export-regression-disabled-welcome.trx` counts **40** tests, while the
+2026-09-17 suite carries **41** `GuardedMeituExportTests` rows (one test added after `fee557e`).
+41 ⊇ 40; the two numbers are not the same set and are not written as if they were.
+
+## Additional validation actually executed
+
+Only one execution was performed, because everything else was already sufficient:
+
+**Synthetic-live recovery surface, re-executed at the accepted candidate pair.** The opt-in
+`PrintFlow.Tests.Smoke.RecoverySurfaceLiveSmoke.Live_A_restart_B_owned_dialog_manual_result_C_abandon`
+was run in three separate test hosts (phases A, B, C) through the supported non-building route
+`dotnet vstest <pair>\harness\PrintFlow.Tests.dll /TestCaseFilter:… /Logger:trx`.
+
+| Phase | Result | Evidence |
+|---|---|---|
+| A — restart | 1/1 passed | `artifacts/pf-accept-a3/closure-20260921/recovery-live/closure-recovery-live-A.trx`, `A/live-transcript-A.txt` |
+| B — owned dialog + manual result | 1/1 passed | `…/closure-recovery-live-B.trx`, `B/live-transcript-B.txt` |
+| C — abandon | 1/1 passed | `…/closure-recovery-live-C.trx`, `C/live-transcript-C.txt` |
+
+Each TRX carries `storage=…\build-pairs\d915b1a6-…\harness\printflow.tests.dll`, so this is the
+first variant evidence in the package pinned to the accepted candidate pair. New session ids
+`01a0c154-…`, fresh temp SQLite and temp workspace under `…\Temp\PrintFlowTests\`; the 10 September
+artefacts were not overwritten. The canonical lease store
+`C:\Users\admin\AppData\Local\PrintFlow Studio\workstation-automation-v1.db` hashed
+`F2EFEFB3…1C02B` before and after all three runs — **unchanged**. No Meitu, Photoshop or
+`PrintFlow.App` action was taken, and this remains synthetic-live evidence: the WPF window is
+created by the test and the files are synthetic.
+
+Why this was the only execution: the remaining rows are already covered by retained evidence whose
+applicability is established by the 614-input file-identity comparison above, and the prompt
+requires reusing sufficient evidence rather than repeating it.
+
+## Why no new live Product run was attempted
+
+An ordinary-Product rejection, takeover or mid-run restart would each need a real Operator at the
+workstation — the native 选择文件… dialog exposes no UIA patterns and cannot be driven by the
+permitted tools, and three Operator review decisions would be required. That makes those checks not
+safely reachable within this bounded authorization, so they are recorded as precise remaining gaps
+with their smallest next action rather than half-performed. No new exclusive-use window was
+requested and **no new live observation was taken**: the read-only review needed none. The three
+applications observed at handback on 21 September were still running unchanged at the same PIDs and
+accepted paths when this task read process identities read-only (`PrintFlow.App` 17840 from the
+candidate folder, Photoshop 8008 at `D:\Adobe Photoshop CC 2019`, Meitu 8368).
+
+## The six-clause matrix
+
+Mechanism labels are strict: **harness** = in-process test doubles and fake windows; **synthetic
+live** = a real WPF window and real UIA driven by the test, with synthetic files and no external
+application; **ordinary Product** = the shipped app on the fixed workstation. None of the six rows
+is ordinary-Product evidence.
+
+### 1. Rejected review
+
+| Field | Value |
+|---|---|
+| Identity | `RetryAndReviewTests.Reject_then_retry_keeps_the_rejected_Revision_audit_visible_and_produces_a_distinct_approved_one`; `ManualResultImportTests.Reject_handoff_resubmit_retains_both_files_attempts_and_decisions`; `A_handed_off_review_offer_must_be_rejected_before_manual_replacement` |
+| Source-build applicability | Applicable — both test files byte-identical across pairs `393c45f8` and `d915b1a6`; both rows `Passed` in the retained 11,965 suite |
+| Raw evidence | `D:\PrintFlowStudio\Evidence\SCRUM-11130-20260910\variant-contracts.trx` (53/53); the same names in `claude-cutout-recovery-final.trx` |
+| Mechanism | **Harness** |
+| Assertions and outcome | Rejection drives the step to `RetryRequired`; the retry produces a **distinct sibling** revision, not a child; both the rejection on the first revision and the approval on the second persist; the rejected revision stays valid and auditable. Passed |
+| Sufficiency | Contract-proven, not production-observed |
+| Exact remaining gap | No review has ever been rejected in the ordinary Product on the fixed workstation; the 21 September run contains zero rejections |
+| Smallest safe supplementary check | One disposable session in the running candidate app, driven to a review surface, with a real Operator pressing 驳回 declared as a deliberate functional-test rejection, then a read-only `ReviewDecision`/`Revision` readback. Needs an Operator and a current exclusive-use confirmation |
+
+### 2. Automatic retry
+
+| Field | Value |
+|---|---|
+| Identity | `RetryAndReviewTests.Retry_after_a_fake_failure_gets_a_fresh_attempt_and_working_directory_then_succeeds`; `StartupRecoveryTests.Retry_after_recovery_gets_a_new_attempt_and_a_new_working_directory`; `FakeAdapterScenarioTests.Missing_output_fails_with_OutputMissing_and_leaves_retry_available` |
+| Source-build applicability | Applicable on the same file-identity basis; all rows `Passed` in the retained suite |
+| Raw evidence | `variant-contracts.trx`; the same names in the retained full suite |
+| Mechanism | **Harness** (fake adapter injects the failure) |
+| Assertions and outcome | Two attempts persist; the failed attempt keeps a null output revision and stays auditable; the retry runs in a **fresh** `Working\<attemptId>\` directory and never reuses the failed one — design invariant 8, 重试始终从干净工作副本开始. Passed |
+| Sufficiency | Sufficient **for the clause as the design defines it** |
+| Clause reading | 自动重试 in `PRINTFLOW_STUDIO_MVP_DESIGN.md` §20 means the retry of an **automated step**, not unattended re-invocation. The design settles this internally: §7.2 makes retry a state transition, invariant 8 constrains only how a retry starts, and the metrics list records 自动化重试率 — the retry rate of automated steps — beside 人工接管率. No `AutoRetry`/`RetryPolicy`/`MaxRetries` construct exists anywhere in `src/`, and `SessionService` carries only `isRetryable` failure flags and `RetrySequence` bookkeeping. The independent reviewer reached this reading on the records and withdrew its own "unmet" finding |
+| Exact remaining gap | Harness level only; the 21 September golden run recorded zero failures and zero retries, so no Product retry has been observed on the fixed workstation |
+| Smallest safe supplementary check | Same as row 1 — a disposable session, a deliberately failed automated step, then the ordinary Retry control. Needs an Operator; do not force a transient failure into the live workstation |
+
+### 3. Manual takeover
+
+| Field | Value |
+|---|---|
+| Identity | `ManualResultImportTests.Takeover_import_review_restart_and_downstream_preserve_truth(step: Enhancement / BackgroundRemoval)` + closure phase **B** of `RecoverySurfaceLiveSmoke` |
+| Source-build applicability | Harness half applicable by file identity; the synthetic-live half is now **pinned to the accepted candidate pair** by this task's re-execution |
+| Raw evidence | `variant-contracts.trx`; `artifacts/pf-accept-a3/closure-20260921/recovery-live/closure-recovery-live-B.trx` and `B/live-transcript-B.txt` (the 10 September `recovery-live-B.trx` is retained and untouched) |
+| Mechanism | **Harness** + **synthetic live** |
+| Assertions and outcome | Harness: a real `RequestStop(TakeOver)` cancels the prior attempt, which stays byte-for-byte unchanged; provenance is recorded through `RetryOfAttemptId`/`RetrySequence`; the adapter is `manual-result-import-v1`; the imported external file and the upstream source are unchanged; re-entering automation is refused; the downstream step consumes the manual revision. Synthetic live B: a real `#32770` common dialog with owner and process verified, the managed file's SHA-256 re-read independently and equal to the recorded `Revision.Sha256`, `ReviewRequired` persisted. All Passed |
+| Sufficiency | Good at harness + synthetic-live level |
+| Exact remaining gap | No takeover of a genuinely stalled Meitu through the ordinary Product on the fixed workstation |
+| Smallest safe supplementary check | Ordinary app: start a step, use the supported stop/take-over control, import disposable synthetic material, read the database back. Needs an Operator and a current exclusive-use confirmation |
+
+### 4. Restart recovery
+
+| Field | Value |
+|---|---|
+| Identity | 13 `StartupRecoveryTests` cases + closure phases **A** and **C** of `RecoverySurfaceLiveSmoke` |
+| Source-build applicability | Harness half applicable by file identity; synthetic-live half now pinned to the accepted candidate pair |
+| Raw evidence | `variant-contracts.trx`; `artifacts/pf-accept-a3/closure-20260921/recovery-live/closure-recovery-live-A.trx`, `-C.trx` and their transcripts; the 10 September A/B/C artefacts retained |
+| Mechanism | **Harness** + **synthetic live** |
+| Assertions and outcome | A crashed `Running` attempt recovers to `Interrupted` and **fabricates no Revision or Output**; the original start time is preserved; the lock is released; a lock whose owner is alive or unverifiable is **never** stolen; recovery is idempotent; a partial file left by a crash is quarantined and protected areas are untouched. Phases A/C: the interrupted attempt is immutable, source and `InputSnapshot` bytes unchanged, no automation lock held, A → `Waiting` with attempts unchanged, C → `Abandoned`, and a startup rerun leaves nothing unresolved. All Passed |
+| Sufficiency | The best-evidenced row of the six |
+| Exact remaining gap | The ordinary `PrintFlow.App` process has never been interrupted mid-run and recovered as acceptance evidence; synthetic-live remains synthetic-live |
+| Smallest safe supplementary check | A fresh orderly close and reopen of a new paused disposable session proves **orderly restart only** and must not be labelled crash recovery. A genuine crash-recovery observation needs its own authorization; no forced kill against real or historical work |
+
+### 5. Unknown dialog
+
+| Field | Value |
+|---|---|
+| Identity | `GuardedMeituExportTests` (40 in the focused TRX, 41 in the retained suite) + ~37 `MeituStateClassifierTests` rows; **not** part of the 53-test variant filter, which is why the earlier matrix row looked unsupported |
+| Source-build applicability | Applicable — all 40 focused names are present and `Passed` in the retained 11,965 suite, and the test files are byte-identical across the two pairs. The focused TRX itself is unpinned (working-tree `bin\Release` storage), so the suite cross-check, not the TRX, is what establishes applicability |
+| Raw evidence | `D:\PrintFlowStudio\Evidence\SCRUM-11130-20260910\guarded-meitu-export-regression-disabled-welcome.trx` (40/40) and `guarded-meitu-export-regression.trx`; the same names in `claude-cutout-recovery-final.trx` |
+| Mechanism | **Harness** (simulated element tree and window fakes; never a live Meitu process) |
+| Assertions and outcome | An unknown popup, a popup with the wrong UIA class, a popup owned by another process, a popup replaced between recognition and input, a format control replaced while the popup is open, a foreground change mid-popup, and a missing/disabled/wrong-process PNG item each end with **zero clicks and zero Save As invocations**. A pre-existing unknown same-process window stops **before the route begins**. Strongest: the 温馨提示「当前图片已修改，是否保存？」prompt, built with the *correct* export-surface class, is still not dismissed — class match alone buys nothing, positive markers are required. The unit classifier returns `Unknown` for an empty observation, for an editor with nothing recognisable and for an unaccepted title even with every marker visible. All Passed. This is design invariant 11, 环境不可识别时，自动化不得猜测点击 |
+| Sufficiency | Contract-proven, not production-observed |
+| Exact remaining gap | No unknown dialog has ever been presented to the Product on the fixed workstation. The 10 September live event was the **opposite** case — a retained Meitu start page positively identified, which is why it was reclassified rather than accepted as unknown |
+| Smallest safe supplementary check | None that is both safe and honest: fabricating a dialog inside accepted Meitu or Photoshop is excluded, and waiting for a spontaneous one is indefinite monitoring. This row closes at contract level or needs a separately authorised supported isolated fixture |
+
+### 6. Output-validation failure
+
+| Field | Value |
+|---|---|
+| Identity | `FakeAdapterScenarioTests.Missing_output_…`, `Unreadable_output_…`, `Explicit_adapter_failure_…`, `Timeout_scenario_…`; `ManualResultImportTests.Invalid_cutout_records_failure_and_preserves_manual_state` × 7 kinds; 27 `MeituOutputValidationTests` rows |
+| Source-build applicability | Applicable by file identity; all rows `Passed` in the retained suite |
+| Raw evidence | `variant-contracts.trx`; the `MeituOutputValidationTests` rows in `claude-cutout-recovery-final.trx` |
+| Mechanism | **Harness** + **unit** |
+| Assertions and outcome | `OutputMissing` and `OutputUnreadable` leave the step `Failed` with **no Revision created** and retry available; the seven invalid-cutout kinds — `empty-alpha`, `opaque`, `malformed`, `missing`, `locked`, `wrong-canvas`, `wrong-format` — each record failure and preserve manual state. The "changing output" sub-claim is covered by the settle family: a file that has not appeared is not settled, a gap inside the stability window is not settled, a stable size that cannot be opened is not settled, a zero-byte file is never settled however stable, growth up to the last moment is not settled, a working copy whose bytes changed refuses the run, and a same-length working copy with different bytes is still treated as changed. All Passed |
+| Sufficiency | Reasonable at contract and unit level; all four adjectives (missing / unreadable / changing / invalid-alpha) are covered |
+| Exact remaining gap | No output-validation failure has been observed against real Meitu output on the fixed workstation |
+| Smallest safe supplementary check | A deliberately invalid disposable input through a supported isolated or manual-validation route, labelled by that route. Do not corrupt Product-owned output, an approved artefact, a source or a baseline |
+
+## Conclusions
+
+- **A3 golden path — PASS, unchanged.** Independently reviewed against the underlying database
+  record: one continuous `PREPARE_ASSET` session, five SUCCEEDED attempts, zero retries,
+  `State = COMPLETED`, three same-session APPROVED decisions whose ids fall inside the session's own
+  time window, and a `PROMOTE_APPROVED` revision carrying the identical SHA-256 as the reviewed Trim
+  revision. Two qualifications travel with it: the trim applied no crop, and "source remains
+  untouched" is not provable from the database — it rests on file-level measurement.
+- **This closure task — COMPLETE within its authorization.** The matrix is built, the review is
+  done in two rounds by one isolated reviewer, two executor errors were caught and corrected, one
+  evidence-staging failure was repaired, and one supplementary execution was performed and pinned to
+  the accepted candidate.
+- **SCRUM-11130 coverage — PARTIAL.** All six variant clauses are supported and none is an ordinary
+  production observation. FULL is not claimed and must not be inferred from the added reviewer or
+  from more passing tests.
+- **Whole-project release — unchanged and not addressed here.** No revalidation, qualification or
+  publication was touched.
+
+## Independent-review status line
+
+**INDEPENDENT READ-ONLY RECORD REVIEW COMPLETED; INDEPENDENT RE-EXECUTION NOT PERFORMED.** This
+replaces the earlier unqualified `SELF-REVIEW ONLY / INDEPENDENT REVIEW NOT COMPLETED` for work from
+this task onward; the historical banners on the earlier sections stay as they were written.
+
+## Next boundary
+
+The next business acceptance item is **SCRUM-11131 — Prepare Customer Design**, followed in the
+existing P3-3 plan by SCRUM-11132. **Nothing found here blocks it.** No demonstrated Product defect
+was found; the residual items are an acceptance-evidence tier question about SCRUM-11130's own
+clauses, not gates on a different work item, and 11131 is a different workflow
+(`PREPARE_CUSTOMER_DESIGN`) with its own six variants. P3-3 groups the three E2Es; it does not make
+every 11130 finding a prerequisite. SCRUM-11130 must simply not be moved to FULL on this evidence,
+and its two weakest tiers must be carried forward explicitly rather than quietly inherited.
+SCRUM-11131 is **not** started here.

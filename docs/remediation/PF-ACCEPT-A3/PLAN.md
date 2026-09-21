@@ -121,3 +121,43 @@ installation-path blocker, the Operator actions and the remaining limitations.
 
 This does not rewrite the two previous A3 failures, which remain FAILED and preserved, and it does
 not make SCRUM-11130 FULL.
+
+---
+
+## Addendum — 21 September 2026: Prompt 26 evidence closure and independent review
+
+Prompt 26 authorised a bounded evidence review, the smallest safe supplementary validation and
+local documentation. It did **not** authorise a Prompt 24 rerun, Prompt 25, a Product or test source
+edit, a build, a full-suite rerun, a requalification, a publication or the start of SCRUM-11131.
+None of those was performed.
+
+What this task added, on top of the golden-path PASS above:
+
+1. **One genuinely independent review**, read-only and isolated, of the original criterion, the
+   retained golden-path evidence and all six variant evidence sets. Two rounds: a full review and
+   one scoped recheck of the rows that moved. The reviewer could not execute, build or hash
+   anything, so independent verification *by execution* has still not happened and the banner is
+   amended rather than removed.
+2. **Two corrections to this executor's own claims**, both accepted: the 2026-09-17 full suite was
+   run from build pair `393c45f8` (`b2cb93b…`), not from the accepted candidate pair `d915b1a6`
+   (`6818757…`) — applicability rests on an exact 614-input manifest comparison in which the two
+   pairs differ in exactly one unrelated opt-in smoke file; and the `§9 forbids automatic retry`
+   comment in `IMeituUiDriver.cs` documents the cancel control under Epic 11300 Part D2A §9, not a
+   product-wide prohibition.
+3. **One repaired evidence-staging failure.** The unknown-dialog row was not unsupported; its TRX
+   (`guarded-meitu-export-regression-disabled-welcome.trx`, 40/40) simply had not been staged for
+   the reviewer. With it staged and cross-checked against the retained suite, that row moves from
+   "insufficient evidence" to "supported at harness level".
+4. **One supplementary execution.** The opt-in synthetic-live recovery smoke was re-run in three
+   phases from the accepted candidate pair's own retained `PrintFlow.Tests.dll`, non-building, each
+   1/1 passed, with the canonical lease store hash unchanged before and after. This is the first
+   variant evidence pinned to the accepted candidate pair.
+
+Everything else was reused rather than repeated, because the manifest comparison establishes that
+the retained results apply to the accepted candidate.
+
+**Outcome: SCRUM-11130 remains PARTIAL.** All six variant clauses are now supported — four at
+harness/contract level, two at harness plus candidate-pinned synthetic-live level — and not one of
+them is an ordinary production observation on the fixed workstation. The 21 September golden-path
+PASS and every historical failure are unchanged. Full detail, identities and the nine-column clause
+matrix are in `HANDOFF.md`, section "PF-ACCEPT-A3 closure handoff — 21 September 2026".
