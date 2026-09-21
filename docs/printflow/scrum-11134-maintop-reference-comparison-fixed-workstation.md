@@ -2,6 +2,8 @@
 
 Date: 21 September 2026
 
+Dated amendment: 22 September 2026 — installed application identity and Operator display-scope clarification.
+
 Status: **PARTIALLY COMPLETE — preparation verified; manual comparison awaits required Operator route details.**
 
 Raw local evidence (ignored): `artifacts/scrum-11134/11134-codex-20260921-1719/`.
@@ -124,11 +126,13 @@ lease OwnerToken was null. These are momentary read-only observations, not a Mai
 proof of future exclusivity. Current process-name/path searches did not identify Maintop;
 that search alone does not prove the application is absent or establish its version.
 
-**PENDING:** actual current executable/path/version, existing profile/color/white identifiers and
-consistency with the accepted environment; exact ordinary document/import-preview route; positive
+The 22 September amendment below resolves the installed executable/path/version using local file
+metadata. **PENDING:** existing profile/color/white identifiers and consistency with the accepted
+environment; exact ordinary document/import-preview route; positive
 evidence that it cannot automatically enqueue, send or print; protection choice for originals
 (demonstrably read-only direct import, or byte-identical copies in a positively unmonitored path).
-The Operator has been asked for the current version and exact route with its no-output basis.
+The initial version question is superseded by the executor's read-only measurement. The exact
+route and its no-output basis remain unanswered.
 No import instruction has been released and no GUI control or application launch has been sent.
 
 ## 6. One comparison matrix
@@ -212,8 +216,48 @@ no metric or schema work is performed here.
 | `historical-reference-index.json` / `reference-save-evidence-integrity.json` | Local reference evidence hashes; referenced TIFF-save runtime evidence matches the current preset |
 | `checkpoint.json` | Exact pending Operator information and the zero-action checkpoint |
 | `independent-review.md` | Isolated review findings, independent hash measurements, record-review boundaries and dispositions |
+| `maintop-installation-readback-20260922.json` / `maintop-version-observation-20260922.json` | Existing shortcut targets, installed PE versions, executable hashes and passive process readback |
+| `operator-amendment-20260922.json` | Dated verbatim Operator statement and its bounded disposition |
 
 Only this English report is included in the scoped local documentation commit. Raw evidence stays
 ignored. Start HEAD is recorded in section 2; the end HEAD/local commit is recorded after commit
 in ignored `git-final.json` and in the user handback (the report cannot contain its own commit hash).
 No push, Jira write, release or publication.
+
+## 9. Dated amendment — 22 September 2026
+
+The Operator requested that the executor read the Maintop version locally, stated that the installed
+version is suitable for DTF and current for that purpose, and directed the comparison to disregard
+screen-display deviations, stating that these deviations are absent in physical output.
+
+The executor read the existing desktop shortcuts without executing them, then read the target files'
+PE version resources and hashes. No Maintop/Print Manager process was launched or controlled.
+
+| Installed component | Actual executable | Product version | File version |
+|---|---|---|---|
+| MainTop DTP | `D:\MainTop\DTP\dtpw.exe` | `6.1.42` | `6.1.42.2506` |
+| MainTop Print Manager | `D:\MainTop\MON\mt_mon.exe` | `6.0.18.f538b3eab6cbf0eca9924aaf178c639382540b86` | Same as product version |
+
+Both target files exist. No running `dtpw.exe` or `mt_mon.exe` was returned by the passive process-name
+readback at the recorded time. This establishes installed binary identity, not a running UI's edition,
+active driver/profile, queue settings, or import behavior. The DTP major/minor version is consistent
+with the historical v6.1 label; the baseline did not capture an executable hash, so no historical
+binary-equality claim is possible or required. No online "latest release" claim was verified, and no
+upgrade/version dispute or new qualification requirement is introduced.
+
+**Operator scope clarification:** screen-display deviations are not an output defect criterion in this
+comparison. Record any such reported deviation as display-only/Operator-accepted rather than using it
+to fail the TIFF or request color/profile changes. Continue to distinguish actual image dimensions,
+import success, available ink/separation interpretation and usability. The statement about printed
+results remains the Operator's general account, not a newly observed physical print and not an
+object-bound acceptance of REF/G1/G2. It does not establish W1 handling from TIFF metadata.
+
+The exact ordinary nonprinting route and positive no-automatic-enqueue/send/print basis remain
+unprovided. No three-file comparison was performed, and the matrix remains NOT OBSERVED. The single
+21 September saved-work/exclusive-use confirmation is retained as given; it is not silently
+redated into a 22 September live-use window. There is no new live-action request in this amendment.
+
+The independent review in section 7 covered the 21 September preparation. This later executable
+measurement and Operator statement have **not** been independently remeasured or reviewed. No new
+reviewer or acceptance replay was started. Preparation/SCRUM-11134 remain PARTIAL; whole-project
+release and physical-print quality remain NOT ASSESSED; SCRUM-11135 is not started.
