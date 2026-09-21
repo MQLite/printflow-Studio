@@ -7,7 +7,7 @@ Dated amendment: 22 September 2026 — installed application identity and Operat
 Bounded execution: **COMPLETE — available safe-preview comparison, integrity checks and isolated record review completed.**
 
 SCRUM-11134: **PARTIAL — display/dimensions supported under Operator-attested unchanged settings;
-safe preview has no independent CMYK/white view. Comparison view retained by Operator; closure unconfirmed.**
+safe preview has no independent CMYK/white view. Operator confirmed view closure; final integrity verified.**
 
 Raw local evidence (ignored): `artifacts/scrum-11134/11134-codex-20260921-1719/`.
 This report concerns the existing accepted reference and two existing approved outputs only.
@@ -210,16 +210,19 @@ candidate fingerprint unchanged. `comparison-copy-integrity-after-20260922.json`
 records each copy and its original still matching the pre-copy accepted hash. These are main
 executor measurements; they do not establish view closure or unobserved Operator actions.
 
-**Handback:** the Operator retains the comparison view and stated it will be closed later.
-No closure or no-save action is claimed. Only the Operator may close this comparison's own views
-without saving when safely distinguishable from unrelated work; no force-close, cleanup or
-monitoring is performed. Copies remain local and retained. No app was opened, focused, modified
-or closed by the executor, and no TIFF processing or new Product live gate occurred.
+**Handback:** the Operator initially retained the view for later closure, then explicitly replied
+**“已关闭”** (closed) to the existing comparison-view handback request. Closure is Operator-attested,
+not independently observed; no claim is made that the whole application exited or that a particular
+UI command was used. After that reply, `measurements-handback-closed-20260922.json` and
+`comparison-copy-integrity-closed-20260922.json` again verified all protected files/records/authority
+and the three copies unchanged. Copies remain local and retained. No force-close, cleanup or
+monitoring was performed. No app was opened, focused, modified or closed by the executor, and no
+TIFF processing or new Product live gate occurred.
 
 | Outcome | Current status |
 |---|---|
 | Observed Maintop comparison | PARTIAL — all three correctly display per Operator; numerical object sizes align at shown precision; settings unchanged per Operator; no independent CMYK/white view available |
-| This bounded task | COMPLETE — available safe-preview comparison, integrity checks and isolated evidence review completed. Comparison view retained by Operator, closure unconfirmed |
+| This bounded task | COMPLETE — available safe-preview comparison, integrity checks and isolated evidence review completed. Operator confirmed comparison view closed; subsequent integrity verified |
 | SCRUM-11134 clauses | PARTIAL — Operator display/dimension support; no separately established current CMYK/W1 interpretation |
 | Whole-project release | NOT ASSESSED |
 | Physical-print quality | NOT ASSESSED — no physical-print test requested or evidenced; Operator's printing statement is general experience only |
@@ -251,11 +254,13 @@ no metric or schema work is performed here.
 | `operator-observations-20260922.json` | Object-bound actual Operator replies, support/limits, attachment handling and recording time |
 | `dimension-readings-20260922.json` / `dimension-crop-1.png` to `dimension-crop-3.png` | Operator-supplied numeric-only crops, unchanged local copies/hashes, exact readings and identity-mapping limits; no artwork |
 | `measurements-after-comparison-20260922.json` / `comparison-copy-integrity-after-20260922.json` | Post-observation original/source/approval/authority/copy integrity; not evidence of UI closure |
+| `measurements-handback-closed-20260922.json` / `comparison-copy-integrity-closed-20260922.json` | Final unchanged-file/record/copy checks after the later Operator close confirmation; main executor measurements |
 
 Only this English report is included in the scoped local documentation commits. Raw evidence stays
 ignored. Start HEAD is recorded in section 2; checkpoint commits are recorded in `git-final.json`
 and `git-amendment-20260922.json`; final comparison end HEAD/local commit is recorded after commit
 in `git-comparison-final-20260922.json` and the user handback (the report cannot contain its own hash).
+The subsequent close-confirmation documentation commit is recorded in `git-closure-final-20260922.json`.
 No push, Jira write, release or publication.
 
 ## 9. Dated amendment — 22 September 2026
@@ -404,8 +409,9 @@ display formatting implementation itself is not proven. G2 matches its exact dec
 This supports the dimensional comparison at the displayed precision, not a physical-print size
 measurement. No screen-display difference is treated as a TIFF defect under the Operator's scope.
 
-Final integrity is verified as described in section 7. View closure remains unconfirmed under
-the Operator's express "later" decision. The same isolated reviewer completed the final affected-scope
+At the final record-review checkpoint, integrity was verified and view closure was still unconfirmed
+under the Operator's express "later" decision; the subsequent close confirmation is recorded below
+and in section 7. The same isolated reviewer completed the final affected-scope
 review: it opened only the three numeric-only crops, confirmed the exact visible size readings,
 and independently hashed those crop files against the retained manifest. This is independent
 review of Operator-provided UI records, not observation of the live UI or proof of loaded filenames.
@@ -420,3 +426,10 @@ main executor's second hash record (Low), and add the explicit physical-print-qu
 row (Low). Review-pending labels were then finalized. No further measurement replay was warranted
 by these documentation-only corrections. Unavailable white/separation views remain the substantive
 AC limitation, with current profile identifiers and direct UI filename bindings also unrecorded.
+
+**Later closure amendment:** after the final record review and initial comparison-results commit,
+the Operator supplied **“已关闭”**. The reply is appended with its actual recording time in the
+observation record. Section 7 now reflects Operator-confirmed closure and the successful subsequent
+main-executor integrity checks. This later closure statement/check was not independently observed
+or remeasured by the reviewer; no new review or acceptance replay was warranted by this narrow
+handback update. No historical observation or review finding has been backdated or replaced.
