@@ -44,3 +44,33 @@ failure), two at harness plus candidate-pinned synthetic-live level (restart rec
 takeover). None is an ordinary production observation on the fixed workstation. SCRUM-11130 must not
 be moved to FULL. No demonstrated Product defect was found, and **nothing blocks starting
 SCRUM-11131**.
+
+---
+
+## Clarification appended 21 September 2026, from the SCRUM-11131 execution
+
+This is a clarification of what F5, F10 and F15/N5 above **mean**, not a change to any of them, to
+this record, or to SCRUM-11130's **PARTIAL** status. Nothing here reopens SCRUM-11130, and every
+historical observation and failure in the A3 documents stands exactly as written.
+
+1. **Source-preservation measurement is evidence provenance, not a schema requirement.** F5 records
+   that `InputSnapshot` carries no hash of the original file, so "source remains untouched" rests on
+   contemporaneous external file-level measurement with its provenance disclosed. SCRUM-11131 relied
+   on the same mechanism and reached the same conclusion for its own fixture. That is an accepted
+   way to evidence the clause. It does **not** authorise an `InputSnapshot` hash column, a schema
+   migration, or any other Product change, and none was made or proposed.
+
+2. **A read-only record review is a completed review.** F15/N5 records that the reviewer could not
+   execute, build or hash. SCRUM-11131 used the same mechanism and carries the same status line. An
+   independent **record and source** review is a completed review with a stated limit; it is not
+   independent re-execution, and its absence is not grounds to demand another end-to-end run, a
+   second workstation or a mandatory independent re-execution as an acceptance condition.
+
+3. **Missing in-run lease rows stay missing.** F10 records that `session-record.json` carries no
+   `AutomationLock` / `AutomationLogEntry` rows. SCRUM-11131 observed a free canonical lease at
+   handback and did **not** back-infer in-run lock behaviour from it. No watcher and no competing
+   lease were added in either task.
+
+SCRUM-11131's own result is recorded separately in
+`docs/printflow/scrum-11131-prepare-customer-design-fixed-workstation-e2e.md`. It is PARTIAL on its
+own evidence and does not depend on, or alter, SCRUM-11130's status.
