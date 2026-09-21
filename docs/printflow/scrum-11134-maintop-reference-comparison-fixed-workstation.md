@@ -4,7 +4,10 @@ Date: 21 September 2026
 
 Dated amendment: 22 September 2026 — installed application identity and Operator display-scope clarification.
 
-Status: **PARTIALLY COMPLETE — preparation verified; manual comparison awaits required Operator route details.**
+Bounded execution: **COMPLETE — available safe-preview comparison, integrity checks and isolated record review completed.**
+
+SCRUM-11134: **PARTIAL — display/dimensions supported under Operator-attested unchanged settings;
+safe preview has no independent CMYK/white view. Comparison view retained by Operator; closure unconfirmed.**
 
 Raw local evidence (ignored): `artifacts/scrum-11134/11134-codex-20260921-1719/`.
 This report concerns the existing accepted reference and two existing approved outputs only.
@@ -27,8 +30,10 @@ Neither establishes today's settings or substitutes for this comparison.
 
 No new TIFF, Product approval, Product live gate, build, restore, qualification, publication,
 live negative check, printer action, queue submission or SCRUM-11135 work is authorized here.
-Maintop remains exclusively Operator-driven. Restricted artwork is never decoded for model
-vision, uploaded or committed. All pending observations below are explicitly unperformed.
+Maintop remains exclusively Operator-driven. The executor does not capture, upload, reproduce or
+commit restricted artwork. A later unsolicited Operator attachment in the conversation is described
+with its evidence limits in section 11; it is not copied into the evidence directory or Git.
+Pending and unobserved fields below are not inferred from successful composite display.
 
 ## 2. Receiver and routing
 
@@ -65,9 +70,10 @@ This is existing-output provenance, not a new current PrintFlow readiness or Mai
 
 ## 4. Exact representative objects and file measurements
 
-Exact local paths are in `operator-file-list.txt` and `measurements-before.json` in the ignored
-evidence directory. The file list is preparation, not an instruction to import before the route
-is verified. Originals remain in place. No comparison copies have been created.
+Exact original paths are in `operator-file-list.txt` and `measurements-before.json` in the ignored
+evidence directory. Originals remain in place. On 22 September, after the current availability and
+unmonitored-destination confirmation, three byte-identical copies were created; see section 10 and
+`comparison-copies-20260922.json` for the active comparison paths and source/copy hash bindings.
 
 | ID | Identity | Bytes | Measured pixels @ 300 PPI | Derived image dimensions, mm |
 |---|---|---:|---|---|
@@ -126,30 +132,42 @@ lease OwnerToken was null. These are momentary read-only observations, not a Mai
 proof of future exclusivity. Current process-name/path searches did not identify Maintop;
 that search alone does not prove the application is absent or establish its version.
 
-The 22 September amendment below resolves the installed executable/path/version using local file
-metadata. **PENDING:** existing profile/color/white identifiers and consistency with the accepted
-environment; exact ordinary document/import-preview route; positive
-evidence that it cannot automatically enqueue, send or print; protection choice for originals
-(demonstrably read-only direct import, or byte-identical copies in a positively unmonitored path).
-The initial version question is superseded by the executor's read-only measurement. The exact
-route and its no-output basis remain unanswered.
-No import instruction has been released and no GUI control or application launch has been sent.
+The 22 September amendment resolves installed executable/path/version using local file metadata.
+The Operator has now positively attested that the ordinary route is layout preview only and does
+not automatically enqueue, send or print; exact menu captions were not supplied and are not invented.
+The Operator also renewed the current saved-work/exclusive/no-competing-automation confirmation and
+confirmed the exact copy destination is not a hot folder or output destination. These are Operator
+attestations, not independent inspection of application/queue configuration. Copies are now verified.
+
+The Operator subsequently confirmed settings remained unchanged between the three samples, CMYK
+color is displayed, white ink cannot be viewed, and there is no independent separation view.
+Specific profile/color/white identifiers have not been supplied or independently read. The current
+fixed environment is therefore identified by its running binary and the Operator's ordinary DTF
+configuration/unchanged-setting attestations, not by independently inspected settings. Manual
+comparison instructions have been delivered; no GUI control or
+application launch has been sent by the executor. See section 10 for the later dated checkpoint.
 
 ## 6. One comparison matrix
 
 | ID | Executor measurement | Current Maintop import/render | Displayed image dimensions | CMYK interpretation | W1 interpretation | Operator usability | Warning / evidence level |
 |---|---|---|---|---|---|---|---|
-| REF | Hash/IFD PASS; accepted-reference identity verified | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | Awaiting verified route; historical acceptance is separate |
-| G1 | Hash/IFD PASS; original approval/lineage verified | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | Awaiting verified route and object-bound observations |
-| G2 | Hash/IFD PASS; original approval/lineage verified | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | NOT OBSERVED | Awaiting verified route and object-bound observations |
+| REF | Hash/IFD PASS; accepted-reference identity verified; copy hash matches | Operator: displays correctly | **279.9926 × 378.7986 mm**, numeric crop 3; Operator confirms correct | Operator: CMYK color display; no independent separation view | NOT OBSERVED / PARTIAL — safe preview does not expose white ink | Correct layout display, per Operator; ink-specific readiness not established | Warnings not specifically reported; settings unchanged per Operator |
+| G1 | Hash/IFD PASS; original approval/lineage verified; copy hash matches | Operator: displays correctly | **199.9826 × 300.0586 mm**, numeric crop 1; Operator confirms correct | Operator: CMYK color display; no independent separation view | NOT OBSERVED / PARTIAL — safe preview does not expose white ink | Correct layout display, per Operator; ink-specific readiness not established | Warnings not specifically reported; settings unchanged per Operator |
+| G2 | Hash/IFD PASS; original approval/lineage verified; copy hash matches | Operator: displays correctly | **50.8 × 76.2 mm**, numeric crop 2; Operator confirms correct | Operator: CMYK color display; no independent separation view | NOT OBSERVED / PARTIAL — safe preview does not expose white ink | Correct layout display, per Operator; ink-specific readiness not established | Warnings not specifically reported; settings unchanged per Operator |
 
-After the route is established, the Operator compares REF first, then G1, then G2 in the same
-unchanged environment. Record the actual loaded object, import/warnings, image size with units,
-available CMYK/separation facility, actual safe white-preview facility and intended ink regions,
-and per-object usability judgement at the time of the answer. Composite rendering alone proves
-neither individual CMYK separations nor W1 interpretation. If the safe UI exposes no white
-mechanism, that clause stays NOT OBSERVED/PARTIAL without starting a RIP or physical print.
-Different artwork is not a pixel-equality oracle. There is no invented numerical tolerance.
+Numeric crops contain object-size controls but no filenames. Their REF/G1/G2 mapping is inferred
+from the unique geometry and the object-bound Operator comparison, not independently read from
+file labels. The displayed four-decimal REF/G1 values match truncation of the file-derived values
+to four decimals; the application's internal rounding rule is not independently documented.
+No arbitrary tolerance, resizing correction or pixel-equality requirement is introduced.
+
+The comparison protocol required REF first, then G1, then G2, with the existing configuration
+kept unchanged. The request named the loaded objects, import/warnings, image sizes/units, actual
+safe CMYK/white-preview facilities and ink regions, and per-object usability. The evidence above
+records only what was supplied. Composite rendering proves neither individual CMYK separations
+nor W1 interpretation. The unavailable white-view claim stays NOT OBSERVED/PARTIAL without starting
+a RIP or physical print. Different artwork is not a pixel-equality oracle, and no arbitrary
+numerical tolerance is introduced.
 
 ## 7. Review, handback and outcomes
 
@@ -165,14 +183,14 @@ executor's. It compared the acceptance, lineage and validation records against t
 criterion. It did **not** query live SQLite: seven-table equality and current-row claims were
 reviewed through the main executor's saved readback and read-only measurement method. It did
 not rerun VerifyOnly. It did **not** decode pixels, independently parse the TIFF IFDs, observe Maintop,
-perform the comparison, or verify the pending no-output route. Its preparation review cannot
+perform the comparison, or verify the then-pending no-output route. Its preparation review cannot
 supply any missing Operator observation or prove physical-print quality.
 
 | Finding | Severity | Disposition |
 |---|---|---|
 | `MODEL_SWITCH_UNAVAILABLE` overstated capability evidence when no switch had been attempted | Moderate | Accepted; removed the marker and distinguished intended route from unverified actual execution |
 | “Independently decode” could misattribute the main executor's TIFF metadata measurement to the reviewer | Low | Accepted; explicitly credited the main executor's first-IFD measurement |
-| Current environment/route and actual comparison results remain missing | Expected blocker | Preserved as pending; no import or acceptance invented |
+| Current environment/route and actual comparison results were missing at the initial review | Expected blocker | Preserved at that checkpoint; later attestations/observations are recorded in sections 10–11; white/separation limits remain |
 
 The reviewer confirmed the final accepted reference identity, the two complementary sample
 selections, their original reviewed-byte bindings, integer-pixel geometry and the separation of
@@ -185,18 +203,26 @@ Maintop comparison. See `independent-review.md` for the transcribed findings and
 seven tables, retained authority and candidate fingerprint. No active attempt and no lease owner
 were recorded at that instant. This is a preparation checkpoint, **not** post-comparison evidence.
 
-Actual post-comparison handback remains **PENDING** because no comparison occurred. No app was
-opened, focused, modified or closed by the executor; no temporary comparison view or input copy
-was created. After any eventual observations, remeasure originals/copies and approval bindings.
-Only this comparison's temporary views may be closed by the Operator without saving when safely
-distinguishable from unrelated work. No new live gate is needed.
+**Post-comparison integrity verified:** after the Operator display/dimension observations and
+numeric crops, `measurements-after-comparison-20260922.json` confirms protected originals, source
+files, all three 11133 outputs/approvals, both sessions' seven tables, retained authority and the
+candidate fingerprint unchanged. `comparison-copy-integrity-after-20260922.json` separately
+records each copy and its original still matching the pre-copy accepted hash. These are main
+executor measurements; they do not establish view closure or unobserved Operator actions.
+
+**Handback:** the Operator retains the comparison view and stated it will be closed later.
+No closure or no-save action is claimed. Only the Operator may close this comparison's own views
+without saving when safely distinguishable from unrelated work; no force-close, cleanup or
+monitoring is performed. Copies remain local and retained. No app was opened, focused, modified
+or closed by the executor, and no TIFF processing or new Product live gate occurred.
 
 | Outcome | Current status |
 |---|---|
-| Observed Maintop comparison | NOT RUN — safe route/current environment pending |
-| This bounded task | PARTIALLY COMPLETE — preparation verified, Operator-driven comparison pending |
-| SCRUM-11134 clauses | PARTIAL — no new current Maintop import/dimension/CMYK/W1/usability evidence yet |
+| Observed Maintop comparison | PARTIAL — all three correctly display per Operator; numerical object sizes align at shown precision; settings unchanged per Operator; no independent CMYK/white view available |
+| This bounded task | COMPLETE — available safe-preview comparison, integrity checks and isolated evidence review completed. Comparison view retained by Operator, closure unconfirmed |
+| SCRUM-11134 clauses | PARTIAL — Operator display/dimension support; no separately established current CMYK/W1 interpretation |
 | Whole-project release | NOT ASSESSED |
+| Physical-print quality | NOT ASSESSED — no physical-print test requested or evidenced; Operator's printing statement is general experience only |
 
 Prior A2/A3/11130–11133 results remain unchanged. SCRUM-11135 is not started. Future 11136/11137
 metrics must distinguish additional sizes from retries despite the retained RetrySequence fields;
@@ -218,10 +244,18 @@ no metric or schema work is performed here.
 | `independent-review.md` | Isolated review findings, independent hash measurements, record-review boundaries and dispositions |
 | `maintop-installation-readback-20260922.json` / `maintop-version-observation-20260922.json` | Existing shortcut targets, installed PE versions, executable hashes and passive process readback |
 | `operator-amendment-20260922.json` | Dated verbatim Operator statement and its bounded disposition |
+| `operator-safe-route-20260922.json` / `operator-current-window-20260922.json` | Actual positive route attestation and current availability/unmonitored-destination confirmation |
+| `measurements-resume-20260922.json` / `comparison-copies-20260922.json` | Unchanged protected records at resumption; exact original/copy identities and verified SHA-256 bindings |
+| `manual-comparison-request-20260922.json` / `operator-comparison-guide-20260922.txt` | Object-bound observation request and exact three-copy manual guide |
+| `maintop-running-readback-20260922.json` | Later passive running-process identity and binary-version readback; no UI/object/settings/queue observation |
+| `operator-observations-20260922.json` | Object-bound actual Operator replies, support/limits, attachment handling and recording time |
+| `dimension-readings-20260922.json` / `dimension-crop-1.png` to `dimension-crop-3.png` | Operator-supplied numeric-only crops, unchanged local copies/hashes, exact readings and identity-mapping limits; no artwork |
+| `measurements-after-comparison-20260922.json` / `comparison-copy-integrity-after-20260922.json` | Post-observation original/source/approval/authority/copy integrity; not evidence of UI closure |
 
-Only this English report is included in the scoped local documentation commit. Raw evidence stays
-ignored. Start HEAD is recorded in section 2; the end HEAD/local commit is recorded after commit
-in ignored `git-final.json` and in the user handback (the report cannot contain its own commit hash).
+Only this English report is included in the scoped local documentation commits. Raw evidence stays
+ignored. Start HEAD is recorded in section 2; checkpoint commits are recorded in `git-final.json`
+and `git-amendment-20260922.json`; final comparison end HEAD/local commit is recorded after commit
+in `git-comparison-final-20260922.json` and the user handback (the report cannot contain its own hash).
 No push, Jira write, release or publication.
 
 ## 9. Dated amendment — 22 September 2026
@@ -252,12 +286,137 @@ import success, available ink/separation interpretation and usability. The state
 results remains the Operator's general account, not a newly observed physical print and not an
 object-bound acceptance of REF/G1/G2. It does not establish W1 handling from TIFF metadata.
 
-The exact ordinary nonprinting route and positive no-automatic-enqueue/send/print basis remain
-unprovided. No three-file comparison was performed, and the matrix remains NOT OBSERVED. The single
-21 September saved-work/exclusive-use confirmation is retained as given; it is not silently
-redated into a 22 September live-use window. There is no new live-action request in this amendment.
+At this early 22 September checkpoint, the ordinary nonprinting route and positive
+no-automatic-enqueue/send/print basis were still unprovided. No three-file comparison had yet
+been reported, and the matrix then remained NOT OBSERVED. The 21 September availability reply
+was retained without being silently redated. Later current confirmation and actual observations
+supersede these pending items in sections 10–11; the early version amendment itself requested no live action.
 
-The independent review in section 7 covered the 21 September preparation. This later executable
-measurement and Operator statement have **not** been independently remeasured or reviewed. No new
-reviewer or acceptance replay was started. Preparation/SCRUM-11134 remain PARTIAL; whole-project
-release and physical-print quality remain NOT ASSESSED; SCRUM-11135 is not started.
+At the time of this version amendment, section 7's review covered only 21 September preparation.
+The same reviewer subsequently reviewed the later records as described below; no new reviewer or
+acceptance replay was started. Whole-project release and physical-print quality remain NOT
+ASSESSED; SCRUM-11135 is not started.
+
+## 10. Later 22 September checkpoint — safe route and manual dispatch
+
+This later checkpoint supersedes the pending route/copy-position items in section 9 without
+backdating that earlier amendment. The actual answer to the safe-route question was:
+**“仅排版预览，不自动入队发送或打印”** (layout preview only; no automatic enqueue, send or print).
+The next combined question asked whether the saved-work/exclusive/no-competing-automation window
+was still valid after the date change and whether the exact proposed copy directory was neither
+a hot folder nor an output directory. The Operator answered **“两项均确认”** (both confirmed).
+No repeated per-file availability or Product approval is requested.
+
+The resumed read-only measurement found the protected files, both sessions' seven tables,
+retained authority and fingerprint unchanged from the original preparation baseline. Only REF,
+G1 and G2 were copied using non-overwriting `File.Copy`, with each original measured before and
+after and each copy measured after copying. All three copy hashes equal their accepted originals.
+No image conversion, new raster generation, resave, channel remapping or source rename occurred.
+
+| ID | Local comparison copy | Expected image mm at 300 PPI |
+|---|---|---|
+| REF | `QA/SCRUM-11134/11134-codex-20260922/input-copies/REF.tif` | 279.9926667 × 378.7986667 |
+| G1 | `QA/SCRUM-11134/11134-codex-20260922/input-copies/G1.tif` | 199.9826667 × 300.0586667 |
+| G2 | `QA/SCRUM-11134/11134-codex-20260922/input-copies/G2.tif` | 50.8 × 76.2 |
+
+Paths above are relative to the existing PrintFlow workspace; exact absolute paths, byte lengths
+and full hashes are in the ignored copy manifest and the Operator guide. Copies inherit the
+originals' local-only restrictions and are retained, not swept or sent to model vision.
+
+The Operator received all three paths and expected sizes together, with instructions to view REF
+first, then G1/G2, keep the existing layout-preview settings unchanged, and report whether they
+remained unchanged. That observation was pending at dispatch and was later supplied in section 11.
+The request named each object and
+asks for import/warnings, complete artwork, actual displayed image dimensions and units,
+available CMYK/white-preview mechanism and ink regions, per-file usability, current visible
+configuration names, and unchanged settings. No screenshot of restricted artwork was requested.
+Unavailable fields must be recorded as not shown; screen-display deviations are excluded under
+the Operator's instruction. Format/actual dimension errors should stop the affected comparison.
+
+The route and unmonitored-directory facts are positively Operator-attested. No independent
+Maintop UI observation or menu-caption discovery is claimed. At dispatch, the matrix was left
+NOT OBSERVED pending object-bound answers, and post-comparison integrity was still outstanding.
+The later observations and integrity results are recorded in sections 6–7 and 11, without backdating
+them into the dispatch record.
+
+A later passive process readback at **10:02:25 +12:00** identified running `dtpw.exe`, PID **22100**, at the measured
+`D:\MainTop\DTP\dtpw.exe`, ProductVersion **6.1.42**, FileVersion **6.1.42.2506**. This strengthens
+installed-file identity to the actual running binary at that recorded instant. No window title,
+image, loaded file, profile, queue or Maintop UI result was read, and none is inferred from the PID.
+
+**Scoped review of this amendment:** the same isolated read-only reviewer resumed without receiving
+parent history or becoming a workstation operator. It independently hashed/measured the three new
+copies and read PE VersionInfo for the two installed executables; those measurements agree with the
+record. It accepted the attribution of the route, availability, destination and display-scope facts
+to Operator attestation. It found the potentially ambiguous unchanged-setting wording above
+(Moderate), corrected to an instruction whose observation was then pending, and requested the timestamped
+running-process note (Minor), now included. No additional acceptance replay was performed. The
+reviewer did not observe any preview/settings/queue/UI result, query live SQLite, decode image/IFD
+data, rerun VerifyOnly/tests/builds or change any state. Actual model/effort remains UNVERIFIED;
+requested route remained Sol High, offset 0. Findings are appended in `independent-review.md`.
+
+## 11. Subsequent Operator observations — 22 September 2026
+
+The request explicitly named REF, G1 and G2, their verified copy paths and each sample's expected
+geometry. The Operator answered **“都能正确显示”** (all display correctly), then **“尺寸也正确”**
+(dimensions are also correct). These responses are collectively object-bound to the named three
+samples and support successful layout display and the Operator's dimensional check. They are
+not additional Product approvals and create no ReviewDecision.
+
+The initial text reply supplied no exact displayed width/height/units; these arrived later in the
+numeric-only crops described below. Section 4's numerical dimensions remain file-derived
+measurements, distinct from section 6's displayed values. Warning absence,
+individual CMYK separations, W1 interpretation/regions, unchanged configuration and production
+readiness are not inferred from "correctly displays". The Operator was asked only for the remaining
+unchanged-setting and safe separation-view availability facts, plus whether the temporary comparison
+view was safely closed without saving or retained for inspection. No repeat dimensional approval is
+requested, and unavailable white/separation facilities must remain NOT OBSERVED.
+
+The Operator voluntarily supplied a composite layout screenshot in the conversation alongside the
+dimensional statement. It contains no numeric image-size readout, loaded-file labels or separate
+ink-view controls; it cannot independently establish the file identities, dimensions or W1 behavior.
+The executor did not request or capture that screenshot, did not copy it into local evidence or Git,
+and did not re-open it with a tool, repost it or use it as quantitative/separation evidence. The
+standing no-agent-upload/no-restricted-artwork-publication boundary remains in force.
+
+The subsequent actual replies were **“不可以查看白墨，只显示CMYK色，但打印时会有白墨。设置保持不变，尺寸稍后发送截图”**
+(white ink cannot be viewed; only CMYK color is shown; white ink appears when printing; settings
+unchanged; numerical-size screenshot to follow), **“没有独立视图”** (no independent view), and
+**“稍后关闭”** (will close later). These establish unchanged settings and the safe preview's
+explicit limitation. Neither CMYK ink separations nor W1 interpretation/regions are exposed in
+this route, so those claims remain NOT OBSERVED/PARTIAL; no RIP/output action is sought to fill them.
+The statement about white ink when printing is the Operator's general production account, not a
+new physical-print test or an observed result for these copies. Screen-display deviations remain
+excluded as directed. The comparison view remains retained by the Operator at this checkpoint.
+
+Recording times and verbatim answers are retained in `operator-observations-20260922.json`; actual
+import instants and attachment capture time are unknown and are not reconstructed. After being
+offered text or numeric-only crops, the Operator supplied three crops containing width/height
+controls, units, position and zero rotation/skew controls, with no artwork/customer identifiers.
+Those three numeric-only files alone were copied unchanged into ignored local evidence and hashed;
+the earlier artwork-containing screenshot was not copied or reposted.
+
+The readings are G1 **199.9826 × 300.0586 mm**, G2 **50.8 × 76.2 mm**, REF **279.9926 × 378.7986 mm**.
+The crop-to-file mapping follows their unique geometry plus the Operator's named comparison; the
+crops do not independently show loaded-file labels. REF/G1 differ from exact pixel/PPI-derived
+geometry by 0.0000667 mm at each displayed edge, consistent with four-decimal truncation; the
+display formatting implementation itself is not proven. G2 matches its exact decimal geometry.
+This supports the dimensional comparison at the displayed precision, not a physical-print size
+measurement. No screen-display difference is treated as a TIFF defect under the Operator's scope.
+
+Final integrity is verified as described in section 7. View closure remains unconfirmed under
+the Operator's express "later" decision. The same isolated reviewer completed the final affected-scope
+review: it opened only the three numeric-only crops, confirmed the exact visible size readings,
+and independently hashed those crop files against the retained manifest. This is independent
+review of Operator-provided UI records, not observation of the live UI or proof of loaded filenames.
+It did not access the earlier artwork screenshot, independently rehash originals/copies after
+comparison, query live SQLite, inspect settings/queues, print, or mutate state. Post-comparison
+unchanged-file/record/lease facts remain the main executor's saved measurements.
+
+The final review accepted the matrix, attribution, inferred crop bindings, unavailable ink views,
+retained-view handback and PARTIAL verdict. Three wording findings were accepted: describe the
+protocol in past tense (Minor), replace "independently records" with "separately records" for the
+main executor's second hash record (Low), and add the explicit physical-print-quality NOT ASSESSED
+row (Low). Review-pending labels were then finalized. No further measurement replay was warranted
+by these documentation-only corrections. Unavailable white/separation views remain the substantive
+AC limitation, with current profile identifiers and direct UI filename bindings also unrecorded.
