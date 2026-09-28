@@ -138,5 +138,6 @@ public partial class SessionViewModel
         OnPropertyChanged(nameof(StatusReason));
         OnPropertyChanged(nameof(RecommendedCommand));
         OnPropertyChanged(nameof(ReviewTargetIdentity));
+        NotifyReviewGuidanceChanged();
     }
 }

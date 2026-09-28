@@ -1,6 +1,6 @@
 # PrintFlow operator terminology (zh-CN / en)
 
-Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24
+Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24; SCRUM-11149 review-guidance wording added 2026-09-29
 
 Scope: beginner-facing operator copy; documentation only
 
@@ -58,6 +58,7 @@ The generated → waiting for review → approved → completed sequence describ
 | Ask a colleague to correct this image | Ask a colleague to correct this image | 请同事修正此图片 | Keep | SCRUM-11148: offered beside Approve and Reject on a background-removal review only. It prepares a reference copy and a working copy and hands the job off; the return is an explicit "Import corrected image" (导入修正后的图片), never a queue, account, watcher or automatic pickup. `Session_AskColleague`. |
 | Confirm result and save | Confirm result and save | 确认结果并保存 | Keep | SCRUM-11145: offered only at a lawful final review (asset Trim, print TIFF). It checks the displayed file name and folder, approves exactly the displayed result, prepares the approved PNG once where needed, then saves; approval and saving are reported separately. `Approve` alone still records the review only. Resources: `FinalSave_ConfirmAndSave`, `FinalSave_ApproveOnlyHint`. |
 | Open containing folder | Open containing folder | 打开所在文件夹 | Keep | SCRUM-11145: shown only for a recorded delivery whose file is verified at that moment; it asks Windows to select that exact file in its folder and never opens the image or the internal Approved area. A dispatched request is not proof that Explorer visibly selected it. Resource: `FinalSave_OpenFolder`. |
+| What to check | What to check | 检查要点 | Keep | SCRUM-11149: read-only section beside a review (Enhancement, background removal, Trim, production TIFF). Two to four checks name the existing tools by their on-screen labels; one line each says what Approve and Reject do, and a help line names only an entry that exists for that result (Ask a colleague on background removal, Adjust trim edges on Trim). Approve is never described as saving; the TIFF Reject line says the TIFF goes to the Recycle Bin first and no new TIFF is made until Run step. Resources `Session_Guidance*`. |
 
 ### Wave 1 next-step sentence patterns
 

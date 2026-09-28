@@ -1230,4 +1230,29 @@
   <data name="Home_RecentWaitingForCorrection" xml:space="preserve"><value>Waiting for a colleague's corrected picture</value></data>
   <data name="Home_RecoveryOpenCorrection" xml:space="preserve"><value>Open job to import corrected image</value></data>
   <data name="Session_NextCorrectionWait" xml:space="preserve"><value>Waiting for your colleague's corrected picture. When it is ready, choose {0}.</value></data>
+  <data name="Session_GuidanceHeading" xml:space="preserve"><value>What to check</value></data>
+  <data name="Session_GuidanceEnhancementCompare" xml:space="preserve"><value>Compare {0} and {1} with {2} or {3}.</value></data>
+  <data name="Session_GuidanceEnhancementDetail" xml:space="preserve"><value>Zoom in on faces, fine detail and lettering: they should look clearer, not changed in shape or smudged.</value></data>
+  <data name="Session_GuidanceEnhancementArtefacts" xml:space="preserve"><value>Look for blotches, halos or odd colours that were not in the original.</value></data>
+  <data name="Session_GuidanceBackgroundColours" xml:space="preserve"><value>Switch the background to {0}, then {1}: leftover old background and missing parts stand out.</value></data>
+  <data name="Session_GuidanceBackgroundEdges" xml:space="preserve"><value>Zoom in on hair, fur and edges: they should be clean, not cut into or fringed.</value></data>
+  <data name="Session_GuidanceBackgroundKept" xml:space="preserve"><value>Compare with {0}: every part of the design, including lettering and thin lines, is still there.</value></data>
+  <data name="Session_GuidanceTrimCompare" xml:space="preserve"><value>Compare {0} and {1}: nothing that belongs to the design is cut off at any edge.</value></data>
+  <data name="Session_GuidanceTrimEmpty" xml:space="preserve"><value>Check that the empty space around the design has gone, apart from any margin that was chosen.</value></data>
+  <data name="Session_GuidanceTrimEdges" xml:space="preserve"><value>Zoom in on each edge and corner, especially thin or pale parts.</value></data>
+  <data name="Session_GuidanceTiffWhiteInk" xml:space="preserve"><value>In {0}, check the white covers the design as intended: no missing areas and no stray marks.</value></data>
+  <data name="Session_GuidanceTiffOverlay" xml:space="preserve"><value>In {0}, zoom in to compare the white with the design's edges.</value></data>
+  <data name="Session_GuidanceTiffColour" xml:space="preserve"><value>In {0}, check the whole design is there and nothing is cut off. Screen colour is only an approximation.</value></data>
+  <data name="Session_GuidanceTiffSize" xml:space="preserve"><value>Under {0}, check that {1} is the print size you need.</value></data>
+  <data name="Session_GuidanceApprove" xml:space="preserve"><value>{0} accepts this exact result and ends this review. It does not save a file to your folder.</value></data>
+  <data name="Session_GuidanceApproveTiff" xml:space="preserve"><value>{0} records that this exact TIFF passed your check. It does not check print quality and does not save it to your folder.</value></data>
+  <data name="Session_GuidanceReject" xml:space="preserve"><value>{0} records the reason you choose below and sets this result aside. Nothing runs again by itself; you then choose how to try again.</value></data>
+  <data name="Session_GuidanceRejectTiff" xml:space="preserve"><value>{0} does not make the new TIFF straight away. It first moves this TIFF to the Recycle Bin, then records the reason you choose below. The new TIFF is made only when you choose {2}; {1} alone does not make one. If the TIFF cannot be moved to the Recycle Bin, nothing is rejected and it stays where it is.</value></data>
+  <data name="Session_GuidanceHelpEnhancement" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look at it with you before you choose.</value></data>
+  <data name="Session_GuidanceHelpAskColleague" xml:space="preserve"><value>Something wrong, or not sure? Use the button below to ask a colleague to correct this picture. You can add a note before anything is sent.</value></data>
+  <data name="Session_GuidanceHelpNoColleague" xml:space="preserve"><value>Asking a colleague is not available for this result. If something is wrong, choose {0}.</value></data>
+  <data name="Session_GuidanceHelpAdjustTrim" xml:space="preserve"><value>An edge not right? Use {0} below to move the edges on the picture before trimming. The new trim still waits for your review.</value></data>
+  <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>Adjusting the edges is not available for this result. If something is cut off, choose {0}; you can then try again.</value></data>
+  <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look before you choose. A TIFF changed outside PrintFlow cannot be imported.</value></data>
+  <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value> To change the print size first, use {0} below.</value></data>
 </root>

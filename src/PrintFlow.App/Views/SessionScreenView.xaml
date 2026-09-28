@@ -1257,6 +1257,63 @@
                         </ContentControl.Style>
                     </ContentControl>
 
+                    <!--
+                        What to check (SCRUM-11149). Read-only guidance for the result under review:
+                        the checks, what Approve and Reject do, and where to get help. Collapsed while
+                        the Ask panel, the trim editor or a manual crop is the task. The two buttons are
+                        the existing entries — same command, same eligibility — so nothing here
+                        approves, rejects, prepares, hands off, crops or saves.
+                    -->
+                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                            AutomationProperties.AutomationId="Session.ReviewGuidance"
+                            AutomationProperties.Name="{Binding ReviewGuidanceHeading}"
+                            Visibility="{Binding ShowsReviewGuidance, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReviewGuidanceHeading}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <ItemsControl ItemsSource="{Binding ReviewGuidanceChecks}" IsTabStop="False" Margin="0,6,0,0"
+                                          AutomationProperties.AutomationId="Session.ReviewGuidance.Checks"
+                                          AutomationProperties.Name="{Binding ReviewGuidanceHeading}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="•" Margin="0,0,6,0" />
+                                            <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="{Binding ReviewGuidanceApprove}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
+                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Approve" />
+                            <TextBlock Text="{Binding ReviewGuidanceReject}" TextWrapping="Wrap" Opacity="0.85" Margin="0,4,0,0"
+                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Reject" />
+                            <TextBlock Text="{Binding ReviewGuidanceHelp}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                                       AutomationProperties.AutomationId="Session.ReviewGuidance.Help" />
+                            <Button Content="{Binding AskColleagueLabel}"
+                                    Command="{Binding BeginAskColleagueCommand}"
+                                    IsEnabled="{Binding CanAskColleague}"
+                                    AutomationProperties.AutomationId="Session.ReviewGuidance.AskColleague"
+                                    AutomationProperties.Name="{Binding AskColleagueLabel}"
+                                    HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
+                                    Visibility="{Binding ShowsGuidanceAskColleague, Converter={StaticResource BoolToVisibility}}" />
+                            <Button Content="{Binding TrimAdjustBeginLabel}"
+                                    Command="{Binding BeginTrimAdjustCommand}"
+                                    IsEnabled="{Binding CanAdjustTrim}"
+                                    AutomationProperties.AutomationId="Session.ReviewGuidance.AdjustTrim"
+                                    AutomationProperties.Name="{Binding TrimAdjustBeginLabel}"
+                                    HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
+                                    Visibility="{Binding ShowsGuidanceAdjustTrim, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+
                     <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>

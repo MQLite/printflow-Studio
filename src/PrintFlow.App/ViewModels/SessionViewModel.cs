@@ -3116,6 +3116,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsCroppingChanged(bool value)
     {
+        NotifyReviewGuidanceChanged();
         OnPropertyChanged(nameof(ShowsManualCropControls));
         OnPropertyChanged(nameof(ShowsCropSurface));
         OnPropertyChanged(nameof(CanAdjustTrim));

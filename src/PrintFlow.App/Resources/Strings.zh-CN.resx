@@ -1219,4 +1219,29 @@
   <data name="Home_RecentWaitingForCorrection" xml:space="preserve"><value>等待同事修正后的图片</value></data>
   <data name="Home_RecoveryOpenCorrection" xml:space="preserve"><value>打开任务以导入修正后的图片</value></data>
   <data name="Session_NextCorrectionWait" xml:space="preserve"><value>正在等待同事修正后的图片。收到后，请选择“{0}”。</value></data>
+  <data name="Session_GuidanceHeading" xml:space="preserve"><value>检查要点</value></data>
+  <data name="Session_GuidanceEnhancementCompare" xml:space="preserve"><value>用“{2}”或“{3}”对照“{0}”和“{1}”。</value></data>
+  <data name="Session_GuidanceEnhancementDetail" xml:space="preserve"><value>放大查看人脸、细节和文字：应更清晰，不应变形或模糊。</value></data>
+  <data name="Session_GuidanceEnhancementArtefacts" xml:space="preserve"><value>检查是否出现原图没有的色块、光晕或异常颜色。</value></data>
+  <data name="Session_GuidanceBackgroundColours" xml:space="preserve"><value>将背景依次切换为“{0}”和“{1}”：残留的旧背景和缺失部分会更明显。</value></data>
+  <data name="Session_GuidanceBackgroundEdges" xml:space="preserve"><value>放大查看头发、毛发和边缘：应干净整齐，不应被切掉或带有杂边。</value></data>
+  <data name="Session_GuidanceBackgroundKept" xml:space="preserve"><value>与“{0}”对照：设计的每个部分（包括文字和细线）都应保留。</value></data>
+  <data name="Session_GuidanceTrimCompare" xml:space="preserve"><value>对照“{0}”和“{1}”：设计的任何部分都没有在边缘被裁掉。</value></data>
+  <data name="Session_GuidanceTrimEmpty" xml:space="preserve"><value>检查设计周围的空白是否已去除（所设边距除外）。</value></data>
+  <data name="Session_GuidanceTrimEdges" xml:space="preserve"><value>放大检查每条边和每个角，尤其是细小或浅色的部分。</value></data>
+  <data name="Session_GuidanceTiffWhiteInk" xml:space="preserve"><value>在“{0}”中检查白墨是否按预期覆盖设计：没有缺失区域，也没有多余痕迹。</value></data>
+  <data name="Session_GuidanceTiffOverlay" xml:space="preserve"><value>在“{0}”中放大，对照白墨与设计边缘。</value></data>
+  <data name="Session_GuidanceTiffColour" xml:space="preserve"><value>在“{0}”中检查设计完整、没有被裁掉。屏幕颜色仅为近似效果。</value></data>
+  <data name="Session_GuidanceTiffSize" xml:space="preserve"><value>在“{0}”下核对“{1}”是否为所需的印刷尺寸。</value></data>
+  <data name="Session_GuidanceApprove" xml:space="preserve"><value>“{0}”会接受当前这个结果并结束本次审核。它不会把文件保存到你的文件夹。</value></data>
+  <data name="Session_GuidanceApproveTiff" xml:space="preserve"><value>“{0}”只记录此 TIFF 已通过你的检查。它不检查打印质量，也不会把文件保存到你的文件夹。</value></data>
+  <data name="Session_GuidanceReject" xml:space="preserve"><value>“{0}”会记录你在下方选择的原因，并搁置此结果。不会自动重新处理；之后由你选择如何重试。</value></data>
+  <data name="Session_GuidanceRejectTiff" xml:space="preserve"><value>“{0}”不会立即生成新的 TIFF：它先将此 TIFF 移入回收站，再记录你在下方选择的原因。只有选择“{2}”后才会生成新的 TIFF；仅选择“{1}”不会生成。如果无法移入回收站，则不会拒绝，TIFF 保持原位。</value></data>
+  <data name="Session_GuidanceHelpEnhancement" xml:space="preserve"><value>不确定？请先请有经验的同事和你一起查看，再做决定。</value></data>
+  <data name="Session_GuidanceHelpAskColleague" xml:space="preserve"><value>有问题或不确定？用下方按钮请同事修正此图片。发送前可以先写备注。</value></data>
+  <data name="Session_GuidanceHelpNoColleague" xml:space="preserve"><value>此结果无法请同事修正。如有问题，请选择“{0}”。</value></data>
+  <data name="Session_GuidanceHelpAdjustTrim" xml:space="preserve"><value>边缘不对？用下方“{0}”在裁切前的图片上移动边缘。新的裁切结果仍需你审核。</value></data>
+  <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>此结果无法调整裁切边缘。如有内容被裁掉，请选择“{0}”，之后可以重新尝试。</value></data>
+  <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>不确定？请先请有经验的同事查看再决定。在 PrintFlow 之外修改的 TIFF 无法导入。</value></data>
+  <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value>如需先修改印刷尺寸，请使用下方“{0}”。</value></data>
 </root>
