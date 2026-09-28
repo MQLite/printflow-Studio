@@ -1,3 +1,51 @@
+# PF-OPUX-v1 — SCRUM-11149 current handoff
+
+2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11149-impl-v1`. **Implementation, verification, independent review, MASTER_PUSH_VERIFIED and Jira synchronization COMPLETE. SCRUM-11149 is In Review; human acceptance NOT RUN. Stop; SCRUM-11150 not started.**
+
+**Delivered.** A read-only "What to check / 检查要点" section in the session screen's details column for the Enhancement, background-removal, Trim and production-TIFF reviews. Each shows 3–4 checks naming existing tools, an Approve line (never "saved"), a Reject line and a help line. The help buttons are the existing Ask-a-colleague and Adjust-trim-edges commands with their own eligibility. The TIFF Reject copy follows the code: Recycle Bin first, a failed recycle records nothing, and no new TIFF until Run step (Retry alone makes none).
+
+**Git**
+- Before: local = `origin/master` = `fddf2434d26d927a798f942678c79072ab3afc99`, clean.
+- Code commit `6cbde817a2da7f3565cf52860ca26d79a3e71242` (11 paths), fast-forward push, verified by fetch, `ls-remote` and the GitHub API.
+- A docs-only commit follows with this HANDOFF, the plan, the CSV, the audit and the one-mapping exporter change. Its SHA is recorded in the local audit copy and in the final report, not here.
+
+**Verification**
+- Tests written first (red build recorded).
+- Targeted 36/36.
+- Settled candidate: clean build 0/0; architecture 452/452; combined UI 554/554 with the SCRUM-11148 corrected filter. Counts overlap.
+- Exclusions and the NOT PASS baseline recovery hang are unchanged. Workflow/persistence and backend groups were not rerun, because no Workflow, Domain or Infrastructure file changed.
+- 16 off-screen renders at 96 DPI: the picture area is identical to the baseline in all 16.
+
+**Independent review.** One fresh read-only reviewer, two rounds, no open P0–P2. Two P2 findings were fixed: TIFF wording against the existing label, and the untested R2 review. Residuals:
+- the Trim/TIFF final-review lines need scrolling at 1000×700;
+- the Trim/TIFF fallback wording is untested;
+- focus returns to the bar button;
+- the real-window review-authority class and other DPI scaling were not run.
+
+**Jira**
+- SCRUM-11149 transitions 21 (→ In Progress) and 31 (→ In Review); comment 10183.
+- Final readback 2026-09-28T23:32:17.755Z: 17 issues, 26 Blocks, 51 labels, 34 timestamps; expected drift only.
+- [CSV](SCRUM-11149_JIRA_FINAL.csv) (23 columns, BOM, exporter and oracle PASS) and [audit](SCRUM-11149_PUBLICATION_STATUS_AUDIT.json).
+- Other issues were read-only.
+
+**Remaining acceptance**
+- Human bilingual workstation check (AC1/AC6), other scaling and physical input.
+- Real colleague round trip from the guidance button.
+- Novice walkthrough (SCRUM-11155). AC4 applies only if the walkthrough refutes a prompt; the first candidate is the unchanged label "Reject and make another TIFF".
+- All earlier open checks listed below remain open.
+
+**Where things are**
+- Public: [plan and AC map](SCRUM-11149_PLAN.md), CSV, audit, code commit.
+- Local only:
+  - `artifacts/pf-opux-scrum11149/` (RESULTS.md, review record, logs/TRX, renders, raw readback);
+  - `SCRUM-11149_JIRA_READBACK.json` (account metadata; gitignored).
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`, Opus High. Host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit; one reviewer subagent (definition `opus`, runtime UNVERIFIED).
+
+Prior handoff bytes are preserved verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — direct master publication and Jira status current handoff
 
 2026-09-29 NZ. Task `PF-OPUX-v1-master-publication-v1`. **MASTER_PUSH_VERIFIED; Jira status synchronization and final readback COMPLETE. Stop; SCRUM-11149 not started.** Full record: [PUBLICATION_STATUS_REPORT.md](PUBLICATION_STATUS_REPORT.md) and [PUBLICATION_STATUS_AUDIT.json](PUBLICATION_STATUS_AUDIT.json).

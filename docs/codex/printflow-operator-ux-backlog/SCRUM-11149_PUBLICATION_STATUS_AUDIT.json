@@ -1,0 +1,113 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11149-impl-v1",
+  "planningId": "PF-OPUX-v1-review-step-guidance",
+  "authority": "printflow-remediation-prompts/PrintFlowStudio_SCRUM11149_Review_Guidance_Implementation_Prompt_v1.md, submitted by the owner on 2026-09-29 with authorization for implementation, verification, independent review, in-scope fixes, direct master publication and SCRUM-11149-only Jira updates",
+  "routing": {
+    "policy": "Claude adaptation v1.2 of policy v2.4",
+    "routeOffset": 0,
+    "requested": "latest Opus / High",
+    "actualModel": "claude-opus-5-5",
+    "actualEffort": "UNVERIFIED",
+    "sonnetUnits": 0,
+    "subagents": [
+      { "role": "independent read-only reviewer", "definition": "personal-dev-reviewer (model: opus)", "rounds": 2, "actualModel": "UNVERIFIED", "ranTests": false }
+    ]
+  },
+  "git": {
+    "repository": "D:/Repositories/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "startingLocalHead": "fddf2434d26d927a798f942678c79072ab3afc99",
+    "startingOriginMaster": "fddf2434d26d927a798f942678c79072ab3afc99",
+    "startingWorktree": "clean (only ignored local evidence, readbacks and the operator prompt bundle)",
+    "remoteAdvancedBeforePush": false,
+    "hooksAndAutomation": "no .github/workflows and no active git hooks; a master push triggers no deployment or migration",
+    "codeCommit": {
+      "sha": "6cbde817a2da7f3565cf52860ca26d79a3e71242",
+      "subject": "feat: SCRUM-11149 review guidance beside each review",
+      "paths": 11,
+      "committedAt": "2026-09-29T12:30:24+13:00",
+      "url": "https://github.com/MQLite/printflow-Studio/commit/6cbde817a2da7f3565cf52860ca26d79a3e71242",
+      "stagedEqualsTestedCandidate": "candidate-02 source hashes re-verified before staging; no unstaged residue in the staged paths (line endings normalized by .gitattributes text=auto)",
+      "stagedScan": "no binaries, credentials, tokens, emails, accountIds or workstation user paths"
+    },
+    "push": { "command": "git push origin master", "output": "fddf243..6cbde81  master -> master", "force": false, "exitCode": 0 },
+    "verification": {
+      "fetchOriginMaster": "6cbde817a2da7f3565cf52860ca26d79a3e71242",
+      "lsRemote": "6cbde817a2da7f3565cf52860ca26d79a3e71242",
+      "githubApiHead": "6cbde817a2da7f3565cf52860ca26d79a3e71242"
+    },
+    "result": "MASTER_PUSH_VERIFIED",
+    "documentationCommit": "created after this audit was written; its SHA and the final remote tip are recorded in the local final copy of this audit and in HANDOFF.md, to avoid a self-referential commit"
+  },
+  "verification": {
+    "sdk": "%LOCALAPPDATA%/Microsoft/dotnet/dotnet.exe 10.0.400",
+    "red": "build-01-red.log: the new tests did not compile before the implementation",
+    "steps": [
+      { "step": "targeted ReviewGuidance* (settled-02 assemblies)", "passed": 36, "failed": 0, "skipped": 0 },
+      { "step": "dotnet build PrintFlowStudio.sln -c Debug --no-incremental (candidate 02)", "exitCode": 0, "result": "0 warnings, 0 errors" },
+      { "step": "architecture", "exitCode": 0, "passed": 452, "failed": 0, "skipped": 0 },
+      { "step": "combined-ui (SCRUM-11148 corrected safe filter)", "exitCode": 0, "passed": 554, "failed": 0, "skipped": 0 },
+      { "step": "Test-JiraExportIntegrity.ps1 (with the extended exporter)", "exitCode": 0, "passed": 18, "failed": 0 }
+    ],
+    "countsOverlap": true,
+    "notRerun": "workflow/persistence and backend/delivery groups: no Workflow, Domain or Infrastructure file changed",
+    "exclusions": "unchanged from SCRUM-11148: real-window/UIA UI classes and ApplicationStartup classes (shared live-operator desktop), ProductionCompositionTests (production DI prohibited); the baseline recovery hang stays excluded and NOT PASS",
+    "renders": "16 off-screen captures (4 steps x en/zh-CN x 1000x700/1920x1040, 96 DPI); review picture area identical to the pre-change baseline in all 16",
+    "independentReview": "no open P0-P2 after two rounds; residuals F3 (scrolling at 1000x700 on final reviews), F4 (trim/TIFF fallback wording untested), F5 (focus returns to bar button), F7 (no guidance while handed off, intended), F8a-c (real-window class, baseline-probe source, other DPI not run), N2 (leading-space separator in one English resource)"
+  },
+  "jira": {
+    "site": "https://yituoxx.atlassian.net",
+    "issue": { "id": "10879", "key": "SCRUM-11149", "parent": "SCRUM-11139" },
+    "transitionsDiscovered": { "11": "To Do", "21": "In Progress", "31": "In Review", "41": "Done" },
+    "transitions": [
+      { "order": 1, "id": "21", "statusBefore": "To Do", "statusAfter": "In Progress", "when": "before implementation", "readback": "In Progress (10001), updated 2026-09-29T11:56:16.518+1300" },
+      { "order": 2, "id": "31", "statusBefore": "In Progress", "statusAfter": "In Review", "when": "after MASTER_PUSH_VERIFIED of 6cbde81", "readback": "In Review in the final initiative readback" }
+    ],
+    "doneNotSet": "the issue's own Validation requires a human check and confirmation by the acceptance walkthrough; no human acceptance or waiver was provided",
+    "comment": { "id": "10183", "marker": "PF-OPUX-v1-SCRUM-11149-impl-v1", "created": "2026-09-29T12:32:04.600+1300", "markerCountAfter": 1, "preReadMarkerCount": 0 },
+    "otherIssues": "read-only; no transition, comment or field change",
+    "finalReadback": {
+      "readAt": "2026-09-28T23:32:17.755Z",
+      "jql": "project = SCRUM AND labels = pf-opux-v1 ORDER BY key ASC",
+      "pages": 1,
+      "isLast": true,
+      "issues": 17,
+      "blocksLinks": 26,
+      "stringLabels": 51,
+      "commentsComplete": true,
+      "rawEvidence": "artifacts/pf-opux-scrum11149/jira-final-readback-raw.json (local only)",
+      "rawSha256": "5e456436d9d6ee83798ee96cb84de7a5376ce2c52f08ada680b7fb4fae81c32b",
+      "snapshot": "docs/codex/printflow-operator-ux-backlog/SCRUM-11149_JIRA_READBACK.json (gitignored: carries Atlassian account metadata)",
+      "snapshotSha256": "bd19331bf483991d7f458fd26907216557d90cd271775a9ecee3185b1347de24"
+    },
+    "driftAgainstPublicationStatusSnapshot": {
+      "SCRUM-11149": "status To Do -> In Review, updated, new comment 10183",
+      "SCRUM-11154/11155": "issuelinks differ only in the embedded SCRUM-11149 status (relationship drift beyond nested status = 0)",
+      "others": "no field change; all prior comments preserved byte-for-byte"
+    },
+    "csv": {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11149_JIRA_FINAL.csv",
+      "sha256": "fbee26c55773cb38f4ea136638a777561a50b8febe8be8ec7e9393b5e0533c20",
+      "columns": 23,
+      "headerIdenticalToPrevious": true,
+      "utf8Bom": true,
+      "exactTimestamps": 34,
+      "exporter": "PASS",
+      "independentOracle": "PASS (raw -> snapshot -> CSV, 0 failures)",
+      "writeActions": { "SCRUM-11149": "STATUS_TRANSITION_AND_COMMENT", "others": "READ_ONLY" },
+      "exporterChange": "Export-Wave1Jira.ps1: one task mapping for PF-OPUX-v1-SCRUM-11149-impl-v1"
+    }
+  },
+  "remainingAcceptance": [
+    "human bilingual visual check on the supported workstation (AC1, AC6), including other DPI scaling and physical input",
+    "real colleague round trip started from the guidance button",
+    "novice walkthrough (SCRUM-11155); AC4 applies only if it refutes a prompt; first candidate: the unchanged label 'Reject and make another TIFF'"
+  ],
+  "notPerformed": [
+    "deployment, production migration, production startup or DI composition",
+    "customer files, visible windows, UIA or desktop input",
+    "force-push, history rewrite, feature branch or PR",
+    "SCRUM-11150 or later work; any change to other initiative issues"
+  ]
+}
