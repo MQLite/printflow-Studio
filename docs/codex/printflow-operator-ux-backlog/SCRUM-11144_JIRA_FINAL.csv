@@ -1,0 +1,648 @@
+﻿"Planning_ID","Issue_ID","Issue_Key","Issue_URL","Issue_Type","Summary","Description","Acceptance_Criteria","Priority","Status","Parent_Issue_ID","Parent_Issue_Key","Labels","Planned_Dependency_Planning_IDs","Verified_Dependency_Issue_IDs","Verified_Dependency_Issue_Keys","Dependency_Link_Status","Recommended_Order","Write_Action","Readback_Status","Jira_Updated_At","Readback_At","Notes"
+"PF-OPUX-v1-epic","10869","SCRUM-11139","https://yituoxx.atlassian.net/browse/SCRUM-11139","Epic","Operator Usability & Workflow Simplification","Planning-ID: PF-OPUX-v1-epic  
+Initiative: PF-OPUX-v1 (backlog revision 2, 2026-09-22)
+
+Goal  
+Make PrintFlow Studio usable by a genuine beginner: a print-shop operator with basic mouse and file-selection skills but no knowledge of Photoshop, Meitu, layers, channels, DPI or workflow states. Experienced operators remain welcome, but experience must not be a prerequisite for the normal path. The operator must always be able to understand what they want to produce, what the app is doing, what they must do next, when to ask for help, and where the approved result was saved.
+
+Normal beginner journey  
+1\. Home states plainly whether the workstation is ready, and which recent jobs need the operator.  
+2\. The operator imports one image and chooses one of the three fixed routes from cards that state purpose and result.  
+3\. A status panel always names the current state (processing, waiting for your review, needs your input, stopped, handed off, completed) and one recommended next action; legitimate secondary actions stay available.  
+4\. Each significant result is reviewed with concrete ""what to check"" prompts and a clear ""ask for help"" option.  
+5\. A slightly wrong automatic trim is adjusted inside PrintFlow with a visible boundary, drag handles, zoom and ""restore automatic suggestion"".  
+6\. A wrong background-removal result, or one the operator is unsure about, goes to a skilled colleague through ""Ask a colleague to correct this image"", with clear instructions and an explicit re-import path.  
+7\. At the final step the operator sees, and may change, the filename and destination, confirms, and can open the folder that contains the delivered file.
+
+Skilled-colleague correction boundary  
+Complex image correction is done by a colleague outside PrintFlow. PrintFlow supplies an original-reference copy, a correction working copy, instructions (what to fix, the supported return format, where to save, how to return) and an explicit re-import. It does not provide an eraser, restore brush, mask editor or general image editor, accounts, assignment queues, notifications or cloud sharing, and it does not monitor Photoshop saves or detect returns automatically.
+
+Must not change  
+One image per session; protection of the original file and InputSnapshot; the three fixed workflows and their outputs (the asset-only route produces an approved PNG and never asks for print size or a TIFF); mandatory reviews bound to exact output content; approved-content identity; legal state transitions, retry boundaries, lineage and downstream invalidation; environment guards (no hidden failure, no auto-repair, no false green); the automation lock; the Photoshop production preset, 300 PPI rule, CMYK, W1 and final TIFF checks; handoff/re-import boundaries except where a Task explicitly proposes a reviewed change; retention and Recycle Bin rules; local-only privacy.
+
+Explicit exclusions  
+Image editor features of any kind; manual TIFF return or broader TIFF editing; automatic route selection; merged or skipped reviews; order management, accounts and permissions, batch processing, cloud upload, RIP/printer control or automatic printing; operator-time baseline, percentage-reduction target or any time KPI (SCRUM-11066 and SCRUM-11137 were waived); reinstating the withdrawn supplemental acceptance checks associated with SCRUM-11130 to SCRUM-11134; reopening or rewriting SCRUM-11115 (this Epic is a follow-up to it).
+
+Proposed sequencing  
+Wave 1 (independent, start early): app-specific takeover wording; status and next-step panel; terminology reference; scheduling of the discovery walkthrough.  
+Wave 2: approved-artifact export, then the final save step; route purpose cards; trim boundary adjustment; colleague-correction handoff.  
+Wave 3: review guidance; print-size guidance; failure copy; Home readiness summary; Recent job status.  
+Wave 4: integration consistency pass, then the acceptance walkthrough.
+
+Functional design items (need implementation-stage design review before code)  
+\- Approved-artifact export: new delivery behaviour and delivery record on the file system.  
+\- Colleague-correction handoff: handoff from a review and re-import eligibility.  
+\- Trim boundary adjustment: adjusting from the trim review without a prior Reject.  
+All other Tasks are presentation or read-model projections over existing rules.
+
+Completion criteria for this Epic  
+1\. Every child Task is Done, or explicitly descoped with a recorded reason.  
+2\. The acceptance walkthrough has run with a real beginner operator and its open findings are recorded. If it has not run, the Epic is not described as operator-validated.  
+3\. No production safeguard listed under ""Must not change"" was altered without a separate approved decision.
+
+Evidence status at planning time  
+Static code at commit eea6019 and earlier recorded workstation runs. The live UI was not observed for this plan (UI_NOT_OBSERVED). No novice walkthrough has taken place yet.","1\. Every child Task is Done, or explicitly descoped with a recorded reason.  
+2\. The acceptance walkthrough has run with a real beginner operator and its open findings are recorded. If it has not run, the Epic is not described as operator-validated.  
+3\. No production safeguard listed under ""Must not change"" was altered without a separate approved decision.
+","High","To Do","","","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","0","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:20:35.697+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-glossary-decision","10870","SCRUM-11140","https://yituoxx.atlassian.net/browse/SCRUM-11140","Task","Maintain a Lightweight Operator Terminology Reference for Beginner-Facing Copy (zh-CN / en)","Planning-ID: PF-OPUX-v1-glossary-decision  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+Beginners see internal words on normal screens, for example Revision/版本 {n}, SHA-256, W1, Working/Approved folder names, Run step/执行步骤, Preset/预设 and Session/会话. Several Tasks in this Epic write new copy at the same time. A short shared reference keeps the words consistent without making those Tasks wait for a formal sign-off.
+
+2\. Current evidence  
+CONFIRMED (code): keys such as Session_BackgroundRemovalAuthorised, Session_LabelHash, Session_LabelBranch, OutputLocation_Working, OutputLocation_Approved, Session_RunStep and Preset_Verified in src/PrintFlow.App/Resources/Strings.resx and Strings.zh-CN.resx. Whether each term confuses real beginners is a hypothesis for PF-OPUX-v1-novice-walkthrough. Related completed work: SCRUM-11119 (bilingual resources and language switching).
+
+3\. Scope and non-goals  
+Scope: a living reference document in docs/printflow/ listing operator-visible terms with: keep / rename / technical details only, the zh-CN and en wording, and where precise terms may still appear (Error Details, technical expanders). It fixes the standard action verbs, including Approve, Reject, Retry, Ask a colleague to correct this image, Confirm result and save, Open containing folder. Copy Tasks add terms as they go.  
+Non-goals: no code or resource change in this Task; stable failure codes, adapter IDs and stored state names stay unchanged; no formal signature gate.
+
+4\. Proposed interaction and copy  
+Examples: ""Run step"" becomes ""Start this step""; ""Waiting for review (Working)"" becomes ""Waiting for your review — not a finished file yet""; W1 is shown as ""White ink (W1)"". Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given the reference document, when a copy Task in this Epic introduces or renames an operator-visible term, then the term appears in the reference with zh-CN and en wording.  
+2\. Given a term marked ""technical details only"", then the reference names the screens where it may still appear.  
+3\. Given a term whose wording changes a business meaning (for example what ""approved"", ""finished file"" or ""saved"" means), then the product owner's decision is recorded in the document or on this issue; wording-only terms need no sign-off.  
+4\. No other Task in this Epic is blocked waiting for this document.
+
+6\. Validation  
+Document review. Product-owner review only for business-semantic terms. No automated test.
+
+7\. Dependencies, reuse and priority  
+No blockers; blocks nothing. Reuses the SCRUM-11119 resources and is not a duplicate of it (11119 delivered bilingual resources, not a beginner vocabulary). Priority Medium: useful coordination, but deliberately not a gate.
+
+8\. Implementation and risk notes  
+Documentation only. Resources live in src/PrintFlow.App/Resources/Strings\*.resx; key parity is guarded by LocalisationResourceTests. Low risk.","1\. Given the reference document, when a copy Task in this Epic introduces or renames an operator-visible term, then the term appears in the reference with zh-CN and en wording.  
+2\. Given a term marked ""technical details only"", then the reference names the screens where it may still appear.  
+3\. Given a term whose wording changes a business meaning (for example what ""approved"", ""finished file"" or ""saved"" means), then the product owner's decision is recorded in the document or on this issue; wording-only terms need no sign-off.  
+4\. No other Task in this Epic is blocked waiting for this document.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","1","READ_ONLY","VERIFIED_CURRENT","2026-09-22T15:18:38.101+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-novice-walkthrough","10871","SCRUM-11141","https://yituoxx.atlassian.net/browse/SCRUM-11141","Task","Run a Beginner-Operator Discovery Walkthrough of the Three Routes and Record Usability Findings","Planning-ID: PF-OPUX-v1-novice-walkthrough  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+Every difficulty in this Epic was found by reading code. None has been watched with a real beginner. This walkthrough checks the uncertain assumptions (especially review, trim, print size and terminology) early enough to adjust the guidance Tasks.
+
+2\. Current evidence  
+No recorded beginner walkthrough exists in docs/printflow. The end-to-end records for SCRUM-11130 to SCRUM-11132 prove function, not learnability. SCRUM-11137 (time measurement) was waived and is not revived.
+
+3\. Scope and non-goals  
+Scope: on the fixed workstation, in a safe setup (fake adapter mode, or synthetic or regression images with the owner's agreement), a real operator without Photoshop/Meitu/CS knowledge attempts: (a) the asset route to an approved PNG; (b) the customer-design route to an approved TIFF; (c) Generate Print TIFF from a PNG; (d) adjusting a trim; (e) deciding whether a background-removal result is acceptable; (f) one representative failure; (g) finding the finished file. The facilitator records per scenario: completed independently yes/no, help requests, wrong clicks or routes, hesitation points and quotes.  
+Non-goals: no customer images; no production session on customer work; no code change; no timing baseline, percentage target or time KPI; not a replacement for the withdrawn SCRUM-11130 to 11134 acceptance checks.
+
+4\. Proposed interaction and copy  
+A one-page facilitator script with neutral task wording (zh-CN for the operator, English summary for the record) and a findings table: scenario, observation, severity, which Epic assumption it confirms or refutes.
+
+5\. Acceptance criteria  
+1\. Given the walkthrough ran, then docs/printflow contains the script, an anonymised findings table and a verdict per assumption (route choice, next step, review, trim, background-removal judgement, print size, finding the file, terminology): confirmed, refuted or not observed.  
+2\. Given a finding that no Epic Task covers, then it is listed as a proposed addition and is not implemented in this Task.  
+3\. Given no suitable person was available, then the record states NOT RUN and does not substitute an agent or developer walkthrough.  
+4\. The record contains no customer image, customer filename or identifying screenshot.
+
+6\. Validation  
+Human-run only. An agent may prepare the script and the safe environment but cannot act as the operator.
+
+7\. Dependencies, reuse and priority  
+No blockers; blocks nothing. Findings inform PF-OPUX-v1-review-step-guidance, PF-OPUX-v1-print-size-plain-guidance, PF-OPUX-v1-trim-boundary-adjustment and PF-OPUX-v1-colleague-correction-handoff, but those Tasks may proceed without it. Uses the existing fake mode and regression image set (SCRUM-11065). Priority Medium.
+
+8\. Implementation and risk notes  
+Schedule when no live production work is running, because the workstation is shared with a live operator. Low product risk.","1\. Given the walkthrough ran, then docs/printflow contains the script, an anonymised findings table and a verdict per assumption (route choice, next step, review, trim, background-removal judgement, print size, finding the file, terminology): confirmed, refuted or not observed.  
+2\. Given a finding that no Epic Task covers, then it is listed as a proposed addition and is not implemented in this Task.  
+3\. Given no suitable person was available, then the record states NOT RUN and does not substitute an agent or developer walkthrough.  
+4\. The record contains no customer image, customer filename or identifying screenshot.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","2","READ_ONLY","VERIFIED_CURRENT","2026-09-22T15:18:40.955+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-app-specific-takeover-wording","10872","SCRUM-11142","https://yituoxx.atlassian.net/browse/SCRUM-11142","Task","Name the Correct Application in Stop and Take Over, and State Plainly What Happens After a Photoshop Takeover","Planning-ID: PF-OPUX-v1-app-specific-takeover-wording  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+While a Photoshop step runs, the beginner is offered ""Take over in Meitu"" and told that Meitu will not be closed, although Meitu is not involved. After a Photoshop takeover, nothing says that a hand-made TIFF cannot be brought back. A small, bounded wording fix removes a misleading message during production.
+
+2\. Current evidence  
+CONFIRMED (code): src/PrintFlow.App/ViewModels/SessionViewModel.cs around lines 1126-1128; TakeOverLabel always returns Strings.Session_TakeOver and StopHint joins Meitu-specific hints. CONFIRMED (recorded live run): docs/printflow/scrum-11132-generate-print-tiff-fixed-workstation-e2e.md section 8.4. Manual-result import is limited to Enhancement and BackgroundRemoval (ManualResultEligibility.Supports). Related: SCRUM-11092, SCRUM-11112, SCRUM-11132.
+
+3\. Scope and non-goals  
+Scope: choose the Stop/Take Over label, hint, confirmation question and taken-over notice by the external application of the current step (Meitu for Enhancement and BackgroundRemoval; Photoshop for PSD/PDF preparation and PhotoshopOutput). After a Photoshop takeover, state that a hand-made TIFF cannot be imported and name the action the engine actually offers (return to automation for a new attempt).  
+Non-goals: no manual TIFF return and no broader TIFF editing; no change to when Stop/Take Over are offered, lock release, ManualResultEligibility or recovery. The colleague-correction flow is PF-OPUX-v1-colleague-correction-handoff.
+
+4\. Proposed interaction and copy  
+""Take over in Photoshop"". After takeover on PhotoshopOutput: ""PrintFlow has stopped controlling Photoshop. A TIFF made by hand cannot be imported back. To get a finished file, choose Return to automation to generate it again."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given a PhotoshopOutput, PSD-preparation or PDF-preparation step is running, when the operator looks at Stop/Take Over, then the label, hint and confirmation name Photoshop and do not mention Meitu.  
+2\. Given an Enhancement or BackgroundRemoval step is running, then the Meitu wording is unchanged.  
+3\. Given a Photoshop step was taken over, then the screen says manual import is not available for it and names only actions the engine offers.  
+4\. Given a Meitu step was taken over, then Submit Manual Result is offered exactly as before.  
+5\. For every step kind, the visibility and enabled state of Stop and Take Over are identical before and after the change.  
+6\. Both languages are updated, resource parity holds, and the new text is not clipped at the supported workstation resolution and scaling.
+
+6\. Validation  
+ViewModel tests per step kind for label, hint and post-takeover text; existing StopAndTakeOverTests stay green; resource parity. No live takeover is needed.
+
+7\. Dependencies, reuse and priority  
+No blockers. Not a duplicate: the defect was recorded in the SCRUM-11132 run record as deferred. Priority High because the message is wrong during a production step; bounded, so it can start first.
+
+8\. Implementation and risk notes  
+SessionViewModel Stop/Take Over properties; resource keys Session_TakeOver\*, Session_StopHint, Session_HandedOffNotice, Failure_AutomationHandedOff. Low technical risk.","1\. Given a PhotoshopOutput, PSD-preparation or PDF-preparation step is running, when the operator looks at Stop/Take Over, then the label, hint and confirmation name Photoshop and do not mention Meitu.  
+2\. Given an Enhancement or BackgroundRemoval step is running, then the Meitu wording is unchanged.  
+3\. Given a Photoshop step was taken over, then the screen says manual import is not available for it and names only actions the engine offers.  
+4\. Given a Meitu step was taken over, then Submit Manual Result is offered exactly as before.  
+5\. For every step kind, the visibility and enabled state of Stop and Take Over are identical before and after the change.  
+6\. Both languages are updated, resource parity holds, and the new text is not clipped at the supported workstation resolution and scaling.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","3","READ_ONLY","VERIFIED_CURRENT","2026-09-22T17:44:57.362+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-session-next-step-panel","10873","SCRUM-11143","https://yituoxx.atlassian.net/browse/SCRUM-11143","Task","Show a Plain ""Current Status and Next Step"" Panel with a Recommended Primary Action on the Session Screen","Planning-ID: PF-OPUX-v1-session-next-step-panel    
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value    
+On the Session screen the beginner sees ""Workflow · State · Step"" and up to thirteen equally styled buttons. Nothing says whether PrintFlow is working, waiting for them, stopped or finished, or which button is expected next. A developer notice (""A browsable processing history is not part of this build…"") is always visible. A status panel answers ""what is happening and what do I do now"" on every step of every job.
+
+2\. Current evidence    
+CONFIRMED (code): src/PrintFlow.App/Views/SessionScreenView.xaml header around lines 73-79; the action WrapPanel around lines 1648-1727 gives all commands the same style; the placeholder notice is bound unconditionally (around line 261; SessionViewModel.cs around line 788). The effect on beginners is inferred. Related: SCRUM-11115 family (complete, not reopened), SCRUM-11120.
+
+3\. Scope and non-goals    
+Scope: one status panel near the top with a category and a one-sentence next step. Categories: Processing automatically; Waiting for your review; Needs your input; Stopped or failed; Handed off to a colleague; Completed; Saved to your chosen folder (once delivery exists). The category and the recommended action are derived from the existing step state and AvailableCommands, with no new rule. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported. Other legal actions stay visible as secondary actions. Remove the developer placeholder notice.    
+Non-goals: no change to which commands are legal; no removed or merged command; no automatic advancing; no single-button-only screen where secondary actions are legitimate.
+
+4\. Proposed interaction and copy    
+""Waiting for your review: compare Before and After, then choose Approve, or ask a colleague if you are not sure."" Failure: ""Stopped: enhancement did not finish. Your original is unchanged. You can retry, or open Error details."" Handed off: ""Handed off to a colleague. PrintFlow is not processing this image."" Both supported UI languages are required.
+
+5\. Acceptance criteria    
+1\. Given a step in review, then the panel shows ""Waiting for your review"" and Approve is the recommended action, while Reject and any other legal action remain available with unchanged enabled state.    
+2\. Given automation is running, then the panel shows ""Processing automatically"", no approve or complete action is emphasised, and Stop/Take Over appear exactly as before.    
+3\. Given a failed step, then the panel shows ""Stopped or failed"" with the localised reason, and Retry is recommended only when the engine offers Retry; there is no generic Continue.    
+4\. Given a handed-off session, then the panel says it is handed off and does not present it as running or as resumable by a normal Run.    
+5\. Given a completed session, then the panel says Completed, and says ""Saved"" only when delivery to the chosen destination has been verified.    
+6\. For every state covered by TransitionMatrixTests, the set of visible commands is identical before and after the change; only emphasis and text differ.    
+7\. The developer placeholder notice is no longer shown.    
+8\. In zh-CN and en the panel text is not clipped at the supported resolution and scaling, status is conveyed by text and not by colour alone, and keyboard access follows this contract: Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.
+
+6\. Validation    
+ViewModel unit tests mapping representative states to category, text and recommended command; a regression test that the visible command set equals AvailableCommands; a rendering or UIA check of the panel; a human visual check on the workstation.
+
+7\. Dependencies, reuse and priority    
+No blockers. Blocks PF-OPUX-v1-recent-row-status (shared category wording). Reuses AvailableCommands, DisplayNames and step state. Not a duplicate of SCRUM-11120 (Error Details). Priority High: present on every step.
+
+8\. Implementation and risk notes    
+SessionViewModel computed properties, SessionScreenView.xaml, resources. Keep the mapping in the ViewModel, not in XAML triggers. Medium risk; the command-visibility regression test is mandatory.","1\. Given a step in review, then the panel shows ""Waiting for your review"" and Approve is the recommended action, while Reject and any other legal action remain available with unchanged enabled state.    
+2\. Given automation is running, then the panel shows ""Processing automatically"", no approve or complete action is emphasised, and Stop/Take Over appear exactly as before.    
+3\. Given a failed step, then the panel shows ""Stopped or failed"" with the localised reason, and Retry is recommended only when the engine offers Retry; there is no generic Continue.    
+4\. Given a handed-off session, then the panel says it is handed off and does not present it as running or as resumable by a normal Run.    
+5\. Given a completed session, then the panel says Completed, and says ""Saved"" only when delivery to the chosen destination has been verified.    
+6\. For every state covered by TransitionMatrixTests, the set of visible commands is identical before and after the change; only emphasis and text differ.    
+7\. The developer placeholder notice is no longer shown.    
+8\. In zh-CN and en the panel text is not clipped at the supported resolution and scaling, status is conveyed by text and not by colour alone, and keyboard access follows this contract: Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","4","READ_ONLY","VERIFIED_CURRENT","2026-09-22T17:44:58.932+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-approved-artifact-export","10874","SCRUM-11144","https://yituoxx.atlassian.net/browse/SCRUM-11144","Task","Export the Exact Approved Result to an Operator-Selected Destination Safely, with Collision Handling, Verification and Retry","Planning-ID: PF-OPUX-v1-approved-artifact-export  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+A beginner needs the finished PNG or TIFF in a folder they choose, for example the customer's job folder, without knowing the internal workspace layout. Today approved results stay only inside PrintFlow's managed workspace. This Task provides the safe backend: copy the exact approved file to the chosen destination and prove it arrived, without regenerating anything.
+
+2\. Current evidence  
+CONFIRMED (code): approved outputs are written to the managed WorkspaceArea.Approved folder under the output root from the verified preset (FileWorkspace.cs around lines 620-628; PresetWorkstationRequirements.cs around line 105, defaultOutputRoot). No export, save dialog or shell-open exists for outputs; the only SaveFileDialog is for diagnostic packages (SaveDiagnosticPackageDialog.cs). Related: SCRUM-11104, SCRUM-11116, SCRUM-11117.
+
+3\. Scope and non-goals  
+Scope: an application service and port that, for one approved and currently valid output record, (a) resolves the exact approved file from the record (never by name search); (b) verifies its content identity against the approval before copying; (c) copies it to a destination folder and filename chosen by the operator, writing to a temporary name first and renaming only after the copy is complete; (d) verifies the written file (existence, size and content hash equal to the approved content); (e) records a delivery entry (output record, destination path, time, verified hash); (f) on a name collision never overwrites, and offers a collision-safe name such as ""name (2).tif"" or another destination; (g) refuses destinations inside the managed workspace, the source snapshot area or the original file's location if that would overwrite it; (h) on cancel, unwritable folder, disconnected drive or failed copy, leaves the approved result untouched and allows another attempt without rerunning processing or TIFF generation; (i) is idempotent, so repeated requests for an already verified delivery do not copy again or start production work.  
+Non-goals: no move or relocation of internal state; no regeneration of the production file; no general replacement of existing user files; no printing, RIP control or cloud upload; no change to approval, review binding or retention rules.
+
+4\. Proposed interaction and copy  
+Service-level only; the operator surface is PF-OPUX-v1-completion-delivery-summary. Result states exposed to the UI: NotDelivered, Delivering, Delivered (verified), DeliveryFailed with a plain reason (destination not writable, drive not available, name already exists, copy did not verify).
+
+5\. Acceptance criteria  
+1\. Given an approved and valid output and a writable destination, when export runs, then the destination contains a file whose content hash equals the approved content, and a delivery entry with the verified hash and path is recorded.  
+2\. Given a file with the same name already exists at the destination, then nothing is overwritten and the service returns a collision-safe alternative name.  
+3\. Given the destination is inside the managed workspace or would overwrite the protected original or snapshot, then export is refused with a plain reason.  
+4\. Given the operator cancels, the folder is read-only, the drive is disconnected, or the copy fails or does not verify, then no partial file remains under the final name, the approved output is unchanged, the state is DeliveryFailed or NotDelivered, and a retry is possible without rerunning any image processing or TIFF generation.  
+5\. Given an output that is waiting for review, rejected, invalidated, recycled, or an obsolete size, then export is refused.  
+6\. Given the same delivery is requested twice, then the second request does not copy again and does not start production work.  
+7\. Delivered is reported only after verification of the file at the final destination.
+
+6\. Validation  
+Unit and integration tests with a temporary-folder file system: happy path, collision, protected destinations, read-only folder, simulated disconnected drive, failed copy, hash mismatch, ineligible outputs, idempotency. No customer data.
+
+7\. Dependencies, reuse and priority  
+No blockers. Blocks PF-OPUX-v1-completion-delivery-summary. Reuses the output records, approval content hashes and workspace path resolution. Priority High: safe final delivery is core scope.
+
+8\. Implementation and risk notes  
+Functional design item: it adds a delivery record (persistence) and file-system writes outside the managed workspace. The storage shape of the delivery record, and whether the remembered default destination is a user setting, need implementation-stage design review. This Task does not amend the approval contract. Medium-high risk, guarded by the verification and no-overwrite criteria.","1\. Given an approved and valid output and a writable destination, when export runs, then the destination contains a file whose content hash equals the approved content, and a delivery entry with the verified hash and path is recorded.  
+2\. Given a file with the same name already exists at the destination, then nothing is overwritten and the service returns a collision-safe alternative name.  
+3\. Given the destination is inside the managed workspace or would overwrite the protected original or snapshot, then export is refused with a plain reason.  
+4\. Given the operator cancels, the folder is read-only, the drive is disconnected, or the copy fails or does not verify, then no partial file remains under the final name, the approved output is unchanged, the state is DeliveryFailed or NotDelivered, and a retry is possible without rerunning any image processing or TIFF generation.  
+5\. Given an output that is waiting for review, rejected, invalidated, recycled, or an obsolete size, then export is refused.  
+6\. Given the same delivery is requested twice, then the second request does not copy again and does not start production work.  
+7\. Delivered is reported only after verification of the file at the final destination.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","5","EVIDENCE_COMMENT_ONLY","VERIFIED_CURRENT","2026-09-23T19:04:00.135+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend evidence comment verified in authenticated current readback; no issue-field mutation authorized."
+"PF-OPUX-v1-completion-delivery-summary","10875","SCRUM-11145","https://yituoxx.atlassian.net/browse/SCRUM-11145","Task","Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder","Planning-ID: PF-OPUX-v1-completion-delivery-summary    
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value    
+After the last review the beginner must know the result is approved and where it is saved. Today the screen shows file names with ""In Approved"" or ""Waiting for review (Working)"" and no way to choose a folder or open one. This Task makes the final step ""see the name and destination, change it if needed, confirm and save, then open the folder"".
+
+2\. Current evidence    
+CONFIRMED (code): no Process.Start, Explorer or ShellExecute call in src/PrintFlow.App; the output list in SessionScreenView.xaml around lines 664-750 is documented as ""no path and no way in""; only the TIFF review shows Session.TiffOutputPath. Related: SCRUM-11104, SCRUM-11116, SCRUM-11117.
+
+3\. Scope and non-goals    
+Scope: at the final review/save step, show the final filename, output type, physical size (TIFF routes only) and the destination folder, with a sensible existing default. Offer ""Change location"" (folder dialog) and allow editing the filename. Remember the last successfully used destination as the next default, and always display it, so reuse of a previous customer's folder is never hidden. Do not force a dialog on every image. Provide one ""Confirm result and save"" interaction through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit ""Confirm result and save"" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. After a verified delivery, show the actual filename and folder and ""Open containing folder"", which selects the delivered file in Explorer.    
+Non-goals: no automatic printing, RIP or cloud upload; no opening of Working, rejected, preview or obsolete files; no change to review binding; the asset route never shows print size or TIFF.
+
+4\. Proposed interaction and copy    
+""Save as: example_A4.tif · Print TIFF · 210 × 297 mm · Folder: <chosen folder> \[Change location\]"" then ""\[Confirm result and save\]"". After success: ""Saved: example_A4.tif in <folder> \[Open containing folder\]"". Failure: ""Approved, but not saved yet: the folder cannot be written. Choose another location and try again. Nothing needs to be processed again."" Both supported UI languages are required.
+
+5\. Acceptance criteria    
+1\. Given the asset route reaches its final step, then the screen shows a PNG filename and destination, and no print size or TIFF wording.    
+2\. Given a TIFF route reaches its final step, then the filename, TIFF type and physical size in mm are shown with the destination.    
+3\. Given the displayed destination is acceptable, when the operator chooses Confirm result and save, then no folder dialog is forced, and the screen passes through Approved to Saved only after the export service reports a verified delivery.    
+4\. Given the export fails, is cancelled, or finds a name collision, then the screen shows Approved but not saved, the plain reason and a collision-safe suggestion where relevant, and lets the operator change the location and retry without rerunning processing.    
+5\. Given a successful delivery, when the operator clicks Open containing folder, then Explorer opens the folder with the delivered file selected, and repeated clicks start no production work.    
+6\. Given a new image after a successful delivery, then the last used destination is shown as the default and is visible before confirmation.    
+7\. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit ""Confirm result and save"" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. Ineligible outputs have no direct export/open action and their status says why.    
+8\. In zh-CN and en the step is keyboard reachable, not clipped at the supported resolution and scaling, and states are readable without colour.
+
+6\. Validation    
+ViewModel tests for state display across generated, waiting, approved, saved, failed and ineligible outputs; the shell-open call behind an interface tested with a fake; a human check on the workstation with synthetic images that Explorer selects the right file.
+
+7\. Dependencies, reuse and priority    
+Blocked by PF-OPUX-v1-approved-artifact-export. Reuses the outputs projection and the status panel wording of PF-OPUX-v1-session-next-step-panel. Not a duplicate: no existing issue provides destination choice or delivery. Priority High: the end of every job.
+
+8\. Implementation and risk notes    
+Whether ""Confirm result and save"" is one command or approval followed by delivery must keep approval and delivery distinguishable underneath; the approval step itself is unchanged. The folder dialog and shell-open go behind App-level ports. Medium risk.","1\. Given the asset route reaches its final step, then the screen shows a PNG filename and destination, and no print size or TIFF wording.    
+2\. Given a TIFF route reaches its final step, then the filename, TIFF type and physical size in mm are shown with the destination.    
+3\. Given the displayed destination is acceptable, when the operator chooses Confirm result and save, then no folder dialog is forced, and the screen passes through Approved to Saved only after the export service reports a verified delivery.    
+4\. Given the export fails, is cancelled, or finds a name collision, then the screen shows Approved but not saved, the plain reason and a collision-safe suggestion where relevant, and lets the operator change the location and retry without rerunning processing.    
+5\. Given a successful delivery, when the operator clicks Open containing folder, then Explorer opens the folder with the delivered file selected, and repeated clicks start no production work.    
+6\. Given a new image after a successful delivery, then the last used destination is shown as the default and is visible before confirmation.    
+7\. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit ""Confirm result and save"" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. Ineligible outputs have no direct export/open action and their status says why.    
+8\. In zh-CN and en the step is keyboard reachable, not clipped at the supported resolution and scaling, and states are readable without colour.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","PF-OPUX-v1-approved-artifact-export","10874","SCRUM-11144","VERIFIED","6","READ_ONLY","VERIFIED_CURRENT","2026-09-22T15:00:19.787+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-route-purpose-cards","10876","SCRUM-11146","https://yituoxx.atlassian.net/browse/SCRUM-11146","Task","Explain Each Workflow Card by Purpose and Result Before the Operator Chooses","Planning-ID: PF-OPUX-v1-route-purpose-cards  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+On Workflow Selection the beginner sees three titles and their step names. Nothing says when to use each route, what file comes out, or whether a print size will be asked for. A wrong choice wastes a full run.
+
+2\. Current evidence  
+CONFIRMED (code): src/PrintFlow.App/Views/WorkflowSelectionView.xaml around lines 138-183 renders only Title and Steps. Related: SCRUM-11071, SCRUM-11078, SCRUM-11116 (complete).
+
+3\. Scope and non-goals  
+Scope: add, per card and localised, ""Use this when…"", ""You get…"", and whether the route asks for a print size and produces a TIFF.  
+Non-goals: no automatic selection or recommended route; no change to WorkflowCatalog, route order, locking rules or the Choose command.
+
+4\. Proposed interaction and copy  
+Prepare Design Asset: ""Use this when a picture needs enhancing and its background removed. You get an approved transparent PNG. No print size, no TIFF."" Prepare Customer Design: ""Use this when a customer's finished design needs cleaning up for print. You get an approved print TIFF (CMYK + white ink)."" Generate Print TIFF: ""Use this when the design is already print-ready. You get an approved print TIFF."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given the Workflow Selection screen in zh-CN or en, then each card shows its purpose and result lines, not clipped at the supported resolution and scaling.  
+2\. Given Prepare Design Asset, then its card states PNG output with no print size and no TIFF, and choosing it still produces a workflow without a print-dimensions or Photoshop-output step.  
+3\. Given the workflow is locked after the first result, then the lock behaviour and message are unchanged.  
+4\. No route is preselected or highlighted as recommended.  
+5\. Keyboard focus and Tab order reach every card and its Choose action.
+
+6\. Validation  
+Update HomeAndWorkflowSelectionTests or ViewRenderingTests for the new text per card and locale; resource parity; a human visual check in both languages.
+
+7\. Dependencies, reuse and priority  
+No blockers. Not a duplicate of SCRUM-11078/11116, which delivered import, preview, output name and selection. Priority High: every job starts here.
+
+8\. Implementation and risk notes  
+WorkflowSelectionViewModel item, WorkflowSelectionView.xaml, resources. Low risk.","1\. Given the Workflow Selection screen in zh-CN or en, then each card shows its purpose and result lines, not clipped at the supported resolution and scaling.  
+2\. Given Prepare Design Asset, then its card states PNG output with no print size and no TIFF, and choosing it still produces a workflow without a print-dimensions or Photoshop-output step.  
+3\. Given the workflow is locked after the first result, then the lock behaviour and message are unchanged.  
+4\. No route is preselected or highlighted as recommended.  
+5\. Keyboard focus and Tab order reach every card and its Choose action.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","7","READ_ONLY","VERIFIED_CURRENT","2026-09-23T11:11:59.171+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-trim-boundary-adjustment","10877","SCRUM-11147","https://yituoxx.atlassian.net/browse/SCRUM-11147","Task","Let the Operator Adjust the Automatic Trim Boundary in PrintFlow with Handles, Zoom and Restore Suggestion","Planning-ID: PF-OPUX-v1-trim-boundary-adjustment  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+When the automatic trim cuts slightly too much or too little, a beginner should fix it in PrintFlow by moving the boundary, not by redrawing it or sending the image to a colleague. They also confuse trimming the image edge with choosing the physical print size.
+
+2\. Current evidence  
+CONFIRMED (code): a manual crop exists (SessionViewModel.ManualCrop.cs, CropSurfaceLayout.cs, SessionScreenView.xaml.cs around lines 51-100): drag to draw a new rectangle, zoom, tight / uniform / per-edge margin modes and a reset of the adjustment. There are no edge or corner handles to move an existing boundary and no explicit ""restore automatic suggestion"". SubmitManualCrop is legal only in Failed and RetryRequired (TransitionTable.cs), so from a trim review the operator must first Reject. Operator difficulty: inferred; see PF-OPUX-v1-novice-walkthrough. Related: SCRUM-11079, SCRUM-11083 (trim cancellation is a separate business item and is not planned here).
+
+3\. Scope and non-goals  
+Scope: (a) show the proposed boundary as a clear outline over the image with edge and corner drag handles, reusing CropSurfaceLayout for coordinate mapping; (b) keep zoom and add a before/after preview of the trimmed result; (c) add ""Restore automatic suggestion""; (d) require an explicit ""Use this trim"" confirmation, which submits through the existing manual-crop path and produces a new Revision that is still reviewed; (e) allow starting an adjustment directly from the trim review without a separate Reject; (f) state on screen that trimming changes the image edges only and that print size is chosen later (TIFF routes) or not at all (asset route).  
+Non-goals: no restoration of missing image content, eraser or editor (that goes to a colleague); no rotation, perspective or free-form masks; no change to trim geometry maths, lineage or downstream invalidation; approved enhancement and background removal must not be repeated because of a trim adjustment.
+
+4\. Proposed interaction and copy  
+""Drag the edges or corners to change what is kept. Trimming only changes the image edges. The print size is set later."" Buttons: ""Restore automatic suggestion"", ""Use this trim"". Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given a trim review, when the operator drags an edge or corner handle, then the outline follows, the source-pixel bounds update through CropSurfaceLayout, and nothing is committed until Use this trim.  
+2\. Given the operator chooses Restore automatic suggestion, then the outline returns exactly to the automatic bounds.  
+3\. Given the operator confirms, then a new trim Revision is produced through the existing manual-crop path and waits for review; the previous Revision is not approved implicitly.  
+4\. Given the adjustment is confirmed, then approved enhancement and background-removal Revisions are reused and not rerun, and downstream outputs are invalidated exactly as the existing rules require.  
+5\. Given a handle is dragged outside the artwork or to a zero-size area, then the selection is refused as it is today, and the previous boundary stays.  
+6\. Given the asset route, then the trim screen does not mention print size; given a TIFF route, then it says print size is chosen in a later step.  
+7\. In zh-CN and en the handles and buttons are keyboard reachable where supported, not clipped, and the boundary is visible without relying on colour alone.
+
+6\. Validation  
+Pure geometry tests for handle drags on CropSurfaceLayout (fitted, magnified, letterboxed, boundary cases); workflow tests for adjusting from review and for no rerun of approved upstream steps; existing manual-crop tests stay green; a human check with synthetic images.
+
+7\. Dependencies, reuse and priority  
+No blockers. Reuses the manual-crop implementation, CropSurfaceLayout and review surface; does not recreate them. Priority High: trimming is a named beginner difficulty.
+
+8\. Implementation and risk notes  
+Functional design item: item (e) needs a reviewed transition-table change (manual crop from ReviewRequired, or an explicit reject-and-adjust command). Items (a)-(d) and (f) are presentation over existing commands and can proceed first. Medium risk around lineage; guarded by criteria 3-4.","1\. Given a trim review, when the operator drags an edge or corner handle, then the outline follows, the source-pixel bounds update through CropSurfaceLayout, and nothing is committed until Use this trim.  
+2\. Given the operator chooses Restore automatic suggestion, then the outline returns exactly to the automatic bounds.  
+3\. Given the operator confirms, then a new trim Revision is produced through the existing manual-crop path and waits for review; the previous Revision is not approved implicitly.  
+4\. Given the adjustment is confirmed, then approved enhancement and background-removal Revisions are reused and not rerun, and downstream outputs are invalidated exactly as the existing rules require.  
+5\. Given a handle is dragged outside the artwork or to a zero-size area, then the selection is refused as it is today, and the previous boundary stays.  
+6\. Given the asset route, then the trim screen does not mention print size; given a TIFF route, then it says print size is chosen in a later step.  
+7\. In zh-CN and en the handles and buttons are keyboard reachable where supported, not clipped, and the boundary is visible without relying on colour alone.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","8","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:25.050+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-colleague-correction-handoff","10878","SCRUM-11148","https://yituoxx.atlassian.net/browse/SCRUM-11148","Task","Add ""Ask a Colleague to Correct This Image"" from Background-Removal Review with Clear Handoff Files, Instructions and Explicit Re-import","Planning-ID: PF-OPUX-v1-colleague-correction-handoff  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+A beginner reviewing a background-removal result may see missing hair, leftover background or damaged edges, or may simply be unsure. They should not have to repair it. They choose a clearly labelled ""Ask a colleague to correct this image"", and PrintFlow tells them and the colleague exactly which files to use, what to fix, how to save, and how to bring the corrected file back.
+
+2\. Current evidence  
+CONFIRMED (code): HandOff is legal from ReviewRequired, Failed, RetryRequired and Interrupted; it keeps the step state, marks the session HandedOff, releases the automation lock and creates a working copy from the latest approved or upstream Revision (TransitionTable.cs; WorkflowEngine.cs HandOff around line 1075). HandOff is refused without a non-empty reason. ManualResultEligibility.CanSubmit requires the step to be Failed, Interrupted or RetryRequired, so after a handoff made from a background-removal review (step stays ReviewRequired) a corrected file cannot be submitted. Related: SCRUM-11092, SCRUM-11112, SCRUM-11131 section 7.3.
+
+3\. Scope and non-goals  
+Scope:  
+\- Copy and presentation: an ""Ask a colleague to correct this image"" action on the background-removal review, available when the result is wrong or the operator is unsure. A handoff panel lists: an original-reference copy (read-only, for comparison), a correction working copy (the file to edit), what needs correction (optional note, with a default reason so no form is mandatory), the supported return format (PNG with transparency), where to save the corrected file, and how to return. The session is shown as handed off and not running.  
+\- Explicit re-import: ""Import corrected image"" on the handed-off session, and plain guidance on which step comes next so the operator does not rerun background removal and undo the colleague's work.  
+\- Contract item for design review: make a correction handed off from a background-removal review re-importable (for example, move the step to RetryRequired on this handoff, or extend CanSubmit), and supply a default handoff reason when the operator gives none.  
+Non-goals: no eraser, restore brush, mask editor or general editor; no accounts, assignment queue, notifications or cloud sharing; no Photoshop-save monitoring, automatic return detection or automatic attachment to the old session; no manual TIFF return. The real original, InputSnapshot and approved results are never exposed for editing.
+
+4\. Proposed interaction and copy  
+""Not sure this looks right? Ask a colleague to correct this image."" Panel: ""1. Give your colleague these two files: Reference (do not edit) and Correct this file. 2. What to fix (optional). 3. Save the corrected picture as PNG with a transparent background in <folder>. 4. Back in PrintFlow, open this job and choose Import corrected image. PrintFlow will not repeat background removal on the imported picture."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given a background-removal review, then ""Ask a colleague to correct this image"" is visible next to Approve and Reject, and choosing it without a note succeeds.  
+2\. Given the handoff completed, then the panel shows the reference copy, the working copy, their folder with an Open folder action, the return format, where to save and how to return; the reference copy is marked do-not-edit.  
+3\. Given the handoff, then the real original, InputSnapshot and approved Revisions are unchanged and not offered for editing.  
+4\. Given the session is handed off, then Home, Recent and the Session screen show it as handed off, never as processing, and a normal Run does not resume it.  
+5\. Given the colleague saved a PNG and the operator chooses Import corrected image, then the file is imported as a new Revision that is still reviewed, and the next step shown is the one after background removal, not background removal again.  
+6\. Given an unsupported file (wrong format, no transparency where required, unreadable), then the import is refused with a plain reason and the handed-off state is kept.  
+7\. Given no corrected file is imported, then nothing happens automatically; PrintFlow does not watch folders or Photoshop.  
+8\. In zh-CN and en the panel is not clipped, keyboard reachable, and states are readable without colour.
+
+6\. Validation  
+Workflow tests for handoff from review, default reason and re-import eligibility; ViewModel tests for panel content and next-step text; import refusal tests; existing StopAndTakeOverTests and manual-result tests stay green; a human check with synthetic images.
+
+7\. Dependencies, reuse and priority  
+No blockers. Relates to PF-OPUX-v1-app-specific-takeover-wording (shared wording area, independent fix). Reuses HandOff, CreateWorkingCopy, SubmitManualResult and ManualResultEligibility. Priority High: correction is a named beginner difficulty.
+
+8\. Implementation and risk notes  
+The presentation and copy parts are separable from the contract item. The contract item (re-import after a review-state handoff; default reason) changes a production handoff rule and needs implementation-stage design review before code; this issue does not approve it. Medium risk to lineage; guarded by criteria 3 and 5.","1\. Given a background-removal review, then ""Ask a colleague to correct this image"" is visible next to Approve and Reject, and choosing it without a note succeeds.  
+2\. Given the handoff completed, then the panel shows the reference copy, the working copy, their folder with an Open folder action, the return format, where to save and how to return; the reference copy is marked do-not-edit.  
+3\. Given the handoff, then the real original, InputSnapshot and approved Revisions are unchanged and not offered for editing.  
+4\. Given the session is handed off, then Home, Recent and the Session screen show it as handed off, never as processing, and a normal Run does not resume it.  
+5\. Given the colleague saved a PNG and the operator chooses Import corrected image, then the file is imported as a new Revision that is still reviewed, and the next step shown is the one after background removal, not background removal again.  
+6\. Given an unsupported file (wrong format, no transparency where required, unreadable), then the import is refused with a plain reason and the handed-off state is kept.  
+7\. Given no corrected file is imported, then nothing happens automatically; PrintFlow does not watch folders or Photoshop.  
+8\. In zh-CN and en the panel is not clipped, keyboard reachable, and states are readable without colour.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","9","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:26.992+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-review-step-guidance","10879","SCRUM-11149","https://yituoxx.atlassian.net/browse/SCRUM-11149","Task","Give Beginners Concrete ""What to Check"" Prompts and a Clear ""Ask for Help"" Path on Each Review","Planning-ID: PF-OPUX-v1-review-step-guidance  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+On a review the heading is only ""Review required"". A beginner does not know what to inspect (face detail after enhancement, hair and edges after background removal, cut-off edges after trim, white-ink coverage on the TIFF), what Approve and Reject do, or when to ask for help.
+
+2\. Current evidence  
+CONFIRMED (code): Session_ReviewHeading; the review tools already exist (background choices, comparison slider, zoom, TIFF colour/white-ink/overlay views). Beginner difficulty is inferred and will be checked by PF-OPUX-v1-novice-walkthrough, but the guidance is useful without waiting for it. Related: SCRUM-11079, SCRUM-11083, SCRUM-11104.
+
+3\. Scope and non-goals  
+Scope: per reviewed step (Enhancement, BackgroundRemoval, Trim, PhotoshopOutput TIFF), show two to four concrete check prompts tied to the existing tools, one sentence on what Approve and Reject do, and a ""When to ask for help"" line. On background removal that line leads to PF-OPUX-v1-colleague-correction-handoff; on trim it points to the in-app adjustment.  
+Non-goals: no automatic quality judgement; no merged or skipped reviews; no new review tools.
+
+4\. Proposed interaction and copy  
+Background removal: ""Zoom in on hair and edges. View it on black and on white. Check that no old background remains. If something is wrong, or you are not sure, ask a colleague to correct this image."" TIFF: ""Check the white-ink view covers the whole design. Reject makes a new TIFF; the rejected one is moved to the Recycle Bin."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given each review step, then its check prompts, Approve/Reject explanation and help line are shown next to the review in both languages.  
+2\. Given Reject on the TIFF review, then the text matches the actual recycle-and-regenerate behaviour.  
+3\. Given the background-removal review, then the help line offers the colleague-correction action once that Task is delivered, and until then names the existing Hand off action.  
+4\. Given the walkthrough later refutes a prompt, then the prompt is revised and the reason recorded on this issue.  
+5\. Approve and Reject behaviour and binding are unchanged.  
+6\. The guidance is not clipped at the supported resolution and scaling and does not hide the image being reviewed.
+
+6\. Validation  
+Rendering tests per step and locale; a human check; confirmation by PF-OPUX-v1-acceptance-walkthrough.
+
+7\. Dependencies, reuse and priority  
+No blockers. Not a duplicate: SCRUM-11079/11083/11104 delivered the tools, not the guidance. Priority High: review is where beginners must make judgements.
+
+8\. Implementation and risk notes  
+SessionScreenView.xaml review area, SessionViewModel, resources. Low risk.","1\. Given each review step, then its check prompts, Approve/Reject explanation and help line are shown next to the review in both languages.  
+2\. Given Reject on the TIFF review, then the text matches the actual recycle-and-regenerate behaviour.  
+3\. Given the background-removal review, then the help line offers the colleague-correction action once that Task is delivered, and until then names the existing Hand off action.  
+4\. Given the walkthrough later refutes a prompt, then the prompt is revised and the reason recorded on this issue.  
+5\. Approve and Reject behaviour and binding are unchanged.  
+6\. The guidance is not clipped at the supported resolution and scaling and does not hide the image being reviewed.
+","High","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","10","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:28.749+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-print-size-plain-guidance","10880","SCRUM-11150","https://yituoxx.atlassian.net/browse/SCRUM-11150","Task","Explain Print Size Choices and the Enlargement Warning in Beginner Terms with a Live Worked Example","Planning-ID: PF-OPUX-v1-print-size-plain-guidance  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+The print-size step uses ""maximum print size"", ""target edge"", ""limiting edge"", ""estimated output pixels"" and PPI. A beginner knows the size they want on the garment, but not which mode to choose or what these terms mean.
+
+2\. Current evidence  
+CONFIRMED (code): resources Session_MaxBounds\*, Session_TargetEdge, Session_PreparationLimitingEdge, Session_PreflightOutputPixels, Session_EnlargementWarning. Beginner difficulty: inferred. Related: SCRUM-11094, SCRUM-11095.
+
+3\. Scope and non-goals  
+Scope: a one-line ""choose this when…"" per mode; a live plain sentence generated from the existing preflight result; the enlargement warning rephrased as its visible effect while keeping the explicit confirmation; technical values (pixels, PPI) moved to a details area.  
+Non-goals: no new presets or store sizes; no change to the 300 PPI rule, fitting maths, enlargement authority or the confirmation requirement; the asset route never shows this step.
+
+4\. Proposed interaction and copy  
+""With this setting the print is about 210 × 148 mm. The width decides the size. The picture is never stretched."" Enlargement: ""This picture is small for this size, so the print may look soft or blurry. Choose a smaller size, or confirm that you accept this."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given valid maximum bounds, then the sentence matches the existing preflight projection in mm and names the governing edge.  
+2\. Given an enlargement is needed, then the warning still requires explicit confirmation and Run stays unavailable until then.  
+3\. Given invalid input, then the existing validation applies with plain wording.  
+4\. Given the asset route, then this step is never shown.  
+5\. Pixel and PPI values remain available under details and are unchanged.  
+6\. The text is not clipped at the supported resolution and scaling in either language.
+
+6\. Validation  
+ViewModel tests comparing the sentence to PrintPreparationPlan values; existing MaximumBoundsUiTests and FlexibleSizeUiTests stay green.
+
+7\. Dependencies, reuse and priority  
+No blockers. Not a duplicate of SCRUM-11094/11095, which delivered the rules. Priority Medium.
+
+8\. Implementation and risk notes  
+SessionViewModel.PrintDimensions.cs and the size area of SessionScreenView.xaml. Generate the sentence from the plan object so it cannot drift from the maths. Low risk.","1\. Given valid maximum bounds, then the sentence matches the existing preflight projection in mm and names the governing edge.  
+2\. Given an enlargement is needed, then the warning still requires explicit confirmation and Run stays unavailable until then.  
+3\. Given invalid input, then the existing validation applies with plain wording.  
+4\. Given the asset route, then this step is never shown.  
+5\. Pixel and PPI values remain available under details and are unchanged.  
+6\. The text is not clipped at the supported resolution and scaling in either language.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","11","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:30.674+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-failure-next-step-copy","10881","SCRUM-11151","https://yituoxx.atlassian.net/browse/SCRUM-11151","Task","Complete ""What Happened, What Was Kept, What You Can Do"" Wording for the Remaining Failure Messages","Planning-ID: PF-OPUX-v1-failure-next-step-copy  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+Many failure messages already explain the situation, but some give only a result (""The operation did not finish in time."") and two generic wrappers put a code in the main sentence. A beginner needs to know what happened, whether their files are safe, what they can do, and when to ask for help.
+
+2\. Current evidence  
+CONFIRMED (code): resource keys Session_ActionFailed, Home_ResumeFailed, Home_AbandonFailed, Home_RecoveryFailed, WorkflowSelection_Refused, Settings_SaveFailed, Failure_Timeout, Failure_OutputMissing, Failure_OutputUnreadable, Failure_OutputValidationFailed, Failure_WorkspaceError, Failure_PersistenceError, Failure_PreconditionNotMet, Failure_AdapterUnavailable, Failure_Cancelled, Failure_UnknownDialog. Related: SCRUM-11120 (Error Details, complete), SCRUM-11091.
+
+3\. Scope and non-goals  
+Scope: for each listed key, zh-CN and en text with three parts (what happened; whether the original and approved results are unchanged; the safe next step, or ""ask a colleague or supervisor"" when the operator cannot act). The stable code moves to a secondary line or Error Details.  
+Non-goals: no change to FailureCode, recovery, retry legality or persisted data; no invented promise; no ""kept"" claim unless it is true.
+
+4\. Proposed interaction and copy  
+Failure_Timeout: ""The operation took too long and produced no result. Your original and approved files are unchanged. You can retry. If it happens again, open Error details or ask for help."" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given any listed failure on screen, then the main sentence contains no bare code, and the code stays reachable in Error Details.  
+2\. Given each listed message, then its ""kept"" claim is true for every code path that raises it, and the implementer records the check per key.  
+3\. Given a failure where Retry is not legal, then the message does not suggest retrying.  
+4\. Both locales are updated, LocalisationResourceTests parity holds, and the messages are not clipped where they are shown.
+
+6\. Validation  
+Resource tests; a targeted test that Session_ActionFailed no longer places the code in the main line; a copy review of both languages by the product owner.
+
+7\. Dependencies, reuse and priority  
+No blockers. Builds on SCRUM-11120. Priority Medium: many messages are already good.
+
+8\. Implementation and risk notes  
+SessionViewModel formatting around line 3608; resources. Risk: a false ""nothing changed"" claim, guarded by criterion 2.","1\. Given any listed failure on screen, then the main sentence contains no bare code, and the code stays reachable in Error Details.  
+2\. Given each listed message, then its ""kept"" claim is true for every code path that raises it, and the implementer records the check per key.  
+3\. Given a failure where Retry is not legal, then the message does not suggest retrying.  
+4\. Both locales are updated, LocalisationResourceTests parity holds, and the messages are not clipped where they are shown.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","12","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:32.786+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-home-readiness-summary","10882","SCRUM-11152","https://yituoxx.atlassian.net/browse/SCRUM-11152","Task","Replace Technical Startup Lines on Home with a Plain Readiness Summary and One Next Action","Planning-ID: PF-OPUX-v1-home-readiness-summary  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+Home opens with ""Startup recovery: 0 interrupted attempt(s), 0 stale lock(s) released, 0 file(s) quarantined."" and ""Preset verified"". A not-ready workstation shows only ""Preset not verified"", and the reason is on another screen. A beginner needs ""can I start, and if not, what do I do or whom do I ask"".
+
+2\. Current evidence  
+CONFIRMED (code): HomeView.xaml around lines 42-59 binds StartupSummary and PresetStatus; resource keys Startup_RecoverySummary, Preset_Verified, Preset_NotVerified. Home does not show the last live readiness result. Related: SCRUM-11110, SCRUM-11112.
+
+3\. Scope and non-goals  
+Scope: one summary line from existing readiness data (Ready to process; Automatic processing is blocked — first reason in plain words; Not checked yet), the time of the last check, and one button to the Production Readiness screen; recovery counts behind a details expander; interrupted jobs shown only through the existing Recovery section.  
+Non-goals: no new check; no automatic check or repair at startup; no change to what blocks production; never a green state when the last result is failed, stale or absent.
+
+4\. Proposed interaction and copy  
+""Ready to process · checked 09:12"". ""Automatic processing is blocked: Photoshop is not open. \[Check the workstation\] If you cannot fix this, ask your supervisor."" ""Not checked yet. \[Check the workstation\]"" Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given the last verification failed, then Home shows blocked with the first reason and a button to the readiness screen, and never shows ready.  
+2\. Given no verification has run in this app session, then Home shows Not checked yet and does not reuse an old pass as current.  
+3\. Given verification passed, then Home shows ready with the check time.  
+4\. Given recovery found interrupted attempts, then the Recovery section still lists them and the counts remain under details.  
+5\. Both locales; not clipped at the supported resolution and scaling; the button is keyboard reachable.
+
+6\. Validation  
+ViewModel tests for passed, failed, not-run and stale results; existing EnvironmentReadinessScreenTests stay green; a human check.
+
+7\. Dependencies, reuse and priority  
+No blockers. Reuses the verifier results; adds no check, so it is not a duplicate of SCRUM-11110. Priority Medium.
+
+8\. Implementation and risk notes  
+HomeViewModel; the readiness source must be the one the readiness screen uses. Risk: a false-ready display, guarded by criteria 1-2.","1\. Given the last verification failed, then Home shows blocked with the first reason and a button to the readiness screen, and never shows ready.  
+2\. Given no verification has run in this app session, then Home shows Not checked yet and does not reuse an old pass as current.  
+3\. Given verification passed, then Home shows ready with the check time.  
+4\. Given recovery found interrupted attempts, then the Recovery section still lists them and the counts remain under details.  
+5\. Both locales; not clipped at the supported resolution and scaling; the button is keyboard reachable.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","","","","NONE_PLANNED","13","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:34.583+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-recent-row-status","10883","SCRUM-11153","https://yituoxx.atlassian.net/browse/SCRUM-11153","Task","Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)","Planning-ID: PF-OPUX-v1-recent-row-status  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+In Recent processing every unfinished job shows ""Active"". A beginner cannot tell which job waits for their review, which one stopped, which one is with a colleague, and which one is saved.
+
+2\. Current evidence  
+CONFIRMED (code): RecentSessionRow.cs around lines 39-40 maps only the session-level SessionListItem.State. Thumbnail, name, step and time already exist. Related: SCRUM-11117 (complete).
+
+3\. Scope and non-goals  
+Scope: add the current step state (and, once delivery exists, the delivered flag) to the session list read model, and show a row status using the categories and wording of PF-OPUX-v1-session-next-step-panel, for example ""Waiting for your review · Trim"" or ""Handed off to a colleague"". Interrupted jobs stay in the Recovery section.  
+Non-goals: no sorting, filtering or bulk actions; no change to Remove versus Abandon or the 30-day/100-row limits.
+
+4\. Proposed interaction and copy  
+""Waiting for your review · Background removal"", ""Stopped · Enhancement"", ""Handed off to a colleague"", ""Saved"". Both supported UI languages are required.
+
+5\. Acceptance criteria  
+1\. Given an active job whose current step requires review, then its row says Waiting for your review with the step name.  
+2\. Given an active job whose current step failed, then its row says it stopped, and Resume opens it.  
+3\. Given a handed-off job, then its row says handed off and does not look active.  
+4\. Given completed or abandoned jobs, then the rows use the panel wording, and the Remove-from-list text still says files and history are kept.  
+5\. The row text is readable without colour and not clipped in either language.
+
+6\. Validation  
+Workflow-layer read-model tests for the step-state projection; HomeAndWorkflowSelectionTests for row text; resource parity.
+
+7\. Dependencies, reuse and priority  
+Blocked by PF-OPUX-v1-session-next-step-panel (shared categories). Not a duplicate of SCRUM-11117. Priority Medium.
+
+8\. Implementation and risk notes  
+SessionListItem (Workflow layer), RecentSessionRow.cs, HomeView.xaml. It touches the Workflow read model, so it is not UI-only. Low risk: read-only projection.","1\. Given an active job whose current step requires review, then its row says Waiting for your review with the step name.  
+2\. Given an active job whose current step failed, then its row says it stopped, and Resume opens it.  
+3\. Given a handed-off job, then its row says handed off and does not look active.  
+4\. Given completed or abandoned jobs, then the rows use the panel wording, and the Remove-from-list text still says files and history are kept.  
+5\. The row text is readable without colour and not clipped in either language.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","PF-OPUX-v1-session-next-step-panel","10873","SCRUM-11143","VERIFIED","14","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:36.524+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-consistency-keyboard-pass","10884","SCRUM-11154","https://yituoxx.atlassian.net/browse/SCRUM-11154","Task","Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages","Planning-ID: PF-OPUX-v1-consistency-keyboard-pass    
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value    
+Each UI Task checks its own localisation, focus and clipping. Once they are all in, the same state can still be named differently on Home, Recent and Session, or focus can jump unexpectedly between screens. A beginner relies on consistent words across the whole journey.
+
+2\. Current evidence    
+Stable AutomationIds exist across screens (CONFIRMED). The new surfaces do not exist yet. Related: SCRUM-11119.
+
+3\. Scope and non-goals    
+Scope: on the supported workstation resolution and scaling only, walk the full journey across all changed screens and check: the same state has the same words everywhere (status panel, Recent rows, Home, handoff, delivery); terms match the terminology reference; focus follows the review-entry input-safety contract below; unavailable expected actions state a reason. Fix inconsistencies within those surfaces.    
+Non-goals: not a substitute for each Task's own checks; no new resolutions, DPI scales or third-party automation; no screen-reader certification.
+
+4\. Proposed interaction and copy    
+No new copy; alignment only. Both supported UI languages are checked.
+
+5\. Acceptance criteria    
+1\. Given the full journey in zh-CN and en, then each state (processing, waiting for review, needs input, stopped, handed off, approved, saved) uses the same wording on every screen where it appears.    
+2\. Given keyboard only, then the operator can complete the journey's primary actions across screens. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.    
+3\. Given a recorded screenshot set on the workstation with synthetic images, then no clipping is present, or each finding is fixed.    
+4\. Findings and fixes are listed in the completion record.
+
+6\. Validation    
+UIA checks using existing AutomationIds; screenshots on the workstation with synthetic images only.
+
+7\. Dependencies, reuse and priority    
+Blocked by all UI Tasks listed in its dependencies. Blocks PF-OPUX-v1-acceptance-walkthrough. Priority Low.
+
+8\. Implementation and risk notes    
+Low risk. Starting the app on the workstation must follow the existing safe-startup rules and never use customer data.","1\. Given the full journey in zh-CN and en, then each state (processing, waiting for review, needs input, stopped, handed off, approved, saved) uses the same wording on every screen where it appears.    
+2\. Given keyboard only, then the operator can complete the journey's primary actions across screens. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.    
+3\. Given a recorded screenshot set on the workstation with synthetic images, then no clipping is present, or each finding is fixed.    
+4\. Findings and fixes are listed in the completion record.
+","Low","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","PF-OPUX-v1-app-specific-takeover-wording;PF-OPUX-v1-colleague-correction-handoff;PF-OPUX-v1-completion-delivery-summary;PF-OPUX-v1-failure-next-step-copy;PF-OPUX-v1-home-readiness-summary;PF-OPUX-v1-print-size-plain-guidance;PF-OPUX-v1-recent-row-status;PF-OPUX-v1-review-step-guidance;PF-OPUX-v1-route-purpose-cards;PF-OPUX-v1-session-next-step-panel;PF-OPUX-v1-trim-boundary-adjustment","10872;10878;10875;10881;10882;10880;10883;10879;10876;10873;10877","SCRUM-11142;SCRUM-11148;SCRUM-11145;SCRUM-11151;SCRUM-11152;SCRUM-11150;SCRUM-11153;SCRUM-11149;SCRUM-11146;SCRUM-11143;SCRUM-11147","VERIFIED","15","READ_ONLY","VERIFIED_CURRENT","2026-09-22T15:00:23.110+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."
+"PF-OPUX-v1-acceptance-walkthrough","10885","SCRUM-11155","https://yituoxx.atlassian.net/browse/SCRUM-11155","Task","Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result","Planning-ID: PF-OPUX-v1-acceptance-walkthrough  
+Initiative: PF-OPUX-v1
+
+1\. Beginner scenario and value  
+The improvements must help a real beginner complete the journey, not only pass tests.
+
+2\. Current evidence  
+None yet; this Task produces it. Baseline for comparison: PF-OPUX-v1-novice-walkthrough, if it ran.
+
+3\. Scope and non-goals  
+Scope: with a real operator without Photoshop/Meitu/CS knowledge (preferably a different person from the discovery walkthrough), in a safe setup with synthetic or agreed regression images, cover: choosing a route; following status and next steps; reviewing with the check prompts; adjusting a trim; sending a background-removal result to a colleague and re-importing a prepared corrected file; choosing a destination, saving and opening the containing folder; a failure and recovery; reading Home readiness and Recent status; the print-size step.  
+Non-goals: no timing baseline, percentage target or time KPI (SCRUM-11137 waived); no customer images; no production run; not a recreation of the withdrawn SCRUM-11130 to 11134 acceptance checks.
+
+4\. Proposed interaction and copy  
+Reuse the discovery script and findings table, extended with the new scenarios.
+
+5\. Acceptance criteria  
+1\. Given the walkthrough ran, then the record shows per scenario: completed independently yes/no, help requests, wrong clicks or routes, and the change against the discovery walkthrough where available.  
+2\. Given a scenario still fails, then it is recorded as an open finding with a proposed follow-up and is not marked PASS.  
+3\. Given no operator was available, then the record states NOT RUN and the Epic is not described as operator-validated.  
+4\. The record contains no customer image, customer filename or identifying screenshot.
+
+6\. Validation  
+Human-run only; an agent cannot act as the operator.
+
+7\. Dependencies, reuse and priority  
+Blocked by every implementation Task in this Epic and by the consistency pass. Priority Medium.
+
+8\. Implementation and risk notes  
+Schedule when no live production work runs on the shared workstation. Low product risk.","1\. Given the walkthrough ran, then the record shows per scenario: completed independently yes/no, help requests, wrong clicks or routes, and the change against the discovery walkthrough where available.  
+2\. Given a scenario still fails, then it is recorded as an open finding with a proposed follow-up and is not marked PASS.  
+3\. Given no operator was available, then the record states NOT RUN and the Epic is not described as operator-validated.  
+4\. The record contains no customer image, customer filename or identifying screenshot.
+","Medium","To Do","10869","SCRUM-11139","operator-ux;pf-opux-v1;printflow","PF-OPUX-v1-app-specific-takeover-wording;PF-OPUX-v1-approved-artifact-export;PF-OPUX-v1-colleague-correction-handoff;PF-OPUX-v1-completion-delivery-summary;PF-OPUX-v1-consistency-keyboard-pass;PF-OPUX-v1-failure-next-step-copy;PF-OPUX-v1-home-readiness-summary;PF-OPUX-v1-print-size-plain-guidance;PF-OPUX-v1-recent-row-status;PF-OPUX-v1-review-step-guidance;PF-OPUX-v1-route-purpose-cards;PF-OPUX-v1-session-next-step-panel;PF-OPUX-v1-trim-boundary-adjustment","10872;10874;10878;10875;10884;10881;10882;10880;10883;10879;10876;10873;10877","SCRUM-11142;SCRUM-11144;SCRUM-11148;SCRUM-11145;SCRUM-11154;SCRUM-11151;SCRUM-11152;SCRUM-11150;SCRUM-11153;SCRUM-11149;SCRUM-11146;SCRUM-11143;SCRUM-11147","VERIFIED","16","READ_ONLY","VERIFIED_CURRENT","2026-09-22T14:27:38.564+1200","2026-09-23T07:04:26.141Z","SCRUM-11144 backend readback only; no Jira write to this issue in this run."

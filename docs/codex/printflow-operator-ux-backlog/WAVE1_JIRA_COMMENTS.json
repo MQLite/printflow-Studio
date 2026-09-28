@@ -1,0 +1,54 @@
+{
+  "task": "PF-OPUX-v1-wave1",
+  "comments": [
+    {
+      "issueId": "10870",
+      "key": "SCRUM-11140",
+      "commentId": "10161",
+      "requestedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): completed the documentation scope in docs/printflow/operator-ux-terminology.md. The bilingual reference covers operator terms, permitted technical surfaces, application-specific takeover wording, and the distinction between generated, awaiting review, approved, completed and verified delivery. Internal Approved placement and workflow completion do not mean Saved. Future delivery and colleague-return semantics remain deferred. This reference blocks no other task and adds no sign-off gate. No global resource sweep or Jira status change.",
+      "savedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): completed the documentation scope in docs/printflow/operator-ux-terminology.md. The bilingual reference covers operator terms, permitted technical surfaces, application-specific takeover wording, and the distinction between generated, awaiting review, approved, completed and verified delivery. Internal Approved placement and workflow completion do not mean Saved. Future delivery and colleague-return semantics remain deferred. This reference blocks no other task and adds no sign-off gate. No global resource sweep or Jira status change.",
+      "created": "2026-09-22T15:18:38.101+1200",
+      "updated": "2026-09-22T15:18:38.101+1200",
+      "readbackAt": "2026-09-22T03:18:39.824Z",
+      "status": "VERIFIED_EXACT",
+      "issueStatus": "To Do"
+    },
+    {
+      "issueId": "10871",
+      "key": "SCRUM-11141",
+      "commentId": "10162",
+      "requestedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): PREPARED / HUMAN WALKTHROUGH NOT RUN. docs/printflow/operator-ux-novice-walkthrough.md contains neutral zh-CN instructions, an English anonymized findings template, the three routes and review/trim/background/dimensions/failure/file-finding scenarios, and safe setup/stopping instructions. All observation fields remain UNOBSERVED or NOT OBSERVED. Future delivery, direct trim-from-review and colleague-correction re-import are explicitly unavailable. No participant was recruited or observed; automated tests and agent screenshots are not novice validation. No timing KPI, customer work or Jira status change.",
+      "savedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): PREPARED / HUMAN WALKTHROUGH NOT RUN. docs/printflow/operator-ux-novice-walkthrough.md contains neutral zh-CN instructions, an English anonymized findings template, the three routes and review/trim/background/dimensions/failure/file-finding scenarios, and safe setup/stopping instructions. All observation fields remain UNOBSERVED or NOT OBSERVED. Future delivery, direct trim-from-review and colleague-correction re-import are explicitly unavailable. No participant was recruited or observed; automated tests and agent screenshots are not novice validation. No timing KPI, customer work or Jira status change.",
+      "created": "2026-09-22T15:18:40.955+1200",
+      "updated": "2026-09-22T15:18:40.955+1200",
+      "readbackAt": "2026-09-22T03:18:42.583Z",
+      "status": "VERIFIED_EXACT",
+      "issueStatus": "To Do"
+    },
+    {
+      "issueId": "10872",
+      "key": "SCRUM-11142",
+      "commentId": "10163",
+      "requestedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): implemented application-specific Photoshop Stop/Take Over hints, confirmation, stopping/retained-state and post-takeover guidance in the Session UI, with unchanged Meitu wording and existing command/eligibility bindings. Photoshop manual-result import remains unsupported; re-entry is named only when offered. The defect was reproduced by failing tests before the fix. The combined targeted verification currently passes 228/228, including Stop/Take Over and localization checks. Isolated synthetic WPF captures cover both languages. Human workstation visual acceptance is NOT RUN; no production app or live takeover was used. Files, exact commands, raw evidence and review outcome are recorded separately in docs/codex/printflow-operator-ux-backlog/WAVE1_PLAN.md. No Jira status change.",
+      "savedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): implemented application-specific Photoshop Stop/Take Over hints, confirmation, stopping/retained-state and post-takeover guidance in the Session UI, with unchanged Meitu wording and existing command/eligibility bindings. Photoshop manual-result import remains unsupported; re-entry is named only when offered. The defect was reproduced by failing tests before the fix. The combined targeted verification currently passes 228/228, including Stop/Take Over and localization checks. Isolated synthetic WPF captures cover both languages. Human workstation visual acceptance is NOT RUN; no production app or live takeover was used. Files, exact commands, raw evidence and review outcome are recorded separately in docs/codex/printflow-operator-ux-backlog/WAVE1_PLAN.md. No Jira status change.",
+      "created": "2026-09-22T15:29:15.753+1200",
+      "updated": "2026-09-22T15:29:15.753+1200",
+      "readbackAt": "2026-09-22T03:29:17.536Z",
+      "status": "VERIFIED_EXACT",
+      "issueStatus": "To Do"
+    },
+    {
+      "issueId": "10873",
+      "key": "SCRUM-11143",
+      "commentId": "10164",
+      "requestedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): implemented the current-status/next-step panel over existing session, step, runtime and command data. Handed-off/terminal states take precedence; Completed never implies Saved. Existing visible/enabled commands remain authoritative. Recommended actions are visually emphasized; new exact review targets receive non-activating focus. Routed WPF input tests cover repeated Enter/Space, stale releases, target/job changes, double-click suppression and fresh keyboard activation. Interactive hosted keyboard focus/navigation and fresh physical mouse activation remain unverified: one hidden-host capability probe failed to establish real device state. This is an evidence gap, not a demonstrated product failure. The combined targeted run currently passes 228/228. An observed manual-crop layout regression was fixed and its original smoke assertion remains unchanged. Isolated synthetic WPF captures were inspected in en and zh-CN; human workstation/novice checks remain NOT RUN. The authorized scope/AC8 focus clarification was saved and read back. Fresh independent review found one glossary re-entry wording defect; it was corrected and re-reviewed, with no remaining actionable product defect found. Exact commands, evidence and review limits are recorded separately in docs/codex/printflow-operator-ux-backlog/WAVE1_PLAN.md. No workflow-engine, delivery, import-contract or Jira status changes.",
+      "savedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): implemented the current-status/next-step panel over existing session, step, runtime and command data. Handed-off/terminal states take precedence; Completed never implies Saved. Existing visible/enabled commands remain authoritative. Recommended actions are visually emphasized; new exact review targets receive non-activating focus. Routed WPF input tests cover repeated Enter/Space, stale releases, target/job changes, double-click suppression and fresh keyboard activation. Interactive hosted keyboard focus/navigation and fresh physical mouse activation remain unverified: one hidden-host capability probe failed to establish real device state. This is an evidence gap, not a demonstrated product failure. The combined targeted run currently passes 228/228. An observed manual-crop layout regression was fixed and its original smoke assertion remains unchanged. Isolated synthetic WPF captures were inspected in en and zh-CN; human workstation/novice checks remain NOT RUN. The authorized scope/AC8 focus clarification was saved and read back. Fresh independent review found one glossary re-entry wording defect; it was corrected and re-reviewed, with no remaining actionable product defect found. Exact commands, evidence and review limits are recorded separately in docs/codex/printflow-operator-ux-backlog/WAVE1_PLAN.md. No workflow-engine, delivery, import-contract or Jira status changes.",
+      "created": "2026-09-22T15:29:18.627+1200",
+      "updated": "2026-09-22T15:36:42.580+1200",
+      "readbackAt": "2026-09-22T03:36:45.211Z",
+      "status": "VERIFIED_EXACT",
+      "issueStatus": "To Do",
+      "previousSavedBody": "PF-OPUX-v1 Wave 1 (2026-09-22): implemented the current-status/next-step panel over existing session, step, runtime and command data. Handed-off/terminal states take precedence; Completed never implies Saved. Existing visible/enabled commands remain authoritative. Recommended actions are visually emphasized; new exact review targets receive non-activating focus. WPF input tests cover repeated Enter/Space, stale releases, target/job changes, double-click suppression and fresh activation. The combined targeted run currently passes 228/228. An observed manual-crop layout regression was fixed and its original smoke assertion remains unchanged. Isolated synthetic WPF captures were inspected in en and zh-CN; human workstation/novice checks remain NOT RUN. The authorized scope/AC8 focus clarification was saved and read back. Exact commands, evidence and independent-review outcome are recorded separately in docs/codex/printflow-operator-ux-backlog/WAVE1_PLAN.md. No workflow-engine, delivery, import-contract or Jira status changes."
+    }
+  ]
+}

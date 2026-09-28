@@ -1,0 +1,1929 @@
+{
+  "task": "PF-OPUX-v1-wave1",
+  "authority": "Owner prompt section 4, 2026-09-22",
+  "amendments": [
+    {
+      "key": "SCRUM-11143",
+      "id": "10873",
+      "before": {
+        "id": "10873",
+        "key": "SCRUM-11143",
+        "fields": {
+          "summary": "Show a Plain \"Current Status and Next Step\" Panel with a Recommended Primary Action on the Session Screen",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:22:36.516+1200",
+          "description": "Planning-ID: PF-OPUX-v1-session-next-step-panel  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nOn the Session screen the beginner sees \"Workflow · State · Step\" and up to thirteen equally styled buttons. Nothing says whether PrintFlow is working, waiting for them, stopped or finished, or which button is expected next. A developer notice (\"A browsable processing history is not part of this build…\") is always visible. A status panel answers \"what is happening and what do I do now\" on every step of every job.\n\n2\\. Current evidence  \nCONFIRMED (code): src/PrintFlow.App/Views/SessionScreenView.xaml header around lines 73-79; the action WrapPanel around lines 1648-1727 gives all commands the same style; the placeholder notice is bound unconditionally (around line 261; SessionViewModel.cs around line 788). The effect on beginners is inferred. Related: SCRUM-11115 family (complete, not reopened), SCRUM-11120.\n\n3\\. Scope and non-goals  \nScope: one status panel near the top with a category and a one-sentence next step. Categories: Processing automatically; Waiting for your review; Needs your input; Stopped or failed; Handed off to a colleague; Completed; Saved to your chosen folder (once delivery exists). The category and the recommended action are derived from the existing step state and AvailableCommands, with no new rule. The recommended action gets primary styling and keyboard default focus; other legal actions stay visible as secondary actions. Remove the developer placeholder notice.  \nNon-goals: no change to which commands are legal; no removed or merged command; no automatic advancing; no single-button-only screen where secondary actions are legitimate.\n\n4\\. Proposed interaction and copy  \n\"Waiting for your review: compare Before and After, then choose Approve, or ask a colleague if you are not sure.\" Failure: \"Stopped: enhancement did not finish. Your original is unchanged. You can retry, or open Error details.\" Handed off: \"Handed off to a colleague. PrintFlow is not processing this image.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria  \n1\\. Given a step in review, then the panel shows \"Waiting for your review\" and Approve is the recommended action, while Reject and any other legal action remain available with unchanged enabled state.  \n2\\. Given automation is running, then the panel shows \"Processing automatically\", no approve or complete action is emphasised, and Stop/Take Over appear exactly as before.  \n3\\. Given a failed step, then the panel shows \"Stopped or failed\" with the localised reason, and Retry is recommended only when the engine offers Retry; there is no generic Continue.  \n4\\. Given a handed-off session, then the panel says it is handed off and does not present it as running or as resumable by a normal Run.  \n5\\. Given a completed session, then the panel says Completed, and says \"Saved\" only when delivery to the chosen destination has been verified.  \n6\\. For every state covered by TransitionMatrixTests, the set of visible commands is identical before and after the change; only emphasis and text differ.  \n7\\. The developer placeholder notice is no longer shown.  \n8\\. In zh-CN and en the panel text is not clipped at the supported resolution and scaling, status is conveyed by text and not by colour alone, and keyboard focus starts on the recommended action.\n\n6\\. Validation  \nViewModel unit tests mapping representative states to category, text and recommended command; a regression test that the visible command set equals AvailableCommands; a rendering or UIA check of the panel; a human visual check on the workstation.\n\n7\\. Dependencies, reuse and priority  \nNo blockers. Blocks PF-OPUX-v1-recent-row-status (shared category wording). Reuses AvailableCommands, DisplayNames and step state. Not a duplicate of SCRUM-11120 (Error Details). Priority High: present on every step.\n\n8\\. Implementation and risk notes  \nSessionViewModel computed properties, SessionScreenView.xaml, resources. Keep the mapping in the ViewModel, not in XAML triggers. Medium risk; the command-visibility regression test is mandatory.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10001",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10883",
+                "key": "SCRUM-11153",
+                "fields": {
+                  "summary": "Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10003",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10884",
+                "key": "SCRUM-11154",
+                "fields": {
+                  "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Low",
+                    "id": "4"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10014",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "High",
+            "id": "2"
+          },
+          "updated": "2026-09-22T14:27:17.166+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "requestedDescription": "Planning-ID: PF-OPUX-v1-session-next-step-panel  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nOn the Session screen the beginner sees \"Workflow · State · Step\" and up to thirteen equally styled buttons. Nothing says whether PrintFlow is working, waiting for them, stopped or finished, or which button is expected next. A developer notice (\"A browsable processing history is not part of this build…\") is always visible. A status panel answers \"what is happening and what do I do now\" on every step of every job.\n\n2\\. Current evidence  \nCONFIRMED (code): src/PrintFlow.App/Views/SessionScreenView.xaml header around lines 73-79; the action WrapPanel around lines 1648-1727 gives all commands the same style; the placeholder notice is bound unconditionally (around line 261; SessionViewModel.cs around line 788). The effect on beginners is inferred. Related: SCRUM-11115 family (complete, not reopened), SCRUM-11120.\n\n3\\. Scope and non-goals  \nScope: one status panel near the top with a category and a one-sentence next step. Categories: Processing automatically; Waiting for your review; Needs your input; Stopped or failed; Handed off to a colleague; Completed; Saved to your chosen folder (once delivery exists). The category and the recommended action are derived from the existing step state and AvailableCommands, with no new rule. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported. Other legal actions stay visible as secondary actions. Remove the developer placeholder notice.  \nNon-goals: no change to which commands are legal; no removed or merged command; no automatic advancing; no single-button-only screen where secondary actions are legitimate.\n\n4\\. Proposed interaction and copy  \n\"Waiting for your review: compare Before and After, then choose Approve, or ask a colleague if you are not sure.\" Failure: \"Stopped: enhancement did not finish. Your original is unchanged. You can retry, or open Error details.\" Handed off: \"Handed off to a colleague. PrintFlow is not processing this image.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria  \n1\\. Given a step in review, then the panel shows \"Waiting for your review\" and Approve is the recommended action, while Reject and any other legal action remain available with unchanged enabled state.  \n2\\. Given automation is running, then the panel shows \"Processing automatically\", no approve or complete action is emphasised, and Stop/Take Over appear exactly as before.  \n3\\. Given a failed step, then the panel shows \"Stopped or failed\" with the localised reason, and Retry is recommended only when the engine offers Retry; there is no generic Continue.  \n4\\. Given a handed-off session, then the panel says it is handed off and does not present it as running or as resumable by a normal Run.  \n5\\. Given a completed session, then the panel says Completed, and says \"Saved\" only when delivery to the chosen destination has been verified.  \n6\\. For every state covered by TransitionMatrixTests, the set of visible commands is identical before and after the change; only emphasis and text differ.  \n7\\. The developer placeholder notice is no longer shown.  \n8\\. In zh-CN and en the panel text is not clipped at the supported resolution and scaling, status is conveyed by text and not by colour alone, and keyboard access follows this contract: Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.\n\n6\\. Validation  \nViewModel unit tests mapping representative states to category, text and recommended command; a regression test that the visible command set equals AvailableCommands; a rendering or UIA check of the panel; a human visual check on the workstation.\n\n7\\. Dependencies, reuse and priority  \nNo blockers. Blocks PF-OPUX-v1-recent-row-status (shared category wording). Reuses AvailableCommands, DisplayNames and step state. Not a duplicate of SCRUM-11120 (Error Details). Priority High: present on every step.\n\n8\\. Implementation and risk notes  \nSessionViewModel computed properties, SessionScreenView.xaml, resources. Keep the mapping in the ViewModel, not in XAML triggers. Medium risk; the command-visibility regression test is mandatory.",
+      "edits": [
+        [
+          "The recommended action gets primary styling and keyboard default focus; other legal actions stay visible as secondary actions.",
+          "Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported. Other legal actions stay visible as secondary actions."
+        ],
+        [
+          "and keyboard focus starts on the recommended action.",
+          "and keyboard access follows this contract: Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported."
+        ]
+      ],
+      "status": "VERIFIED_CONTENT_WITH_RECORDED_MARKDOWN_HARDBREAK_PADDING",
+      "at": "2026-09-22T02:59:45.625Z",
+      "readback": {
+        "id": "10873",
+        "key": "SCRUM-11143",
+        "fields": {
+          "summary": "Show a Plain \"Current Status and Next Step\" Panel with a Recommended Primary Action on the Session Screen",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:22:36.516+1200",
+          "description": "Planning-ID: PF-OPUX-v1-session-next-step-panel    \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value    \nOn the Session screen the beginner sees \"Workflow · State · Step\" and up to thirteen equally styled buttons. Nothing says whether PrintFlow is working, waiting for them, stopped or finished, or which button is expected next. A developer notice (\"A browsable processing history is not part of this build…\") is always visible. A status panel answers \"what is happening and what do I do now\" on every step of every job.\n\n2\\. Current evidence    \nCONFIRMED (code): src/PrintFlow.App/Views/SessionScreenView.xaml header around lines 73-79; the action WrapPanel around lines 1648-1727 gives all commands the same style; the placeholder notice is bound unconditionally (around line 261; SessionViewModel.cs around line 788). The effect on beginners is inferred. Related: SCRUM-11115 family (complete, not reopened), SCRUM-11120.\n\n3\\. Scope and non-goals    \nScope: one status panel near the top with a category and a one-sentence next step. Categories: Processing automatically; Waiting for your review; Needs your input; Stopped or failed; Handed off to a colleague; Completed; Saved to your chosen folder (once delivery exists). The category and the recommended action are derived from the existing step state and AvailableCommands, with no new rule. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported. Other legal actions stay visible as secondary actions. Remove the developer placeholder notice.    \nNon-goals: no change to which commands are legal; no removed or merged command; no automatic advancing; no single-button-only screen where secondary actions are legitimate.\n\n4\\. Proposed interaction and copy    \n\"Waiting for your review: compare Before and After, then choose Approve, or ask a colleague if you are not sure.\" Failure: \"Stopped: enhancement did not finish. Your original is unchanged. You can retry, or open Error details.\" Handed off: \"Handed off to a colleague. PrintFlow is not processing this image.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria    \n1\\. Given a step in review, then the panel shows \"Waiting for your review\" and Approve is the recommended action, while Reject and any other legal action remain available with unchanged enabled state.    \n2\\. Given automation is running, then the panel shows \"Processing automatically\", no approve or complete action is emphasised, and Stop/Take Over appear exactly as before.    \n3\\. Given a failed step, then the panel shows \"Stopped or failed\" with the localised reason, and Retry is recommended only when the engine offers Retry; there is no generic Continue.    \n4\\. Given a handed-off session, then the panel says it is handed off and does not present it as running or as resumable by a normal Run.    \n5\\. Given a completed session, then the panel says Completed, and says \"Saved\" only when delivery to the chosen destination has been verified.    \n6\\. For every state covered by TransitionMatrixTests, the set of visible commands is identical before and after the change; only emphasis and text differ.    \n7\\. The developer placeholder notice is no longer shown.    \n8\\. In zh-CN and en the panel text is not clipped at the supported resolution and scaling, status is conveyed by text and not by colour alone, and keyboard access follows this contract: Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.\n\n6\\. Validation    \nViewModel unit tests mapping representative states to category, text and recommended command; a regression test that the visible command set equals AvailableCommands; a rendering or UIA check of the panel; a human visual check on the workstation.\n\n7\\. Dependencies, reuse and priority    \nNo blockers. Blocks PF-OPUX-v1-recent-row-status (shared category wording). Reuses AvailableCommands, DisplayNames and step state. Not a duplicate of SCRUM-11120 (Error Details). Priority High: present on every step.\n\n8\\. Implementation and risk notes    \nSessionViewModel computed properties, SessionScreenView.xaml, resources. Keep the mapping in the ViewModel, not in XAML triggers. Medium risk; the command-visibility regression test is mandatory.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10001",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10883",
+                "key": "SCRUM-11153",
+                "fields": {
+                  "summary": "Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10003",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10884",
+                "key": "SCRUM-11154",
+                "fields": {
+                  "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Low",
+                    "id": "4"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10014",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "High",
+            "id": "2"
+          },
+          "updated": "2026-09-22T14:59:46.284+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "readbackAt": "2026-09-22T02:59:48.188Z",
+      "serializationNote": "Connector round-trip adds two trailing spaces before hard-break newlines; before/requested/saved raw strings retained. No word, clause, ordering or paragraph changed. Final CSV uses saved description exactly."
+    },
+    {
+      "key": "SCRUM-11145",
+      "id": "10875",
+      "before": {
+        "id": "10875",
+        "key": "SCRUM-11145",
+        "fields": {
+          "summary": "Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:23:12.058+1200",
+          "description": "Planning-ID: PF-OPUX-v1-completion-delivery-summary  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nAfter the last review the beginner must know the result is approved and where it is saved. Today the screen shows file names with \"In Approved\" or \"Waiting for review (Working)\" and no way to choose a folder or open one. This Task makes the final step \"see the name and destination, change it if needed, confirm and save, then open the folder\".\n\n2\\. Current evidence  \nCONFIRMED (code): no Process.Start, Explorer or ShellExecute call in src/PrintFlow.App; the output list in SessionScreenView.xaml around lines 664-750 is documented as \"no path and no way in\"; only the TIFF review shows Session.TiffOutputPath. Related: SCRUM-11104, SCRUM-11116, SCRUM-11117.\n\n3\\. Scope and non-goals  \nScope: at the final review/save step, show the final filename, output type, physical size (TIFF routes only) and the destination folder, with a sensible existing default. Offer \"Change location\" (folder dialog) and allow editing the filename. Remember the last successfully used destination as the next default, and always display it, so reuse of a previous customer's folder is never hidden. Do not force a dialog on every image. Provide one \"Confirm result and save\" interaction that performs approval and then delivery through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder. After a verified delivery, show the actual filename and folder and \"Open containing folder\", which selects the delivered file in Explorer.  \nNon-goals: no automatic printing, RIP or cloud upload; no opening of Working, rejected, preview or obsolete files; no change to review binding; the asset route never shows print size or TIFF.\n\n4\\. Proposed interaction and copy  \n\"Save as: example_A4.tif · Print TIFF · 210 × 297 mm · Folder: <chosen folder> \\[Change location\\]\" then \"\\[Confirm result and save\\]\". After success: \"Saved: example_A4.tif in <folder> \\[Open containing folder\\]\". Failure: \"Approved, but not saved yet: the folder cannot be written. Choose another location and try again. Nothing needs to be processed again.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria  \n1\\. Given the asset route reaches its final step, then the screen shows a PNG filename and destination, and no print size or TIFF wording.  \n2\\. Given a TIFF route reaches its final step, then the filename, TIFF type and physical size in mm are shown with the destination.  \n3\\. Given the displayed destination is acceptable, when the operator chooses Confirm result and save, then no folder dialog is forced, and the screen passes through Approved to Saved only after the export service reports a verified delivery.  \n4\\. Given the export fails, is cancelled, or finds a name collision, then the screen shows Approved but not saved, the plain reason and a collision-safe suggestion where relevant, and lets the operator change the location and retry without rerunning processing.  \n5\\. Given a successful delivery, when the operator clicks Open containing folder, then Explorer opens the folder with the delivered file selected, and repeated clicks start no production work.  \n6\\. Given a new image after a successful delivery, then the last used destination is shown as the default and is visible before confirmation.  \n7\\. Given an output waiting for review, rejected, invalidated, recycled or obsolete, then it has no save or open action and its status says why.  \n8\\. In zh-CN and en the step is keyboard reachable, not clipped at the supported resolution and scaling, and states are readable without colour.\n\n6\\. Validation  \nViewModel tests for state display across generated, waiting, approved, saved, failed and ineligible outputs; the shell-open call behind an interface tested with a fake; a human check on the workstation with synthetic images that Explorer selects the right file.\n\n7\\. Dependencies, reuse and priority  \nBlocked by PF-OPUX-v1-approved-artifact-export. Reuses the outputs projection and the status panel wording of PF-OPUX-v1-session-next-step-panel. Not a duplicate: no existing issue provides destination choice or delivery. Priority High: the end of every job.\n\n8\\. Implementation and risk notes  \nWhether \"Confirm result and save\" is one command or approval followed by delivery must keep approval and delivery distinguishable underneath; the approval step itself is unchanged. The folder dialog and shell-open go behind App-level ports. Medium risk.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10000",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10874",
+                "key": "SCRUM-11144",
+                "fields": {
+                  "summary": "Export the Exact Approved Result to an Operator-Selected Destination Safely, with Collision Handling, Verification and Retry",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10004",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10884",
+                "key": "SCRUM-11154",
+                "fields": {
+                  "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Low",
+                    "id": "4"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10016",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "High",
+            "id": "2"
+          },
+          "updated": "2026-09-22T14:27:20.959+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "requestedDescription": "Planning-ID: PF-OPUX-v1-completion-delivery-summary  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nAfter the last review the beginner must know the result is approved and where it is saved. Today the screen shows file names with \"In Approved\" or \"Waiting for review (Working)\" and no way to choose a folder or open one. This Task makes the final step \"see the name and destination, change it if needed, confirm and save, then open the folder\".\n\n2\\. Current evidence  \nCONFIRMED (code): no Process.Start, Explorer or ShellExecute call in src/PrintFlow.App; the output list in SessionScreenView.xaml around lines 664-750 is documented as \"no path and no way in\"; only the TIFF review shows Session.TiffOutputPath. Related: SCRUM-11104, SCRUM-11116, SCRUM-11117.\n\n3\\. Scope and non-goals  \nScope: at the final review/save step, show the final filename, output type, physical size (TIFF routes only) and the destination folder, with a sensible existing default. Offer \"Change location\" (folder dialog) and allow editing the filename. Remember the last successfully used destination as the next default, and always display it, so reuse of a previous customer's folder is never hidden. Do not force a dialog on every image. Provide one \"Confirm result and save\" interaction through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. After a verified delivery, show the actual filename and folder and \"Open containing folder\", which selects the delivered file in Explorer.  \nNon-goals: no automatic printing, RIP or cloud upload; no opening of Working, rejected, preview or obsolete files; no change to review binding; the asset route never shows print size or TIFF.\n\n4\\. Proposed interaction and copy  \n\"Save as: example_A4.tif · Print TIFF · 210 × 297 mm · Folder: <chosen folder> \\[Change location\\]\" then \"\\[Confirm result and save\\]\". After success: \"Saved: example_A4.tif in <folder> \\[Open containing folder\\]\". Failure: \"Approved, but not saved yet: the folder cannot be written. Choose another location and try again. Nothing needs to be processed again.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria  \n1\\. Given the asset route reaches its final step, then the screen shows a PNG filename and destination, and no print size or TIFF wording.  \n2\\. Given a TIFF route reaches its final step, then the filename, TIFF type and physical size in mm are shown with the destination.  \n3\\. Given the displayed destination is acceptable, when the operator chooses Confirm result and save, then no folder dialog is forced, and the screen passes through Approved to Saved only after the export service reports a verified delivery.  \n4\\. Given the export fails, is cancelled, or finds a name collision, then the screen shows Approved but not saved, the plain reason and a collision-safe suggestion where relevant, and lets the operator change the location and retry without rerunning processing.  \n5\\. Given a successful delivery, when the operator clicks Open containing folder, then Explorer opens the folder with the delivered file selected, and repeated clicks start no production work.  \n6\\. Given a new image after a successful delivery, then the last used destination is shown as the default and is visible before confirmation.  \n7\\. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. Ineligible outputs have no direct export/open action and their status says why.  \n8\\. In zh-CN and en the step is keyboard reachable, not clipped at the supported resolution and scaling, and states are readable without colour.\n\n6\\. Validation  \nViewModel tests for state display across generated, waiting, approved, saved, failed and ineligible outputs; the shell-open call behind an interface tested with a fake; a human check on the workstation with synthetic images that Explorer selects the right file.\n\n7\\. Dependencies, reuse and priority  \nBlocked by PF-OPUX-v1-approved-artifact-export. Reuses the outputs projection and the status panel wording of PF-OPUX-v1-session-next-step-panel. Not a duplicate: no existing issue provides destination choice or delivery. Priority High: the end of every job.\n\n8\\. Implementation and risk notes  \nWhether \"Confirm result and save\" is one command or approval followed by delivery must keep approval and delivery distinguishable underneath; the approval step itself is unchanged. The folder dialog and shell-open go behind App-level ports. Medium risk.",
+      "edits": [
+        [
+          "Provide one \"Confirm result and save\" interaction that performs approval and then delivery through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder.",
+          "Provide one \"Confirm result and save\" interaction through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation."
+        ],
+        [
+          "7\\. Given an output waiting for review, rejected, invalidated, recycled or obsolete, then it has no save or open action and its status says why.",
+          "7\\. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. Ineligible outputs have no direct export/open action and their status says why."
+        ]
+      ],
+      "status": "VERIFIED_CONTENT_WITH_RECORDED_MARKDOWN_HARDBREAK_PADDING",
+      "at": "2026-09-22T03:00:19.402Z",
+      "readback": {
+        "id": "10875",
+        "key": "SCRUM-11145",
+        "fields": {
+          "summary": "Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:23:12.058+1200",
+          "description": "Planning-ID: PF-OPUX-v1-completion-delivery-summary    \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value    \nAfter the last review the beginner must know the result is approved and where it is saved. Today the screen shows file names with \"In Approved\" or \"Waiting for review (Working)\" and no way to choose a folder or open one. This Task makes the final step \"see the name and destination, change it if needed, confirm and save, then open the folder\".\n\n2\\. Current evidence    \nCONFIRMED (code): no Process.Start, Explorer or ShellExecute call in src/PrintFlow.App; the output list in SessionScreenView.xaml around lines 664-750 is documented as \"no path and no way in\"; only the TIFF review shows Session.TiffOutputPath. Related: SCRUM-11104, SCRUM-11116, SCRUM-11117.\n\n3\\. Scope and non-goals    \nScope: at the final review/save step, show the final filename, output type, physical size (TIFF routes only) and the destination folder, with a sensible existing default. Offer \"Change location\" (folder dialog) and allow editing the filename. Remember the last successfully used destination as the next default, and always display it, so reuse of a previous customer's folder is never hidden. Do not force a dialog on every image. Provide one \"Confirm result and save\" interaction through PF-OPUX-v1-approved-artifact-export, while showing the states separately: Result generated, Waiting for your review, Approved, Saved to the selected folder. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. After a verified delivery, show the actual filename and folder and \"Open containing folder\", which selects the delivered file in Explorer.    \nNon-goals: no automatic printing, RIP or cloud upload; no opening of Working, rejected, preview or obsolete files; no change to review binding; the asset route never shows print size or TIFF.\n\n4\\. Proposed interaction and copy    \n\"Save as: example_A4.tif · Print TIFF · 210 × 297 mm · Folder: <chosen folder> \\[Change location\\]\" then \"\\[Confirm result and save\\]\". After success: \"Saved: example_A4.tif in <folder> \\[Open containing folder\\]\". Failure: \"Approved, but not saved yet: the folder cannot be written. Choose another location and try again. Nothing needs to be processed again.\" Both supported UI languages are required.\n\n5\\. Acceptance criteria    \n1\\. Given the asset route reaches its final step, then the screen shows a PNG filename and destination, and no print size or TIFF wording.    \n2\\. Given a TIFF route reaches its final step, then the filename, TIFF type and physical size in mm are shown with the destination.    \n3\\. Given the displayed destination is acceptable, when the operator chooses Confirm result and save, then no folder dialog is forced, and the screen passes through Approved to Saved only after the export service reports a verified delivery.    \n4\\. Given the export fails, is cancelled, or finds a name collision, then the screen shows Approved but not saved, the plain reason and a collision-safe suggestion where relevant, and lets the operator change the location and retry without rerunning processing.    \n5\\. Given a successful delivery, when the operator clicks Open containing folder, then Explorer opens the folder with the delivered file selected, and repeated clicks start no production work.    \n6\\. Given a new image after a successful delivery, then the last used destination is shown as the default and is visible before confirmation.    \n7\\. A pending-review result cannot be directly exported or opened as a finished file. At the final review, an explicit \"Confirm result and save\" action may first invoke the existing lawful approval of the currently reviewed result and only after successful approval export that exact approved result. If approval fails, no export occurs. Rejected, invalidated, recycled and obsolete results remain ineligible for export/open. Approval and delivery remain separately observable; an export failure does not rerun image processing or TIFF generation. Ineligible outputs have no direct export/open action and their status says why.    \n8\\. In zh-CN and en the step is keyboard reachable, not clipped at the supported resolution and scaling, and states are readable without colour.\n\n6\\. Validation    \nViewModel tests for state display across generated, waiting, approved, saved, failed and ineligible outputs; the shell-open call behind an interface tested with a fake; a human check on the workstation with synthetic images that Explorer selects the right file.\n\n7\\. Dependencies, reuse and priority    \nBlocked by PF-OPUX-v1-approved-artifact-export. Reuses the outputs projection and the status panel wording of PF-OPUX-v1-session-next-step-panel. Not a duplicate: no existing issue provides destination choice or delivery. Priority High: the end of every job.\n\n8\\. Implementation and risk notes    \nWhether \"Confirm result and save\" is one command or approval followed by delivery must keep approval and delivery distinguishable underneath; the approval step itself is unchanged. The folder dialog and shell-open go behind App-level ports. Medium risk.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10000",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10874",
+                "key": "SCRUM-11144",
+                "fields": {
+                  "summary": "Export the Exact Approved Result to an Operator-Selected Destination Safely, with Collision Handling, Verification and Retry",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10004",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10884",
+                "key": "SCRUM-11154",
+                "fields": {
+                  "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Low",
+                    "id": "4"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10016",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "High",
+            "id": "2"
+          },
+          "updated": "2026-09-22T15:00:19.787+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "readbackAt": "2026-09-22T03:00:21.789Z",
+      "serializationNote": "Connector round-trip adds two trailing spaces before hard-break newlines; before/requested/saved raw strings retained. No word, clause, ordering or paragraph changed. Final CSV uses saved description exactly."
+    },
+    {
+      "key": "SCRUM-11154",
+      "id": "10884",
+      "before": {
+        "id": "10884",
+        "key": "SCRUM-11154",
+        "fields": {
+          "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:26:09.735+1200",
+          "description": "Planning-ID: PF-OPUX-v1-consistency-keyboard-pass  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nEach UI Task checks its own localisation, focus and clipping. Once they are all in, the same state can still be named differently on Home, Recent and Session, or focus can jump unexpectedly between screens. A beginner relies on consistent words across the whole journey.\n\n2\\. Current evidence  \nStable AutomationIds exist across screens (CONFIRMED). The new surfaces do not exist yet. Related: SCRUM-11119.\n\n3\\. Scope and non-goals  \nScope: on the supported workstation resolution and scaling only, walk the full journey across all changed screens and check: the same state has the same words everywhere (status panel, Recent rows, Home, handoff, delivery); terms match the terminology reference; focus moves to the recommended action after each transition; unavailable expected actions state a reason. Fix inconsistencies within those surfaces.  \nNon-goals: not a substitute for each Task's own checks; no new resolutions, DPI scales or third-party automation; no screen-reader certification.\n\n4\\. Proposed interaction and copy  \nNo new copy; alignment only. Both supported UI languages are checked.\n\n5\\. Acceptance criteria  \n1\\. Given the full journey in zh-CN and en, then each state (processing, waiting for review, needs input, stopped, handed off, approved, saved) uses the same wording on every screen where it appears.  \n2\\. Given keyboard only, then the operator can complete the journey's primary actions across screens, with focus landing on the recommended action after each transition.  \n3\\. Given a recorded screenshot set on the workstation with synthetic images, then no clipping is present, or each finding is fixed.  \n4\\. Findings and fixes are listed in the completion record.\n\n6\\. Validation  \nUIA checks using existing AutomationIds; screenshots on the workstation with synthetic images only.\n\n7\\. Dependencies, reuse and priority  \nBlocked by all UI Tasks listed in its dependencies. Blocks PF-OPUX-v1-acceptance-walkthrough. Priority Low.\n\n8\\. Implementation and risk notes  \nLow risk. Starting the app on the workstation must follow the existing safe-startup rules and never use customer data.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10002",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10872",
+                "key": "SCRUM-11142",
+                "fields": {
+                  "summary": "Name the Correct Application in Stop and Take Over, and State Plainly What Happens After a Photoshop Takeover",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10003",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10873",
+                "key": "SCRUM-11143",
+                "fields": {
+                  "summary": "Show a Plain \"Current Status and Next Step\" Panel with a Recommended Primary Action on the Session Screen",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10004",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10875",
+                "key": "SCRUM-11145",
+                "fields": {
+                  "summary": "Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10005",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10876",
+                "key": "SCRUM-11146",
+                "fields": {
+                  "summary": "Explain Each Workflow Card by Purpose and Result Before the Operator Chooses",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10006",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10877",
+                "key": "SCRUM-11147",
+                "fields": {
+                  "summary": "Let the Operator Adjust the Automatic Trim Boundary in PrintFlow with Handles, Zoom and Restore Suggestion",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10007",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10878",
+                "key": "SCRUM-11148",
+                "fields": {
+                  "summary": "Add \"Ask a Colleague to Correct This Image\" from Background-Removal Review with Clear Handoff Files, Instructions and Explicit Re-import",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10008",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10879",
+                "key": "SCRUM-11149",
+                "fields": {
+                  "summary": "Give Beginners Concrete \"What to Check\" Prompts and a Clear \"Ask for Help\" Path on Each Review",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10009",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10880",
+                "key": "SCRUM-11150",
+                "fields": {
+                  "summary": "Explain Print Size Choices and the Enlargement Warning in Beginner Terms with a Live Worked Example",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10010",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10881",
+                "key": "SCRUM-11151",
+                "fields": {
+                  "summary": "Complete \"What Happened, What Was Kept, What You Can Do\" Wording for the Remaining Failure Messages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10011",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10882",
+                "key": "SCRUM-11152",
+                "fields": {
+                  "summary": "Replace Technical Startup Lines on Home with a Plain Readiness Summary and One Next Action",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10012",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10883",
+                "key": "SCRUM-11153",
+                "fields": {
+                  "summary": "Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10025",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "Low",
+            "id": "4"
+          },
+          "updated": "2026-09-22T14:27:38.530+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "requestedDescription": "Planning-ID: PF-OPUX-v1-consistency-keyboard-pass  \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value  \nEach UI Task checks its own localisation, focus and clipping. Once they are all in, the same state can still be named differently on Home, Recent and Session, or focus can jump unexpectedly between screens. A beginner relies on consistent words across the whole journey.\n\n2\\. Current evidence  \nStable AutomationIds exist across screens (CONFIRMED). The new surfaces do not exist yet. Related: SCRUM-11119.\n\n3\\. Scope and non-goals  \nScope: on the supported workstation resolution and scaling only, walk the full journey across all changed screens and check: the same state has the same words everywhere (status panel, Recent rows, Home, handoff, delivery); terms match the terminology reference; focus follows the review-entry input-safety contract below; unavailable expected actions state a reason. Fix inconsistencies within those surfaces.  \nNon-goals: not a substitute for each Task's own checks; no new resolutions, DPI scales or third-party automation; no screen-reader certification.\n\n4\\. Proposed interaction and copy  \nNo new copy; alignment only. Both supported UI languages are checked.\n\n5\\. Acceptance criteria  \n1\\. Given the full journey in zh-CN and en, then each state (processing, waiting for review, needs input, stopped, handed off, approved, saved) uses the same wording on every screen where it appears.  \n2\\. Given keyboard only, then the operator can complete the journey's primary actions across screens. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.  \n3\\. Given a recorded screenshot set on the workstation with synthetic images, then no clipping is present, or each finding is fixed.  \n4\\. Findings and fixes are listed in the completion record.\n\n6\\. Validation  \nUIA checks using existing AutomationIds; screenshots on the workstation with synthetic images only.\n\n7\\. Dependencies, reuse and priority  \nBlocked by all UI Tasks listed in its dependencies. Blocks PF-OPUX-v1-acceptance-walkthrough. Priority Low.\n\n8\\. Implementation and risk notes  \nLow risk. Starting the app on the workstation must follow the existing safe-startup rules and never use customer data.",
+      "edits": [
+        [
+          "focus moves to the recommended action after each transition;",
+          "focus follows the review-entry input-safety contract below;"
+        ],
+        [
+          "2\\. Given keyboard only, then the operator can complete the journey's primary actions across screens, with focus landing on the recommended action after each transition.",
+          "2\\. Given keyboard only, then the operator can complete the journey's primary actions across screens. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported."
+        ]
+      ],
+      "status": "VERIFIED_CONTENT_WITH_RECORDED_MARKDOWN_HARDBREAK_PADDING",
+      "at": "2026-09-22T03:00:22.615Z",
+      "readback": {
+        "id": "10884",
+        "key": "SCRUM-11154",
+        "fields": {
+          "summary": "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+          "issuetype": {
+            "id": "10003",
+            "description": "Tasks track small, distinct pieces of work.",
+            "name": "Task",
+            "subtask": false,
+            "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+            "hierarchyLevel": 0
+          },
+          "parent": {
+            "id": "10869",
+            "key": "SCRUM-11139",
+            "fields": {
+              "summary": "Operator Usability & Workflow Simplification",
+              "status": {
+                "description": "",
+                "name": "To Do",
+                "id": "10000",
+                "statusCategory": {
+                  "id": 2,
+                  "key": "new",
+                  "colorName": "blue-gray",
+                  "name": "To Do"
+                }
+              },
+              "priority": {
+                "name": "High",
+                "id": "2"
+              },
+              "issuetype": {
+                "id": "10001",
+                "description": "Epics track collections of related bugs, stories, and tasks.",
+                "name": "Epic",
+                "subtask": false,
+                "entityId": "353df9b8-7646-4c0b-a33a-94f241b871c4",
+                "hierarchyLevel": 1
+              }
+            }
+          },
+          "created": "2026-09-22T14:26:09.735+1200",
+          "description": "Planning-ID: PF-OPUX-v1-consistency-keyboard-pass    \nInitiative: PF-OPUX-v1\n\n1\\. Beginner scenario and value    \nEach UI Task checks its own localisation, focus and clipping. Once they are all in, the same state can still be named differently on Home, Recent and Session, or focus can jump unexpectedly between screens. A beginner relies on consistent words across the whole journey.\n\n2\\. Current evidence    \nStable AutomationIds exist across screens (CONFIRMED). The new surfaces do not exist yet. Related: SCRUM-11119.\n\n3\\. Scope and non-goals    \nScope: on the supported workstation resolution and scaling only, walk the full journey across all changed screens and check: the same state has the same words everywhere (status panel, Recent rows, Home, handoff, delivery); terms match the terminology reference; focus follows the review-entry input-safety contract below; unavailable expected actions state a reason. Fix inconsistencies within those surfaces.    \nNon-goals: not a substitute for each Task's own checks; no new resolutions, DPI scales or third-party automation; no screen-reader certification.\n\n4\\. Proposed interaction and copy    \nNo new copy; alignment only. Both supported UI languages are checked.\n\n5\\. Acceptance criteria    \n1\\. Given the full journey in zh-CN and en, then each state (processing, waiting for review, needs input, stopped, handed off, approved, saved) uses the same wording on every screen where it appears.    \n2\\. Given keyboard only, then the operator can complete the journey's primary actions across screens. Visually emphasize the recommended legal action and provide predictable keyboard access. When a new review target is displayed, place focus on a non-activating review heading/preview container, not on Approve, Reject, Complete, Take Over, or another consequential action. Do not make approval an implicit default action on review entry. Preserve a user's valid focus during ordinary refreshes instead of continually stealing it. Every approval must result from fresh intentional input directed at the currently displayed result; held/repeating keys, a previous interaction's remaining input events or a double-click must not approve a subsequent result. Explicit keyboard navigation to an enabled action followed by a fresh activation remains supported.    \n3\\. Given a recorded screenshot set on the workstation with synthetic images, then no clipping is present, or each finding is fixed.    \n4\\. Findings and fixes are listed in the completion record.\n\n6\\. Validation    \nUIA checks using existing AutomationIds; screenshots on the workstation with synthetic images only.\n\n7\\. Dependencies, reuse and priority    \nBlocked by all UI Tasks listed in its dependencies. Blocks PF-OPUX-v1-acceptance-walkthrough. Priority Low.\n\n8\\. Implementation and risk notes    \nLow risk. Starting the app on the workstation must follow the existing safe-startup rules and never use customer data.",
+          "comment": {
+            "comments": [],
+            "maxResults": 0,
+            "total": 0,
+            "startAt": 0
+          },
+          "issuelinks": [
+            {
+              "id": "10002",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10872",
+                "key": "SCRUM-11142",
+                "fields": {
+                  "summary": "Name the Correct Application in Stop and Take Over, and State Plainly What Happens After a Photoshop Takeover",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10003",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10873",
+                "key": "SCRUM-11143",
+                "fields": {
+                  "summary": "Show a Plain \"Current Status and Next Step\" Panel with a Recommended Primary Action on the Session Screen",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10004",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10875",
+                "key": "SCRUM-11145",
+                "fields": {
+                  "summary": "Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10005",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10876",
+                "key": "SCRUM-11146",
+                "fields": {
+                  "summary": "Explain Each Workflow Card by Purpose and Result Before the Operator Chooses",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10006",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10877",
+                "key": "SCRUM-11147",
+                "fields": {
+                  "summary": "Let the Operator Adjust the Automatic Trim Boundary in PrintFlow with Handles, Zoom and Restore Suggestion",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10007",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10878",
+                "key": "SCRUM-11148",
+                "fields": {
+                  "summary": "Add \"Ask a Colleague to Correct This Image\" from Background-Removal Review with Clear Handoff Files, Instructions and Explicit Re-import",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10008",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10879",
+                "key": "SCRUM-11149",
+                "fields": {
+                  "summary": "Give Beginners Concrete \"What to Check\" Prompts and a Clear \"Ask for Help\" Path on Each Review",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "High",
+                    "id": "2"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10009",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10880",
+                "key": "SCRUM-11150",
+                "fields": {
+                  "summary": "Explain Print Size Choices and the Enlargement Warning in Beginner Terms with a Live Worked Example",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10010",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10881",
+                "key": "SCRUM-11151",
+                "fields": {
+                  "summary": "Complete \"What Happened, What Was Kept, What You Can Do\" Wording for the Remaining Failure Messages",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10011",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10882",
+                "key": "SCRUM-11152",
+                "fields": {
+                  "summary": "Replace Technical Startup Lines on Home with a Plain Readiness Summary and One Next Action",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10012",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "inwardIssue": {
+                "id": "10883",
+                "key": "SCRUM-11153",
+                "fields": {
+                  "summary": "Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            },
+            {
+              "id": "10025",
+              "type": {
+                "id": "10000",
+                "name": "Blocks",
+                "inward": "is blocked by",
+                "outward": "blocks"
+              },
+              "outwardIssue": {
+                "id": "10885",
+                "key": "SCRUM-11155",
+                "fields": {
+                  "summary": "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                  "status": {
+                    "description": "",
+                    "name": "To Do",
+                    "id": "10000",
+                    "statusCategory": {
+                      "id": 2,
+                      "key": "new",
+                      "colorName": "blue-gray",
+                      "name": "To Do"
+                    }
+                  },
+                  "priority": {
+                    "name": "Medium",
+                    "id": "3"
+                  },
+                  "issuetype": {
+                    "id": "10003",
+                    "description": "Tasks track small, distinct pieces of work.",
+                    "name": "Task",
+                    "subtask": false,
+                    "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                    "hierarchyLevel": 0
+                  }
+                }
+              }
+            }
+          ],
+          "priority": {
+            "name": "Low",
+            "id": "4"
+          },
+          "updated": "2026-09-22T15:00:23.110+1200",
+          "status": {
+            "description": "",
+            "name": "To Do",
+            "id": "10000",
+            "statusCategory": {
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            }
+          },
+          "labels": [
+            "operator-ux",
+            "pf-opux-v1",
+            "printflow"
+          ]
+        },
+        "appliedContentFormat": "markdown"
+      },
+      "readbackAt": "2026-09-22T03:00:24.895Z",
+      "serializationNote": "Connector round-trip adds two trailing spaces before hard-break newlines; before/requested/saved raw strings retained. No word, clause, ordering or paragraph changed. Final CSV uses saved description exactly."
+    }
+  ]
+}

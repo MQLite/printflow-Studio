@@ -1,0 +1,336 @@
+# PF-OPUX-v1 — SCRUM-11148 current handoff
+
+2026-09-28 NZ. **Bounded local implementation, verification, independent review and authorized Jira reporting COMPLETE. Human/native acceptance NOT RUN. Stop at SCRUM-11148.**
+
+Continued Claude session `58c23d0a-0ac1-44c6-a1c9-3a728d6d9436` after its quota interruption. Request-bound colleague correction now covers migration0019, verified independent U/R copies, explicit PNG preflight/import, distinct R2 with exact human review and Trim next, Home navigation plus both generic guards, post-opening/persisted bindings, atomic AssertBound unfinished closures, no post-success handoff and foreign-lock preservation. Approved base/addendum/D1–D5/C1/C2 unchanged.
+
+The continuation corrected the stale delivery-schema version expectation and three independently found P2 defects: partial-file overwrite, linked-final acceptance and stale same-session asynchronous UI responses. Fresh CreateNew staging leaves old partials untouched; held handles reject reparse/multi-link finals. Correction-only target ownership covers responses/reloads/picker/focus/busy state. T9 real closing seams supplement pure-builder evidence.
+
+- Reviewed50-file scoped diff SHA256 `80323da44bb3998dc55ac24342aabcc0af5ae623cf93e89973c3be0e25ac7622`; manifest/assembly hashes under artifacts/pf-opux-scrum11148. Four designs/reviews plus833 unrelated baseline files remain unchanged.
+- Build0 warnings/errors. Targeted379/379; final UI518, workflow/persistence11531, architecture452, backend/delivery124 all PASS with0 failed/skipped. Counts overlap. Export integrity18/18; final raw/snapshot/CSV fidelity PASS. Failed/intermediate evidence preserved.
+- Independent fresh native reviewer, then same-context recheck: R1/R2/R3 CLOSED, no remaining P0–P2. Read-only review, no tests executed by reviewer. Requested Astra High; actual runtime model/effort UNVERIFIED.
+- Fourteen new off-screen bilingual captures,1000x700/1920x1040 at96DPI, with representative inspection. English small handoff panel needs scrolling. These are not native input/workstation acceptance.
+- Scope deviation: inherited historical backend filter ran22 ProductionCompositionTests cases against temp layouts without activating adapters, contrary to production-DI prohibition. Disclosed; final03 stopped and final04 excludes that class. No production startup/customer migration/files/visible desktop operations. Pre-existing baseline recovery hang remains excluded and NOT PASS.
+- Real colleague round trip, picker/Explorer, physical input/focus, supported-workstation visuals and novice usability remain NOT RUN. Previous Wave1A/11145/11146/11147 checks, generic unbound Stop/TakeOver, KeepOriginalExtent PNG gap, startup invalid-binding asymmetry and trim/small-viewport residuals remain open. Stop does not immediately interrupt the importer; successful imports remain successful.
+
+Jira: sole evidence comment [10172](https://yituoxx.atlassian.net/browse/SCRUM-11148?focusedCommentId=10172), marker PF-OPUX-v1-SCRUM-11148-impl-v1. Authenticated final readback2026-09-28T04:36:30.035Z:17 issues/26 Blocks/51 string labels/34 raw timestamps; all comments complete, marker once, no unexpected field drift. [Actual JSON](SCRUM-11148_JIRA_READBACK.json) and [23-column UTF-8-BOM CSV](SCRUM-11148_JIRA_FINAL.csv) validated independently; no status/field/AC/label/relationship changes.
+
+[Plan](SCRUM-11148_PLAN.md), [results and AC/T1–T9 evidence](../../../artifacts/pf-opux-scrum11148/RESULTS.md), [independent review](../../../artifacts/pf-opux-scrum11148/independent-review.md). Codex policy2.4, offset0; package Sol High/UI Astra High at independent correction boundary; native isolated review. Runtime telemetry UNVERIFIED, no claimed in-place switch. Root switch unavailable recorded.
+
+Repository D:/Repositories/printflow-Studio, master at eea60198c5095243f0694717a7479b00c3e1cd73. All accumulated work uncommitted; no commit, push, deployment, global rule/memory update, SCRUM-11149 or later task. No further work scheduled. Prior HANDOFF bytes are preserved verbatim below.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11148 design-boundary closeout current handoff
+
+2026-09-28 NZ. Task `PF-OPUX-v1-SCRUM-11148-design-boundary-closeout-v1` (PLAN_ONLY / REVIEW_ONLY). **AWAITING_OWNER_REVIEW.** This task produced a design addendum and its review only; nothing is authorized for implementation or migration.
+- **Base design:** unchanged, SHA-256 `8d4edaec9c9b02d94bde75ac18d85f7a1bbf609bdcd667dc2df21e0c316bd9b2`. Its review is also unchanged.
+- **[Addendum](SCRUM-11148_DESIGN_ADDENDUM.md):** 288 lines, SHA-256 `90f5d61a2b51f48188766d81d9dd5a652f11494bc576ae2aed643d6559ec5f28`.
+- **[Addendum review](SCRUM-11148_DESIGN_ADDENDUM_REVIEW.md).**
+- **Candidate specification:** the base design plus the addendum. The addendum's §5 lists the exact base clauses it supersedes.
+
+**C1 — Home recovery import (confirmed base-design defect, runtime not tested).**
+- **The defect.** The base design kept Home's generic "Import manual result" for a correction job. A replacement import started there has no request binding. If it is stopped and then fails, or crashes, the job ends `Active` + `Interrupted`, where Run restarts background removal.
+- **The fix: Home navigates instead.** For a job with an eligible request, the Home card offers "Open job to import corrected image" (read-only load and navigation) and no generic import.
+- **Two service guards.** `RecoveryOf` omits ManualResult, and `ExecuteCoreAsync` refuses a generic `SubmitManualResult` while an eligible request exists without a `CorrectionContext`.
+- **Legacy and F19 are unchanged.** No request is inferred from text or filenames.
+
+**C2 — bound closing scope (confirmed document inconsistency).**
+- **The inconsistency.** Base §6.4 L293 and review N1 applied `LockChange = null` to every manual-import Stop.
+- **Source shows this is unnecessary.** Success and failure closes of manual imports are already lock-neutral today. The addendum defines one explicit predicate, `BoundCorrectionClose` (session, BackgroundRemoval, READY, `LastImportAttemptId`, the attempt being closed, input = U), sourced from `afterStart` or the persisted row.
+- **Bound closes.** A bound unfinished close re-hands off with the request's reason, touches no lock, and asserts the request row in the same transaction. A bound success does not hand off.
+- **Unbound closes are unchanged.** Generic Stop/TakeOver lock release is recorded as an observation only.
+
+**Review.** One fresh read-only `personal-dev-reviewer`, because the original context was unavailable. Round 1: CLOSED with 8 × P3, all fixed. Recheck in the same context: CLOSED, with one wording-only P3 applied verbatim.
+
+**Owner decisions.** D1–D5 remain pending; D5 is now scoped by the predicate (addendum §9). No new decision is proposed. Generic manual-import lock neutrality would need its own decision and task.
+
+**Not run.** Builds, tests, the application, desktop, migrations, Jira (neither read nor written) and CSV regeneration. Future cases T1–T9 are NOT RUN.
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`. Opus High; host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit.
+
+**Repository.** `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. Only the two addendum documents and this section were added. No commit, push or deploy.
+
+**Stop.** Implementation requires owner approval of the base design, the addendum and D1–D5, plus a separate authorization.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11148 colleague-correction design current handoff
+
+2026-09-28 NZ. Task `PF-OPUX-v1-SCRUM-11148-design-v1` (PLAN_ONLY / REVIEW_ONLY). **AWAITING_OWNER_REVIEW.** Design and independent review only; nothing is authorized for implementation or migration.
+- [Design](SCRUM-11148_COLLEAGUE_HANDOFF_DESIGN.md): SHA-256 `8d4edaec9c9b02d94bde75ac18d85f7a1bbf609bdcd667dc2df21e0c316bd9b2`.
+- [Review](SCRUM-11148_COLLEAGUE_HANDOFF_DESIGN_REVIEW.md).
+
+**Requirement source.** Authenticated read-only read of SCRUM-11148 (id 10878): To Do, updated 2026-09-22T14:27:26.992+1200, 0 comments, parent SCRUM-11139, label `pf-opux-v1`. All eight AC are mapped in design §10.
+
+**Current-source findings**
+- Today a background-removal review handed off via `HandOff` is a dead end, except for Reject or Abandon. The session is `HandedOff` with the step still `ReviewRequired`; `CanSubmit`, `ReenterAutomation` and Approve all refuse.
+- Operator `HandOff` creates **no file**: its `CreateWorkingCopy` and `OpenForManualWork` effects are never realized.
+- A stopped or crash-interrupted manual import leaves the session `Active`.
+- A lock release by a non-holder rolls back the whole commit.
+
+**Recommendation: a dedicated exact-target pair.**
+- `RequestColleagueCorrection` (default reason when there is no note) and `ImportCorrectedImage`.
+- Both are bound to a persisted request id with R and U id + hash.
+- Both are reachable only through dedicated service entries; `ExecuteAsync` refuses them.
+- The generic `HandOff`, `CanSubmit` and the F19 test are unchanged.
+
+**Files.**
+- Reference = U, the exact input of background removal. Working copy = R, the result under review.
+- Verified copies go into `Sessions\…\Correction\…`. They are never links, and PrintFlow never overwrites or deletes the colleague's files.
+- "Handed off" is committed only after the files are verified.
+- This is not delivery: no delivery records, and no remembered destination is used.
+
+**Return.**
+- An explicit picker, then a read-only preflight using the importer's own limits. A refusal writes nothing and keeps the handoff.
+- The import produces a new Revision R2 (source U) awaiting review. Approve and Reject become exact (id + hash).
+- The R2 review names the next step (Trim).
+- A failed, stopped or crash-recovered correction import re-hands off in its closing commit.
+- There is no watcher and no automatic re-run.
+
+**Review.** One fresh read-only `personal-dev-reviewer` context (Opus High requested; it reported `claude-opus-5-5`, effort UNVERIFIED).
+- Round 1: OPEN, 2 × P1, 4 × P2, 6 × P3.
+- Round 2: CLOSED, plus three P3 items, which were folded in.
+- Round 3: OPEN, one P2 (bound-attempt lookup), fixed.
+- Round 4: **CLOSED**.
+
+**Owner decisions (design §13).**
+- D1: additive migration 0019 `CorrectionRequest`.
+- D2: correction folder inside the managed workspace.
+- D3: reference = U, not the uploaded original.
+- D4: hide the generic "Hand off manually" on background-removal review.
+- D5: the narrow closing-seam re-handoff for correction-bound imports.
+
+**Not run.** Builds, tests, application, picker, Explorer, desktop, migrations, Jira writes and CSV regeneration. All design §11 evidence is future work. The SCRUM-11147 open items and the earlier human checks preserved below remain open.
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`. Opus High throughout; host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit.
+
+**Repository.** `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`.
+- The accumulated uncommitted work is untouched.
+- This task added only the two SCRUM-11148 documents and this section.
+- No checkout, stash, commit, push or deploy.
+
+**Stop.** Implementation needs owner approval of the design (with D1–D5) and a separate authorization. Do not start it from this handoff alone.
+
+The complete previous handoff is preserved verbatim below as dated history.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11147 implementation current handoff
+
+2026-09-25/28 NZ. Task `PF-OPUX-v1-SCRUM-11147-impl-v1`, run under the owner's approval of the reviewed design (SHA-256 `be4d7491…9cb7`, unchanged). **The bounded implementation, validation, independent review and authorized Jira synchronization are complete. STOP; no autonomous continuation.** This is technical completion on synthetic data, not operator acceptance or production readiness. Documents: [plan](SCRUM-11147_PLAN.md), [results](../../../artifacts/pf-opux-scrum11147/RESULTS.md), [review](../../../artifacts/pf-opux-scrum11147/independent-review.md), [scoped diff](../../../artifacts/pf-opux-scrum11147/scrum11147-scoped.diff).
+
+**Implemented**
+- **Command.** The exact-target `AdjustTrimFromReview` names R1 and U by id + hash and is legal only from Trim ReviewRequired. It emits only the existing manual-crop effects with a tight margin.
+- **R1.** Only leaves the step: no review, rejection or invalidation is written, and it stays valid, unreviewed history even if the crop fails. The new result R2 has U as its source and waits for its own review.
+- **Eligibility and service.** Workflow-layer eligibility checks three-way U lineage, R1/U validity and retention, a raster source, geometry, and no descendants. The service re-checks eligibility, U integrity and that the crop fits U under one gate.
+- **Editor.** Draws on U, never R1: inside-anchored handles, displacement drag with the system threshold, key nudges and border snap, dimming with an inset two-tone outline, Compare, and exact Restore from the stored automatic bounds. Use this trim and Cancel.
+- **Around the editor.** Consequential actions are suppressed while editing, except read-only Open and Check saved. Plain Trim Approve goes through the exact entry. The R2 review, save target and focus follow correctly.
+- **Unchanged:** the fallback manual crop; schema and migrations.
+
+**Evidence** (settled candidate, isolated synthetic fixtures)
+- Combined UI 477/477; workflow/trim 10228/10228; architecture 452/452; delivery backend 146/146; Unit UI 62/62; renders 16/16 (16 inspected PNGs); export-integrity 19/19.
+- Six red mutations, each restored byte-identically.
+- Design deviations are recorded in RESULTS §1: fitted Compare, toggle placement, 印刷尺寸, Tab order, the fits-U pre-check, member renames.
+
+**Review.** One fresh read-only `personal-dev-reviewer` context (Opus High requested; the reviewer reported `claude-opus-5-5`, effort UNVERIFIED). It inspected but did not rerun tests. Round 1 was OPEN on one P2 (missing gesture/focus evidence), which was fixed; the same-context recheck was CLOSED. Its later P3 test gap was also fixed.
+
+**Jira**
+- One comment, [10171](https://yituoxx.atlassian.net/browse/SCRUM-11147?focusedCommentId=10171), marker `PF-OPUX-v1-SCRUM-11147-impl-v1`.
+- Authenticated readback at **2026-09-27T21:29:59.658Z**: 17 issues, 26 Blocks, all To Do. Current exports are [SCRUM-11147_JIRA_READBACK.json](SCRUM-11147_JIRA_READBACK.json) and [SCRUM-11147_JIRA_FINAL.csv](SCRUM-11147_JIRA_FINAL.csv). Exporter and oracle both PASS (51 string labels, 34 raw timestamps).
+- Drift: only SCRUM-11147 `updated` and comment 10171.
+- The exporter gained only a narrow task mapping.
+
+**Still open**
+- **NOT RUN (native/human):** physical drag, Esc and lost capture; arrow keys versus scrolling; held or repeated keys onto Use this trim and then Approve; supported-workstation bilingual layout; novice walkthrough. A synthetic checklist is in RESULTS §5.
+- **Residuals:** the KeepOriginalExtent PNG approval gap; pre-existing Trim Reject/KeepOriginalExtent exact binding without a fresh-gesture guard; inert Reject reason/notes while editing. At 1000×700 the adjust surface is small, which is the screen's existing height budget. Wave1A, SCRUM-11146 and SCRUM-11145 human checks remain open, as preserved below.
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`. Opus High throughout; host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit.
+
+**Repository.** `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. All work is uncommitted.
+- 32 files changed against the pre-task tree (`artifacts/pf-opux-scrum11147/candidate-changed-files.txt`). Added afterwards: this handoff, the plan execution record, the two Jira outputs and the artifacts.
+- Everything else is byte-identical to `baseline-all-files.sha256`.
+- No checkout, stash, commit, push or deploy; no production app, data, migration or customer files; no desktop input or capture.
+- Not started: SCRUM-11148, the PNG repair, any other Task.
+
+**Stop at SCRUM-11147.**
+
+The complete previous handoff is preserved verbatim below as dated history.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11147 trim design current handoff
+
+2026-09-25 NZ. Task `PF-OPUX-v1-SCRUM-11147-design-v1` (PLAN_ONLY). **AWAITING_OWNER_REVIEW.** This handoff covers a design and its independent review only. Nothing is authorized for implementation. Documents: [design](SCRUM-11147_TRIM_DESIGN.md), [review](SCRUM-11147_TRIM_DESIGN_REVIEW.md).
+
+**Requirement source.** Authenticated read of SCRUM-11147 (issue 10877): To Do, updated 2026-09-22T14:27:25.050+1200, no comments. It matches the closeout snapshot. Jira was read only; no CSV was produced.
+
+**Recommended interaction.** The trim review offers "Adjust trim edges", which opens the existing crop surface over the **pre-trim source U**, never the cropped result R1.
+- The editor shows the current boundary with inside-anchored edge and corner handles, dims the area outside it, and reuses the existing zoom.
+- Keyboard: arrow keys move the focused handle; Shift moves 10 px; Ctrl moves to the picture border.
+- "Compare" shows the current result beside a display-only proposed crop.
+- "Restore automatic suggestion" returns to the stored `TrimGeometry.AppliedBounds` of the automatic attempt on U, with margin Tight. Nothing is recomputed.
+- "Use this trim" submits once. "Cancel adjustment" discards the draft.
+- Nothing persists before "Use this trim".
+
+**Persistent transition.** A new exact-target command, `AdjustTrimFromReview(R1 id+hash, U id+hash, crop)`, legal only from Trim `ReviewRequired`.
+- It emits only the existing manual-crop effects (working copy, `ManualImport` attempt, `RunManualCrop` with margin Tight).
+- R1 is taken off the step with no review decision and no invalidation, as `KeepOriginalExtent` does.
+- R2 then waits for its own review.
+- Eligibility lives in the workflow layer: geometry-bearing R1, three-way agreement on U, valid unreleased U and R1, no descendants of R1.
+- Integrity is re-checked on U. The whole command runs under one gate acquisition inside `ExecuteAsync`, and stale revision ids are refused even when hashes match.
+- The existing Failed/RetryRequired manual crop is unchanged. There is no Reject wrapper, no schema change and no migration.
+
+**Saving and the PNG approval gap.**
+- While the editor is open, approval, reject, save and the other consequential actions are hidden. The commit-time exact checks remain the authority.
+- Plain Trim Approve is routed through the existing exact entry, `ApproveExactReviewAsync`.
+- After R2 appears, the pending save target, `ConfirmAndSaveIdentity`, non-activating focus and the fresh-gesture guards all move to R2. "Use this trim" is itself fresh-gesture guarded.
+- Delivered copies and delivery records are untouched.
+- There is no dependency on the separate KeepOriginalExtent PNG approval gap, which remains open and unrepaired.
+- Residual recorded for the owner: Trim Reject and KeepOriginalExtent do not bind the exact revision.
+
+**Review.** One fresh read-only `personal-dev-reviewer` context (requested Opus High; actual model UNVERIFIED), rechecked twice in the same context.
+- Round 1: OPEN, with 2 × P2 (R1 falsely marked Superseded; handles clipped at the picture border) and 7 × P3.
+- Round 2: those fixed; one new P2 (a handle grab-offset jump) and 2 × P3.
+- Round 3: **CLOSED**.
+- One reviewer run ended early on a host rate limit and was resumed once.
+
+**Owner decisions.** None blocks the design. The owner is asked to approve or revise it as a whole. The final wording is subject to the novice walkthrough.
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`. Opus High throughout; host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit.
+
+**Not run.** Builds, tests, the application, desktop, input, capture and migrations. All future evidence in design §12 is NOT RUN. Closeout exclusions and the human acceptance items preserved below remain open.
+
+**Repository.** `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. The accumulated uncommitted work is preserved and untouched. This task changed only this handoff and added the two SCRUM-11147 documents. There was no product/test/tool/config change and no checkout, stash, commit, push or deploy.
+
+**Stop.** A future, separately authorized task may implement design §13 slices 1–5 after owner approval. It must not start from this handoff alone.
+
+The complete previous handoff is preserved verbatim below as dated history.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11145 closeout current handoff
+
+2026-09-25 NZ. Task `PF-OPUX-v1-SCRUM-11145-closeout-v1`. **The bounded regression and evidence closeout is complete. STOP; no autonomous continuation.** This is technical completion only, not operator acceptance or production readiness. [Closeout record](SCRUM-11145_CLOSEOUT.md), [review](../../../artifacts/pf-opux-scrum11145-closeout/review.md), evidence under `artifacts/pf-opux-scrum11145-closeout/`.
+
+- **Label defect, corrected.** The scratch transformer's `-is [pscustomobject]` test matched pipeline-wrapped label strings, which were rebuilt as `{"Length": n}`; the exporter then accepted them. New `Build-JiraReadback.ps1`. The exporter refuses non-string labels and checks the Labels column after writing. New independent oracle `Test-JiraSnapshotFidelity.ps1` (System.Text.Json) and regression script `Test-JiraExportIntegrity.ps1` (19/19).
+  - **Label-integrity limitation:** the preserved [SCRUM-11145_JIRA_READBACK.json](SCRUM-11145_JIRA_READBACK.json) and [SCRUM-11145_JIRA_FINAL.csv](SCRUM-11145_JIRA_FINAL.csv) have invalid Labels. They are byte-unchanged history and are superseded for current use by the closeout pair below.
+- **Language leak, corrected.** The two test classes restored the resolved fallback (and the process default UI culture) instead of the raw state. The shared `Fixtures/OperatorCultureScope` restores the exact prior state, and an order-sensitive reproducer was red before the fix and green after. One combined noninteractive run including both classes: 415/415. Excluded classes and their reasons are in the closeout §2.
+- **Architecture, corrected.** The migration-list expectation names the accepted 0018 (SQL untouched). The delivery P/Invokes moved verbatim into `NativeMethods.cs`. Architecture 452/452; backend, real NTFS and migrations 146/146.
+- **P3 items against AC/design.**
+  - Fixed: recorded-saves selector (R4); collision during a recheck keeps Check again (T2); dated history after a thrown save plus a failed refresh (T3); the list's language refresh.
+  - Not a defect: F12, with a confirming test. Late progress got a deterministic test with mutation evidence.
+  - Deferred with reason: two cosmetic wording/selection items and the backend Intent-collision residual.
+  - Final-save and isolation suites: 61/61. en/zh-CN off-screen renders inspected.
+- **Independent review.** Fresh read-only `personal-dev-reviewer` (Opus High requested, actual UNVERIFIED): CLOSED (no P0–P2). Its P3 notes were fixed or recorded; the same-context recheck was CLOSED.
+- **Jira.** One comment, [10170](https://yituoxx.atlassian.net/browse/SCRUM-11145?focusedCommentId=10170), marker `PF-OPUX-v1-SCRUM-11145-closeout-v1`; 10169 untouched. Authenticated readback **2026-09-24T23:21:49.205Z**: 17 issues / 26 Blocks, all To Do.
+  - Current exports: [SCRUM-11145_CLOSEOUT_JIRA_READBACK.json](SCRUM-11145_CLOSEOUT_JIRA_READBACK.json) and [SCRUM-11145_CLOSEOUT_JIRA_FINAL.csv](SCRUM-11145_CLOSEOUT_JIRA_FINAL.csv). Exporter PASS; oracle PASS against the raw response (51 string labels, IDs, full descriptions/AC, relationships, 34 exact timestamp strings).
+  - Only drift: SCRUM-11145 `updated` and comment 10170.
+- **Still NOT RUN (human acceptance):** Explorer selection, real picker, physical input, supported-workstation bilingual layout, removable-drive disconnect, novice walkthrough. The PNG approval gap (KeepOriginalExtent) remains open. Wave1A post-focus-fix desktop checks and SCRUM-11146 human acceptance remain open as preserved below.
+- **Routing:** approved Claude adaptation v1.2 of policy v2.4, `route_offset: 0`; Opus High throughout. Host model `claude-opus-5-5`, effort UNVERIFIED; no Sonnet unit, no rules/config edits.
+- **Repository:** `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. All work is uncommitted and preserved: 19 source/test/tool files plus these closeout documents changed against the pre-task tree; nothing else. No checkout/stash/clean/commit/push/deploy, production startup/migration, customer files or desktop input. No SCRUM-11147/11148, PNG repair or other Task.
+- **Stop here.** A future separately authorized task should read this checkpoint and SCRUM-11145_CLOSEOUT.md, and preserve dirty work and historical evidence.
+
+The complete previous handoff is preserved verbatim below as dated history.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11145 final save UI current handoff
+
+2026-09-24 NZ. **SCRUM-11145 bounded implementation, validation, independent review and authorized Jira synchronization complete. STOP; no autonomous continuation.** Technical completion only — not operator acceptance or production readiness.
+
+- Built on the accepted, uncommitted SCRUM-11144 backend without changing its publication, recovery, schema or alias contract. Added: exact revision+hash approval and once-only PNG promotion entries on the session service (single gate acquisition, existing lawful cores), read-only destination preference and draft check, `FinalSaveCoordinator`, App folder picker and Infrastructure shell-selection ports, and a compact bilingual final-save section on the Session screen with truthful approval/delivery states, retries, reconciliation, history and Open containing folder. [Plan](SCRUM-11145_PLAN.md), [results](../../../artifacts/pf-opux-scrum11145/RESULTS.md), [review](../../../artifacts/pf-opux-scrum11145/independent-review.md), [final manifest](../../../artifacts/pf-opux-scrum11145/final-candidate-manifest.json).
+- Final evidence: final-save suites **49/49**, affected UI **377/377**, delivery backend + composition **78/78**, isolated Wave1/cards 21/21 + 6/6, architecture 450/452 (the 2 failures read the unchanged 11144 files `WindowsDeliveryNative.cs` and migration 0018). Synthetic GUID data, temporary SQLite and NTFS folders, fake processors/picker/shell. Off-screen renders (en/zh-CN, 1000×700 and 1920×1040) inspected. A pre-existing combined-run culture leak in `OperatorWave1Tests`/`WorkflowPurposeCardTests` is documented, not changed.
+- Independent review (fresh read-only Opus High context, actual model UNVERIFIED): rounds 1–2 found 6 P2 and several P3; all P2 fixed with regression tests (red evidence kept); round 3 **CLOSED**; T1 then fixed and confirmed. Open P3: single displayed history record, collision during a recheck, double-failure refresh, ineligible outputs not listed, no dedicated late-progress test.
+- NOT RUN: Explorer visibly selecting the file, real folder picker, physical keyboard/mouse (fresh gesture, held key, double-click, stale release), bilingual layout on the supported workstation, removable-drive disconnect, novice walkthrough; UI classes that show real windows or run `ApplicationStartup`. Checklist in RESULTS.md. The unreviewed-PNG (KeepOriginalExtent) gap remains open. Wave1A post-focus-fix desktop checks and SCRUM-11146 human acceptance remain open as preserved below.
+- Jira: one comment [10169](https://yituoxx.atlassian.net/browse/SCRUM-11145?focusedCommentId=10169), marker `PF-OPUX-v1-SCRUM-11145-ui-v1`. Final authenticated readback **2026-09-24T03:25:06.124Z**, 17 issues / 26 Blocks, all To Do; [JSON](SCRUM-11145_JIRA_READBACK.json) built from the preserved raw response, [CSV](SCRUM-11145_JIRA_FINAL.csv) from the existing exporter (exact 23 columns, UTF-8 BOM, 34 raw timestamps, PASS). Only drift: SCRUM-11145 updated/comment. Exporter received a narrow task-marker mapping. Earlier exports unchanged.
+- Routing: approved Claude adaptation v1.2 of policy v2.4, `route_offset: 0`; Astra/Sol High map to Opus High; host model `claude-opus-5-5`, effort UNVERIFIED; no rules/config edits.
+- Repository `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`; all work uncommitted and preserved. No checkout/stash/clean/commit/push/deploy, production startup/migration, customer files or desktop input. No PNG approval repair, SCRUM-11147, SCRUM-11148 or other Task.
+- **Stop at SCRUM-11145.** A future separately authorized task should read this checkpoint and RESULTS.md, and preserve dirty work and historical evidence.
+
+The complete previous handoff is preserved verbatim below as dated history.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11144 backend current handoff
+
+2026-09-23 NZ. **SCRUM-11144 backend implementation, bounded verification and authorized reporting complete within the accepted local-NTFS/approval envelope. STOP; no autonomous continuation.** This is not product/operator acceptance or production readiness.
+
+- The newly submitted owner request adopted existing SQLite delivery/attempt records with atomic ordered destination preference, the reviewed local fixed/removable drive-letter NTFS envelope, and temporary `ApprovalEvidenceMissing` for PNG without valid human approval. The historical design/review remain unchanged; approval repair/backfill and complete asset-route acceptance remain open.
+- Backend now covers exact reviewed PNG/TIFF authority and dimensions, additive migration 0018, immutable RequestId/alias binding, session coordination, held-handle verified staging/no-replace publication, durable restart/unknown-ack reconciliation, availability, explicit successor-first replacement, identity-bearing progress and a disposable verified-selection lease. App composition only; no 11145 UI/coordinator/Explorer.
+- Corrected affected verification: **138 PASS / 0 FAIL / 0 SKIP**, exit 0, including **10 real local NTFS adapter cases**. Synthetic access/disconnect/copy faults are separately labeled. Temporary databases and GUID-owned storage only; no production migration or App launch. Initial 131-case candidate, red regressions and failed native probes are preserved.
+- One fresh independent **Astra 6.0 High** review found R1–R4 and E1; the same context rechecked all corrections and raw results: **CLOSED, no unresolved actionable finding**. It inspected source/assertions/hashes/TRX and did not independently rerun tests. [Plan](SCRUM-11144_PLAN.md), [results](../../../artifacts/pf-opux-scrum11144/RESULTS.md), [review](../../../artifacts/pf-opux-scrum11144/independent-review.md), [corrected manifest](../../../artifacts/pf-opux-scrum11144/corrected-candidate-manifest.json), [corrected diff](../../../artifacts/pf-opux-scrum11144/corrected-scoped-candidate.diff).
+- Physical removable disconnect, genuine read-only media, power-loss durability, live reparse/mode-substitution probes and human/UI acceptance are unperformed. Excluded network/non-NTFS/path forms are unsupported. Wave1A post-focus-fix desktop checks and SCRUM-11146 human acceptance remain open as preserved below; do not retry their desktop probes from this handoff.
+- Jira: one authorized [comment 10168](https://yituoxx.atlassian.net/browse/SCRUM-11144?focusedCommentId=10168), marker `PF-OPUX-v1-SCRUM-11144-backend-v1`, read back exactly once with identical body. Current authenticated snapshot **2026-09-23T07:04:26.141Z**, **17 issues / 26 Blocks**, all To Do. [JSON](SCRUM-11144_JIRA_READBACK.json) and [CSV](SCRUM-11144_JIRA_FINAL.csv): exact 23-column historical schema, UTF-8 BOM, full descriptions/AC/relationships, 34 unchanged raw timestamp strings. No unexpected Jira field drift; no status/AC/other field writes. Earlier exports remain unchanged.
+- Routing: approved **v2.4**, `route_offset: 0`; actual backend **gpt-6-sol/high**, bounded native escalation **gpt-6-astra/high**, fresh independent review **gpt-6-astra/high**, runtime-verified. Root coordination/export remains pre-existing **gpt-6-astra/xhigh**, normal Sol Medium route unavailable in-place (`MODEL_SWITCH_UNAVAILABLE`); no claimed downgrade, silent 5.6 fallback or rules/configuration edits. [Routes](../../../artifacts/pf-opux-scrum11144/routes.json).
+- Repository remains `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. Accumulated work is uncommitted and preserved. No checkout/stash/clean/commit/push/deploy, customer work, production migration/startup, desktop capture/input, PNG approval repair, trim transition or colleague re-import.
+- **SCRUM-11145 is the next candidate, not authorized by this task.** A future separately authorized task should read this checkpoint, plan/design/review, actual current Jira requirements and relevant backend contracts; preserve dirty work and historical evidence. Do not execute historical commands merely because they appear below.
+
+The complete previous handoff is preserved verbatim below as dated history. Its earlier owner-approval and routing statements describe those checkpoints, not the current authorization.
+
+---
+
+
+# PF-OPUX-v1 — delivery design handoff
+
+2026-09-23 NZ. Task `PF-OPUX-v1-delivery-design-v1`. **PROPOSED / AWAITING_OWNER_REVIEW**; design only. No implementation authorization.
+
+- [DELIVERY_DESIGN.md](DELIVERY_DESIGN.md) covers exact approved PNG/TIFF identity, proposed delivery/attempt persistence and destination preference, no-overwrite staging/publication, crash reconciliation, idempotency, cancellation and the SCRUM-11145 final-review/save/Open contract. [Independent review](DELIVERY_DESIGN_REVIEW.md): technically ready for owner review; both P2 findings resolved and affected corrections rechecked. Added restart delivery discovery and explicit missing-copy replacement, including successor-first idempotency. Owner approval remains pending.
+- Current authenticated full Jira reads: 11144 updated `2026-09-22T14:27:19.196+1200`; 11145 updated `2026-09-22T15:00:19.787+1200`; both To Do with zero comments, read 2026-09-23 NZ. Amended 11145 approval-before-export applies. Jira remained read-only; no CSV was regenerated.
+- Recommended: existing SQLite with bounded delivery and attempt records; remember a distinct last-successful external destination atomically with delivery. Exact source/approval is revalidated; a held, verified temporary file is published without replacement; final-file verification plus durable evidence precedes Saved. Retry reconciles publication before copying again.
+- Owner decisions: approve/revise the proposed storage/recovery design; accept or expand the proposed local NTFS destination envelope; decide the asset-path compatibility gap. Current KeepOriginalExtent can lead from an unreviewed import to an internally Approved PNG without a human ReviewDecision. Proposed delivery refuses that case; a new approval contract needs separate authorization. Normal reviewed PNG and valid sibling TIFF sizes remain in the design.
+- Next, only after owner review and separate implementation authorization: bounded implementation plan, then **11144 backend/persistence (Sol High)**, then **11145 UI/interaction (Astra High)**. No automatic continuation, migration or Jira mutation.
+- Policy: approved local v2.3; explicit `ROUTE_PROFILE.route_offset: 0`. Root runtime is `gpt-6-astra/xhigh`, pre-existing; intended design route Astra High. **MODEL_SWITCH_UNAVAILABLE** disclosed; no claim that High or a later Sol downgrade actually ran. Fresh review used `fork_turns=none`; actual reviewer `gpt-6-astra/high` is runtime-verified.
+- Repository: `D:/Repositories/printflow-Studio`, `master`, HEAD `eea60198c5095243f0694717a7479b00c3e1cd73`. Existing source/test/configuration work remains uncommitted and untouched. Design verification is document/source/AC inspection plus file integrity; builds, tests, migration, application/native probes and customer work are **NOT RUN**. No commit, push, deployment or scheduled continuation.
+- Change scope: only the two new design/review Markdown files and this handoff. The other 802 existing tracked/unignored files have identical before/after path/content hashes; prior handoff text is retained below. Final reviewed design SHA-256: `FF4AEA4EDAAB78DCDB8C0A44D34AE51B41DBA33F5F5FB373830758531B930ACB`.
+- Future startup: read this handoff, the design/review and approved global policy; run `git status --short`, `git branch --show-current`, `git rev-parse HEAD`; re-read current 11144/11145 requirements and only the relevant code. Preserve uncommitted work. Do not execute historical native-test commands merely because they are recorded below.
+
+The previous handoff is preserved verbatim below as a **dated historical checkpoint preceding this design task**. Its evidence remains historical; its pending acceptance has not been run or closed by this task.
+
+---
+
+# PF-OPUX-v1 — SCRUM-11146 and Wave1A current handoff
+
+2026-09-23 NZ. **SCRUM-11146 bounded implementation/reporting complete; human/native acceptance remains open.** Stop here. No autonomous continuation.
+
+## SCRUM-11146
+
+- Three existing cards now explain purpose, approved PNG/print-TIFF result and print-size requirements in en/zh-CN. Enhancement/background removal remain optional; no delivery promise. Same route order, steps, Choose/lock behavior/message, preview/output name and focus/approval source.
+- Localized read-model properties and wrapping XAML; existing localization event refreshes the same card objects. Source delta: WorkflowSelectionViewModel.cs, WorkflowSelectionView.xaml, Strings.cs/.resx/.zh-CN.resx. New WorkflowPurposeCardTests.cs. Terminology reference updated narrowly.
+- Targeted final evidence: **24 PASS / 0 FAIL / 0 SKIP** (6 new + 18 affected), successful build. Red: four missing-copy failures before implementation; raw intermediate test-authoring errors retained. No full suite, timestamp regression or production-startup/crop smoke.
+- Existing off-screen WPF renderer produced eight PNGs (six distinct) at 1000x700 and 1920x1040, 96 DPI, en/zh-CN top/bottom. Astra High inspected them: purpose/result/size content visible, lower cards scroll-accessible. Synthetic layout/binding/Tab-stop/UIA evidence is separate from native/human acceptance.
+- Actual OS input, physical keyboard/mouse, human supported-workstation visuals and novice validation **NOT RUN**. Original bilingual human visual AC remains open.
+- One genuinely fresh isolated independent code review: **no actionable findings**. Requested gpt-6-sol/high; actual route **UNVERIFIED** because reviewer runtime metadata was unavailable. No correction/re-review needed; unchanged Wave1A code was not re-reviewed.
+- [Plan](SCRUM-11146_PLAN.md), [full results](../../../artifacts/pf-opux-scrum11146/RESULTS.md), [independent review](../../../artifacts/pf-opux-scrum11146/independent-review.md), [scoped diff](../../../artifacts/pf-opux-scrum11146/scrum11146.diff), candidate hashes/TRX/logs/rendered PNGs under artifacts/pf-opux-scrum11146.
+
+## Wave1A pending acceptance — preserved
+
+- Bounded checkpoint for this request: **AWAITING_SAFE_DESKTOP**. No current operator confirmation and current native computer controls disabled. No launch/input/capture probe, no postfix run directory. All 14 source/launcher + 2 assembly hashes matched the focus-fix manifest before SCRUM-11146 edits; comparison is artifacts/pf-opux-scrum11146/wave1a-candidate-check.json.
+- Earlier four en/zh-CN native Enter/Space approvals, ordinary controls, Tab navigation and F6/F7 focus stability **belong to the pre-focus-fix candidate only**.
+- The initial visible-entry /Window focus defect was separately reproduced/fixed. Fixed candidate has historical **22 PASS / 0 FAIL / 1 explicit interactive SKIP** and independent fix review with no actionable findings. Its **native post-fix acceptance remains NOT RUN**. New SCRUM-11146 assemblies do not inherit historical input PASS.
+- Pending fixed-candidate native checks: first attached review gets non-activating status/preview focus (not action/Window), zero unintended approvals; ordinary-button positive controls; en/zh-CN fresh Enter/Space on actual Approve with exact displayed job/step/revision/hash and persisted counts; subsequent review unaffected by prior gesture; same-target refresh/language changes preserve valid focus without approval.
+- Pending physical cases: ordinary-button/fresh single-click, unrelated click, double-click remainder, genuinely held/repeating keys and stale releases across jobs/revisions, followed by valid fresh activation. Earlier screenshot errors (0x80004002), unavailable mouse geometry and unsupported held-key API are known limitations, not new product defects. The two mouse events during the historical pause have UNVERIFIED source/hit target and establish no acceptance.
+- Pending visuals: bilingual review, Photoshop guidance and crop at supported workstation conditions. HUMAN_PHYSICAL_INPUT, HUMAN_WORKSTATION_VISUALS and HUMAN_NOVICE_VALIDATION remain NOT RUN. A person doing device/layout checks need not be a novice; novice usability remains separate.
+- Preserve [WAVE1A_VERIFICATION.md](WAVE1A_VERIFICATION.md), [historical RESULTS](../../../artifacts/pf-opux-wave1a/interactive-20260923/RESULTS.md), raw host logs, FAIL/PASS and focus-fix evidence. The unchanged startup-based crop smoke remains excluded because its shared LocalAppData lease is not isolated.
+
+Only after a currently safe idle operator-controlled desktop and supported input are established, reuse the existing launcher and [operator checklist](../../../artifacts/pf-opux-wave1a/ui-operator-checklist.md):
+
+```powershell
+& 'D:\Repositories\printflow-Studio\docs\codex\printflow-operator-ux-backlog\Start-Wave1AHost.ps1' -SafeDesktopConfirmed
+```
+
+Record the actual source/assembly candidate, display/work area/DPI/viewport, initial post-fix focus, physical input source, exact target/counts, repeat/stale/double-click results and bilingual visuals. Baseline requirement: 1920x1080 display, 1920x1040 work area, 100%/96 DPI. Historical host measured display1920x1080/DPI96 and viewport1184x686.8; work area/visuals were not verified. Those values are not current observations. No production launch, display changes, new capture/input framework or repeated failed probes. A new focus defect requires separately scoped fixing authorization.
+
+## Jira synchronization and actual exports
+
+Only SCRUM-11146 received one comment: [10167](https://yituoxx.atlassian.net/browse/SCRUM-11146?focusedCommentId=10167), marker PF-OPUX-v1-SCRUM-11146-dev-v1. Complete pre-write reconciliation found no comments; final readback verifies the exact body once. No issue fields/status/AC/assignment/parent/links changed.
+
+Final authenticated initiative readback: **2026-09-22T23:12:09.631Z**, one complete page, 17 issues/26 Blocks, all To Do. [SCRUM-11146_JIRA_READBACK.json](SCRUM-11146_JIRA_READBACK.json) and [SCRUM-11146_JIRA_FINAL.csv](SCRUM-11146_JIRA_FINAL.csv) are the actual new files. Existing exporter and reparse checks pass: exact 23 columns, UTF-8 BOM, full descriptions/AC, identity/parents/relationships, 34 exact raw timestamp strings. One EVIDENCE_COMMENT_ONLY and sixteen READ_ONLY rows; no observed external field/count/link drift. Narrow exporter task/marker mapping added; no interface/schema/timestamp algorithm change.
+
+Original [WAVE1A_JIRA_READBACK.json](WAVE1A_JIRA_READBACK.json)/[WAVE1A_JIRA_FINAL.csv](WAVE1A_JIRA_FINAL.csv) remain the preserved **2026-09-22T05:45:29.544Z** historical checkpoint; original comments 10165/10166 unchanged. Historical exports/import evidence remain immutable.
+
+## Route, Git and stopping boundary
+
+Codex policy v2.3, route_offset0. Root/UI actual gpt-6-astra/high verified from runtime turn_context (artifacts/pf-opux-scrum11146/route.json). Documentation/export re-evaluated to normal Sol Medium; in-place switch unavailable (**MODEL_SWITCH_UNAVAILABLE**), disclosed safe Astra fallback without claiming downgrade. Independent review used fork_turns=none with only requirements/scoped diff/direct evidence; actual reviewer route UNVERIFIED.
+
+D:/Repositories/printflow-Studio, master at eea60198c5095243f0694717a7479b00c3e1cd73; all work uncommitted. Integrity checks preserve 136 historical files, unrelated starting changes, existing resource values and focus/approval source. No checkout/stash/clean/commit/push/deploy/status transition/production/customer work. No delivery SCRUM-11144/11145, trim transition SCRUM-11147, correction re-import SCRUM-11148 or other Epic implementation. Stop; no further work or follow-up scheduled.

@@ -1,0 +1,555 @@
+{
+    "initiative":  "PF-OPUX-v1",
+    "ledgerVersion":  3,
+    "backlogRevision":  2,
+    "updated":  "2026-09-22T14:30:19+12:00",
+    "site":  "https://yituoxx.atlassian.net",
+    "projectKey":  "SCRUM",
+    "overallStatus":  "WRITTEN_AND_VERIFIED",
+    "blockReason":  null,
+    "liveReconciliation":  {
+                               "status":  "RUN",
+                               "note":  "Authenticated duplicate search before any create: labels = pf-opux-v1 OR text ~ \"PF-OPUX-v1\" OR summary ~ \"Operator Usability\", plus summary searches on the distinctive terms of all 16 Task summaries, in project SCRUM. Zero matches, so every item was created."
+                           },
+    "liveJiraDiscovery":  {
+                              "issueTypes":  "VERIFIED: Epic (10001), Subtask (10002), Task (10003), Story (10004), Bug (10038); team-managed (simplified) project",
+                              "priorities":  "VERIFIED in use: High, Medium, Low",
+                              "parentField":  "VERIFIED: native parent field (Task -\u003e Epic), as on SCRUM-11134 -\u003e SCRUM-11124",
+                              "linkTypes":  "VERIFIED: Blocks (10000), inward \"is blocked by\", outward \"blocks\"; direction confirmed by reading back SCRUM-11145",
+                              "duplicateSearch":  "RUN (authenticated): zero matches"
+                          },
+    "commonLabels":  [
+                         "printflow",
+                         "operator-ux",
+                         "pf-opux-v1"
+                     ],
+    "nativeLinkPolicy":  "Blocks links only between PF-OPUX-v1 items; historical SCRUM issues are referenced in descriptions only.",
+    "plannedBlocksLinks":  26,
+    "revision1To2Changes":  {
+                                "preservedPlanningIds":  14,
+                                "newPlanningIds":  [
+                                                       "PF-OPUX-v1-approved-artifact-export",
+                                                       "PF-OPUX-v1-trim-boundary-adjustment",
+                                                       "PF-OPUX-v1-colleague-correction-handoff"
+                                                   ],
+                                "retiredPlanningIds":  [
+
+                                                       ],
+                                "deferredCandidates":  [
+                                                           "Photoshop manual-result import",
+                                                           "Trim cancellation (SCRUM-11083 business item)",
+                                                           "Meitu unknown-editor recovery",
+                                                           "General replacement of existing user files at the delivery destination"
+                                                       ]
+                            },
+    "items":  [
+                  {
+                      "planningId":  "PF-OPUX-v1-epic",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Epic",
+                      "priority":  "High",
+                      "summary":  "Operator Usability \u0026 Workflow Simplification",
+                      "parentPlanningId":  null,
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  0,
+                      "changeClass":  "Initiative container",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-epic\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10869",
+                      "jiraIssueKey":  "SCRUM-11139",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11139",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-glossary-decision",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Maintain a Lightweight Operator Terminology Reference for Beginner-Facing Copy (zh-CN / en)",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  1,
+                      "changeClass":  "Documentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-glossary-decision\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10870",
+                      "jiraIssueKey":  "SCRUM-11140",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11140",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-novice-walkthrough",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Run a Beginner-Operator Discovery Walkthrough of the Three Routes and Record Usability Findings",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  2,
+                      "changeClass":  "Human research (no code)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-novice-walkthrough\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10871",
+                      "jiraIssueKey":  "SCRUM-11141",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11141",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-app-specific-takeover-wording",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Name the Correct Application in Stop and Take Over, and State Plainly What Happens After a Photoshop Takeover",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  3,
+                      "changeClass":  "Presentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-app-specific-takeover-wording\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10872",
+                      "jiraIssueKey":  "SCRUM-11142",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11142",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-session-next-step-panel",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Show a Plain \"Current Status and Next Step\" Panel with a Recommended Primary Action on the Session Screen",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  4,
+                      "changeClass":  "Presentation (ViewModel projection over existing state)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-session-next-step-panel\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10873",
+                      "jiraIssueKey":  "SCRUM-11143",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11143",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-approved-artifact-export",
+                      "planningIdOrigin":  "NEW_IN_REVISION_2",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Export the Exact Approved Result to an Operator-Selected Destination Safely, with Collision Handling, Verification and Retry",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  5,
+                      "changeClass":  "State/persistence and file export (functional design item)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-approved-artifact-export\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10874",
+                      "jiraIssueKey":  "SCRUM-11144",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11144",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-completion-delivery-summary",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Let the Operator Confirm the Final Filename and Destination, See Distinct Approval and Delivery States, and Open the Containing Folder",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+                                                   "PF-OPUX-v1-approved-artifact-export"
+                                               ],
+                      "recommendedOrder":  6,
+                      "changeClass":  "Presentation plus ViewModel wiring to the export service",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-completion-delivery-summary\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10875",
+                      "jiraIssueKey":  "SCRUM-11145",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11145",
+                      "readBack":  "VERIFIED",
+                      "links":  "BLOCKED_BY_VERIFIED (1)"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-route-purpose-cards",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Explain Each Workflow Card by Purpose and Result Before the Operator Chooses",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  7,
+                      "changeClass":  "Presentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-route-purpose-cards\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10876",
+                      "jiraIssueKey":  "SCRUM-11146",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11146",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-trim-boundary-adjustment",
+                      "planningIdOrigin":  "NEW_IN_REVISION_2",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Let the Operator Adjust the Automatic Trim Boundary in PrintFlow with Handles, Zoom and Restore Suggestion",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  8,
+                      "changeClass":  "Presentation plus a workflow-command change (functional design item)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-trim-boundary-adjustment\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10877",
+                      "jiraIssueKey":  "SCRUM-11147",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11147",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-colleague-correction-handoff",
+                      "planningIdOrigin":  "NEW_IN_REVISION_2",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Add \"Ask a Colleague to Correct This Image\" from Background-Removal Review with Clear Handoff Files, Instructions and Explicit Re-import",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  9,
+                      "changeClass":  "Presentation plus handoff/re-import contract change (functional design item)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-colleague-correction-handoff\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10878",
+                      "jiraIssueKey":  "SCRUM-11148",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11148",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-review-step-guidance",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "High",
+                      "summary":  "Give Beginners Concrete \"What to Check\" Prompts and a Clear \"Ask for Help\" Path on Each Review",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  10,
+                      "changeClass":  "Presentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-review-step-guidance\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10879",
+                      "jiraIssueKey":  "SCRUM-11149",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11149",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-print-size-plain-guidance",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Explain Print Size Choices and the Enlargement Warning in Beginner Terms with a Live Worked Example",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  11,
+                      "changeClass":  "Presentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-print-size-plain-guidance\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10880",
+                      "jiraIssueKey":  "SCRUM-11150",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11150",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-failure-next-step-copy",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Complete \"What Happened, What Was Kept, What You Can Do\" Wording for the Remaining Failure Messages",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  12,
+                      "changeClass":  "Presentation only",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-failure-next-step-copy\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10881",
+                      "jiraIssueKey":  "SCRUM-11151",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11151",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-home-readiness-summary",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Replace Technical Startup Lines on Home with a Plain Readiness Summary and One Next Action",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+
+                                               ],
+                      "recommendedOrder":  13,
+                      "changeClass":  "Presentation (projection over existing readiness results)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-home-readiness-summary\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10882",
+                      "jiraIssueKey":  "SCRUM-11152",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11152",
+                      "readBack":  "VERIFIED",
+                      "links":  "NONE_PLANNED"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-recent-row-status",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Show Which Recent Jobs Need the Operator (Waiting for Review, Stopped, Handed Off, Saved)",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+                                                   "PF-OPUX-v1-session-next-step-panel"
+                                               ],
+                      "recommendedOrder":  14,
+                      "changeClass":  "Read-model projection plus presentation",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-recent-row-status\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10883",
+                      "jiraIssueKey":  "SCRUM-11153",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11153",
+                      "readBack":  "VERIFIED",
+                      "links":  "BLOCKED_BY_VERIFIED (1)"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-consistency-keyboard-pass",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Low",
+                      "summary":  "Check Integration Consistency of the New Operator Surfaces: Shared Wording, Focus Flow and Cross-Screen States in Both Languages",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+                                                   "PF-OPUX-v1-app-specific-takeover-wording",
+                                                   "PF-OPUX-v1-session-next-step-panel",
+                                                   "PF-OPUX-v1-completion-delivery-summary",
+                                                   "PF-OPUX-v1-route-purpose-cards",
+                                                   "PF-OPUX-v1-trim-boundary-adjustment",
+                                                   "PF-OPUX-v1-colleague-correction-handoff",
+                                                   "PF-OPUX-v1-review-step-guidance",
+                                                   "PF-OPUX-v1-print-size-plain-guidance",
+                                                   "PF-OPUX-v1-failure-next-step-copy",
+                                                   "PF-OPUX-v1-home-readiness-summary",
+                                                   "PF-OPUX-v1-recent-row-status"
+                                               ],
+                      "recommendedOrder":  15,
+                      "changeClass":  "Integration check with small fixes",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-consistency-keyboard-pass\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10884",
+                      "jiraIssueKey":  "SCRUM-11154",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11154",
+                      "readBack":  "VERIFIED",
+                      "links":  "BLOCKED_BY_VERIFIED (11)"
+                  },
+                  {
+                      "planningId":  "PF-OPUX-v1-acceptance-walkthrough",
+                      "planningIdOrigin":  "PRESERVED_FROM_REVISION_1",
+                      "type":  "Task",
+                      "priority":  "Medium",
+                      "summary":  "Validate the Complete Beginner Journey with a Real Novice-Operator Walkthrough and Record the Result",
+                      "parentPlanningId":  "PF-OPUX-v1-epic",
+                      "blockedByPlanningIds":  [
+                                                   "PF-OPUX-v1-app-specific-takeover-wording",
+                                                   "PF-OPUX-v1-session-next-step-panel",
+                                                   "PF-OPUX-v1-approved-artifact-export",
+                                                   "PF-OPUX-v1-completion-delivery-summary",
+                                                   "PF-OPUX-v1-route-purpose-cards",
+                                                   "PF-OPUX-v1-trim-boundary-adjustment",
+                                                   "PF-OPUX-v1-colleague-correction-handoff",
+                                                   "PF-OPUX-v1-review-step-guidance",
+                                                   "PF-OPUX-v1-print-size-plain-guidance",
+                                                   "PF-OPUX-v1-failure-next-step-copy",
+                                                   "PF-OPUX-v1-home-readiness-summary",
+                                                   "PF-OPUX-v1-recent-row-status",
+                                                   "PF-OPUX-v1-consistency-keyboard-pass"
+                                               ],
+                      "recommendedOrder":  16,
+                      "changeClass":  "Human validation (no code)",
+                      "labels":  [
+                                     "printflow",
+                                     "operator-ux",
+                                     "pf-opux-v1"
+                                 ],
+                      "descriptionSource":  "PLAN.md section 6, heading \u0027### PF-OPUX-v1-acceptance-walkthrough\u0027",
+                      "result":  "CREATED",
+                      "liveJiraState":  "VERIFIED",
+                      "jiraIssueId":  "10885",
+                      "jiraIssueKey":  "SCRUM-11155",
+                      "jiraUrl":  "https://yituoxx.atlassian.net/browse/SCRUM-11155",
+                      "readBack":  "VERIFIED",
+                      "links":  "BLOCKED_BY_VERIFIED (13)"
+                  }
+              ],
+    "finalReadback":  {
+                          "status":  "VERIFIED",
+                          "readbackAt":  "2026-09-22T14:30:19+12:00",
+                          "snapshotIssueCount":  17,
+                          "snapshotFile":  "JIRA_READBACK_SNAPSHOT.json",
+                          "checks":  "For all 17 issues: description equals PLAN.md section 6 text byte for byte; summary, type, priority, labels and parent equal the ledger; Blocks links equal blockedByPlanningIds (26 total); no other link types.",
+                          "snapshotIssues":  [
+                                                 "SCRUM-11139",
+                                                 "SCRUM-11140",
+                                                 "SCRUM-11141",
+                                                 "SCRUM-11142",
+                                                 "SCRUM-11143",
+                                                 "SCRUM-11144",
+                                                 "SCRUM-11145",
+                                                 "SCRUM-11146",
+                                                 "SCRUM-11147",
+                                                 "SCRUM-11148",
+                                                 "SCRUM-11149",
+                                                 "SCRUM-11150",
+                                                 "SCRUM-11151",
+                                                 "SCRUM-11152",
+                                                 "SCRUM-11153",
+                                                 "SCRUM-11154",
+                                                 "SCRUM-11155"
+                                             ]
+                      },
+    "exports":  {
+                    "finalCsv":  "JIRA_FINAL_IMPORT.csv (17 verified rows from the readback snapshot)",
+                    "pendingCsv":  "JIRA_PENDING_IMPORT.csv (header only: nothing unresolved)",
+                    "snapshot":  "JIRA_READBACK_SNAPSHOT.json",
+                    "generatedAt":  "2026-09-22T14:30:19+12:00"
+                },
+    "counts":  {
+                   "created":  17,
+                   "updated":  0,
+                   "reused":  0,
+                   "referencedOnly":  0,
+                   "pendingNotWritten":  0,
+                   "failed":  0,
+                   "outcomeUnknown":  0,
+                   "readbackMismatch":  0,
+                   "nativeLinksWritten":  26,
+                   "nativeLinksPending":  0
+               }
+}
