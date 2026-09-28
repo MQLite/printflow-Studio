@@ -1,0 +1,104 @@
+{
+  "task": "PF-OPUX-v1-master-publication-v1",
+  "authority": "printflow-remediation-prompts/PrintFlowStudio_Master_Publication_and_Jira_Status_Sync_Prompt_v2.md plus the user's direct-master publication authorization of 2026-09-29",
+  "routing": {
+    "policy": "Claude adaptation v1.2 of policy v2.4",
+    "routeOffset": 0,
+    "requested": "latest Opus / High",
+    "actualModel": "claude-opus-5-5",
+    "actualEffort": "UNVERIFIED",
+    "sonnetUnits": 0,
+    "subagents": 0
+  },
+  "git": {
+    "repository": "D:/Repositories/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "remoteVisibility": "public (GitHub API private=false)",
+    "branch": "master",
+    "prePublicationLocalHead": "eea60198c5095243f0694717a7479b00c3e1cd73",
+    "prePublicationOriginMaster": "cb552eefad00682c2e2f868206d248715dfeb6d3",
+    "remoteAdvancedBeyondHistoricalBase": false,
+    "historicalBaseNote": "origin/master was an ancestor of local master; the 7 earlier unpushed local docs commits (d6e5e59..eea6019, SCRUM-11131 to SCRUM-11134 records) were published by the same fast-forward",
+    "commits": [
+      { "sha": "cb875b2896481abd7915f52fba833b939aec22f4", "subject": "feat: operator UX for PF-OPUX-v1 through SCRUM-11148", "paths": 103, "url": "https://github.com/MQLite/printflow-Studio/commit/cb875b2896481abd7915f52fba833b939aec22f4" },
+      { "sha": "4ed9b52a448339e4041e5bbaf937312fee51aced", "subject": "docs: PF-OPUX-v1 plans, designs, Jira exports and tooling through SCRUM-11148", "paths": 44, "url": "https://github.com/MQLite/printflow-Studio/commit/4ed9b52a448339e4041e5bbaf937312fee51aced" }
+    ],
+    "push": { "command": "git push origin master:master", "output": "cb552ee..4ed9b52  master -> master", "force": false, "exitCode": 0 },
+    "finalOriginMaster": "4ed9b52a448339e4041e5bbaf937312fee51aced",
+    "verification": { "fetchOriginMaster": "4ed9b52a448339e4041e5bbaf937312fee51aced", "lsRemote": "4ed9b52a448339e4041e5bbaf937312fee51aced", "githubApiHead": "4ed9b52a448339e4041e5bbaf937312fee51aced", "publishedPathsEqualManifest": true },
+    "result": "MASTER_PUSH_VERIFIED",
+    "manifest": {
+      "path": "artifacts/pf-opux-master-publication/publication-manifest.tsv",
+      "sha256": "f3578c803b85d94d8ec67a3d3c88bea57cd37f0213e1dfd0a9b197c2b9ca3e66",
+      "counts": { "INCLUDE_PRODUCT": 65, "INCLUDE_MIGRATION": 2, "INCLUDE_TEST": 36, "INCLUDE_PROJECT_DOC": 20, "INCLUDE_TOOL": 6, "INCLUDE_REQUIRED_JIRA_EXPORT": 18, "EXCLUDE_UNRELATED_USER_WORK": 2, "REQUIRES_OWNER_DECISION": 5 },
+      "excluded": [
+        { "path": "docs/printflow/original-jira-functional-coverage-reaudit.md", "class": "EXCLUDE_UNRELATED_USER_WORK", "reason": "pre-existing uncommitted user waiver deltas recorded in PLAN.md and WAVE1_PLAN.md as outside PF-OPUX" },
+        { "path": "docs/printflow/scrum-11134-maintop-reference-comparison-fixed-workstation.md", "class": "EXCLUDE_UNRELATED_USER_WORK", "reason": "same" },
+        { "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11144_JIRA_READBACK.json", "class": "REQUIRES_OWNER_DECISION", "reason": "carries Atlassian accountId and the owner email; public repository history carries neither" },
+        { "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11145_JIRA_READBACK.json", "class": "REQUIRES_OWNER_DECISION", "reason": "carries Atlassian accountId" },
+        { "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11145_CLOSEOUT_JIRA_READBACK.json", "class": "REQUIRES_OWNER_DECISION", "reason": "carries Atlassian accountId" },
+        { "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11147_JIRA_READBACK.json", "class": "REQUIRES_OWNER_DECISION", "reason": "carries Atlassian accountId" },
+        { "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11148_JIRA_READBACK.json", "class": "REQUIRES_OWNER_DECISION", "reason": "carries Atlassian accountId and the owner email" }
+      ],
+      "stagedScan": "no binaries, credentials, tokens, private keys, emails, real accountIds or workstation user paths in either staged commit"
+    }
+  },
+  "verification": {
+    "sourceIdentity": "all 50 files of artifacts/pf-opux-scrum11148/review-02-candidate.sha256 matched before staging; rebuilt assemblies byte-identical to review-02-assemblies.sha256",
+    "sdk": "%LOCALAPPDATA%/Microsoft/dotnet/dotnet.exe (10.0.400 per global.json)",
+    "script": "artifacts/pf-opux-master-publication/Run-PublicationVerification.ps1 -Run 01",
+    "steps": [
+      { "step": "dotnet clean + build PrintFlowStudio.sln -c Debug --no-incremental", "exitCode": 0, "result": "0 warnings, 0 errors" },
+      { "step": "architecture", "exitCode": 0, "passed": 452, "failed": 0, "skipped": 0 },
+      { "step": "combined-ui (safe exclusions)", "exitCode": 0, "passed": 518, "failed": 0, "skipped": 0 },
+      { "step": "workflow-persistence", "exitCode": 0, "passed": 11531, "failed": 0, "skipped": 0 },
+      { "step": "backend-delivery (ProductionCompositionTests excluded)", "exitCode": 0, "passed": 124, "failed": 0, "skipped": 0 },
+      { "step": "Test-JiraExportIntegrity.ps1 (with the updated exporter)", "exitCode": 0, "passed": 18, "failed": 0 }
+    ],
+    "filters": "exact artifacts/pf-opux-scrum11148/*-final-filter.txt",
+    "exclusions": [
+      "UI classes that show real windows or drive UIA (ErrorDetailsRenderingTests, KeepOriginalExtentUiTests, ManualCropAdjustmentUiTests, PrintDimensionsPreflightUiTests, SharedReviewAuthorityTests, OperatorWave1AHostTests) and ApplicationStartup classes (SessionSmokeTests, HomeAndWorkflowSelectionTests), Category=OperatorInteractive, one composed diagnostic-path rendering case: shared live-operator desktop",
+      "ProductionCompositionTests: production DI graph prohibited",
+      "ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment: known baseline hang, NOT PASS"
+    ],
+    "migrations": "0001-0017 unchanged versus origin/master; 0018 sha256 829f316f... matches the SCRUM-11144 corrected manifest; 0019 sha256 b61074c4... matches the SCRUM-11148 final candidate; embedded via Sqlite\\Migrations\\*.sql",
+    "countsOverlap": true
+  },
+  "jira": {
+    "cloudId": "6ea5df13-e1e2-4df3-bb4b-691a3fb8626c",
+    "site": "https://yituoxx.atlassian.net",
+    "workflowTransitions": { "11": "To Do", "21": "In Progress", "31": "In Review", "41": "Done" },
+    "prewriteRead": "all 17 issues To Do (initiative search before push)",
+    "marker": "PF-OPUX-v1-master-publication-v1",
+    "transitions": [
+      { "key": "SCRUM-11139", "id": "10869", "from": "To Do", "transitionId": "21", "to": "In Progress", "commentId": "10173", "commit": "4ed9b52a448339e4041e5bbaf937312fee51aced", "reason": "No child Task Done; real beginner walkthrough (completion criterion 2) not run", "open": ["child Tasks", "SCRUM-11155 novice walkthrough"] },
+      { "key": "SCRUM-11140", "id": "10870", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10174", "commentEdited": "wording of the transition line corrected once, same comment id", "commit": "4ed9b52a448339e4041e5bbaf937312fee51aced", "reason": "Reference published; delivery-term business decision needs product-owner review (AC3)", "open": ["product-owner review of delivery terms"] },
+      { "key": "SCRUM-11141", "id": "10871", "from": "To Do", "transitionId": "21", "to": "In Progress", "commentId": "10175", "commit": "4ed9b52a448339e4041e5bbaf937312fee51aced", "reason": "Script prepared; human-only walkthrough NOT RUN", "open": ["real beginner walkthrough and findings"] },
+      { "key": "SCRUM-11142", "id": "10872", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10176", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Implemented and tested; AC6 workstation visual check open", "open": ["supported-workstation bilingual visual check"] },
+      { "key": "SCRUM-11143", "id": "10873", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10177", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Implemented and tested; post-focus-fix native input and human visual check open", "open": ["native fresh-gesture checks", "physical held/repeat/double-click/stale input", "workstation visuals"] },
+      { "key": "SCRUM-11144", "id": "10874", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10178", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Backend and migration 0018 tested; KeepOriginalExtent PNG ApprovalEvidenceMissing limit leaves asset-route acceptance to an owner decision", "open": ["owner decision on PNG approval contract", "physical disconnect/read-only media"] },
+      { "key": "SCRUM-11145", "id": "10875", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10179", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "UI and coordinator tested with fakes; human Explorer selection check (AC5) and AC8 layout open", "open": ["Explorer selection", "real picker", "physical input", "workstation layout", "removable disconnect"] },
+      { "key": "SCRUM-11146", "id": "10876", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10180", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Implemented and tested; human bilingual visual check open", "open": ["human bilingual visual check"] },
+      { "key": "SCRUM-11147", "id": "10877", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10181", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Implemented and tested; human synthetic-image check and physical input open", "open": ["human check", "physical drag/keys", "workstation layout"] },
+      { "key": "SCRUM-11148", "id": "10878", "from": "To Do", "transitionId": "31", "to": "In Review", "commentId": "10182", "commit": "cb875b2896481abd7915f52fba833b939aec22f4", "reason": "Implemented with migration 0019 and tested; human check and real colleague round trip open", "open": ["human check / colleague round trip", "picker/Explorer", "physical input", "workstation visuals", "novice usability"] }
+    ],
+    "doneTransitions": 0,
+    "readOnly": ["SCRUM-11149", "SCRUM-11150", "SCRUM-11151", "SCRUM-11152", "SCRUM-11153", "SCRUM-11154", "SCRUM-11155"],
+    "finalReadback": {
+      "readAt": "2026-09-28T22:29:11.826Z",
+      "raw": "artifacts/pf-opux-master-publication/jira-final-readback-raw.json",
+      "rawSha256": "786291efb29dba76ba9f250c281a0880612f8dbc36ac96c653d14b9ca74f159d",
+      "pages": 1, "isLast": true, "issues": 17, "blocksLinks": 26, "stringLabels": 51, "exactTimestamps": 34,
+      "markersPerIssue": "exactly 1 on each of SCRUM-11139..11148, 0 on SCRUM-11149..11155",
+      "allCommentsComplete": true,
+      "drift": "versus SCRUM-11148_JIRA_READBACK.json: only status, updated and the new comment on SCRUM-11139..11148; parent/issuelinks differ only in embedded related-issue status; descriptions, AC, labels, priority, type and created unchanged; all prior comments preserved byte-identically; SCRUM-11149..11155 unchanged apart from embedded related-issue status"
+    },
+    "outputs": {
+      "snapshot": { "path": "docs/codex/printflow-operator-ux-backlog/PUBLICATION_STATUS_JIRA_READBACK.json", "sha256": "a0f50d912798e386d084cbf98b39b1e685ee75d4754244d47655585132152391", "tracked": false, "note": "contains accountId/email like the excluded snapshots; kept local" },
+      "csv": { "path": "docs/codex/printflow-operator-ux-backlog/PUBLICATION_STATUS_JIRA_FINAL.csv", "sha256": "e62aecddf736eaa810c3e3fbc1b70ee758689f90d6f706b85886a82d100e9fac", "columns": 23, "utf8Bom": true, "exporterValidation": "PASS" },
+      "oracle": { "script": "Test-JiraSnapshotFidelity.ps1", "verdict": "PASS", "failures": 0, "result": "artifacts/pf-opux-master-publication/jira-final-fidelity.json" }
+    }
+  },
+  "notPerformed": ["deployment", "production database migration", "production application startup", "customer-file operations", "force-push or history rewrite", "SCRUM-11149 or later development", "global routing policy update"],
+  "postPublicationLocalChanges": "HANDOFF.md top section, PUBLICATION_STATUS_* outputs and this audit are written after the push and remain uncommitted"
+}

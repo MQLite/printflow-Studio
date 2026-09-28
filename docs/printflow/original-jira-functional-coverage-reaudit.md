@@ -1912,3 +1912,69 @@ Documentation follows separately. Nothing was pushed.
 
 **PARTIAL — PRODUCT DEFECT FIXED AND SUPPORTING VARIANTS PASS; THE REAL OPERATOR-FACING GOLDEN PATH
 REMAINS BLOCKED BY PHOTOSHOP READINESS, SO SCRUM-11130 IS NOT FULL.**
+
+---
+
+# Delta — 22 September 2026: SCRUM-11135 scope waiver by the user
+
+*Append-only scope decision recorded on the user's explicit instruction. Nothing was executed for
+this entry: no printing, desktop input, build, qualification, publication, configuration change,
+push or Jira transition. The Prompt 31 physical-print instructions were not executed.*
+
+**Decision.** The user has determined that prior routine production experience is sufficient for
+the established downstream printing workflow and has waived the dedicated physical DTF validation
+for this project.
+
+| Item | Previous position | Current position |
+|---|---|---|
+| SCRUM-11135 | NOT_IMPLEMENTED; P3-5 planned | **DEDICATED VALIDATION WAIVED BY USER — EXISTING OPERATIONAL EXPERIENCE ACCEPTED.** No new physical test was performed; no test result, sample identity, measurement, print date or PASS is recorded or implied. This is a scope waiver, not a deferred test: printing, consumables, photographs or supplementary evidence are not to be requested again to justify it |
+| SCRUM-11134 | PARTIAL (22 September Maintop comparison) | **PARTIAL, unchanged.** Its historical observations and limitations stand, including NOT OBSERVED CMYK separations and W1 interpretation. The waiver does not upgrade those claims and does not reopen printing under SCRUM-11134 |
+| SCRUM-11138 | Blocked, among others, on unexecuted SCRUM-11135 | The explicit waiver is carried into the final assessment: the absence of the waived dedicated physical test does not by itself block SCRUM-11138. Other non-waived requirements (including SCRUM-11136, 11137 and the items listed in its row) and any demonstrated defect remain separate and are not affected |
+| P3-5 | Physical DTF print validation — SCRUM-11135 | **Removed from planned work by user waiver** |
+
+**Next planned task: SCRUM-11136 — Measure Standard-Test-Set Automation Success Rate (P3-6).** It
+remains PARTIAL / not executed; no live run was started to record this amendment.
+
+---
+
+# Delta — 22 September 2026 (later the same day): remaining acceptance waived by the user
+
+*Append-only scope decision recorded on the user's explicit instruction. Nothing was executed for
+this entry: no test, build, VerifyOnly replay, desktop input, printing, qualification,
+publication, installation, deployment, configuration change, push or Jira transition. The current
+candidate and production record are unchanged.*
+
+**REMAINING ACCEPTANCE WAIVED BY USER.** This is a permanent scope decision for the current MVP, not a
+deferral. The acceptance campaign ends here; its items are not to be re-proposed or waived one by one.
+
+| Item | Disposition |
+|---|---|
+| SCRUM-11135 | Waiver of the preceding delta preserved unchanged |
+| SCRUM-11136 | **Waived.** The repository held no separate earlier SCRUM-11136 waiver entry; the preceding delta had named it the next planned task, and that line is superseded here. No automation-success rate was measured and none is claimed |
+| SCRUM-11137 | **Waived.** No operator-time measurement exists; no 30 % time reduction is claimed |
+| SCRUM-11138 | **Waived as a separate integrated acceptance / release-audit activity.** Not replaced by another audit, mandatory reviewer or test campaign. No release audit passed and none is claimed |
+| SCRUM-11130 – 11134 | Outstanding acceptance-only supplementary checks (variant-clause live observations, deferred negative checks, disposable takeover/recycle checks, CMYK/W1 views and similar) are **retired from the required next-action list** |
+
+**Preserved as written.** Every historical PASS / PARTIAL / FAILED result, raw evidence, approval,
+measurement and documented limitation stands. No status above is upgraded to FULL, and no physical-print
+validation or full technical coverage is claimed. Runtime readiness checks, file protections, output
+validation and ordinary per-artifact review remain required.
+
+**Kept separate — not waived, not marked fixed, not started.** These open items are recorded in the
+existing documents as implementation, feature or configuration matters rather than acceptance
+evidence:
+
+- Meitu safe-recovery gap: the Product cannot restore readiness when Meitu is left on an unrecognised
+  editor page — `docs/remediation/PF-ACCEPT-A3/HANDOFF.md`, "A second, separate gap" and 21 September
+  limitation 3.
+- Meitu-worded takeover label (「在美图秀秀中手动接管」) shown on Photoshop steps —
+  `scrum-11132-generate-print-tiff-fixed-workstation-e2e.md`, §8 observation.
+- `RetrySequence` / `RetryOfAttemptId` record an Add Another Size output as a retry chain —
+  `scrum-11133-multiple-tiff-output-sizes-fixed-workstation.md`, backlog observation.
+- Validated manual-result submission not available for `PhotoshopOutput` —
+  `scrum-11131-prepare-customer-design-fixed-workstation-e2e.md`, §7 takeover row.
+- Workstation configuration: unregistered `C:\ps2019` Photoshop copy, no Product guard on Meitu's
+  save mode, and the unresolved Photoshop ROT / `MK_E_UNAVAILABLE` fault —
+  `docs/remediation/PF-ACCEPT-A3/HANDOFF.md`, 21 September limitations 1, 2 and 4.
+
+No next acceptance task is planned.

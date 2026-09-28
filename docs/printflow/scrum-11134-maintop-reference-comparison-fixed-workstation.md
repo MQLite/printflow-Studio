@@ -433,3 +433,23 @@ observation record. Section 7 now reflects Operator-confirmed closure and the su
 main-executor integrity checks. This later closure statement/check was not independently observed
 or remeasured by the reviewer; no new review or acceptance replay was warranted by this narrow
 handback update. No historical observation or review finding has been backdated or replaced.
+
+## 12. Later scope decision — 22 September 2026 (SCRUM-11135 waiver)
+
+After this comparison closed, the user waived the dedicated SCRUM-11135 physical DTF validation,
+accepting existing routine production experience for the established downstream printing workflow.
+SCRUM-11135 disposition: **DEDICATED VALIDATION WAIVED BY USER — EXISTING OPERATIONAL EXPERIENCE
+ACCEPTED.** No physical test was performed, and none is recorded here.
+
+This report is otherwise unchanged. The "SCRUM-11135 is not started" statements in sections 7 and 9
+were true when written and are preserved. SCRUM-11134 remains **PARTIAL**: the Operator's general
+statement that white ink appears when printing stays general experience, and CMYK separations and W1
+interpretation remain NOT OBSERVED. The waiver neither upgrades those claims nor reopens printing
+under SCRUM-11134. Physical-print quality for REF/G1/G2 remains NOT ASSESSED as an observation; the
+decision is recorded in the coverage reaudit delta of the same date and carried into SCRUM-11138.
+The next planned task is SCRUM-11136.
+
+**Later the same day:** the user waived all remaining acceptance for the current MVP (REMAINING
+ACCEPTANCE WAIVED BY USER). The "next planned task is SCRUM-11136" line above is superseded, and this
+report's outstanding CMYK/W1 checks are retired from the next-action list. Its PARTIAL status and
+limitations are unchanged. See the coverage reaudit delta of the same date.

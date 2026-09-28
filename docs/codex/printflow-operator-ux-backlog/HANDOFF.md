@@ -1,3 +1,61 @@
+# PF-OPUX-v1 — direct master publication and Jira status current handoff
+
+2026-09-29 NZ. Task `PF-OPUX-v1-master-publication-v1`. **MASTER_PUSH_VERIFIED; Jira status synchronization and final readback COMPLETE. Stop; SCRUM-11149 not started.** Full record: [PUBLICATION_STATUS_REPORT.md](PUBLICATION_STATUS_REPORT.md) and [PUBLICATION_STATUS_AUDIT.json](PUBLICATION_STATUS_AUDIT.json).
+
+**Authorization.** The user authorized direct publication to `master` for this batch, with no feature branch or PR. That supersedes this batch's earlier no-commit/no-push/no-status-change instructions. The historical statements below remain true for their own dates.
+
+**Git**
+- Local HEAD before: `eea60198c5095243f0694717a7479b00c3e1cd73`. `origin/master` before: `cb552eefad00682c2e2f868206d248715dfeb6d3`; it had not advanced.
+- New commits:
+  - `cb875b2896481abd7915f52fba833b939aec22f4`: feat: operator UX for PF-OPUX-v1 through SCRUM-11148 (103 source/test/migration paths)
+  - `4ed9b52a448339e4041e5bbaf937312fee51aced`: docs: PF-OPUX-v1 plans, designs, Jira exports and tooling through SCRUM-11148 (44 paths)
+- The fast-forward push also published the seven earlier local docs commits.
+- Final `origin/master`: `4ed9b52a448339e4041e5bbaf937312fee51aced`. Fetch, ls-remote and the GitHub API agree, and the published paths equal the manifest.
+
+**Not committed**
+- The two `docs/printflow` waiver files (pre-existing user work).
+- Five `SCRUM-*_JIRA_READBACK.json` snapshots, plus the new publication readback. They embed the Atlassian accountId, and two also embed the owner email. The repository is public. This is an owner decision.
+- This section and the PUBLICATION_STATUS_* outputs, which were written after the push.
+
+**Verification**
+- Settled source equals the SCRUM-11148 final candidate; the assemblies are byte-identical.
+- Clean build: 0 warnings, 0 errors.
+- Architecture 452, UI 518, workflow/persistence 11531 and delivery backend 124 all passed, with 0 failed or skipped. The counts overlap.
+- Export integrity 18/18.
+- Migrations 0001–0017 unchanged; 0018 and 0019 match their accepted hashes.
+- The exclusions are unchanged. The baseline recovery hang remains NOT PASS.
+
+**Jira**
+- Transitions: To Do 11, In Progress 21, In Review 31, Done 41.
+- Status changes:
+  - SCRUM-11139 Epic and SCRUM-11141 → In Progress.
+  - SCRUM-11140 and SCRUM-11142–11148 → In Review.
+  - None → Done.
+- One marker comment `PF-OPUX-v1-master-publication-v1` per issue, comments 10173–10182.
+- Final authenticated readback 2026-09-28T22:29:11.826Z: 17 issues, 26 Blocks, 51 string labels, 34 timestamps. Only the expected drift occurred.
+- CSV: 23 columns with a UTF-8 BOM. Exporter PASS; independent oracle PASS.
+- SCRUM-11149–11155 were read only and remain To Do.
+
+**Still awaiting acceptance**
+- **Owner review:** 11140 delivery terms; 11144 KeepOriginalExtent PNG approval contract and asset-route acceptance.
+- **Human-only:** the 11141 walkthrough.
+- **Human/native checks:**
+  - 11142/11143/11146 workstation bilingual visuals;
+  - 11143 post-focus-fix native and physical input;
+  - 11145 Explorer selection and real picker;
+  - 11147 human synthetic-image, drag and key checks;
+  - 11148 human check and real colleague round trip.
+- **Epic:** novice validation (SCRUM-11155).
+- Residuals preserved below are unchanged.
+
+**Not performed.** No deployment, production migration or startup, customer files, force-push, history rewrite or SCRUM-11149+ work.
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`, Opus High. Host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit or subagent.
+
+Prior handoff bytes are preserved verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11148 current handoff
 
 2026-09-28 NZ. **Bounded local implementation, verification, independent review and authorized Jira reporting COMPLETE. Human/native acceptance NOT RUN. Stop at SCRUM-11148.**

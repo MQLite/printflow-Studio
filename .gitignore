@@ -57,6 +57,13 @@ workstation-preset-*.json
 workstation.json
 displays.json
 
+# --- Jira readback snapshots (initiative folder only) -----------------------
+# Build-JiraReadback.ps1 keeps comment authors, so a snapshot of an issue with
+# comments carries the Atlassian accountId and email. This repository is public;
+# keep new snapshots local. The sanitized *_JIRA_FINAL.csv exports stay tracked,
+# and the three snapshots committed before this rule (no author data) stay tracked.
+/docs/codex/printflow-operator-ux-backlog/*_JIRA_READBACK.json
+
 # --- Local production evidence (repository root only) -----------------------
 /signoff/
 /preset/
