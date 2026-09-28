@@ -1026,4 +1026,208 @@
   <data name="Environment_ProbeNotRecorded" xml:space="preserve"><value>Not recorded</value></data>
   <data name="Environment_LiveEvidenceDetail" xml:space="preserve"><value>Last complete live verification: {0}; retained evidence: {1}; current runtime observation deferred: {2}. Historical observations do not authorize production.</value></data>
   <data name="Environment_ProbeProgressDetail" xml:space="preserve"><value>Latest diagnostic attempt: {0}; probe: {1}. Recorded stages (unlisted stages are not confirmed): {2}. Last attempted: {3}; last confirmed: {4}; cleanup outcome: {5}. Primary failure: {6}; secondary failures: {7}.</value></data>
+  <data name="Session_PhotoshopTakeOver" xml:space="preserve"><value>Take Over in Photoshop</value></data>
+  <data name="Session_PhotoshopStopHint" xml:space="preserve"><value>Stops this automated operation. Take over stops PrintFlow control and leaves Photoshop as it is; it may still be working. PrintFlow will not force-close Photoshop. Check Photoshop before returning to automation.</value></data>
+  <data name="Session_PhotoshopTakeOverConfirmQuestion" xml:space="preserve"><value>Take over in Photoshop? PrintFlow will stop controlling Photoshop and leave it as it is. It may still be working; check it yourself before returning to automation. A manually made result, including a TIFF, cannot be imported back for this step.</value></data>
+  <data name="Session_PhotoshopStoppingNotice" xml:space="preserve"><value>Stopping — PrintFlow has requested that the Photoshop operation stop. Please wait.</value></data>
+  <data name="Session_PhotoshopTakingOverNotice" xml:space="preserve"><value>Handing over — PrintFlow is ending its control of Photoshop.</value></data>
+  <data name="Session_PhotoshopHandedOffNotice" xml:space="preserve"><value>PrintFlow has stopped controlling Photoshop. Manual result import, including a hand-made TIFF, is not supported for this step.</value></data>
+  <data name="Session_PhotoshopReturnGuidance" xml:space="preserve"><value>To make a new attempt, choose {0}, then start the step again.</value></data>
+  <data name="Session_PhotoshopRetainedNotice" xml:space="preserve"><value>Photoshop may still be working or holding a result. Check Photoshop before starting another attempt.</value></data>
+  <data name="Session_StatusHandedOff" xml:space="preserve"><value>Handed off</value></data>
+  <data name="Session_StatusCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="Session_StatusStopped" xml:space="preserve"><value>Stopped or failed</value></data>
+  <data name="Session_StatusProcessing" xml:space="preserve"><value>Processing automatically</value></data>
+  <data name="Session_StatusReview" xml:space="preserve"><value>Waiting for your review</value></data>
+  <data name="Session_StatusInput" xml:space="preserve"><value>Needs your input</value></data>
+  <data name="Session_NextCompleted" xml:space="preserve"><value>The workflow is complete.</value></data>
+  <data name="Session_NextAbandoned" xml:space="preserve"><value>This job was abandoned; return to Home to choose another job.</value></data>
+  <data name="Session_NextProcessing" xml:space="preserve"><value>Please wait while PrintFlow processes: {0}.</value></data>
+  <data name="Session_NextReview" xml:space="preserve"><value>Inspect this result, then choose {0} or {1}.</value></data>
+  <data name="Session_NextRetry" xml:space="preserve"><value>This step needs another attempt; choose {0} when ready.</value></data>
+  <data name="Session_NextAction" xml:space="preserve"><value>When ready, choose {0}.</value></data>
+  <data name="Session_NextStopped" xml:space="preserve"><value>This step did not finish; check the notices and available actions below.</value></data>
+  <data name="Session_NextOriginal" xml:space="preserve"><value>Check the original image, then choose {0}.</value></data>
+  <data name="Session_NextWhiteInk" xml:space="preserve"><value>Choose the white-ink option below and confirm it.</value></data>
+  <data name="Session_NextDimensions" xml:space="preserve"><value>Set and confirm the print size below.</value></data>
+  <data name="Session_NextBackground" xml:space="preserve"><value>Choose how to remove the background in the controls below.</value></data>
+  <data name="Session_NextInput" xml:space="preserve"><value>Check the current step and complete the required input below.</value></data>
+  <data name="Session_NextCrop" xml:space="preserve"><value>Draw or adjust the crop boundary, then choose {0}.</value></data>
+  <data name="WorkflowPurpose_Asset" xml:space="preserve"><value>Use this for a picture or logo you will use in a design. Enhance or remove the background if needed.</value></data>
+  <data name="WorkflowPurpose_Customer" xml:space="preserve"><value>Use this for a customer's finished design that needs preparation for print. Enhance or remove the background if needed.</value></data>
+  <data name="WorkflowPurpose_Print" xml:space="preserve"><value>Use this for a finished design that is ready to make into a print file.</value></data>
+  <data name="WorkflowResult_Png" xml:space="preserve"><value>You get an approved transparent PNG.</value></data>
+  <data name="WorkflowResult_Tiff" xml:space="preserve"><value>You get an approved print TIFF (CMYK + white ink).</value></data>
+  <data name="WorkflowDimensions_None" xml:space="preserve"><value>No print size needed. No TIFF.</value></data>
+  <data name="WorkflowDimensions_Required" xml:space="preserve"><value>Print size needed.</value></data>
+  <data name="FinalSave_Heading" xml:space="preserve"><value>Save the final result</value></data>
+  <data name="FinalSave_TargetLabel" xml:space="preserve"><value>Result to save</value></data>
+  <data name="FinalSave_TargetPending" xml:space="preserve"><value>{0} (waiting for your review)</value></data>
+  <data name="FinalSave_TargetApproved" xml:space="preserve"><value>{0} (approved)</value></data>
+  <data name="FinalSave_FileNameLabel" xml:space="preserve"><value>File name</value></data>
+  <data name="FinalSave_FolderLabel" xml:space="preserve"><value>Folder</value></data>
+  <data name="FinalSave_NoFolderValue" xml:space="preserve"><value>No folder chosen yet</value></data>
+  <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>Change location</value></data>
+  <data name="FinalSave_PickerTitle" xml:space="preserve"><value>Choose the folder for the final result</value></data>
+  <data name="FinalSave_NoFolder" xml:space="preserve"><value>Choose a folder before saving.</value></data>
+  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>This is the last folder a save succeeded in. Change it if this job belongs somewhere else.</value></data>
+  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>The last used folder could not be read. Choose a folder before saving.</value></data>
+  <data name="FinalSave_SaveAs" xml:space="preserve"><value>Save as: {0}</value></data>
+  <data name="FinalSave_TypePng" xml:space="preserve"><value>PNG</value></data>
+  <data name="FinalSave_TypeTiff" xml:space="preserve"><value>Print TIFF · {0:0.#} × {1:0.#} mm</value></data>
+  <data name="FinalSave_TypeTiffSizePending" xml:space="preserve"><value>Print TIFF · actual size not shown yet</value></data>
+  <data name="FinalSave_FolderValue" xml:space="preserve"><value>Folder: {0}</value></data>
+  <data name="FinalSave_NameExtensionAdded" xml:space="preserve"><value>The extension will be added: the file is saved as {0}.</value></data>
+  <data name="FinalSave_NameInvalid" xml:space="preserve"><value>Enter a plain file name without \ / : * ? " &lt; &gt; | and without a trailing dot or space.</value></data>
+  <data name="FinalSave_NameWrongType" xml:space="preserve"><value>This result is a {0} file, so the name must end in {1}.</value></data>
+  <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>Confirm result and save</value></data>
+  <data name="FinalSave_SaveApproved" xml:space="preserve"><value>Save approved result</value></data>
+  <data name="FinalSave_RetrySave" xml:space="preserve"><value>Retry save</value></data>
+  <data name="FinalSave_CheckAgain" xml:space="preserve"><value>Check this save again</value></data>
+  <data name="FinalSave_CheckSaved" xml:space="preserve"><value>Check saved file</value></data>
+  <data name="FinalSave_OpenFolder" xml:space="preserve"><value>Open containing folder</value></data>
+  <data name="FinalSave_SaveAnotherCopy" xml:space="preserve"><value>Save another copy</value></data>
+  <data name="FinalSave_UseSuggestion" xml:space="preserve"><value>Use {0}</value></data>
+  <data name="FinalSave_CancelSave" xml:space="preserve"><value>Cancel save</value></data>
+  <data name="FinalSave_AwaitingConfirmation" xml:space="preserve"><value>Waiting for your review. Check the result, file name and folder, then choose {0}.</value></data>
+  <data name="FinalSave_ApproveOnlyHint" xml:space="preserve"><value>{0} only records your review; it does not save a file.</value></data>
+  <data name="FinalSave_StageChecking" xml:space="preserve"><value>Checking the file name and folder…</value></data>
+  <data name="FinalSave_StageApproving" xml:space="preserve"><value>Confirming this result…</value></data>
+  <data name="FinalSave_StagePreparingPng" xml:space="preserve"><value>Approved. Preparing the approved PNG…</value></data>
+  <data name="FinalSave_StageSaving" xml:space="preserve"><value>Approved. Saving to {0}…</value></data>
+  <data name="FinalSave_StageFinishing" xml:space="preserve"><value>Approved. Finishing the save… This can no longer be cancelled.</value></data>
+  <data name="FinalSave_ApprovedNotSaved" xml:space="preserve"><value>Approved, but not saved to your folder yet.</value></data>
+  <data name="FinalSave_ApprovedNotSavedReason" xml:space="preserve"><value>Approved, but not saved: {0} Nothing needs to be processed again.</value></data>
+  <data name="FinalSave_Saved" xml:space="preserve"><value>Saved: {0} in {1}.</value></data>
+  <data name="FinalSave_SavedPreviously" xml:space="preserve"><value>Saved previously: {0} in {1}. Location not checked.</value></data>
+  <data name="FinalSave_Uncertain" xml:space="preserve"><value>A file may have been saved to {0}, but completion is not verified. Check this save again.</value></data>
+  <data name="FinalSave_Collision" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Use {1} or choose another folder.</value></data>
+  <data name="FinalSave_CollisionNoSuggestion" xml:space="preserve"><value>{0} already exists in this folder and will not be overwritten. Enter another name or choose another folder.</value></data>
+  <data name="FinalSave_Missing" xml:space="preserve"><value>Saved previously, but the file is now missing: {0}</value></data>
+  <data name="FinalSave_Changed" xml:space="preserve"><value>Saved previously, but the file at {0} has changed. It will not be overwritten; choose another name or folder to save again.</value></data>
+  <data name="FinalSave_Unavailable" xml:space="preserve"><value>Saved previously, but {0} cannot be reached now. Reconnect the drive, then check again.</value></data>
+  <data name="FinalSave_HistoryUnavailable" xml:space="preserve"><value>Save history could not be read, so earlier saves may exist.</value></data>
+  <data name="FinalSave_PngPreparationPending" xml:space="preserve"><value>Approved; the approved PNG is not prepared yet. Use the step action below to prepare it, then save. The image does not need processing again.</value></data>
+  <data name="FinalSave_ApprovalRefused" xml:space="preserve"><value>Result not approved: the result on screen changed or could not be approved. Nothing was saved.</value></data>
+  <data name="FinalSave_ApprovalUnknown" xml:space="preserve"><value>PrintFlow could not confirm whether the approval was recorded. Nothing was saved. Return to Home and reopen this job to see its current state.</value></data>
+  <data name="FinalSave_DraftRefused" xml:space="preserve"><value>Nothing was approved or saved: {0}</value></data>
+  <data name="FinalSave_Ineligible" xml:space="preserve"><value>This result cannot be saved: {0}</value></data>
+  <data name="FinalSave_UncertainElsewhere" xml:space="preserve"><value>An earlier save to {0} is not verified yet. Saving with a different name or folder makes a separate copy.</value></data>
+  <data name="FinalSave_ReasonApprovalEvidenceMissing" xml:space="preserve"><value>there is no human review record for this image, so it cannot be treated as approved.</value></data>
+  <data name="FinalSave_ReasonPending" xml:space="preserve"><value>it is still waiting for review.</value></data>
+  <data name="FinalSave_ReasonRejected" xml:space="preserve"><value>it was rejected.</value></data>
+  <data name="FinalSave_ReasonInvalidated" xml:space="preserve"><value>it is no longer valid because an earlier step changed.</value></data>
+  <data name="FinalSave_ReasonRecycled" xml:space="preserve"><value>its file was sent to the Recycle Bin.</value></data>
+  <data name="FinalSave_ReasonObsolete" xml:space="preserve"><value>a newer result replaced it.</value></data>
+  <data name="FinalSave_ReasonInconsistent" xml:space="preserve"><value>its approval record does not match its file.</value></data>
+  <data name="FinalSave_ReasonMissing" xml:space="preserve"><value>it could not be found.</value></data>
+  <data name="FinalSave_ReasonSourceChanged" xml:space="preserve"><value>the approved file in PrintFlow's storage changed or is missing.</value></data>
+  <data name="FinalSave_FailCancelled" xml:space="preserve"><value>the save was cancelled.</value></data>
+  <data name="FinalSave_FailNotWritable" xml:space="preserve"><value>the folder cannot be written.</value></data>
+  <data name="FinalSave_FailUnavailable" xml:space="preserve"><value>the folder is not available (the drive may be disconnected).</value></data>
+  <data name="FinalSave_FailUnsupported" xml:space="preserve"><value>this location is not supported. Choose a folder on a local NTFS drive of this computer (a USB drive only if it is formatted NTFS); network, cloud and other drive types are not supported.</value></data>
+  <data name="FinalSave_FailProtected" xml:space="preserve"><value>that folder belongs to PrintFlow's own storage, or the name is the original imported file. Choose another folder or name.</value></data>
+  <data name="FinalSave_FailCopy" xml:space="preserve"><value>the copy could not be completed.</value></data>
+  <data name="FinalSave_FailVerify" xml:space="preserve"><value>the copied file could not be verified.</value></data>
+  <data name="FinalSave_FailPersistence" xml:space="preserve"><value>the save record could not be written.</value></data>
+  <data name="FinalSave_FailInvalidName" xml:space="preserve"><value>the file name is not valid.</value></data>
+  <data name="FinalSave_FailConflict" xml:space="preserve"><value>the selection changed. Check the result and try again.</value></data>
+  <data name="FinalSave_FailOther" xml:space="preserve"><value>the save did not complete.</value></data>
+  <data name="FinalSave_OpenDispatched" xml:space="preserve"><value>Asked Windows to show {0} in its folder.</value></data>
+  <data name="FinalSave_OpenMissing" xml:space="preserve"><value>The folder was not opened: the saved file is missing.</value></data>
+  <data name="FinalSave_OpenChanged" xml:space="preserve"><value>The folder was not opened: the saved file has changed.</value></data>
+  <data name="FinalSave_OpenUnavailable" xml:space="preserve"><value>The folder was not opened: the location cannot be reached now.</value></data>
+  <data name="FinalSave_OpenIneligible" xml:space="preserve"><value>The folder was not opened: this result can no longer be saved or opened.</value></data>
+  <data name="FinalSave_OpenUncertain" xml:space="preserve"><value>The folder was not opened: this save is not verified.</value></data>
+  <data name="FinalSave_OpenShellFailed" xml:space="preserve"><value>Windows did not open the folder. The file is still saved at {0}.</value></data>
+  <data name="FinalSave_FullPathLabel" xml:space="preserve"><value>Full path (select to copy)</value></data>
+  <data name="FinalSave_DetailsLabel" xml:space="preserve"><value>Technical details</value></data>
+  <data name="Session_NextFinalReview" xml:space="preserve"><value>Inspect this result and check the file name and folder, then choose {0}. {1} only records the review.</value></data>
+  <data name="Session_NextCompletedNotSaved" xml:space="preserve"><value>The workflow is complete, but the approved result is not saved to your folder yet.</value></data>
+  <data name="FinalSave_StageVerifyingSaved" xml:space="preserve"><value>Checking the saved file…</value></data>
+  <data name="FinalSave_StageApproved" xml:space="preserve"><value>Approved. Preparing the save…</value></data>
+  <data name="FinalSave_ActionIncomplete" xml:space="preserve"><value>This action did not finish, so nothing more is known about this save yet. Try again.</value></data>
+  <data name="FinalSave_HistoryLoading" xml:space="preserve"><value>Reading earlier saves…</value></data>
+  <data name="FinalSave_HistoryNotRefreshed" xml:space="preserve"><value>Save history could not be refreshed. What is shown was read earlier and may be out of date.</value></data>
+  <data name="FinalSave_RecordsLabel" xml:space="preserve"><value>Recorded saves of this result</value></data>
+  <data name="FinalSave_RecordSaved" xml:space="preserve"><value>Saved {2}: {0} in {1}</value></data>
+  <data name="FinalSave_RecordUnverified" xml:space="preserve"><value>Not verified: {0} in {1}</value></data>
+  <data name="FinalSave_RecordNotSaved" xml:space="preserve"><value>Not saved: {0} in {1}</value></data>
+  <data name="Session_NextFinalReviewNeedsDraft" xml:space="preserve"><value>Inspect this result, then choose a folder and check the file name to save it. {0} only records the review.</value></data>
+  <data name="Session_TrimAdjustBegin" xml:space="preserve"><value>Adjust trim edges</value></data>
+  <data name="Session_TrimAdjustHeading" xml:space="preserve"><value>Adjust trim edges</value></data>
+  <data name="Session_TrimAdjustInstructions" xml:space="preserve"><value>Drag the edges or corners to change what is kept. Trimming only changes the picture's edges.</value></data>
+  <data name="Session_TrimAdjustPrintSizeLater" xml:space="preserve"><value>The print size is set in a later step.</value></data>
+  <data name="Session_TrimAdjustKeyboard" xml:space="preserve"><value>Keyboard: Tab to a handle, then use the arrow keys (Shift moves 10 pixels; Ctrl moves to the picture's border).</value></data>
+  <data name="Session_TrimAdjustUse" xml:space="preserve"><value>Use this trim</value></data>
+  <data name="Session_TrimAdjustRestore" xml:space="preserve"><value>Restore automatic suggestion</value></data>
+  <data name="Session_TrimAdjustNoSuggestion" xml:space="preserve"><value>There is no automatic suggestion for this picture.</value></data>
+  <data name="Session_TrimAdjustCancel" xml:space="preserve"><value>Cancel adjustment</value></data>
+  <data name="Session_TrimAdjustAdjustView" xml:space="preserve"><value>Adjust</value></data>
+  <data name="Session_TrimAdjustCompareView" xml:space="preserve"><value>Compare</value></data>
+  <data name="Session_TrimAdjustCurrent" xml:space="preserve"><value>Current result (waiting for review)</value></data>
+  <data name="Session_TrimAdjustProposed" xml:space="preserve"><value>Proposed trim (not used yet)</value></data>
+  <data name="Session_TrimAdjustKept" xml:space="preserve"><value>Kept area: {0}</value></data>
+  <data name="Session_TrimAdjustSuggestion" xml:space="preserve"><value>Automatic suggestion: {0}</value></data>
+  <data name="Session_TrimAdjustInvalid" xml:space="preserve"><value>That boundary can't be used: it must stay inside the picture and keep at least one pixel. The previous boundary is kept. To place an edge exactly on the picture's border, zoom in or press Ctrl+arrow on its handle.</value></data>
+  <data name="Session_TrimAdjustUnchanged" xml:space="preserve"><value>The boundary is unchanged. Using it still makes a new result that needs review.</value></data>
+  <data name="Session_TrimAdjustBusy" xml:space="preserve"><value>Making the new trim…</value></data>
+  <data name="Session_TrimAdjustReady" xml:space="preserve"><value>The new trim is ready. Check it, then approve it.</value></data>
+  <data name="Session_TrimAdjustSourceUnavailable" xml:space="preserve"><value>The picture this trim was made from can't be opened, so the edges can't be adjusted here. The current result is unchanged.</value></data>
+  <data name="Session_NextTrimAdjust" xml:space="preserve"><value>Drag the edges or corners, then choose {0}.</value></data>
+  <data name="FinalSave_TrimAdjustOpen" xml:space="preserve"><value>Finish or cancel the trim adjustment before approving or saving.</value></data>
+  <data name="Session_TrimHandleLeft" xml:space="preserve"><value>Left edge</value></data>
+  <data name="Session_TrimHandleTop" xml:space="preserve"><value>Top edge</value></data>
+  <data name="Session_TrimHandleRight" xml:space="preserve"><value>Right edge</value></data>
+  <data name="Session_TrimHandleBottom" xml:space="preserve"><value>Bottom edge</value></data>
+  <data name="Session_TrimHandleTopLeft" xml:space="preserve"><value>Top-left corner</value></data>
+  <data name="Session_TrimHandleTopRight" xml:space="preserve"><value>Top-right corner</value></data>
+  <data name="Session_TrimHandleBottomLeft" xml:space="preserve"><value>Bottom-left corner</value></data>
+  <data name="Session_TrimHandleBottomRight" xml:space="preserve"><value>Bottom-right corner</value></data>
+  <data name="Session_TrimAdjustClosed" xml:space="preserve"><value>This trim can no longer be adjusted here, so the adjustment was closed. The current result is unchanged.</value></data>
+  <data name="Session_AskColleague" xml:space="preserve"><value>Ask a colleague to correct this image</value></data>
+  <data name="Session_AskColleagueHint" xml:space="preserve"><value>Not sure this looks right? A colleague can correct it.</value></data>
+  <data name="Session_CorrectionNoteLabel" xml:space="preserve"><value>What to fix (optional)</value></data>
+  <data name="Session_CorrectionPrepare" xml:space="preserve"><value>Prepare files for my colleague</value></data>
+  <data name="Session_CorrectionTryAgain" xml:space="preserve"><value>Try again</value></data>
+  <data name="Session_CorrectionCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Session_CorrectionPreparing" xml:space="preserve"><value>Preparing files…</value></data>
+  <data name="Session_CorrectionPrepareFailed" xml:space="preserve"><value>The files for your colleague could not be prepared. Nothing was handed off. {0}</value></data>
+  <data name="Session_CorrectionStatus" xml:space="preserve"><value>Handed off — waiting for your colleague's corrected picture</value></data>
+  <data name="Session_CorrectionStep1" xml:space="preserve"><value>1. Give your colleague these two files:</value></data>
+  <data name="Session_CorrectionReference" xml:space="preserve"><value>Reference (do not edit): {0}</value></data>
+  <data name="Session_CorrectionWorking" xml:space="preserve"><value>Correct this file: {0}</value></data>
+  <data name="Session_CorrectionFolder" xml:space="preserve"><value>Folder: {0}</value></data>
+  <data name="Session_CorrectionOpenFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="Session_CorrectionStep2" xml:space="preserve"><value>2. What to fix: {0}</value></data>
+  <data name="Session_CorrectionNoNote" xml:space="preserve"><value>No note — check hair, edges and leftover background.</value></data>
+  <data name="Session_CorrectionStep3" xml:space="preserve"><value>3. Save the corrected picture as a PNG with a transparent background, {0} × {1} pixels, in the same folder (for example "{2}").</value></data>
+  <data name="Session_CorrectionStep4" xml:space="preserve"><value>4. Back in PrintFlow, open this job and choose Import corrected image. PrintFlow will not repeat background removal on the imported picture.</value></data>
+  <data name="Session_CorrectionImport" xml:space="preserve"><value>Import corrected image</value></data>
+  <data name="Session_CorrectionPickerTitle" xml:space="preserve"><value>Choose the corrected picture</value></data>
+  <data name="Session_CorrectionChecking" xml:space="preserve"><value>Checking the picture…</value></data>
+  <data name="Session_CorrectionRefused" xml:space="preserve"><value>Import refused: {0} The job is still handed off.</value></data>
+  <data name="Session_CorrectionIsReference" xml:space="preserve"><value>This is the reference copy. Choose the corrected picture.</value></data>
+  <data name="Session_CorrectionChanged" xml:space="preserve"><value>The picture changed while it was being checked. Save it again, then choose Import corrected image.</value></data>
+  <data name="Session_CorrectionMissingFiles" xml:space="preserve"><value>Some files for your colleague are missing.</value></data>
+  <data name="Session_CorrectionRepair" xml:space="preserve"><value>Prepare files again</value></data>
+  <data name="Session_CorrectionLastImportFailed" xml:space="preserve"><value>The last import did not finish. Choose Import corrected image again.</value></data>
+  <data name="Session_CorrectionReview" xml:space="preserve"><value>Check the corrected picture, then choose Approve or Reject. After you approve it, PrintFlow continues with {0}. Background removal will not run again.</value></data>
+  <data name="Session_CorrectionIdentical" xml:space="preserve"><value>This picture is identical to the one you sent.</value></data>
+  <data name="Session_CorrectionOtherComputer" xml:space="preserve"><value>If your colleague uses another computer, copy these files to them yourself.</value></data>
+  <data name="Session_CorrectionObsolete" xml:space="preserve"><value>This correction request is no longer current. Its files remain in {0}.</value></data>
+  <data name="Session_CorrectionUseImport" xml:space="preserve"><value>This job is waiting for a colleague's corrected picture. Use Import corrected image in this job.</value></data>
+  <data name="Session_CorrectionNotAvailable" xml:space="preserve"><value>This correction request is no longer available. Nothing was changed.</value></data>
+  <data name="Session_CorrectionResultChanged" xml:space="preserve"><value>This result is no longer the one under review. Nothing was changed.</value></data>
+  <data name="Session_CorrectionAlreadyImported" xml:space="preserve"><value>This correction has already been imported.</value></data>
+  <data name="Session_CorrectionNameTaken" xml:space="preserve"><value>A different file with the same name is already in the correction folder. It was left untouched; move it away, then try again.</value></data>
+  <data name="Session_CorrectionOpenFolderFailed" xml:space="preserve"><value>The folder could not be opened. Its path is shown in the panel.</value></data>
+  <data name="Session_CorrectionOtherOptions" xml:space="preserve"><value>Other options</value></data>
+  <data name="Session_CorrectionFileReference" xml:space="preserve"><value>{0} - REFERENCE (do not edit)</value></data>
+  <data name="Session_CorrectionFileWorking" xml:space="preserve"><value>{0} - CORRECT THIS</value></data>
+  <data name="Session_CorrectionFileReturn" xml:space="preserve"><value>{0} - CORRECTED</value></data>
+  <data name="Session_CorrectionInstructionsTitle" xml:space="preserve"><value>PrintFlow — colleague correction</value></data>
+  <data name="Home_RecentWaitingForCorrection" xml:space="preserve"><value>Waiting for a colleague's corrected picture</value></data>
+  <data name="Home_RecoveryOpenCorrection" xml:space="preserve"><value>Open job to import corrected image</value></data>
+  <data name="Session_NextCorrectionWait" xml:space="preserve"><value>Waiting for your colleague's corrected picture. When it is ready, choose {0}.</value></data>
 </root>

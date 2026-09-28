@@ -4,9 +4,9 @@ using PrintFlow.Domain.Ids;
 namespace PrintFlow.Workflow.Services;
 
 /// <summary>
-/// Serialises completion maintenance with AddAnotherSize within the single application
-/// instance. Startup already runs behind ApplicationStartup's process-wide single-instance
-/// guard, before operator commands. This is independent of the external automation lock.
+/// Serialises one session's workflow mutation, completion/retention, recovery and external
+/// delivery authority checks within the single application instance. This is independent of
+/// the workstation automation lock; stop signaling deliberately remains outside this gate.
 /// </summary>
 internal static class SessionCompletionGate
 {

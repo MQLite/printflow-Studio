@@ -446,6 +446,7 @@ public sealed class StartupRecoveryTests
             await harness.CreateRecoveryService(liveness).RecoverAsync(CancellationToken.None);
         recovered.IsSuccess.ShouldBeTrue(recovered.IsFailure ? recovered.Failure.ToString() : "");
         recovered.Value.Entries.ShouldNotContain(e => e.Action == StartupRecoveryAction.RecoveryFailed);
+        SimulatedProcessDeath.BeginRecoveredProcess(recovered.Value);
         return recovered.Value;
     }
 

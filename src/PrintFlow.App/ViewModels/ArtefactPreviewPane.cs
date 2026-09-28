@@ -85,6 +85,18 @@ public sealed class ArtefactPreviewPane
     /// <inheritdoc cref="SourcePixelWidth" />
     public int SourcePixelHeight { get; }
 
+    /// <summary>
+    /// The Revision this pane shows, when the screen built it from one (SCRUM-11147). Lets the
+    /// trim editor bind to its exact source by identity rather than by position in the list.
+    /// </summary>
+    public PrintFlow.Domain.Ids.RevisionId? RevisionId { get; private set; }
+
+    internal ArtefactPreviewPane For(PrintFlow.Domain.Ids.RevisionId revision)
+    {
+        RevisionId = revision;
+        return this;
+    }
+
     internal static ArtefactPreviewPane From(string heading, string fileName, ImagePreview preview)
     {
         ArgumentNullException.ThrowIfNull(preview);

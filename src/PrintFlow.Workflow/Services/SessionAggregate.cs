@@ -29,6 +29,12 @@ public sealed record SessionAggregate(
     IReadOnlyList<PrintOutput> Outputs)
 {
     /// <summary>
+    /// The session's colleague-correction requests, oldest first (SCRUM-11148). Binding and
+    /// history only; eligibility is decided by <see cref="CorrectionRequestEligibility"/>.
+    /// </summary>
+    public IReadOnlyList<CorrectionRequest> CorrectionRequests { get; init; } = [];
+
+    /// <summary>
     /// Rebuilds the engine's <see cref="WorkflowSnapshot"/> from persisted rows.
     /// </summary>
     /// <remarks>
@@ -157,6 +163,12 @@ public sealed record SessionListItem(
     /// finished record".
     /// </summary>
     public bool CanContinueProcessing => SessionStateRules.AllowsProgress(State);
+
+    /// <summary>
+    /// Whether this handed-off job is waiting for a colleague's corrected picture under an eligible
+    /// request (SCRUM-11148). Display only: it grants nothing.
+    /// </summary>
+    public bool HasOpenCorrection { get; init; }
 }
 
 /// <summary>

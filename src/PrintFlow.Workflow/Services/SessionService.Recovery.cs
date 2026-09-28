@@ -17,6 +17,13 @@ public sealed record RecoveryItem(SessionId Id, OutputName OutputName, WorkflowT
     IReadOnlyList<RecoveryAction> Actions)
 {
     public bool HasUnfinishedManualImport => StepState == StepState.Processing;
+
+    /// <summary>
+    /// Whether this job waits for a colleague's corrected picture under an eligible request after
+    /// an unfinished import (SCRUM-11148, addendum §2.2). Display only: it grants nothing, and Home
+    /// answers it by opening the job, never by importing.
+    /// </summary>
+    public bool HasOpenCorrection { get; init; }
 }
 
 public sealed partial class SessionService
@@ -59,12 +66,19 @@ public sealed partial class SessionService
                 new CommandContext(DateTimeOffset.UnixEpoch, CommandContext.UnknownOperator, default, default));
             if (handoff.IsAccepted) manualState = handoff.State;
         }
-        if (_manualResults is not null && ManualResultEligibility.CanSubmit(manualState) &&
+        // A correction job is imported only from its own Session panel, never through the generic
+        // Home import: its ManualResult action is not offered at all (SCRUM-11148, addendum §2.2).
+        bool hasOpenCorrection = CorrectionRequestEligibility.Resolve(state, aggregate.CorrectionRequests, aggregate.Attempts)
+            is { Mode: CorrectionImportMode.AfterUnfinishedImport };
+        if (!hasOpenCorrection && _manualResults is not null && ManualResultEligibility.CanSubmit(manualState) &&
             _engine.AvailableCommands(manualState).Contains(CommandKind.SubmitManualResult))
             actions.Add(RecoveryAction.ManualResult);
         if (commands.Contains(CommandKind.AbandonSession)) actions.Add(RecoveryAction.Abandon);
         return new RecoveryItem(aggregate.Session.Id, aggregate.Session.OutputName, state.WorkflowType,
-            step.Step, step.State, state.SessionState, aggregate.Session.UpdatedAtUtc, actions);
+            step.Step, step.State, state.SessionState, aggregate.Session.UpdatedAtUtc, actions)
+        {
+            HasOpenCorrection = hasOpenCorrection,
+        };
     }
 
     private const string RecoveryManualReason = "Operator chose a manually saved result after interruption.";
@@ -91,6 +105,9 @@ public sealed partial class SessionService
     public async Task<OperationResult<SessionView>> ResolveRecoveryAsync(SessionId id, RecoveryAction action,
         string? selectedPath, string? operatorName, CancellationToken cancellationToken)
     {
+        // Recovery's eligibility read and its possibly two-step manual transition share the
+        // delivery/session gate. Calling ExecuteAsync here would reacquire it and deadlock.
+        using IDisposable lease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
         var loaded = await _repository.LoadAsync(id, cancellationToken);
         if (loaded.IsFailure) return OperationResult.Fail<SessionView>(loaded.Failure);
         if (loaded.Value is not { } aggregate || RecoveryOf(aggregate) is not { } item || !item.Actions.Contains(action))
@@ -102,14 +119,16 @@ public sealed partial class SessionService
                 return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet, "Choose a saved result first.");
             if (item.State == SessionState.Active)
             {
-                var handedOff = await ExecuteAsync(id, new WorkflowCommand.HandOff(item.Step, RecoveryManualReason), operatorName, cancellationToken);
+                var handedOff = await ExecuteCoreAsync(id, new WorkflowCommand.HandOff(item.Step, RecoveryManualReason),
+                    operatorName, expectedFailureAttemptId: null, cancellationToken);
                 if (handedOff.IsFailure) return handedOff;
             }
-            return await ExecuteAsync(id, new WorkflowCommand.SubmitManualResult(item.Step, selectedPath), operatorName, cancellationToken);
+            return await ExecuteCoreAsync(id, new WorkflowCommand.SubmitManualResult(item.Step, selectedPath),
+                operatorName, expectedFailureAttemptId: null, cancellationToken);
         }
         WorkflowCommand command = action == RecoveryAction.Abandon
             ? new WorkflowCommand.AbandonSession("Abandoned by the operator from Home recovery.")
             : item.State == SessionState.HandedOff ? new WorkflowCommand.ReenterAutomation() : new WorkflowCommand.Retry(item.Step);
-        return await ExecuteAsync(id, command, operatorName, cancellationToken);
+        return await ExecuteCoreAsync(id, command, operatorName, expectedFailureAttemptId: null, cancellationToken);
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PrintFlow.App.Localisation;
 using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Files;
@@ -18,19 +19,20 @@ namespace PrintFlow.App.ViewModels;
 /// One of the three fixed workflows, flattened for display.
 /// </summary>
 /// <remarks>
-/// <see cref="Type"/> is the internal value that is persisted; <see cref="Title"/> is the only
-/// part an operator reads. There are exactly three of these and no way to add a fourth — the
+/// <see cref="Type"/> is the internal value that is persisted; the localised projections are
+/// what an operator reads. There are exactly three of these and no way to add a fourth — the
 /// catalogue is the configuration (MVP design §6.1).
 /// </remarks>
-public sealed class WorkflowChoice
+public sealed class WorkflowChoice : ObservableObject
 {
+    private readonly WorkflowDefinition _definition;
+
     internal WorkflowChoice(WorkflowDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
         Type = definition.Type;
-        Title = DisplayNames.Workflow(definition.Type);
-        Steps = new ReadOnlyCollection<string>(definition.Steps.Select(Describe).ToList());
+        _definition = definition;
     }
 
     /// <summary>The persisted workflow value. Never displayed.</summary>
@@ -54,10 +56,30 @@ public sealed class WorkflowChoice
     };
 
     /// <summary>The localised workflow name.</summary>
-    public string Title { get; }
+    public string Title => DisplayNames.Workflow(Type);
+
+    /// <summary>When to choose this route, without making optional preparation mandatory.</summary>
+    public string Purpose => Type switch
+    {
+        WorkflowType.PrepareAsset => Strings.WorkflowPurpose_Asset,
+        WorkflowType.PrepareCustomerDesign => Strings.WorkflowPurpose_Customer,
+        WorkflowType.GeneratePrintTiff => Strings.WorkflowPurpose_Print,
+        _ => throw new InvalidOperationException("Unknown workflow type."),
+    };
+
+    /// <summary>The approved file this route produces, not a promise of external delivery.</summary>
+    public string Result => Type == WorkflowType.PrepareAsset
+        ? Strings.WorkflowResult_Png : Strings.WorkflowResult_Tiff;
+
+    /// <summary>Whether the existing route asks for physical print dimensions.</summary>
+    public string Dimensions => Type == WorkflowType.PrepareAsset
+        ? Strings.WorkflowDimensions_None : Strings.WorkflowDimensions_Required;
 
     /// <summary>The workflow's steps, so the choice is informed rather than a bare name.</summary>
-    public IReadOnlyList<string> Steps { get; }
+    public IReadOnlyList<string> Steps =>
+        new ReadOnlyCollection<string>(_definition.Steps.Select(Describe).ToList());
+
+    internal void RefreshLanguage() => OnPropertyChanged(string.Empty);
 
     private static string Describe(StepDefinition step)
     {
@@ -132,7 +154,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     private SessionView? _session;
 
     public WorkflowSelectionViewModel(
-        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation)
+        ISessionService sessions, IArtefactPreviewService previews, INavigationService navigation,
+        ILocalisationService? localisation = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -144,6 +167,22 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
 
         Workflows = new ReadOnlyCollection<WorkflowChoice>(
             WorkflowCatalog.All.Select(definition => new WorkflowChoice(definition)).ToList());
+
+        if (localisation is not null)
+        {
+            System.Windows.WeakEventManager<ILocalisationService, EventArgs>.AddHandler(
+                localisation, nameof(ILocalisationService.LanguageChanged), OnLanguageChanged);
+        }
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        foreach (WorkflowChoice choice in Workflows)
+        {
+            choice.RefreshLanguage();
+        }
+
+        OnPropertyChanged(string.Empty);
     }
 
     /// <summary>The three fixed workflows, in menu order, straight from the catalogue.</summary>

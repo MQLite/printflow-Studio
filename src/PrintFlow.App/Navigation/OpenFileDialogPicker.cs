@@ -11,7 +11,11 @@ namespace PrintFlow.App.Navigation;
 public sealed class OpenFileDialogPicker : IFilePicker
 {
     /// <inheritdoc />
-    public string? PickSingleFile(string dialogTitle, string filter)
+    public string? PickSingleFile(string dialogTitle, string filter) =>
+        PickSingleFile(dialogTitle, filter, initialFolder: null);
+
+    /// <inheritdoc />
+    public string? PickSingleFile(string dialogTitle, string filter, string? initialFolder)
     {
         OpenFileDialog dialog = new()
         {
@@ -20,6 +24,11 @@ public sealed class OpenFileDialogPicker : IFilePicker
             Multiselect = false,
             CheckFileExists = true,
         };
+
+        if (!string.IsNullOrWhiteSpace(initialFolder))
+        {
+            dialog.InitialDirectory = initialFolder;
+        }
 
         return dialog.ShowDialog() == true ? dialog.FileName : null;
     }

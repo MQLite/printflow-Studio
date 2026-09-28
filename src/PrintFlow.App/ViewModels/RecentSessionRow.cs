@@ -42,7 +42,16 @@ public sealed partial class RecentSessionRow : ObservableObject
         CanAbandon = item.CanAbandon;
         CanContinueProcessing = item.CanContinueProcessing;
         CanRemoveRecord = item.CanRemoveRecord;
+        HasOpenCorrection = item.HasOpenCorrection;
     }
+
+    /// <summary>
+    /// Whether this handed-off job waits for a colleague's corrected picture (SCRUM-11148). The
+    /// open action still reads "Details"; this line is what says there is something to return to.
+    /// </summary>
+    public bool HasOpenCorrection { get; }
+
+    public string WaitingForCorrectionText => Strings.Home_RecentWaitingForCorrection;
 
     /// <summary>Which session an entry action applies to. Never displayed.</summary>
     public SessionId Id { get; }

@@ -1,3 +1,4 @@
+using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
@@ -46,6 +47,86 @@ public interface ISessionService
 
     /// <summary>Loads a session's current view without changing anything.</summary>
     Task<OperationResult<SessionView>> LoadAsync(SessionId id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Applies the ordinary lawful Approve only when <paramref name="step"/>'s current result is
+    /// still exactly <paramref name="revision"/> with <paramref name="reviewedHash"/> (SCRUM-11145).
+    /// </summary>
+    /// <remarks>
+    /// The command payload alone binds the hash, so an identical re-run would satisfy it. This
+    /// entry adds the revision identity under the same session coordination and changes no
+    /// approval semantics.
+    /// </remarks>
+    Task<OperationResult<SessionView>> ApproveExactReviewAsync(
+        SessionId id, StepKind step, RevisionId revision, Sha256 reviewedHash, string? operatorName,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support exact review approval."));
+
+    /// <summary>
+    /// Applies the ordinary lawful Reject only when <paramref name="step"/>'s current result is
+    /// still exactly <paramref name="revision"/> with <paramref name="reviewedHash"/> (SCRUM-11148).
+    /// </summary>
+    /// <remarks>
+    /// The sibling of <see cref="ApproveExactReviewAsync"/>, for the same reason: a colleague may
+    /// return unchanged bytes, so a stale screen of R must not reject a same-hash R2.
+    /// </remarks>
+    Task<OperationResult<SessionView>> RejectExactReviewAsync(
+        SessionId id, StepKind step, RevisionId revision, Sha256 reviewedHash,
+        Domain.Reviews.RejectionReason reason, string? notes, string? operatorName,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support exact review rejection."));
+
+    /// <summary>
+    /// Asks a colleague to correct the exact background-removal result under review: records the
+    /// request, prepares and verifies the reference and working copies, and only then hands the
+    /// session off (SCRUM-11148, design §6.2).
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="requestId"/> is minted by the screen once per fresh request and reused on a
+    /// retry, so a repeat after an uncertain outcome returns or resumes the same request and never
+    /// makes a second package.
+    /// </remarks>
+    Task<OperationResult<SessionView>> RequestColleagueCorrectionAsync(
+        SessionId id, Guid requestId, RevisionId reviewedRevision, Sha256 reviewedHash, string? note,
+        CorrectionFileNaming naming, string? operatorName, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support colleague correction."));
+
+    /// <summary>
+    /// Recreates only the missing files of an eligible correction request; never overwrites
+    /// (SCRUM-11148, design §6.3).
+    /// </summary>
+    Task<OperationResult<SessionView>> RepairCorrectionFilesAsync(
+        SessionId id, Guid requestId, CorrectionFileNaming naming, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support colleague correction."));
+
+    /// <summary>
+    /// Checks the selected corrected picture read-only, then imports it for the request as a new
+    /// Revision that waits for its own review (SCRUM-11148, design §6.5).
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="reviewedRevision"/> and <paramref name="reviewedHash"/> are the result the
+    /// screen showed as handed out; they are required to match while that result is still under
+    /// review, and ignored once an unfinished import has taken it off review.
+    /// </remarks>
+    Task<OperationResult<SessionView>> ImportCorrectedImageAsync(
+        SessionId id, Guid requestId, RevisionId? reviewedRevision, Sha256? reviewedHash, string selectedPath,
+        string? operatorName, CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support colleague correction."));
+
+    /// <summary>
+    /// Runs the existing byte-preserving ApprovedPngExport promotion once for the exact approved
+    /// final Trim result, or returns the promotion already made from it (SCRUM-11145).
+    /// </summary>
+    Task<OperationResult<SessionView>> PromoteReviewedPngAsync(
+        SessionId id, RevisionId reviewedRevision, Sha256 reviewedHash, string? operatorName,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult.Fail<SessionView>(
+            FailureCode.PreconditionNotMet, "This session service does not support approved PNG preparation."));
 
     /// <summary>
     /// Calculates one sizing proposal from the session's exact current upstream Revision without

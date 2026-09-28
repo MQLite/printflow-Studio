@@ -1,15 +1,18 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.App.Views;
 
 /// <summary>
-/// The session screen. Every action is a bound command; the only code here is the crop
-/// surface's pointer handling (Epic 11200 Part C2 §5).
+/// The session screen. Actions remain bound commands. This view handles crop pointer
+/// geometry and non-activating focus when the exact review target changes.
 /// </summary>
 /// <remarks>
 /// <b>Why this is code and not a binding.</b> A drag is three events and a transient rubber-band
@@ -29,6 +32,8 @@ public partial class SessionScreenView : UserControl
     private Point? _dragOrigin;
 
     private SessionViewModel? _observed;
+    private string? _reviewTarget;
+    private DependencyObject? _reviewFocusScope;
 
     public SessionScreenView()
     {
@@ -40,7 +45,25 @@ public partial class SessionScreenView : UserControl
         CropOverlay.LostMouseCapture += OnCropLostCapture;
         CropOverlay.SizeChanged += OnCropSurfaceResized;
 
+        // Trim adjustment (SCRUM-11147): the press is taken in the tunnelling phase so a handle
+        // is resolved by the same nearest-centre rule everywhere, never by whichever Thumb the
+        // pointer happens to be over.
+        CropOverlay.PreviewMouseLeftButtonDown += OnTrimPress;
+        PreviewKeyDown += OnTrimEscape;
+        foreach (Thumb handle in TrimHandles())
+        {
+            handle.KeyDown += OnTrimHandleKey;
+        }
+
         DataContextChanged += OnDataContextChanged;
+        Loaded += (_, _) =>
+        {
+            ObserveModel();
+            FocusNewReview();
+            if (_reviewTarget is not null &&
+                ReferenceEquals(FocusManager.GetFocusedElement(FocusManager.GetFocusScope(this)), OperatorStatusPanel))
+                OperatorStatusPanel.Focus();
+        };
         Unloaded += OnUnloaded;
     }
 
@@ -53,7 +76,8 @@ public partial class SessionScreenView : UserControl
 
     private void OnCropMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (Model is not { IsCropping: true })
+        // Drawing a new rectangle is the unchanged fallback; a trim adjustment only moves handles.
+        if (Model is not { IsCropping: true, IsAdjustingTrim: false })
         {
             return;
         }
@@ -73,6 +97,12 @@ public partial class SessionScreenView : UserControl
     /// </remarks>
     private void OnCropMouseMove(object sender, MouseEventArgs e)
     {
+        if (_trimGesture is not null)
+        {
+            MoveTrimHandle(e.GetPosition(CropOverlay));
+            return;
+        }
+
         if (_dragOrigin is not { } origin || e.LeftButton != MouseButtonState.Pressed)
         {
             return;
@@ -83,6 +113,18 @@ public partial class SessionScreenView : UserControl
 
     private void OnCropMouseUp(object sender, MouseButtonEventArgs e)
     {
+        if (_trimGesture is not null)
+        {
+            // The release position decides, exactly as the last move did; the gesture is cleared
+            // before capture is released so the lost-capture handler does not undo it.
+            MoveTrimHandle(e.GetPosition(CropOverlay));
+            _trimGesture = null;
+            CropOverlay.ReleaseMouseCapture();
+            e.Handled = true;
+            RedrawSelection();
+            return;
+        }
+
         if (_dragOrigin is not { } origin || Model is not { } model)
         {
             return;
@@ -105,8 +147,226 @@ public partial class SessionScreenView : UserControl
         RedrawSelection();
     }
 
-    /// <summary>A drag interrupted by anything else — an alt-tab, a dialog — simply ends.</summary>
-    private void OnCropLostCapture(object sender, MouseEventArgs e) => _dragOrigin = null;
+    /// <summary>
+    /// A drag interrupted by anything else — an alt-tab, a dialog — simply ends. An interrupted
+    /// handle drag also puts back the boundary it began with.
+    /// </summary>
+    private void OnCropLostCapture(object sender, MouseEventArgs e)
+    {
+        _dragOrigin = null;
+        CancelTrimGesture();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Trim adjustment handles (SCRUM-11147)
+    // -----------------------------------------------------------------------------
+
+    /// <summary>The handle drag in progress, or null.</summary>
+    private TrimHandleDrag? _trimGesture;
+
+    /// <summary>The review target when the editor opened; decides where focus goes on close.</summary>
+    private string? _reviewTargetAtTrimAdjust;
+
+    private void OnTrimPress(object sender, MouseButtonEventArgs e)
+    {
+        if (Model is not { IsAdjustingTrim: true, IsComparingTrim: false, IsBusy: false, CropSelection: TrimBounds start } model ||
+            e.ClickCount != 1 ||
+            !CurrentLayout(model).TryToSurfaceRect(start, out double x, out double y, out double w, out double h))
+        {
+            return;
+        }
+
+        Point press = e.GetPosition(CropOverlay);
+        if (CropHandleGesture.HitTest(x, y, w, h, press.X, press.Y, CropOverlay.ActualWidth, CropOverlay.ActualHeight) is not { } handle)
+        {
+            return;
+        }
+
+        _trimGesture = new TrimHandleDrag(handle, press.X, press.Y, start,
+            SystemParameters.MinimumHorizontalDragDistance, SystemParameters.MinimumVerticalDragDistance);
+        HandleFor(handle).Focus();
+        CropOverlay.CaptureMouse();
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Moves the dragged edges by the pointer's displacement since the press — never to the
+    /// pointer itself, so grabbing a handle anywhere inside its square does not jump the edge.
+    /// Below the system drag threshold nothing moves at all.
+    /// </summary>
+    private void MoveTrimHandle(Point pointer)
+    {
+        if (_trimGesture is not { } gesture || Model is not { } model ||
+            gesture.Displacement(pointer.X, pointer.Y) is not { } delta)
+        {
+            return;
+        }
+
+        model.TryMoveTrimHandle(CurrentLayout(model), gesture.Start, gesture.Handle, delta.DeltaX, delta.DeltaY);
+        RedrawSelection();
+    }
+
+    private void CancelTrimGesture()
+    {
+        if (_trimGesture is not { } gesture)
+        {
+            return;
+        }
+
+        _trimGesture = null;
+        Model?.RestoreTrimDraft(gesture.Start);
+        RedrawSelection();
+    }
+
+    private void OnTrimEscape(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || _trimGesture is null)
+        {
+            return;
+        }
+
+        CancelTrimGesture();
+        CropOverlay.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Arrow keys move the focused handle's edges by one source pixel, Shift by ten, Ctrl to the
+    /// picture border. Handled here so the surrounding scroll viewer does not scroll instead.
+    /// </summary>
+    private void OnTrimHandleKey(object sender, KeyEventArgs e)
+    {
+        if (sender is not Thumb { Tag: string tag } || !Enum.TryParse(tag, out CropHandle handle) || Model is not { } model ||
+            !TrimHandleKeys.TryMap(e.Key, Keyboard.Modifiers, out int x, out int y, out bool bigStep, out bool toBorder))
+        {
+            return;
+        }
+
+        model.TryNudgeTrimHandle(handle, x, y, bigStep, toBorder);
+        RedrawSelection();
+        e.Handled = true;
+    }
+
+    private IEnumerable<Thumb> TrimHandles() =>
+    [
+        TrimHandleLeft, TrimHandleTop, TrimHandleRight, TrimHandleBottom,
+        TrimHandleTopLeft, TrimHandleTopRight, TrimHandleBottomLeft, TrimHandleBottomRight,
+    ];
+
+    private Thumb HandleFor(CropHandle handle) => handle switch
+    {
+        CropHandle.Left => TrimHandleLeft,
+        CropHandle.Top => TrimHandleTop,
+        CropHandle.Right => TrimHandleRight,
+        CropHandle.Bottom => TrimHandleBottom,
+        CropHandle.TopLeft => TrimHandleTopLeft,
+        CropHandle.TopRight => TrimHandleTopRight,
+        CropHandle.BottomLeft => TrimHandleBottomLeft,
+        _ => TrimHandleBottomRight,
+    };
+
+    /// <summary>
+    /// Draws the adjustment: dimming outside the kept area within the picture, an inset
+    /// two-tone outline, and the eight handles anchored inside the boundary.
+    /// </summary>
+    private void DrawTrimAdjustment(SessionViewModel model, TrimBounds bounds)
+    {
+        CropSurfaceLayout layout = CurrentLayout(model);
+        if (!layout.TryToSurfaceRect(bounds, out double x, out double y, out double w, out double h))
+        {
+            HideTrimAdjustment();
+            return;
+        }
+
+        double imageLeft = layout.LetterboxX, imageTop = layout.LetterboxY;
+        double imageRight = imageLeft + layout.DisplayWidth, imageBottom = imageTop + layout.DisplayHeight;
+        PlaceRect(TrimDimLeft, imageLeft, imageTop, x - imageLeft, imageBottom - imageTop);
+        PlaceRect(TrimDimRight, x + w, imageTop, imageRight - (x + w), imageBottom - imageTop);
+        PlaceRect(TrimDimTop, x, imageTop, w, y - imageTop);
+        PlaceRect(TrimDimBottom, x, y + h, w, imageBottom - (y + h));
+        PlaceRect(TrimOutlineLight, x, y, w, h);
+        PlaceRect(TrimOutlineDark, x + 0.5, y + 0.5, w - 1, h - 1);
+
+        foreach (CropHandle handle in Enum.GetValues<CropHandle>())
+        {
+            Thumb thumb = HandleFor(handle);
+            // Kept whole inside the surface: on a boundary narrower than a handle the
+            // inside-anchored centres cross, and a handle on the picture border must still show.
+            // The press is hit-tested against these same centres.
+            (double cx, double cy) = CropHandleGesture.Centre(x, y, w, h, handle, CropOverlay.ActualWidth, CropOverlay.ActualHeight);
+            Canvas.SetLeft(thumb, cx - (CropHandleGesture.HandleSize / 2));
+            Canvas.SetTop(thumb, cy - (CropHandleGesture.HandleSize / 2));
+            AutomationProperties.SetName(thumb, SessionViewModel.TrimHandleName(handle));
+            thumb.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void HideTrimAdjustment()
+    {
+        foreach (Rectangle part in new[] { TrimDimLeft, TrimDimTop, TrimDimRight, TrimDimBottom, TrimOutlineLight, TrimOutlineDark })
+        {
+            part.Visibility = Visibility.Collapsed;
+        }
+
+        foreach (Thumb thumb in TrimHandles())
+        {
+            thumb.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static void PlaceRect(FrameworkElement element, double x, double y, double width, double height)
+    {
+        if (width <= 0 || height <= 0)
+        {
+            element.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        Canvas.SetLeft(element, x);
+        Canvas.SetTop(element, y);
+        element.Width = width;
+        element.Height = height;
+        element.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
+    /// Where focus goes when the trim editor opens or closes. Opening puts it on the editor's
+    /// heading, never on Use this trim, so a key still held from the button that opened it cannot
+    /// submit anything. Closing on the same review (Cancel, or an adjustment that can no longer
+    /// be made) puts it back on Adjust trim edges, or on the non-activating status panel when that
+    /// is no longer offered; a new review is placed by the existing new-review rule instead.
+    /// </summary>
+    private void PlaceTrimAdjustFocus(bool opened)
+    {
+        if (Model is not { } model)
+        {
+            return;
+        }
+
+        if (opened)
+        {
+            _reviewTargetAtTrimAdjust = model.ReviewTargetIdentity;
+            PlaceFocus(TrimAdjustHeadingText);
+            return;
+        }
+
+        if (model.ReviewTargetIdentity is { } target && target == _reviewTargetAtTrimAdjust)
+        {
+            PlaceFocus(model.CanAdjustTrim ? BeginTrimAdjustButton : OperatorStatusPanel);
+        }
+
+        _reviewTargetAtTrimAdjust = null;
+    }
+
+    /// <summary>Logical focus now, keyboard focus once the element has been laid out.</summary>
+    private void PlaceFocus(FrameworkElement element)
+    {
+        FocusManager.SetFocusedElement(FocusManager.GetFocusScope(this), element);
+        if (IsLoaded)
+        {
+            Dispatcher.BeginInvoke(() => element.Focus(), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+    }
 
     // -----------------------------------------------------------------------------
     // Keeping the outline over the same artwork
@@ -115,6 +375,14 @@ public partial class SessionScreenView : UserControl
     private void OnCropSurfaceResized(object sender, SizeChangedEventArgs e) => RedrawSelection();
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        _reviewTarget = null;
+        ObserveModel();
+        FocusNewReview();
+        RedrawSelection();
+    }
+
+    private void ObserveModel()
     {
         if (_observed is not null)
         {
@@ -128,7 +396,21 @@ public partial class SessionScreenView : UserControl
             _observed.PropertyChanged += OnModelPropertyChanged;
         }
 
-        RedrawSelection();
+    }
+
+    private void FocusNewReview()
+    {
+        string? target = Model?.ReviewTargetIdentity;
+        DependencyObject scope = FocusManager.GetFocusScope(this);
+        if (target == _reviewTarget && ReferenceEquals(scope, _reviewFocusScope)) return;
+        _reviewTarget = target;
+        _reviewFocusScope = scope;
+        if (target is null) return;
+        // Set logical focus immediately; apply keyboard focus when the view is loaded.
+        // Attachment can move a pre-bound view into a Window's scope. Carry the initial
+        // landing across that boundary, while preserving valid focus within the same scope.
+        FocusManager.SetFocusedElement(scope, OperatorStatusPanel);
+        if (IsLoaded) OperatorStatusPanel.Focus();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
@@ -151,10 +433,39 @@ public partial class SessionScreenView : UserControl
     /// </remarks>
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(SessionViewModel.ReviewTargetIdentity) or "" or null)
+            FocusNewReview();
+
+        // Colleague correction (SCRUM-11148): Ask moves focus to the note, Cancel back to Ask, a
+        // finished preparation to the non-activating handed-off heading, and a closed picker or a
+        // refusal to Import. Never to Prepare or Import from a key still held elsewhere.
+        if (e.PropertyName == nameof(SessionViewModel.CorrectionFocusToken) && Model is { } correcting)
+        {
+            FrameworkElement? target = correcting.CorrectionFocusTarget switch
+            {
+                CorrectionFocus.NoteBox => CorrectionNoteBox,
+                CorrectionFocus.AskButton => AskColleagueButton,
+                CorrectionFocus.HandedOffHeading => CorrectionHeadingText,
+                CorrectionFocus.ImportButton => ImportCorrectedButton,
+                _ => null,
+            };
+            if (target is not null) PlaceFocus(target);
+        }
+
+        if (e.PropertyName == nameof(SessionViewModel.IsAdjustingTrim))
+        {
+            bool opened = Model is { IsAdjustingTrim: true };
+            if (!opened) CancelTrimGesture();
+            PlaceTrimAdjustFocus(opened);
+        }
+
         if (e.PropertyName is
             nameof(SessionViewModel.CropSelection) or
             nameof(SessionViewModel.CropAppliedBounds) or
             nameof(SessionViewModel.IsCropping) or
+            nameof(SessionViewModel.IsAdjustingTrim) or
+            nameof(SessionViewModel.IsComparingTrim) or
+            nameof(SessionViewModel.CropPane) or
             nameof(SessionViewModel.ZoomScale) or
             nameof(SessionViewModel.IsFitToViewport))
         {
@@ -168,6 +479,14 @@ public partial class SessionScreenView : UserControl
     private void RedrawSelection()
     {
         CropAppliedOutline.Visibility = Visibility.Collapsed;
+        if (Model is { IsAdjustingTrim: true, IsCropping: true, CropSelection: TrimBounds kept } adjusting)
+        {
+            CropSelectionOutline.Visibility = Visibility.Collapsed;
+            DrawTrimAdjustment(adjusting, kept);
+            return;
+        }
+
+        HideTrimAdjustment();
         if (Model is not { IsCropping: true, CropSelection: TrimBounds bounds } model ||
             !CurrentLayout(model).TryToSurfaceRect(bounds, out double x, out double y, out double w, out double h))
         {

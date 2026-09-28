@@ -50,6 +50,7 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.Reject c => Reject(state, c, context),
             WorkflowCommand.Retry c => Retry(state, c, context),
             WorkflowCommand.SubmitManualCrop c => SubmitManualCrop(state, c, context),
+            WorkflowCommand.AdjustTrimFromReview c => AdjustTrimFromReview(state, c, context),
             WorkflowCommand.Skip c => Skip(state, c, context),
             WorkflowCommand.KeepOriginalExtent => KeepOriginalExtent(state, context),
             WorkflowCommand.HandOff c => HandOff(state, c, context),
@@ -69,6 +70,8 @@ public sealed class WorkflowEngine : IWorkflowEngine
             WorkflowCommand.System.AttemptInterrupted c => AttemptInterrupted(state, c, context),
             WorkflowCommand.System.AttemptCancelled c => AttemptCancelled(state, c, context),
             WorkflowCommand.SubmitManualResult c => SubmitManualResult(state, c, context),
+            WorkflowCommand.RequestColleagueCorrection c => RequestColleagueCorrection(state, c, context),
+            WorkflowCommand.ImportCorrectedImage c => ImportCorrectedImage(state, c, context),
             WorkflowCommand.ReenterAutomation => ReenterAutomation(state, context),
             _ => WorkflowTransition.Rejected(
                 RejectionCode.CommandNotApplicable,
@@ -1004,6 +1007,79 @@ public sealed class WorkflowEngine : IWorkflowEngine
         return WorkflowTransition.Accepted(state.WithStep(started), effects);
     }
 
+    /// <summary>
+    /// Crops the trim review's own pre-trim source again, replacing the result under review
+    /// (SCRUM-11147).
+    /// </summary>
+    /// <remarks>
+    /// The pure half of the rule: Trim is current and under review, the command names exactly
+    /// the result on offer and exactly the source it would crop (Revision id <i>and</i> hash, so
+    /// an equal hash on a different Revision is refused), and the rectangle has a pixel. That the
+    /// result on offer really was cut from that source, has no descendants and still has valid
+    /// bytes is the attempt-history half, checked by <see cref="Services.TrimAdjustmentEligibility"/>
+    /// before the command reaches this method.
+    /// <para>
+    /// The offer is superseded exactly as <see cref="KeepOriginalExtent"/> supersedes it: the
+    /// step stops pointing at it, and nothing else is written about it. No review decision, no
+    /// rejection and no invalidation — the Revision stays valid, unreviewed history even if the
+    /// new crop then fails. The effects are the manual-crop ones, unchanged, with a tight margin
+    /// because the rectangle is the kept area.
+    /// </para>
+    /// </remarks>
+    private static WorkflowTransition AdjustTrimFromReview(
+        WorkflowSnapshot state, WorkflowCommand.AdjustTrimFromReview command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, StepKind.Trim, CommandKind.AdjustTrimFromReview);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        SessionStep step = resolved.Step!;
+        if (step.CurrentRevisionId != command.ReviewedRevision || step.CurrentRevisionSha256 != command.ReviewedHash)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The trim result on screen is no longer the result under review.");
+        }
+
+        if (state.UpstreamResultOf(StepKind.Trim) is not { } source ||
+            source.Id != command.SourceRevision || source.Sha256 != command.SourceHash)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The picture this trim was made from is no longer the trim's input.");
+        }
+
+        if (command.Crop.IsEmpty)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, "A trim rectangle contains at least one pixel.");
+        }
+
+        List<WorkflowEffect> effects =
+        [
+            new WorkflowEffect.CreateWorkingCopy(StepKind.Trim, source.Id, WorkspaceArea.Working),
+            new WorkflowEffect.RecordAttemptStarted(
+                context.NewAttemptId, StepKind.Trim, OperationKind.ManualImport, source.Id, step.AttemptCount),
+            new WorkflowEffect.RunManualCrop(
+                context.NewAttemptId, StepKind.Trim, source.Id, command.Crop, ManualCropMargin.Tight),
+        ];
+
+        SessionStep started = step with
+        {
+            State = StepState.Processing,
+            CurrentRevisionId = null,
+            CurrentRevisionSha256 = null,
+            AttemptCount = step.AttemptCount + 1,
+            EnteredStateAtUtc = context.NowUtc,
+        };
+
+        WorkflowSnapshot newState = state.WithStep(started);
+        newState = newState with { HasDerivedRevision = HasDerivedRevision(newState.Steps) };
+        return WorkflowTransition.Accepted(newState, effects);
+    }
+
     private static WorkflowTransition KeepOriginalExtent(WorkflowSnapshot state, CommandContext context)
     {
         StepResolution resolved = Resolve(state, StepKind.Trim, CommandKind.KeepOriginalExtent);
@@ -1098,11 +1174,121 @@ public sealed class WorkflowEngine : IWorkflowEngine
 
         effects.Add(new WorkflowEffect.OpenForManualWork(command.Step, reason));
         effects.Add(new WorkflowEffect.ReleaseAutomationLock());
-        effects.Add(new WorkflowEffect.MarkSessionHandedOff(context.NowUtc, reason));
 
+        (WorkflowSnapshot handedOff, WorkflowEffect marked) = HandOffSession(state, reason, context);
+        effects.Add(marked);
+
+        return WorkflowTransition.Accepted(handedOff, effects);
+    }
+
+    /// <summary>
+    /// The session-level half of a handoff, shared by <see cref="HandOff"/> and
+    /// <see cref="RequestColleagueCorrection"/>: the session becomes <c>HandedOff</c> and the time and
+    /// reason are recorded. Step state, files and the automation lock are the caller's business.
+    /// </summary>
+    private static (WorkflowSnapshot State, WorkflowEffect Effect) HandOffSession(
+        WorkflowSnapshot state, string reason, CommandContext context) =>
+        (state with { SessionState = SessionState.HandedOff },
+            new WorkflowEffect.MarkSessionHandedOff(context.NowUtc, reason));
+
+    /// <summary>
+    /// Hands the background-removal result under review to a colleague (SCRUM-11148, design §6.1).
+    /// </summary>
+    /// <remarks>
+    /// Only the session-level handoff. The step keeps <c>ReviewRequired</c> with R current: asking
+    /// for help is neither approval nor rejection. There is no working copy here — the service has
+    /// already prepared and verified the package — and no automation-lock release: a review holds no
+    /// lock, and releasing one another session or environment verification holds would roll the
+    /// whole handoff back.
+    /// </remarks>
+    private static WorkflowTransition RequestColleagueCorrection(
+        WorkflowSnapshot state, WorkflowCommand.RequestColleagueCorrection command, CommandContext context)
+    {
+        StepResolution resolved = Resolve(state, StepKind.BackgroundRemoval, CommandKind.RequestColleagueCorrection);
+        if (resolved.Rejection is not null)
+        {
+            return WorkflowTransition.Rejected(resolved.Rejection);
+        }
+
+        if (command.CorrectionRequestId == Guid.Empty)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, "A correction request needs its own identity.");
+        }
+
+        SessionStep step = resolved.Step!;
+        if (step.CurrentRevisionId != command.ReviewedRevision || step.CurrentRevisionSha256 != command.ReviewedHash)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The background-removal result on screen is no longer the result under review.");
+        }
+
+        if (state.UpstreamResultOf(StepKind.BackgroundRemoval) is not { } reference ||
+            reference.Id != command.ReferenceRevision || reference.Sha256 != command.ReferenceHash)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The picture background removal was made from is no longer its input.");
+        }
+
+        (WorkflowSnapshot handedOff, WorkflowEffect marked) = HandOffSession(state, command.EffectiveReason, context);
+        return WorkflowTransition.Accepted(handedOff, marked);
+    }
+
+    /// <summary>
+    /// Starts the import of a colleague's corrected picture for the exact result handed out
+    /// (SCRUM-11148, design §6.1).
+    /// </summary>
+    /// <remarks>
+    /// The effects and state are exactly <see cref="SubmitManualResult"/>'s. What differs is where it
+    /// is legal: a handed-off session whose background-removal step is still <c>ReviewRequired</c>
+    /// with exactly R current. <c>ManualResultEligibility.CanSubmit</c> is unchanged, so no other
+    /// handed-off review becomes importable through this command.
+    /// </remarks>
+    private static WorkflowTransition ImportCorrectedImage(
+        WorkflowSnapshot state, WorkflowCommand.ImportCorrectedImage command, CommandContext context)
+    {
+        if (state.SessionState != SessionState.HandedOff)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                $"The session is {state.SessionState}; a corrected picture is imported only into a job handed off for correction.");
+        }
+
+        if (state.CurrentStep is not { Step: StepKind.BackgroundRemoval, State: StepState.ReviewRequired } step ||
+            step.CurrentRevisionId != command.ReviewedRevision || step.CurrentRevisionSha256 != command.ReviewedHash)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet,
+                "The background-removal result that was handed out is no longer the result under review.");
+        }
+
+        if (state.UpstreamRevisionOf(StepKind.BackgroundRemoval) is not RevisionId source)
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.PreconditionNotMet, "Background removal has no input to import against.");
+        }
+
+        if (command.CorrectionRequestId == Guid.Empty || string.IsNullOrWhiteSpace(command.SelectedPath))
+        {
+            return WorkflowTransition.Rejected(
+                RejectionCode.InvalidPayload, "Choose the corrected picture for this correction request.");
+        }
+
+        SessionStep started = step with
+        {
+            State = StepState.Processing,
+            CurrentRevisionId = null,
+            CurrentRevisionSha256 = null,
+            AttemptCount = step.AttemptCount + 1,
+            EnteredStateAtUtc = context.NowUtc,
+        };
         return WorkflowTransition.Accepted(
-            state with { SessionState = SessionState.HandedOff },
-            effects);
+            state.WithStep(started) with { SessionState = SessionState.Active },
+            new WorkflowEffect.RecordAttemptStarted(context.NewAttemptId, step.Step,
+                OperationKind.ManualResultImport, source, step.AttemptCount),
+            new WorkflowEffect.ImportManualResult(context.NewAttemptId, step.Step, source, command.SelectedPath));
     }
 
     /// <summary>
@@ -1809,6 +1995,13 @@ public sealed class WorkflowEngine : IWorkflowEngine
             CommandKind.StartStep => new WorkflowCommand.StartStep(step),
             CommandKind.Retry => new WorkflowCommand.Retry(step),
             CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(step, ProbeCrop),
+
+            // Probed with the session's own result under review and its own trim input, never
+            // invented identities, so the answer is exactly "may this review be adjusted".
+            CommandKind.AdjustTrimFromReview
+                when current is { Step: StepKind.Trim, CurrentRevisionId: RevisionId reviewed, CurrentRevisionSha256: Sha256 reviewedHash }
+                    && state.UpstreamResultOf(StepKind.Trim) is { } trimInput =>
+                new WorkflowCommand.AdjustTrimFromReview(reviewed, reviewedHash, trimInput.Id, trimInput.Sha256, ProbeCrop),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.KeepOriginalExtent => new WorkflowCommand.KeepOriginalExtent(),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, ProbeReason),
@@ -1856,6 +2049,19 @@ public sealed class WorkflowEngine : IWorkflowEngine
             // whether its current step is one whose attempt stopped without a result
             // (Epic 11300 Part D2A §22).
             CommandKind.SubmitManualResult => new WorkflowCommand.SubmitManualResult(step, "manual-result.png"),
+
+            // Probed with the session's own result under review and its own input, never invented
+            // identities (SCRUM-11148). A positive probe is not an offer: the screen reads the
+            // correction projection, which also needs a persisted request (import) or the
+            // service-level eligibility (request).
+            CommandKind.RequestColleagueCorrection
+                when current is { Step: StepKind.BackgroundRemoval, CurrentRevisionId: RevisionId handedOut, CurrentRevisionSha256: Sha256 handedOutHash }
+                    && state.UpstreamResultOf(StepKind.BackgroundRemoval) is { } reference =>
+                new WorkflowCommand.RequestColleagueCorrection(
+                    ProbeCorrectionRequestId, handedOut, handedOutHash, reference.Id, reference.Sha256),
+            CommandKind.ImportCorrectedImage
+                when current is { Step: StepKind.BackgroundRemoval, CurrentRevisionId: RevisionId underReview, CurrentRevisionSha256: Sha256 underReviewHash } =>
+                new WorkflowCommand.ImportCorrectedImage(ProbeCorrectionRequestId, underReview, underReviewHash, "corrected.png"),
             CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
             CommandKind.Approve when current?.CurrentRevisionSha256 is Sha256 hash =>
                 new WorkflowCommand.Approve(step, hash),
@@ -1895,6 +2101,9 @@ public sealed class WorkflowEngine : IWorkflowEngine
     /// step state — decide the answer.
     /// </remarks>
     private const string ProbeReason = "probe";
+
+    /// <summary>The stand-in request identity for probing the two correction commands. Never persisted.</summary>
+    private static readonly Guid ProbeCorrectionRequestId = new("00000000-0000-0000-0000-00000000c0de");
 
     /// <summary>
     /// The stand-in size used when probing <see cref="CommandKind.SetPrintDimensions"/>.

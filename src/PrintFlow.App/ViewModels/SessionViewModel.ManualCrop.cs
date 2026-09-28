@@ -87,6 +87,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyManualCropDraft()
     {
+        NotifyOperatorStatusChanged();
         OnPropertyChanged(nameof(DraftManualCropGeometry));
         OnPropertyChanged(nameof(CropAppliedBounds));
         OnPropertyChanged(nameof(CropAppliedSummary));

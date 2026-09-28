@@ -19,6 +19,7 @@ using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.Infrastructure.Verification;
 using PrintFlow.Infrastructure.Workspace;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Delivery;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -92,6 +93,31 @@ public static class ServiceRegistration
         RegisterEnvironmentGate(services, configuration, workspaceRootAbsolute, presetManifestPath,
             expectedPresetHash, connectionFactory);
         services.AddSingleton<ISessionRepository>(new SqliteSessionRepository(connectionFactory));
+        services.AddSingleton<IDeliveryRepository>(new SqliteDeliveryRepository(connectionFactory));
+        services.AddSingleton<IDeliveryFileSystem, PrintFlow.Infrastructure.Delivery.WindowsDeliveryFileSystem>();
+        services.AddSingleton<IApprovedArtifactDeliveryService>(provider =>
+            new ApprovedArtifactDeliveryService(
+                provider.GetRequiredService<ISessionRepository>(),
+                provider.GetRequiredService<IDeliveryRepository>(),
+                provider.GetRequiredService<IWorkspace>(),
+                provider.GetRequiredService<IDeliveryFileSystem>(),
+                [workspaceRootAbsolute,
+                 System.IO.Path.GetDirectoryName(connectionFactory.DatabasePath)!,
+                 System.IO.Path.Combine(workspaceRootAbsolute, EvidenceFolderName)],
+                provider.GetRequiredService<TimeProvider>(),
+                provider.GetRequiredService<ITiffReviewDecoder>()));
+        // SCRUM-11145: the final-save coordinator consumes the lawful approval entries and the
+        // delivery authority above; the shell port selects only a live verified delivered file.
+        services.AddSingleton<IDeliveredFileShell, PrintFlow.Infrastructure.Delivery.WindowsDeliveredFileShell>();
+
+        // SCRUM-11148: colleague-correction packages live in the managed session workspace, and the
+        // folder port is separate from delivered-file selection (no lease, no delivery wording).
+        services.AddSingleton<ICorrectionPackageStore>(provider =>
+            new PrintFlow.Infrastructure.Workspace.FileCorrectionPackageStore(provider.GetRequiredService<IWorkspace>()));
+        services.AddSingleton<ICorrectionFolderShell, PrintFlow.Infrastructure.Workspace.WindowsCorrectionFolderShell>();
+        services.AddSingleton(provider => new FinalSaveCoordinator(
+            provider.GetRequiredService<ISessionService>(),
+            provider.GetRequiredService<IApprovedArtifactDeliveryService>()));
 
         // The settings store the same migrated database already carries (Jira 11108; MVP design
         // §17.6). Registered beside the session repository and against the same connection
@@ -182,6 +208,7 @@ public static class ServiceRegistration
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IFilePicker, OpenFileDialogPicker>();
         services.AddSingleton<IDiagnosticPackageDestinationPicker, SaveDiagnosticPackageDialog>();
+        services.AddSingleton<IDeliveryFolderPicker, OpenFolderDialogPicker>();
         services.AddSingleton<ShellViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<WorkflowSelectionViewModel>();

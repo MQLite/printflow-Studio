@@ -108,7 +108,9 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
         foreach (IGrouping<SessionId, ProcessingAttempt> group in bySession)
         {
             bool releaseHere = lockVerdict.ReleaseStaleLock && !lockReleased && lockVerdict.HeldBy == group.Key;
-
+            // ApplicationStartup invokes this only after the single-instance guard and before
+            // the shell exists. That lifecycle excludes live delivery; a crashed process has
+            // no in-memory session gate to reacquire. On-demand recovery uses the gate instead.
             bool committed = await RecoverSessionAsync(
                 group.Key, [.. group], releaseHere, nowUtc, entries, cancellationToken);
 
@@ -279,6 +281,8 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
         WorkflowSnapshot snapshot = aggregate.ToSnapshot();
         List<ProcessingAttempt> interruptedAttempts = [];
         List<StartupRecoveryEntry> pending = [];
+        List<CorrectionRequestChange> requestChanges = [];
+        string? correctionHandOffReason = null;
 
         foreach (ProcessingAttempt attempt in crashed.OrderBy(a => a.StartedAtUtc).ThenBy(a => a.Id.Value))
         {
@@ -311,9 +315,30 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             }
 
             snapshot = transition.State;
+
+            // A crashed colleague-correction import (SCRUM-11148, addendum §3.3 Interrupted row).
+            // The binding is the unique persisted READY row naming this attempt, checked with the
+            // same predicate the live closings use, on this freshly loaded aggregate. The handoff
+            // is the engine's own, legal from Active + Interrupted; its effects are ignored like
+            // every other engine effect here, and the lock decision stays the liveness one.
+            string handedBack = string.Empty;
+            if (CorrectionRequestEligibility.PersistedBindingOf(attempt, aggregate.CorrectionRequests) is { } request &&
+                CorrectionRequestEligibility.IsBound(attempt, sessionId, request))
+            {
+                WorkflowTransition handedOff = _engine.Apply(
+                    snapshot, new WorkflowCommand.HandOff(attempt.Step, request.EffectiveReason), context);
+                if (handedOff.IsAccepted)
+                {
+                    snapshot = handedOff.State;
+                    correctionHandOffReason = request.EffectiveReason;
+                    requestChanges.Add(new CorrectionRequestChange.AssertBound(request.Id, attempt.Id));
+                    handedBack = " The job was handed back for its colleague correction.";
+                }
+            }
+
             pending.Add(new StartupRecoveryEntry(
                 StartupRecoveryAction.StepInterrupted, nowUtc, sessionId, attempt.Id, null,
-                $"Step {attempt.Step} was moved to Interrupted; it holds no result."));
+                $"Step {attempt.Step} was moved to Interrupted; it holds no result.{handedBack}"));
         }
 
         ProcessingSession updatedSession = aggregate.Session with
@@ -322,6 +347,11 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             State = snapshot.SessionState,
             UpdatedAtUtc = nowUtc,
         };
+
+        if (correctionHandOffReason is not null)
+        {
+            updatedSession = updatedSession with { HandOffReason = correctionHandOffReason, HandedOffAtUtc = nowUtc };
+        }
 
         // The engine emits ReleaseAutomationLock alongside every AttemptInterrupted, and that
         // effect is deliberately *not* applied here. The engine reasons about one session and
@@ -335,6 +365,7 @@ public sealed class StartupRecoveryService : IStartupRecoveryService
             LockChange = releaseLock
                 ? new AutomationLockChange(AutomationLockAction.Release, sessionId, nowUtc, _processId, _machineName)
                 : null,
+            CorrectionRequestChanges = requestChanges,
         };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);

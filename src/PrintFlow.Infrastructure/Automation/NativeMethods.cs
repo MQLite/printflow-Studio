@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 
@@ -40,6 +41,110 @@ internal static partial class NativeMethods
         public uint FileIndexHigh;
         public uint FileIndexLow;
     }
+
+    // SCRUM-11145 Open containing folder: parse one exact, verified delivered path and ask the
+    // shell to select that item in its parent folder. No verb, command string or process launch,
+    // and the image itself is never opened.
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+    internal static extern int SHParseDisplayName(
+        string name, nint bindingContext, out nint pidl, uint attributesIn, out uint attributesOut);
+
+    [DllImport("shell32.dll", ExactSpelling = true)]
+    internal static extern int SHOpenFolderAndSelectItems(nint pidlFolder, uint count, nint[]? children, uint flags);
+
+    // -- SCRUM-11144 approved-artifact delivery ------------------------------------------
+    //
+    // Held-handle staging, identity, volume checks and no-replace publication. Only these
+    // declarations live here; the rules that use them (reparse/case-sensitivity refusal, the
+    // RootDirectory + leaf rename without ReplaceIfExists, exact held deletion) are in
+    // Delivery\WindowsDeliveryNative.cs.
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileIdInfoValue
+    {
+        public ulong VolumeSerialNumber;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public byte[] FileId;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileCaseSensitiveInfoValue { public uint Flags; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileRenameInformationValue
+    {
+        public uint Flags; // BOOLEAN ReplaceIfExists shares this zeroed union.
+        public nint RootDirectory;
+        public uint FileNameLength;
+        public ushort FileName;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct IoStatusBlock
+    {
+        public nint StatusOrPointer;
+        public nuint Information;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileTimeValue { public uint Low; public uint High; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ByHandleFileInformation
+    {
+        public uint Attributes;
+        public FileTimeValue CreationTime;
+        public FileTimeValue LastAccessTime;
+        public FileTimeValue LastWriteTime;
+        public uint VolumeSerialNumber;
+        public uint FileSizeHigh;
+        public uint FileSizeLow;
+        public uint NumberOfLinks;
+        public uint FileIndexHigh;
+        public uint FileIndexLow;
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern SafeFileHandle CreateFileW(string fileName, uint desiredAccess, uint shareMode,
+        nint securityAttributes, uint creationDisposition, uint flagsAndAttributes, nint templateFile);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern bool GetFileInformationByHandleEx(SafeFileHandle file, int infoClass,
+        out FileIdInfoValue info, uint size);
+
+    [DllImport("kernel32.dll", SetLastError = true, EntryPoint = "GetFileInformationByHandleEx")]
+    internal static extern bool GetFileCaseSensitiveInformation(SafeFileHandle file, int infoClass,
+        out FileCaseSensitiveInfoValue info, uint size);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern bool GetFileInformationByHandle(SafeFileHandle file,
+        out ByHandleFileInformation info);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern uint GetFinalPathNameByHandleW(SafeFileHandle file,
+        StringBuilder path, uint length, uint flags);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern bool SetFileInformationByHandle(SafeFileHandle file, int infoClass,
+        nint info, uint size);
+
+    [DllImport("ntdll.dll", ExactSpelling = true)]
+    internal static extern int NtSetInformationFile(SafeFileHandle file, out IoStatusBlock ioStatus,
+        nint info, uint size, int infoClass);
+
+    [DllImport("ntdll.dll", ExactSpelling = true)]
+    internal static extern uint RtlNtStatusToDosError(int status);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern uint GetDriveTypeW(string rootPathName);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern bool GetVolumeInformationW(string rootPathName,
+        StringBuilder volumeName, uint volumeNameSize, out uint volumeSerial,
+        out uint maximumComponentLength, out uint fileSystemFlags,
+        StringBuilder fileSystemName, uint fileSystemNameSize);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern uint QueryDosDeviceW(string deviceName, StringBuilder targetPath, uint maximumCharacters);
 
     internal const int SW_RESTORE = 9;
 

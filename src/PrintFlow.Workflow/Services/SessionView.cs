@@ -646,7 +646,40 @@ public sealed record SessionView(
         CurrentArtefact is { IsCurrentStepResult: true } ? ArtefactManualCropGeometry : null;
     public bool HasManualCropGeometry => CurrentManualCropGeometry is not null;
 
-    public bool CanSubmitManualResult => AvailableCommands.Contains(CommandKind.SubmitManualResult);
+    /// <summary>
+    /// What adjusting the trim under review would work on, or null when adjustment is not on
+    /// offer (SCRUM-11147). Both halves are required: the engine's probe and the attempt-history
+    /// eligibility.
+    /// </summary>
+    public TrimAdjustmentView? TrimAdjustment { get; init; }
+
+    public bool CanAdjustTrim => TrimAdjustment is not null;
+
+    /// <summary>
+    /// Whether the generic manual-result import is offered. False while an eligible correction
+    /// request waits in AfterUnfinishedImport, so the button agrees with what the service accepts
+    /// (SCRUM-11148, addendum §2.2): that import goes through Import corrected image.
+    /// </summary>
+    public bool CanSubmitManualResult => AvailableCommands.Contains(CommandKind.SubmitManualResult) &&
+        Correction?.Mode != CorrectionImportMode.AfterUnfinishedImport;
+
+    /// <summary>
+    /// The colleague-correction request this session is waiting on, or the most recent one that no
+    /// longer grants anything (history), or null (SCRUM-11148).
+    /// </summary>
+    public CorrectionHandoffView? Correction { get; init; }
+
+    /// <summary>Whether Import corrected image is offered — from the request, never from the probe.</summary>
+    public bool CanImportCorrectedImage => Correction?.CanImport == true;
+
+    /// <summary>
+    /// Whether "Ask a colleague to correct this image" is offered: the engine's probe and the
+    /// service-level request eligibility both hold (SCRUM-11148).
+    /// </summary>
+    public bool CanAskColleague { get; init; }
+
+    /// <summary>The imported correction now under review, or null.</summary>
+    public CorrectionReturnView? CorrectionReturn { get; init; }
 
     public bool CanKeepOriginalExtent => AvailableCommands.Contains(CommandKind.KeepOriginalExtent);
 
@@ -929,6 +962,9 @@ public sealed record SessionView(
                 snapshot, availableCommands, presetRecommendations, enlargementOfferId))
         {
             ArtefactManualCropGeometry = current is null ? null : attempts.FirstOrDefault(a => a.OutputRevisionId == current.RevisionId)?.ManualCropGeometry,
+            TrimAdjustment = availableCommands.Contains(CommandKind.AdjustTrimFromReview)
+                ? TrimAdjustmentEligibility.Resolve(snapshot, revisions, attempts, outputs)
+                : null,
             OriginalSourceFormat = revisions.FirstOrDefault(r => r.IsRoot)?.Facts.Format,
 
             // The same root Revision the format is read from, so the file name, the format and

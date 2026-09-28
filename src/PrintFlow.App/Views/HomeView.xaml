@@ -121,7 +121,14 @@
                                             <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,10" />
                                             <TextBlock Text="{Binding UnfinishedImportHint}" TextWrapping="Wrap" Margin="0,0,0,10"
                                                        Visibility="{Binding HasUnfinishedManualImport, Converter={StaticResource BoolToVisibility}}" />
+                                            <!-- SCRUM-11148: the job waits for a colleague; Home opens it and never imports. -->
+                                            <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
+                                                       AutomationProperties.AutomationId="Home.Recovery.WaitingForCorrection"
+                                                       Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
                                             <WrapPanel>
+                                                <Button Content="{Binding OpenCorrectionLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                        AutomationProperties.AutomationId="Home.Recovery.OpenCorrection" AutomationProperties.Name="{Binding OpenCorrectionLabel}"
+                                                        Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
                                                 <Button Content="{Binding RestartLabel}" Command="{Binding DataContext.RestartRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.Restart" AutomationProperties.Name="{Binding RestartLabel}"
                                                         Visibility="{Binding CanRestart, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
@@ -129,7 +136,8 @@
                                                         AutomationProperties.AutomationId="Home.Recovery.ManualResult" AutomationProperties.Name="{Binding ManualResultLabel}"
                                                         Visibility="{Binding CanImport, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
                                                 <Button Content="{Binding OpenLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
-                                                        AutomationProperties.AutomationId="Home.Recovery.Open" AutomationProperties.Name="{Binding OpenLabel}" Padding="12,6" Margin="0,0,8,4" />
+                                                        AutomationProperties.AutomationId="Home.Recovery.Open" AutomationProperties.Name="{Binding OpenLabel}"
+                                                        Visibility="{Binding ShowsPlainOpen, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
                                                 <Button Content="{Binding AbandonLabel}" Command="{Binding DataContext.AbandonRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.Abandon" AutomationProperties.Name="{Binding AbandonLabel}"
                                                         Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
@@ -220,6 +228,10 @@
                                             <TextBlock Text="  ·  " />
                                             <TextBlock Text="{Binding UpdatedAt}" />
                                         </StackPanel>
+                                        <!-- SCRUM-11148: what "Details" alone cannot say for a handed-off correction job. -->
+                                        <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+                                                   AutomationProperties.AutomationId="Home.RecentWaitingForCorrection"
+                                                   Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

@@ -591,9 +591,22 @@ public sealed class MaximumBoundsBoundaryTests
     /// to the operator who approved it. A record leaving the list is therefore a persisted flag
     /// and never a deletion.
     /// </para>
+    /// <para>
+    /// It moves to 0018 for SCRUM-11144's approved-artifact delivery evidence. That script only
+    /// adds: three new tables (<c>ArtifactDelivery</c>, <c>DeliveryAttempt</c>,
+    /// <c>DeliveryRequestAlias</c>) with their indexes and immutability/forward-only triggers. It
+    /// rebuilds, alters and backfills no existing table, and deliberately has no cascade from a
+    /// session, review, revision or output into delivery history.
+    /// </para>
+    /// <para>
+    /// It moves to 0019 for SCRUM-11148's colleague-correction request (owner decision D1). That
+    /// script only adds: one new table (<c>CorrectionRequest</c>) with its CHECKs, the
+    /// one-open-request partial unique index and its identity/forward-only triggers. It rebuilds,
+    /// alters and backfills no existing table, so every legacy handoff keeps its behaviour.
+    /// </para>
     /// </remarks>
     [Fact]
-    public void The_migration_set_ends_at_the_recent_processing_record_removal_migration()
+    public void The_migration_set_ends_at_the_correction_request_migration()
     {
         string directory = Path.Combine(FindProjectDirectory("PrintFlow.Infrastructure"), "Sqlite");
 
@@ -610,7 +623,9 @@ public sealed class MaximumBoundsBoundaryTests
         // SCRUM-11114: verified Revision relocation and explicit rejected-Meitu expiry.
         // SCRUM-11110: the same singleton lock also owns bounded environment verification.
         // SCRUM-11117: one nullable ProcessingSession column so a finished record can leave the list.
-        scripts.Last().ShouldBe("0017_recent_processing_record_removal.sql");
+        // SCRUM-11144: additive delivery/attempt/alias tables; no existing table changes.
+        // SCRUM-11148: one additive CorrectionRequest table; no existing table changes.
+        scripts.Last().ShouldBe("0019_correction_request.sql");
     }
 
     // -------------------------------------------------------------------------------------

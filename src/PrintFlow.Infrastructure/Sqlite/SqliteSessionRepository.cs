@@ -90,6 +90,9 @@ public sealed class SqliteSessionRepository : ISessionRepository
         IEnumerable<OutputRow> outputRows = await connection.QueryAsync<OutputRow>(
             "SELECT * FROM PrintOutput WHERE SessionId = @sessionId ORDER BY CreatedAtUtc;", new { sessionId });
 
+        IEnumerable<CorrectionRequestRow> correctionRows = await connection.QueryAsync<CorrectionRequestRow>(
+            "SELECT * FROM CorrectionRequest WHERE SessionId = @sessionId ORDER BY CreatedAtUtc, Id;", new { sessionId });
+
         SessionAggregate aggregate = new(
             Mappers.ToDomain(sessionRow),
             snapshotRow is null ? null : Mappers.ToDomain(snapshotRow),
@@ -97,7 +100,10 @@ public sealed class SqliteSessionRepository : ISessionRepository
             revisionRows.Select(Mappers.ToDomain).ToList(),
             attempts,
             reviewRows.Select(Mappers.ToDomain).ToList(),
-            outputRows.Select(Mappers.ToDomain).ToList());
+            outputRows.Select(Mappers.ToDomain).ToList())
+        {
+            CorrectionRequests = correctionRows.Select(CorrectionRequestRow.ToDomain).ToList(),
+        };
 
         return OperationResult.Ok<SessionAggregate?>(aggregate);
     }
@@ -138,7 +144,7 @@ public sealed class SqliteSessionRepository : ISessionRepository
             mutation.NewRevisions.Count != 0 || mutation.RevisionInvalidations.Count != 0 ||
             mutation.RevisionReviewStateChanges.Count != 0 ||
             mutation.UpsertAttempts.Count != 0 || mutation.NewReviews.Count != 0 || mutation.NewSnapshot is not null ||
-            mutation.LockChange is not null))
+            mutation.LockChange is not null || mutation.CorrectionRequestChanges.Count != 0))
             return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet,
                 "Retention maintenance cannot change workflow, attempts, reviews, snapshots or automation ownership.");
 
@@ -273,6 +279,23 @@ public sealed class SqliteSessionRepository : ISessionRepository
             foreach (Domain.Automation.AutomationLogEntry entry in mutation.NewAutomationLog)
             {
                 await InsertAutomationLogAsync(connection, transaction, entry);
+            }
+
+            // After the attempts and Revisions they may name, in the order the service built them
+            // (a supersede before the insert that replaces it). Every change but an insert is
+            // conditional: one that matches no row means the request is no longer the one this
+            // transaction was built for, and nothing of the transaction may land (SCRUM-11148).
+            foreach (CorrectionRequestChange change in mutation.CorrectionRequestChanges)
+            {
+                int changed = await ApplyCorrectionRequestChangeAsync(
+                    connection, transaction, mutation.Session.Id, change);
+                if (changed != 1)
+                {
+                    transaction.Rollback();
+                    return OperationResult.Fail<Unit>(
+                        FailureCode.PreconditionNotMet,
+                        $"The correction request changed before this transaction could {change.GetType().Name}; nothing was recorded.");
+                }
             }
 
             if (mutation.LockChange is { } lockChange)
@@ -920,6 +943,83 @@ public sealed class SqliteSessionRepository : ISessionRepository
         return connection.ExecuteAsync(sql, row, transaction);
     }
 
+    /// <summary>
+    /// Applies one correction-request change and returns how many rows it matched (SCRUM-11148).
+    /// </summary>
+    /// <remarks>
+    /// Every update names the session and the exact prior state it expects in its WHERE clause, so
+    /// a row that moved since the caller read it simply matches nothing and the caller rolls back.
+    /// <see cref="CorrectionRequestChange.AssertBound"/> sets a column to itself: SQLite still
+    /// reports the matched row, which is exactly the "still READY and still bound to this attempt"
+    /// answer the closing transaction needs, and nothing is written.
+    /// </remarks>
+    private static Task<int> ApplyCorrectionRequestChangeAsync(
+        SqliteConnection connection, SqliteTransaction transaction, SessionId sessionId, CorrectionRequestChange change)
+    {
+        string session = sessionId.ToString();
+        return change switch
+        {
+            CorrectionRequestChange.Insert insert => insert.Row.Status != CorrectionRequestStatus.Preparing ||
+                insert.Row.SessionId != sessionId
+                ? Task.FromResult(0)
+                : connection.ExecuteAsync(
+                    """
+                    INSERT INTO CorrectionRequest
+                        (Id, SessionId, StepKind, HandedOutRevisionId, HandedOutSha256, ReferenceRevisionId,
+                         ReferenceSha256, FolderRelativePath, ReferenceFileName, WorkingFileName,
+                         SuggestedReturnName, Note, EffectiveReason, Status, CreatedAtUtc)
+                    VALUES
+                        (@Id, @SessionId, @StepKind, @HandedOutRevisionId, @HandedOutSha256, @ReferenceRevisionId,
+                         @ReferenceSha256, @FolderRelativePath, @ReferenceFileName, @WorkingFileName,
+                         @SuggestedReturnName, @Note, @EffectiveReason, 'PREPARING', @CreatedAtUtc);
+                    """,
+                    new
+                    {
+                        Id = insert.Row.Id.ToString("D"),
+                        SessionId = session,
+                        StepKind = Mappers.ToText(insert.Row.StepKind),
+                        HandedOutRevisionId = insert.Row.HandedOutRevisionId.ToString(),
+                        HandedOutSha256 = insert.Row.HandedOutSha256.Value,
+                        ReferenceRevisionId = insert.Row.ReferenceRevisionId.ToString(),
+                        ReferenceSha256 = insert.Row.ReferenceSha256.Value,
+                        FolderRelativePath = insert.Row.Folder.RelativePath,
+                        insert.Row.ReferenceFileName,
+                        insert.Row.WorkingFileName,
+                        insert.Row.SuggestedReturnName,
+                        insert.Row.Note,
+                        insert.Row.EffectiveReason,
+                        CreatedAtUtc = Mappers.ToText(insert.Row.CreatedAtUtc),
+                    },
+                    transaction),
+            CorrectionRequestChange.Supersede supersede => connection.ExecuteAsync(
+                "UPDATE CorrectionRequest SET Status = 'SUPERSEDED', ClosedAtUtc = @at " +
+                "WHERE Id = @id AND SessionId = @session AND Status IN ('PREPARING', 'READY');",
+                new { id = supersede.Id.ToString("D"), session, at = Mappers.ToText(supersede.AtUtc) }, transaction),
+            CorrectionRequestChange.MarkReady ready => connection.ExecuteAsync(
+                "UPDATE CorrectionRequest SET Status = 'READY', ReadyAtUtc = @at " +
+                "WHERE Id = @id AND SessionId = @session AND Status = 'PREPARING';",
+                new { id = ready.Id.ToString("D"), session, at = Mappers.ToText(ready.AtUtc) }, transaction),
+            CorrectionRequestChange.SetLastImportAttempt opened => connection.ExecuteAsync(
+                "UPDATE CorrectionRequest SET LastImportAttemptId = @attempt " +
+                "WHERE Id = @id AND SessionId = @session AND Status = 'READY';",
+                new { id = opened.Id.ToString("D"), session, attempt = opened.Attempt.ToString() }, transaction),
+            CorrectionRequestChange.AssertBound bound => connection.ExecuteAsync(
+                "UPDATE CorrectionRequest SET Status = Status " +
+                "WHERE Id = @id AND SessionId = @session AND Status = 'READY' AND LastImportAttemptId = @attempt;",
+                new { id = bound.Id.ToString("D"), session, attempt = bound.Attempt.ToString() }, transaction),
+            CorrectionRequestChange.MarkReturned returned => connection.ExecuteAsync(
+                "UPDATE CorrectionRequest SET Status = 'RETURNED', ResultRevisionId = @result, ClosedAtUtc = @at " +
+                "WHERE Id = @id AND SessionId = @session AND Status = 'READY' AND LastImportAttemptId = @attempt;",
+                new
+                {
+                    id = returned.Id.ToString("D"), session, attempt = returned.Attempt.ToString(),
+                    result = returned.Result.ToString(), at = Mappers.ToText(returned.AtUtc),
+                },
+                transaction),
+            _ => Task.FromResult(0),
+        };
+    }
+
     private static Task<int> ApplyLockChangeAsync(
         SqliteConnection connection, SqliteTransaction transaction, AutomationLockChange change)
     {
@@ -941,4 +1041,56 @@ public sealed class SqliteSessionRepository : ISessionRepository
             machineName = change.MachineName,
         }, transaction);
     }
+}
+
+/// <summary>One <c>CorrectionRequest</c> row as stored (SCRUM-11148, migration 0019).</summary>
+internal sealed class CorrectionRequestRow
+{
+    public string Id { get; set; } = "";
+    public string SessionId { get; set; } = "";
+    public string StepKind { get; set; } = "";
+    public string HandedOutRevisionId { get; set; } = "";
+    public string HandedOutSha256 { get; set; } = "";
+    public string ReferenceRevisionId { get; set; } = "";
+    public string ReferenceSha256 { get; set; } = "";
+    public string FolderRelativePath { get; set; } = "";
+    public string ReferenceFileName { get; set; } = "";
+    public string WorkingFileName { get; set; } = "";
+    public string SuggestedReturnName { get; set; } = "";
+    public string? Note { get; set; }
+    public string EffectiveReason { get; set; } = "";
+    public string Status { get; set; } = "";
+    public string CreatedAtUtc { get; set; } = "";
+    public string? ReadyAtUtc { get; set; }
+    public string? ClosedAtUtc { get; set; }
+    public string? LastImportAttemptId { get; set; }
+    public string? ResultRevisionId { get; set; }
+
+    public static CorrectionRequest ToDomain(CorrectionRequestRow row) => new(
+        Guid.Parse(row.Id),
+        Domain.Ids.SessionId.From(Guid.Parse(row.SessionId)),
+        Mappers.ToStepKind(row.StepKind),
+        RevisionId.From(Guid.Parse(row.HandedOutRevisionId)),
+        Domain.Files.Sha256.Parse(row.HandedOutSha256),
+        RevisionId.From(Guid.Parse(row.ReferenceRevisionId)),
+        Domain.Files.Sha256.Parse(row.ReferenceSha256),
+        Domain.Files.WorkspaceDirRef.Create(row.FolderRelativePath),
+        row.ReferenceFileName,
+        row.WorkingFileName,
+        row.SuggestedReturnName,
+        row.Note,
+        row.EffectiveReason,
+        row.Status switch
+        {
+            "PREPARING" => CorrectionRequestStatus.Preparing,
+            "READY" => CorrectionRequestStatus.Ready,
+            "RETURNED" => CorrectionRequestStatus.Returned,
+            "SUPERSEDED" => CorrectionRequestStatus.Superseded,
+            _ => throw new InvalidOperationException($"Unknown correction request status '{row.Status}'."),
+        },
+        Mappers.ToDateTimeOffset(row.CreatedAtUtc),
+        Mappers.ToDateTimeOffsetOrNull(row.ReadyAtUtc),
+        Mappers.ToDateTimeOffsetOrNull(row.ClosedAtUtc),
+        row.LastImportAttemptId is { } attempt ? AttemptId.From(Guid.Parse(attempt)) : null,
+        row.ResultRevisionId is { } result ? RevisionId.From(Guid.Parse(result)) : null);
 }

@@ -23,4 +23,12 @@ public interface IFilePicker
     /// explicitly because Windows will hand it as many paths as the operator dragged.
     /// </remarks>
     string? PickSingleFile(string dialogTitle, string filter);
+
+    /// <summary>
+    /// The same single-file choice, starting in <paramref name="initialFolder"/> when it is given
+    /// (SCRUM-11148: the colleague-correction folder). The folder is a starting place only; it
+    /// selects nothing and authorises nothing.
+    /// </summary>
+    string? PickSingleFile(string dialogTitle, string filter, string? initialFolder) =>
+        PickSingleFile(dialogTitle, filter);
 }

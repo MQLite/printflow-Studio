@@ -75,6 +75,23 @@ public abstract record WorkflowCommand
     /// </remarks>
     public sealed record SubmitManualCrop(StepKind Step, TrimBounds Crop, ManualCropMargin Margin = default) : WorkflowCommand;
 
+    /// <summary>
+    /// Replaces the trim result under review with a new crop of its own pre-trim source
+    /// (SCRUM-11147).
+    /// </summary>
+    /// <remarks>
+    /// Exact-target on purpose: the reviewed result and the source it was cut from are both
+    /// named by Revision id <i>and</i> hash, so a screen showing an older result is refused even
+    /// when a newer one happens to hash the same. The crop is a kept rectangle in the source's
+    /// own pixels and is cropped with a tight margin — the rectangle is exactly what is kept.
+    /// </remarks>
+    public sealed record AdjustTrimFromReview(
+        RevisionId ReviewedRevision,
+        Sha256 ReviewedHash,
+        RevisionId SourceRevision,
+        Sha256 SourceHash,
+        TrimBounds Crop) : WorkflowCommand;
+
     /// <summary>Decline Trim and continue with its approved upstream artwork, without producing a result.</summary>
     public sealed record KeepOriginalExtent : WorkflowCommand
     {
@@ -122,6 +139,51 @@ public abstract record WorkflowCommand
 
     /// <summary>SCRUM-11092 / SCRUM-11112: import a result after explicit manual handoff.</summary>
     public sealed record SubmitManualResult(StepKind Step, string SelectedPath) : WorkflowCommand;
+
+    /// <summary>
+    /// Hands a background-removal result under review to a colleague for correction (SCRUM-11148).
+    /// </summary>
+    /// <remarks>
+    /// Exact-target on purpose: the result handed out (R) and the picture it was made from (U) are
+    /// named by Revision id <i>and</i> hash. It is neither an approval nor a rejection — the step
+    /// keeps <c>ReviewRequired</c> with R current — and it applies only the session-level half of a
+    /// handoff: no working copy, no automation-lock release.
+    /// <para>
+    /// Legal in the engine only; the service accepts it solely from its dedicated entry, after the
+    /// request row and its verified files exist. <c>ExecuteAsync</c> refuses it.
+    /// </para>
+    /// </remarks>
+    public sealed record RequestColleagueCorrection(
+        Guid CorrectionRequestId,
+        RevisionId ReviewedRevision,
+        Sha256 ReviewedHash,
+        RevisionId ReferenceRevision,
+        Sha256 ReferenceHash,
+        string? Note = null) : WorkflowCommand
+    {
+        /// <summary>The stable reason recorded when the operator gives no note (design §6.1).</summary>
+        public const string DefaultReason = "Operator asked a colleague to correct the background-removal result.";
+
+        /// <summary>The reason actually recorded on the session.</summary>
+        public string EffectiveReason =>
+            string.IsNullOrWhiteSpace(Note) ? DefaultReason : Note!.Trim();
+    }
+
+    /// <summary>
+    /// Imports a colleague's corrected picture for the exact result that was handed out, while it is
+    /// still the one under review (SCRUM-11148).
+    /// </summary>
+    /// <remarks>
+    /// Session-scoped like <see cref="SubmitManualResult"/>, whose effects it shares: the session is
+    /// handed off. Legal in the engine only while background removal is <c>ReviewRequired</c> with
+    /// exactly R current. The service accepts it solely from its dedicated entry, which binds it to a
+    /// persisted request; <c>ExecuteAsync</c> refuses it.
+    /// </remarks>
+    public sealed record ImportCorrectedImage(
+        Guid CorrectionRequestId,
+        RevisionId ReviewedRevision,
+        Sha256 ReviewedHash,
+        string SelectedPath) : WorkflowCommand;
 
     /// <summary>
     /// Confirm typed maximum bounds. The custom fit-box route only

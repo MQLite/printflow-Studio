@@ -90,6 +90,12 @@ public sealed partial class SessionService : ISessionService
     private readonly IDiagnosticImagePreviewDecoder? _diagnosticImages;
 
     /// <summary>
+    /// The file half of colleague-correction packages (SCRUM-11148). Optional: without it the Ask
+    /// action is not offered and the dedicated entries refuse.
+    /// </summary>
+    private readonly ICorrectionPackageStore? _correctionPackages;
+
+    /// <summary>
     /// The persisted operator preferences, read at exactly one point: the trim safety margin a
     /// <b>newly imported</b> job starts with (SCRUM-11118).
     /// </summary>
@@ -162,7 +168,8 @@ public sealed partial class SessionService : ISessionService
         ISettingsRepository? settings = null,
         IDiagnosticImagePreviewDecoder? diagnosticImages = null,
         IWorkstationAutomationLease? enclosingAutomationLease = null,
-        IWorkstationAutomationLeaseManager? automationLeases = null)
+        IWorkstationAutomationLeaseManager? automationLeases = null,
+        ICorrectionPackageStore? correctionPackages = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(repository);
@@ -191,6 +198,7 @@ public sealed partial class SessionService : ISessionService
         _manualResults = manualResults;
         _settings = settings;
         _diagnosticImages = diagnosticImages;
+        _correctionPackages = correctionPackages;
         _presetProvider = presetProvider;
         _environmentGate = environmentGate;
         _automationLeases = automationLeases;
@@ -332,7 +340,7 @@ public sealed partial class SessionService : ISessionService
         }
 
         // A freshly imported session has produced nothing yet, so it holds no PrintOutput.
-        return ViewOf(finished.State, [rootRevision], [], [succeededAttempt]);
+        return ViewOf(finished.State, [rootRevision], [], [succeededAttempt], []);
     }
 
     /// <summary>
@@ -370,9 +378,59 @@ public sealed partial class SessionService : ISessionService
     public async Task<OperationResult<SessionView>> ExecuteAsync(
         SessionId id, WorkflowCommand command, string? operatorName, CancellationToken cancellationToken)
     {
-        using IDisposable? completionLease = command is WorkflowCommand.Complete or WorkflowCommand.AddAnotherSize
-            ? await SessionCompletionGate.EnterAsync(id, cancellationToken) : null;
+        // Every authority-changing command shares the delivery/retention gate. Complete's
+        // retention path calls its under-gate core, so this lease is acquired only once.
+        using IDisposable completionLease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
         return await ExecuteCoreAsync(id, command, operatorName, expectedFailureAttemptId: null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<SessionView>> ApproveExactReviewAsync(
+        SessionId id, StepKind step, RevisionId revision, Sha256 reviewedHash, string? operatorName,
+        CancellationToken cancellationToken)
+    {
+        // One gate acquisition covers the identity check and the ordinary Approve core, so no
+        // other in-process mutation can replace the result between them.
+        using IDisposable completionLease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
+        OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
+        if (loaded.IsFailure) return OperationResult.Fail<SessionView>(loaded.Failure);
+        SessionStep? current = loaded.Value?.Steps.SingleOrDefault(s => s.Step == step);
+        if (current is null || current.CurrentRevisionId != revision || current.CurrentRevisionSha256 != reviewedHash)
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "The result on screen is no longer the step's current result.");
+        return await ExecuteCoreAsync(id, new WorkflowCommand.Approve(step, reviewedHash), operatorName,
+            expectedFailureAttemptId: null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<OperationResult<SessionView>> PromoteReviewedPngAsync(
+        SessionId id, RevisionId reviewedRevision, Sha256 reviewedHash, string? operatorName,
+        CancellationToken cancellationToken)
+    {
+        using IDisposable completionLease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
+        OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
+        if (loaded.IsFailure) return OperationResult.Fail<SessionView>(loaded.Failure);
+        if (loaded.Value is not { Session.WorkflowType: WorkflowType.PrepareAsset } aggregate)
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "Approved PNG preparation applies only to the asset workflow.");
+        SessionStep? trim = aggregate.Steps.SingleOrDefault(s => s.Step == StepKind.Trim);
+        SessionStep? export = aggregate.Steps.SingleOrDefault(s => s.Step == StepKind.ApprovedPngExport);
+        if (trim is not { State: StepState.Approved } || trim.CurrentRevisionId != reviewedRevision ||
+            trim.CurrentRevisionSha256 != reviewedHash || export is null)
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "The exact reviewed result is not the approved final result.");
+
+        // Once only: an existing promotion of this exact source is returned, never repeated.
+        if (export.State == StepState.Approved &&
+            aggregate.Revisions.SingleOrDefault(r => r.Id == export.CurrentRevisionId) is
+                { Operation: OperationKind.PromoteApproved } promoted &&
+            promoted.SourceRevisionId == reviewedRevision && promoted.Sha256 == reviewedHash)
+            return await LoadAsync(id, cancellationToken);
+        if (export.State != StepState.Waiting)
+            return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
+                "Approved PNG preparation needs its existing explicit retry.");
+        return await ExecuteCoreAsync(id, new WorkflowCommand.StartStep(StepKind.ApprovedPngExport),
+            operatorName, expectedFailureAttemptId: null, cancellationToken);
     }
 
     private async Task<OperationResult<SessionView>> ExecuteCoreAsync(
@@ -380,7 +438,8 @@ public sealed partial class SessionService : ISessionService
         WorkflowCommand command,
         string? operatorName,
         AttemptId? expectedFailureAttemptId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        CorrectionContext? correction = null)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -441,10 +500,42 @@ public sealed partial class SessionService : ISessionService
                 "after an earlier manual crop was rejected.");
         }
 
+        // Adjusting a trim review: the attempt-history half, on the aggregate this command will
+        // actually apply to. A visible button is not authority. The rectangle must also fit the
+        // source it names, checked here so a refused rectangle never turns a reviewable result
+        // into a failed attempt (the processor still refuses it as a second guard). SCRUM-11147.
+        if (command is WorkflowCommand.AdjustTrimFromReview adjustment)
+        {
+            TrimAdjustmentView? eligible = TrimAdjustmentEligibility.Resolve(
+                snapshot, aggregate.Revisions, aggregate.Attempts, aggregate.Outputs);
+            if (eligible is null ||
+                eligible.ResultRevisionId != adjustment.ReviewedRevision || eligible.ResultSha256 != adjustment.ReviewedHash ||
+                eligible.PreTrimRevisionId != adjustment.SourceRevision || eligible.PreTrimSha256 != adjustment.SourceHash)
+            {
+                return OperationResult.Fail<SessionView>(
+                    FailureCode.PreconditionNotMet,
+                    "The trim on screen can no longer be adjusted: the result under review or the picture it was cut from has changed.");
+            }
+
+            if (adjustment.Crop.IsEmpty || !adjustment.Crop.FitsWithin(eligible.SourcePixelWidth, eligible.SourcePixelHeight))
+            {
+                return OperationResult.Fail<SessionView>(
+                    FailureCode.PreconditionNotMet,
+                    $"The trim rectangle {adjustment.Crop} is not inside the {eligible.SourcePixelWidth}x{eligible.SourcePixelHeight} source.");
+            }
+        }
+
         if (command is WorkflowCommand.SubmitManualResult submission &&
             (!ManualResultEligibility.CanSubmit(snapshot) || snapshot.CurrentStep!.Step != submission.Step))
             return OperationResult.Fail<SessionView>(FailureCode.PreconditionNotMet,
                 "Manual result submission requires an eligible handed-off step.");
+
+        // Colleague correction (SCRUM-11148): both correction commands need the internal context
+        // only their dedicated entries build, and a generic manual-result import is refused while a
+        // correction request waits after an unfinished import (addendum §2.2 guard b). Every generic
+        // caller — ExecuteAsync, Home recovery, a stale screen — passes through here.
+        if (RefuseCorrectionMisuse(command, aggregate, snapshot, correction) is { } correctionRefusal)
+            return OperationResult.Fail<SessionView>(correctionRefusal);
 
         OperationResult<Unit> integrity = await EnsureIntegrityAsync(aggregate, snapshot, command, context, cancellationToken);
         if (integrity.IsFailure)
@@ -511,6 +602,13 @@ public sealed partial class SessionService : ISessionService
                 aggregate, updatedSession, state, transition.Effects, context,
                 upsertOutputs: lifecycle.Value is { } lifecycleOutput ? [lifecycleOutput] : null);
 
+            // The handoff and READY land together, or neither does (design §6.2 commit 2).
+            if (command is WorkflowCommand.RequestColleagueCorrection && correction is { Purpose: CorrectionPurpose.Prepare })
+                mutation = mutation with
+                {
+                    CorrectionRequestChanges = [new CorrectionRequestChange.MarkReady(correction.RequestId, context.NowUtc)],
+                };
+
             OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
             if (committed.IsFailure)
             {
@@ -529,8 +627,15 @@ public sealed partial class SessionService : ISessionService
             }
 
             return ViewOf(
-                state, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts);
+                state, aggregate.Revisions, OutputsAfter(aggregate.Outputs, mutation), aggregate.Attempts,
+                CorrectionRequestChange.ApplyAll(aggregate.CorrectionRequests, mutation.CorrectionRequestChanges));
         }
+
+        // A correction import carries its request and the bytes it was checked for into the
+        // producing path, so the opening commit binds the attempt and the closing commit can find
+        // the request on the post-opening aggregate (addendum §3.2).
+        if (correction is { Purpose: CorrectionPurpose.Import })
+            work = work with { CorrectionRequestId = correction.RequestId, ExpectedSelectedHash = correction.SelectedHash };
 
         return await RunProducingStepAsync(aggregate, transition, context, work, cancellationToken);
     }
@@ -881,7 +986,17 @@ public sealed partial class SessionService : ISessionService
         RevisionId? InputRevision,
         string ProcessorId,
         TrimBounds? ManualCrop,
-        string? ManualResultPath = null, ManualCropMargin ManualCropMargin = default);
+        string? ManualResultPath = null, ManualCropMargin ManualCropMargin = default)
+    {
+        /// <summary>
+        /// The colleague-correction request this import is for, set only by the dedicated import
+        /// entry (SCRUM-11148). Null for every other attempt, including a generic manual import.
+        /// </summary>
+        public Guid? CorrectionRequestId { get; init; }
+
+        /// <summary>The selected file's hash when it was checked; the importer refuses other bytes.</summary>
+        public Sha256? ExpectedSelectedHash { get; init; }
+    }
 
     /// <summary>
     /// What one attempt's file work produced, on its way to the closing transaction.
@@ -956,18 +1071,46 @@ public sealed partial class SessionService : ISessionService
         }
 
         WorkflowSnapshot snapshot = loaded.Value.ToSnapshot(ConfiguredRecommendations());
-        return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs, loaded.Value.Attempts);
+        return ViewOf(snapshot, loaded.Value.Revisions, loaded.Value.Outputs, loaded.Value.Attempts,
+            loaded.Value.CorrectionRequests);
     }
 
     /// <inheritdoc />
-    public Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken) =>
-        _repository.ListRecentAsync(
+    public async Task<OperationResult<IReadOnlyList<SessionListItem>>> ListRecentAsync(CancellationToken cancellationToken)
+    {
+        OperationResult<IReadOnlyList<SessionListItem>> listed = await _repository.ListRecentAsync(
             RecentSessionLimit, _timeProvider.GetUtcNow() - RecentSessionWindow, cancellationToken);
+        if (listed.IsFailure || !listed.Value.Any(item => item.State == SessionState.HandedOff))
+        {
+            return listed;
+        }
+
+        // Only handed-off rows can be waiting for a colleague, and whether one is waiting is the
+        // same eligibility the service enforces, read from the persisted request (SCRUM-11148).
+        List<SessionListItem> items = [];
+        foreach (SessionListItem item in listed.Value)
+        {
+            if (item.State != SessionState.HandedOff)
+            {
+                items.Add(item);
+                continue;
+            }
+
+            OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(item.Id, cancellationToken);
+            bool waiting = loaded.IsSuccess && loaded.Value is { } aggregate &&
+                CorrectionRequestEligibility.Resolve(
+                    aggregate.ToSnapshot(ConfiguredRecommendations()), aggregate.CorrectionRequests, aggregate.Attempts) is not null;
+            items.Add(item with { HasOpenCorrection = waiting });
+        }
+
+        return OperationResult.Ok<IReadOnlyList<SessionListItem>>(items);
+    }
 
     /// <inheritdoc />
     public async Task<OperationResult<Unit>> RemoveFromRecentAsync(
         SessionId id, CancellationToken cancellationToken)
     {
+        using IDisposable lease = await SessionCompletionGate.EnterAsync(id, cancellationToken);
         OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(id, cancellationToken);
         if (loaded.IsFailure)
         {
@@ -1030,7 +1173,8 @@ public sealed partial class SessionService : ISessionService
         WorkflowSnapshot state,
         IReadOnlyList<Revision> revisions,
         IReadOnlyList<PrintOutput> outputs,
-        IReadOnlyList<ProcessingAttempt> attempts)
+        IReadOnlyList<ProcessingAttempt> attempts,
+        IReadOnlyList<CorrectionRequest> corrections)
     {
         state = state with { RequiresPsdPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Psd),
             RequiresPdfPreparation = revisions.Any(r => r.IsRoot && r.Facts.Format == ImageFormat.Pdf) };
@@ -1089,8 +1233,73 @@ public sealed partial class SessionService : ISessionService
             };
         }
 
+        view = view with
+        {
+            Correction = CorrectionHandoffOf(state, corrections, revisions, attempts),
+            CorrectionReturn = CorrectionReturnOf(state, corrections),
+            CanAskColleague = _correctionPackages is not null &&
+                view.AvailableCommands.Contains(CommandKind.RequestColleagueCorrection) &&
+                CorrectionRequestEligibility.RequestCandidate(state, revisions, outputs) is not null,
+        };
+
         return OperationResult.Ok(view);
     }
+
+    /// <summary>
+    /// The correction panel's read model: the eligible request with its import mode, or — while
+    /// background removal is still the current step — the latest READY request that no longer
+    /// grants anything, as history (SCRUM-11148, design §6.4).
+    /// </summary>
+    private CorrectionHandoffView? CorrectionHandoffOf(
+        WorkflowSnapshot state, IReadOnlyList<CorrectionRequest> corrections,
+        IReadOnlyList<Revision> revisions, IReadOnlyList<ProcessingAttempt> attempts)
+    {
+        if (_correctionPackages is not { } store)
+        {
+            return null;
+        }
+
+        CorrectionEligibility? eligible = CorrectionRequestEligibility.Resolve(state, corrections, attempts);
+        CorrectionRequest? request = eligible?.Request ??
+            (state.CurrentStep?.Step == StepKind.BackgroundRemoval
+                ? corrections.LastOrDefault(r => r.Status == CorrectionRequestStatus.Ready)
+                : null);
+        if (request is null)
+        {
+            return null;
+        }
+
+        Revision? reference = revisions.FirstOrDefault(r => r.Id == request.ReferenceRevisionId);
+        return new CorrectionHandoffView(
+            request.Id,
+            eligible?.Mode,
+            request.HandedOutRevisionId,
+            request.HandedOutSha256,
+            store.ResolveFolder(request.Folder),
+            request.ReferenceFileName,
+            request.WorkingFileName,
+            request.SuggestedReturnName,
+            request.Note,
+            reference?.Facts.PixelWidth ?? 0,
+            reference?.Facts.PixelHeight ?? 0,
+            MissingFiles: eligible is not null &&
+                (!store.Exists(request.Folder, request.ReferenceFileName) ||
+                 !store.Exists(request.Folder, request.WorkingFileName)));
+    }
+
+    /// <summary>The imported correction under review, with the step that follows (design §8.1).</summary>
+    private static CorrectionReturnView? CorrectionReturnOf(
+        WorkflowSnapshot state, IReadOnlyList<CorrectionRequest> corrections) =>
+        state.CurrentStep is
+        {
+            Step: StepKind.BackgroundRemoval, State: StepState.ReviewRequired,
+            CurrentRevisionId: RevisionId current, CurrentRevisionSha256: Sha256 currentHash,
+        } &&
+        corrections.LastOrDefault(r => r.Status == CorrectionRequestStatus.Returned && r.ResultRevisionId == current) is { } returned
+            ? new CorrectionReturnView(
+                returned.Id, currentHash == returned.HandedOutSha256,
+                state.Definition.Next(StepKind.BackgroundRemoval)?.Kind)
+            : null;
 
     private static RecordedSize? CurrentRecordedSize(WorkflowSnapshot snapshot)
     {
@@ -1269,7 +1478,16 @@ public sealed partial class SessionService : ISessionService
             WorkflowCommand.StartStep start => FindRevision(aggregate, snapshot.UpstreamRevisionOf(start.Step)),
             // Retaining the approved original is a decision about those exact bytes.
             WorkflowCommand.KeepOriginalExtent => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
+
+            // A trim adjustment is a decision about the exact pixels of the pre-trim source it
+            // crops, so those bytes are re-verified before anything is committed (SCRUM-11147).
+            WorkflowCommand.AdjustTrimFromReview => FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.Trim)),
             WorkflowCommand.SubmitManualResult manual => FindRevision(aggregate, snapshot.UpstreamRevisionOf(manual.Step)),
+
+            // The same input a manual import is checked against: U's bytes are re-verified before
+            // the correction import's attempt opens (SCRUM-11148, design §6.5).
+            WorkflowCommand.ImportCorrectedImage =>
+                FindRevision(aggregate, snapshot.UpstreamRevisionOf(StepKind.BackgroundRemoval)),
 
             // Authorising reviewed content is a decision about specific bytes, exactly as an
             // Approve is, so it is checked exactly as an Approve is (Epic 11300 Part C2B2 §20).
@@ -1835,17 +2053,32 @@ public sealed partial class SessionService : ISessionService
             aggregate, sessionAfterStart, started.State, started.Effects, context, upsertAttempts: [runningAttempt]);
         opening = opening with { LockChange = acquire };
 
+        // A correction import binds its attempt to the request in the opening commit itself
+        // (SCRUM-11148, design §6.5): a crash at any later point leaves a persisted READY row
+        // naming exactly this attempt for startup recovery to find.
+        if (work.CorrectionRequestId is { } boundRequestId)
+        {
+            opening = opening with
+            {
+                CorrectionRequestChanges = [new CorrectionRequestChange.SetLastImportAttempt(boundRequestId, runningAttempt.Id)],
+            };
+        }
+
         OperationResult<Unit> committedStart = await _repository.CommitAsync(opening, cancellationToken);
         if (committedStart.IsFailure)
         {
             return OperationResult.Fail<SessionView>(committedStart.Failure);
         }
 
+        // The opening commit's request change is applied here as well as to the database, so every
+        // live closing reads the post-opening binding and never the pre-opening one (addendum §3.2).
         SessionAggregate afterStart = aggregate with
         {
             Session = sessionAfterStart,
             Steps = started.State.Steps,
             Attempts = [.. aggregate.Attempts, runningAttempt],
+            CorrectionRequests = CorrectionRequestChange.ApplyAll(
+                aggregate.CorrectionRequests, opening.CorrectionRequestChanges),
         };
 
         // Registered only now, after the attempt row exists. A Stop that arrived before the
@@ -1963,7 +2196,7 @@ public sealed partial class SessionService : ISessionService
             // structured context, and whatever the adapter reported goes into the detail (§29).
             return await StopAttemptAsync(
                 afterStart, started.State, closing, work.Step, runningAttempt, definition,
-                stopped, stop, produced.Failure);
+                stopped, stop, produced.Failure, work.CorrectionRequestId);
         }
 
         // Cancellation is the one failure whose caller token cannot be used to close the
@@ -1983,7 +2216,8 @@ public sealed partial class SessionService : ISessionService
                 ? CancellationToken.None
                 : cancellationToken;
         return await FailAttemptAsync(
-            afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken);
+            afterStart, started.State, closing, work.Step, runningAttempt, produced.Failure, closingToken,
+            work.CorrectionRequestId);
     }
 
     /// <summary>
@@ -2063,6 +2297,13 @@ public sealed partial class SessionService : ISessionService
         if (work.ManualResultPath is not null)
             finishing = finishing with { LockChange = null };
 
+        // A bound correction import returns its request in the same transaction as R2 and the
+        // successful attempt (addendum §3.3 Success). When the binding predicate fails on the
+        // post-opening aggregate, today's success commits unchanged: no RETURNED is fabricated.
+        SucceededCorrectionClose correctionClose = CorrectionClosing.Succeeded(
+            work.CorrectionRequestId, afterStart, runningAttempt, revisionId, context.NowUtc);
+        finishing = finishing with { CorrectionRequestChanges = correctionClose.Changes };
+
         // Closed on CancellationToken.None when a stop is pending, for the same reason a
         // cancelled attempt is: the validated file already exists, and losing the transaction
         // that records it would leave a real output with no Revision — the one outcome §16
@@ -2081,6 +2322,8 @@ public sealed partial class SessionService : ISessionService
             Revisions = [.. afterStart.Revisions, newRevision],
             Attempts = [.. afterStart.Attempts, succeededAttempt],
             Outputs = OutputsAfter(afterStart.Outputs, finishing),
+            CorrectionRequests = CorrectionRequestChange.ApplyAll(
+                afterStart.CorrectionRequests, finishing.CorrectionRequestChanges),
         };
 
         // §16's boundary, on the far side of the success transaction. A Take Over that arrived
@@ -2088,13 +2331,18 @@ public sealed partial class SessionService : ISessionService
         // a session whose Attempt and Revision are complete, and it cannot turn either into a
         // failure, because the only thing left to change is the session's automated
         // progression. A plain Stop has nothing further to do: the run is over.
-        if (stop.RequestedMode == AutomationStopMode.TakeOver)
+        //
+        // A correction import is never handed off again after success, in either stop mode
+        // (addendum §3.3, owner decision D5): R2 goes to its own review. Generic imports keep
+        // today's behaviour.
+        if (stop.RequestedMode == AutomationStopMode.TakeOver && correctionClose.MayHandOffAfterSuccess)
         {
             return await HandOffAfterSuccessAsync(afterFinish, finished.State, context, work.Step, stop);
         }
 
         return ViewOf(
-            finished.State, afterFinish.Revisions, afterFinish.Outputs, afterFinish.Attempts);
+            finished.State, afterFinish.Revisions, afterFinish.Outputs, afterFinish.Attempts,
+            afterFinish.CorrectionRequests);
     }
 
     /// <summary>Performs one attempt's file work, whatever kind of work that is.</summary>
@@ -2118,7 +2366,7 @@ public sealed partial class SessionService : ISessionService
             if (_manualResults is null)
                 return OperationResult.Fail<StepWork>(FailureCode.PreconditionNotMet, "Manual result import is unavailable.");
             var imported = await _manualResults.ImportAsync(session, attempt.Id, work.Step,
-                FindRevision(aggregate, work.InputRevision)!.Facts, selected, cancellationToken);
+                FindRevision(aggregate, work.InputRevision)!.Facts, selected, work.ExpectedSelectedHash, cancellationToken);
             return imported.IsFailure
                 ? OperationResult.Fail<StepWork>(imported.Failure)
                 : OperationResult.Ok(new StepWork(imported.Value.File, imported.Value.Facts,
@@ -2589,7 +2837,8 @@ public sealed partial class SessionService : ISessionService
 
     private async Task<OperationResult<SessionView>> FailAttemptAsync(
         SessionAggregate aggregate, WorkflowSnapshot stateAfterStart, CommandContext context, StepKind step,
-        ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken)
+        ProcessingAttempt runningAttempt, OperationFailure failure, CancellationToken cancellationToken,
+        Guid? correctionRequestId = null)
     {
         failure = FailureEvidence.ForAttempt(failure, runningAttempt.Id);
         WorkflowCommand.System.AttemptFailed failedCommand = new(runningAttempt.Id, step, failure);
@@ -2599,10 +2848,23 @@ public sealed partial class SessionService : ISessionService
             return OperationResult.Fail<SessionView>(MapRejection(failedTransition.Rejection!));
         }
 
+        List<CorrectionRequestChange> requestChanges = [];
         if (runningAttempt.Operation == OperationKind.ManualResultImport)
         {
+            // A bound correction import re-hands off with the request's own reason and asserts the
+            // request in this same transaction; a correction import whose binding no longer holds
+            // re-hands off with the neutral reason and touches no request (addendum §3.3). Every
+            // other manual import keeps today's text. The effects are replaced exactly as before,
+            // so no path here changes the automation lock.
+            string reason = "Manual result validation failed; manual processing remains authorised.";
+            if (CorrectionClosing.Unfinished(correctionRequestId, aggregate, runningAttempt) is { } correctionClose)
+            {
+                reason = correctionClose.HandOffReason;
+                requestChanges.AddRange(correctionClose.Changes);
+            }
+
             WorkflowTransition handedOff = _engine.Apply(failedTransition.State,
-                new WorkflowCommand.HandOff(step, "Manual result validation failed; manual processing remains authorised."), context);
+                new WorkflowCommand.HandOff(step, reason), context);
             if (handedOff.IsRejected)
                 return OperationResult.Fail<SessionView>(MapRejection(handedOff.Rejection!));
             failedTransition = WorkflowTransition.Accepted(handedOff.State,
@@ -2619,6 +2881,7 @@ public sealed partial class SessionService : ISessionService
             upsertAttempts: [failedAttempt]) with
         {
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
+            CorrectionRequestChanges = requestChanges,
         };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, cancellationToken);
@@ -2694,7 +2957,8 @@ public sealed partial class SessionService : ISessionService
         StepDefinition definition,
         AutomationStopMode mode,
         IAutomationStopSignal stop,
-        OperationFailure? adapterFailure)
+        OperationFailure? adapterFailure,
+        Guid? correctionRequestId = null)
     {
         OperationFailure failure = DescribeStop(
             mode, stop, definition.IsAdapterBacked, runningAttempt, step, adapterFailure);
@@ -2713,8 +2977,28 @@ public sealed partial class SessionService : ISessionService
 
         WorkflowSnapshot state = stopped.State;
         List<WorkflowEffect> effects = [.. stopped.Effects];
+        List<CorrectionRequestChange> requestChanges = [];
 
-        if (mode == AutomationStopMode.TakeOver)
+        if (CorrectionClosing.Unfinished(correctionRequestId, aggregate, runningAttempt) is { } correctionClose)
+        {
+            // A correction import stopped by a Stop or TakeOver request, reached only because the
+            // importer then failed (Stop does not interrupt an import). Exactly one HandOff, with the
+            // request's own reason in either mode, or the neutral reason when the binding no longer
+            // holds; every automation-lock release is removed, so no lock row belonging to another
+            // session or to environment verification can roll this close back (addendum §3.3).
+            WorkflowTransition handedOff = _engine.Apply(
+                state, new WorkflowCommand.HandOff(step, correctionClose.HandOffReason), context);
+            if (handedOff.IsRejected)
+            {
+                return OperationResult.Fail<SessionView>(MapRejection(handedOff.Rejection!));
+            }
+
+            state = handedOff.State;
+            effects.AddRange(handedOff.Effects);
+            effects.RemoveAll(effect => effect is WorkflowEffect.ReleaseAutomationLock);
+            requestChanges.AddRange(correctionClose.Changes);
+        }
+        else if (mode == AutomationStopMode.TakeOver)
         {
             WorkflowTransition handedOff = _engine.Apply(
                 state, new WorkflowCommand.HandOff(step, TakeOverHandOffReason), context);
@@ -2732,6 +3016,7 @@ public sealed partial class SessionService : ISessionService
             aggregate, updatedSession, state, effects, context, upsertAttempts: [cancelledAttempt]) with
         {
             NewAutomationLog = [RecordAutomationStop(aggregate.Session.Id, step, failure, context.NowUtc)],
+            CorrectionRequestChanges = requestChanges,
         };
 
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
@@ -2767,7 +3052,7 @@ public sealed partial class SessionService : ISessionService
             state, new WorkflowCommand.HandOff(step, TakeOverHandOffReason), context);
         if (handedOff.IsRejected)
         {
-            return ViewOf(state, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts);
+            return ViewOf(state, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts, aggregate.CorrectionRequests);
         }
 
         ProcessingSession updatedSession = MergeSession(
@@ -2778,7 +3063,7 @@ public sealed partial class SessionService : ISessionService
         OperationResult<Unit> committed = await _repository.CommitAsync(mutation, CancellationToken.None);
         return committed.IsFailure
             ? OperationResult.Fail<SessionView>(committed.Failure)
-            : ViewOf(handedOff.State, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts);
+            : ViewOf(handedOff.State, aggregate.Revisions, aggregate.Outputs, aggregate.Attempts, aggregate.CorrectionRequests);
     }
 
     /// <summary>

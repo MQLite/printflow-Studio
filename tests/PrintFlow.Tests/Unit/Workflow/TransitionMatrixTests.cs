@@ -196,6 +196,10 @@ public sealed class TransitionMatrixTests
             CommandKind.Retry => new WorkflowCommand.Retry(step),
             CommandKind.SubmitManualCrop => new WorkflowCommand.SubmitManualCrop(
                 step, global::PrintFlow.Domain.Trimming.TrimBounds.Canvas(4, 4)),
+            // The forced revision stands in for both the reviewed result and its source: the
+            // matrix asserts only an explicit outcome, and a mismatched pair must still be refused.
+            CommandKind.AdjustTrimFromReview => new WorkflowCommand.AdjustTrimFromReview(
+                revision, hash, revision, hash, global::PrintFlow.Domain.Trimming.TrimBounds.Canvas(4, 4)),
             CommandKind.Skip => new WorkflowCommand.Skip(step),
             CommandKind.KeepOriginalExtent => new WorkflowCommand.KeepOriginalExtent(),
             CommandKind.HandOff => new WorkflowCommand.HandOff(step, "matrix probe"),
@@ -248,6 +252,13 @@ public sealed class TransitionMatrixTests
                 SystemCommands.Cancelled(AttemptId.From(Guid.CreateVersion7()), step),
             CommandKind.ReenterAutomation => new WorkflowCommand.ReenterAutomation(),
             CommandKind.SubmitManualResult => new WorkflowCommand.SubmitManualResult(step, @"C:\manual-result.png"),
+
+            // SCRUM-11148. The forced revision stands in for both R and U, as it does for the trim
+            // adjustment above: the matrix asserts only an explicit outcome, never acceptance.
+            CommandKind.RequestColleagueCorrection => new WorkflowCommand.RequestColleagueCorrection(
+                Guid.CreateVersion7(), revision, hash, revision, hash),
+            CommandKind.ImportCorrectedImage => new WorkflowCommand.ImportCorrectedImage(
+                Guid.CreateVersion7(), revision, hash, @"C:\corrected.png"),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unhandled command kind."),
         };
     }

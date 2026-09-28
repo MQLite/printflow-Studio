@@ -365,7 +365,12 @@ public sealed class TrimBoundaryTests
                 .Any(p => p.ParameterType == typeof(TrimBounds)))
             .Select(t => t.FullName!);
 
-        commandsCarryingBounds.ShouldBe([typeof(WorkflowCommand.SubmitManualCrop).FullName!]);
+        // SCRUM-11147 adds the second, and only other, shape: the exact-target adjustment of a
+        // trim review. It is still a command handed to ISessionService, so the property this test
+        // protects is unchanged; the set is pinned exactly so a third shape is a visible decision.
+        commandsCarryingBounds.ShouldBe(
+            [typeof(WorkflowCommand.SubmitManualCrop).FullName!, typeof(WorkflowCommand.AdjustTrimFromReview).FullName!],
+            ignoreOrder: true);
 
         Type[] cropSeam = [typeof(IManualCropProcessor), typeof(ManualCropRequest), typeof(ManualCropResult)];
 

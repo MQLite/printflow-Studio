@@ -25,6 +25,15 @@ public sealed class RecoverySessionRow(RecoveryItem item)
     public string ManualResultLabel => Strings.Home_RecoveryManualResult;
     public string AbandonLabel => Strings.Home_Abandon;
     public string OpenLabel => Strings.Home_Resume;
+
+    /// <summary>
+    /// The job waits for a colleague's corrected picture (SCRUM-11148). Home then offers only to
+    /// open the job, first, with the plain Open hidden; it never imports from here.
+    /// </summary>
+    public bool HasOpenCorrection => item.HasOpenCorrection;
+    public bool ShowsPlainOpen => !item.HasOpenCorrection;
+    public string OpenCorrectionLabel => Strings.Home_RecoveryOpenCorrection;
+    public string WaitingForCorrectionText => Strings.Home_RecentWaitingForCorrection;
     internal string ManualFilter => item.Step == StepKind.BackgroundRemoval
         ? Strings.Session_ManualCutoutFilter : Strings.Session_ManualEnhancementFilter;
 }

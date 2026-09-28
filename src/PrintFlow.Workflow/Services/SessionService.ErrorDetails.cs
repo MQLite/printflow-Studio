@@ -170,6 +170,7 @@ public sealed partial class SessionService
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
 
+        using IDisposable lease = await SessionCompletionGate.EnterAsync(sessionId, cancellationToken);
         return await ExecuteCoreAsync(
             sessionId, command, operatorName, expectedFailureAttemptId: attemptId, cancellationToken);
     }

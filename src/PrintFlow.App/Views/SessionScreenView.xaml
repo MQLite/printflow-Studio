@@ -14,6 +14,51 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <local:PreviewPayloadConverter x:Key="PreviewPayload" />
+        <local:RecommendedCommandConverter x:Key="RecommendedCommand" />
+        <local:ProposedTrimConverter x:Key="ProposedTrim" />
+
+        <!--
+            A trim-adjustment handle (SCRUM-11147): a white square with a dark border, readable
+            over any artwork without relying on colour. Keyboard focus thickens the border.
+            Positioned, hit-tested and moved by the code-behind; never a drag source of its own.
+        -->
+        <Style x:Key="TrimHandle" TargetType="Thumb">
+            <Setter Property="Width" Value="10" />
+            <Setter Property="Height" Value="10" />
+            <Setter Property="Focusable" Value="True" />
+            <Setter Property="IsTabStop" Value="True" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="Square" Background="White" BorderBrush="#FF1A1A1A" BorderThickness="1" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Square" Property="BorderThickness" Value="3" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RecommendedAction" TargetType="Button">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource RecommendedCommand}">
+                            <Binding Path="Command" RelativeSource="{RelativeSource Self}" />
+                            <Binding Path="DataContext.RecommendedCommand" RelativeSource="{RelativeSource AncestorType={x:Type local:SessionScreenView}}" />
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="BorderBrush" Value="#174D83" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="Background" Value="#E1EEFA" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}" />
 
         <Style x:Key="MetadataLabel" TargetType="TextBlock">
             <Setter Property="Opacity" Value="0.6" />
@@ -55,6 +100,160 @@
         </DrawingBrush>
 
 
+
+        <!-- Final review and save section (SCRUM-11145); instantiated only while it applies. -->
+        <DataTemplate x:Key="FinalSaveTemplate">
+            <Border BorderBrush="#174D83" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,14"
+                    AutomationProperties.AutomationId="Session.FinalSave"
+                    AutomationProperties.Name="{Binding FinalSaveHeading}">
+                <StackPanel>
+                    <TextBlock Text="{Binding FinalSaveHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasMultipleFinalSaveTargets, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FinalSaveTargetLabel}" Style="{StaticResource MetadataLabel}" />
+                        <ComboBox ItemsSource="{Binding FinalSaveTargets}"
+                                  SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
+                                  DisplayMemberPath="Label"
+                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  AutomationProperties.AutomationId="Session.FinalSave.Target"
+                                  AutomationProperties.Name="{Binding FinalSaveTargetLabel}" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding FinalSaveStatus}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                               AutomationProperties.AutomationId="Session.FinalSave.Status" />
+                    <TextBlock Text="{Binding FinalSaveAlert}" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="#8A1F11"
+                               AutomationProperties.AutomationId="Session.FinalSave.Alert"
+                               Visibility="{Binding HasFinalSaveAlert, Converter={StaticResource BoolToVisibility}}" />
+                    <ProgressBar Height="6" Margin="0,6,0,0" Minimum="0" Maximum="1" Value="{Binding FinalSaveProgress, Mode=OneWay}"
+                                 AutomationProperties.Name="{Binding FinalSaveStatus}"
+                                 Visibility="{Binding HasFinalSaveProgress, Converter={StaticResource BoolToVisibility}}" />
+
+                    <!-- Older and unresolved saves stay reachable with their own destination. -->
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasFinalSaveRecords, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FinalSaveRecordsLabel}" Style="{StaticResource MetadataLabel}" />
+                        <!-- Labels carry full folders, so they wrap rather than clip. -->
+                        <ComboBox ItemsSource="{Binding FinalSaveRecords}"
+                                  SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
+                                  HorizontalContentAlignment="Stretch"
+                                  TextSearch.TextPath="Label"
+                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  AutomationProperties.AutomationId="Session.FinalSave.Record"
+                                  AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- The draft is shown only while a save of this result is possible. -->
+                    <StackPanel Visibility="{Binding ShowsSaveDraft, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding SaveSummary}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   AutomationProperties.AutomationId="Session.FinalSave.Summary" />
+
+                        <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,2" />
+                        <TextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding IsSaveDraftEditable}"
+                                 AutomationProperties.AutomationId="Session.FinalSave.FileName"
+                                 AutomationProperties.Name="{Binding SaveFileNameLabel}" />
+
+                        <TextBlock Text="{Binding SaveFolderLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,2" />
+                        <TextBox Text="{Binding SaveFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 AutomationProperties.AutomationId="Session.FinalSave.Folder"
+                                 AutomationProperties.Name="{Binding SaveFolderLabel}" />
+                        <Button Content="{Binding ChangeLocationLabel}" Command="{Binding ChangeLocationCommand}"
+                                HorizontalAlignment="Left" Padding="12,4" Margin="0,6,0,0"
+                                AutomationProperties.AutomationId="Session.FinalSave.ChangeLocation"
+                                AutomationProperties.Name="{Binding ChangeLocationLabel}"
+                                Visibility="{Binding CanChangeLocation, Converter={StaticResource BoolToVisibility}}" />
+
+                        <TextBlock Text="{Binding SaveDraftNotice}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
+                                   AutomationProperties.AutomationId="Session.FinalSave.DraftNotice"
+                                   Visibility="{Binding HasSaveDraftNotice, Converter={StaticResource BoolToVisibility}}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding FinalSaveSecondary}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
+                               AutomationProperties.AutomationId="Session.FinalSave.Secondary"
+                               Visibility="{Binding HasFinalSaveSecondary, Converter={StaticResource BoolToVisibility}}" />
+
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasFinalSaveSavedPath, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding SavedPathLabel}" Style="{StaticResource MetadataLabel}" />
+                        <TextBox Text="{Binding FinalSaveSavedPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 AutomationProperties.AutomationId="Session.FinalSave.SavedPath"
+                                 AutomationProperties.Name="{Binding SavedPathLabel}" />
+                    </StackPanel>
+
+                    <WrapPanel Margin="0,10,0,0">
+                        <WrapPanel.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
+                                <Setter Property="Padding" Value="12,5" />
+                                <Setter Property="Margin" Value="0,0,8,6" />
+                            </Style>
+                        </WrapPanel.Resources>
+                        <local:ReviewApprovalButton Content="{Binding ConfirmAndSaveLabel}"
+                                Style="{StaticResource {x:Type Button}}"
+                                TargetIdentity="{Binding ConfirmAndSaveIdentity}"
+                                Command="{Binding ConfirmAndSaveCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.ConfirmAndSave"
+                                AutomationProperties.Name="{Binding ConfirmAndSaveLabel}"
+                                Visibility="{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}" />
+                        <local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
+                                Style="{StaticResource {x:Type Button}}"
+                                TargetIdentity="{Binding SaveApprovedIdentity}"
+                                Command="{Binding SaveApprovedCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
+                                AutomationProperties.Name="{Binding SaveApprovedLabel}"
+                                Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
+                        <local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
+                                AutomationProperties.Name="{Binding RetryRecordedLabel}"
+                                Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
+                        <local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
+                                AutomationProperties.Name="{Binding CheckAgainLabel}"
+                                Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
+                        <Button Content="{Binding OpenFolderLabel}" Command="{Binding OpenContainingFolderCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.OpenFolder"
+                                AutomationProperties.Name="{Binding OpenFolderLabel}"
+                                Visibility="{Binding CanOpenContainingFolder, Converter={StaticResource BoolToVisibility}}" />
+                        <Button Content="{Binding CheckSavedLabel}" Command="{Binding CheckSavedFileCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.CheckSaved"
+                                AutomationProperties.Name="{Binding CheckSavedLabel}"
+                                Visibility="{Binding CanCheckSavedFile, Converter={StaticResource BoolToVisibility}}" />
+                        <local:ReviewApprovalButton Content="{Binding SaveAnotherCopyLabel}" Command="{Binding SaveAnotherCopyCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.SaveAnotherCopy"
+                                AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
+                                Visibility="{Binding CanSaveAnotherCopy, Converter={StaticResource BoolToVisibility}}" />
+                        <Button Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
+                                AutomationProperties.Name="{Binding UseSuggestionLabel}"
+                                Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
+                        <Button Content="{Binding CancelSaveLabel}" Command="{Binding CancelSaveCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.Cancel"
+                                AutomationProperties.Name="{Binding CancelSaveLabel}"
+                                Visibility="{Binding CanCancelSave, Converter={StaticResource BoolToVisibility}}" />
+                    </WrapPanel>
+
+                    <TextBlock Text="{Binding FinalSaveOpenNotice}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Session.FinalSave.OpenNotice"
+                               Visibility="{Binding HasFinalSaveOpenNotice, Converter={StaticResource BoolToVisibility}}" />
+
+                    <Expander Header="{Binding FinalSaveDetailsLabel}" Margin="0,6,0,0"
+                              AutomationProperties.AutomationId="Session.FinalSave.Details"
+                              AutomationProperties.Name="{Binding FinalSaveDetailsLabel}"
+                              Visibility="{Binding HasFinalSaveDetails, Converter={StaticResource BoolToVisibility}}">
+                        <TextBox Text="{Binding FinalSaveDetails, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 AutomationProperties.Name="{Binding FinalSaveDetailsLabel}" />
+                    </Expander>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -68,15 +267,34 @@
         </Grid.RowDefinitions>
 
         <!-- Session identity (§3). -->
-        <TextBlock Grid.Row="0" Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" />
+        <DockPanel Grid.Row="0">
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Workflow}" VerticalAlignment="Center"
+                       Margin="12,0,0,0" Opacity="0.85" />
+            <TextBlock Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        </DockPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0" Opacity="0.85">
-            <TextBlock Text="{Binding Workflow}" />
-            <TextBlock Text="  ·  " />
-            <TextBlock Text="{Binding State}" />
-            <TextBlock Text="  ·  " />
-            <TextBlock Text="{Binding CurrentStep}" />
-        </StackPanel>
+        <Border Grid.Row="1" x:Name="OperatorStatusPanel" Margin="0,6,0,0" Padding="10,4"
+                Background="#F3F7FA"
+                Focusable="True" KeyboardNavigation.IsTabStop="True"
+                AutomationProperties.AutomationId="Session.OperatorStatus"
+                AutomationProperties.Name="{Binding StatusHeading}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush" Value="#9BAFC0" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Style.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter Property="BorderBrush" Value="#174D83" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock TextWrapping="Wrap">
+                <Run Text="{Binding StatusHeading, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" /><Run Text=" — " />
+                <Run Text="{Binding NextStepText, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding StatusReason, Mode=OneWay}" />
+            </TextBlock>
+        </Border>
 
         <!--
             The fake-adapter warning (§8). Deliberately loud: an operator must never mistake a
@@ -216,7 +434,7 @@
                 a separate local manual-result submission; restart never resumes automation.
             -->
             <StackPanel Margin="0,0,0,8"
-                        Visibility="{Binding CanReenterAutomation,
+                        Visibility="{Binding ShowsReenterAutomationBlock,
                                      Converter={StaticResource BoolToVisibility}}">
                 <TextBlock Text="{Binding ReenterAutomationHint}"
                            TextWrapping="Wrap"
@@ -258,9 +476,6 @@
                     Margin="0,0,0,8"
                     Visibility="{Binding CanManualCrop, Converter={StaticResource BoolToVisibility}}" />
 
-            <TextBlock Text="{Binding PlaceholderNotice}"
-                       TextWrapping="Wrap"
-                       Opacity="0.7" />
         </StackPanel>
 
         <Grid Grid.Row="4" Margin="0,14,0,0">
@@ -496,9 +711,22 @@
                                Text="{Binding ManualCropHeading}"
                                FontSize="16"
                                FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Center"
+                               Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock x:Name="TrimAdjustHeadingText"
+                               DockPanel.Dock="Left"
+                               Text="{Binding TrimAdjustHeading}"
+                               AutomationProperties.AutomationId="Session.TrimAdjust.Heading"
+                               Focusable="True"
+                               FocusVisualStyle="{x:Null}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}" />
 
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <!-- Zoom acts on the adjust surface; Compare shows both pictures fitted, so it is hidden there. -->
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                                Visibility="{Binding ShowsCropSurface, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding ZoomLabel}"
                                    VerticalAlignment="Center"
                                    Opacity="0.75"
@@ -522,6 +750,63 @@
                 </DockPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <!--
+                        Adjusting a trim review (SCRUM-11147). Use this trim is the only control
+                        here that reaches the service; it is guarded like Approve so a key or click
+                        begun elsewhere never submits. Nothing here approves or saves.
+                    -->
+                    <StackPanel AutomationProperties.AutomationId="Session.TrimAdjust.Panel"
+                                Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,4"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.Instructions">
+                            <Run Text="{Binding TrimAdjustInstructions, Mode=OneWay}" />
+                            <Run Text="{Binding TrimAdjustKeyboardHint, Mode=OneWay}" Foreground="#FF5A5A5A" />
+                        </TextBlock>
+                        <WrapPanel Margin="0,0,0,4">
+                            <TextBlock Text="{Binding TrimAdjustKeptSummary}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,16,0"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Kept" />
+                            <TextBlock Text="{Binding TrimAdjustSuggestionSummary}" TextWrapping="Wrap"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Suggestion" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding TrimAdjustUnchangedNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.Unchanged"
+                                   Visibility="{Binding IsTrimDraftUnchanged, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding TrimAdjustInvalidNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.Invalid"
+                                   Visibility="{Binding IsTrimAdjustInvalid, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding TrimAdjustSourceUnavailableNotice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.SourceUnavailable"
+                                   Visibility="{Binding IsTrimSourceUnavailable, Converter={StaticResource BoolToVisibility}}" />
+                        <WrapPanel>
+                            <local:ReviewApprovalButton Content="{Binding UseThisTrimLabel}"
+                                    Style="{StaticResource RecommendedAction}"
+                                    TargetIdentity="{Binding UseThisTrimIdentity}"
+                                    Command="{Binding UseThisTrimCommand}"
+                                    IsEnabled="{Binding CanUseThisTrim}"
+                                    AutomationProperties.AutomationId="Session.TrimAdjust.Use"
+                                    AutomationProperties.Name="{Binding UseThisTrimLabel}"
+                                    Padding="14,6" Margin="0,0,8,4" />
+                            <Button Content="{Binding RestoreSuggestionLabel}"
+                                    Command="{Binding RestoreAutomaticSuggestionCommand}"
+                                    IsEnabled="{Binding CanRestoreAutomaticSuggestion}"
+                                    AutomationProperties.AutomationId="Session.TrimAdjust.Restore"
+                                    AutomationProperties.Name="{Binding RestoreSuggestionLabel}"
+                                    Padding="14,6" Margin="0,0,8,4" />
+                            <Button Content="{Binding CancelTrimAdjustLabel}"
+                                    Command="{Binding CancelTrimAdjustCommand}"
+                                    AutomationProperties.AutomationId="Session.TrimAdjust.Cancel"
+                                    AutomationProperties.Name="{Binding CancelTrimAdjustLabel}"
+                                    Padding="14,6" Margin="0,0,16,4" />
+                            <!-- Compare / Adjust: which picture the surface shows; nothing is written. -->
+                            <Button Content="{Binding TrimCompareToggleLabel}"
+                                    Command="{Binding ToggleTrimCompareCommand}"
+                                    AutomationProperties.AutomationId="Session.TrimAdjust.CompareToggle"
+                                    AutomationProperties.Name="{Binding TrimCompareToggleLabel}"
+                                    Padding="10,6" Margin="0,0,0,4" />
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="{Binding ManualCropAdjustmentLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                         <RadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0"
@@ -589,9 +874,53 @@
                                 Command="{Binding CancelManualCropCommand}"
                                 Padding="14,6" />
                     </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
+                <Grid>
+                <!--
+                    Compare (SCRUM-11147): the result under review beside the proposed trim, both
+                    fitted. The proposed image is the pre-trim source's preview cut in memory; the
+                    two payloads can differ in display reduction, so they are shown fitted rather
+                    than at one shared numeric zoom that would draw them at different scales.
+                -->
+                <Grid AutomationProperties.AutomationId="Session.TrimAdjust.Compare"
+                      Visibility="{Binding ShowsTrimCompare, Converter={StaticResource BoolToVisibility}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel Grid.Column="0" Margin="0,0,6,0">
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustCurrentLabel}" TextWrapping="Wrap"
+                                   FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
+                                Background="{StaticResource TransparencyCheckerboard}">
+                            <Image Source="{Binding TrimAdjustCurrentPane.Payload, Converter={StaticResource PreviewPayload}}"
+                                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.CurrentImage" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Margin="6,0,0,0">
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustProposedLabel}" TextWrapping="Wrap"
+                                   FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
+                                Background="{StaticResource TransparencyCheckerboard}">
+                            <Image Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                                   AutomationProperties.AutomationId="Session.TrimAdjust.ProposedImage">
+                                <Image.Source>
+                                    <MultiBinding Converter="{StaticResource ProposedTrim}">
+                                        <Binding Path="TrimAdjustSourcePane.Payload" />
+                                        <Binding Path="TrimProposedPayloadRect" />
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                        </Border>
+                    </DockPanel>
+                </Grid>
+
                 <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
+                        Visibility="{Binding DataContext.ShowsCropSurface, RelativeSource={RelativeSource AncestorType=UserControl},
+                                     Converter={StaticResource BoolToVisibility}}"
                         DataContext="{Binding CropPane}">
                     <ScrollViewer>
                         <ScrollViewer.Style>
@@ -655,10 +984,44 @@
                                            StrokeDashArray="4 3"
                                            Fill="#221E88E5"
                                            IsHitTestVisible="False" />
+
+                                <!--
+                                    Trim adjustment (SCRUM-11147): the picture outside the kept
+                                    area is dimmed, the boundary is a light solid line under a
+                                    dark dashed one drawn just inside the kept area, and eight
+                                    square handles sit inside the boundary so none is cut off
+                                    when the boundary lies on the picture border. Positioned by
+                                    the code-behind from the source-pixel draft.
+                                -->
+                                <Rectangle x:Name="TrimDimLeft" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
+                                <Rectangle x:Name="TrimDimTop" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
+                                <Rectangle x:Name="TrimDimRight" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
+                                <Rectangle x:Name="TrimDimBottom" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
+                                <Rectangle x:Name="TrimOutlineLight" Visibility="Collapsed" Stroke="White" StrokeThickness="2"
+                                           IsHitTestVisible="False" AutomationProperties.AutomationId="Session.TrimAdjust.Outline" />
+                                <Rectangle x:Name="TrimOutlineDark" Visibility="Collapsed" Stroke="#FF1A1A1A" StrokeThickness="1"
+                                           StrokeDashArray="4 3" IsHitTestVisible="False" />
+                                <Thumb x:Name="TrimHandleLeft" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Left"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Left" />
+                                <Thumb x:Name="TrimHandleTop" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Top"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Top" />
+                                <Thumb x:Name="TrimHandleRight" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Right"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Right" />
+                                <Thumb x:Name="TrimHandleBottom" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Bottom"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Bottom" />
+                                <Thumb x:Name="TrimHandleTopLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="TopLeft"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopLeft" />
+                                <Thumb x:Name="TrimHandleTopRight" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="TopRight"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopRight" />
+                                <Thumb x:Name="TrimHandleBottomLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="BottomLeft"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomLeft" />
+                                <Thumb x:Name="TrimHandleBottomRight" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="BottomRight"
+                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomRight" />
                             </Canvas>
                         </Grid>
                     </ScrollViewer>
                 </Border>
+                </Grid>
             </DockPanel>
 
             <!--
@@ -748,6 +1111,152 @@
 
             <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
+                    <!--
+                        Colleague correction (SCRUM-11148). Conditional and compact: the Ask panel
+                        (S1) while it is open, the handed-off panel (S3) while the request can be
+                        imported, and one history line for a request that no longer can. Every state
+                        is stated in words; no button here is a default button, and the two
+                        consequential ones use the fresh-gesture guard bound to their exact target.
+                    -->
+                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                            AutomationProperties.AutomationId="Session.Correction.AskPanel"
+                            Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding AskColleagueLabel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding AskColleagueHint}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,8" />
+                            <Label Content="{Binding CorrectionNoteLabel}" Target="{Binding ElementName=CorrectionNoteBox}" Padding="0,0,0,2" />
+                            <TextBox x:Name="CorrectionNoteBox"
+                                     Text="{Binding CorrectionNote, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="False" TextWrapping="Wrap" MaxLength="1000" MinHeight="26"
+                                     AutomationProperties.AutomationId="Session.Correction.Note"
+                                     AutomationProperties.Name="{Binding CorrectionNoteLabel}" />
+                            <TextBlock Text="{Binding CorrectionActivityText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       Visibility="{Binding IsCorrectionBusy, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="{Binding CorrectionMessage}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                                       AutomationProperties.AutomationId="Session.Correction.AskMessage"
+                                       AutomationProperties.LiveSetting="Assertive"
+                                       Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
+                            <WrapPanel Margin="0,10,0,0">
+                                <local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
+                                        TargetIdentity="{Binding AskIdentity}"
+                                        Command="{Binding PrepareCorrectionFilesCommand}"
+                                        IsEnabled="{Binding CanPrepareCorrection}"
+                                        AutomationProperties.AutomationId="Session.Correction.Prepare"
+                                        AutomationProperties.Name="{Binding CorrectionPrepareLabel}"
+                                        Padding="14,6" Margin="0,0,8,4" />
+                                <Button Content="{Binding CorrectionCancelLabel}"
+                                        Command="{Binding CancelAskColleagueCommand}"
+                                        IsEnabled="{Binding CanCancelAskColleague}"
+                                        AutomationProperties.AutomationId="Session.Correction.Cancel"
+                                        AutomationProperties.Name="{Binding CorrectionCancelLabel}"
+                                        Padding="14,6" Margin="0,0,8,4" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                            AutomationProperties.AutomationId="Session.Correction.Panel"
+                            Visibility="{Binding ShowsCorrectionPanel, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock x:Name="CorrectionHeadingText"
+                                       Text="{Binding CorrectionStatusText}"
+                                       Focusable="True" FocusVisualStyle="{x:Null}"
+                                       FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       AutomationProperties.AutomationId="Session.Correction.Heading"
+                                       AutomationProperties.Name="{Binding CorrectionStatusText}" />
+                            <TextBlock Text="{Binding CorrectionLastImportText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                       Visibility="{Binding ShowsLastImportUnfinished, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="{Binding CorrectionStep1Text}" TextWrapping="Wrap" Margin="0,8,0,2" />
+                            <TextBlock Text="{Binding CorrectionReferenceText}" TextWrapping="Wrap" Margin="12,0,0,2"
+                                       AutomationProperties.AutomationId="Session.Correction.Reference" />
+                            <TextBlock Text="{Binding CorrectionWorkingText}" TextWrapping="Wrap" Margin="12,0,0,2"
+                                       AutomationProperties.AutomationId="Session.Correction.Working" />
+                            <TextBox Text="{Binding CorrectionFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                     BorderThickness="0" Background="Transparent" Padding="0" Margin="12,0,0,4"
+                                     AutomationProperties.AutomationId="Session.Correction.Folder"
+                                     AutomationProperties.Name="{Binding CorrectionFolderText}" />
+                            <WrapPanel Margin="12,0,0,6">
+                                <Button Content="{Binding CorrectionOpenFolderLabel}"
+                                        Command="{Binding OpenCorrectionFolderCommand}"
+                                        IsEnabled="{Binding CanOpenCorrectionFolder}"
+                                        AutomationProperties.AutomationId="Session.Correction.OpenFolder"
+                                        AutomationProperties.Name="{Binding CorrectionOpenFolderLabel}"
+                                        Padding="12,4" Margin="0,0,8,4" />
+                            </WrapPanel>
+                            <TextBlock Text="{Binding CorrectionOtherComputerText}" TextWrapping="Wrap" Opacity="0.8" Margin="12,0,0,6" />
+                            <TextBlock Text="{Binding CorrectionStep2Text}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding CorrectionStep3Text}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding CorrectionStep4Text}" TextWrapping="Wrap" Margin="0,0,0,8" />
+                            <StackPanel Visibility="{Binding ShowsCorrectionMissingFiles, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,8">
+                                <TextBlock Text="{Binding CorrectionMissingFilesText}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                <Button Content="{Binding CorrectionRepairLabel}"
+                                        Command="{Binding RepairCorrectionFilesCommand}"
+                                        IsEnabled="{Binding CanRepairCorrectionFiles}"
+                                        AutomationProperties.AutomationId="Session.Correction.Repair"
+                                        AutomationProperties.Name="{Binding CorrectionRepairLabel}"
+                                        HorizontalAlignment="Left" Padding="12,4" Margin="0,4,0,0" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding CorrectionActivityText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       Visibility="{Binding IsCorrectionBusy, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBlock Text="{Binding CorrectionMessage}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
+                                       AutomationProperties.AutomationId="Session.Correction.Message"
+                                       AutomationProperties.LiveSetting="Assertive"
+                                       Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
+                            <local:ReviewApprovalButton x:Name="ImportCorrectedButton"
+                                    Content="{Binding CorrectionImportLabel}"
+                                    TargetIdentity="{Binding ImportIdentity}"
+                                    Command="{Binding ImportCorrectedImageCommand}"
+                                    IsEnabled="{Binding CanImportCorrectedImage}"
+                                    AutomationProperties.AutomationId="Session.Correction.Import"
+                                    AutomationProperties.Name="{Binding CorrectionImportLabel}"
+                                    HorizontalAlignment="Left" Padding="14,6" FontWeight="SemiBold" />
+                            <Expander Header="{Binding CorrectionOtherOptionsLabel}" Margin="0,10,0,0"
+                                      AutomationProperties.AutomationId="Session.Correction.OtherOptions"
+                                      AutomationProperties.Name="{Binding CorrectionOtherOptionsLabel}"
+                                      Visibility="{Binding ShowsReenterAutomationInCorrection, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel Margin="0,6,0,0">
+                                    <TextBlock Text="{Binding ReenterAutomationHint}" TextWrapping="Wrap" Opacity="0.75" Margin="0,0,0,6" />
+                                    <Button Content="{Binding ReenterAutomationLabel}"
+                                            Command="{Binding ReenterAutomationCommand}"
+                                            AutomationProperties.AutomationId="Session.Correction.ReenterAutomation"
+                                            AutomationProperties.Name="{Binding ReenterAutomationLabel}"
+                                            HorizontalAlignment="Left" Padding="12,4" />
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="{Binding CorrectionObsoleteText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,10"
+                               AutomationProperties.AutomationId="Session.Correction.Obsolete"
+                               Visibility="{Binding ShowsCorrectionObsolete, Converter={StaticResource BoolToVisibility}}" />
+
+                    <TextBlock Text="{Binding CorrectionIdenticalText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
+                               AutomationProperties.AutomationId="Session.Correction.Identical"
+                               Visibility="{Binding IsCorrectionIdenticalToSent, Converter={StaticResource BoolToVisibility}}" />
+
+                    <!--
+                        Final review and save (SCRUM-11145). Present only for a final review, an
+                        approved final result or its recorded saves. Every state is stated in
+                        words; paths are selectable text; technical identities stay in details.
+                        No button here is a default button, and approving or saving buttons use
+                        the fresh-gesture input guard bound to the exact target and draft.
+                    -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+
                     <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
@@ -1648,7 +2157,7 @@
         <DockPanel Grid.Row="5" Margin="0,14,0,0" LastChildFill="False">
             <WrapPanel DockPanel.Dock="Left" Orientation="Horizontal">
                 <WrapPanel.Resources>
-                    <Style TargetType="Button">
+                    <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
                         <Setter Property="Padding" Value="14,6" />
                         <Setter Property="Margin" Value="0,0,8,0" />
                     </Style>
@@ -1666,17 +2175,45 @@
                         AutomationProperties.Name="{Binding RunStepLabel}"
                         Visibility="{Binding CanRunStep, Converter={StaticResource BoolToVisibility}}" />
 
-                <Button Content="{Binding ApproveLabel}"
+                <local:ReviewApprovalButton Content="{Binding ApproveLabel}"
+                        Style="{StaticResource {x:Type Button}}"
+                        TargetIdentity="{Binding ReviewTargetIdentity}"
                         Command="{Binding ApproveCommand}"
                         AutomationProperties.AutomationId="Session.Approve"
                         AutomationProperties.Name="{Binding ApproveLabel}"
                         Visibility="{Binding CanApprove, Converter={StaticResource BoolToVisibility}}" />
 
-                <Button Content="{Binding RejectLabel}"
+                <!--
+                    The same Session.Reject everywhere. On background-removal review it is bound to
+                    the exact result and guarded against a gesture begun elsewhere (SCRUM-11148);
+                    every other step keeps a plain button.
+                -->
+                <local:ReviewApprovalButton Content="{Binding RejectLabel}"
+                        Style="{StaticResource {x:Type Button}}"
+                        IsGestureGuarded="{Binding IsRejectGestureGuarded}"
+                        TargetIdentity="{Binding RejectTargetIdentity}"
                         Command="{Binding RejectCommand}"
                         AutomationProperties.AutomationId="Session.Reject"
                         AutomationProperties.Name="{Binding RejectLabel}"
                         Visibility="{Binding CanReject, Converter={StaticResource BoolToVisibility}}" />
+
+                <!-- Opens the Ask panel beside the review; writes nothing (SCRUM-11148, D4). -->
+                <Button x:Name="AskColleagueButton"
+                        Content="{Binding AskColleagueLabel}"
+                        ToolTip="{Binding AskColleagueHint}"
+                        Command="{Binding BeginAskColleagueCommand}"
+                        AutomationProperties.AutomationId="Session.AskColleague"
+                        AutomationProperties.Name="{Binding AskColleagueLabel}"
+                        AutomationProperties.HelpText="{Binding AskColleagueHint}"
+                        Visibility="{Binding CanAskColleague, Converter={StaticResource BoolToVisibility}}" />
+
+                <!-- Opens the trim editor over the pre-trim source; sends nothing (SCRUM-11147). -->
+                <Button x:Name="BeginTrimAdjustButton"
+                        Content="{Binding TrimAdjustBeginLabel}"
+                        Command="{Binding BeginTrimAdjustCommand}"
+                        AutomationProperties.AutomationId="Session.TrimAdjust.Begin"
+                        AutomationProperties.Name="{Binding TrimAdjustBeginLabel}"
+                        Visibility="{Binding CanAdjustTrim, Converter={StaticResource BoolToVisibility}}" />
 
                 <Button Content="{Binding RetryLabel}"
                         Command="{Binding RetryCommand}"

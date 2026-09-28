@@ -679,7 +679,12 @@ public sealed partial class SessionViewModel : ObservableObject
         IArtefactPreviewService previews,
         IProductionTiffReviewService tiffReviews,
         INavigationService navigation,
-        IFilePicker? filePicker = null)
+        IFilePicker? filePicker = null,
+        PrintFlow.App.Localisation.ILocalisationService? localisation = null,
+        PrintFlow.Workflow.Delivery.FinalSaveCoordinator? finalSave = null,
+        IDeliveryFolderPicker? folderPicker = null,
+        PrintFlow.Workflow.Delivery.IDeliveredFileShell? fileShell = null,
+        PrintFlow.Workflow.Ports.ICorrectionFolderShell? correctionShell = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -691,6 +696,13 @@ public sealed partial class SessionViewModel : ObservableObject
         _previews = previews;
         _tiffReviews = tiffReviews;
         _navigation = navigation;
+        _finalSave = finalSave;
+        _folderPicker = folderPicker;
+        _fileShell = fileShell;
+        _correctionShell = correctionShell;
+        if (localisation is not null)
+            System.Windows.WeakEventManager<PrintFlow.App.Localisation.ILocalisationService, EventArgs>.AddHandler(
+                localisation, nameof(PrintFlow.App.Localisation.ILocalisationService.LanguageChanged), OnOperatorLanguageChanged);
 
         // The Stop and Take Over controls have to appear and disappear *while* a command is in
         // flight, which is exactly when no new SessionView exists to rebuild the screen from.
@@ -857,7 +869,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string ErrorDetailsLabel => Strings.ErrorDetails_Heading;
 
-    public bool CanOpenErrorDetails => _session?.CurrentFailureAttemptId is not null && !IsBusy;
+    public bool CanOpenErrorDetails => _session?.CurrentFailureAttemptId is not null && !IsBusy && !IsAdjustingTrim;
 
     [RelayCommand]
     private Task OpenErrorDetailsAsync(CancellationToken cancellationToken) =>
@@ -869,7 +881,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public string KeepOriginalExtentLabel => Strings.Session_KeepOriginalExtent;
     public string KeepOriginalExtentHint => Strings.Session_KeepOriginalExtentHint;
-    public bool CanKeepOriginalExtent => _session?.CanKeepOriginalExtent == true && !IsBusy;
+    public bool CanKeepOriginalExtent => _session?.CanKeepOriginalExtent == true && !IsBusy && !IsAdjustingTrim;
 
     public string HandOffLabel => Strings.Session_HandOff;
 
@@ -1031,7 +1043,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// would eventually give two answers, and the one that decides whether a button appears is
     /// the one that would be wrong (§3, §13).
     /// </remarks>
-    public bool CanManualCrop => _session?.CanManualCrop == true;
+    public bool CanManualCrop => _session?.CanManualCrop == true && !IsAdjustingTrim;
 
     // --- Stop and Take Over (Epic 11300 Part D2A §24–§28) ---------------------------------
 
@@ -1070,8 +1082,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public string? StoppingNotice => _runtime.State switch
     {
-        AutomationRuntimeState.StopRequested => Strings.Session_StoppingNotice,
-        AutomationRuntimeState.TakeOverRequested => Strings.Session_TakingOverNotice,
+        AutomationRuntimeState.StopRequested => UsesPhotoshop ? Strings.Session_PhotoshopStoppingNotice : Strings.Session_StoppingNotice,
+        AutomationRuntimeState.TakeOverRequested => UsesPhotoshop ? Strings.Session_PhotoshopTakingOverNotice : Strings.Session_TakingOverNotice,
         _ => null,
     };
 
@@ -1094,7 +1106,8 @@ public sealed partial class SessionViewModel : ObservableObject
     /// stopped looking at it, and the honest statements are "it may still be running" and "it
     /// may still be holding a result" (§21).
     /// </remarks>
-    public string? RetainedExternalStateNotice => _session?.LastAutomationStop switch
+    public string? RetainedExternalStateNotice => UsesPhotoshop && HasRetainedExternalState
+        ? Strings.Session_PhotoshopRetainedNotice : _session?.LastAutomationStop switch
     {
         null => null,
         { Retained: RetainedExternalState.OperationMayStillBeRunning } =>
@@ -1111,7 +1124,12 @@ public sealed partial class SessionViewModel : ObservableObject
     public bool CanReenterAutomation => _session?.RequiresAutomationReentry == true;
 
     /// <summary>The confirmation text shown before a takeover is carried out (§26).</summary>
-    public string TakeOverConfirmQuestion => Strings.Session_TakeOverConfirmQuestion;
+    private bool UsesPhotoshop => _session?.CurrentStep?.Step == StepKind.PhotoshopOutput ||
+        (_session?.CurrentStep?.Step == StepKind.OriginalConfirmation &&
+         _session.OriginalSourceFormat is ImageFormat.Psd or ImageFormat.Pdf);
+
+    public string TakeOverConfirmQuestion => UsesPhotoshop
+        ? Strings.Session_PhotoshopTakeOverConfirmQuestion : Strings.Session_TakeOverConfirmQuestion;
 
     public string StopLabel => Strings.Session_Stop;
 
@@ -1123,9 +1141,10 @@ public sealed partial class SessionViewModel : ObservableObject
     /// at the moment of choosing. Told separately, "stops this operation safely" and "leaves
     /// Meitu as it is" are each easy to read as the other.
     /// </remarks>
-    public string StopHint => $"{Strings.Session_StopHint} {Strings.Session_TakeOverHint}";
+    public string StopHint => UsesPhotoshop ? Strings.Session_PhotoshopStopHint
+        : $"{Strings.Session_StopHint} {Strings.Session_TakeOverHint}";
 
-    public string TakeOverLabel => Strings.Session_TakeOver;
+    public string TakeOverLabel => UsesPhotoshop ? Strings.Session_PhotoshopTakeOver : Strings.Session_TakeOver;
 
     public string TakeOverConfirmLabel => Strings.Session_TakeOverConfirm;
 
@@ -1136,7 +1155,7 @@ public sealed partial class SessionViewModel : ObservableObject
     public string ReenterAutomationHint => Strings.Session_ReenterAutomationHint;
 
     /// <summary>True while a drawn rectangle is ready to be submitted (§23).</summary>
-    public bool CanApplyManualCrop => IsCropping && DraftManualCropGeometry is not null && !IsBusy;
+    public bool CanApplyManualCrop => IsCropping && !IsAdjustingTrim && DraftManualCropGeometry is not null && !IsBusy;
 
     /// <summary>
     /// The image the crop rectangle is drawn on, or null when crop mode is closed (§24).
@@ -1150,8 +1169,15 @@ public sealed partial class SessionViewModel : ObservableObject
     /// choosing a Revision or asking for a second decode: it reuses the pane the C1 preview
     /// seam already produced (§24).
     /// </remarks>
-    public ArtefactPreviewPane? CropPane =>
-        IsCropping && PreviewPanes.Count > 0 && PreviewPanes[^1] is { HasImage: true } pane ? pane : null;
+    /// <para>
+    /// Adjusting a trim review is the one exception, and the reason it is one: during a review
+    /// the last pane is the cropped result, and cropping that again could never widen a boundary.
+    /// Adjust mode draws on the pre-trim source instead, found by its exact Revision id and pixel
+    /// size (SCRUM-11147), or on nothing at all.
+    /// </para>
+    public ArtefactPreviewPane? CropPane => !IsCropping ? null
+        : IsAdjustingTrim ? TrimAdjustSourcePane
+        : PreviewPanes.Count > 0 && PreviewPanes[^1] is { HasImage: true } pane ? pane : null;
 
     /// <summary>The selection in source pixels, or a line saying nothing is selected yet.</summary>
     /// <remarks>
@@ -1196,7 +1222,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// only steps the real <c>ReturnToStep</c> accepts, so an offered control and an accepted
     /// command cannot disagree (§4, §8).
     /// </remarks>
-    public bool CanReturnToStep => _session?.CanReturnToStep == true;
+    public bool CanReturnToStep => _session?.CanReturnToStep == true && !IsAdjustingTrim && !IsAskingColleague;
 
     /// <summary>True once a destination has been picked, so the confirmation can be opened.</summary>
     public bool CanBeginReturn => CanReturnToStep && SelectedReturnTarget is not null && !IsBusy;
@@ -1232,7 +1258,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// controls, because adding margin to a crop that was never decided is not a thing the
     /// control could do (§17).
     /// </remarks>
-    public bool CanSetTrimParameters => _session?.CanSetTrimParameters == true;
+    public bool CanSetTrimParameters => _session?.CanSetTrimParameters == true && !IsAdjustingTrim;
 
     /// <summary>Whether the single uniform box is the relevant input (§11).</summary>
     public bool IsUniformMargin => SelectedTrimMode.Mode == TrimMode.UniformMargin;
@@ -1508,7 +1534,10 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     public bool IsHandedOff => _session?.State == SessionState.HandedOff;
 
-    public string HandedOffNotice => Strings.Session_HandedOffNotice;
+    public string HandedOffNotice => UsesPhotoshop
+        ? Strings.Session_PhotoshopHandedOffNotice + (CanReenterAutomation
+            ? " " + string.Format(OperatorCulture.Current, Strings.Session_PhotoshopReturnGuidance, ReenterAutomationLabel) : string.Empty)
+        : Strings.Session_HandedOffNotice;
 
     // --- Current artefact ----------------------------------------------------------------
 
@@ -1560,12 +1589,19 @@ public sealed partial class SessionViewModel : ObservableObject
 
     public bool CanSkip => Allows(CommandKind.Skip);
 
-    public bool CanSubmitManualResult => _session?.CanSubmitManualResult == true;
+    public bool CanSubmitManualResult => _session?.CanSubmitManualResult == true && !IsAdjustingTrim &&
+        !ShowsCorrectionPanel;
     public string SubmitManualResultLabel => Strings.Session_SubmitManualResult;
     public bool IsManualProcessingResult => _session?.CurrentArtefact?.IsManualProcessingResult == true;
     public string ManualProcessingResultLabel => Strings.Session_ManualProcessingResult;
 
-    public bool CanHandOff => Allows(CommandKind.HandOff);
+    /// <summary>
+    /// The generic "Hand off manually". Hidden on an active background-removal review, where
+    /// "Ask a colleague to correct this image" replaces it (SCRUM-11148, owner decision D4); the
+    /// engine legality of HandOff is unchanged.
+    /// </summary>
+    public bool CanHandOff => Allows(CommandKind.HandOff) &&
+        _session is not { State: SessionState.Active, CurrentStep: { Step: StepKind.BackgroundRemoval, State: StepState.ReviewRequired } };
 
     /// <summary>
     /// Whether the maximum-bounds panel is shown (§3; Epic 11400 Part B1A.2B §5).
@@ -2057,7 +2093,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// same reason as above: the panel exists to carry Approve and Reject, so "is either of
     /// them offered" is the honest condition, and it cannot drift from the buttons inside it.
     /// </remarks>
-    public bool IsReviewRequired => CanApprove || CanReject;
+    public bool IsReviewRequired => Offers(CommandKind.Approve) || Offers(CommandKind.Reject);
 
     /// <summary>Shows <paramref name="session"/> exactly as the service returned it.</summary>
     /// <remarks>
@@ -2120,20 +2156,56 @@ public sealed partial class SessionViewModel : ObservableObject
     /// with <c>RevisionIntegrityMismatch</c> and the session does not advance — there is no
     /// automatic re-approval anywhere in this path.
     /// </remarks>
+    /// <para>
+    /// A trim review is approved through the exact revision-and-hash entry (SCRUM-11147). An
+    /// adjusted trim can have exactly the bytes of the result it replaced, so the hash alone
+    /// would not tell a stale screen from the current one.
+    /// </para>
     [RelayCommand]
-    private Task ApproveAsync(CancellationToken cancellationToken) =>
-        RunAsync(
+    private Task ApproveAsync(CancellationToken cancellationToken)
+    {
+        if (IsAdjustingTrim || IsAskingColleague) return Task.CompletedTask;
+        // Background removal too (SCRUM-11148): a colleague can return the exact bytes that were
+        // sent, so the Revision id is what tells the review on screen from a newer one.
+        if (_session?.CurrentStep?.Step is StepKind.Trim or StepKind.BackgroundRemoval &&
+            _session.CurrentArtefact is { IsCurrentStepResult: true } displayed)
+        {
+            StepKind step = _session.CurrentStep.Step;
+            return RunServiceAsync(id => _sessions.ApproveExactReviewAsync(
+                id, step, displayed.RevisionId, displayed.Sha256, Environment.UserName, cancellationToken),
+                cancellationToken);
+        }
+
+        return RunAsync(
             step => ReviewedHash is Sha256 hash ? new WorkflowCommand.Approve(step, hash) : null,
             cancellationToken);
+    }
 
     /// <summary>Rejects the result currently on screen with a quick reason and optional notes.</summary>
+    /// <remarks>
+    /// A background-removal result is rejected through the exact revision-and-hash entry
+    /// (SCRUM-11148), for the same reason it is approved through one. Other steps are unchanged.
+    /// </remarks>
     [RelayCommand]
-    private Task RejectAsync(CancellationToken cancellationToken) =>
-        RunAsync(
+    private Task RejectAsync(CancellationToken cancellationToken)
+    {
+        if (IsAskingColleague) return Task.CompletedTask;
+        if (_session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
+            _session.CurrentArtefact is { IsCurrentStepResult: true } displayed && !IsAdjustingTrim)
+        {
+            RejectionReason reason = SelectedRejectionReason.Reason;
+            string? notes = Trimmed(RejectionNotes);
+            return RunServiceAsync(id => _sessions.RejectExactReviewAsync(
+                id, StepKind.BackgroundRemoval, displayed.RevisionId, displayed.Sha256, reason, notes,
+                Environment.UserName, cancellationToken), cancellationToken);
+        }
+
+        return RunAsync(
             step => ReviewedHash is Sha256 hash
                 ? new WorkflowCommand.Reject(step, hash, SelectedRejectionReason.Reason, Trimmed(RejectionNotes))
                 : null,
             cancellationToken);
+    }
 
     /// <summary>
     /// Returns a rejected, failed or interrupted step to a state where a new attempt is legal.
@@ -2334,7 +2406,8 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ApplyManualCropAsync(CancellationToken cancellationToken)
     {
-        if (!IsCropping || IsBusy || !TryReadManualCropMargin(out var margin)) return;
+        // Never from a trim review: that has its own exact-target command (SCRUM-11147).
+        if (!IsCropping || IsAdjustingTrim || IsBusy || !TryReadManualCropMargin(out var margin)) return;
         if (DraftManualCropGeometry is not { SelectedBounds: var crop })
         {
             IsCropSelectionInvalid = true;
@@ -2865,7 +2938,15 @@ public sealed partial class SessionViewModel : ObservableObject
     private Sha256? ReviewedHash =>
         _session?.CurrentArtefact is { IsCurrentStepResult: true } artefact ? artefact.Sha256 : null;
 
-    private bool Allows(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
+    /// <summary>
+    /// Whether an action is offered to the operator. Nothing consequential is offered while a
+    /// trim adjustment is open (SCRUM-11147): an Approve pressed then would approve the old
+    /// result while the operator believes they are confirming the new boundary.
+    /// </summary>
+    private bool Allows(CommandKind kind) => !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
+
+    /// <summary>What the workflow layer offers, regardless of what this screen is showing.</summary>
+    private bool Offers(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
 
     /// <summary>
     /// Eight hex characters of a Revision id — enough to tell two apart on screen.
@@ -2971,7 +3052,11 @@ public sealed partial class SessionViewModel : ObservableObject
             PreviewPanes.Add(pane);
         }
 
+        _publishedPreviewGeneration = generation;
         OnPropertyChanged(nameof(HasPreview));
+
+        // A trim adjustment kept across a refresh draws again on the newly published source.
+        NotifyTrimAdjustPanes();
 
         // The specialist surface last, and only for a validated production output. It is a
         // second, narrower request rather than part of the loop above: the generic panes are
@@ -2987,9 +3072,9 @@ public sealed partial class SessionViewModel : ObservableObject
             .GetPreviewAsync(sessionId, artefact.RevisionId, cancellationToken)
             .ConfigureAwait(true);
 
-        return preview.IsSuccess
+        return (preview.IsSuccess
             ? ArtefactPreviewPane.From(heading, artefact.FileName, preview.Value)
-            : ArtefactPreviewPane.Unreadable(heading, artefact.FileName, preview.Failure);
+            : ArtefactPreviewPane.Unreadable(heading, artefact.FileName, preview.Failure)).For(artefact.RevisionId);
     }
 
     /// <summary>
@@ -3014,12 +3099,16 @@ public sealed partial class SessionViewModel : ObservableObject
 
         PreviewPanes.Clear();
         OnPropertyChanged(nameof(HasPreview));
+        NotifyTrimAdjustPanes();
     }
 
     /// <summary>Leaves crop mode with nothing selected. Touches no file and issues no command.</summary>
     private void ClearCropState()
     {
+        // Crop mode ends first, so whatever reacts to the adjustment closing already sees
+        // Adjust trim edges offered again when it is.
         IsCropping = false;
+        ClearTrimAdjustState();
         CropSelection = null;
         IsCropSelectionInvalid = false;
         ResetManualCropAdjustment();
@@ -3027,6 +3116,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
     partial void OnIsCroppingChanged(bool value)
     {
+        OnPropertyChanged(nameof(ShowsManualCropControls));
+        OnPropertyChanged(nameof(ShowsCropSurface));
+        OnPropertyChanged(nameof(CanAdjustTrim));
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CropPane));
         NotifyManualCropDraft();
@@ -3036,11 +3128,15 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanApplyManualCrop));
         OnPropertyChanged(nameof(CropSelectionSummary));
+        if (IsAdjustingTrim) NotifyTrimAdjustState();
         NotifyManualCropDraft();
     }
 
     partial void OnIsBusyChanged(bool value)
     {
+        NotifyTrimAdjustState();
+        NotifyCorrectionState();
+        NotifyOperatorStatusChanged();
         OnPropertyChanged(nameof(CanOpenErrorDetails));
         OnPropertyChanged(nameof(CanKeepOriginalExtent));
         KeepOriginalExtentCommand.NotifyCanExecuteChanged();
@@ -3050,6 +3146,7 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CanReviewMaximumBounds));
         OnPropertyChanged(nameof(CanAdjustSelectedPreset));
         OnPropertyChanged(nameof(CanAuthoriseEnlargement));
+        NotifyFinalSaveChanged();
     }
 
     /// <summary>Leaves the return confirmation closed with nothing chosen. Issues no command.</summary>
@@ -3248,9 +3345,23 @@ public sealed partial class SessionViewModel : ObservableObject
     /// always rebuilt from the <see cref="SessionView"/> the service returned, and a failure is
     /// reported rather than swallowed or worked around.
     /// </remarks>
-    private async Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken)
+    /// <remarks>
+    /// While a trim adjustment is open the only workflow command this screen will send is the
+    /// adjustment itself: every other action is hidden, and this refuses it even if something
+    /// invoked it anyway (SCRUM-11147). The service's exact-target checks stay the authority.
+    /// </remarks>
+    private Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken) =>
+        command is null || (IsAdjustingTrim && command is not WorkflowCommand.AdjustTrimFromReview)
+            ? Task.CompletedTask
+            : RunServiceAsync(id => _sessions.ExecuteAsync(id, command, Environment.UserName, cancellationToken), cancellationToken);
+
+    /// <summary>
+    /// Runs one service call with the screen's ordinary busy, notice and refresh handling.
+    /// </summary>
+    private async Task RunServiceAsync(
+        Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy || command is null)
+        if (_session is null || IsBusy)
         {
             return;
         }
@@ -3259,9 +3370,7 @@ public sealed partial class SessionViewModel : ObservableObject
         try
         {
             Notice = null;
-            OperationResult<SessionView> result = await _sessions
-                .ExecuteAsync(_session.Id, command, Environment.UserName, cancellationToken)
-                .ConfigureAwait(true);
+            OperationResult<SessionView> result = await call(_session.Id).ConfigureAwait(true);
 
             if (result.IsFailure)
             {
@@ -3333,6 +3442,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
     private void NotifyAutomationRuntimeChanged()
     {
+        NotifyOperatorStatusChanged();
         OnPropertyChanged(nameof(CanStopAutomation));
         OnPropertyChanged(nameof(CanTakeOverAutomation));
         OnPropertyChanged(nameof(IsStopping));
@@ -3368,17 +3478,40 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         if (session.CompletionCleanup is { IsComplete: false })
             Notice = Strings.Session_CompletionCleanupPending;
+        // A trim adjustment survives a refresh of the very same review of the very same source —
+        // a language change, a refused command, a reload — together with its zoom. Anything else
+        // closes it: the draft was drawn for a result or a source that is no longer the one on
+        // offer (SCRUM-11147 §6.4).
+        bool keepTrimDraft = IsAdjustingTrim && _trimAdjustTarget is { } adjusting && adjusting.SameTargetAs(session.TrimAdjustment);
+        bool lostTrimAdjustment = IsAdjustingTrim && !keepTrimDraft &&
+            session.CurrentStep?.CurrentRevisionId == _trimAdjustTarget?.ResultRevisionId;
         _session = session;
         ShowCommittedPreflight(session);
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
-        ResetZoom();
+        if (!keepTrimDraft) ResetZoom();
 
         // The crop surface belongs to the state that needed one. A rectangle drawn against the
         // file the operator was looking at a moment ago must not survive into a state showing a
         // different one — that is the same staleness the preview generation token exists to
         // prevent, applied to the selection (Part C2 §22, §25).
-        ClearCropState();
+        if (keepTrimDraft)
+        {
+            _trimAdjustTarget = session.TrimAdjustment;
+        }
+        else
+        {
+            ClearCropState();
+        }
+
+        // The same result is still under review but can no longer be adjusted — its source
+        // failed an integrity check, say. The editor closes rather than failing on every press,
+        // and says so; the refusal's own message, when there was one, says why.
+        if (lostTrimAdjustment)
+        {
+            Notice = string.Join(" ", new[] { Notice, Strings.Session_TrimAdjustClosed }
+                .Where(text => !string.IsNullOrWhiteSpace(text)));
+        }
 
         // Same reasoning as the crop rectangle: a destination chosen against the previous state
         // may not be a legal target in this one, and a confirmation left standing would be a
@@ -3451,6 +3584,10 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(IsReadOnly));
         OnPropertyChanged(nameof(IsHandedOff));
+        OnPropertyChanged(nameof(HandedOffNotice));
+        OnPropertyChanged(nameof(TakeOverLabel));
+        OnPropertyChanged(nameof(StopHint));
+        OnPropertyChanged(nameof(TakeOverConfirmQuestion));
         OnPropertyChanged(nameof(IsFakeProcessing));
         OnPropertyChanged(nameof(IsFakeTiffOutput));
 
@@ -3576,6 +3713,19 @@ public sealed partial class SessionViewModel : ObservableObject
         OnPropertyChanged(nameof(PreparationAttemptLimitingEdge));
         OnPropertyChanged(nameof(PreparationAttemptProjected));
         OnPropertyChanged(nameof(HasPreparationAttemptProjectionNotice));
+        NotifyTrimAdjustState();
+        ShowCorrection(session);
+        NotifyOperatorStatusChanged();
+
+        // The final-save section is rebuilt from the same view; operator drafts are kept by key.
+        ShowFinalSave(session);
+    }
+
+    private void OnOperatorLanguageChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(string.Empty);
+        foreach (FinalSaveTargetRow row in FinalSaveTargets) row.Refresh();
+        foreach (FinalSaveRecordRow row in FinalSaveRecords) row.Refresh();
     }
 
     /// <summary>Re-seeds the mode selector and the margin boxes from a persisted margin.</summary>

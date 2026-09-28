@@ -262,6 +262,8 @@ public sealed partial class SessionViewModel
 
     private void NotifyTiffReviewChanged()
     {
+        // The pending final TIFF shows its output-bound physical size once this payload arrives.
+        NotifyFinalSaveChanged();
         OnPropertyChanged(nameof(HasTiffReview));
         OnPropertyChanged(nameof(TiffReviewUnavailable));
         OnPropertyChanged(nameof(IsTiffReviewUnavailable));

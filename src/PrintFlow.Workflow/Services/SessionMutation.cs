@@ -111,6 +111,13 @@ public sealed record SessionMutation(
     /// </remarks>
     public IReadOnlyList<StepKind> RemoveSteps { get; init; } = [];
 
+    /// <summary>
+    /// Colleague-correction request changes, applied in order inside the same transaction
+    /// (SCRUM-11148). Every change except an insert is conditional, and one that matches no row
+    /// rolls the whole commit back.
+    /// </summary>
+    public IReadOnlyList<CorrectionRequestChange> CorrectionRequestChanges { get; init; } = [];
+
     public static SessionMutation Empty(ProcessingSession session) => new(
         session, [], [], [], [], [], [], null, null);
 }

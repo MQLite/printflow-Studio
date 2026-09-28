@@ -164,7 +164,8 @@ internal sealed class SessionServiceHarness : IDisposable
         ISessionRepository? repository = null,
         IPhotoshopOutputProcessor? photoshop = null,
         IWorkstationAutomationLeaseManager? automationLeases = null,
-        IWorkstationAutomationLease? enclosingAutomationLease = null) => new SessionService(
+        IWorkstationAutomationLease? enclosingAutomationLease = null,
+        IManualCropProcessor? manualCrop = null) => new SessionService(
         WorkflowEngine.Instance,
         repository ?? Repository,
         workspace ?? FileWorkspace,
@@ -173,7 +174,7 @@ internal sealed class SessionServiceHarness : IDisposable
         FakeMeitu,
         photoshop ?? FakePhotoshop,
         Trim,
-        ManualCrop,
+        manualCrop ?? ManualCrop,
         preset ?? Preset,
         EnvironmentGate,
         SystemIdGenerator.Instance,

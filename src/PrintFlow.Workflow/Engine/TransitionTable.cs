@@ -25,6 +25,9 @@ public enum CommandKind
     KeepOriginalExtent,
     HandOff,
     SubmitManualCrop,
+
+    /// <summary>Crop the pre-trim source again, directly from the trim review (SCRUM-11147).</summary>
+    AdjustTrimFromReview,
     SetPrintDimensions,
 
     /// <summary>Take a named preset's configured recommendation (Part B1A.2D §3).</summary>
@@ -47,6 +50,12 @@ public enum CommandKind
     /// <summary>Bring a handed-off session back under automation, explicitly (Part D2A §22).</summary>
     ReenterAutomation,
     SubmitManualResult,
+
+    /// <summary>Hand a background-removal review to a colleague for correction (SCRUM-11148).</summary>
+    RequestColleagueCorrection,
+
+    /// <summary>Import the colleague's corrected picture for the result handed out (SCRUM-11148).</summary>
+    ImportCorrectedImage,
 
     AttemptSucceeded,
     AttemptFailed,
@@ -120,6 +129,10 @@ public static class TransitionTable
         // step in its payload for the same reason (Epic 11300 Part D2A §22).
         CommandKind.ReenterAutomation,
         CommandKind.SubmitManualResult,
+
+        // Like SubmitManualResult: the session is handed off, which is a state no step row
+        // records, so the engine decides it from the session (SCRUM-11148).
+        CommandKind.ImportCorrectedImage,
     ];
 
     /// <summary>
@@ -165,6 +178,14 @@ public static class TransitionTable
             CommandKind.KeepOriginalExtent,
             CommandKind.Reject,
             CommandKind.HandOff,
+
+            // Only here. It supersedes the offer under review without a review decision, the
+            // way KeepOriginalExtent does; every other state keeps its own manual-crop rules.
+            CommandKind.AdjustTrimFromReview,
+
+            // Only here, and neither a review decision nor a supersede: the result stays under
+            // review and the session is handed off (SCRUM-11148).
+            CommandKind.RequestColleagueCorrection,
         ],
 
         // A finished step is reopened only by returning to it, which is session-scoped.
@@ -257,6 +278,9 @@ public static class TransitionTable
         // Revision that still has to be reviewed; nothing here approves anything (Part C2 §17).
         CommandKind.SubmitManualCrop => StepState.Processing,
 
+        // The same producing attempt a manual crop starts; its result is reviewed again.
+        CommandKind.AdjustTrimFromReview => StepState.Processing,
+
         // A produced result that needs no review is approved by construction: for
         // ApprovedPngExport the bytes are unchanged, so the upstream hash-bound approval
         // already covers them (plan §7.3).
@@ -275,6 +299,9 @@ public static class TransitionTable
 
         // HandOff ends the session's automated progression; the step keeps its state.
         CommandKind.HandOff => StepState.ReviewRequired,
+
+        // The same session-level handoff from a review; the result stays under review.
+        CommandKind.RequestColleagueCorrection => StepState.ReviewRequired,
 
         _ => throw new ArgumentOutOfRangeException(
             nameof(command), command, "The command is not step-scoped and has no step destination."),
