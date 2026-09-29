@@ -211,7 +211,8 @@ public sealed class BackgroundRemovalUiTests
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
 
         screen.Notice.ShouldNotBeNullOrWhiteSpace();
-        screen.Notice!.ShouldContain(nameof(FailureCode.PreconditionNotMet));
+        screen.NoticeErrorCode.ShouldBe(nameof(FailureCode.PreconditionNotMet), "SCRUM-11151: the exact code sits under Error details");
+        screen.Notice!.ShouldNotContain(nameof(FailureCode.PreconditionNotMet));
 
         SessionAggregate persisted = await open.ReloadAsync();
         persisted.Session.BackgroundRemovalAuthority.ShouldBeNull();
@@ -255,7 +256,8 @@ public sealed class BackgroundRemovalUiTests
         await screen.ConfirmAutomaticSelectionCommand.ExecuteAsync(null);
 
         screen.Notice.ShouldNotBeNullOrWhiteSpace();
-        screen.Notice!.ShouldContain(nameof(FailureCode.RevisionIntegrityMismatch));
+        screen.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch), "SCRUM-11151: the exact code sits under Error details");
+        screen.Notice!.ShouldNotContain(nameof(FailureCode.RevisionIntegrityMismatch));
 
         SessionAggregate after = await open.ReloadAsync();
         after.Session.BackgroundRemovalAuthority.ShouldBeNull();

@@ -78,11 +78,14 @@
             </StackPanel>
         </Border>
 
-        <TextBlock Grid.Row="3"
-                   Text="{Binding Notice}"
-                   TextWrapping="Wrap"
-                   Margin="0,12,0,0"
-                   FontWeight="SemiBold" />
+        <StackPanel Grid.Row="3">
+            <TextBlock Text="{Binding Notice}"
+                       TextWrapping="Wrap"
+                       Margin="0,12,0,0"
+                       FontWeight="SemiBold" />
+            <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
+            <views:NoticeErrorDetails Margin="0,4,0,0" />
+        </StackPanel>
 
         <DockPanel Grid.Row="4" Margin="0,18,0,0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">

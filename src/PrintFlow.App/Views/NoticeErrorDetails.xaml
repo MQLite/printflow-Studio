@@ -1,0 +1,46 @@
+<UserControl x:Class="PrintFlow.App.Views.NoticeErrorDetails"
+             x:Name="DetailsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="False"
+             IsTabStop="False">
+    <!--
+        The Error details of the failure the notice above describes (SCRUM-11151): its exact stable
+        code, collapsed so the sentence stays short. Bound to the screen's own NoticeErrorCode, which
+        exists only while that notice is shown, so an earlier failure's code never appears here.
+        Opening it is view state only: it sends nothing, retries nothing and changes no record.
+    -->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+    <Expander Header="{Binding NoticeErrorDetailsLabel}"
+              Margin="0,0,0,6"
+              IsExpanded="False"
+              AutomationProperties.AutomationId="NoticeErrorDetails"
+              AutomationProperties.Name="{Binding NoticeErrorDetailsLabel}">
+        <Expander.Style>
+            <Style TargetType="Expander">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Code, ElementName=DetailsControl}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Expander.Style>
+        <!-- One line where it fits: the code first, then how to use it. -->
+        <DockPanel Margin="0,2,0,0">
+            <TextBlock DockPanel.Dock="Left" Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold" />
+            <TextBox DockPanel.Dock="Left"
+                     Text="{Binding Code, ElementName=DetailsControl, Mode=OneWay}"
+                     IsReadOnly="True"
+                     IsReadOnlyCaretVisible="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     Padding="0,3"
+                     AutomationProperties.AutomationId="NoticeErrorDetails.Code"
+                     AutomationProperties.Name="{Binding NoticeErrorCodeLabel}" />
+            <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="16,3,0,0"
+                       AutomationProperties.AutomationId="NoticeErrorDetails.Hint" />
+        </DockPanel>
+    </Expander>
+</UserControl>

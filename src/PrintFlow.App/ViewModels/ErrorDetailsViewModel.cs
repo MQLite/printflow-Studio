@@ -33,7 +33,22 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
     private OperationFailure? _noticeFailure;
     private string? _noticeText;
 
-    public string? Notice => _noticeText ?? (_noticeFailure is { } failure ? DisplayNames.Failure(failure) : null);
+    public string? Notice => _noticeText ?? (_noticeFailure is { } failure ? DisplayNames.FailureNotice(failure) : null);
+
+    /// <summary>
+    /// The exact code of the failure the notice describes (a recovery, Back or refresh call), shown
+    /// in place under it. The page's Code row is the opened attempt's, a different failure
+    /// (SCRUM-11151).
+    /// </summary>
+    public string? NoticeErrorCode => _noticeText is null ? _noticeFailure?.Code.ToString() : null;
+
+    public bool HasNoticeErrorCode => NoticeErrorCode is not null;
+
+    public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
+
+    public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
+
+    public string NoticeErrorCodeHint => Strings.ErrorDetails_CodeHint;
 
     public ErrorDetailsViewModel(ISessionService sessions, INavigationService navigation,
         ILocalisationService localisation,
@@ -232,7 +247,7 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
             _noticeText = result.IsSuccess
                 ? string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_Saved, result.Value.SavedPath)
                 : string.Format(CultureInfo.CurrentCulture, Strings.DiagnosticPackage_SaveFailed, result.Failure.Code);
-            OnPropertyChanged(nameof(Notice));
+            NotifyNotice();
         }
         finally
         {
@@ -267,6 +282,7 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
             }
             else
             {
+                _noticeText = null;
                 _noticeFailure = result.Failure;
                 await RefreshAsync(cancellationToken).ConfigureAwait(true);
             }
@@ -290,8 +306,9 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
                 _navigation.GoToSession(result.Value);
             else
             {
+                _noticeText = null;
                 _noticeFailure = result.Failure;
-                OnPropertyChanged(nameof(Notice));
+                NotifyNotice();
             }
         }
         finally
@@ -308,7 +325,10 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
             sessionId, attemptId, cancellationToken).ConfigureAwait(true);
         _details = result.IsSuccess ? result.Value : null;
         if (result.IsFailure)
+        {
+            _noticeText = null;
             _noticeFailure = result.Failure;
+        }
         OnPropertyChanged(string.Empty);
     }
 
@@ -346,6 +366,13 @@ public sealed partial class ErrorDetailsViewModel : ObservableObject
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e) => OnPropertyChanged(string.Empty);
+
+    private void NotifyNotice()
+    {
+        OnPropertyChanged(nameof(Notice));
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
 
     private IReadOnlyList<DiagnosticPackagePreviewItem> PreviewItems(
         DiagnosticPackageItemDisposition disposition) => _packagePlan?.Items

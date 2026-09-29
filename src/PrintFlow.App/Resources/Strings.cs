@@ -120,6 +120,7 @@ internal static class Strings
     internal static string ErrorDetails_Workflow => Get(nameof(ErrorDetails_Workflow));
     internal static string ErrorDetails_Step => Get(nameof(ErrorDetails_Step));
     internal static string ErrorDetails_Code => Get(nameof(ErrorDetails_Code));
+    internal static string ErrorDetails_CodeHint => Get(nameof(ErrorDetails_CodeHint));
     internal static string ErrorDetails_RetryInformation => Get(nameof(ErrorDetails_RetryInformation));
     internal static string ErrorDetails_InputPath => Get(nameof(ErrorDetails_InputPath));
     internal static string ErrorDetails_ExpectedOutputPath => Get(nameof(ErrorDetails_ExpectedOutputPath));
@@ -503,8 +504,28 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     /// <summary>Shown where a structural fact was legitimately not determined.</summary>
     internal static string Session_ValueUnknown => Get(nameof(Session_ValueUnknown));
 
-    /// <summary>Composite format: the stable failure code.</summary>
+    /// <summary>Composite format: the failure's own sentence. The stable code sits under Error details (SCRUM-11151).</summary>
     internal static string Session_ActionFailed => Get(nameof(Session_ActionFailed));
+
+    /// <summary>
+    /// Composite format: the failure's own sentence, for a record that could not be read or saved.
+    /// </summary>
+    /// <remarks>
+    /// A persistence failure does not prove that nothing was saved: an operation with more than one
+    /// commit can fail after an earlier one landed. So this says the outcome is unconfirmed rather
+    /// than that the action did not complete (SCRUM-11151).
+    /// </remarks>
+    internal static string Session_ActionUnconfirmed => Get(nameof(Session_ActionUnconfirmed));
+
+    /// <summary>The help line after a failed action once the screen shows the job's current state.</summary>
+    /// <remarks>
+    /// It names no action of its own: the status line is built from the commands that are legal now,
+    /// so Retry is named there only when Retry is offered (SCRUM-11151).
+    /// </remarks>
+    internal static string Session_ActionFailedNext => Get(nameof(Session_ActionFailedNext));
+
+    /// <summary>The help line after a failed action when re-reading the job afterwards failed.</summary>
+    internal static string Session_ActionFailedNextStale => Get(nameof(Session_ActionFailedNextStale));
 
     // --- Part 3C3B: dimensions, W1 and production output ---------------------------------
 

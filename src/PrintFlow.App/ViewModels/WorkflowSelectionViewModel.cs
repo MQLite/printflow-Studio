@@ -367,9 +367,10 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
                 // Includes the workflow lock: the engine refuses SelectWorkflow once a derived
                 // Revision exists, and that refusal is shown rather than pre-empted. The name
                 // that was accepted a moment ago stays accepted — a refused workflow does not
-                // roll one back, and the screen must not claim it did.
-                Notice = string.Format(
-                    CultureInfo.CurrentCulture, Strings.WorkflowSelection_Refused, selected.Failure.Code);
+                // roll one back, and the screen must not claim it did. SelectWorkflow never starts
+                // a step, so "No processing was started" holds; the code sits under Error details
+                // (SCRUM-11151).
+                ShowFailureNotice(Strings.WorkflowSelection_Refused, selected.Failure);
                 return;
             }
 
@@ -460,4 +461,34 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+
+    // --- SCRUM-11151: failure notices whose code sits under Error details ------------------
+
+    private readonly NoticeFailure _noticeFailure = new();
+
+    /// <summary>The exact stable code of the failure the notice describes; null when it describes none.</summary>
+    public string? NoticeErrorCode => _noticeFailure.Code;
+
+    public bool HasNoticeErrorCode => NoticeErrorCode is not null;
+
+    public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
+
+    public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
+
+    public string NoticeErrorCodeHint => Strings.ErrorDetails_CodeHint;
+
+    partial void OnNoticeChanged(string? value)
+    {
+        _noticeFailure.Track(value);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
+
+    /// <summary>A plain sentence for <paramref name="failure"/>, with its exact code under Error details.</summary>
+    private void ShowFailureNotice(string sentence, OperationFailure failure)
+    {
+        Notice = _noticeFailure.Describe(sentence, failure);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
 }

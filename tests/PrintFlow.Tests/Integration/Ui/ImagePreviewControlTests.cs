@@ -370,7 +370,8 @@ public sealed class ImagePreviewControlTests
         await session.ApproveCommand.ExecuteAsync(null);
 
         session.Notice.ShouldNotBeNull();
-        session.Notice.ShouldContain(nameof(FailureCode.RevisionIntegrityMismatch));
+        session.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch), "SCRUM-11151: the exact code sits under Error details");
+        session.Notice!.ShouldNotContain(nameof(FailureCode.RevisionIntegrityMismatch));
 
         SessionView refused = (await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value;
         refused.Steps.Single(step => step.Step == StepKind.Enhancement).State

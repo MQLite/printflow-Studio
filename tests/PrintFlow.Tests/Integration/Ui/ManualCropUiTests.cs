@@ -406,7 +406,8 @@ public sealed class ManualCropUiTests
         await session.ApproveCommand.ExecuteAsync(null);
 
         session.Notice.ShouldNotBeNull();
-        session.Notice.ShouldContain(nameof(FailureCode.RevisionIntegrityMismatch));
+        session.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch), "SCRUM-11151: the exact code sits under Error details");
+        session.Notice!.ShouldNotContain(nameof(FailureCode.RevisionIntegrityMismatch));
 
         (await harness.Sessions.LoadAsync(id, CancellationToken.None)).Value
             .Steps.Single(s => s.Step == StepKind.Trim).State.ShouldNotBe(StepState.Approved);

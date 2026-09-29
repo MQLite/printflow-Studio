@@ -333,7 +333,10 @@ public sealed partial class SettingsViewModel : ObservableObject
             {
                 // Nothing committed, so nothing is applied: the operator stays here, in the
                 // language the database still says is authoritative, with their entries intact.
-                Notice = Describe(Strings.Settings_SaveFailed, saved.Failure);
+                // The write is one rolled-back transaction, which is what lets the sentence say
+                // "Nothing was changed"; its code sits under Error details (SCRUM-11151).
+                ShowFailureNotice(string.Format(CultureInfo.CurrentCulture, Strings.Settings_SaveFailed, ApplyLabel),
+                    saved.Failure);
                 return;
             }
 
@@ -434,4 +437,34 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// <summary>One localised sentence carrying the stable English failure code, as Home does.</summary>
     private static string Describe(string localisedSentence, OperationFailure failure) =>
         string.Format(CultureInfo.CurrentCulture, localisedSentence, failure.Code);
+
+    // --- SCRUM-11151: failure notices whose code sits under Error details ------------------
+
+    private readonly NoticeFailure _noticeFailure = new();
+
+    /// <summary>The exact stable code of the failure the notice describes; null when it describes none.</summary>
+    public string? NoticeErrorCode => _noticeFailure.Code;
+
+    public bool HasNoticeErrorCode => NoticeErrorCode is not null;
+
+    public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
+
+    public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
+
+    public string NoticeErrorCodeHint => Strings.ErrorDetails_CodeHint;
+
+    partial void OnNoticeChanged(string? value)
+    {
+        _noticeFailure.Track(value);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
+
+    /// <summary>A plain sentence for <paramref name="failure"/>, with its exact code under Error details.</summary>
+    private void ShowFailureNotice(string sentence, OperationFailure failure)
+    {
+        Notice = _noticeFailure.Describe(sentence, failure);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
 }

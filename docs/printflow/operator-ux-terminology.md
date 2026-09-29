@@ -1,6 +1,6 @@
 # PrintFlow operator terminology (zh-CN / en)
 
-Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24; SCRUM-11149 review-guidance wording added 2026-09-29; SCRUM-11150 print-size guidance added 2026-09-29
+Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24; SCRUM-11149 review-guidance wording added 2026-09-29; SCRUM-11150 print-size guidance added 2026-09-29; SCRUM-11151 failure-notice wording added 2026-09-29
 
 Scope: beginner-facing operator copy; documentation only
 
@@ -95,6 +95,7 @@ These bilingual patterns were introduced with the current-status panel. They des
 | Preset | Approved production setup | 已批准的生产设置 | Rename in operator copy | Fixed validated workstation production configuration. “Preset” and its identifier may remain in Settings, Production details, Error details, and diagnostics. Current resources include `Settings_Preset` and `Preset_Verified`. |
 | White ink / W1 | White ink (W1) | 白墨（W1） | Rename in operator copy | W1 is the technical white-ink branch/channel label. Use “W1” alone only in Production details, Error details, technical expanders, audit/history, or diagnostics. Current resource: `Session_LabelBranch`; TIFF review modes. |
 | Error details | Error details | 错误详情 | Keep | Secondary technical surface for stable failure code and diagnostic facts. The primary message should explain the operator-safe next step. `ErrorDetails_Heading`. |
+| Failure notice | What happened, what is known, then the next step; code under "Error details" | 发生了什么、已知情况、下一步；错误代码在“错误详情”中 | Keep | SCRUM-11151. The sentence carries no code. A collapsed "Error details / 错误详情" under the notice shows "Code / 错误代码" of that exact failure and "Quote this code when you ask for help." Shared `Failure_*` sentences avoid unconditional Run/Retry advice and end with "PrintFlow never changes your original file." / "PrintFlow 不会更改你的原始文件。"; they do not promise that no file was produced or that every failed action was rolled back. On the processing screen the next step is the status line, so Retry is named only when offered. Home, Workflow Selection and Settings name their own safe repeat ("choose Resume/Apply/a workflow again") or ask for "a colleague or supervisor / 同事或主管". Resources and final wording: `docs/codex/printflow-operator-ux-backlog/SCRUM-11151_COPY_REVIEW.md`. |
 
 ## Terms still requiring a later business decision
 

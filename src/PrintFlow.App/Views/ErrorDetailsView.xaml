@@ -39,6 +39,8 @@
             <StackPanel>
                 <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="#A12822"
                            AutomationProperties.AutomationId="ErrorDetails.Notice" />
+                <!-- The notice's own code; the Code row below belongs to the opened attempt (SCRUM-11151). -->
+                <views:NoticeErrorDetails Margin="0,4,0,0" />
                 <StackPanel Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="{Binding WhatHappenedHeading}" Style="{StaticResource SectionHeading}" />
                     <TextBox Text="{Binding Description, Mode=OneWay}" Style="{StaticResource ReadOnlyValue}"

@@ -333,7 +333,8 @@ public sealed partial class HomeViewModel : ObservableObject
         if (row is null || IsBusy) return;
         var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
         if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
-        else Notice = Describe(Strings.Home_ResumeFailed, loaded.Failure);
+        else ShowFailureNotice(Format(Strings.Home_ResumeFailed,
+            row.HasOpenCorrection ? row.OpenCorrectionLabel : row.OpenLabel), loaded.Failure);
     }
 
     private async Task RecoverAsync(RecoverySessionRow? row, RecoveryAction action, CancellationToken cancellationToken)
@@ -351,7 +352,7 @@ public sealed partial class HomeViewModel : ObservableObject
             }
             var result = await _sessions.ResolveRecoveryAsync(row.Id, action, path, Environment.UserName, cancellationToken).ConfigureAwait(true);
             await RefreshAsync(cancellationToken).ConfigureAwait(true);
-            if (result.IsFailure) Notice = Describe(Strings.Home_RecoveryFailed, result.Failure);
+            if (result.IsFailure) ShowFailureNotice(Strings.Home_RecoveryFailed, result.Failure);
             else if (action != RecoveryAction.Abandon) _navigation.GoToSession(result.Value);
         }
         finally { IsBusy = false; }
@@ -420,7 +421,7 @@ public sealed partial class HomeViewModel : ObservableObject
 
             if (loaded.IsFailure)
             {
-                Notice = Describe(Strings.Home_ResumeFailed, loaded.Failure);
+                ShowFailureNotice(Format(Strings.Home_ResumeFailed, row.OpenActionLabel), loaded.Failure);
                 return;
             }
 
@@ -460,9 +461,10 @@ public sealed partial class HomeViewModel : ObservableObject
                 Environment.UserName,
                 cancellationToken).ConfigureAwait(true);
 
-            Notice = abandoned.IsFailure
-                ? Describe(Strings.Home_AbandonFailed, abandoned.Failure)
-                : string.Format(CultureInfo.CurrentCulture, Strings.Home_AbandonDone, row.DisplayName);
+            if (abandoned.IsFailure)
+                ShowFailureNotice(Strings.Home_AbandonFailed, abandoned.Failure);
+            else
+                Notice = string.Format(CultureInfo.CurrentCulture, Strings.Home_AbandonDone, row.DisplayName);
         }
         finally
         {
@@ -563,4 +565,40 @@ public sealed partial class HomeViewModel : ObservableObject
     /// </remarks>
     private static string Describe(string localisedSentence, OperationFailure failure) =>
         string.Format(CultureInfo.CurrentCulture, localisedSentence, failure.Code);
+
+    // --- SCRUM-11151: failure notices whose code sits under Error details ------------------
+
+    private readonly NoticeFailure _noticeFailure = new();
+
+    /// <summary>The exact stable code of the failure the notice describes; null when it describes none.</summary>
+    public string? NoticeErrorCode => _noticeFailure.Code;
+
+    public bool HasNoticeErrorCode => NoticeErrorCode is not null;
+
+    public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
+
+    public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
+
+    public string NoticeErrorCodeHint => Strings.ErrorDetails_CodeHint;
+
+    partial void OnNoticeChanged(string? value)
+    {
+        _noticeFailure.Track(value);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
+
+    /// <summary>
+    /// Shows a plain sentence for <paramref name="failure"/> and keeps its exact code under Error
+    /// details. Home has no failed attempt to open, so the code is shown in place (SCRUM-11151).
+    /// </summary>
+    private void ShowFailureNotice(string sentence, OperationFailure failure)
+    {
+        Notice = _noticeFailure.Describe(sentence, failure);
+        OnPropertyChanged(nameof(NoticeErrorCode));
+        OnPropertyChanged(nameof(HasNoticeErrorCode));
+    }
+
+    private static string Format(string format, string label) =>
+        string.Format(CultureInfo.CurrentCulture, format, label);
 }

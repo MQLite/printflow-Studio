@@ -2274,8 +2274,9 @@ public sealed partial class SessionViewModel : ObservableObject
         if (requested.IsFailure)
         {
             // Reported rather than swallowed. "Stop did nothing" is precisely the outcome an
-            // operator must not be left guessing about.
-            Notice = Describe(requested.Failure);
+            // operator must not be left guessing about. A refused request changed no record, and
+            // the status line follows the runtime, so it is current.
+            ShowActionFailure(requested.Failure, ActionFailureScreen.Current);
         }
     }
 
@@ -2328,7 +2329,7 @@ public sealed partial class SessionViewModel : ObservableObject
 
         if (requested.IsFailure)
         {
-            Notice = Describe(requested.Failure);
+            ShowActionFailure(requested.Failure, ActionFailureScreen.Current);
         }
     }
 
@@ -2760,8 +2761,8 @@ public sealed partial class SessionViewModel : ObservableObject
 
             if (result.IsFailure)
             {
-                Notice = Describe(result.Failure);
-                await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                ShowActionFailure(result.Failure, ActionFailureScreen.Pending);
+                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
                 await PreviewsLoaded.ConfigureAwait(true);
                 return;
             }
@@ -3375,13 +3376,14 @@ public sealed partial class SessionViewModel : ObservableObject
 
             if (result.IsFailure)
             {
-                Notice = Describe(result.Failure);
+                ShowActionFailure(result.Failure, ActionFailureScreen.Pending);
 
                 // The command did not apply, but the session may still have moved — an
                 // integrity mismatch invalidates the Revision it was about, and a failed
                 // attempt is persisted before the failure returns. Re-reading is what keeps the
-                // screen showing the database rather than the last thing that worked.
-                await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                // screen showing the database rather than the last thing that worked. Only a
+                // successful re-read lets the notice point at the status line (SCRUM-11151).
+                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
                 await PreviewsLoaded.ConfigureAwait(true);
                 return;
             }
@@ -3452,11 +3454,12 @@ public sealed partial class SessionViewModel : ObservableObject
         BeginTakeOverCommand.NotifyCanExecuteChanged();
     }
 
-    private async Task RefreshAsync(CancellationToken cancellationToken)
+    /// <returns>Whether the screen now shows the job as it was just read.</returns>
+    private async Task<bool> RefreshAsync(CancellationToken cancellationToken)
     {
         if (_session is null)
         {
-            return;
+            return false;
         }
 
         OperationResult<SessionView> reloaded =
@@ -3466,6 +3469,8 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             Show(reloaded.Value);
         }
+
+        return reloaded.IsSuccess;
     }
 
     /// <summary>Rebuilds every displayed value from <paramref name="session"/>.</summary>
@@ -3510,8 +3515,10 @@ public sealed partial class SessionViewModel : ObservableObject
         // and says so; the refusal's own message, when there was one, says why.
         if (lostTrimAdjustment)
         {
-            Notice = string.Join(" ", new[] { Notice, Strings.Session_TrimAdjustClosed }
-                .Where(text => !string.IsNullOrWhiteSpace(text)));
+            // A failure notice keeps its code and next-step line with the added sentence (SCRUM-11151).
+            if (!AppendToActionFailure(nameof(Strings.Session_TrimAdjustClosed)))
+                Notice = string.Join(" ", new[] { Notice, Strings.Session_TrimAdjustClosed }
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
         }
 
         // Same reasoning as the crop rectangle: a destination chosen against the previous state
@@ -3726,6 +3733,8 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         OnPropertyChanged(string.Empty);
         RefreshPreflightLanguage();
+        RefreshActionFailureLanguage();
+        RefreshCorrectionFailureLanguage();
         foreach (FinalSaveTargetRow row in FinalSaveTargets) row.Refresh();
         foreach (FinalSaveRecordRow row in FinalSaveRecords) row.Refresh();
     }
@@ -3746,18 +3755,4 @@ public sealed partial class SessionViewModel : ObservableObject
         BottomMarginText = margin.Bottom.ToString(CultureInfo.CurrentCulture);
         LeftMarginText = margin.Left.ToString(CultureInfo.CurrentCulture);
     }
-
-    /// <summary>
-    /// A localised sentence plus the stable failure code.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="OperationFailure.TechnicalDetail"/> is never shown: it is English log text
-    /// that can name a path. The code is a stable identifier a support call can quote, and no
-    /// stack trace reaches this screen (Part 3C3A §15).
-    /// </remarks>
-    private static string Describe(OperationFailure failure) => string.Format(
-        CultureInfo.CurrentCulture,
-        Strings.Session_ActionFailed,
-        DisplayNames.Failure(failure),
-        failure.Code);
 }

@@ -71,6 +71,10 @@ public sealed partial class SessionViewModel
 
     /// <summary>The request a shown correction message is about; a different request clears it.</summary>
     private Guid? _correctionMessageRequest;
+    private readonly NoticeFailure _correctionFailure = new();
+    private string? _correctionFailureWrapperKey;
+
+    public string? CorrectionErrorCode => _correctionFailure.Code;
 
     /// <summary>Whether the inline Ask panel (S1) is open. Opening or cancelling it writes nothing.</summary>
     [ObservableProperty]
@@ -280,7 +284,6 @@ public sealed partial class SessionViewModel
 
             if (result.IsFailure)
             {
-                string message = Format(Strings.Session_CorrectionPrepareFailed, DisplayNames.Failure(result.Failure));
                 await ReloadCorrectionAsync(interaction, id, cancellationToken).ConfigureAwait(true);
                 if (!IsCurrentCorrectionInteraction(interaction)) return;
                 if (_session?.Correction is { CanImport: true } landed && landed.RequestId == requestId)
@@ -291,7 +294,7 @@ public sealed partial class SessionViewModel
                 }
 
                 if (IsAskingColleague && _pendingCorrectionRequestId == requestId)
-                    SetCorrectionMessage(message, requestId);
+                    SetCorrectionFailure(result.Failure, nameof(Strings.Session_CorrectionPrepareFailed), requestId);
                 return;
             }
 
@@ -351,13 +354,12 @@ public sealed partial class SessionViewModel
 
             if (result.IsFailure)
             {
-                string message = Format(Strings.Session_CorrectionRefused, DisplayNames.Failure(result.Failure));
                 await ReloadCorrectionAsync(interaction, id, cancellationToken).ConfigureAwait(true);
                 await PreviewsLoaded.ConfigureAwait(true);
                 if (!IsCurrentCorrectionInteraction(interaction)) return;
                 if (_session?.Correction is { CanImport: true } still && still.RequestId == requestId)
                 {
-                    SetCorrectionMessage(message, requestId);
+                    SetCorrectionFailure(result.Failure, nameof(Strings.Session_CorrectionRefused), requestId);
                     RequestCorrectionFocus(CorrectionFocus.ImportButton);
                 }
 
@@ -397,10 +399,10 @@ public sealed partial class SessionViewModel
             if (!IsCurrentCorrectionInteraction(interaction)) return;
             if (result.IsFailure)
             {
-                await ReloadCorrectionAsync(interaction, session.Id, cancellationToken).ConfigureAwait(true);
+                bool reloaded = await ReloadCorrectionAsync(interaction, session.Id, cancellationToken).ConfigureAwait(true);
                 if (!IsCurrentCorrectionInteraction(interaction)) return;
                 if (_session?.Correction is { CanImport: true } still && still.RequestId == requestId)
-                    Notice = Describe(result.Failure);
+                    ShowActionFailure(result.Failure, reloaded ? ActionFailureScreen.Current : ActionFailureScreen.Stale);
             }
             else
             {
@@ -465,13 +467,15 @@ public sealed partial class SessionViewModel
         Show(session);
     }
 
-    private async Task ReloadCorrectionAsync(CorrectionInteraction interaction, SessionId id, CancellationToken cancellationToken)
+    /// <returns>Whether the job was read again; a failure-notice line depends on it (SCRUM-11151).</returns>
+    private async Task<bool> ReloadCorrectionAsync(CorrectionInteraction interaction, SessionId id, CancellationToken cancellationToken)
     {
         // Unknown outcomes still require the database, but a delayed reload has no authority
         // over a target shown after it began, just like a delayed command response.
         OperationResult<SessionView> reloaded = await _sessions.LoadAsync(id, cancellationToken).ConfigureAwait(true);
         if (IsCurrentCorrectionInteraction(interaction) && reloaded.IsSuccess)
             ShowCorrectionResult(interaction, reloaded.Value);
+        return reloaded.IsSuccess;
     }
 
     /// <summary>
@@ -518,10 +522,20 @@ public sealed partial class SessionViewModel
         RequestCorrectionFocus(CorrectionFocus.HandedOffHeading);
     }
 
-    private void SetCorrectionMessage(string message, Guid requestId)
+    private void SetCorrectionFailure(OperationFailure failure, string wrapperKey, Guid requestId)
     {
         _correctionMessageRequest = requestId;
-        CorrectionMessage = message;
+        _correctionFailureWrapperKey = wrapperKey;
+        CorrectionMessage = _correctionFailure.Describe(
+            Format(Strings.Resolve(wrapperKey), DisplayNames.FailureNotice(failure)), failure);
+        OnPropertyChanged(nameof(CorrectionErrorCode));
+    }
+
+    private void RefreshCorrectionFailureLanguage()
+    {
+        if (_correctionFailure.Failure is { } failure && _correctionFailureWrapperKey is { } key &&
+            _correctionMessageRequest is { } requestId)
+            SetCorrectionFailure(failure, key, requestId);
     }
 
     private void RequestCorrectionFocus(CorrectionFocus target)
@@ -585,6 +599,8 @@ public sealed partial class SessionViewModel
 
     partial void OnCorrectionMessageChanged(string? value)
     {
+        _correctionFailure.Track(value);
+        OnPropertyChanged(nameof(CorrectionErrorCode));
         OnPropertyChanged(nameof(HasCorrectionMessage));
         OnPropertyChanged(nameof(CorrectionPrepareLabel));
     }

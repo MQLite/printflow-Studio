@@ -193,6 +193,8 @@
                        TextWrapping="Wrap"
                        FontWeight="SemiBold"
                        Margin="0,0,0,8" />
+            <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
+            <local:NoticeErrorDetails />
             <Button Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
                     AutomationProperties.AutomationId="WorkflowSelection.Back"

@@ -340,10 +340,22 @@
             <TextBlock Text="{Binding PsdSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
                        Visibility="{Binding HasPsdSource, Converter={StaticResource BoolToVisibility}}" />
 
-            <TextBlock Text="{Binding Notice}"
-                       TextWrapping="Wrap"
+            <TextBlock TextWrapping="Wrap"
                        FontWeight="SemiBold"
-                       Margin="0,0,0,6" />
+                       Margin="0,0,0,6">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="{Binding Notice}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasNoticeErrorCode}" Value="True">
+                                <!-- Keep the existing single-line space; full failures use the
+                                     scrolling details column without shrinking the preview. -->
+                                <Setter Property="Text" Value="" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <!--
                 Stop and Take Over (Epic 11300 Part D2A §24, §25, §27). Both are bound to the
@@ -1109,8 +1121,14 @@
             </Border>
             </Grid>
 
-            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
+                    <StackPanel Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}"
+                                AutomationProperties.AutomationId="Session.ActionFailure">
+                        <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
+                                   AutomationProperties.LiveSetting="Assertive" />
+                        <local:NoticeErrorDetails />
+                    </StackPanel>
                     <!--
                         Colleague correction (SCRUM-11148). Conditional and compact: the Ask panel
                         (S1) while it is open, the handed-off panel (S3) while the request can be
@@ -1137,6 +1155,7 @@
                                        AutomationProperties.AutomationId="Session.Correction.AskMessage"
                                        AutomationProperties.LiveSetting="Assertive"
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
+                            <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
                             <WrapPanel Margin="0,10,0,0">
                                 <local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
                                         TargetIdentity="{Binding AskIdentity}"
@@ -1204,6 +1223,7 @@
                                        AutomationProperties.AutomationId="Session.Correction.Message"
                                        AutomationProperties.LiveSetting="Assertive"
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
+                            <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
                             <local:ReviewApprovalButton x:Name="ImportCorrectedButton"
                                     Content="{Binding CorrectionImportLabel}"
                                     TargetIdentity="{Binding ImportIdentity}"

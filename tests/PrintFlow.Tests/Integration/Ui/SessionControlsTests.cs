@@ -177,7 +177,8 @@ public sealed class SessionControlsTests
         await open.Screen.ApproveCommand.ExecuteAsync(null);
 
         open.Screen.Notice.ShouldNotBeNullOrWhiteSpace();
-        open.Screen.Notice!.ShouldContain(nameof(FailureCode.RevisionIntegrityMismatch));
+        open.Screen.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch), "SCRUM-11151: the exact code sits under Error details");
+        open.Screen.Notice!.ShouldNotContain(nameof(FailureCode.RevisionIntegrityMismatch));
 
         SessionAggregate after = await open.ReloadAsync();
         StepOf(after, StepKind.Enhancement).State.ShouldBe(StepState.ReviewRequired);

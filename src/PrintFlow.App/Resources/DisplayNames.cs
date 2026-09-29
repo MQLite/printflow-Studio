@@ -216,6 +216,27 @@ internal static class DisplayNames
     internal static string Failure(OperationFailure failure) =>
         Strings.Resolve(failure.MessageKey);
 
+    /// <summary>A failed action names its next step separately, from current screen authority.
+    /// Keep specialized facts here without inheriting an unconditional Run/Retry instruction.
+    /// Persisted message keys and full diagnostic descriptions remain unchanged.</summary>
+    internal static string FailureNotice(OperationFailure failure) => failure.MessageKey switch
+    {
+        "Failure_RevisionIntegrityMismatch" => Strings.Resolve("FailureNotice_RevisionIntegrityMismatch"),
+        "Failure_OperationFaulted" => Strings.Resolve("FailureNotice_OperationFaulted"),
+        "Failure_MeituLaunchFailed" => Strings.Resolve("FailureNotice_MeituLaunchFailed"),
+        "Failure_MeituTargetLost" => Strings.Resolve("FailureNotice_MeituTargetLost"),
+        "Failure_MeituUnknownState" => Strings.Resolve("FailureNotice_MeituUnknownState"),
+        "Failure_MeituBlockingDialog" => Strings.Resolve("FailureNotice_MeituBlockingDialog"),
+        "Failure_MeituInterrupted" => Strings.Resolve("FailureNotice_MeituInterrupted"),
+        "Failure_PhotoshopLaunchFailed" => Strings.Resolve("FailureNotice_PhotoshopLaunchFailed"),
+        "Failure_PhotoshopTargetLost" => Strings.Resolve("FailureNotice_PhotoshopTargetLost"),
+        "Failure_PhotoshopUnknownState" => Strings.Resolve("FailureNotice_PhotoshopUnknownState"),
+        "Failure_PhotoshopBlockingDialog" => Strings.Resolve("FailureNotice_PhotoshopBlockingDialog"),
+        "Failure_PsdPreparationFailed" => Strings.Resolve("FailureNotice_PsdPreparationFailed"),
+        "Failure_PdfPreparationFailed" => Strings.Resolve("FailureNotice_PdfPreparationFailed"),
+        _ => Failure(failure),
+    };
+
     /// <summary>
     /// The operator label for a white-underbase branch, carrying its guidance (Part 3C3B §7).
     /// </summary>

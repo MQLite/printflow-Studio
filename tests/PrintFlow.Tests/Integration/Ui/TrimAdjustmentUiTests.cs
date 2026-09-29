@@ -13,6 +13,8 @@ using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Results;
+using PrintFlow.App.Localisation;
 using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Domain.Trimming;
@@ -251,11 +253,16 @@ public sealed class TrimAdjustmentUiTests
         screen.CropSelection.ShouldBeNull();
     }
 
-    [Fact]
-    public async Task An_integrity_refusal_closes_the_editor_and_says_why()
+    [Theory]
+    [InlineData("en", "zh-CN")]
+    [InlineData("zh-CN", "en")]
+    public async Task An_integrity_refusal_closes_the_editor_and_says_why(string language, string nextLanguage)
     {
+        using OperatorCultureScope culture = new(language);
         using SessionServiceHarness h = new();
-        (_, SessionViewModel screen, SessionView review) = await OpenAsync(h, enhance: true);
+        LocalisationService localisation = new(h.Settings);
+        localisation.Use(language == "en" ? OperatorLanguage.English : OperatorLanguage.SimplifiedChinese);
+        (_, SessionViewModel screen, SessionView review) = await OpenAsync(h, enhance: true, localisation: localisation);
         SessionAggregate aggregate = (await h.Repository.LoadAsync(review.Id, CancellationToken.None)).Value!;
         Revision u = aggregate.Revisions.Single(r => r.Id == review.TrimAdjustment!.PreTrimRevisionId);
         screen.BeginTrimAdjustCommand.Execute(null);
@@ -268,8 +275,26 @@ public sealed class TrimAdjustmentUiTests
 
         screen.IsAdjustingTrim.ShouldBeFalse();
         screen.Notice!.ShouldContain(Strings.Session_TrimAdjustClosed);
+        screen.Notice!.ShouldContain(Strings.Session_ActionFailedNext);
+        screen.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch));
+        screen.Notice!.ShouldNotContain(nameof(FailureCode.RevisionIntegrityMismatch));
         screen.CanAdjustTrim.ShouldBeFalse();
         screen.CanApprove.ShouldBeTrue("the result under review is unchanged and can still be reviewed");
+        screen.CanRunStep.ShouldBeFalse();
+        screen.CanRetry.ShouldBeFalse();
+        screen.Notice!.ShouldNotContain(language == "en" ? "Run the step again" : "请重新执行该步骤");
+        Snapshot beforeLanguage = await Snapshot.TakeAsync(h, review.Id);
+        string oldAddition = Strings.Session_TrimAdjustClosed;
+        var commands = (screen.CanAdjustTrim, screen.CanApprove, screen.CanRetry, screen.CanRunStep);
+
+        localisation.Use(nextLanguage == "en" ? OperatorLanguage.English : OperatorLanguage.SimplifiedChinese);
+
+        screen.Notice!.ShouldContain(Strings.Session_TrimAdjustClosed);
+        screen.Notice!.ShouldNotContain(oldAddition);
+        screen.Notice!.ShouldContain(Strings.Session_ActionFailedNext);
+        screen.NoticeErrorCode.ShouldBe(nameof(FailureCode.RevisionIntegrityMismatch));
+        (screen.CanAdjustTrim, screen.CanApprove, screen.CanRetry, screen.CanRunStep).ShouldBe(commands);
+        (await Snapshot.TakeAsync(h, review.Id)).ShouldBe(beforeLanguage);
     }
 
     [Fact]
@@ -477,15 +502,16 @@ public sealed class TrimAdjustmentUiTests
 
     // -----------------------------------------------------------------------------
 
-    private static async Task<(ISessionService Service, SessionViewModel Screen, SessionView Review)> OpenAsync(
-        SessionServiceHarness h, bool enhance = false, string? source = null, WorkflowType type = WorkflowType.PrepareAsset)
+    internal static async Task<(ISessionService Service, SessionViewModel Screen, SessionView Review)> OpenAsync(
+        SessionServiceHarness h, bool enhance = false, string? source = null, WorkflowType type = WorkflowType.PrepareAsset,
+        ILocalisationService? localisation = null)
     {
         ISessionService service = h.CreateService();
         (_, SessionView review) = await TrimAdjustmentStepTests.AtTrimReviewAsync(h, service, enhance, source,
             margin: source is null ? null : TrimMargin.Tight, type: type);
         review.TrimAdjustment.ShouldNotBeNull();
         FolderPicker picker = new();
-        var screen = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation(), null, null,
+        var screen = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation(), null, localisation,
             new FinalSaveCoordinator(service, FinalSaveFixtures.Delivery(h), "tester"), picker, new RecordingDeliveredFileShell());
         Pickers.Add(screen, picker);
         screen.Open(review);

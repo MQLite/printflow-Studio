@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
+             xmlns:views="clr-namespace:PrintFlow.App.Views"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
              AutomationProperties.AutomationId="Screen.Settings"
@@ -144,6 +145,8 @@
                        TextWrapping="Wrap"
                        Margin="0,0,0,8"
                        AutomationProperties.AutomationId="Settings.Notice" />
+            <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
+            <views:NoticeErrorDetails />
 
             <StackPanel Orientation="Horizontal">
                 <Button Content="{Binding ApplyLabel}"

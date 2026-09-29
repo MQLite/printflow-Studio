@@ -433,6 +433,16 @@ public partial class SessionScreenView : UserControl
     /// </remarks>
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(SessionViewModel.NoticeErrorCode) && Model?.HasNoticeErrorCode == true)
+        {
+            // A failure from a lower control must still be visible. Only move this scrolling
+            // column, after binding/layout; never move focus or invoke an operator command.
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (Model?.HasNoticeErrorCode == true) SessionDetailsScroll.ScrollToTop();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
         if (e.PropertyName is nameof(SessionViewModel.ReviewTargetIdentity) or "" or null)
             FocusNewReview();
 

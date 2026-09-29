@@ -778,6 +778,171 @@ public sealed class LocalisationResourceTests
         }
     }
 
+    // --- SCRUM-11151: failure guidance -----------------------------------------------------
+
+    /// <summary>The six listed wrappers and the four helper strings they are shown with.</summary>
+    private static readonly string[] FailureGuidanceWrappers =
+    [
+        "Session_ActionFailed", "Home_ResumeFailed", "Home_AbandonFailed", "Home_RecoveryFailed",
+        "WorkflowSelection_Refused", "Settings_SaveFailed",
+    ];
+
+    private static readonly string[] FailureGuidanceHelpers =
+    [
+        "Session_ActionUnconfirmed", "Session_ActionFailedNext", "Session_ActionFailedNextStale", "ErrorDetails_CodeHint",
+    ];
+
+    /// <summary>The ten listed failure sentences, each shared by every producer of its code.</summary>
+    private static readonly string[] SharedFailureKeys =
+    [
+        "Failure_Timeout", "Failure_OutputMissing", "Failure_OutputUnreadable", "Failure_OutputValidationFailed",
+        "Failure_WorkspaceError", "Failure_PersistenceError", "Failure_PreconditionNotMet", "Failure_AdapterUnavailable",
+        "Failure_Cancelled", "Failure_UnknownDialog",
+    ];
+
+    public static TheoryData<string> SharedFailureSentences() => new(SharedFailureKeys);
+
+    private static IEnumerable<string> FailureGuidanceKeys() =>
+        FailureGuidanceWrappers.Concat(FailureGuidanceHelpers).Concat(SharedFailureKeys).Concat(SpecializedNoticeKeys);
+
+    private static readonly string[] SpecializedNoticeKeys =
+    [
+        "FailureNotice_RevisionIntegrityMismatch",
+        "FailureNotice_OperationFaulted",
+        "FailureNotice_MeituLaunchFailed",
+        "FailureNotice_MeituTargetLost",
+        "FailureNotice_MeituUnknownState",
+        "FailureNotice_MeituBlockingDialog",
+        "FailureNotice_MeituInterrupted",
+        "FailureNotice_PhotoshopLaunchFailed",
+        "FailureNotice_PhotoshopTargetLost",
+        "FailureNotice_PhotoshopUnknownState",
+        "FailureNotice_PhotoshopBlockingDialog",
+        "FailureNotice_PsdPreparationFailed",
+        "FailureNotice_PdfPreparationFailed",
+    ];
+
+    [Theory]
+    [InlineData("FailureNotice_RevisionIntegrityMismatch", "en", "The file changed")]
+    [InlineData("FailureNotice_RevisionIntegrityMismatch", "zh-CN", "文件在显示后发生了变化")]
+    [InlineData("FailureNotice_MeituLaunchFailed", "en", "was started")]
+    [InlineData("FailureNotice_MeituLaunchFailed", "zh-CN", "已启动")]
+    [InlineData("FailureNotice_PhotoshopLaunchFailed", "en", "was started")]
+    [InlineData("FailureNotice_PhotoshopLaunchFailed", "zh-CN", "已启动")]
+    public void A_specialized_refusal_does_not_turn_an_unconfirmed_event_into_a_fact(string key, string language, string unsupportedClaim)
+    {
+        // Integrity also covers an unreadable or already-invalid file. LaunchFailed also covers
+        // Process.Start returning no process or throwing, not just readiness after a launch.
+        ValueOf(language == "en" ? NeutralResx : ChineseResx, key)
+            .ShouldNotContain(unsupportedClaim, Case.Insensitive, key);
+    }
+
+    [Fact]
+    public void Specialized_action_notices_leave_recovery_advice_to_the_current_screen()
+    {
+        foreach (string key in SpecializedNoticeKeys)
+        {
+            foreach (string forbidden in new[] { "retry", "try again", "Run the step" })
+                ValueOf(NeutralResx, key).ShouldNotContain(forbidden, Case.Insensitive, key);
+            foreach (string forbidden in new[] { "重试", "再试", "重新执行", "重新运行" })
+                ValueOf(ChineseResx, key).ShouldNotContain(forbidden, Case.Sensitive, key);
+            if (key.EndsWith("UnknownState", StringComparison.Ordinal))
+            {
+                // These codes also arise after earlier guarded UI actions already succeeded.
+                ValueOf(NeutralResx, key).ShouldNotContain("Nothing was changed", Case.Insensitive, key);
+                ValueOf(ChineseResx, key).ShouldNotContain("未做任何更改", Case.Sensitive, key);
+            }
+        }
+    }
+
+    [Fact]
+    public void The_failure_guidance_strings_exist_in_both_languages_with_the_same_placeholders()
+    {
+        Dictionary<string, string> expected = new()
+        {
+            ["Session_ActionFailed"] = "{0}",
+            ["Session_ActionUnconfirmed"] = "{0}",
+            ["Home_ResumeFailed"] = "{0}",
+            ["Settings_SaveFailed"] = "{0}",
+        };
+
+        foreach (string key in FailureGuidanceKeys())
+        {
+            string english = ValueOf(NeutralResx, key);
+            string chinese = ValueOf(ChineseResx, key);
+            english.ShouldNotBeNullOrWhiteSpace(key);
+            chinese.ShouldNotBeNullOrWhiteSpace(key);
+            Placeholders(english).ShouldBe(expected.GetValueOrDefault(key, string.Empty), key);
+            Placeholders(chinese).ShouldBe(Placeholders(english), $"{key} has the same placeholders in both languages");
+            string.Format(System.Globalization.CultureInfo.InvariantCulture, english, "x").ShouldNotBeNullOrWhiteSpace();
+            string.Format(System.Globalization.CultureInfo.InvariantCulture, chinese, "x").ShouldNotBeNullOrWhiteSpace();
+        }
+    }
+
+    [Fact]
+    public void No_failure_guidance_sentence_carries_a_bare_code()
+    {
+        string[] codes = Enum.GetNames<PrintFlow.Domain.Results.FailureCode>();
+        foreach (string key in FailureGuidanceKeys())
+            foreach (string value in new[] { ValueOf(NeutralResx, key), ValueOf(ChineseResx, key) })
+            {
+                foreach (string code in codes)
+                    value.ShouldNotContain(code, Case.Sensitive, $"{key} names the code {code}");
+                value.ShouldNotContain("({");
+                value.ShouldNotContain("（{");
+            }
+    }
+
+    /// <summary>
+    /// A shared sentence is shown for every producer of its code: a stored step failure, a refused
+    /// command, a correction wrapper and Error Details. It may therefore name no action (the screen
+    /// adds one it actually offers) and claim nothing only some paths support.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(SharedFailureSentences))]
+    public void A_shared_failure_sentence_suggests_no_retry_and_claims_only_what_every_path_supports(string key)
+    {
+        string english = ValueOf(NeutralResx, key);
+        string chinese = ValueOf(ChineseResx, key);
+        foreach (string forbidden in new[] { "retry", "try again", "nothing was changed", "nothing changed", "unchanged",
+                     "not saved", "produced no result", "no result was produced", "all previous files", "you can" })
+            english.ShouldNotContain(forbidden, Case.Insensitive, key);
+        foreach (string forbidden in new[] { "重试", "再试", "没有做任何更改", "未做任何更改", "未保存", "没有生成", "均予保留", "你可以" })
+            chinese.ShouldNotContain(forbidden, Case.Sensitive, key);
+
+        // Design invariant §18.1, true on every path: PrintFlow never overwrites or deletes the source.
+        english.ShouldEndWith("PrintFlow never changes your original file.");
+        chinese.ShouldEndWith("PrintFlow 不会更改你的原始文件。");
+    }
+
+    [Fact]
+    public void No_failure_wrapper_or_help_line_suggests_retrying()
+    {
+        foreach (string key in FailureGuidanceWrappers.Concat(FailureGuidanceHelpers))
+        {
+            ValueOf(NeutralResx, key).ShouldNotContain("retry", Case.Insensitive, key);
+            ValueOf(ChineseResx, key).ShouldNotContain("重试", Case.Sensitive, key);
+        }
+    }
+
+    [Fact]
+    public void Every_failure_help_line_names_Error_details_and_a_colleague_or_supervisor()
+    {
+        string englishDetails = ValueOf(NeutralResx, "ErrorDetails_Heading");
+        string chineseDetails = ValueOf(ChineseResx, "ErrorDetails_Heading");
+        foreach (string key in FailureGuidanceWrappers.Where(key => key != "Session_ActionFailed")
+                     .Concat(["Session_ActionFailedNext", "Session_ActionFailedNextStale"]))
+        {
+            ValueOf(NeutralResx, key).ShouldContain(englishDetails, Case.Sensitive, key);
+            ValueOf(NeutralResx, key).ShouldContain("colleague or supervisor", Case.Sensitive, key);
+            ValueOf(ChineseResx, key).ShouldContain("“" + chineseDetails + "”", Case.Sensitive, key);
+            ValueOf(ChineseResx, key).ShouldContain("同事或主管", Case.Sensitive, key);
+        }
+    }
+
+    private static string Placeholders(string value) =>
+        string.Concat(Regex.Matches(value, @"\{\d+\}").Cast<Match>().Select(match => match.Value).Order(StringComparer.Ordinal));
+
     private static string ValueOf(string relativePath, string key)
     {
         XDocument document = XDocument.Load(Path.Combine(ShellProjectDirectory(), relativePath));

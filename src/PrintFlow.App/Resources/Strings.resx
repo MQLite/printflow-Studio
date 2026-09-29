@@ -134,10 +134,10 @@
     <value>{0} files were dropped. PrintFlow Studio processes one file per session, so nothing was started — drop a single file.</value>
   </data>
   <data name="Home_ResumeFailed" xml:space="preserve">
-    <value>That session could not be opened ({0}).</value>
+    <value>That job could not be opened. Opening a job only reads it, so nothing was changed. You can choose {0} again; if it still does not open, open Error details below and ask a colleague or supervisor.</value>
   </data>
   <data name="Home_AbandonFailed" xml:space="preserve">
-    <value>That session could not be abandoned ({0}).</value>
+    <value>That job could not be abandoned. Abandoning never deletes files, so its imported file, approved outputs and history are kept. Check the job's state in the list; if you are not sure, open Error details below and ask a colleague or supervisor.</value>
   </data>
   <data name="Home_AbandonDone" xml:space="preserve">
     <value>“{0}” was abandoned. Its imported file, approved outputs and history are kept.</value>
@@ -158,7 +158,7 @@
     <value>The workflow is locked because this session has already produced a result. To use a different workflow, end this session and import the file again.</value>
   </data>
   <data name="WorkflowSelection_Refused" xml:space="preserve">
-    <value>That workflow could not be selected ({0}).</value>
+    <value>That workflow could not be selected. No processing was started, and the output name shown is kept. You can choose a workflow again; if it is still refused, open Error details below and ask a colleague or supervisor.</value>
   </data>
   <data name="WorkflowSelection_SourceFileLabel" xml:space="preserve">
     <value>Source file</value>
@@ -237,22 +237,22 @@
   <data name="Session_LabelRevision" xml:space="preserve"><value>Revision</value></data>
   <data name="Session_ValueUnknown" xml:space="preserve"><value>Not determined</value></data>
   <data name="Session_ActionFailed" xml:space="preserve">
-    <value>That action did not complete. {0} ({1})</value>
+    <value>That action did not complete. {0}</value>
   </data>
   <data name="Failure_OutputMissing" xml:space="preserve">
-    <value>The expected result file was not produced.</value>
+    <value>A file PrintFlow expected was not found, so it could not continue. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_OutputUnreadable" xml:space="preserve">
-    <value>The result file exists but could not be read completely.</value>
+    <value>A file PrintFlow needed exists but could not be read completely, so it was not used. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_OutputValidationFailed" xml:space="preserve">
-    <value>The result file did not pass validation.</value>
+    <value>A file did not pass PrintFlow's checks, so it was not accepted. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_Timeout" xml:space="preserve">
-    <value>The operation did not finish in time.</value>
+    <value>Meitu or Photoshop did not finish in time, so PrintFlow stopped waiting. It may still be busy, so check it before you continue. No result from this attempt was accepted, and PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_Cancelled" xml:space="preserve">
-    <value>The operation was cancelled.</value>
+    <value>The operation was stopped before it finished. Part of it may already have been done, and Meitu or Photoshop, if it was in use, may still be busy, so check before you continue. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_RevisionIntegrityMismatch" xml:space="preserve">
     <value>The file changed after it was shown, so the decision was not applied. Run the step again.</value>
@@ -261,7 +261,7 @@
     <value>This workstation has not been verified for automated processing.</value>
   </data>
   <data name="Failure_AdapterUnavailable" xml:space="preserve">
-    <value>The required application is unavailable or already in use.</value>
+    <value>A program it needs was unavailable or in use by another job, or the operation stopped unexpectedly. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_OperationFaulted" xml:space="preserve">
     <value>The operation ended unexpectedly. Nothing was produced and no result was recorded. PrintFlow changed nothing in the external application; what it is showing now is unknown, so check it before retrying.</value>
@@ -270,16 +270,16 @@
     <value>The workstation preset did not match its expected signature.</value>
   </data>
   <data name="Failure_UnknownDialog" xml:space="preserve">
-    <value>An unrecognised window appeared, so automation stopped.</value>
+    <value>A window PrintFlow did not recognise appeared, so automation stopped without clicking in it. The window may still be open, so check Meitu or Photoshop before you continue. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_WorkspaceError" xml:space="preserve">
-    <value>A file operation in the workspace failed.</value>
+    <value>PrintFlow could not finish a file operation, and part of it may already have been done. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_PersistenceError" xml:space="preserve">
-    <value>Saving or reading the session record failed.</value>
+    <value>PrintFlow could not read or save the job's record, so the screen may not show its latest state. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_PreconditionNotMet" xml:space="preserve">
-    <value>This action is not possible in the session's current state.</value>
+    <value>This is not possible in the job's current state; the screen may have been out of date. PrintFlow never changes your original file.</value>
   </data>
   <data name="Failure_ManualCropRequired" xml:space="preserve">
     <value>This image has no transparent area to trim to, so it must be cropped by hand.</value>
@@ -884,7 +884,7 @@
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>Session completed. File cleanup is pending and will be retried when PrintFlow starts again. Approved outputs are retained.</value></data>
   <data name="Home_RecoveryDescription" xml:space="preserve"><value>{0} · Interrupted at {1} · {2} · Last activity: {3}</value></data>
-  <data name="Home_RecoveryFailed" xml:space="preserve"><value>Recovery could not be completed ({0}). The job remains available for inspection.</value></data>
+  <data name="Home_RecoveryFailed" xml:space="preserve"><value>The recovery action could not be completed. Part of it may already have been recorded (for example, the job may now be handed off), so do not repeat it straight away. Open the job from the list to check its current state; if you are not sure, open Error details below and ask a colleague or supervisor.</value></data>
   <data name="Home_RecoveryHeading" xml:space="preserve"><value>Recovery needed</value></data>
   <data name="Home_RecoveryManualResult" xml:space="preserve"><value>Import manual result</value></data>
   <data name="Home_RecoveryNoActions" xml:space="preserve"><value>No recovery action available.</value></data>
@@ -923,7 +923,7 @@
   <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>Enter the number of days to keep local records, from 1 to {0}. Nothing was saved.</value></data>
   <data name="Settings_Apply" xml:space="preserve"><value>Apply</value></data>
   <data name="Settings_Saved" xml:space="preserve"><value>Settings saved.</value></data>
-  <data name="Settings_SaveFailed" xml:space="preserve"><value>The settings could not be saved ({0}). Nothing was changed.</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>The settings could not be saved. Nothing was changed: the previous settings still apply and your entries are still shown. You can choose {0} again; if it fails again, open Error details below and ask a colleague or supervisor.</value></data>
   <data name="Settings_LoadFailed" xml:space="preserve"><value>The saved settings could not be read ({0}). The values shown are the defaults.</value></data>
   <data name="ErrorDetails_Heading" xml:space="preserve"><value>Error details</value></data>
   <data name="ErrorDetails_WhatHappened" xml:space="preserve"><value>What happened</value></data>
@@ -1270,4 +1270,21 @@
   <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>At this size the picture would have to be enlarged, so the print may look soft or blurry. If you confirm this size, you will be asked whether to accept that.</value></data>
   <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>At this size the picture has to be enlarged, so the print may look soft or blurry. Choose {0} to pick a smaller size, which needs less enlarging, or {1} to accept this. While this size needs enlarging, {2} stays unavailable until you accept.</value></data>
   <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>Technical details (pixels and PPI)</value></data>
+  <data name="Session_ActionUnconfirmed" xml:space="preserve"><value>PrintFlow could not confirm whether that action completed. {0}</value></data>
+  <data name="Session_ActionFailedNext" xml:space="preserve"><value>The status at the top of the screen shows what you can do now. If you are not sure, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="Session_ActionFailedNextStale" xml:space="preserve"><value>The screen could not be updated afterwards. Before doing anything else, open Error details below and ask a colleague or supervisor.</value></data>
+  <data name="ErrorDetails_CodeHint" xml:space="preserve"><value>Quote this code when you ask for help.</value></data>
+  <data name="FailureNotice_RevisionIntegrityMismatch" xml:space="preserve"><value>PrintFlow could not confirm that the file still matches the recorded result, so the decision was not applied.</value></data>
+  <data name="FailureNotice_OperationFaulted" xml:space="preserve"><value>The operation ended unexpectedly. No validated result was recorded. PrintFlow left the external application untouched when the operation stopped; its current state is unknown.</value></data>
+  <data name="FailureNotice_MeituLaunchFailed" xml:space="preserve"><value>Meitu could not be started or did not become ready.</value></data>
+  <data name="FailureNotice_MeituTargetLost" xml:space="preserve"><value>Meitu's verified window or foreground changed, so no further input was sent.</value></data>
+  <data name="FailureNotice_MeituUnknownState" xml:space="preserve"><value>PrintFlow could not confirm Meitu's state. Some work may already have been done.</value></data>
+  <data name="FailureNotice_MeituBlockingDialog" xml:space="preserve"><value>A message window is open in Meitu. PrintFlow will not close it for you.</value></data>
+  <data name="FailureNotice_MeituInterrupted" xml:space="preserve"><value>Meitu processing was interrupted. Meitu may still be running; check its screen.</value></data>
+  <data name="FailureNotice_PhotoshopLaunchFailed" xml:space="preserve"><value>Photoshop could not be started or did not become ready.</value></data>
+  <data name="FailureNotice_PhotoshopTargetLost" xml:space="preserve"><value>Photoshop's verified window or foreground changed, so no further input was sent.</value></data>
+  <data name="FailureNotice_PhotoshopUnknownState" xml:space="preserve"><value>PrintFlow could not confirm Photoshop's state. Some work may already have been done.</value></data>
+  <data name="FailureNotice_PhotoshopBlockingDialog" xml:space="preserve"><value>A message window is open in Photoshop. PrintFlow will not close it for you.</value></data>
+  <data name="FailureNotice_PsdPreparationFailed" xml:space="preserve"><value>Photoshop could not produce a verified raster from this PSD. The source is preserved.</value></data>
+  <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available.</value></data>
 </root>
