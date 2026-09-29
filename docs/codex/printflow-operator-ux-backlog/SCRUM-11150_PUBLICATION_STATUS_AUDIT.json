@@ -1,0 +1,127 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11150-impl-v1",
+  "planningId": "PF-OPUX-v1-print-size-plain-guidance",
+  "authority": "printflow-remediation-prompts/PrintFlowStudio_SCRUM11150_Print_Size_Guidance_Implementation_Prompt_v1.md, submitted by the owner on 2026-09-29 with authorization for implementation, verification, independent review, in-scope fixes, direct master publication and SCRUM-11150-only Jira updates",
+  "routing": {
+    "policy": "Claude adaptation v1.2 of policy v2.4",
+    "routeOffset": 0,
+    "requested": "latest Opus / High",
+    "actualModel": "claude-opus-5-5",
+    "actualEffort": "UNVERIFIED",
+    "sonnetUnits": 0,
+    "subagents": [
+      { "role": "independent read-only reviewer", "definition": "personal-dev-reviewer (model: opus)", "rounds": 2, "actualModel": "UNVERIFIED", "ranTests": false }
+    ]
+  },
+  "git": {
+    "repository": "D:/Repositories/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "startingLocalHead": "fe38160796e39af5dd511cacf676778e9c3bee16",
+    "startingOriginMaster": "fe38160796e39af5dd511cacf676778e9c3bee16",
+    "startingWorktree": "only the pre-existing SCRUM-11149 local audit residue (docs/codex/printflow-operator-ux-backlog/SCRUM-11149_PUBLICATION_STATUS_AUDIT.json), preserved and never staged",
+    "remoteAdvancedBeforePush": false,
+    "hooksAndAutomation": "no .github/workflows and no active git hooks; a master push triggers no deployment or migration",
+    "codeCommit": {
+      "sha": "03da756f6b021cce809b8591229b0c605ebe1f55",
+      "subject": "feat: SCRUM-11150 plain print-size guidance with a live summary",
+      "paths": 12,
+      "url": "https://github.com/MQLite/printflow-Studio/commit/03da756f6b021cce809b8591229b0c605ebe1f55",
+      "stagedEqualsTestedCandidate": "staged set equals the explicit manifest; worktree bytes re-verified against candidate-03 hashes before commit; product assemblies of candidate 03 identical to settled-02 (only PrintFlow.Tests.dll differs)",
+      "stagedScan": "no binaries, credentials, tokens, emails, accountIds or workstation user paths",
+      "containsPriorWork": "descends from 6cbde81 (SCRUM-11149 code) and fe38160 (SCRUM-11149 docs)"
+    },
+    "push": { "command": "git push origin master", "output": "fe38160..03da756  master -> master", "force": false, "exitCode": 0 },
+    "verification": {
+      "fetchOriginMaster": "03da756f6b021cce809b8591229b0c605ebe1f55",
+      "lsRemote": "03da756f6b021cce809b8591229b0c605ebe1f55",
+      "githubApiHead": "03da756f6b021cce809b8591229b0c605ebe1f55"
+    },
+    "result": "MASTER_PUSH_VERIFIED",
+    "documentationCommit": "created after this audit was written; its SHA and the final remote tip are recorded in the local final copy of this audit and in the final report, to avoid a self-referential commit"
+  },
+  "change": {
+    "product": [
+      "PrintDimensionsPreflight: additive read-only PrintSizeGovernor enum and init-only Governor, GoverningEdge, SelectedTargetEdge (constructor unchanged, never persisted)",
+      "SessionService.PreflightFrom: copies those facts from the plan it already projects (bounds RequiresShrink + LimitingEdge, or target Projection.SelectedTargetEdge + PhotoshopTargetEdge)",
+      "SessionViewModel.PrintDimensions: mode help, live summary, draft enlargement note, plain enlargement warning, inline custom-size validation; rows rebuilt on a language change without a query",
+      "SessionScreenView.xaml: guidance in the details column only; technical pixel/PPI/edge/scale facts under collapsed Technical details",
+      "Strings: 15 Session_Size* keys (en/zh-CN); Session_PreflightHeading and zh-CN Session_PreflightPrintSize use 印刷尺寸 terminology",
+      "docs/printflow/operator-ux-terminology.md: one Print size guidance row"
+    ],
+    "unchanged": "fitting maths, the fixed 300 PPI rule, enlargement offer identity/expiry/reset, command gating, stale-response guard, presets, approval/delivery/correction, persistence, asset route"
+  },
+  "verification": {
+    "sdk": "%LOCALAPPDATA%/Microsoft/dotnet/dotnet.exe 10.0.400",
+    "testFirst": "tests were written alongside the implementation, not strictly before it; two deliberate mutations (swapped limit-edge sentence; target edge forced to Width) failed 4 tests and were restored byte-for-byte",
+    "steps": [
+      { "step": "baseline layout probe on the unchanged product", "passed": 16, "failed": 0 },
+      { "step": "affected sizing/preflight/workflow/resource suites incl. MaximumBoundsUiTests and FlexibleSizeUiTests (candidate 01)", "passed": 264, "failed": 0, "skipped": 0 },
+      { "step": "workflow/persistence group, SCRUM-11148 final filter (candidate 01; justified by the SessionService read-path change)", "passed": 11531, "failed": 0, "skipped": 0 },
+      { "step": "dotnet build PrintFlowStudio.sln --no-incremental (candidate 02)", "exitCode": 0, "result": "0 warnings, 0 errors" },
+      { "step": "architecture (candidate 02)", "passed": 452, "failed": 0, "skipped": 0 },
+      { "step": "combined-ui, SCRUM-11148 corrected safe filter (candidate 02)", "passed": 601, "failed": 0, "skipped": 0 },
+      { "step": "PrintSizeGuidance* with renders (candidate 02)", "passed": 47, "failed": 0, "skipped": 0 },
+      { "step": "PrintSizeGuidance* + FlexibleSizeUiTests + MaximumBoundsUiTests (candidate 03, test-only assertion added)", "passed": 88, "failed": 0, "skipped": 0 },
+      { "step": "Test-JiraExportIntegrity.ps1 (with the extended exporter)", "exitCode": 0, "passed": 18, "failed": 0 }
+    ],
+    "countsOverlap": true,
+    "exclusions": "unchanged from SCRUM-11148/11149: real-window/UIA UI classes (incl. PrintDimensionsPreflightUiTests) and ApplicationStartup classes (shared live-operator desktop), ProductionCompositionTests (production DI prohibited); ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment stays excluded and NOT PASS",
+    "renders": "20 off-screen layouts (5 states x en/zh-CN x 1000x700/1920x1040, 96 DPI) and 28 captures; preview area identical to the fe38160 baseline in all 20; no clipped line in the size sections; every guidance element reachable by scrolling; enlargement warning outside the details",
+    "independentReview": "CLOSED after two rounds, no open P0-P2; P3-2 and P3-4/P3-7 fixed; residuals P3-1 (a parsable number the Domain refuses shows no inline hint), P3-3 (scaling other than 96 DPI not run), P3-5 (zh-CN 打印尺寸/打印准备 still in older labels on this screen)"
+  },
+  "jira": {
+    "site": "https://yituoxx.atlassian.net",
+    "issue": { "id": "10880", "key": "SCRUM-11150", "parent": "SCRUM-11139" },
+    "transitionsDiscovered": { "11": "To Do", "21": "In Progress", "31": "In Review", "41": "Done" },
+    "transitions": [
+      { "order": 1, "id": "21", "statusBefore": "To Do", "statusAfter": "In Progress", "when": "before implementation", "readback": "In Progress (10001), updated 2026-09-29T13:53:57.381+1300" },
+      { "order": 2, "id": "31", "statusBefore": "In Progress", "statusAfter": "In Review", "when": "after MASTER_PUSH_VERIFIED of 03da756 and the evidence comment", "readback": "In Review in the final initiative readback, updated 2026-09-29T14:56:54.932+1300" }
+    ],
+    "doneNotSet": "AC6 needs the human bilingual check at the supported workstation's own scaling, and the novice walkthrough (SCRUM-11155) is open; no human acceptance or waiver was provided",
+    "comment": { "id": "10184", "marker": "PF-OPUX-v1-SCRUM-11150-impl-v1", "created": "2026-09-29T14:56:34.479+1300", "markerCountAfter": 1, "preReadMarkerCount": 0 },
+    "otherIssues": "read-only; no transition, comment or field change",
+    "finalReadback": {
+      "readAt": "2026-09-29T01:57:19.864Z",
+      "jql": "project = SCRUM AND labels = pf-opux-v1 ORDER BY key ASC",
+      "pages": 1,
+      "isLast": true,
+      "issues": 17,
+      "blocksLinks": 26,
+      "stringLabels": 51,
+      "commentsComplete": true,
+      "rawEvidence": "artifacts/pf-opux-scrum11150/jira-final-readback-raw.json (local only)",
+      "rawSha256": "105a211813c66125f03964343b84348d355c6d968767bd4e81642d7c45d152dd",
+      "snapshot": "docs/codex/printflow-operator-ux-backlog/SCRUM-11150_JIRA_READBACK.json (gitignored: carries Atlassian account metadata)",
+      "snapshotSha256": "ef329e269206993be31ba05287bd72d9f3e29a913e11af7046db4545ee405491"
+    },
+    "driftAgainstSCRUM11149Snapshot": {
+      "SCRUM-11150": "status To Do -> In Review, updated, new comment 10184",
+      "SCRUM-11154/11155": "issuelinks differ only in the embedded SCRUM-11150 status (relationship drift beyond nested status = 0)",
+      "others": "no field change; all prior comments preserved byte-for-byte"
+    },
+    "csv": {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11150_JIRA_FINAL.csv",
+      "sha256": "ae8b1bd2f4bfe7257b9258edbc3c2caad2914974b11f8227c380128387812d9f",
+      "columns": 23,
+      "headerIdenticalToPrevious": true,
+      "utf8Bom": true,
+      "exactTimestamps": 34,
+      "exporter": "PASS",
+      "independentOracle": "PASS (raw -> snapshot -> CSV, 0 failures)",
+      "privacyScan": "no account IDs, emails, display names or avatars",
+      "writeActions": { "SCRUM-11150": "STATUS_TRANSITION_AND_COMMENT", "others": "READ_ONLY" },
+      "exporterChange": "Export-Wave1Jira.ps1: one task mapping for PF-OPUX-v1-SCRUM-11150-impl-v1"
+    }
+  },
+  "remainingAcceptance": [
+    "human bilingual visual check on the supported workstation at its own scaling (AC6), and physical input",
+    "novice walkthrough (SCRUM-11155)"
+  ],
+  "notPerformed": [
+    "deployment, production migration, production startup or DI composition",
+    "customer files, visible windows, UIA or desktop input",
+    "force-push, history rewrite, feature branch or PR",
+    "SCRUM-11151 or later work; any change to other initiative issues"
+  ]
+}

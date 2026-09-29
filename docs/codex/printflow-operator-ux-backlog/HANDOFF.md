@@ -1,3 +1,56 @@
+# PF-OPUX-v1 — SCRUM-11150 current handoff
+
+2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11150-impl-v1`. **Implementation, verification, independent review, MASTER_PUSH_VERIFIED and Jira synchronization COMPLETE. SCRUM-11150 is In Review; human acceptance NOT RUN. Stop; SCRUM-11151 not started.**
+
+**Delivered.** Plain print-size guidance on the two TIFF routes, in the right-hand details column:
+- a "choose this when" line beside each existing choice (a preset is a maximum and is never enlarged; Custom size fixes one chosen side, Long edge = the longer side of this picture);
+- a live sentence in "Print size check / 印刷尺寸核对": the whole picture's approximate millimetres, what decided them and that proportions are kept, formatted from the shown preflight; drafts say "would";
+- the enlargement offer in plain words beside the same buttons and gating;
+- the existing custom-size validation under the input;
+- unchanged pixel, PPI, edge and scale facts under collapsed "Technical details".
+
+The deciding edge comes from a new read-only projection on `PrintDimensionsPreflight` (`Governor`, `GoverningEdge`, `SelectedTargetEdge`), copied in `SessionService.PreflightFrom` from the plan it already projects. No second calculator, no persistence, no change to fitting, 300 PPI, offers or gating.
+
+**Git**
+- Before: local = `origin/master` = `fe38160796e39af5dd511cacf676778e9c3bee16`; only the SCRUM-11149 local audit residue was modified, and it stays unstaged.
+- Code commit `03da756f6b021cce809b8591229b0c605ebe1f55` (12 paths), fast-forward push, verified by fetch, `ls-remote` and the GitHub API.
+- A docs-only commit follows with this HANDOFF, the plan, the CSV, the audit and the one-mapping exporter change. Its SHA is recorded in the local audit copy and in the final report, not here.
+
+**Verification**
+- New tests 47/47 (tests written alongside the code; two deliberate mutations caught and restored).
+- Affected sizing/preflight/workflow/resource suites 264/264, incl. MaximumBoundsUiTests and FlexibleSizeUiTests.
+- Settled candidate: clean build 0/0; architecture 452/452; combined UI 601/601; workflow/persistence 11531/11531. Counts overlap.
+- Exclusions and the NOT PASS baseline recovery hang are unchanged.
+- 20 off-screen layouts at 96 DPI: the preview area is identical to the baseline in all 20.
+
+**Independent review.** One fresh read-only reviewer, two rounds, CLOSED with no P0–P2. Residuals:
+- a number that parses but that the Domain refuses shows no inline hint;
+- scaling other than 96 DPI was not run;
+- zh-CN 打印尺寸/打印准备 remain in older labels on this screen.
+
+**Jira**
+- SCRUM-11150 transitions 21 (→ In Progress) and 31 (→ In Review); comment 10184.
+- Final readback 2026-09-29T01:57:19.864Z: 17 issues, 26 Blocks, 51 labels, 34 timestamps; expected drift only.
+- [CSV](SCRUM-11150_JIRA_FINAL.csv) (23 columns, BOM, exporter and oracle PASS, integrity 18/18) and [audit](SCRUM-11150_PUBLICATION_STATUS_AUDIT.json).
+- Other issues were read-only.
+
+**Remaining acceptance**
+- Human bilingual workstation check at its own scaling (AC6) and physical input; checklist in [SCRUM-11150_PLAN.md](SCRUM-11150_PLAN.md).
+- Novice walkthrough (SCRUM-11155).
+- All earlier open checks listed below remain open.
+
+**Where things are**
+- Public: [plan and AC map](SCRUM-11150_PLAN.md), CSV, audit, code commit.
+- Local only:
+  - `artifacts/pf-opux-scrum11150/` (RESULTS.md, review record, logs/TRX, renders, raw readback);
+  - `SCRUM-11150_JIRA_READBACK.json` (account metadata; gitignored).
+
+**Routing.** Claude adaptation v1.2 of policy v2.4, `route_offset: 0`, Opus High. Host model `claude-opus-5-5`, effort UNVERIFIED. No Sonnet unit; one reviewer subagent (definition `opus`, runtime UNVERIFIED).
+
+Prior handoff bytes are preserved verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11149 current handoff
 
 2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11149-impl-v1`. **Implementation, verification, independent review, MASTER_PUSH_VERIFIED and Jira synchronization COMPLETE. SCRUM-11149 is In Review; human acceptance NOT RUN. Stop; SCRUM-11150 not started.**
