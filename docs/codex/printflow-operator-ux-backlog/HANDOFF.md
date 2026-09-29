@@ -1,3 +1,46 @@
+# PF-OPUX-v1 — SCRUM-11151 current handoff
+
+2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11151-impl-v1`. **Implementation, final verification, independent review, code MASTER_PUSH_VERIFIED and Jira synchronization complete. SCRUM-11151 is In Review; owner bilingual copy review remains OPEN. Stop at 11151.**
+
+Delivered: all 16 scoped failure keys in en/zh-CN, four helper strings and 13 notice-only specialised variants. Main notices describe known/uncertain outcomes without unconditional Retry; exact originating codes sit in adjacent read-only Error details disclosures. Trim/language retention, correction prepare/import, alternate actions and successive Error Details failures are covered. Guidance uses the existing right scroller; preview/crop dimensions and business commands remain unchanged.
+
+**Publication and verification**
+
+- Code: [924281d22974f1693900052851f05c7ddfda750a](https://github.com/MQLite/printflow-Studio/commit/924281d22974f1693900052851f05c7ddfda750a), 30 paths, normal fast-forward push from `91a21ea`; fetch, ls-remote and authenticated GitHub verification agree.
+- Final clean build: 0 warnings/errors; architecture 473/473; corrected safe UI/resource set 681/681; 0 failures/skips. Focused/intermediate counts overlap.
+- 36 synthetic off-screen renders: 9 contexts × both languages × 1000×700/1920×1040, 96 DPI. Every materially different family inspected in both languages. Expanded/collapsed disclosures retain baseline preview geometry.
+- Fresh independent read-only review and same-context fix recheck: closed for this bounded implementation. Latest P2 (old package failure masking the next failure) fixed after six behavioral RED cases; affected suite 42/42. Reviewer reran no tests.
+- This six-path docs commit follows the code commit. Its verified SHA/final tip is recorded only in the local final audit and execution report.
+
+**Jira and export**
+
+- Original Claude session moved To Do → In Progress; continuation moved In Progress → In Review after verified code publication.
+- Single evidence comment `10185`; marker `PF-OPUX-v1-SCRUM-11151-impl-v1`.
+- Final read `2026-09-29T05:11:42.773Z`: 17 issues, 26 Blocks, 51 string labels, 34 exact timestamps. Complete comments, one marker. Only this issue and its nested linked status changed; prior comments and relationships preserved.
+- [CSV](SCRUM-11151_JIRA_FINAL.csv): exact 23-column schema, UTF-8 BOM; exporter and independent fidelity oracle PASS. Other 16 issues READ_ONLY.
+
+**Open acceptance and limits**
+
+- Owner must review the actual [bilingual copy table](SCRUM-11151_COPY_REVIEW.md); no acceptance/waiver inferred from the implementation brief.
+- Adjacent disclosures show the exact code; they do not navigate to the attempt-bound full diagnostic page. This precise AC1 gap remains documented.
+- Full specialised attempt Description retains legacy advice/claims outside the bounded notice variants. This is not claimed fixed or waived.
+- No live workstation/scaling or physical-input acceptance. Real-window/UIA, ApplicationStartup and ProductionComposition stay excluded. The known hanging recovery test remains excluded and NOT PASS.
+- Nonblocking English button-label quotes, Home refresh/notice ordering and retained disclosure state remain. Earlier 11150 Domain-invalid sizing inline-hint residual and all earlier open checks remain.
+- No deployment, production startup/data changes, desktop interaction, other-issue writes or 11152+ work.
+
+**Evidence and routing**
+
+Public: [source/claim matrix and AC map](SCRUM-11151_PLAN.md), [copy review](SCRUM-11151_COPY_REVIEW.md), CSV and [audit](SCRUM-11151_PUBLICATION_STATUS_AUDIT.json).
+Local only: `artifacts/pf-opux-scrum11151/` (RESULTS, raw responses, review records, logs/TRX, layout/renders); `SCRUM-11151_JIRA_READBACK.json` (account metadata, ignored).
+
+Policy 2.4, route_offset 0. Approved Claude plan continued. UI-fix and independent-review native subagents requested/accepted Astra High; actual runtime metadata UNVERIFIED. Coordinator normal route Sol Medium; MODEL_SWITCH_UNAVAILABLE, no claimed live downgrade. No global configuration changed.
+
+Prior 11149/11150 audit residues are preserved byte-for-byte and never staged. After docs publication, one deliberate local 11151 final-audit residue records the docs SHA; do not fold these residues into later work.
+
+Prior handoff bytes are preserved verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11150 current handoff
 
 2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11150-impl-v1`. **Implementation, verification, independent review, MASTER_PUSH_VERIFIED and Jira synchronization COMPLETE. SCRUM-11150 is In Review; human acceptance NOT RUN. Stop; SCRUM-11151 not started.**

@@ -1,0 +1,216 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11151-impl-v1",
+  "planningId": "PF-OPUX-v1-failure-next-step-copy",
+  "authority": "Owner's original Claude implementation brief explicitly authorizes implementation, verification, review/fixes, direct master publication and SCRUM-11151-only Jira writes; continued at the owner's request.",
+  "routing": {
+    "policy": "development-routing.md v2.4",
+    "routeOffset": 0,
+    "context": "CONTINUE inherited approved implementation",
+    "coordinatorNormalRoute": "Sol Medium",
+    "liveSwitch": "MODEL_SWITCH_UNAVAILABLE",
+    "actualModel": "UNVERIFIED",
+    "actualEffort": "UNVERIFIED",
+    "subagents": [
+      {
+        "role": "UI fixes",
+        "requestedAccepted": "gpt-6-astra High",
+        "actualRuntime": "UNVERIFIED"
+      },
+      {
+        "role": "fresh independent read-only review; same context for corrections",
+        "requestedAccepted": "gpt-6-astra High",
+        "actualRuntime": "UNVERIFIED",
+        "ranTests": false
+      }
+    ]
+  },
+  "git": {
+    "repository": "MQLite/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "startingHead": "91a21ea39c93c227a1ad980150dafc21b067e4c5",
+    "preservedPriorResidues": {
+      "SCRUM-11149_PUBLICATION_STATUS_AUDIT.json": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "SCRUM-11150_PUBLICATION_STATUS_AUDIT.json": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD"
+    },
+    "hooksAndAutomation": "No active git hooks, no custom hooks path and no .github directory. No deployment performed.",
+    "codeCommit": {
+      "sha": "924281d22974f1693900052851f05c7ddfda750a",
+      "url": "https://github.com/MQLite/printflow-Studio/commit/924281d22974f1693900052851f05c7ddfda750a",
+      "paths": 30,
+      "tree": "cb617e7d71d5529da5291e11e680f8f536474c27",
+      "candidateIdentity": "Reviewed final manifest/hashes match staged and committed tree; no product changes after final tests",
+      "publication": "MASTER_PUSH_VERIFIED",
+      "push": "91a21ea..924281d master -> master; normal fast-forward",
+      "verification": [
+        "fetch origin master exact SHA",
+        "ls-remote exact SHA",
+        "authenticated GitHub commit readback exact SHA"
+      ],
+      "privacyScan": "No binary/private artifacts, credentials, tokens, emails, account IDs or workstation user paths in added staged lines"
+    },
+    "documentationCommit": {
+      "status": "PENDING_AT_DOCUMENT_CREATION",
+      "intendedPaths": 6,
+      "note": "After docs push, its SHA and final remote tip are recorded only in the local final audit and final report, avoiding a self-referential commit loop."
+    }
+  },
+  "change": {
+    "listedKeys": 16,
+    "helperKeys": 4,
+    "noticeOnlySpecialisedKeys": 13,
+    "locales": [
+      "en",
+      "zh-CN"
+    ],
+    "copyReview": "SCRUM-11151_COPY_REVIEW.md",
+    "behavior": "Truthful main failure sentences; exact originating codes in adjacent read-only disclosures; current-state next steps; trim/language, correction, alternate-entry and sequential notice coverage; guidance in existing right scroller preserves preview/crop geometry",
+    "unchanged": "FailureCode, stored diagnostic identity, engine commands/retry eligibility, persistence, file operations, fitting, approval and production behavior"
+  },
+  "verification": {
+    "build": {
+      "command": "dotnet build PrintFlowStudio.sln --no-incremental --nologo",
+      "warnings": 0,
+      "errors": 0,
+      "exitCode": 0
+    },
+    "architecture": {
+      "passed": 473,
+      "failed": 0,
+      "skipped": 0
+    },
+    "safeCombinedUi": {
+      "passed": 681,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focusedReviewFix": {
+      "behavioralRedFailures": 6,
+      "greenPassed": 42,
+      "initialFixtureDefect": "Not counted as behavioral RED"
+    },
+    "countsOverlap": true,
+    "testFirst": "Inherited Claude implementation/mutations are not retroactively described as test-first; new continuation fixes have focused behavioral failures before their fixes.",
+    "renders": {
+      "count": 36,
+      "contexts": 9,
+      "locales": [
+        "en",
+        "zh-CN"
+      ],
+      "viewports": [
+        "1000x700",
+        "1920x1040"
+      ],
+      "dpi": 96,
+      "inspection": "Every materially different touched layout family inspected in both languages; code reaches viewport; expanded/collapsed disclosure preserves baseline picture height",
+      "normalPreviewHeights": [
+        453.48,
+        793.48
+      ],
+      "trimPreviewHeights": [
+        451.48,
+        791.48
+      ]
+    },
+    "independentReview": {
+      "result": "CLOSED for bounded implementation; no further actionable findings after same-context correction review",
+      "reviewerRanTests": false,
+      "condition": "Final settled verification passed before publication"
+    },
+    "exclusions": [
+      "Real-window/UIA and interactive fixtures; ApplicationStartup and ProductionComposition",
+      "ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment remains excluded and NOT PASS",
+      "Historical 11531 workflow/persistence group and native delivery groups not rerun: backend unchanged"
+    ],
+    "localEvidence": "artifacts/pf-opux-scrum11151/codex-continuation/ (final-build, final-architecture, final-combined-ui logs/TRX; final-renders/final-layout; INDEPENDENT_REVIEW.md; frozen manifests and hashes)"
+  },
+  "jira": {
+    "site": "https://yituoxx.atlassian.net",
+    "issue": {
+      "id": "10881",
+      "key": "SCRUM-11151",
+      "parent": "SCRUM-11139"
+    },
+    "transitionsDiscovered": {
+      "11": "To Do",
+      "21": "In Progress",
+      "31": "In Review",
+      "41": "Done"
+    },
+    "transitions": [
+      {
+        "executor": "original Claude session",
+        "id": "21",
+        "before": "To Do",
+        "after": "In Progress",
+        "readbackUpdated": "2026-09-29T16:29:48.552+1300"
+      },
+      {
+        "executor": "Codex continuation, after verified code publication and evidence comment",
+        "id": "31",
+        "before": "In Progress",
+        "after": "In Review",
+        "readbackUpdated": "2026-09-29T18:11:22.295+1300"
+      }
+    ],
+    "finalStatus": "In Review",
+    "comment": {
+      "id": "10185",
+      "marker": "PF-OPUX-v1-SCRUM-11151-impl-v1",
+      "created": "2026-09-29T18:11:13.746+1300",
+      "preReadMarkerCount": 0,
+      "finalMarkerCount": 1
+    },
+    "otherIssues": "Read-only; no comments, transitions or field updates",
+    "readback": {
+      "readAt": "2026-09-29T05:11:42.773Z",
+      "pages": 1,
+      "isLast": true,
+      "issues": 17,
+      "blocksLinks": 26,
+      "stringLabels": 51,
+      "exactTimestamps": 34,
+      "commentsComplete": true,
+      "rawEvidence": "artifacts/pf-opux-scrum11151/codex-continuation/jira-final-raw.json",
+      "rawSha256": "C16907327257A2EF6DDD0CC3BF978B78700FE0B9E1CE8D3AFC02F9620BD4185B",
+      "snapshot": "SCRUM-11151_JIRA_READBACK.json (local only; gitignored account metadata)",
+      "snapshotSha256": "BE6713F373893471F7FC86B02BC81D67B97A95E27B9DD6D017BD8E9B639C3F92"
+    },
+    "drift": "Only SCRUM-11151 status/updated/new comment, plus embedded linked SCRUM-11151 status on 11154/11155. No relationship/description/AC/label/parent/prior-comment changes.",
+    "csv": {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11151_JIRA_FINAL.csv",
+      "sha256": "91C13D2A0B672F9B4E2BF6214B06F068E9FC8B7C1A39C20A7AAA37607BE5514D",
+      "columns": 23,
+      "utf8Bom": true,
+      "exporter": "PASS",
+      "independentFidelityOracle": "PASS; zero failures",
+      "writeActions": {
+        "SCRUM-11151": "STATUS_TRANSITION_AND_COMMENT",
+        "others": "READ_ONLY"
+      },
+      "exporterChange": "One task-marker mapping; no schema change",
+      "privacyScan": "Verified before documentation commit"
+    }
+  },
+  "remainingAcceptance": [
+    "Owner bilingual copy review OPEN; no acceptance or waiver inferred",
+    "Synthetic 96 DPI layout checks do not constitute live workstation/scaling or physical-input acceptance",
+    "In-place disclosure exposes exact code, not navigation to full attempt-bound diagnostics; precise AC1 gap recorded",
+    "Unchanged specialised full attempt Description can retain legacy retry advice or preservation claims; outside bounded notice variants, not fixed or waived"
+  ],
+  "nonblockingResiduals": [
+    "English Home button labels unquoted in prose",
+    "Home refresh/notice ordering and retained disclosure expansion state",
+    "SCRUM-11150 Domain-invalid size missing inline hint unchanged"
+  ],
+  "notPerformed": [
+    "Deployment, production startup/DI, migration, customer data or real desktop/UIA",
+    "Force push, history rewrite, new branch or PR",
+    "Other-issue writes, SCRUM-11152+ implementation, global rules/memory changes"
+  ],
+  "handoffHistory": {
+    "priorSha256": "BF7F3DDDE9FA896F33155550ADF98E30F814958149E1F8A0E43CAD6512E549C7",
+    "preservation": "Prior bytes retained verbatim after the new dated section"
+  }
+}
