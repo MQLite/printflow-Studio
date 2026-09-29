@@ -256,7 +256,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
 
         IsBusy = true;
-        long? observation = null;
+        ReadinessObservation? captured = null;
         try
         {
             SelectedLanguage = OptionFor(_localisation.Current);
@@ -280,15 +280,18 @@ public sealed partial class SettingsViewModel : ObservableObject
             // first reading of a run hashes the accepted installations and the evidence chain.
             // Recorded for Home too, so a newer answer taken here is never hidden behind an older
             // one taken on the readiness screen (SCRUM-11152).
-            observation = _observations.Begin();
+            captured = _observations.Current;
             EnvironmentReadinessReport report =
                 await Task.Run(_diagnostics.Read, cancellationToken).ConfigureAwait(true);
-            _observations.Complete(observation.Value, report);
             Apply(report);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (captured is not null) _observations.AbandonIfUnchanged(captured);
+            throw;
         }
         finally
         {
-            if (observation is { } started) _observations.Abandon(started);
             IsBusy = false;
         }
     }

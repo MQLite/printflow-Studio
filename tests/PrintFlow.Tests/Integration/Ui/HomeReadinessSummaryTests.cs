@@ -196,6 +196,7 @@ public sealed class HomeReadinessSummaryTests
     {
         ScriptedDiagnostics diagnostics = new(Passed);
         using HomeScreenHarness h = new();
+        diagnostics.Observations = h.Readiness;
         EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation(), h.Readiness);
         await screen.OpenAsync(CancellationToken.None);
         await h.Home.RefreshCommand.ExecuteAsync(null);
@@ -238,6 +239,7 @@ public sealed class HomeReadinessSummaryTests
     {
         ScriptedDiagnostics diagnostics = new(Passed) { HoldLiveCheck = true, CancelReturnsReport = cancelReturnsReport };
         using HomeScreenHarness h = new();
+        diagnostics.Observations = h.Readiness;
         EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation(), h.Readiness);
         await screen.OpenAsync(CancellationToken.None);
 
@@ -266,9 +268,9 @@ public sealed class HomeReadinessSummaryTests
     public async Task A_slow_earlier_pass_completing_after_a_newer_failure_does_not_come_back()
     {
         using HomeScreenHarness h = new();
-        HeldReadDiagnostics slow = new(Passed);
+        HeldReadDiagnostics slow = new(Passed) { Observations = h.Readiness };
         EnvironmentReadinessViewModel first = new(slow, new RecordingNavigation(), h.Readiness);
-        EnvironmentReadinessViewModel second = new(new ScriptedDiagnostics(Failed), new RecordingNavigation(), h.Readiness);
+        EnvironmentReadinessViewModel second = new(new ScriptedDiagnostics(Failed) { Observations = h.Readiness }, new RecordingNavigation(), h.Readiness);
 
         Task earlier = first.OpenAsync(CancellationToken.None);
         slow.Entered.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
@@ -308,7 +310,7 @@ public sealed class HomeReadinessSummaryTests
     public async Task A_settings_reading_is_recorded_like_any_other_observation()
     {
         using SettingsScreenHarness settings = new();
-        await settings.OpenAsync(diagnostics: new ScriptedDiagnostics(Failed));
+        await settings.OpenAsync(diagnostics: new ScriptedDiagnostics(Failed) { Observations = settings.Observations });
 
         settings.Observations.Current.Report.ShouldBeSameAs(Failed);
     }
@@ -343,6 +345,7 @@ public sealed class HomeReadinessSummaryTests
 
         ScriptedDiagnostics diagnostics = new(Passed);
         using HomeScreenHarness h = new();
+        diagnostics.Observations = h.Readiness;
         await new EnvironmentReadinessViewModel(diagnostics, new RecordingNavigation(), h.Readiness)
             .OpenAsync(CancellationToken.None);
         ReadinessObservation observed = h.Readiness.Current;
@@ -643,6 +646,19 @@ public sealed class HomeReadinessSummaryTests
         rendered.Facts.RecoveryReachable.ShouldBeTrue($"list viewport {rendered.Facts.ListViewport:0}px");
         rendered.Facts.CodeVisible.ShouldBeTrue();
         rendered.DesiredSize.Width.ShouldBeLessThanOrEqualTo(viewport.Width);
+
+        string? captures = Environment.GetEnvironmentVariable("PF_SCRUM11152_CAPTURE_DIR");
+        if (!string.IsNullOrWhiteSpace(captures))
+            foreach (Size size in new[] { new Size(1000, 700), new Size(1920, 1040) })
+                WpfRendering.CapturePng(() => new HomeView { DataContext = home }, size,
+                    Path.Combine(captures, $"home-all-details-recovery-end-{language}-{size.Width:0}x{size.Height:0}.png"), tree =>
+                    {
+                        foreach (Expander e in tree.OfType<Expander>()) e.IsExpanded = true;
+                        Settle(tree.Root);
+                        tree.OfType<ScrollViewer>().Single(s => AutomationProperties.GetAutomationId(s) == "Home.Lists").ScrollToEnd();
+                        tree.OfType<FrameworkElement>().Single(e => AutomationProperties.GetAutomationId(e) == "NoticeErrorDetails.Code").BringIntoView();
+                        Settle(tree.Root);
+                    });
     }
 
     /// <summary>
@@ -660,10 +676,12 @@ public sealed class HomeReadinessSummaryTests
         foreach ((string state, Action<HomeScreenHarness> arrange, bool recovery) in new (string, Action<HomeScreenHarness>, bool)[]
                  {
                      ("not-checked", _ => { }, false),
+                     ("checking", h => h.Readiness.Begin(), false),
                      ("ready", h => h.Readiness.Complete(h.Readiness.Begin(), Passed), false),
                      ("blocked", h => h.Readiness.Complete(h.Readiness.Begin(), Failed), false),
                      ("live-check-pending-warnings", h => h.Readiness.Complete(h.Readiness.Begin(), LiveCheckPending), true),
                      ("not-confirmed", h => { h.Readiness.Complete(h.Readiness.Begin(), Passed); h.Readiness.Abandon(h.Readiness.Begin()); }, false),
+                     ("not-confirmed-warnings", h => h.Readiness.Abandon(h.Readiness.Begin()), true),
                      ("ready-recovery-warning", h => h.Readiness.Complete(h.Readiness.Begin(), Passed), true),
                  })
         {
@@ -688,7 +706,7 @@ public sealed class HomeReadinessSummaryTests
                         Path.Combine(destination, name), tree =>
                         {
                             if (!expanded) return;
-                            foreach (Expander e in tree.OfType<Expander>().Where(e => AutomationProperties.GetAutomationId(e) == "Home.StartupDetails"))
+                            foreach (Expander e in tree.OfType<Expander>())
                                 e.IsExpanded = true;
                         });
                 }
@@ -706,6 +724,7 @@ public sealed class HomeReadinessSummaryTests
         "Home_ReadinessNotConfirmed", "Home_ReadinessUnfinishedReason", "Home_ReadinessNoReason",
         "Home_ReadinessNotConfirmedHint", "Home_ReadinessCheckedAt", "Home_ReadinessTechnicalCheck",
         "Home_StartupDetails", "Home_StartupPresetVerified", "Home_StartupPresetNotVerified",
+        "Home_ViewWorkstationChecks", "Home_DiagnosticRetentionWarning",
     ];
 
     private static readonly DateTimeOffset At = new(2026, 9, 29, 21, 12, 0, TimeSpan.Zero);
@@ -736,7 +755,7 @@ public sealed class HomeReadinessSummaryTests
 
     private static EnvironmentReadinessViewModel ScreenOver(
         WorkstationVerificationFixture fixture, ReadinessObservationAccessor observations) =>
-        new(new VerifiedEnvironmentGate(fixture.CreateVerifier()), new RecordingNavigation(), observations);
+        new(new VerifiedEnvironmentGate(fixture.CreateVerifier(), observations), new RecordingNavigation(), observations);
 
     /// <summary>Another Home in the same run: same service, navigation, picker and observations.</summary>
     private static HomeViewModel Home(HomeScreenHarness h) =>
@@ -779,6 +798,7 @@ public sealed class HomeReadinessSummaryTests
     /// <summary>A diagnostics seam with scripted answers, counting every call.</summary>
     private sealed class ScriptedDiagnostics(EnvironmentReadinessReport report) : IEnvironmentDiagnostics
     {
+        public ReadinessObservationAccessor? Observations { get; set; }
         public int ReadCalls { get; private set; }
         public int LiveCalls { get; private set; }
         public bool NextReadThrows { get; set; }
@@ -788,13 +808,22 @@ public sealed class HomeReadinessSummaryTests
 
         public EnvironmentReadinessReport Read()
         {
-            ReadCalls++;
-            if (NextReadThrows) throw new InvalidOperationException("Scripted read failure.");
-            return report;
+            long? ticket = Observations?.Begin();
+            try
+            {
+                ReadCalls++;
+                if (NextReadThrows) throw new InvalidOperationException("Scripted read failure.");
+                if (ticket is { } current) Observations!.Complete(current, report);
+                return report;
+            }
+            finally { if (ticket is { } current) Observations!.Abandon(current); }
         }
 
         public async Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken)
         {
+            long? ticket = Observations?.Begin();
+            try
+            {
             LiveCalls++;
             if (HoldLiveCheck) await ReleaseLiveCheck.Task;
             if (cancellationToken.IsCancellationRequested && CancelReturnsReport)
@@ -809,21 +838,31 @@ public sealed class HomeReadinessSummaryTests
                 ]);
             }
             cancellationToken.ThrowIfCancellationRequested();
+            if (ticket is { } current) Observations!.Complete(current, report);
             return report;
+            }
+            finally { if (ticket is { } current) Observations!.Abandon(current); }
         }
     }
 
     /// <summary>A passive reading that waits until the test lets it finish.</summary>
     private sealed class HeldReadDiagnostics(EnvironmentReadinessReport report) : IEnvironmentDiagnostics
     {
+        public ReadinessObservationAccessor? Observations { get; init; }
         public ManualResetEventSlim Entered { get; } = new();
         public ManualResetEventSlim Release { get; } = new();
 
         public EnvironmentReadinessReport Read()
         {
-            Entered.Set();
-            Release.Wait(TimeSpan.FromSeconds(30));
-            return report;
+            long? ticket = Observations?.Begin();
+            try
+            {
+                Entered.Set();
+                Release.Wait(TimeSpan.FromSeconds(30));
+                if (ticket is { } current) Observations!.Complete(current, report);
+                return report;
+            }
+            finally { if (ticket is { } current) Observations!.Abandon(current); }
         }
 
         public Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken) =>

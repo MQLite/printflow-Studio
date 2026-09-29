@@ -374,7 +374,6 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         _wasCancelled = false;
         IsRunningLiveChecks = true;
         IsBusy = true;
-        long observation = _observations.Begin();
         try
         {
             EnvironmentReadinessReport report = await _diagnostics.RunLiveChecksAsync(cancellationToken)
@@ -382,9 +381,6 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
             _wasCancelled = cancellationToken.IsCancellationRequested && !report.Verified;
             Apply(report);
 
-            // A cancelled check reports the step it stopped in as failed, which is not an observed
-            // fault. Home therefore records it as unfinished, not as that failure.
-            if (!_wasCancelled) _observations.Complete(observation, report);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -393,8 +389,6 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         }
         finally
         {
-            // Home may show the kept report on this screen as history only, never as current.
-            _observations.Abandon(observation);
             IsRunningLiveChecks = false;
             IsBusy = false;
         }
@@ -449,7 +443,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         _wasCancelled = false;
         _cancellationRequested = false;
         IsBusy = true;
-        long observation = _observations.Begin();
+        ReadinessObservation captured = _observations.Current;
         try
         {
             EnvironmentReadinessReport report = await Task
@@ -457,12 +451,14 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
                 .ConfigureAwait(true);
 
             Apply(report);
-            _observations.Complete(observation, report);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _observations.AbandonIfUnchanged(captured);
+            throw;
         }
         finally
         {
-            // A reading that threw or was cancelled leaves Home "not confirmed", not the older answer.
-            _observations.Abandon(observation);
             IsBusy = false;
         }
     }

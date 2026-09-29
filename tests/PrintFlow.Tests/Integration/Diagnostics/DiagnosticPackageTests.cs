@@ -19,6 +19,41 @@ namespace PrintFlow.Tests.Integration.Diagnostics;
 public sealed class DiagnosticPackageTests
 {
     [Fact]
+    public async Task Closeout_package_observes_actual_failed_read_independently_of_export_success_or_failure()
+    {
+        using SessionServiceHarness harness = new();
+        using WorkstationVerificationFixture workstation = new();
+        PrintFlow.App.Startup.ReadinessObservationAccessor observations = new();
+        PrintFlow.Infrastructure.Gate.VerifiedEnvironmentGate gate = new(workstation.CreateVerifier(), observations);
+        observations.Complete(observations.Begin(), gate.Read());
+        observations.Changed += (_, _) => throw new ObjectDisposedException("retired Home view");
+        string evidenceRoot = Path.Combine(harness.Workspace.Root, "Evidence");
+        Directory.CreateDirectory(evidenceRoot);
+        ISessionService sessions = harness.CreateServiceWithMeitu(new FailingMeitu(Path.Combine(evidenceRoot, "absent.png")));
+        SessionId id = await ReadyForEnhancementAsync(harness, sessions, "closeout.png");
+        (await sessions.ExecuteAsync(id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", CancellationToken.None)).IsFailure.ShouldBeTrue();
+        AttemptId attempt = Accept(await sessions.LoadAsync(id, CancellationToken.None)).CurrentFailureAttemptId.ShouldNotBeNull();
+        IDiagnosticPackageService packages = CreatePackages(harness, sessions, evidenceRoot, Path.Combine(harness.Workspace.Root, "stage"), gate);
+        workstation.Facts.Display = workstation.Facts.Display with { ActiveDisplayCount = 2 };
+        workstation.Clock.Advance(TimeSpan.FromMinutes(3));
+        DiagnosticPackagePlan blocked = Accept(await packages.BuildPlanAsync(id, attempt, CancellationToken.None));
+        string destination = Path.Combine(harness.Workspace.Root, "support.zip");
+        Accept(await packages.ExportAsync(blocked, destination, CancellationToken.None));
+        observations.Current.Report!.Verified.ShouldBeFalse();
+        observations.Current.Report.BlockingFailures.First().CheckKey.ShouldBe("DisplayConfiguration");
+        observations.Current.Report.ObservedAt.ShouldBe(workstation.Clock.GetUtcNow());
+
+        workstation.Facts.Display = workstation.Facts.Display with { ActiveDisplayCount = 1 };
+        DiagnosticPackagePlan passed = Accept(await packages.BuildPlanAsync(id, attempt, CancellationToken.None));
+        // A test-owned file prevents creation of the archive staging directory.
+        string blockedStage = Path.Combine(harness.Workspace.Root, "blocked-stage");
+        await File.WriteAllTextAsync(blockedStage, "owned fixture");
+        IDiagnosticPackageService cannotWrite = CreatePackages(harness, sessions, evidenceRoot, blockedStage, gate);
+        (await cannotWrite.ExportAsync(passed, destination, CancellationToken.None)).IsFailure.ShouldBeTrue();
+        observations.Current.Report!.Verified.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Exact_attempt_plan_is_default_deny_and_includes_only_the_owned_failure_capture()
     {
         using SessionServiceHarness harness = new();
@@ -241,12 +276,13 @@ public sealed class DiagnosticPackageTests
         SessionServiceHarness harness,
         ISessionService sessions,
         string evidenceRoot,
-        string staging)
+        string staging,
+        IEnvironmentDiagnostics? diagnostics = null)
     {
         LocalDiagnosticPackageEvidence evidence = new(evidenceRoot);
         return new DiagnosticPackageService(
             sessions,
-            new FixedDiagnostics(harness.Clock.GetUtcNow()),
+            diagnostics ?? new FixedDiagnostics(harness.Clock.GetUtcNow()),
             evidence,
             new DiagnosticPackageArchiveWriter(evidence, staging),
             new DiagnosticPackageApplicationInfo("PrintFlow Studio", "test-version"),

@@ -39,8 +39,7 @@ public enum HomeReadinessState
 /// name and explanation, is resolved on each read, so a language change rewords the same
 /// observation without taking a new one.
 /// <para>
-/// Ready is worded as what the last check found: Home is not told when a later automatic step's
-/// own gate check refuses, so it never presents the answer as live.
+/// This is a recorded observation; each automatic step still uses its own gate.
 /// </para>
 /// </remarks>
 public sealed class HomeReadinessSummary
@@ -118,7 +117,8 @@ public sealed class HomeReadinessSummary
 
     /// <summary>The stable identifier of the first blocking check, for support; empty otherwise.</summary>
     public string TechnicalDetailText => _firstBlocker is { } check
-        ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("Home_ReadinessTechnicalCheck"), check.CheckKey)
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Resolve("Home_ReadinessTechnicalCheck"),
+            check.CheckKey, new EnvironmentCheckRow(check).Status)
         : string.Empty;
 
     public bool HasTechnicalDetail => TechnicalDetailText.Length > 0;

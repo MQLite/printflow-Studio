@@ -27,7 +27,46 @@ public partial class HomeView : UserControl
     /// </remarks>
     private const double UpperShare = 0.65;
 
-    public HomeView() => InitializeComponent();
+    private HomeViewModel? _subscribedHome;
+    private EventHandler? _observationChanged;
+    private long _subscription;
+    private bool _observing;
+
+    public HomeView()
+    {
+        InitializeComponent();
+        Loaded += (_, _) => { _observing = true; Subscribe(); };
+        Unloaded += (_, _) => { _observing = false; Unsubscribe(); };
+        DataContextChanged += (_, _) => { Unsubscribe(); if (_observing) Subscribe(); };
+    }
+
+    private void Subscribe()
+    {
+        Unsubscribe();
+        if (DataContext is not HomeViewModel home) return;
+        _subscribedHome = home;
+        long subscription = _subscription;
+        _observationChanged = (_, _) =>
+        {
+            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (_subscription == subscription && ReferenceEquals(_subscribedHome, home))
+                    home.ReadReadiness();
+            }));
+        };
+        home.ReadinessObservations.Changed += _observationChanged;
+        home.ReadReadiness();
+    }
+
+    private void Unsubscribe()
+    {
+        ++_subscription;
+        if (_subscribedHome is { } home && _observationChanged is { } handler)
+            home.ReadinessObservations.Changed -= handler;
+        _subscribedHome = null;
+        _observationChanged = null;
+    }
 
     private void OnLayoutSizeChanged(object sender, SizeChangedEventArgs e) =>
         Upper.MaxHeight = e.NewSize.Height * UpperShare;

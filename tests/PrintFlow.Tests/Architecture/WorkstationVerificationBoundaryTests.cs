@@ -281,13 +281,13 @@ public sealed class WorkstationVerificationBoundaryTests
     public void The_verified_gate_holds_a_verifier_and_no_other_machine_seam()
     {
         ConstructorInfo constructor = typeof(VerifiedEnvironmentGate).GetConstructors().ShouldHaveSingleItem();
-        constructor.GetParameters().ShouldHaveSingleItem()
-            .ParameterType.ShouldBe(typeof(IProductionWorkstationVerifier));
+        constructor.GetParameters().Select(parameter => parameter.ParameterType)
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
 
         typeof(VerifiedEnvironmentGate)
             .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
             .Select(f => f.FieldType)
-            .ShouldBe([typeof(IProductionWorkstationVerifier)]);
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
     }
 
     /// <summary>

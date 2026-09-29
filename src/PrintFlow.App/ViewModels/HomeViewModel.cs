@@ -105,8 +105,8 @@ public sealed partial class HomeViewModel : ObservableObject
     /// What the latest readiness observation of this run found, as Home's one summary.
     /// </summary>
     /// <remarks>
-    /// A snapshot of <see cref="ReadinessObservationAccessor"/> taken when the screen opens and
-    /// again on each ordinary refresh. Taking it reads memory only: Home never asks the
+    /// A snapshot of <see cref="ReadinessObservationAccessor"/> updated while the view is loaded
+    /// and on ordinary refresh. Taking it reads memory only: Home never asks the
     /// diagnostics seam, never starts a check and gates no command on the answer.
     /// </remarks>
     [ObservableProperty]
@@ -151,10 +151,12 @@ public sealed partial class HomeViewModel : ObservableObject
     /// <summary>Kept visible, not folded into details: local diagnostic cleanup did not finish.</summary>
     public bool HasRetentionWarning => _startupStatus.Status?.DiagnosticRetentionReport?.Warning is not null;
 
-    public string RetentionWarningText => Strings.Startup_DiagnosticRetentionWarning;
+    public string RetentionWarningText => Strings.Resolve("Home_DiagnosticRetentionWarning");
 
     /// <summary>Takes a fresh snapshot of what has already been observed. Observes nothing itself.</summary>
-    private void ReadReadiness() => Readiness = new HomeReadinessSummary(_readinessObservations.Current);
+    internal void ReadReadiness() => Readiness = new HomeReadinessSummary(_readinessObservations.Current);
+
+    internal ReadinessObservationAccessor ReadinessObservations => _readinessObservations;
 
     /// <summary>Recent Processing, newest first, exactly as the service returned it.</summary>
     public ObservableCollection<RecentSessionRow> RecentSessions { get; } = [];
@@ -189,7 +191,7 @@ public sealed partial class HomeViewModel : ObservableObject
     public string EmptyRecentText => Strings.Home_NoRecentSessions;
 
     /// <summary>The way to the Production Readiness screen (Epic 11500 Part C §3).</summary>
-    public string EnvironmentLabel => Strings.Environment_Open;
+    public string EnvironmentLabel => Strings.Resolve("Home_ViewWorkstationChecks");
 
     /// <summary>The way to Settings (SCRUM-11118).</summary>
     public string SettingsLabel => Strings.Settings_Open;

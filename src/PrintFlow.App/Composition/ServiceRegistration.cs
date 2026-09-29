@@ -206,6 +206,7 @@ public static class ServiceRegistration
         // read the diagnostics seam and shown on Home (SCRUM-11152). In memory for one process
         // only: a restart starts it empty, and no gate or workflow reads it.
         services.AddSingleton<ReadinessObservationAccessor>();
+        services.AddSingleton<IEnvironmentReadinessObservations>(p => p.GetRequiredService<ReadinessObservationAccessor>());
 
         // Navigation is a singleton because "which screen is current" is one fact per window;
         // the screens themselves are transient so each visit starts from a clean view model

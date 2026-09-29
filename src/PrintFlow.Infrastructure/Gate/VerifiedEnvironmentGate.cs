@@ -65,16 +65,19 @@ public sealed class VerifiedEnvironmentGate :
     private const int MaxItemisedFailures = 8;
 
     private readonly IProductionWorkstationVerifier _verifier;
+    private readonly IEnvironmentReadinessObservations? _observations;
 
     /// <param name="verifier">
     /// The Part A workstation verifier. Required, with no permissive fallback: a gate that could
     /// be constructed without one would be a gate that could authorise Production without
     /// evidence (§14).
     /// </param>
-    public VerifiedEnvironmentGate(IProductionWorkstationVerifier verifier)
+    public VerifiedEnvironmentGate(IProductionWorkstationVerifier verifier,
+        IEnvironmentReadinessObservations? observations = null)
     {
         ArgumentNullException.ThrowIfNull(verifier);
         _verifier = verifier;
+        _observations = observations;
     }
 
     /// <inheritdoc />
@@ -123,19 +126,31 @@ public sealed class VerifiedEnvironmentGate :
     /// <inheritdoc />
     public EnvironmentReadinessReport Read()
     {
-        WorkstationVerificationResult result = _verifier.Verify();
-
-        return ToReadinessReport(result);
+        long? ticket = BeginObservation();
+        try
+        {
+            WorkstationVerificationResult result = _verifier.Verify();
+            EnvironmentReadinessReport report = ToReadinessReport(result);
+            CompleteObservation(ticket, result, report);
+            return report;
+        }
+        finally { AbandonObservation(ticket); }
     }
 
     /// <inheritdoc />
     public async Task<EnvironmentReadinessReport> RunLiveChecksAsync(CancellationToken cancellationToken)
     {
-        WorkstationVerificationResult result = await _verifier
-            .RunLiveChecksAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return ToReadinessReport(result);
+        long? ticket = BeginObservation();
+        try
+        {
+            WorkstationVerificationResult result = await _verifier
+                .RunLiveChecksAsync(cancellationToken).ConfigureAwait(false);
+            EnvironmentReadinessReport report = ToReadinessReport(result);
+            if (!cancellationToken.IsCancellationRequested)
+                CompleteObservation(ticket, result, report);
+            return report;
+        }
+        finally { AbandonObservation(ticket); }
     }
 
     /// <summary>The stable per-check resource key, for the resx and for tests to enumerate.</summary>
@@ -188,21 +203,52 @@ public sealed class VerifiedEnvironmentGate :
     private OperationResult<Unit> AuthoriseProduction(
         IWorkstationAutomationLease? workstationLease = null)
     {
-        WorkstationVerificationResult result = _verifier.Verify(workstationLease);
-
-        // Authorisation reads Verified, which the result derives from its own checks and which
-        // no advisory can influence. An advisory is carried into diagnostics and into the log,
-        // and it changes nothing about permission (§8).
-        return Authorise(result);
+        long? ticket = BeginObservation();
+        try
+        {
+            WorkstationVerificationResult result = _verifier.Verify(workstationLease);
+            CompleteObservation(ticket, result);
+            return Authorise(result);
+        }
+        finally { AbandonObservation(ticket); }
     }
 
     private OperationResult<Unit> AuthoriseInternalProduction()
     {
-        WorkstationVerificationResult result = _verifier is IInternalProductionWorkstationVerifier internalVerifier
-            ? internalVerifier.VerifyForInternalWork()
-            : _verifier.Verify();
+        long? ticket = BeginObservation();
+        try
+        {
+            bool subset = _verifier is IInternalProductionWorkstationVerifier;
+            WorkstationVerificationResult result = _verifier is IInternalProductionWorkstationVerifier internalVerifier
+                ? internalVerifier.VerifyForInternalWork()
+                : _verifier.Verify();
+            // Internal work can omit automation availability. Its success cannot vouch for
+            // the full workstation; a real failed observation still supplies its first reason.
+            if (!subset || !result.Verified) CompleteObservation(ticket, result);
+            return Authorise(result);
+        }
+        finally { AbandonObservation(ticket); }
+    }
 
-        return Authorise(result);
+    private long? BeginObservation()
+    {
+        try { return _observations?.Begin(); }
+        catch (Exception) { return null; }
+    }
+
+    private void CompleteObservation(long? ticket, WorkstationVerificationResult result,
+        EnvironmentReadinessReport? report = null)
+    {
+        if (ticket is not { } started || result.Checks.Any(c => c.FailureCode == FailureCode.Cancelled)) return;
+        try { _observations?.Complete(started, report ?? ToReadinessReport(result)); }
+        catch (Exception) { /* Optional projection/publication must never change admission. */ }
+    }
+
+    private void AbandonObservation(long? ticket)
+    {
+        if (ticket is not { } started) return;
+        try { _observations?.Abandon(started); }
+        catch (Exception) { /* Preserve the original result/exception and lease ownership. */ }
     }
 
     private static OperationResult<Unit> Authorise(WorkstationVerificationResult result) =>

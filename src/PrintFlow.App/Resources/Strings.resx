@@ -1289,23 +1289,29 @@
   <data name="FailureNotice_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available.</value></data>
   <!-- SCRUM-11152: Home readiness summary and startup details. -->
   <data name="Home_ReadinessHeading" xml:space="preserve"><value>Workstation check</value></data>
-  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Not checked yet since PrintFlow started.</value></data>
-  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>Open Production readiness to check this workstation. A result from an earlier run is not used.</value></data>
-  <data name="Home_ReadinessChecking" xml:space="preserve"><value>A workstation check is running. There is no result yet.</value></data>
-  <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>Open Production readiness to see the check.</value></data>
-  <data name="Home_ReadinessReady" xml:space="preserve"><value>Ready to process when last checked.</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is what that check found. Each automatic step checks the workstation again before it runs, and those checks do not update Home. If a step is refused, open Production readiness.</value></data>
+  <data name="Home_ReadinessNotChecked" xml:space="preserve"><value>Not checked in this run.</value></data>
+  <data name="Home_ReadinessNotCheckedHint" xml:space="preserve"><value>Choose “View workstation checks” to check this workstation. A result from an earlier run is not used.</value></data>
+  <data name="Home_ReadinessChecking" xml:space="preserve"><value>Checking the workstation…</value></data>
+  <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>Choose “View workstation checks” to see the check.</value></data>
+  <data name="Home_ReadinessReady" xml:space="preserve"><value>Passed at last check.</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>This is a recorded observation. Each automatic step still uses its own workstation check.</value></data>
   <data name="Home_ReadinessBlocked" xml:space="preserve"><value>Automatic processing is blocked.</value></data>
-  <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>First reason: {0}. {1}</value></data>
-  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>First reason: the Meitu and Photoshop check has no current result. Open Production readiness and choose {0}.</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Open Production readiness to see every check and what to do. If you cannot fix this, ask your supervisor.</value></data>
-  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Readiness is not confirmed.</value></data>
+  <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>Reason: {0}. {1}</value></data>
+  <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>Reason: the Meitu and Photoshop check has no current result. Choose “View workstation checks”, then “{0}”.</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>Choose “View workstation checks” to see every check. Ask an experienced colleague or supervisor for help.</value></data>
+  <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>Readiness needs to be checked again.</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>The last check did not finish, so no earlier result is shown as current.</value></data>
-  <data name="Home_ReadinessNoReason" xml:space="preserve"><value>The last check did not name a reason. Production readiness shows the details.</value></data>
-  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>Open Production readiness and check again.</value></data>
+  <data name="Home_ReadinessNoReason" xml:space="preserve"><value>The last check did not name a reason. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_ReadinessNotConfirmedHint" xml:space="preserve"><value>Choose “View workstation checks” to check again. Ask an experienced colleague or supervisor for help.</value></data>
   <data name="Home_ReadinessCheckedAt" xml:space="preserve"><value>Checked at {0}</value></data>
-  <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check: {0}</value></data>
+  <data name="Home_ReadinessTechnicalCheck" xml:space="preserve"><value>Check identifier: {0} · {1}</value></data>
   <data name="Home_StartupDetails" xml:space="preserve"><value>Startup details</value></data>
-  <data name="Home_StartupPresetVerified" xml:space="preserve"><value>Production setup file (preset): verified at startup. This alone does not mean the workstation is ready.</value></data>
-  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Production setup file (preset): not verified at startup. Production readiness shows why.</value></data>
+  <data name="Home_StartupPresetVerified" xml:space="preserve"><value>The production setup file was verified at startup. This does not confirm that the workstation is ready now.</value></data>
+  <data name="Home_StartupPresetNotVerified" xml:space="preserve"><value>Startup could not verify the production setup file. Choose “View workstation checks” for details.</value></data>
+  <data name="Home_ViewWorkstationChecks" xml:space="preserve">
+    <value>View workstation checks</value>
+  </data>
+  <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
+    <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
+  </data>
 </root>

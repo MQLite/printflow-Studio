@@ -496,10 +496,10 @@ public sealed class VerifiedEnvironmentGateTests
         recording.FilesRead.ShouldContain(fixture.PhotoshopPath);
         recording.FilesRead.ShouldContain(fixture.MeituPath);
 
-        // The gate itself owns no process-starting surface: its only dependency is the verifier.
+        // The gate owns no process-starting surface; its additional port only publishes observations.
         typeof(VerifiedEnvironmentGate).GetConstructors().ShouldHaveSingleItem()
-            .GetParameters().ShouldHaveSingleItem()
-            .ParameterType.ShouldBe(typeof(IProductionWorkstationVerifier));
+            .GetParameters().Select(parameter => parameter.ParameterType)
+            .ShouldBe([typeof(IProductionWorkstationVerifier), typeof(IEnvironmentReadinessObservations)]);
     }
 
     // ---------------------------------------------------------------- §20
