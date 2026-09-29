@@ -1336,6 +1336,12 @@ public sealed partial class SessionService : ISessionService
         int productionOutputPpi;
         bool requiresEnlargement;
 
+        // What decided the size is copied from the plan's own decision (SCRUM-11150), so an
+        // operator sentence about it cannot disagree with the edge Photoshop will be given.
+        PrintSizeGovernor governor;
+        LimitingEdge governingEdge;
+        TargetEdge? selectedTargetEdge;
+
         if (size.BoundsPlan is { } bounds)
         {
             sourceRevisionId = bounds.SourceRevisionId;
@@ -1345,6 +1351,9 @@ public sealed partial class SessionService : ISessionService
             outputPixelHeight = bounds.ProjectedPixelHeight;
             productionOutputPpi = bounds.ProductionDpi;
             requiresEnlargement = false;
+            governor = bounds.RequiresShrink ? PrintSizeGovernor.LimitReached : PrintSizeGovernor.WithinLimits;
+            governingEdge = bounds.LimitingEdge;
+            selectedTargetEdge = null;
         }
         else
         {
@@ -1356,6 +1365,9 @@ public sealed partial class SessionService : ISessionService
             outputPixelHeight = target.Projection.ProjectedPixelHeight;
             productionOutputPpi = target.ProductionDpi;
             requiresEnlargement = target.RequiresEnlargementAuthority;
+            governor = PrintSizeGovernor.SelectedEdge;
+            governingEdge = target.Projection.PhotoshopTargetEdge;
+            selectedTargetEdge = target.Projection.SelectedTargetEdge;
         }
 
         double widthMm = outputPixelWidth * MillimetresPerInch / productionOutputPpi;
@@ -1381,6 +1393,9 @@ public sealed partial class SessionService : ISessionService
             enlargementAuthorised)
         {
             EnlargementOfferId = enlargementOfferId,
+            Governor = governor,
+            GoverningEdge = governingEdge,
+            SelectedTargetEdge = selectedTargetEdge,
         };
     }
 

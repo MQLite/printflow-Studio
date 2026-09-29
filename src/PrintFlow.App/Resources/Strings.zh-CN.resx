@@ -993,7 +993,7 @@
   <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>故障截图：{0}</value></data>
   <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>本机诊断数据库：{0}</value></data>
   <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>故障截图文件夹：{0}</value></data>
-  <data name="Session_PreflightHeading" xml:space="preserve"><value>打印尺寸预检</value></data>
+  <data name="Session_PreflightHeading" xml:space="preserve"><value>印刷尺寸核对</value></data>
   <data name="Session_PreflightSourcePixels" xml:space="preserve"><value>源图像像素</value></data>
   <data name="Session_PreflightArtworkContent" xml:space="preserve"><value>图稿内容</value></data>
   <data name="Session_PreflightSelectedArtwork" xml:space="preserve"><value>所选图稿</value></data>
@@ -1002,7 +1002,7 @@
   <data name="Session_PreflightFullOriginalCanvas" xml:space="preserve"><value>完整原始画布</value></data>
   <data name="Session_PreflightNoCrop" xml:space="preserve"><value>未应用裁剪或修边</value></data>
   <data name="Session_PreflightGeometryUnavailable" xml:space="preserve"><value>裁剪详情不可用</value></data>
-  <data name="Session_PreflightPrintSize" xml:space="preserve"><value>打印尺寸</value></data>
+  <data name="Session_PreflightPrintSize" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_PreflightOutputPixels" xml:space="preserve"><value>预计输出像素</value></data>
   <data name="Session_PreflightOutputDpi" xml:space="preserve"><value>生产输出分辨率</value></data>
   <data name="Session_PreflightStatus" xml:space="preserve"><value>状态</value></data>
@@ -1244,4 +1244,19 @@
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>此结果无法调整裁切边缘。如有内容被裁掉，请选择“{0}”，之后可以重新尝试。</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>不确定？请先请有经验的同事查看再决定。在 PrintFlow 之外修改的 TIFF 无法导入。</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value>如需先修改印刷尺寸，请使用下方“{0}”。</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>需要标准尺寸时选择预设。预设是上限，不是准确的印刷尺寸：较大的图片会缩小到上限以内，较小的图片不会被放大，图片比例保持不变。</value></data>
+  <data name="Session_SizeHelpCustom" xml:space="preserve"><value>某一边必须是准确尺寸时，选择“{0}”。选择要固定的边（“{1}”、“{2}”，或表示此图片较长一边的“{3}”），并输入毫米数，另一边按图片比例得出。如需放大图片，会先征求你的确认。</value></data>
+  <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>按当前设置，整张图片（含透明边缘）的印刷尺寸预计约为 {0:0.0} × {1:0.0} 毫米。</value></data>
+  <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>按已选尺寸，整张图片（含透明边缘）的印刷尺寸约为 {0:0.0} × {1:0.0} 毫米。</value></data>
+  <data name="Session_SizeGovernorWithinLimits" xml:space="preserve"><value>图片已在上限以内，因此不会缩小，也不会为填满上限而放大。</value></data>
+  <data name="Session_SizeGovernorLimitWidth" xml:space="preserve"><value>宽度达到上限，因此由宽度决定尺寸。</value></data>
+  <data name="Session_SizeGovernorLimitHeight" xml:space="preserve"><value>高度达到上限，因此由高度决定尺寸。</value></data>
+  <data name="Session_SizeGovernorEdgeWidth" xml:space="preserve"><value>由你输入的宽度决定尺寸。</value></data>
+  <data name="Session_SizeGovernorEdgeHeight" xml:space="preserve"><value>由你输入的高度决定尺寸。</value></data>
+  <data name="Session_SizeGovernorLongEdgeWidth" xml:space="preserve"><value>你输入的长边就是此图片的宽度，因此由宽度决定尺寸。</value></data>
+  <data name="Session_SizeGovernorLongEdgeHeight" xml:space="preserve"><value>你输入的长边就是此图片的高度，因此由高度决定尺寸。</value></data>
+  <data name="Session_SizeSummaryProportions" xml:space="preserve"><value>图片保持原有比例。</value></data>
+  <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>按此尺寸需要放大图片，印刷效果可能发虚或模糊。确认此尺寸后，会请你决定是否接受。</value></data>
+  <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>按此尺寸需要放大图片，印刷效果可能发虚或模糊。可选择“{0}”改用较小的尺寸（需要的放大更少），或选择“{1}”接受这一点。此尺寸需要放大时，在你接受之前“{2}”不可用。</value></data>
+  <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>技术细节（像素与 PPI）</value></data>
 </root>

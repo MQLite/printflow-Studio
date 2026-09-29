@@ -1587,6 +1587,12 @@
                         <StackPanel>
                             <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
+                            <!-- When each choice fits (SCRUM-11150), beside the choice it explains. -->
+                            <TextBlock Text="{Binding PresetModeHelp}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,0,0,6"
+                                       AutomationProperties.AutomationId="Session.PrintDimensions.PresetHelp" />
                             <ItemsControl ItemsSource="{Binding SizePresets}"
                                           IsTabStop="False"
                                           AutomationProperties.AutomationId="Session.SizePresetList">
@@ -1612,6 +1618,11 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            <TextBlock Text="{Binding CustomModeHelp}"
+                                       TextWrapping="Wrap"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,6"
+                                       AutomationProperties.AutomationId="Session.PrintDimensions.CustomHelp" />
                             <Button Content="{Binding CustomSizeLabel}"
                                     Command="{Binding ChooseCustomSizeCommand}"
                                     AutomationProperties.AutomationId="Session.PrintDimensions.CustomSize"
@@ -1658,6 +1669,13 @@
                                                  AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
                                     </Grid>
+                                    <!-- The existing custom-size validation, beside the input it is about. -->
+                                    <TextBlock Text="{Binding CustomSizeInputHint}"
+                                               TextWrapping="Wrap"
+                                               Foreground="#8A5600"
+                                               Margin="0,6,0,0"
+                                               AutomationProperties.AutomationId="Session.PrintDimensions.TargetSizeHint"
+                                               Visibility="{Binding HasCustomSizeInputHint, Converter={StaticResource BoolToVisibility}}" />
                                     <Button Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
@@ -1680,6 +1698,26 @@
                             <TextBlock Text="{Binding PreflightHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding PreflightDraftHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,6"
                                        Visibility="{Binding IsDraftPreflight, Converter={StaticResource BoolToVisibility}}" />
+                            <!--
+                                The live summary (SCRUM-11150), formatted from this same preflight: the
+                                millimetres, what decided them and that proportions are kept.
+                            -->
+                            <TextBlock Text="{Binding PrintSizeSummary}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0"
+                                       AutomationProperties.AutomationId="Session.PrintDimensions.Summary"
+                                       AutomationProperties.Name="{Binding PrintSizeSummary}" />
+                            <TextBlock Text="{Binding PreflightEnlargementNote}"
+                                       TextWrapping="Wrap"
+                                       Foreground="#8A5600"
+                                       Margin="0,6,0,0"
+                                       AutomationProperties.AutomationId="Session.PrintDimensions.DraftEnlargementNote"
+                                       Visibility="{Binding HasPreflightEnlargementNote, Converter={StaticResource BoolToVisibility}}" />
+                            <!-- The unchanged pixel and PPI facts, one click away. View state only. -->
+                            <Expander Header="{Binding SizeTechnicalDetailsLabel}"
+                                      Margin="0,8,0,0"
+                                      AutomationProperties.AutomationId="Session.PrintDimensions.TechnicalDetails"
+                                      AutomationProperties.Name="{Binding SizeTechnicalDetailsLabel}">
                             <ItemsControl ItemsSource="{Binding PreflightRows}" IsTabStop="False"
                                           HorizontalContentAlignment="Stretch">
                                 <ItemsControl.ItemTemplate>
@@ -1697,6 +1735,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                            </Expander>
                         </StackPanel>
                     </Border>
 
@@ -1738,20 +1777,6 @@
                                        Opacity="0.8"
                                        Margin="0,6,0,0"
                                        Visibility="{Binding HasPreparationModeText, Converter={StaticResource BoolToVisibility}}" />
-                            <TextBlock Text="{Binding PreparationLimitingEdge}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8"
-                                       Margin="0,4,0,0"
-                                       Visibility="{Binding HasPreparationLimitingEdge,
-                                                    Converter={StaticResource BoolToVisibility}}" />
-                            <TextBlock Text="{Binding PreparationProjectedSize}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8"
-                                       Margin="0,4,0,0" />
-                            <TextBlock Text="{Binding PreparationResolution}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8"
-                                       Margin="0,4,0,0" />
 
                             <TextBlock Text="{Binding PresetLimitNotice}"
                                        TextWrapping="Wrap"
@@ -1767,7 +1792,9 @@
                                     Margin="0,10,0,0"
                                     Visibility="{Binding NeedsEnlargementAuthority, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding EnlargementWarning}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding EnlargementPlainWarning}"
+                                               TextWrapping="Wrap"
+                                               AutomationProperties.AutomationId="Session.PrintDimensions.EnlargementWarning" />
                                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                                         <Button Content="{Binding ChangeSizeLabel}"
                                                 Command="{Binding ChangeSizeCommand}"
@@ -1795,6 +1822,34 @@
                                        Margin="0,8,0,0"
                                        Visibility="{Binding HasRunReadinessNotice,
                                                     Converter={StaticResource BoolToVisibility}}" />
+
+                            <!-- The plan's unchanged pixel, PPI and edge facts (SCRUM-11150). View state only. -->
+                            <Expander Header="{Binding SizeTechnicalDetailsLabel}"
+                                      Margin="0,8,0,0"
+                                      AutomationProperties.AutomationId="Session.Preparation.TechnicalDetails"
+                                      AutomationProperties.Name="{Binding SizeTechnicalDetailsLabel}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding PreparationLimitingEdge}"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding HasPreparationLimitingEdge,
+                                                            Converter={StaticResource BoolToVisibility}}" />
+                                    <TextBlock Text="{Binding PreparationProjectedSize}"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               Margin="0,4,0,0" />
+                                    <TextBlock Text="{Binding PreparationResolution}"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               Margin="0,4,0,0" />
+                                    <TextBlock Text="{Binding EnlargementWarning}"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding NeedsEnlargementAuthority, Converter={StaticResource BoolToVisibility}}" />
+                                </StackPanel>
+                            </Expander>
                         </StackPanel>
                     </Border>
 

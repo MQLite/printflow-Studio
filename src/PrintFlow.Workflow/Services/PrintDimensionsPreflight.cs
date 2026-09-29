@@ -1,4 +1,5 @@
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Trimming;
 
 namespace PrintFlow.Workflow.Services;
@@ -20,6 +21,35 @@ public enum GraphicBoundsKind
 
     /// <summary>No crop or trim produced the Revision being sized.</summary>
     NoRelevantGeometry,
+}
+
+/// <summary>
+/// What decided the physical size of one preflight, copied from the plan it projects (SCRUM-11150).
+/// </summary>
+/// <remarks>
+/// A read-out of the existing plan's own decision, never a second calculation: a maximum-bound
+/// plan's <see cref="PrintPreparationMode"/> and <see cref="LimitingEdge"/>, or a target-edge
+/// plan's selected edge. Nothing here compares dimensions.
+/// </remarks>
+public enum PrintSizeGovernor
+{
+    /// <summary>
+    /// Maximum bounds the source already fits (<see cref="PrintPreparationMode.ResolutionOnly"/>):
+    /// its pixels are kept, it is not enlarged to fill the bounds, and no edge decides.
+    /// </summary>
+    WithinLimits,
+
+    /// <summary>
+    /// Maximum bounds the source exceeds: <see cref="PrintDimensionsPreflight.GoverningEdge"/> is
+    /// the edge the plan limits to its bound, and the other edge follows proportionally.
+    /// </summary>
+    LimitReached,
+
+    /// <summary>
+    /// A custom target edge: <see cref="PrintDimensionsPreflight.SelectedTargetEdge"/> was set to
+    /// the requested millimetres, resolved to <see cref="PrintDimensionsPreflight.GoverningEdge"/>.
+    /// </summary>
+    SelectedEdge,
 }
 
 /// <summary>
@@ -53,4 +83,19 @@ public sealed record PrintDimensionsPreflight(
     /// one, because viewing or editing a draft must not create authorization state.
     /// </summary>
     public Guid? EnlargementOfferId { get; init; }
+
+    /// <summary>
+    /// What decided the physical size, from the same plan; null when a projection was built
+    /// without it.
+    /// </summary>
+    public PrintSizeGovernor? Governor { get; init; }
+
+    /// <summary>
+    /// The edge the plan writes: the limited edge of a shrinking maximum-bound plan, or the
+    /// resolved target edge. <see cref="LimitingEdge.None"/> when nothing is limited.
+    /// </summary>
+    public LimitingEdge GoverningEdge { get; init; }
+
+    /// <summary>The operator-selected target edge of a custom size; null for maximum bounds.</summary>
+    public TargetEdge? SelectedTargetEdge { get; init; }
 }

@@ -1,6 +1,6 @@
 # PrintFlow operator terminology (zh-CN / en)
 
-Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24; SCRUM-11149 review-guidance wording added 2026-09-29
+Status: active operator reference; SCRUM-11146 purpose-card wording added 2026-09-23; SCRUM-11145 final-save wording added 2026-09-24; SCRUM-11149 review-guidance wording added 2026-09-29; SCRUM-11150 print-size guidance added 2026-09-29
 
 Scope: beginner-facing operator copy; documentation only
 
@@ -90,6 +90,7 @@ These bilingual patterns were introduced with the current-status panel. They des
 | Use this trim | Use this trim | 使用此裁切 | Keep | Makes a new trim result that still waits for review. It never approves or saves. `Session_TrimAdjustUse`. |
 | Restore automatic suggestion | Restore automatic suggestion | 恢复自动建议 | Keep | Puts the boundary back exactly on the automatic trim's recorded rectangle; unavailable, with an explanation, when there is none. `Session_TrimAdjustRestore`. |
 | Print size | Print size | 印刷尺寸 | Keep | Physical dimensions in millimetres, available only on the two TIFF routes. Current dimensions/preflight surfaces. |
+| Print size guidance | Print size check / Technical details (pixels and PPI) | 印刷尺寸核对 / 技术细节（像素与 PPI） | Keep | SCRUM-11150: one "choose this when" line beside each existing sizing choice (a preset is a **maximum**, never enlarged; Custom size fixes one chosen side, Long edge = the longer side of this picture), and a live sentence formatted from the shown preflight: the whole picture's approximate millimetres (including see-through edges), what decided them (the width or height reaching the maximum, the picture already within it, or the side the operator entered) and that proportions are kept. Drafts say "would"; nothing is described as saved or made. Enlargement is "may look soft or blurry" and still needs "Continue with this size"; the scale %, 300 PPI and pixel facts sit under the collapsed technical details. Resources `Session_Size*`; the heading `Session_PreflightHeading` and the zh-CN row label `Session_PreflightPrintSize` use 印刷尺寸. |
 | Pixels / PPI | Pixel dimensions / source resolution | 像素尺寸 / 源图分辨率 | Technical details only on beginner flow | May appear in print-size technical details, Production details, Error details, and diagnostic/audit records. Do not remove or change the underlying values. |
 | Preset | Approved production setup | 已批准的生产设置 | Rename in operator copy | Fixed validated workstation production configuration. “Preset” and its identifier may remain in Settings, Production details, Error details, and diagnostics. Current resources include `Settings_Preset` and `Preset_Verified`. |
 | White ink / W1 | White ink (W1) | 白墨（W1） | Rename in operator copy | W1 is the technical white-ink branch/channel label. Use “W1” alone only in Production details, Error details, technical expanders, audit/history, or diagnostics. Current resource: `Session_LabelBranch`; TIFF review modes. |

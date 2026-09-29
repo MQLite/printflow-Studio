@@ -1,4 +1,5 @@
 using PrintFlow.App.Resources;
+using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Workflow.Commands;
 using PrintFlow.Workflow.Services;
@@ -115,9 +116,146 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(PreflightRows));
         OnPropertyChanged(nameof(HasPrintDimensionsPreflight));
         OnPropertyChanged(nameof(IsDraftPreflight));
+        OnPropertyChanged(nameof(PrintSizeSummary));
+        OnPropertyChanged(nameof(PreflightEnlargementNote));
+        OnPropertyChanged(nameof(HasPreflightEnlargementNote));
+        OnPropertyChanged(nameof(EnlargementPlainWarning));
     }
 
-    partial void OnSelectedTargetEdgeChoiceChanged(TargetEdgeChoice? value) => RequestDraftPreflight();
-    partial void OnCustomMillimetresTextChanged(string? value) => RequestDraftPreflight();
-    partial void OnIsChoosingCustomSizeChanged(bool value) => RequestDraftPreflight();
+    /// <summary>Rebuilds the technical rows in the current language from the preflight already shown.</summary>
+    /// <remarks>No query, no command and no new generation: a pending draft query stays current.</remarks>
+    private void RefreshPreflightLanguage() => ShowPreflight(Preflight, IsDraftPreflight);
+
+    // --- Beginner guidance (SCRUM-11150) -------------------------------------------------
+    //
+    // Every sentence below is formatted from facts the screen already holds: the preflight the
+    // session service projected from the one preparation plan, and the existing enlargement
+    // state. Nothing here fits an image, picks an edge or converts millimetres.
+
+    /// <summary>When a preset is the right choice, and that its size is a maximum.</summary>
+    public string PresetModeHelp => Strings.Session_SizeHelpPreset;
+
+    /// <summary>When a custom size is the right choice, naming the existing edge choices.</summary>
+    public string CustomModeHelp => string.Format(
+        OperatorCulture.Current,
+        Strings.Session_SizeHelpCustom,
+        CustomSizeLabel,
+        DisplayNames.TargetEdge(TargetEdge.Width),
+        DisplayNames.TargetEdge(TargetEdge.Height),
+        DisplayNames.TargetEdge(TargetEdge.LongEdge));
+
+    /// <summary>Heading of the collapsed pixel and PPI facts.</summary>
+    public string SizeTechnicalDetailsLabel => Strings.Session_SizeTechnicalDetails;
+
+    /// <summary>
+    /// The shown preflight in words: its physical size, what decided it, and that proportions
+    /// are kept. Empty while no preflight is shown, so a pending or invalid draft shows nothing.
+    /// </summary>
+    public string PrintSizeSummary
+    {
+        get
+        {
+            if (Preflight is not { } facts)
+            {
+                return string.Empty;
+            }
+
+            List<string> sentences =
+            [
+                string.Format(
+                    OperatorCulture.Current,
+                    IsDraftPreflight ? Strings.Session_SizeSummaryDraft : Strings.Session_SizeSummaryCurrent,
+                    facts.PhysicalWidthMm,
+                    facts.PhysicalHeightMm),
+            ];
+            string? governor = GovernorSentence(facts);
+            if (governor is not null)
+            {
+                sentences.Add(governor);
+            }
+
+            sentences.Add(Strings.Session_SizeSummaryProportions);
+            return JoinSentences(sentences);
+        }
+    }
+
+    /// <summary>English sentences take a space between them; Chinese ones, ending in "。", do not.</summary>
+    private static string JoinSentences(IReadOnlyList<string> sentences) =>
+        string.Concat(sentences.Select((sentence, i) => i > 0 && !sentences[i - 1].EndsWith('。') ? " " + sentence : sentence));
+
+    /// <summary>A proposed size that would need enlarging, said before anything is confirmed.</summary>
+    public string PreflightEnlargementNote =>
+        Preflight is { RequiresEnlargement: true } && IsDraftPreflight
+            ? Strings.Session_SizeDraftEnlargement
+            : string.Empty;
+
+    public bool HasPreflightEnlargementNote => PreflightEnlargementNote.Length > 0;
+
+    /// <summary>
+    /// The existing enlargement offer in plain words. Shown by the same condition as before and
+    /// beside the same two buttons; the scale and PPI figures stay in the technical details.
+    /// </summary>
+    public string EnlargementPlainWarning => NeedsEnlargementAuthority
+        ? string.Format(
+            OperatorCulture.Current,
+            Strings.Session_SizeEnlargementPlain,
+            ChangeSizeLabel,
+            ContinueWithSizeLabel,
+            RunStepLabel)
+        : string.Empty;
+
+    /// <summary>
+    /// The existing custom-size validation, beside the input while typed text is not yet a usable
+    /// size. The same rule as Confirm: <see cref="ReadCustomSizeCommand"/>.
+    /// </summary>
+    public string CustomSizeInputHint =>
+        IsChoosingCustomSize && !string.IsNullOrWhiteSpace(CustomMillimetresText) && ReadCustomSizeCommand() is null
+            ? Strings.Session_TargetSizeInvalid
+            : string.Empty;
+
+    public bool HasCustomSizeInputHint => CustomSizeInputHint.Length > 0;
+
+    private static string? GovernorSentence(PrintDimensionsPreflight facts) => facts.Governor switch
+    {
+        PrintSizeGovernor.WithinLimits => Strings.Session_SizeGovernorWithinLimits,
+        PrintSizeGovernor.LimitReached => facts.GoverningEdge switch
+        {
+            LimitingEdge.Width => Strings.Session_SizeGovernorLimitWidth,
+            LimitingEdge.Height => Strings.Session_SizeGovernorLimitHeight,
+            _ => null,
+        },
+        PrintSizeGovernor.SelectedEdge => (facts.SelectedTargetEdge, facts.GoverningEdge) switch
+        {
+            (TargetEdge.Width, _) => Strings.Session_SizeGovernorEdgeWidth,
+            (TargetEdge.Height, _) => Strings.Session_SizeGovernorEdgeHeight,
+            (TargetEdge.LongEdge, LimitingEdge.Width) => Strings.Session_SizeGovernorLongEdgeWidth,
+            (TargetEdge.LongEdge, LimitingEdge.Height) => Strings.Session_SizeGovernorLongEdgeHeight,
+            _ => null,
+        },
+        _ => null,
+    };
+
+    private void NotifyCustomSizeInputHint()
+    {
+        OnPropertyChanged(nameof(CustomSizeInputHint));
+        OnPropertyChanged(nameof(HasCustomSizeInputHint));
+    }
+
+    partial void OnSelectedTargetEdgeChoiceChanged(TargetEdgeChoice? value)
+    {
+        NotifyCustomSizeInputHint();
+        RequestDraftPreflight();
+    }
+
+    partial void OnCustomMillimetresTextChanged(string? value)
+    {
+        NotifyCustomSizeInputHint();
+        RequestDraftPreflight();
+    }
+
+    partial void OnIsChoosingCustomSizeChanged(bool value)
+    {
+        NotifyCustomSizeInputHint();
+        RequestDraftPreflight();
+    }
 }

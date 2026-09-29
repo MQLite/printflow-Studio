@@ -1281,6 +1281,23 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Session_GuidanceHelpTiff => Get(nameof(Session_GuidanceHelpTiff));
     internal static string Session_GuidanceHelpTiffReturn => Get(nameof(Session_GuidanceHelpTiffReturn));
 
+    // Print-size guidance (SCRUM-11150): mode help, the live summary and plain enlargement wording.
+    internal static string Session_SizeHelpPreset => Get(nameof(Session_SizeHelpPreset));
+    internal static string Session_SizeHelpCustom => Get(nameof(Session_SizeHelpCustom));
+    internal static string Session_SizeSummaryDraft => Get(nameof(Session_SizeSummaryDraft));
+    internal static string Session_SizeSummaryCurrent => Get(nameof(Session_SizeSummaryCurrent));
+    internal static string Session_SizeGovernorWithinLimits => Get(nameof(Session_SizeGovernorWithinLimits));
+    internal static string Session_SizeGovernorLimitWidth => Get(nameof(Session_SizeGovernorLimitWidth));
+    internal static string Session_SizeGovernorLimitHeight => Get(nameof(Session_SizeGovernorLimitHeight));
+    internal static string Session_SizeGovernorEdgeWidth => Get(nameof(Session_SizeGovernorEdgeWidth));
+    internal static string Session_SizeGovernorEdgeHeight => Get(nameof(Session_SizeGovernorEdgeHeight));
+    internal static string Session_SizeGovernorLongEdgeWidth => Get(nameof(Session_SizeGovernorLongEdgeWidth));
+    internal static string Session_SizeGovernorLongEdgeHeight => Get(nameof(Session_SizeGovernorLongEdgeHeight));
+    internal static string Session_SizeSummaryProportions => Get(nameof(Session_SizeSummaryProportions));
+    internal static string Session_SizeDraftEnlargement => Get(nameof(Session_SizeDraftEnlargement));
+    internal static string Session_SizeEnlargementPlain => Get(nameof(Session_SizeEnlargementPlain));
+    internal static string Session_SizeTechnicalDetails => Get(nameof(Session_SizeTechnicalDetails));
+
     /// <summary>A resource in a named culture, for text written once in both languages (SCRUM-11148).</summary>
     internal static string InCulture(string key, CultureInfo culture) =>
         Manager.GetString(key, culture) ?? key;

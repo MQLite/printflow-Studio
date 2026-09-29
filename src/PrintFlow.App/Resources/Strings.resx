@@ -1004,7 +1004,7 @@
   <data name="DiagnosticPackage_PathScreenshot" xml:space="preserve"><value>Failure screenshot: {0}</value></data>
   <data name="DiagnosticPackage_PathLocalLog" xml:space="preserve"><value>Local diagnostic database: {0}</value></data>
   <data name="DiagnosticPackage_PathScreenshotFolder" xml:space="preserve"><value>Failure screenshot folder: {0}</value></data>
-  <data name="Session_PreflightHeading" xml:space="preserve"><value>Print size preflight</value></data>
+  <data name="Session_PreflightHeading" xml:space="preserve"><value>Print size check</value></data>
   <data name="Session_PreflightSourcePixels" xml:space="preserve"><value>Source pixels</value></data>
   <data name="Session_PreflightArtworkContent" xml:space="preserve"><value>Artwork content</value></data>
   <data name="Session_PreflightSelectedArtwork" xml:space="preserve"><value>Selected artwork</value></data>
@@ -1255,4 +1255,19 @@
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>Adjusting the edges is not available for this result. If something is cut off, choose {0}; you can then try again.</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>Not sure? Ask a skilled colleague to look before you choose. A TIFF changed outside PrintFlow cannot be imported.</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value> To change the print size first, use {0} below.</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>Choose a preset when a standard size is fine. A preset is a maximum, not the exact print size: a bigger picture is reduced to fit within it, a smaller one is never enlarged, and the proportions stay the same.</value></data>
+  <data name="Session_SizeHelpCustom" xml:space="preserve"><value>Choose {0} when one side must be an exact size. Pick that side ({1}, {2}, or {3} for the longer side of this picture) and enter it in millimetres. The other side follows the picture's proportions. If this needs the picture enlarged, you are asked first.</value></data>
+  <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>With these settings, the whole picture (including any see-through edges) would print at about {0:0.0} × {1:0.0} mm.</value></data>
+  <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>With the chosen size, the whole picture (including any see-through edges) is set to print at about {0:0.0} × {1:0.0} mm.</value></data>
+  <data name="Session_SizeGovernorWithinLimits" xml:space="preserve"><value>The picture is already within the maximum, so it is not reduced, and it is not enlarged to fill the maximum.</value></data>
+  <data name="Session_SizeGovernorLimitWidth" xml:space="preserve"><value>The width reaches the maximum, so the width decides the size.</value></data>
+  <data name="Session_SizeGovernorLimitHeight" xml:space="preserve"><value>The height reaches the maximum, so the height decides the size.</value></data>
+  <data name="Session_SizeGovernorEdgeWidth" xml:space="preserve"><value>The width you entered decides the size.</value></data>
+  <data name="Session_SizeGovernorEdgeHeight" xml:space="preserve"><value>The height you entered decides the size.</value></data>
+  <data name="Session_SizeGovernorLongEdgeWidth" xml:space="preserve"><value>The long edge you entered is this picture's width, so the width decides the size.</value></data>
+  <data name="Session_SizeGovernorLongEdgeHeight" xml:space="preserve"><value>The long edge you entered is this picture's height, so the height decides the size.</value></data>
+  <data name="Session_SizeSummaryProportions" xml:space="preserve"><value>The picture keeps its proportions.</value></data>
+  <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>At this size the picture would have to be enlarged, so the print may look soft or blurry. If you confirm this size, you will be asked whether to accept that.</value></data>
+  <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>At this size the picture has to be enlarged, so the print may look soft or blurry. Choose {0} to pick a smaller size, which needs less enlarging, or {1} to accept this. While this size needs enlarging, {2} stays unavailable until you accept.</value></data>
+  <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>Technical details (pixels and PPI)</value></data>
 </root>

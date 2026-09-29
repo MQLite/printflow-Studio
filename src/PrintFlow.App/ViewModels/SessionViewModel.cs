@@ -3725,6 +3725,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private void OnOperatorLanguageChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(string.Empty);
+        RefreshPreflightLanguage();
         foreach (FinalSaveTargetRow row in FinalSaveTargets) row.Refresh();
         foreach (FinalSaveRecordRow row in FinalSaveRecords) row.Refresh();
     }
