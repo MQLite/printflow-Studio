@@ -1,3 +1,81 @@
+# PF-OPUX-v1 — SCRUM-11152 current handoff
+
+2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11152-impl-v1`. **Implementation, verification, independent review (two rounds), code MASTER_PUSH_VERIFIED and Jira synchronization complete. SCRUM-11152 is In Review. AC1 and AC5 are PARTIAL, the owner copy review is OPEN, and the Jira human check is NOT RUN. Stop at 11152; SCRUM-11153 not started.**
+
+**Delivered.** Home now shows one readiness summary built from what Production Readiness last observed in this run:
+- **Not checked yet**: nothing observed since PrintFlow started. An earlier run's pass or the startup preset check never counts.
+- **Checking**: a reading has started but has no result yet.
+- **Ready to process when last checked**: shown with that reading's own `ObservedAt`, in local time with the date.
+- **Automatic processing is blocked**: gives the report's first blocking reason in the readiness screen's wording. A live check that has not run reads "no current result… choose Safe recovery and recheck".
+- **Readiness is not confirmed**: the last check threw or was cancelled, or its report named no reason.
+
+It has one button, the existing Production readiness screen. Startup recovery counts are under a collapsed "Startup details / 启动详情". The preset-not-verified, recovery-not-run and retention warnings stay visible. The Recovery list, its actions, correction navigation and the 11151 notice + Error details are unchanged. The part above the lists scrolls on its own once it would crowd them.
+
+**How.**
+- `ReadinessObservationAccessor` is an app-lifetime, in-memory singleton that is never persisted and starts empty each run.
+- It uses latest-ticket-wins semantics: a started reading hides the older report, a thrown or cancelled reading withdraws it, and a late earlier completion is ignored.
+- It is fed by `EnvironmentReadinessViewModel` (passive and live readings) and `SettingsViewModel` (the same passive `Read`).
+- `HomeReadinessSummary` restates no rule, and Home reads memory only.
+
+No new check, gate, persistence, production authorisation or processor activity.
+
+**Publication and verification**
+- Code: [a71927fcfe09f3644be74bbc9718321a220e670c](https://github.com/MQLite/printflow-Studio/commit/a71927fcfe09f3644be74bbc9718321a220e670c), 25 paths, normal fast-forward from `d017fdb`. Fetch, `ls-remote` and a GitHub REST readback agree. The `gh` CLI is not installed; the REST readback was an unauthenticated GET of the public repository.
+- Settled candidate (clean `--no-incremental` build, 0 warnings/errors). Counts overlap:
+  - focused 155/155;
+  - architecture 473/473;
+  - safe combined UI 711/711;
+  - final test class 30/30 after the test-only follow-ups.
+- Test-first evidence:
+  - behavioural RED 16/27 before wiring;
+  - RED 5/30 against the reverted review fixes;
+  - three mutations caught.
+- Renders: 32 final synthetic 96-DPI renders, 8 capture contexts × en/zh-CN × 1000×700 and 1920×1040. Materially different states were inspected.
+- Independent review: one fresh read-only reviewer over two rounds; no blocking defect remains, and the reviewer ran no tests.
+  - Round 1 found F1 (a false "prerequisite failed" reason) and F2 (unrecorded gate re-verification) at P1, plus F3 (cancel shown as a fault) and F4 (lists squeezed to 1px) at P2.
+  - F1, F3, F4 and F5 are fixed. F2 is dispositioned: Ready is worded as a past result and AC1 stays PARTIAL.
+- This docs commit follows the code commit. Its verified SHA and the final tip are recorded only in the local final audit, the owner-review packet and the execution report.
+
+**Jira and export**
+- Transitions: To Do → In Progress (21) at implementation start, then In Progress → In Review (31) after verified code publication.
+- One evidence comment, `10186`, with marker `PF-OPUX-v1-SCRUM-11152-impl-v1`.
+- Final read `2026-09-29T21:57:25.846Z`: 17 issues, 26 Blocks links, 51 string labels, 34 exact timestamps, complete comments, one marker. Only this issue and its embedded link status on 11154/11155 changed. A first readback taken without the `parent` field was set aside as NOT A RESULT.
+- [CSV](SCRUM-11152_JIRA_FINAL.csv): unchanged 23-column schema, UTF-8 BOM. Both the exporter and the independent fidelity oracle PASS. The other 16 issues are READ_ONLY.
+
+**Open acceptance and limits**
+- **AC1 PARTIAL.** Two readings are not recorded, so after a later refusal Home can still show an earlier "Ready to process when last checked":
+  - the gate's own re-verification before each production step (`VerifiedEnvironmentGate.AuthoriseProduction`);
+  - `DiagnosticPackageService` readings.
+
+  The owner option to downgrade Home on `EnvironmentNotVerified` is documented and not implemented.
+- **AC5 PARTIAL.** Only synthetic 96 DPI renders exist. Display scaling, real keyboard traversal and the Jira human check are NOT RUN.
+- The owner must review the [bilingual copy](SCRUM-11152_COPY_REVIEW.md). No acceptance is inferred from the implementation brief.
+- Accepted residuals (see [plan](SCRUM-11152_PLAN.md)):
+  - Home refreshes its snapshot on open and on Refresh only;
+  - cancelling right after a real failure shows "not confirmed";
+  - Settings moved to the title row;
+  - `Preset_*` keys are unused.
+- Excluded and NOT RUN: real-window/UIA classes, ApplicationStartup and ProductionComposition paths (including `ApplicationStartupTests`, which reads `StartupSummary`, and `HomeAndWorkflowSelectionTests`). The known hanging recovery test remains excluded and NOT PASS.
+- All earlier open items are still open: 11151 owner copy review, AC1 diagnostic-navigation gap and legacy attempt wording; 11150 inline-validation residual, PNG approval and physical-input checks.
+
+**Owner-review packet (new convention).** Every task now finishes with one self-contained packet and ZIP per issue per run. The layout and rules are in [`doc/owner-review/README.md`](../../../doc/owner-review/README.md). Packets, ZIPs and `LATEST.md` stay local and ignored by Git; only the README is tracked. This run's packet includes the still-pending 11151 copy review under `related-pending/`, with its originals untouched.
+
+**Evidence and routing**
+
+Public: [plan, source-to-display matrix and AC map](SCRUM-11152_PLAN.md), [copy review](SCRUM-11152_COPY_REVIEW.md), the CSV and the audit.
+Local only:
+- `artifacts/pf-opux-scrum11152/`: RESULTS, both review records, raw Jira responses, logs/TRX and renders;
+- `SCRUM-11152_JIRA_READBACK.json` (account metadata; gitignored);
+- `doc/owner-review/SCRUM-11152/`.
+
+Claude adaptation v1.2 of policy v2.4, `route_offset: 0`, Opus High. The host model is `claude-opus-5-5`; effort is UNVERIFIED. No Sonnet unit. One `personal-dev-reviewer` subagent (definition `opus`) reported `claude-opus-5-5` from its context. No global configuration changed.
+
+Prior 11149/11150/11151 audit residues are preserved byte-for-byte and never staged. After the docs publication, one deliberate local 11152 final-audit residue will record the docs SHA.
+
+Prior handoff bytes are preserved verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11151 current handoff
 
 2026-09-29 NZ. Task `PF-OPUX-v1-SCRUM-11151-impl-v1`. **Implementation, final verification, independent review, code MASTER_PUSH_VERIFIED and Jira synchronization complete. SCRUM-11151 is In Review; owner bilingual copy review remains OPEN. Stop at 11151.**

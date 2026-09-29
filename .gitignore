@@ -64,6 +64,12 @@ displays.json
 # and the three snapshots committed before this rule (no author data) stay tracked.
 /docs/codex/printflow-operator-ux-backlog/*_JIRA_READBACK.json
 
+# --- Owner-review packets (SCRUM-11152) -------------------------------------
+# Per-issue/per-run packet folders, their ZIPs and the LATEST.md pointer are local
+# deliverables. Only the convention README is tracked.
+/doc/owner-review/*
+!/doc/owner-review/README.md
+
 # --- Local production evidence (repository root only) -----------------------
 /signoff/
 /preset/

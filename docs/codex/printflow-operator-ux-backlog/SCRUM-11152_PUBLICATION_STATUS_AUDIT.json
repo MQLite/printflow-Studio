@@ -1,0 +1,136 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11152-impl-v1",
+  "planningId": "PF-OPUX-v1-home-readiness-summary",
+  "authority": "Owner's SCRUM-11152 implementation prompt v1 approves the bounded interaction brief and authorizes implementation, targeted verification, one independent review with in-scope fixes, direct master publication, SCRUM-11152 Jira lifecycle updates and the owner-review packet. No deployment, production startup/migration, shared-desktop operation or other-issue writes.",
+  "routing": {
+    "policy": "Claude adaptation v1.2 of development-routing v2.4",
+    "routeOffset": 0,
+    "routeOffsetResult": "UNCHANGED",
+    "context": "CONTINUE",
+    "normalRoute": "Opus High",
+    "actualModel": "claude-opus-5-5 (host context)",
+    "actualEffort": "UNVERIFIED",
+    "sonnetUnits": 0,
+    "subagents": [
+      {
+        "role": "independent read-only reviewer (two rounds, same context)",
+        "definition": "personal-dev-reviewer, model: opus",
+        "reportedRuntime": "claude-opus-5-5 per its own context; effort UNVERIFIED",
+        "ranTests": false
+      }
+    ]
+  },
+  "git": {
+    "repository": "MQLite/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "startingHead": "d017fdba365bd3425585688acd09b6b179d380d2",
+    "preservedPriorResidues": {
+      "SCRUM-11149_PUBLICATION_STATUS_AUDIT.json": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "SCRUM-11150_PUBLICATION_STATUS_AUDIT.json": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD",
+      "SCRUM-11151_PUBLICATION_STATUS_AUDIT.json": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228"
+    },
+    "hooksAndAutomation": "No .github directory, no active git hooks, no core.hooksPath. Push triggers no deployment or migration. No deployment performed.",
+    "codeCommit": {
+      "sha": "a71927fcfe09f3644be74bbc9718321a220e670c",
+      "url": "https://github.com/MQLite/printflow-Studio/commit/a71927fcfe09f3644be74bbc9718321a220e670c",
+      "paths": 25,
+      "tree": "bd6ba3903e14ab25977aff0771c99e692e3629c9",
+      "parent": "d017fdba365bd3425585688acd09b6b179d380d2",
+      "push": "d017fdb..a71927f master -> master; normal fast-forward",
+      "candidateIdentity": "Staged paths equal the final candidate list; every file matched the candidate SHA-256 manifest before staging; no product change after the settled candidate-02 runs",
+      "publication": "MASTER_PUSH_VERIFIED",
+      "verification": "local HEAD, fetched origin/master, ls-remote and GitHub REST branches/master all a71927f; REST commit readback: same parent, tree and 25 files. REST GET unauthenticated (public repository; gh CLI not installed)",
+      "coAuthoredByTrailer": false,
+      "privacyScan": "No e-mail, account id, credential, token or workstation user path in the staged diff"
+    },
+    "documentationCommit": {
+      "status": "Recorded in the local final copy of this audit and in the owner-review packet only; the committed copy predates it by design (no self-referential commit)."
+    }
+  },
+  "change": {
+    "summary": "Home readiness summary from the latest readiness observation of this run; startup recovery counts under a collapsed Startup details expander; warnings stay visible; upper area scrolls on overflow.",
+    "states": ["NotChecked", "Checking", "Ready (when last checked)", "Blocked (report's first blocking reason)", "NotConfirmed (unfinished or no reason)"],
+    "source": "ReadinessObservationAccessor: app-lifetime in-memory singleton, latest-ticket-wins, fed by EnvironmentReadinessViewModel (Read and RunLiveChecksAsync) and SettingsViewModel (Read); read-only for Home; never persisted; not read by any gate or workflow",
+    "newResourceKeys": 20,
+    "locales": ["en", "zh-CN"],
+    "copyReview": "SCRUM-11152_COPY_REVIEW.md",
+    "unchanged": "IEnvironmentDiagnostics, VerifiedEnvironmentGate, verifier, production authorisation, persistence, Recovery list/actions, correction navigation, 11151 notice and Error details, Import/Resume/recovery eligibility, StartupSummary"
+  },
+  "verification": {
+    "build": { "command": "dotnet build PrintFlowStudio.sln -c Debug --no-incremental", "warnings": 0, "errors": 0 },
+    "behavioralRed": { "beforeWiring": "16 failed of 27", "beforeReviewFixes": "5 failed of 30 (F1, F3 returned-cancel, F4 x2, F5)" },
+    "mutationsKilled": 3,
+    "settledCandidate02": { "focused": "155/155", "architecture": "473/473", "safeCombinedUi": "711/711" },
+    "finalClass": "30/30 on a clean build after test-only follow-ups",
+    "countsOverlap": true,
+    "renders": { "count": 32, "contexts": 8, "locales": ["en", "zh-CN"], "viewports": ["1000x700", "1920x1040"], "dpi": 96, "inspection": "Materially different states inspected from the final source; earlier render sets are not final" },
+    "independentReview": {
+      "round1": "NOT ACCEPTABLE AS-IS: F1, F2 P1; F3, F4 P2; F5-F9 P3",
+      "round2": "F1, F3, F4, F5, F6 CLOSED; F2 dispositioned (option b: Ready worded as past, AC1 PARTIAL); F7, F8 accepted residuals; new P3s N1 (kept), N2, N3 (done); no blocking defect",
+      "reviewerRanTests": false
+    },
+    "exclusions": "Real-window/UIA classes, ApplicationStartup classes and case, ProductionCompositionTests, OperatorInteractive category; known hanging ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment remains excluded and NOT PASS; 11,531 workflow/persistence and native-delivery groups not rerun",
+    "localEvidence": "artifacts/pf-opux-scrum11152/ (RESULTS.md, review records, logs/TRX, renders, raw Jira responses, candidate manifests)"
+  },
+  "jira": {
+    "site": "https://yituoxx.atlassian.net",
+    "issue": { "id": "10882", "key": "SCRUM-11152", "parent": "SCRUM-11139" },
+    "transitionsDiscovered": { "11": "To Do", "21": "In Progress", "31": "In Review", "41": "Done" },
+    "transitions": [
+      { "id": "21", "before": "To Do", "after": "In Progress", "when": "implementation start" },
+      { "id": "31", "before": "In Progress", "after": "In Review", "when": "after verified code publication and evidence comment", "readbackUpdated": "2026-09-30T10:55:55.112+1300" }
+    ],
+    "finalStatus": "In Review",
+    "whyNotDone": "AC1 and AC5 PARTIAL; owner copy review and Jira human check open",
+    "comment": { "id": "10186", "marker": "PF-OPUX-v1-SCRUM-11152-impl-v1", "created": "2026-09-30T10:55:50.349+1300", "preReadMarkerCount": 0, "finalMarkerCount": 1 },
+    "otherIssues": "Read-only; no comments, transitions or field updates",
+    "readback": {
+      "readAt": "2026-09-29T21:57:25.846Z",
+      "pages": 1,
+      "isLast": true,
+      "issues": 17,
+      "blocksLinks": 26,
+      "stringLabels": 51,
+      "exactTimestamps": 34,
+      "commentsComplete": true,
+      "rawEvidence": "artifacts/pf-opux-scrum11152/jira-final-raw.json",
+      "rawSha256": "4B77DDE66E1C053E82A3E66F065B50AB9497388269E5DCE6ADDCA090EE4D6103",
+      "snapshot": "SCRUM-11152_JIRA_READBACK.json (local only; gitignored account metadata)",
+      "snapshotSha256": "AE4B4B7D88C1003FA1AB95165C084A1961A5B94E6A2D2F030409389CC5A5258C",
+      "supersededAttempt": "A first readback requested without the parent field was refused by the exporter and kept locally as NOT A RESULT"
+    },
+    "drift": "Only SCRUM-11152 status/updated/new comment, plus the embedded SCRUM-11152 status on SCRUM-11154/11155 link entries. Comment-author metadata fields differ only by readback transport representation. No description, AC, label, parent, link or prior-comment change.",
+    "csv": {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_JIRA_FINAL.csv",
+      "sha256": "18D603BDCF44C9B1D6C671FB06AE4026E9F1615DE5AFF2437C0D9599EACCC504",
+      "rows": 17,
+      "columns": 23,
+      "headerIdenticalTo11151Csv": true,
+      "utf8Bom": true,
+      "exporter": "PASS",
+      "independentFidelityOracle": "PASS; zero failures",
+      "writeActions": { "SCRUM-11152": "STATUS_TRANSITION_AND_COMMENT", "others": "READ_ONLY" },
+      "exporterChange": "11152 task allowlist entry and marker mapping only; no schema change"
+    }
+  },
+  "remainingAcceptance": [
+    "AC1 PARTIAL: gate re-verification (VerifiedEnvironmentGate.AuthoriseProduction) and DiagnosticPackageService readings are not recorded; after a later refusal Home can show an earlier 'Ready to process when last checked' until the next readiness or Settings reading. Owner option (downgrade on EnvironmentNotVerified) documented, not implemented.",
+    "AC5 PARTIAL: display scaling other than 96 DPI, real keyboard traversal and the Jira human check NOT RUN.",
+    "Owner bilingual copy review of SCRUM-11152_COPY_REVIEW.md OPEN."
+  ],
+  "nonblockingResiduals": [
+    "Home snapshots on open and Refresh only",
+    "Cancel right after a genuine failure shows 'not confirmed'",
+    "Settings button moved to the title row (tab order Settings, Production readiness, Choose file)",
+    "Preset_Verified/Preset_NotVerified keys unused",
+    "Technical details names ExternalApplicationAutomationLock in the 'no current result' case",
+    "English button name unquoted inside Home_ReadinessLiveCheckPending"
+  ],
+  "notPerformed": [
+    "Deployment, production startup, migration, shared-desktop operation, live application runs",
+    "SCRUM-11153 or any other issue's work",
+    "Global rule, memory, dependency or toolchain changes"
+  ],
+  "ownerReviewPacket": "Local only under doc/owner-review/SCRUM-11152/; path, ZIP and SHA-256 in the local final audit, LATEST.md and the execution report"
+}
