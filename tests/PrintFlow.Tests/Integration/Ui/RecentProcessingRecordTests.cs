@@ -197,7 +197,7 @@ public sealed class RecentProcessingRecordTests
         GatedThumbnailService gate = new(harness.Previews);
         HomeViewModel home = new(
             harness.Sessions, gate, new RecordingNavigation(), new StubFilePicker(),
-            new PrintFlow.App.Startup.StartupStatusAccessor());
+            new PrintFlow.App.Startup.StartupStatusAccessor(), new PrintFlow.App.Startup.ReadinessObservationAccessor());
 
         await home.RefreshCommand.ExecuteAsync(null);
         await gate.FirstCallStarted;

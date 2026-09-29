@@ -6,6 +6,7 @@ using PrintFlow.App.Localisation;
 using PrintFlow.App.Navigation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Settings;
+using PrintFlow.App.Startup;
 using PrintFlow.Domain.Outputs;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Settings;
@@ -80,6 +81,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly SettingsDefaults _defaults;
     private readonly LocalDiagnosticLocations _locations;
 
+    /// <summary>Where the passive reading below is recorded for Home (SCRUM-11152).</summary>
+    private readonly ReadinessObservationAccessor _observations;
+
     private EnvironmentReadinessReport? _report;
 
     [ObservableProperty]
@@ -106,7 +110,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         IEnvironmentDiagnostics diagnostics,
         INavigationService navigation,
         SettingsDefaults defaults,
-        LocalDiagnosticLocations locations)
+        LocalDiagnosticLocations locations,
+        ReadinessObservationAccessor observations)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(localisation);
@@ -114,6 +119,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(defaults);
         ArgumentNullException.ThrowIfNull(locations);
+        ArgumentNullException.ThrowIfNull(observations);
 
         _settings = settings;
         _localisation = localisation;
@@ -121,6 +127,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _navigation = navigation;
         _defaults = defaults;
         _locations = locations;
+        _observations = observations;
 
         foreach (OperatorLanguage language in OperatorLanguages.All)
         {
@@ -249,6 +256,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
 
         IsBusy = true;
+        long? observation = null;
         try
         {
             SelectedLanguage = OptionFor(_localisation.Current);
@@ -270,10 +278,17 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             // Off the UI thread for the same reason Production Readiness reads off it: the
             // first reading of a run hashes the accepted installations and the evidence chain.
-            Apply(await Task.Run(_diagnostics.Read, cancellationToken).ConfigureAwait(true));
+            // Recorded for Home too, so a newer answer taken here is never hidden behind an older
+            // one taken on the readiness screen (SCRUM-11152).
+            observation = _observations.Begin();
+            EnvironmentReadinessReport report =
+                await Task.Run(_diagnostics.Read, cancellationToken).ConfigureAwait(true);
+            _observations.Complete(observation.Value, report);
+            Apply(report);
         }
         finally
         {
+            if (observation is { } started) _observations.Abandon(started);
             IsBusy = false;
         }
     }

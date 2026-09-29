@@ -606,7 +606,7 @@ public sealed class ColleagueCorrectionTests
         AutomationLockState lockBefore = (await h.Repository.GetAutomationLockAsync(default)).Value;
         StubFilePicker picker = new(CorrectedPng(h));
         RecordingNavigation navigation = new();
-        HomeViewModel home = new(service, h.Previews, navigation, picker, new StartupStatusAccessor());
+        HomeViewModel home = new(service, h.Previews, navigation, picker, new StartupStatusAccessor(), new ReadinessObservationAccessor());
         await home.RefreshCommand.ExecuteAsync(null);
         RecoverySessionRow row = home.RecoverySessions.Single();
         row.HasOpenCorrection.ShouldBeTrue();
@@ -701,7 +701,7 @@ public sealed class ColleagueCorrectionTests
         (SessionView handedOff, CorrectionHandoffView panel, _) = await CrashedCorrectionImportAsync(h);
         SessionService service = Service(h);
         RecordingNavigation navigation = new();
-        HomeViewModel staleHome = new(service, h.Previews, navigation, new StubFilePicker(), new StartupStatusAccessor());
+        HomeViewModel staleHome = new(service, h.Previews, navigation, new StubFilePicker(), new StartupStatusAccessor(), new ReadinessObservationAccessor());
         await staleHome.RefreshCommand.ExecuteAsync(null);
         RecoverySessionRow staleCard = staleHome.RecoverySessions.Single();
 

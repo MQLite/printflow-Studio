@@ -204,6 +204,41 @@ public sealed class EnvironmentGateCompositionTests
     }
 
     /// <summary>
+    /// Home shows what the composed readiness screen read in this run, and a newly composed
+    /// graph starts unchecked (SCRUM-11152).
+    /// </summary>
+    /// <remarks>
+    /// The real registrations, not a harness: the transient screens share the one in-memory
+    /// holder only because the graph registers it once, and a second graph — a restart — has its
+    /// own, empty one. Neither Home resolution reads the workstation.
+    /// </remarks>
+    [Fact]
+    public async Task Home_shows_the_composed_readiness_reading_and_a_new_graph_starts_unchecked()
+    {
+        using TempApplication application = new();
+        using (ServiceProvider services = Compose(application))
+        {
+            services.GetRequiredService<ReadinessObservationAccessor>()
+                .ShouldBeSameAs(services.GetRequiredService<ReadinessObservationAccessor>());
+            services.GetRequiredService<HomeViewModel>().Readiness.State.ShouldBe(HomeReadinessState.NotChecked);
+
+            EnvironmentReadinessViewModel screen = services.GetRequiredService<EnvironmentReadinessViewModel>();
+            await screen.OpenAsync(CancellationToken.None);
+            screen.IsReady.ShouldBeFalse("the synthetic layout is not the accepted workstation.");
+
+            HomeReadinessSummary home = services.GetRequiredService<HomeViewModel>().Readiness;
+            home.State.ShouldNotBe(HomeReadinessState.Ready);
+            home.State.ShouldBe(screen.HasBlockingFailures ? HomeReadinessState.Blocked : HomeReadinessState.NotConfirmed);
+            home.CheckedAtText.ShouldContain(screen.ObservedAt);
+            if (screen.HasBlockingFailures)
+                home.TechnicalDetailText.ShouldContain(screen.BlockingFailures[0].SupportKey);
+        }
+
+        using ServiceProvider restarted = Compose(application);
+        restarted.GetRequiredService<HomeViewModel>().Readiness.State.ShouldBe(HomeReadinessState.NotChecked);
+    }
+
+    /// <summary>
     /// Fake work stays usable on a workstation that is not production-ready
     /// (Epic 11500 Part C §12).
     /// </summary>

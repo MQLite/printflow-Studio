@@ -1,4 +1,5 @@
 using System.Globalization;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Results;
 using PrintFlow.Infrastructure.Gate;
@@ -123,7 +124,7 @@ public sealed class ImmutableBaselineTrustModelTests
 
             using WorkstationVerificationFixture fixture = new();
             VerifiedEnvironmentGate gate = new(fixture.CreateVerifier());
-            EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation());
+            EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation(), new ReadinessObservationAccessor());
 
             await screen.OpenAsync(CancellationToken.None);
             screen.IsReady.ShouldBeTrue();
@@ -162,7 +163,7 @@ public sealed class ImmutableBaselineTrustModelTests
     {
         using WorkstationVerificationFixture fixture = new();
         VerifiedEnvironmentGate gate = new(fixture.CreateVerifier());
-        EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation());
+        EnvironmentReadinessViewModel screen = new(gate, new RecordingNavigation(), new ReadinessObservationAccessor());
 
         await screen.OpenAsync(CancellationToken.None);
         int perRead = fixture.Facts.DynamicReadCount;
@@ -193,7 +194,7 @@ public sealed class ImmutableBaselineTrustModelTests
 
         // The restart: a newly constructed graph, exactly as composition would build it.
         VerifiedEnvironmentGate restarted = new(fixture.CreateVerifier());
-        EnvironmentReadinessViewModel screen = new(restarted, new RecordingNavigation());
+        EnvironmentReadinessViewModel screen = new(restarted, new RecordingNavigation(), new ReadinessObservationAccessor());
         await screen.OpenAsync(CancellationToken.None);
 
         screen.IsReady.ShouldBeFalse();

@@ -978,7 +978,7 @@ public sealed class ViewRenderingTests
 
     private static EnvironmentReadinessViewModel ReadinessScreen(WorkstationVerificationFixture fixture) =>
         new(new PrintFlow.Infrastructure.Gate.VerifiedEnvironmentGate(fixture.CreateVerifier()),
-            new RecordingNavigation());
+            new RecordingNavigation(), new PrintFlow.App.Startup.ReadinessObservationAccessor());
 
     private static readonly Size Viewport = new(1200, 900);
 

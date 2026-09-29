@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.App.Views;
 using PrintFlow.Infrastructure.Gate;
@@ -428,7 +429,7 @@ public sealed class EnvironmentReadinessScreenTests
                 [new EnvironmentCheckReport(
                     "OperatingSystem", EnvironmentCheckStatus.Passed, true,
                     "EnvironmentCheck_OperatingSystem", "matched")])),
-            new RecordingNavigation());
+            new RecordingNavigation(), new ReadinessObservationAccessor());
 
         await screen.OpenAsync(CancellationToken.None);
 
@@ -461,7 +462,7 @@ public sealed class EnvironmentReadinessScreenTests
                         "FilesystemReadOnlyPolicyAdvisory", EnvironmentCheckStatus.Advisory, false,
                         "EnvironmentCheck_FilesystemReadOnlyPolicyAdvisory", "16 of 27 are writable"),
                 ])),
-            new RecordingNavigation());
+            new RecordingNavigation(), new ReadinessObservationAccessor());
 
         await screen.OpenAsync(CancellationToken.None);
 
@@ -477,7 +478,7 @@ public sealed class EnvironmentReadinessScreenTests
         using WorkstationVerificationFixture fixture = new();
         RecordingNavigation navigation = new();
         EnvironmentReadinessViewModel screen = new(
-            new VerifiedEnvironmentGate(fixture.CreateVerifier()), navigation);
+            new VerifiedEnvironmentGate(fixture.CreateVerifier()), navigation, new ReadinessObservationAccessor());
 
         await screen.OpenAsync(CancellationToken.None);
         await screen.BackToHomeCommand.ExecuteAsync(null);
@@ -505,7 +506,7 @@ public sealed class EnvironmentReadinessScreenTests
                 "Open and close exact probe", "(not run)", EnvironmentCheckPhase.LiveApplication),
         ]);
         StubDiagnostics diagnostics = new(passive, live);
-        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation(), new ReadinessObservationAccessor());
 
         await screen.OpenAsync(CancellationToken.None);
         diagnostics.LiveCalls.ShouldBe(0, "opening and refreshing the page must stay passive");
@@ -549,7 +550,7 @@ public sealed class EnvironmentReadinessScreenTests
             };
             EnvironmentReadinessReport attempted = passive with { Checks = [actualFailure] };
             EnvironmentReadinessViewModel screen = new(new StubDiagnostics(passive, attempted),
-                new RecordingNavigation());
+                new RecordingNavigation(), new ReadinessObservationAccessor());
 
             await screen.OpenAsync(CancellationToken.None);
 
@@ -586,7 +587,7 @@ public sealed class EnvironmentReadinessScreenTests
             },
         };
         StubDiagnostics diagnostics = new(failed);
-        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation(), new ReadinessObservationAccessor());
 
         await screen.RunLiveChecksCommand.ExecuteAsync(null);
 
@@ -609,7 +610,7 @@ public sealed class EnvironmentReadinessScreenTests
                 Phase: EnvironmentCheckPhase.LiveApplication),
         ]);
         UnwindingDiagnostics diagnostics = new(failed);
-        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation());
+        EnvironmentReadinessViewModel screen = new(diagnostics, new RecordingNavigation(), new ReadinessObservationAccessor());
         await screen.OpenAsync(CancellationToken.None);
 
         Task run = screen.RunLiveChecksCommand.ExecuteAsync(null);
@@ -681,7 +682,7 @@ public sealed class EnvironmentReadinessScreenTests
                     "EnvironmentCheck_PhotoshopTestImageRoundTrip", "CloseGuard: owned Save As surface not observed.",
                     Phase: EnvironmentCheckPhase.LiveApplication),
             ]);
-            EnvironmentReadinessViewModel screen = new(new StubDiagnostics(failed), new RecordingNavigation());
+            EnvironmentReadinessViewModel screen = new(new StubDiagnostics(failed), new RecordingNavigation(), new ReadinessObservationAccessor());
             await screen.OpenAsync(CancellationToken.None);
 
             var rendered = WpfRendering.RenderExpectingNoBindingErrors(
@@ -727,7 +728,7 @@ public sealed class EnvironmentReadinessScreenTests
         ?? throw new InvalidOperationException($"No resource '{key}'.");
 
     private static EnvironmentReadinessViewModel ScreenOver(WorkstationVerificationFixture fixture) =>
-        new(new VerifiedEnvironmentGate(fixture.CreateVerifier()), new RecordingNavigation());
+        new(new VerifiedEnvironmentGate(fixture.CreateVerifier()), new RecordingNavigation(), new ReadinessObservationAccessor());
 
     private static async Task InCulture(string name, Func<EnvironmentReadinessViewModel, Task> assert)
     {

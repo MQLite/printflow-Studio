@@ -2,6 +2,7 @@ using System.Globalization;
 using PrintFlow.App.Localisation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Settings;
+using PrintFlow.App.Startup;
 using PrintFlow.App.ViewModels;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Ports;
@@ -69,7 +70,10 @@ internal sealed class SettingsScreenHarness : IDisposable
         ISettingsRepository? settings = null, IEnvironmentDiagnostics? diagnostics = null) =>
         new(settings ?? Settings, Localisation, diagnostics ?? Diagnostics, Navigation, Defaults,
             new LocalDiagnosticLocations(_harness.Database.Path,
-                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")));
+                System.IO.Path.Combine(_harness.Workspace.Root, "Evidence")), Observations);
+
+    /// <summary>Where each screen records its passive reading for Home (SCRUM-11152).</summary>
+    public ReadinessObservationAccessor Observations { get; } = new();
 
     /// <summary>A Settings screen that has already loaded, as navigation would have left it.</summary>
     public async Task<SettingsViewModel> OpenAsync(

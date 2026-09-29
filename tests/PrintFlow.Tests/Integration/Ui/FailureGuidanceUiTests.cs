@@ -648,7 +648,7 @@ public sealed class FailureGuidanceUiTests
     }
 
     private static HomeViewModel Home(ISessionService service, SessionServiceHarness h, RecordingNavigation navigation) =>
-        new(service, h.Previews, navigation, new StubFilePicker(), new StartupStatusAccessor());
+        new(service, h.Previews, navigation, new StubFilePicker(), new StartupStatusAccessor(), new ReadinessObservationAccessor());
 
     private static OperatorLanguage Language(string culture) =>
         culture == "en" ? OperatorLanguage.English : OperatorLanguage.SimplifiedChinese;

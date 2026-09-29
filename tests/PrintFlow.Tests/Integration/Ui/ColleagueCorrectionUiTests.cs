@@ -193,7 +193,7 @@ public sealed class ColleagueCorrectionUiTests
         SessionView waiting = await MustAsync(RequestAsync(service, await AtBackgroundRemovalReviewAsync(h, service)));
         RecordingNavigation navigation = new();
         StubFilePicker picker = new(CorrectedPng(h));
-        HomeViewModel home = new(service, h.Previews, navigation, picker, new StartupStatusAccessor());
+        HomeViewModel home = new(service, h.Previews, navigation, picker, new StartupStatusAccessor(), new ReadinessObservationAccessor());
         await home.RefreshCommand.ExecuteAsync(null);
 
         home.RecentSessions.ShouldNotContain(r => r.Id == handedOff.Id, "a recovery job is shown once, on its card");
@@ -321,7 +321,7 @@ public sealed class ColleagueCorrectionUiTests
         using SessionServiceHarness h = new();
         await CrashedImportAsync(h);
         await MustAsync(RequestAsync(Service(h), await AtBackgroundRemovalReviewAsync(h, Service(h))));
-        HomeViewModel home = new(Service(h), h.Previews, new RecordingNavigation(), new StubFilePicker(), new StartupStatusAccessor());
+        HomeViewModel home = new(Service(h), h.Previews, new RecordingNavigation(), new StubFilePicker(), new StartupStatusAccessor(), new ReadinessObservationAccessor());
         await home.RefreshCommand.ExecuteAsync(null);
 
         var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = home }, WpfRendering.ReviewViewport, tree =>

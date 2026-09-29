@@ -191,7 +191,7 @@ public sealed class RecoverySurfaceTests
         SessionServiceHarness harness, ISessionService service,
         IFilePicker? picker = null, RecordingNavigation? navigation = null) =>
         new(service, harness.Previews, navigation ?? new RecordingNavigation(),
-            picker ?? new StubFilePicker(), new StartupStatusAccessor());
+            picker ?? new StubFilePicker(), new StartupStatusAccessor(), new ReadinessObservationAccessor());
 
     internal static async Task<SessionAggregate> Load(SessionServiceHarness h, SessionId id) =>
         (await h.Repository.LoadAsync(id, default)).Value!;

@@ -23,45 +23,96 @@
         <views:PreviewPayloadConverter x:Key="PreviewPayload" />
     </UserControl.Resources>
 
-    <Grid Margin="24">
+    <Grid x:Name="LayoutRoot" Margin="24" SizeChanged="OnLayoutSizeChanged">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="{Binding Title}"
-                   FontSize="26"
-                   FontWeight="SemiBold" />
+        <DockPanel Grid.Row="0" LastChildFill="True">
+            <Button DockPanel.Dock="Right"
+                    VerticalAlignment="Center"
+                    Content="{Binding SettingsLabel}"
+                    Command="{Binding ShowSettingsCommand}"
+                    AutomationProperties.AutomationId="Home.ShowSettings"
+                    AutomationProperties.Name="{Binding SettingsLabel}"
+                    Padding="10,4" />
+            <TextBlock Text="{Binding Title}"
+                       FontSize="26"
+                       FontWeight="SemiBold" />
+        </DockPanel>
 
-        <!-- Startup recovery and preset status: one line each. The one link out is to the
-             read-only Production Readiness screen (Epic 11500 Part C §3). -->
-        <StackPanel Grid.Row="1" Margin="0,6,0,16">
-            <TextBlock Text="{Binding StartupSummary}" TextWrapping="Wrap" Opacity="0.85" />
-            <TextBlock Text="{Binding PresetStatus}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0" />
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <Button Content="{Binding EnvironmentLabel}"
-                        Command="{Binding ShowEnvironmentCommand}"
-                        AutomationProperties.AutomationId="Home.ShowEnvironment"
-                        AutomationProperties.Name="{Binding EnvironmentLabel}"
-                        Padding="10,4"
-                        HorizontalAlignment="Left" />
-                <Button Content="{Binding SettingsLabel}"
-                        Command="{Binding ShowSettingsCommand}"
-                        AutomationProperties.AutomationId="Home.ShowSettings"
-                        AutomationProperties.Name="{Binding SettingsLabel}"
-                        Padding="10,4"
-                        Margin="8,0,0,0"
-                        HorizontalAlignment="Left" />
-            </StackPanel>
+        <!-- SCRUM-11152: what Production Readiness last observed in this run, in words, with its
+             one way to that screen. The button only navigates; nothing here starts a check. -->
+        <!-- SCRUM-11152: everything between the title and the lists. It scrolls on its own only
+             when it would take more than its share of the height (code-behind), so the Recovery
+             and Recent lists below always keep room to scroll to their last action. -->
+        <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
+                      AutomationProperties.AutomationId="Home.Upper">
+        <StackPanel>
+        <StackPanel Margin="0,8,0,14">
+            <Border BorderBrush="#33000000" BorderThickness="1" CornerRadius="6" Padding="14,10">
+                <StackPanel>
+                    <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="Home.Readiness.Heading" />
+                    <TextBlock Text="{Binding Readiness.StatusText}" FontSize="16" FontWeight="SemiBold"
+                               TextWrapping="Wrap" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Status" />
+                    <TextBlock Text="{Binding Readiness.ReasonText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Reason"
+                               Visibility="{Binding Readiness.HasReason, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding Readiness.CheckedAtText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.CheckedAt"
+                               Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding Readiness.HintText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Hint" />
+                    <Expander Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
+                              AutomationProperties.AutomationId="Home.Readiness.Details"
+                              AutomationProperties.Name="{Binding Readiness.DetailsLabel}"
+                              Visibility="{Binding Readiness.HasTechnicalDetail, Converter={StaticResource BoolToVisibility}}">
+                        <TextBox Text="{Binding Readiness.TechnicalDetailText, Mode=OneWay}" IsReadOnly="True"
+                                 TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
+                                 AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
+                    </Expander>
+                    <Button Content="{Binding EnvironmentLabel}"
+                            Command="{Binding ShowEnvironmentCommand}"
+                            AutomationProperties.AutomationId="Home.ShowEnvironment"
+                            AutomationProperties.Name="{Binding EnvironmentLabel}"
+                            Padding="10,4"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <!-- Startup warnings stay visible; only the counts that need no action fold away. -->
+            <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                       AutomationProperties.AutomationId="Home.Startup.PresetWarning"
+                       Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}" />
+            <TextBlock Text="{Binding RecoveryNotRunText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0"
+                       AutomationProperties.AutomationId="Home.Startup.RecoveryNotRun"
+                       Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}" />
+            <TextBlock Text="{Binding RetentionWarningText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0"
+                       AutomationProperties.AutomationId="Home.Startup.RetentionWarning"
+                       Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}" />
+            <Expander Header="{Binding StartupDetailsLabel}" Margin="0,6,0,0"
+                      AutomationProperties.AutomationId="Home.StartupDetails"
+                      AutomationProperties.Name="{Binding StartupDetailsLabel}">
+                <StackPanel Margin="0,4,0,0">
+                    <TextBlock Text="{Binding RecoveryCountsText}" TextWrapping="Wrap" Opacity="0.85"
+                               AutomationProperties.AutomationId="Home.StartupDetails.RecoveryCounts" />
+                    <TextBlock Text="{Binding RecoveryPendingText}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.StartupDetails.RecoveryPending"
+                               Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" Opacity="0.85" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.StartupDetails.Preset" />
+                </StackPanel>
+            </Expander>
         </StackPanel>
 
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
              drop anywhere rather than hunt for a target. -->
-        <Border Grid.Row="2"
+        <Border
                 BorderBrush="#33000000"
                 BorderThickness="1"
                 CornerRadius="6"
@@ -78,7 +129,7 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="3">
+        <StackPanel>
             <TextBlock Text="{Binding Notice}"
                        TextWrapping="Wrap"
                        Margin="0,12,0,0"
@@ -87,7 +138,10 @@
             <views:NoticeErrorDetails Margin="0,4,0,0" />
         </StackPanel>
 
-        <DockPanel Grid.Row="4" Margin="0,18,0,0">
+        </StackPanel>
+        </ScrollViewer>
+
+        <DockPanel Grid.Row="2" Margin="0,18,0,0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
                 <Button DockPanel.Dock="Right"
                         Content="{Binding RefreshLabel}"
@@ -103,7 +157,7 @@
                        Margin="0,4,0,0"
                        Visibility="{Binding HasNoRecentSessions, Converter={StaticResource BoolToVisibility}}" />
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.AutomationId="Home.Lists">
                 <StackPanel>
                     <StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
                         <TextBlock Text="{Binding RecoveryHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />

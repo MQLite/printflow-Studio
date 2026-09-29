@@ -330,7 +330,7 @@ public sealed class PdfPreparationWorkflowTests
             var service = Service(h, new WindowsPdfPreparationProcessor(h.FileWorkspace, h.FileInspector) { Authority = authority });
             var navigation = new RecordingNavigation();
             var picker = new StubFilePicker(h.Workspace.CreateSourceFile(fixture + ".pdf", PdfFixtures.Read(fixture)));
-            var home = new HomeViewModel(service, h.Previews, navigation, picker, new PrintFlow.App.Startup.StartupStatusAccessor());
+            var home = new HomeViewModel(service, h.Previews, navigation, picker, new PrintFlow.App.Startup.StartupStatusAccessor(), new PrintFlow.App.Startup.ReadinessObservationAccessor());
             await home.ChooseFileCommand.ExecuteAsync(null);
             var imported = navigation.WorkflowSelectionFor.ShouldNotBeNull();
             authority.Opens.ShouldBe(0);

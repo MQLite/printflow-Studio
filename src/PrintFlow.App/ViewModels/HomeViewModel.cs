@@ -78,20 +78,83 @@ public sealed partial class HomeViewModel : ObservableObject
         IArtefactPreviewService previews,
         INavigationService navigation,
         IFilePicker filePicker,
-        StartupStatusAccessor startupStatus)
+        StartupStatusAccessor startupStatus,
+        ReadinessObservationAccessor readiness)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(filePicker);
         ArgumentNullException.ThrowIfNull(startupStatus);
+        ArgumentNullException.ThrowIfNull(readiness);
 
         _sessions = sessions;
         _previews = previews;
         _navigation = navigation;
         _filePicker = filePicker;
         _startupStatus = startupStatus;
+        _readinessObservations = readiness;
+        Readiness = new HomeReadinessSummary(readiness.Current);
     }
+
+    // --- SCRUM-11152: the readiness summary and the startup details behind it ------------------
+
+    private readonly ReadinessObservationAccessor _readinessObservations;
+
+    /// <summary>
+    /// What the latest readiness observation of this run found, as Home's one summary.
+    /// </summary>
+    /// <remarks>
+    /// A snapshot of <see cref="ReadinessObservationAccessor"/> taken when the screen opens and
+    /// again on each ordinary refresh. Taking it reads memory only: Home never asks the
+    /// diagnostics seam, never starts a check and gates no command on the answer.
+    /// </remarks>
+    [ObservableProperty]
+    private HomeReadinessSummary _readiness;
+
+    /// <summary>The collapsed heading over the startup facts that need no action (SCRUM-11152).</summary>
+    public string StartupDetailsLabel => Strings.Resolve("Home_StartupDetails");
+
+    /// <summary>
+    /// What startup recovery counted, always in full: interrupted attempts, released locks and
+    /// quarantined files, or that it found nothing or did not run.
+    /// </summary>
+    public string RecoveryCountsText
+    {
+        get
+        {
+            StartupStatus? status = _startupStatus.Status;
+            if (status is null || !status.RecoveryExecuted) return Strings.Startup_RecoveryNotRun;
+            if (status.RecoveryReport is { IsNoOp: true }) return Strings.Startup_RecoveryClean;
+            return string.Format(CultureInfo.CurrentCulture, Strings.Startup_RecoverySummary,
+                status.RecoveredAttemptCount, status.ReleasedStaleLockCount, status.QuarantinedFileCount);
+        }
+    }
+
+    /// <summary>How many listed jobs wait for a recovery decision; empty when none do.</summary>
+    public string RecoveryPendingText => HasRecoverySessions
+        ? string.Format(CultureInfo.CurrentCulture, Strings.Home_RecoveryPending, RecoverySessions.Count)
+        : string.Empty;
+
+    /// <summary>Startup's own preset check, worded as the production setup file and nothing more.</summary>
+    public string PresetDetailText => Strings.Resolve(_startupStatus.Status?.PresetVerified == true
+        ? "Home_StartupPresetVerified" : "Home_StartupPresetNotVerified");
+
+    /// <summary>Kept visible, not folded into details: startup could not accept the preset.</summary>
+    public bool HasPresetWarning => _startupStatus.Status?.PresetVerified != true;
+
+    /// <summary>Kept visible, not folded into details: startup recovery did not run.</summary>
+    public bool HasRecoveryNotRunWarning => _startupStatus.Status is not { RecoveryExecuted: true };
+
+    public string RecoveryNotRunText => Strings.Startup_RecoveryNotRun;
+
+    /// <summary>Kept visible, not folded into details: local diagnostic cleanup did not finish.</summary>
+    public bool HasRetentionWarning => _startupStatus.Status?.DiagnosticRetentionReport?.Warning is not null;
+
+    public string RetentionWarningText => Strings.Startup_DiagnosticRetentionWarning;
+
+    /// <summary>Takes a fresh snapshot of what has already been observed. Observes nothing itself.</summary>
+    private void ReadReadiness() => Readiness = new HomeReadinessSummary(_readinessObservations.Current);
 
     /// <summary>Recent Processing, newest first, exactly as the service returned it.</summary>
     public ObservableCollection<RecentSessionRow> RecentSessions { get; } = [];
@@ -138,6 +201,11 @@ public sealed partial class HomeViewModel : ObservableObject
     /// One line describing what startup recovery did, so a restart after a crash says so
     /// visibly rather than only in a report object (Part 3C1 §6, Part 3C2 §12).
     /// </summary>
+    /// <remarks>
+    /// The screen itself now splits this line (SCRUM-11152): the counts sit under
+    /// <see cref="StartupDetailsLabel"/> as <see cref="RecoveryCountsText"/>, and the warnings stay
+    /// visible on their own. The combined form is unchanged for the startup checks that read it.
+    /// </remarks>
     public string StartupSummary
         => _startupStatus.Status?.DiagnosticRetentionReport?.Warning is not null
             ? RecoverySummary + " " + Strings.Startup_DiagnosticRetentionWarning
@@ -172,9 +240,9 @@ public sealed partial class HomeViewModel : ObservableObject
     /// Opens Production Readiness (Epic 11500 Part C §3).
     /// </summary>
     /// <remarks>
-    /// Navigation and nothing else. Home neither reads readiness nor decides anything from it —
-    /// the screen it opens is the only thing that consults the diagnostics seam, and even that
-    /// one can only look.
+    /// Navigation and nothing else. Home shows what was last observed but decides nothing from
+    /// it and never consults the diagnostics seam — the screen it opens does, and opening it
+    /// starts no live check (SCRUM-11152).
     /// </remarks>
     [RelayCommand]
     private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
@@ -192,22 +260,11 @@ public sealed partial class HomeViewModel : ObservableObject
     private async Task ShowSettingsAsync(CancellationToken cancellationToken) =>
         await _navigation.GoToSettingsAsync(cancellationToken).ConfigureAwait(true);
 
-    /// <summary>
-    /// Whether the signed workstation preset verified, in one line (Part 3C2 §13).
-    /// </summary>
-    /// <remarks>
-    /// Deliberately a yes/no, and about startup's own preset check rather than about production
-    /// readiness — which has its own screen, one click away (Epic 11500 Part C §3).
-    /// </remarks>
-    public string PresetStatus =>
-        _startupStatus.Status?.PresetVerified == true
-            ? Strings.Preset_Verified
-            : Strings.Preset_NotVerified;
-
     /// <summary>Reloads Recent Processing from persistence.</summary>
     [RelayCommand]
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        ReadReadiness();
         var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
         if (recovery.IsFailure)
         {
@@ -218,6 +275,7 @@ public sealed partial class HomeViewModel : ObservableObject
         foreach (RecoveryItem item in recovery.Value) RecoverySessions.Add(new RecoverySessionRow(item));
         OnPropertyChanged(nameof(HasRecoverySessions));
         OnPropertyChanged(nameof(StartupSummary));
+        OnPropertyChanged(nameof(RecoveryPendingText));
         OnPropertyChanged(nameof(HasNoRecentSessions));
 
         OperationResult<IReadOnlyList<SessionListItem>> listed =

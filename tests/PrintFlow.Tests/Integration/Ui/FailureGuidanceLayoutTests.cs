@@ -215,7 +215,7 @@ public sealed class FailureGuidanceLayoutTests
             {
                 SessionId id = await RecoverySurfaceTests.Seed(h, "layout");
                 ScriptedFailureSessionService service = new(h.CreateService());
-                HomeViewModel home = new(service, h.Previews, new RecordingNavigation(), new StubFilePicker(), new StartupStatusAccessor());
+                HomeViewModel home = new(service, h.Previews, new RecordingNavigation(), new StubFilePicker(), new StartupStatusAccessor(), new ReadinessObservationAccessor());
                 await home.RefreshCommand.ExecuteAsync(null);
                 service.NextRecoveryFailure = OperationFailure.Create(FailureCode.PersistenceError, "Scripted commit failure.");
                 await home.RestartRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single(r => r.Id == id));
