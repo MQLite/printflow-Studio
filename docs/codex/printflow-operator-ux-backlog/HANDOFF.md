@@ -1,3 +1,23 @@
+# PF-OPUX-v1 — SCRUM-11152 signal closeout handoff
+
+2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11152-signal-closeout-v1`. **Implementation and technical independent review PASS; code MASTER_PUSH_VERIFIED; Jira In Review. AC1–4 pass technical/automated verification. AC5 PARTIAL; owner copy acceptance and human workstation checks remain OPEN/NOT RUN. Stop at SCRUM-11152; do not begin SCRUM-11153.**
+
+Home receives existing authoritative observations from Production Readiness passive/live, Settings, per-step full gate verification (including owned lease), and diagnostic-package reads. No extra checks or permission changes. Monotonic generation withdraws prior Ready on later starts/failures/incomplete checks; cancelled results stay unconfirmed. Internal-work subset success cannot establish full Ready. Loaded Home updates on its dispatcher without refreshing jobs, clearing notices or changing focus. Diagnostic-package outcome does not classify readiness.
+
+Approved Home copy directions are implemented in both locales, including “View workstation checks”, exact check identifier/state, experienced-colleague/supervisor help, startup-only preset wording, and a Home-only cleanup notice that does not imply processing may proceed. Final copy acceptance is open.
+
+- Code: [11df50f7143faa8cc33ec537eaf5f7a162a69d08](https://github.com/MQLite/printflow-Studio/commit/11df50f7143faa8cc33ec537eaf5f7a162a69d08), 16 source/test paths; direct fast-forward, authenticated GitHub commit/tree/parent/path verification plus fetch/ls-remote.
+- Validation: final focused 155/155, architecture 473/473, affected safe UI/resources 225/225 (overlap); 4/4 render cases, 48 final synthetic PNGs, en/zh-CN, 1000×700 and 1920×1040, 96 DPI. Same independent reviewer performed precheck and final source/evidence/visual review, no actionable findings; reviewer ran no tests.
+- Jira: In Review; new deduplicated comment 10187, original 10186 unchanged. Final authenticated read `2026-09-29T22:58:30.117Z`; 17 issues, 26 Blocks, 51 string labels, 34 exact timestamp strings; complete parent/comments, exact 23-column CSV and independent fidelity PASS; other issues read-only with no unexpected drift.
+- Public decision documents: [closeout contract and evidence](SCRUM-11152_CLOSEOUT.md), [final bilingual copy](SCRUM-11152_CLOSEOUT_COPY_REVIEW.md), [complete results](SCRUM-11152_CLOSEOUT_RESULTS.md), [independent review](SCRUM-11152_CLOSEOUT_INDEPENDENT_REVIEW.md), [CSV](SCRUM-11152_CLOSEOUT_JIRA_FINAL.csv), [publication audit](SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json).
+- The following privacy-safe docs commit is verified separately; its SHA is recorded only in the local final audit and new immutable packet. Packet/ZIP follow the existing `doc/owner-review/` convention and stay ignored/local. Old packet, original evidence, prior exports and all four audit residues are preserved.
+- Remaining: AC5 physical input/other scaling/Jira human check NOT RUN; final copy acceptance OPEN; prior 11151 copy/navigation and 11150 residuals unchanged. Unsafe real-window/UIA/startup/composition paths excluded; known hanging recovery test remains NOT PASS.
+- Routing policy 2.4, route_offset 0; supported native Astra High implementation and independent-review targets, actual model/effort UNVERIFIED. Coordinator live switch unavailable; no fabricated downgrade. No global configuration changes.
+
+No deployment, production migration/startup, desktop control, feature branch/PR, force-push or other-issue writes. Prior handoff bytes remain verbatim below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11152 current handoff
 
 2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11152-impl-v1`. **Implementation, verification, independent review (two rounds), code MASTER_PUSH_VERIFIED and Jira synchronization complete. SCRUM-11152 is In Review. AC1 and AC5 are PARTIAL, the owner copy review is OPEN, and the Jira human check is NOT RUN. Stop at 11152; SCRUM-11153 not started.**

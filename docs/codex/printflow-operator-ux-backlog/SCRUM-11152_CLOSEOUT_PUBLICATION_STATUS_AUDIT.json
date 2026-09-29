@@ -1,0 +1,411 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11152-signal-closeout-v1",
+  "policy": "development-routing 2.4",
+  "routeOffset": 0,
+  "authority": "Owner explicitly authorized narrow readiness-result transport, copy directions, isolated tests/rendering, same-context independent precheck/final review, direct origin/master publication, SCRUM-11152-only Jira writes and new local review packet.",
+  "routing": {
+    "integration": {
+      "normalRoute": "gpt-6-astra High",
+      "requestedRoute": "gpt-6-astra High",
+      "executionTarget": "native subagent /root/integration",
+      "actualRoute": "UNVERIFIED",
+      "context": "fresh implementation context, continued through tightly coupled authority/ordering/cancellation/UI unit",
+      "adjustment": "UNCHANGED"
+    },
+    "review": {
+      "normalRoute": "gpt-6-astra High",
+      "requestedRoute": "gpt-6-astra High",
+      "actualRoute": "UNVERIFIED",
+      "context": "fresh native /root/reviewer, fork_turns none; same context reused for precheck and final critical authority/AC/visual audit",
+      "ranTests": false
+    },
+    "coordination": {
+      "normalRoute": "Sol Medium",
+      "actualRoute": "UNVERIFIED",
+      "limitation": "MODEL_SWITCH_UNAVAILABLE for live coordinator context; no claimed downgrade. Supported alternate native contexts used for implementation and independent review."
+    }
+  },
+  "executionHost": "Local Windows desktop workspace",
+  "git": {
+    "repository": "MQLite/printflow-Studio",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "startingHead": "20ece916d290e489fe64a58155800a873dde5ed0",
+    "codeCommit": {
+      "status": "MASTER_PUSH_VERIFIED",
+      "authenticated": true,
+      "repository": "MQLite/printflow-Studio",
+      "branch": "master",
+      "sha": "11df50f7143faa8cc33ec537eaf5f7a162a69d08",
+      "tree": "1e12d2b8f071340285f40d750d31b90bec295ef0",
+      "parent": "20ece916d290e489fe64a58155800a873dde5ed0",
+      "files": [
+        "src/PrintFlow.App/Composition/ServiceRegistration.cs",
+        "src/PrintFlow.App/Resources/Strings.resx",
+        "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+        "src/PrintFlow.App/Startup/ReadinessObservationAccessor.cs",
+        "src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs",
+        "src/PrintFlow.App/ViewModels/HomeReadinessSummary.cs",
+        "src/PrintFlow.App/ViewModels/HomeViewModel.cs",
+        "src/PrintFlow.App/ViewModels/SettingsViewModel.cs",
+        "src/PrintFlow.App/Views/HomeView.xaml.cs",
+        "src/PrintFlow.Infrastructure/Gate/VerifiedEnvironmentGate.cs",
+        "src/PrintFlow.Workflow/Ports/IEnvironmentReadinessObservations.cs",
+        "tests/PrintFlow.Tests/Architecture/WorkstationVerificationBoundaryTests.cs",
+        "tests/PrintFlow.Tests/Integration/Diagnostics/DiagnosticPackageTests.cs",
+        "tests/PrintFlow.Tests/Integration/Ui/HomeReadinessSignalCloseoutTests.cs",
+        "tests/PrintFlow.Tests/Integration/Ui/HomeReadinessSummaryTests.cs",
+        "tests/PrintFlow.Tests/Integration/Verification/VerifiedEnvironmentGateTests.cs"
+      ],
+      "fileCount": 16,
+      "fetched": "11df50f7143faa8cc33ec537eaf5f7a162a69d08",
+      "advertised": "11df50f7143faa8cc33ec537eaf5f7a162a69d08",
+      "coAuthoredByTrailer": false,
+      "checkedAt": "2026-09-29T22:57:10.9581530+00:00"
+    },
+    "documentationCommit": {
+      "status": "Recorded only in local final audit after this documentation commit is published",
+      "reason": "Avoid self-referential commit chain"
+    },
+    "hooksAndAutomation": "No active local hooks, core.hooksPath or .github directory found; no repository deployment trigger found. No deployment performed.",
+    "preservedPriorAuditResidues": {
+      "SCRUM-11149_PUBLICATION_STATUS_AUDIT.json": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "SCRUM-11150_PUBLICATION_STATUS_AUDIT.json": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD",
+      "SCRUM-11151_PUBLICATION_STATUS_AUDIT.json": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228",
+      "SCRUM-11152_PUBLICATION_STATUS_AUDIT.json": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938"
+    },
+    "priorPacketZipSha256": "7C48A3F6DE6A0154E1A4F431A82A8B3F9BC971EC52D67226D80FBDBF4A501F50"
+  },
+  "change": {
+    "observationSources": [
+      "Production Readiness passive",
+      "Production Readiness full live",
+      "Settings passive",
+      "per-production-step full gate including owned lease",
+      "existing diagnostic-package Read"
+    ],
+    "additionalInternalSource": "Internal-work subset failures publish facts; subset success remains unconfirmed and cannot establish full Ready.",
+    "transport": "Existing sole authority publishes original verification-result projection through write-only Workflow port to process-only holder; monotonic generation and immutable snapshot CAS; current Home dispatcher/lifetime notifications.",
+    "copy": "Compact bilingual states, Home-specific navigation label, exact quoted labels, experienced-colleague/supervisor help, true reason/time/check identifier/status, startup-only preset text, Home-only diagnostic-cleanup warning.",
+    "unchanged": "Verifier calls/decisions/failure identities, locks, processor activity, production permissions, persistence, recovery/correction/final-save/original-file behavior; no new diagnostics implementation or checks."
+  },
+  "verification": {
+    "candidate": {
+      "baseline": "20ece916d290e489fe64a58155800a873dde5ed0",
+      "checkedAtUtc": "2026-09-29T22:50:34.8957983+00:00",
+      "files": [
+        {
+          "path": "src/PrintFlow.App/Composition/ServiceRegistration.cs",
+          "sha256": "88BADE16DFD185605593E6BB3FD5E6245321CDAC3B215CA691819B387ED0B192",
+          "checkedAtUtc": "2026-09-29T22:50:34.8620934+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/Resources/Strings.resx",
+          "sha256": "40BC16B9F1657B133C90BBE7D321D1D0E816FCA786DC835447B485289AADA19F",
+          "checkedAtUtc": "2026-09-29T22:50:34.8667198+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+          "sha256": "7714ED1279A0429DB8A6C1B67F93C45347C849A3BEBA2690B76A4A910E52C911",
+          "checkedAtUtc": "2026-09-29T22:50:34.8674439+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/Startup/ReadinessObservationAccessor.cs",
+          "sha256": "A3F2FFE8F735AC660EF86B4D1FFCF9ACF6CD3CBE5EAEBB852123D66790C21B88",
+          "checkedAtUtc": "2026-09-29T22:50:34.8676914+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs",
+          "sha256": "63C89B9E97F90A0FD0AB37A035B905F7C76315E28AEF553CEF7157E3F372A16D",
+          "checkedAtUtc": "2026-09-29T22:50:34.8680964+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/ViewModels/HomeReadinessSummary.cs",
+          "sha256": "7A58421703B6798E9A143B9D4EC7F181DC917C813BAE1C0C4AECA65C0130B6D8",
+          "checkedAtUtc": "2026-09-29T22:50:34.8684041+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/ViewModels/HomeViewModel.cs",
+          "sha256": "57B83FDC51E7B1B9645B7BAD134440DE51C766AE4264AFA0CAA4171FB565979E",
+          "checkedAtUtc": "2026-09-29T22:50:34.8687086+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/ViewModels/SettingsViewModel.cs",
+          "sha256": "8DCF705A050E4885EFB5298FB112C582B7C54CE47E263B1FE5DC60DF319A4B75",
+          "checkedAtUtc": "2026-09-29T22:50:34.8689778+00:00"
+        },
+        {
+          "path": "src/PrintFlow.App/Views/HomeView.xaml.cs",
+          "sha256": "B44770167A1274F977992879024395874C0584B2E949F4E9145B9AF8D41E7C52",
+          "checkedAtUtc": "2026-09-29T22:50:34.8691749+00:00"
+        },
+        {
+          "path": "src/PrintFlow.Infrastructure/Gate/VerifiedEnvironmentGate.cs",
+          "sha256": "231C09712BF001F925A3ABA9C1DDED03E4AF59B92C0661FD8C4E86CF5CB08F88",
+          "checkedAtUtc": "2026-09-29T22:50:34.8694208+00:00"
+        },
+        {
+          "path": "src/PrintFlow.Workflow/Ports/IEnvironmentReadinessObservations.cs",
+          "sha256": "8BEE528ED81C9B58BED5079B35D1FFAC79ED69150B9685EC2F8861F7319071F1",
+          "checkedAtUtc": "2026-09-29T22:50:34.8696126+00:00"
+        },
+        {
+          "path": "tests/PrintFlow.Tests/Architecture/WorkstationVerificationBoundaryTests.cs",
+          "sha256": "69A17F0B84F5F3AB04B922306ED6FEC274F6E5AE6BA08B595661DDBB54F13A2A",
+          "checkedAtUtc": "2026-09-29T22:50:34.8699457+00:00"
+        },
+        {
+          "path": "tests/PrintFlow.Tests/Integration/Diagnostics/DiagnosticPackageTests.cs",
+          "sha256": "5FFEDADACDCD96FC0F363D3BCB6618105117D596131F85CD2E47C4A5C9D68AA3",
+          "checkedAtUtc": "2026-09-29T22:50:34.8702369+00:00"
+        },
+        {
+          "path": "tests/PrintFlow.Tests/Integration/Ui/HomeReadinessSignalCloseoutTests.cs",
+          "sha256": "E469C08D5C32C780777638B608A4CAD11F94BDF81E7E3881C3B52227106ABAFF",
+          "checkedAtUtc": "2026-09-29T22:50:34.8704903+00:00"
+        },
+        {
+          "path": "tests/PrintFlow.Tests/Integration/Ui/HomeReadinessSummaryTests.cs",
+          "sha256": "513BA397A12A4D952FA6BA78FA3C8AB844C4DADD014E87D619A4C63DEAFEEF9D",
+          "checkedAtUtc": "2026-09-29T22:50:34.8708578+00:00"
+        },
+        {
+          "path": "tests/PrintFlow.Tests/Integration/Verification/VerifiedEnvironmentGateTests.cs",
+          "sha256": "D306E8C73F0E108A00C4D0DEE71389F1D7CBE7A456564781F6AB67E5A14B3162",
+          "checkedAtUtc": "2026-09-29T22:50:34.8711741+00:00"
+        }
+      ]
+    },
+    "build": "Settled clean --no-incremental build 0 warnings/errors; test-only constructor assertion follow-up build 0/0; source/binary hashes checked after final runs.",
+    "settled": {
+      "focused": "155/155",
+      "architecture": "473/473",
+      "affectedSafeUi": "225/225",
+      "capture": "4/4"
+    },
+    "countsOverlap": true,
+    "behavioralRed": "4/4 stale Home/cleanup failures plus 1/1 actual diagnostic-package gap; clean builds before RED.",
+    "retainedNonpassingAttempts": [
+      "green-01: 4/5, test incorrectly assumed destination collision fails; corrected to actual owned-file staging failure",
+      "settled-focused:154/155, old exact gate-constructor test allowance; corrected and rerun"
+    ],
+    "renders": {
+      "count": 48,
+      "locales": [
+        "en",
+        "zh-CN"
+      ],
+      "viewports": [
+        "1000x700",
+        "1920x1040"
+      ],
+      "dpi": 96,
+      "index": "artifacts/pf-opux-scrum11152-closeout/renders-final/INDEX.md",
+      "reviewerInspected": 10
+    },
+    "independentReview": {
+      "verdict": "PASS: no actionable source or visual finding",
+      "precheck": "Initial HOLD corrected with immutable-snapshot CAS; cleared before wiring",
+      "sameContext": true,
+      "ranTests": false
+    },
+    "exclusions": "Real-window/UIA, OperatorInteractive, ApplicationStartup/ProductionComposition paths, known hanging ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment excluded and NOT PASS; no broad 11,531-case suite.",
+    "rawRunSummary": "artifacts/pf-opux-scrum11152-closeout/test-evidence-summary.json"
+  },
+  "jira": {
+    "issue": "SCRUM-11152",
+    "id": "10882",
+    "finalStatus": "In Review",
+    "transitions": [
+      "21: In Review to In Progress at corrective implementation start",
+      "31: In Progress to In Review after technical review and verified code publication"
+    ],
+    "commentId": "10187",
+    "commentCreated": "2026-09-30T11:57:44.028+1300",
+    "marker": "PF-OPUX-v1-SCRUM-11152-signal-closeout-v1",
+    "markerCount": 1,
+    "originalComment10186Preserved": true,
+    "otherIssues": "READ_ONLY; no writes and no unexpected business-field drift",
+    "readAt": "2026-09-29T22:58:30.117Z",
+    "readback": {
+      "authenticated": true,
+      "issues": 17,
+      "blocksLinks": 26,
+      "stringLabels": 51,
+      "exactIssueTimestamps": 34,
+      "commentsComplete": true,
+      "rawSha256": "18CFBB8635B17A8AFEAD08C936E68AA5B0DA79528D54C8B54EBAF140880AC193",
+      "snapshotSha256": "C66FD17DB478FB35E15179435DFA5C18142B8D74B5EF7E2D67D85DB115C6E0B8",
+      "snapshot": "SCRUM-11152_CLOSEOUT_JIRA_READBACK.json (private; ignored)"
+    },
+    "csv": {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_JIRA_FINAL.csv",
+      "sha256": "DFC5C9DED9587729FEF0AE123B3F2969C4B3A783C31C70FB241353006826770B",
+      "rows": 17,
+      "columns": 23,
+      "utf8Bom": true,
+      "exporter": "PASS",
+      "independentFidelityOracle": "PASS; zero failures"
+    },
+    "drift": {
+      "verdict": "PASS",
+      "issueCount": 17,
+      "uniqueBlocksLinks": 26,
+      "stringLabels": 51,
+      "exactIssueTimestampStrings": 34,
+      "commentPagination": [
+        {
+          "key": "SCRUM-11139",
+          "startAt": 0,
+          "total": 1,
+          "returned": 1,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11140",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11141",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11142",
+          "startAt": 0,
+          "total": 3,
+          "returned": 3,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11143",
+          "startAt": 0,
+          "total": 3,
+          "returned": 3,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11144",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11145",
+          "startAt": 0,
+          "total": 3,
+          "returned": 3,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11146",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11147",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11148",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11149",
+          "startAt": 0,
+          "total": 1,
+          "returned": 1,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11150",
+          "startAt": 0,
+          "total": 1,
+          "returned": 1,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11151",
+          "startAt": 0,
+          "total": 1,
+          "returned": 1,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11152",
+          "startAt": 0,
+          "total": 2,
+          "returned": 2,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11153",
+          "startAt": 0,
+          "total": 0,
+          "returned": 0,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11154",
+          "startAt": 0,
+          "total": 0,
+          "returned": 0,
+          "complete": true
+        },
+        {
+          "key": "SCRUM-11155",
+          "startAt": 0,
+          "total": 0,
+          "returned": 0,
+          "complete": true
+        }
+      ],
+      "comment10186Preserved": true,
+      "priorCommentsPreserved": true,
+      "closeoutMarkerCount": 1,
+      "closeoutCommentId": "10187",
+      "closeoutCommentCreated": "2026-09-30T11:57:44.028+1300",
+      "issueUpdated": "2026-09-30T11:58:00.785+1300",
+      "finalStatus": "In Review",
+      "driftPaths": {
+        "SCRUM-11152": [
+          "SCRUM-11152.fields.updated",
+          "SCRUM-11152.fields.comment.total",
+          "SCRUM-11152.fields.comment.comments.length",
+          "SCRUM-11152.fields.comment.maxResults"
+        ]
+      },
+      "unexpectedOtherIssueDrift": {},
+      "originalDescriptionsAcPriorityLabelsParentsAndLinksPreserved": true
+    }
+  },
+  "acceptance": {
+    "AC1": "PASS technical/automated: full specified observation paths and current Home, actual first reason/time; prior stale-signal gap closed",
+    "AC2": "PASS technical/automated: empty current-run state",
+    "AC3": "PASS technical/automated: eligible pass with true observation time",
+    "AC4": "PASS technical/automated: recovery list/actions/counts preserved",
+    "AC5": "PARTIAL: bilingual 96-DPI layout and reachability verified; other scaling/physical keyboard/Jira human check NOT RUN",
+    "ownerCopyReview": "OPEN; directions applied but final acceptance not inferred",
+    "humanAcceptance": "NOT RUN; no production-readiness claim"
+  },
+  "packet": {
+    "status": "Created locally after documentation publication; final path/ZIP hash in LATEST.md and execution report",
+    "root": "doc/owner-review/SCRUM-11152/",
+    "privacy": "No raw account-bearing responses, credentials, customer data or machine-specific user paths; redacted derivative retains business fields."
+  },
+  "stop": "SCRUM-11152 only; SCRUM-11153 not begun"
+}
