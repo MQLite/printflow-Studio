@@ -46,15 +46,18 @@
   },
   "desktopEvidence": "NOT_RUN; no visible windows, native dialogs, Explorer, desktop capture/input or live processors authorized",
   "publication": {
-    "status": "NOT_PUBLISHED",
+    "status": "CODE_PUBLISHED_AND_REMOTE_VERIFIED; final documentation commit follows",
     "verifiedInitialMaster": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
     "origin": "https://github.com/MQLite/printflow-Studio.git",
     "activeHooks": [],
     "repositoryWorkflows": [],
-    "codeCommit": null,
+    "codeCommit": "a39b3bd94c541e4faadfeafbaffa69e0f35525a4",
     "documentationCommit": null,
-    "finalObservedRemoteTip": null,
-    "githubAuthentication": "UNVERIFIED: connected get_user_login returned only Action completed, without identity evidence. Git transport verification is separate."
+    "finalObservedRemoteTip": "a39b3bd94c541e4faadfeafbaffa69e0f35525a4",
+    "githubAuthentication": "UNVERIFIED: connected get_user_login returned only Action completed, without identity evidence. Git transport verification is separate.",
+    "codeCommitSourceVerification": "PASS: all 748 raw candidate source hashes and 51 actual host output hashes unchanged; normalized Git source blobs match code commit",
+    "verification": "git push origin master succeeded; git ls-remote refs/heads/master and local origin/master both exactly equal code commit; no Co-Authored-By trailer",
+    "documentationCommitNote": "Final docs SHA/tip will be recorded locally after its verified push, avoiding a self-referencing commit loop."
   },
   "jira": {
     "issue": "SCRUM-11154",
@@ -65,28 +68,50 @@
         "from": "In Review",
         "to": "In Progress",
         "result": "success"
+      },
+      {
+        "id": "31",
+        "from": "In Progress",
+        "to": "In Review",
+        "result": "success after final review and verified code publication"
       }
     ],
-    "currentObservedStatus": "In Progress",
-    "commentId": null,
+    "currentObservedStatus": "In Review",
+    "commentId": "10191",
     "marker": "PF-OPUX-v1-SCRUM-11154-workstation-entry-impl-v1",
     "protectedComments": [
       "10189",
       "10190"
     ],
-    "otherIssueWrites": 0
+    "otherIssueWrites": 0,
+    "markerCount": 1,
+    "historicalCommentsUnchanged": true,
+    "finalReadAt": "2026-09-30T06:02:00Z"
   },
   "export": {
-    "status": "PENDING_FINAL_WRITES",
+    "status": "PASS: authenticated raw/snapshot/CSV independent fidelity oracle and issue drift verification",
     "baselineAuthenticated": true,
     "baselineIssues": 17,
     "baselineBlocks": 26,
     "baselineStringLabels": 51,
     "baselineCompleteComments": 30,
     "requiredColumns": 23,
-    "requiredEncoding": "UTF-8 BOM"
+    "requiredEncoding": "UTF-8 BOM",
+    "issues": 17,
+    "blocks": 26,
+    "stringLabels": 51,
+    "completeComments": 31,
+    "columns": 23,
+    "utf8Bom": true,
+    "exactTimestampValues": 34,
+    "rawResponse": "Private ignored artifacts/pf-opux-scrum11154-workstation-entry/jira-final-envelope.json and jira-final-raw.json",
+    "readback": "SCRUM-11154_WORKSTATION_ENTRY_IMPL_JIRA_READBACK.json (private, account-bearing, ignored)",
+    "csv": "SCRUM-11154_WORKSTATION_ENTRY_IMPL_JIRA_FINAL.csv",
+    "fidelityEvidence": "artifacts/pf-opux-scrum11154-workstation-entry/jira-final-fidelity.json",
+    "driftEvidence": "artifacts/pf-opux-scrum11154-workstation-entry/jira-drift-validation.json",
+    "driftExplanation": "Only SCRUM-11154 workflow status (including its status-object description), updated timestamp and one new comment changed. Other issues only project the linked SCRUM-11154 status. Full issue descriptions/AC/parents/dependencies/labels and all historical comments unchanged."
   },
-  "packet": "PENDING_FINAL_EVIDENCE",
+  "packet": "Assemble after final documentation publication; exact path, payload hashes and ZIP SHA are recorded by local packet-validation.json and LATEST. Prior packets preserved.",
   "candidate": {
     "hash": "51123588D1C3F5790ED55119FD79106F223725C913D60981C5B0818D149EFD15",
     "sourceHead": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
