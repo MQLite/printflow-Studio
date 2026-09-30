@@ -25,23 +25,71 @@
   },
   "independentDesignReview": "CORRECTIONS_RECHECKED_NO_REMAINING_ACTIONABLE_FINDINGS",
   "publication": {
-    "status": "NOT_YET_PUBLISHED",
+    "status": "DESIGN_MASTER_PUSH_VERIFIED_EXPORT_FOLLOWUP_PENDING",
     "finalCommitRecordedLocallyAfterPublication": true,
-    "automationInspection": "No active local hooks, no configured hooksPath, no tracked CI/workflows/deployment files; GitHub connected read returned zero workflow runs. No unsafe automation found in available evidence; unobservable external hooks are not certified absent."
+    "automationInspection": "No active local hooks, no configured hooksPath, no tracked CI/workflows/deployment files; GitHub connected read returned zero workflow runs. No unsafe automation found in available evidence; unobservable external hooks are not certified absent.",
+    "designCommit": "a4a896b11023e7e2a89993d81436ce591f262b61",
+    "designTree": "d5ec92f07fe2a199f09c08c08b9bf8aa68ba1a2d",
+    "designParent": "5e6adcf3251bded0ce3df2d127d933eecde71969",
+    "verification": "fetch, origin/master, ls-remote and connected GitHub commit/file readback agree",
+    "githubApiAuthentication": "Connected GitHub app transport; raw response does not independently attest authentication. No separate unauthenticated public read relabelled as authenticated.",
+    "noCoAuthoredBy": true,
+    "changedDesignPaths": 4,
+    "finalDocumentationCommit": null
   },
   "jira": {
     "initialAuthenticatedStatus": "In Review",
     "issueKey": "SCRUM-11154",
     "marker": "PF-OPUX-v1-SCRUM-11154-workstation-entry-design-v1",
-    "write": "NOT_YET_WRITTEN",
+    "write": "VERIFIED_ONE_COMMENT",
     "transitions": 0,
-    "otherIssues": "READ_ONLY"
+    "otherIssues": "READ_ONLY",
+    "commentId": "10190",
+    "finalAuthenticatedStatus": "In Review",
+    "markerCount": 1,
+    "commentCreated": "2026-09-30T16:08:20.803+13:00",
+    "otherIssueWrites": 0,
+    "priorCommentsPreserved": true,
+    "businessDrift": {
+      "verdict": "PASS",
+      "changedPaths": [
+        "SCRUM-11154.fields.comment.comments",
+        "SCRUM-11154.fields.comment.maxResults",
+        "SCRUM-11154.fields.comment.total",
+        "SCRUM-11154.fields.updated"
+      ],
+      "other16IssuesUnchanged": true,
+      "priorCommentsPreserved": true,
+      "statusUnchanged": "In Review",
+      "markerCount": 1,
+      "commentId": "10190",
+      "writeActionsCorrect": true
+    }
   },
   "export": {
-    "status": "NOT_YET_GENERATED",
+    "status": "VERIFIED",
     "columnsRequired": 23,
     "issuesRequired": 17,
-    "encodingRequired": "UTF-8 BOM"
+    "encodingRequired": "UTF-8 BOM",
+    "readAt": "2026-09-30T03:08:39Z",
+    "authenticated": true,
+    "issues": 17,
+    "comments": 30,
+    "blocksLinks": 26,
+    "stringLabels": 51,
+    "completeComments": true,
+    "columns": 23,
+    "utf8Bom": true,
+    "exactTimestampStrings": 34,
+    "exporter": "PASS",
+    "fidelityOracle": "PASS",
+    "exporterAdaptation": "Private ignored copy of corrected exporter with current task/marker and EVIDENCE_COMMENT_ONLY metadata only; tracked pipeline unchanged",
+    "hashes": {
+      "rawResponse": "4A78ABEEAAD20758A16D85B81BA06BA5CDC76880617D19666D11CB9EBBBB7C05",
+      "privateSnapshot": "C00CBC21D7BC08191C11E7945415E71C99BABCA98B90677FA98B54809B1743B1",
+      "csv": "ACCA35CBAD4F5D16505B42D55510293A2B5473D7F6F11BADD4B8B8C7B6881C7F"
+    },
+    "whitespace": "Jira Markdown trailing spaces preserved exactly in CSV; broad git diff --check flags source content. MD/JSON whitespace checked separately; independent raw-to-snapshot-to-CSV fidelity PASS. No source text normalized."
   },
   "checks": {
     "build": "NOT_RUN",
@@ -64,12 +112,13 @@
   },
   "implementation": "NOT_AUTHORIZED_NOT_STARTED",
   "SCRUM-11155": "READ_ONLY_NOT_STARTED",
-  "packet": "Build only after publication, authorized Jira write, authenticated final export and local audit",
+  "packet": "Await final documentation publication and final local audit; then allowlist copy, redaction, manifest and extracted ZIP verification",
   "reviewedDesignSha256": "E31BE7B9435F457A12A525D82117D891E16FD05A77A935CA670DE7BD6C273DA3",
   "reviewFindings": {
     "P3": 1,
     "clarifications": 1,
     "P2": 2,
     "allRechecked": true
-  }
+  },
+  "documentationValidation": "PASS: source pointers, JSON, current links/privacy, prior handoff history and seven pre-existing residue hashes"
 }
