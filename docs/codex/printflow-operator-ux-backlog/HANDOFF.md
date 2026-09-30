@@ -1,3 +1,21 @@
+# PF-OPUX-v1 — SCRUM-11154 integration handoff
+
+2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11154-integration-v1`. **Bounded noninteractive integration, focused verification, one independent review, direct master code publication and SCRUM-11154-only Jira synchronization complete. SCRUM-11154 is In Review. AC1 whole-journey/owner acceptance is OPEN; AC2 physical keyboard-only and AC3 workstation screenshot criteria are NOT RUN; AC4 findings/fixes are recorded. Stop at SCRUM-11154; SCRUM-11155 was not started.**
+
+Across Home, Recent, Recovery, routes, reviews, trim, colleague correction, print dimensions, final save and error details, the single [integration matrix](SCRUM-11154_INTEGRATION.md) maps state, exact identity, legal action and evidence. It preserves Approved versus Saved, Completed versus Delivered, historical saved metadata versus current file existence, and last-observed readiness versus production authority. Existing PNG approval/backfill, legacy Trim Reject exact binding, generic import/recovery, diagnostic navigation and physical usability gaps remain in the owner open-items record. No approval, file, production, gate or recovery contract changed.
+
+- Fixes: final TIFF Reject label now says only “Reject this TIFF” / “驳回此 TIFF”; custom-size current-preview failure shows a neutral adjacent bilingual hint; eight Chinese resources consistently name physical print size “印刷尺寸”. Recent stopped, abandoned and actual running-current-attempt states gained a bilingual render check. [Affected final copy](SCRUM-11154_COPY_REVIEW.md) awaits owner judgment.
+- Code: [e7852f00311d5bc914eae12174e0ae84196bcc23](https://github.com/MQLite/printflow-Studio/commit/e7852f00311d5bc914eae12174e0ae84196bcc23), nine scoped source/test/terminology paths, fast-forward to `origin/master`; Git remote ref and authenticated GitHub commit/file readback agree. Six pre-existing modified earlier audit files were not staged.
+- Verification: nonincremental build zero warnings/errors; final affected safe set **453/453**, architecture **474/474** (overlap); synthetic 96-DPI off-screen bilingual renders at 1000×700 and 1920×1040. One fresh independent reviewer found a P2 initial over-specific size hint, then confirmed the neutral correction and non-size failure regression; no remaining actionable P0/P1/P2 in the scoped delta. Review/test details are in local `artifacts/pf-opux-scrum11154/`.
+- Jira: only SCRUM-11154 To Do → In Progress → In Review (transition IDs 21, 31), one comment `10189` with marker `PF-OPUX-v1-SCRUM-11154-integration-v1`. Post-write authenticated readback at `2026-09-30T01:46:22.488Z`: 17 issues, 29 complete comments, 26 Blocks links, 51 string labels; exact 23-column UTF-8 BOM [CSV](SCRUM-11154_JIRA_FINAL.csv), exporter and independent fidelity oracle PASS. Other 16 issues were read-only; compared with the prior readback, only 11154's updated timestamp/status/comment count changed.
+- Next boundary: [one workstation checklist](SCRUM-11154_WORKSTATION_CHECKLIST.md) for a later separately authorized safe session with verified isolation, native keyboard and actual screenshot evidence. A one-Screen Wave1A host is not a verified whole-app host. No shared desktop or production was run now. Owner copy and earlier Tasks remain open. The local owner packet and final audit record the later documentation publication SHA without a self-referential commit.
+
+Routing policy 2.4, `route_offset: 0`: requested Astra High UI/review context; actual runtime model/effort UNVERIFIED, root model switch unavailable, no paper downgrade represented as a switch. No global rule update.
+
+No deployment, production migration/startup, feature branch/PR, force push, protection bypass, other-issue writes or SCRUM-11155 work.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11153 Recent status handoff
 
 2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11153-impl-v1`. **Bounded implementation, safe technical verification, independent review, direct master code publication and Jira synchronization complete. SCRUM-11153 is In Review. AC1–4 pass technical checks; AC5 has synthetic layout evidence and awaits physical/human acceptance. Stop at SCRUM-11153.**

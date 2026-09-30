@@ -1,0 +1,18 @@
+# SCRUM-11154 affected copy for owner review
+
+This table lists only wording changed by this integration batch. It is an exact resource-value review aid, not an owner sign-off. The owner review and live workstation judgement remain open. The English and Chinese values below are the final source values for this candidate.
+
+| Condition / resource | English | 简体中文 | Why this differs from nearby copy |
+|---|---|---|---|
+| Production TIFF is awaiting exact-result review / `Session_RejectTiff` | Reject this TIFF | 驳回此 TIFF | The button only rejects this result. `Session_GuidanceRejectTiff` already explains that recycling precedes the recorded rejection and a new TIFF needs the later Run step. Its button content and accessible name share the same binding. |
+| Custom physical size parses but its current preview fails / `Session_TargetSizeUnavailable` | Could not preview this size. Check the entry and job details, then try again. | 无法预览此尺寸。请核对输入和任务详情，然后重试。 | Appears adjacent to the entered value only for the current failed draft query. A preview can fail from the plan or its source/repository, so the message makes no claim about which failed. A newer draft clears it; the committed command remains authoritative. A missing edge, nonnumeric or nonpositive input still uses the distinct existing `Session_TargetSizeInvalid` instruction. |
+| Print-dimensions step name / `Step_PrintDimensions` | Print dimensions | 印刷尺寸 | This is the same physical size decision named “印刷尺寸” in the existing preflight and route cards. |
+| Maximum-size heading / `Session_MaxBoundsHeading` | Maximum print size | 最大印刷尺寸 | A maximum is a limit, not the exact output size. |
+| Maximum-size confirmation / `Session_MaxBoundsConfirm` | Confirm maximum print size | 确认最大印刷尺寸 | Names the same limit as the heading. |
+| Run is offered after sizing / `Session_RunReady` | Existing English resource unchanged | 可以运行此步骤：本图片的印刷尺寸已确认。 | Refers to the confirmed size, not completed output or delivery. |
+| Run is unavailable before sizing/enlargement authority / `Session_RunNotReady` | Existing English resource unchanged | 在确认本图片的印刷尺寸及所需放大之前，无法运行此步骤。 | The refusal still names both prerequisites. |
+| Older exact-size record or changed source / `Session_DimensionReviewRequired` | Existing English resource unchanged | 此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大印刷尺寸。 | Retains the historical-record and changed-source reasons. “保存” here describes a stored size decision, not an external file delivery. |
+| Prepared PDF asks for the later size step / `Session_PdfPrepared` | Existing English resource unchanged | 单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置印刷尺寸。 | Preserves the source and page claims; only the term for the later size step changes. |
+| Current-status next action at dimensions / `Session_NextDimensions` | Existing English resource unchanged | 请在下方设置并确认印刷尺寸。 | Matches the size controls and preflight. |
+
+**Meanings deliberately kept separate:** generated is not approved; approved is not saved; completed is not delivered; a Recent “saved previously” line is an exact eligible delivery-history fact and does not verify a file now. A past workstation pass is a dated observation, not continuous production authorization. “打印准备” remains on preparation summaries because that is a preparation plan rather than the physical-size term; diagnostic resource keys and historical records remain untouched. The owner should judge whether the changed Chinese strings, especially the longer refusal near a narrow size input, read naturally on the actual workstation.

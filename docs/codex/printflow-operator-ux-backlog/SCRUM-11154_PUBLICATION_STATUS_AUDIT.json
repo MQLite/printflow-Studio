@@ -1,0 +1,93 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-integration-v1",
+  "policy": "development-routing 2.4",
+  "routeOffset": 0,
+  "authority": "User-approved bounded noninteractive integration, targeted fixes/tests, one independent review, direct master publication, SCRUM-11154-only Jira lifecycle, complete readback and owner packet.",
+  "routing": {
+    "uiAndReviewRequested": "gpt-6-astra/high",
+    "actualRuntime": "UNVERIFIED",
+    "rootModelSwitch": "MODEL_SWITCH_UNAVAILABLE",
+    "reviewer": "One fresh read-only reviewer; one P2 corrected and re-reviewed resolved."
+  },
+  "git": {
+    "repository": "MQLite/printflow-Studio",
+    "branch": "master",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "startingHead": "1140ac28a9aa38f53e677b4e255486c2a093faf5",
+    "codeCommit": {
+      "status": "MASTER_PUSH_VERIFIED",
+      "sha": "e7852f00311d5bc914eae12174e0ae84196bcc23",
+      "tree": "eb9a9be7d179661490f9ef2908aff73545f913a0",
+      "parent": "1140ac28a9aa38f53e677b4e255486c2a093faf5",
+      "fileCount": 9,
+      "authenticatedGithubCommitAndFileReadback": true,
+      "advertised": "e7852f00311d5bc914eae12174e0ae84196bcc23",
+      "coAuthoredByTrailer": false
+    },
+    "documentationCommit": {
+      "status": "PENDING_AT_PUBLIC_DOCS_SNAPSHOT",
+      "sha": null,
+      "note": "Deliberate final local audit update after documentation push; do not recommit only to record this SHA."
+    },
+    "hooksAndAutomation": "No active hooks or .github workflow/deployment trigger found; no deployment performed.",
+    "preservedPriorAuditResidues": {
+      "SCRUM-11149_PUBLICATION_STATUS_AUDIT.json": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "SCRUM-11150_PUBLICATION_STATUS_AUDIT.json": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD",
+      "SCRUM-11151_PUBLICATION_STATUS_AUDIT.json": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228",
+      "SCRUM-11152_PUBLICATION_STATUS_AUDIT.json": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938",
+      "SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json": "81BE7F65AEF11A5C4476164B33E7BFFEDA804A94B8037C81882B94B4D966E86F",
+      "SCRUM-11153_PUBLICATION_STATUS_AUDIT.json": "3C9FE2FB2C215A6D789CE29A02F8292841D3632215E7684F712AD8EFA4D072B8"
+    }
+  },
+  "jira": {
+    "issue": "SCRUM-11154",
+    "issueId": "10884",
+    "planningId": "PF-OPUX-v1-consistency-keyboard-pass",
+    "before": "To Do",
+    "implementationStart": "In Progress",
+    "final": "In Review",
+    "transitionIds": [
+      "21",
+      "31"
+    ],
+    "evidenceCommentId": "10189",
+    "marker": "PF-OPUX-v1-SCRUM-11154-integration-v1",
+    "otherIssueWrites": 0,
+    "ownerAcceptance": "OPEN",
+    "originalAc2NativeKeyboard": "NOT RUN",
+    "originalAc3WorkstationScreenshots": "NOT RUN"
+  },
+  "readback": {
+    "source": "Authenticated Atlassian Rovo searchJiraIssuesUsingJql full response after final Jira writes",
+    "at": "2026-09-30T01:46:22.488Z",
+    "issueCount": 17,
+    "commentCount": 29,
+    "blocksLinks": 26,
+    "stringLabels": 51,
+    "completeCommentPages": true,
+    "csvColumns": 23,
+    "csvUtf8Bom": true,
+    "exactTimestampStrings": 34,
+    "exporter": "PASS",
+    "fidelityOracle": "PASS",
+    "privateEnvelopeSha256": "1736F637F145088BE5CEDC03F376FB35DA9F9E5306FFB0C475E7424D6FE3C800",
+    "privateRawSha256": "249886C5AF693781EFEA8F6C4E55D713EFB280BB4EAD4D652C6BE833A89416D4",
+    "privateSnapshotSha256": "716E871B20CB847C2A5DEF0603D122BE9B46A0141E78044EEADA49322A7A0019",
+    "csvSha256": "A832D6A09931567219FB833D3F99CD22B30CA822BDA56D72D2D15B49E938A882",
+    "businessDrift": "Compared with prior authenticated 11153 readback, only SCRUM-11154 updated timestamp/status/comment count changed."
+  },
+  "verification": {
+    "nonincrementalBuild": "PASS; 0 warnings, 0 errors",
+    "safeAffectedFinal": "453/453 PASS",
+    "architecture": "474/474 PASS",
+    "groupsOverlap": true,
+    "focusedReviewerCorrection": "4/4 PASS",
+    "offscreen": "202 synthetic 96-DPI PNGs locally; selected representative images in owner packet",
+    "independentReview": "One P2 initially, corrected and re-reviewed resolved; no remaining actionable P0/P1/P2.",
+    "excluded": "Native/physical input, workstation screenshots, real-window/UIA, ApplicationStartup, ProductionComposition, known hanging recovery test and production adapters NOT RUN/NOT PASS."
+  },
+  "fileHashes": {
+    "Export-Wave1Jira.ps1": "3C751DD3215F684B7B77401BE3C91101740B13389C290CEC326A40300D6A8314",
+    "SCRUM-11154_JIRA_FINAL.csv": "A832D6A09931567219FB833D3F99CD22B30CA822BDA56D72D2D15B49E938A882"
+  }
+}

@@ -163,6 +163,15 @@ function Get-WriteAction {
         [Parameter(Mandatory)][object] $Issue
     )
 
+    if ($snapshotTask -eq 'PF-OPUX-v1-SCRUM-11154-integration-v1') {
+        if ($Issue.key -eq 'SCRUM-11154') {
+            $comments = Get-RequiredProperty $Issue.fields 'comment' "Issue $($Issue.key) fields"
+            $saved = @(Get-RequiredProperty $comments 'comments' "Issue $($Issue.key) comments")
+            Assert-Condition (@($saved | Where-Object { $_.body -cmatch '(?m)^PF-OPUX-v1-SCRUM-11154-integration-v1\s*$' }).Count -eq 1) 'Expected exactly one SCRUM-11154 integration evidence marker.'
+            return 'STATUS_TRANSITION_AND_COMMENT'
+        }
+        return 'READ_ONLY'
+    }
     if ($snapshotTask -eq 'PF-OPUX-v1-SCRUM-11153-impl-v1') {
         if ($Issue.key -eq 'SCRUM-11153') {
             $comments = Get-RequiredProperty $Issue.fields 'comment' "Issue $($Issue.key) fields"
@@ -321,6 +330,12 @@ function Get-WriteAction {
 function Get-WriteActionNote {
     param([Parameter(Mandatory)][string] $WriteAction)
 
+    if ($snapshotTask -eq 'PF-OPUX-v1-SCRUM-11154-integration-v1') {
+        if ($WriteAction -eq 'STATUS_TRANSITION_AND_COMMENT') {
+            return 'SCRUM-11154 In Progress and In Review transitions plus one integration evidence comment verified in authenticated current readback; native keyboard, workstation screenshots and owner acceptance remain open.'
+        }
+        return 'SCRUM-11154 integration readback only; no Jira write to this issue in this run.'
+    }
     if ($snapshotTask -eq 'PF-OPUX-v1-SCRUM-11153-impl-v1') {
         if ($WriteAction -eq 'STATUS_TRANSITION_AND_COMMENT') {
             return 'SCRUM-11153 In Progress and In Review transitions plus one implementation evidence comment verified in authenticated current readback; owner acceptance remains open.'
@@ -442,7 +457,7 @@ $snapshot = Get-Content -LiteralPath $snapshotFullPath -Raw -Encoding utf8 | Con
 $ledger = Get-Content -LiteralPath $ledgerFullPath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 100
 
 $snapshotTask = Get-RequiredProperty $snapshot 'task' 'Snapshot'
-Assert-Condition ($snapshotTask -in @('PF-OPUX-v1-wave1', 'PF-OPUX-v1-wave1a', 'PF-OPUX-v1-SCRUM-11146-dev-v1', 'PF-OPUX-v1-SCRUM-11144-backend-v1', 'PF-OPUX-v1-SCRUM-11145-ui-v1', 'PF-OPUX-v1-SCRUM-11145-closeout-v1', 'PF-OPUX-v1-SCRUM-11147-impl-v1', 'PF-OPUX-v1-SCRUM-11148-impl-v1', 'PF-OPUX-v1-master-publication-v1', 'PF-OPUX-v1-SCRUM-11149-impl-v1', 'PF-OPUX-v1-SCRUM-11150-impl-v1', 'PF-OPUX-v1-SCRUM-11151-impl-v1', 'PF-OPUX-v1-SCRUM-11152-impl-v1', 'PF-OPUX-v1-SCRUM-11152-signal-closeout-v1', 'PF-OPUX-v1-SCRUM-11153-impl-v1')) 'Snapshot task must identify a supported PF-OPUX-v1 wave, publication synchronization, or SCRUM-11144 through SCRUM-11153 task.'
+Assert-Condition ($snapshotTask -in @('PF-OPUX-v1-wave1', 'PF-OPUX-v1-wave1a', 'PF-OPUX-v1-SCRUM-11146-dev-v1', 'PF-OPUX-v1-SCRUM-11144-backend-v1', 'PF-OPUX-v1-SCRUM-11145-ui-v1', 'PF-OPUX-v1-SCRUM-11145-closeout-v1', 'PF-OPUX-v1-SCRUM-11147-impl-v1', 'PF-OPUX-v1-SCRUM-11148-impl-v1', 'PF-OPUX-v1-master-publication-v1', 'PF-OPUX-v1-SCRUM-11149-impl-v1', 'PF-OPUX-v1-SCRUM-11150-impl-v1', 'PF-OPUX-v1-SCRUM-11151-impl-v1', 'PF-OPUX-v1-SCRUM-11152-impl-v1', 'PF-OPUX-v1-SCRUM-11152-signal-closeout-v1', 'PF-OPUX-v1-SCRUM-11153-impl-v1', 'PF-OPUX-v1-SCRUM-11154-integration-v1')) 'Snapshot task must identify a supported PF-OPUX-v1 wave, publication synchronization, or SCRUM-11144 through SCRUM-11154 task.'
 Assert-Condition ((Get-RequiredProperty $snapshot 'initiative' 'Snapshot') -eq 'PF-OPUX-v1') "Snapshot initiative is not PF-OPUX-v1."
 Assert-Condition ([bool](Get-RequiredProperty $snapshot 'isLast' 'Snapshot')) 'Snapshot is incomplete: isLast must be true after pagination.'
 $readAt = [string](Get-RequiredProperty $snapshot 'readAt' 'Snapshot')
