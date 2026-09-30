@@ -1,3 +1,16 @@
+# SCRUM-11154 — isolated workstation entry design handoff
+
+2026-09-30. Task `PF-OPUX-v1-SCRUM-11154-workstation-entry-design-v1`. **AWAITING_OWNER_REVIEW.** Design-only investigation of actual master `5e6adcf3251bded0ce3df2d127d933eecde71969`; historical product candidate `e7852f00311d5bc914eae12174e0ae84196bcc23`. SCRUM-11154 remains In Review; AC1–3 and earlier owner decisions remain open. No implementation or SCRUM-11155 work.
+
+- Recommendation: a separate test-only composition using the real MainWindow, navigation, product views/commands/services and isolated SQLite/NTFS behavior. Fake mode and one-screen Wave1A do not prove whole-app isolation. Bind every root/lease/diagnostic destination before construction; production processors and authority remain unreachable.
+- [Design and owner decisions](SCRUM-11154_WORKSTATION_ENTRY_DESIGN.md), [independent review](SCRUM-11154_WORKSTATION_ENTRY_DESIGN_REVIEW.md), [publication/Jira audit](SCRUM-11154_WORKSTATION_ENTRY_AUDIT.json). Publication/comment/export results are recorded in the audit; the final local audit and owner packet record the last documentation SHA without a self-referential commit.
+- Source-traced TIFF discrepancy: the 6×5 fixture at 300 DPI produces 0.508×0.423 mm from its preparation, while the output row displays retained 200×150 maximum-box dimensions. No product/fixture fix; this frame is negative size-consistency evidence. Exact review/save identity and known PNG approval/recovery/diagnostic gaps are preserved.
+- Validation in this task is static source/document/privacy/hash/link and publication/export verification only. No builds, product tests, DI, migrations, app launch, native/physical input, new screenshot, real processor, production or novice run. Seven pre-existing audit residues remain untouched and unstaged.
+- Next boundary: owner decides on the concrete design and bounded implementation sequence; implementation and a later safe-desktop slot require separate authorization. Continue from the next actual master and verify source/binary identity before any future run. Do not run historical launcher commands from this handoff.
+
+Policy 2.4, route_offset 0. Design and fresh independent safety reviewer requested `gpt-6-astra/high`; runtime metadata UNVERIFIED. Root live switch unavailable (MODEL_SWITCH_UNAVAILABLE); no paper downgrade. Local Windows host, source-only work. Current branch master; scoped documentation only is authorized for direct publication. Other issues stay read-only.
+
+---
 # PF-OPUX-v1 — SCRUM-11154 integration handoff
 
 2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11154-integration-v1`. **Bounded noninteractive integration, focused verification, one independent review, direct master code publication and SCRUM-11154-only Jira synchronization complete. SCRUM-11154 is In Review. AC1 whole-journey/owner acceptance is OPEN; AC2 physical keyboard-only and AC3 workstation screenshot criteria are NOT RUN; AC4 findings/fixes are recorded. Stop at SCRUM-11154; SCRUM-11155 was not started.**

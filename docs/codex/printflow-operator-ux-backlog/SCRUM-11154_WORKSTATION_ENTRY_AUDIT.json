@@ -1,0 +1,75 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-workstation-entry-design-v1",
+  "status": "AWAITING_OWNER_REVIEW",
+  "scope": "Source-grounded design, independent source review, documentation publication and one Jira evidence comment only",
+  "sourceBaseline": "5e6adcf3251bded0ce3df2d127d933eecde71969",
+  "historicalProductCandidate": "e7852f00311d5bc914eae12174e0ae84196bcc23",
+  "sourceBranch": "master",
+  "sourceMatchedFetchedOriginMaster": true,
+  "preexistingAuditResidues": {
+    "count": 7,
+    "preserved": true,
+    "staged": false
+  },
+  "routing": {
+    "policyVersion": "2.4",
+    "routeOffset": 0,
+    "normalRoute": "gpt-6-astra/high",
+    "requestedRoute": "gpt-6-astra/high",
+    "executionTarget": "gpt-6-astra/high",
+    "actualRoute": "UNVERIFIED",
+    "adjustmentResult": "UNCHANGED",
+    "rootSwitch": "MODEL_SWITCH_UNAVAILABLE",
+    "independence": "One native reviewer, fork_turns=none; same reviewer for corrections",
+    "host": "local Windows Codex desktop; no workstation interaction"
+  },
+  "independentDesignReview": "CORRECTIONS_RECHECKED_NO_REMAINING_ACTIONABLE_FINDINGS",
+  "publication": {
+    "status": "NOT_YET_PUBLISHED",
+    "finalCommitRecordedLocallyAfterPublication": true,
+    "automationInspection": "No active local hooks, no configured hooksPath, no tracked CI/workflows/deployment files; GitHub connected read returned zero workflow runs. No unsafe automation found in available evidence; unobservable external hooks are not certified absent."
+  },
+  "jira": {
+    "initialAuthenticatedStatus": "In Review",
+    "issueKey": "SCRUM-11154",
+    "marker": "PF-OPUX-v1-SCRUM-11154-workstation-entry-design-v1",
+    "write": "NOT_YET_WRITTEN",
+    "transitions": 0,
+    "otherIssues": "READ_ONLY"
+  },
+  "export": {
+    "status": "NOT_YET_GENERATED",
+    "columnsRequired": 23,
+    "issuesRequired": 17,
+    "encodingRequired": "UTF-8 BOM"
+  },
+  "checks": {
+    "build": "NOT_RUN",
+    "productTests": "NOT_RUN",
+    "diConstruction": "NOT_RUN",
+    "migrations": "NOT_RUN",
+    "applicationLaunch": "NOT_RUN",
+    "desktopInputCapture": "NOT_RUN",
+    "nativeKeyboard": "NOT_RUN",
+    "newWorkstationScreenshots": "NOT_RUN",
+    "production": "NOT_RUN",
+    "novice": "NOT_RUN",
+    "dependencyInstallation": "NOT_RUN"
+  },
+  "acceptance": {
+    "AC1": "OPEN",
+    "AC2": "NOT_RUN_OPEN",
+    "AC3": "NOT_RUN_OPEN",
+    "AC4": "Design finding documented; no criterion closed"
+  },
+  "implementation": "NOT_AUTHORIZED_NOT_STARTED",
+  "SCRUM-11155": "READ_ONLY_NOT_STARTED",
+  "packet": "Build only after publication, authorized Jira write, authenticated final export and local audit",
+  "reviewedDesignSha256": "E31BE7B9435F457A12A525D82117D891E16FD05A77A935CA670DE7BD6C273DA3",
+  "reviewFindings": {
+    "P3": 1,
+    "clarifications": 1,
+    "P2": 2,
+    "allRechecked": true
+  }
+}
