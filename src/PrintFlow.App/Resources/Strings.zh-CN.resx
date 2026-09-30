@@ -1029,6 +1029,10 @@
   <data name="Session_StatusProcessing" xml:space="preserve"><value>正在自动处理</value></data>
   <data name="Session_StatusReview" xml:space="preserve"><value>等待你检查</value></data>
   <data name="Session_StatusInput" xml:space="preserve"><value>需要你操作</value></data>
+  <data name="Home_RecentStatusUnknown" xml:space="preserve"><value>状态暂不可用</value></data>
+  <data name="Home_RecentSaveHistoryUnavailable" xml:space="preserve"><value>保存记录暂不可用；请在任务详情中检查</value></data>
+  <data name="Home_RecentPngSavedPreviously" xml:space="preserve"><value>已批准的 PNG 曾保存过；请在任务详情中检查</value></data>
+  <data name="Home_RecentTiffSavedPreviously" xml:space="preserve"><value>{0} 个已批准的 TIFF 尺寸曾保存过；请在任务详情中检查</value></data>
   <data name="Session_NextCompleted" xml:space="preserve"><value>此流程已完成。</value></data>
   <data name="Session_NextAbandoned" xml:space="preserve"><value>此任务已放弃；请返回主页选择其他任务。</value></data>
   <data name="Session_NextProcessing" xml:space="preserve"><value>PrintFlow 正在处理：{0}，请稍候。</value></data>

@@ -1040,6 +1040,10 @@
   <data name="Session_StatusProcessing" xml:space="preserve"><value>Processing automatically</value></data>
   <data name="Session_StatusReview" xml:space="preserve"><value>Waiting for your review</value></data>
   <data name="Session_StatusInput" xml:space="preserve"><value>Needs your input</value></data>
+  <data name="Home_RecentStatusUnknown" xml:space="preserve"><value>Status unavailable</value></data>
+  <data name="Home_RecentSaveHistoryUnavailable" xml:space="preserve"><value>Save history unavailable; check job details</value></data>
+  <data name="Home_RecentPngSavedPreviously" xml:space="preserve"><value>Saved previously (approved PNG); check job details</value></data>
+  <data name="Home_RecentTiffSavedPreviously" xml:space="preserve"><value>{0} approved TIFF size(s) saved previously; check job details</value></data>
   <data name="Session_NextCompleted" xml:space="preserve"><value>The workflow is complete.</value></data>
   <data name="Session_NextAbandoned" xml:space="preserve"><value>This job was abandoned; return to Home to choose another job.</value></data>
   <data name="Session_NextProcessing" xml:space="preserve"><value>Please wait while PrintFlow processes: {0}.</value></data>

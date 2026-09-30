@@ -1,4 +1,5 @@
 using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Ids;
 using PrintFlow.Domain.Sessions;
@@ -7,8 +8,9 @@ using PrintFlow.Workflow.Services;
 namespace PrintFlow.App.ViewModels;
 
 /// <summary>Formatting only: every action flag comes from the service recovery read model.</summary>
-public sealed class RecoverySessionRow(RecoveryItem item)
+public sealed class RecoverySessionRow(RecoveryItem item) : ObservableObject
 {
+    internal void RefreshLanguage() => OnPropertyChanged(string.Empty);
     public SessionId Id => item.Id;
     public string DisplayName => item.OutputName.Value;
     public string Description => string.Format(CultureInfo.CurrentCulture, Strings.Home_RecoveryDescription,

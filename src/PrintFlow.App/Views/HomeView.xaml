@@ -275,16 +275,15 @@
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14" />
-                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0" Opacity="0.75">
-                                            <TextBlock Text="{Binding Workflow}" />
-                                            <TextBlock Text="  ·  " />
-                                            <TextBlock Text="{Binding CurrentStep}" />
-                                            <TextBlock Text="  ·  " />
-                                            <TextBlock Text="{Binding State}" />
-                                            <TextBlock Text="  ·  " />
-                                            <TextBlock Text="{Binding UpdatedAt}" />
-                                        </StackPanel>
+                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="14" />
+                                        <TextBlock Text="{Binding MetadataText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.75" />
+                                        <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+                                                   AutomationProperties.AutomationId="Home.RecentStatus"
+                                                   AutomationProperties.Name="{Binding State}" />
+                                        <TextBlock Text="{Binding SaveHistoryText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.8"
+                                                   AutomationProperties.AutomationId="Home.RecentSaveHistory"
+                                                   AutomationProperties.Name="{Binding SaveHistoryText}"
+                                                   Visibility="{Binding HasSaveHistoryText, Converter={StaticResource BoolToVisibility}}" />
                                         <!-- SCRUM-11148: what "Details" alone cannot say for a handed-off correction job. -->
                                         <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
                                                    AutomationProperties.AutomationId="Home.RecentWaitingForCorrection"

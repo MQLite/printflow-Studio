@@ -144,6 +144,15 @@ public sealed record SessionListItem(
     SessionState State,
     DateTimeOffset UpdatedAtUtc)
 {
+    /// <summary>Read-only current-step fact; null means the list could not establish it.</summary>
+    public StepState? CurrentStepState { get; init; }
+
+    /// <summary>A current-step attempt is actually running, rather than merely historically present.</summary>
+    public bool HasRunningCurrentAttempt { get; init; }
+
+    /// <summary>Null means history was unavailable; zero means a successful read found no exact delivered result.</summary>
+    public int? PreviouslySavedOutputCount { get; init; }
+
     /// <summary>Whether Home may offer Abandon for this session.</summary>
     public bool CanAbandon => SessionStateRules.AllowsAbandon(State);
 

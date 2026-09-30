@@ -113,26 +113,149 @@ public sealed class SqliteSessionRepository : ISessionRepository
         int maxCount, DateTimeOffset since, CancellationToken cancellationToken)
     {
         using SqliteConnection connection = _connectionFactory.Open();
+        using SqliteTransaction transaction = connection.BeginTransaction(deferred: true);
 
         // Removed records are filtered before the limit, not after: a job the operator took off
         // the list must not occupy one of the hundred places Home has to offer (Jira 11602).
-        IEnumerable<SessionRow> rows = await connection.QueryAsync<SessionRow>(
+        IEnumerable<SessionRow> rows = await connection.QueryAsync<SessionRow>(new CommandDefinition(
             """
-            SELECT * FROM ProcessingSession
-            WHERE UpdatedAtUtc >= @since AND RemovedFromRecentAtUtc IS NULL
-            ORDER BY UpdatedAtUtc DESC LIMIT @maxCount;
+            SELECT s.*, t.State AS CurrentStepState,
+                   EXISTS (SELECT 1 FROM ProcessingAttempt a
+                           WHERE a.SessionId = s.Id AND a.StepKind = s.CurrentStep
+                             AND a.ResultStatus = 'RUNNING') AS HasRunningCurrentAttempt
+            FROM ProcessingSession s
+            LEFT JOIN SessionStep t ON t.SessionId = s.Id AND t.StepKind = s.CurrentStep
+            WHERE s.UpdatedAtUtc >= @since AND s.RemovedFromRecentAtUtc IS NULL
+            ORDER BY s.UpdatedAtUtc DESC LIMIT @maxCount;
             """,
-            new { since = Mappers.ToText(since), maxCount });
+            new { since = Mappers.ToText(since), maxCount }, transaction, cancellationToken: cancellationToken));
 
-        IReadOnlyList<SessionListItem> items = rows.Select(row => new SessionListItem(
+        List<SessionRow> selected = rows.ToList();
+        Dictionary<string, int>? savedCounts = null;
+        if (selected.Count != 0)
+        {
+            try
+            {
+                // A single metadata-only read for the bounded list. Artifact ID, latest current
+                // approval subject, hash and length must agree. A TIFF sibling has a different
+                // PrintOutputId even when its content hash happens to match.
+                IEnumerable<RecentSaveCountRow> history = await connection.QueryAsync<RecentSaveCountRow>(
+                    new CommandDefinition("""
+                    WITH RECURSIVE roots(SessionId, RootId) AS (
+                      SELECT DISTINCT d.SessionId, promoted.SourceRevisionId
+                      FROM ArtifactDelivery d JOIN Revision promoted ON promoted.Id=d.RevisionId
+                      WHERE d.SessionId IN @ids AND d.Kind='ApprovedAssetPng' AND d.Status='Delivered'
+                      UNION
+                      SELECT DISTINCT d.SessionId, output.SourceRevisionId
+                      FROM ArtifactDelivery d JOIN PrintOutput output ON output.Id=d.PrintOutputId
+                      WHERE d.SessionId IN @ids AND d.Kind='ApprovedPrintTiff' AND d.Status='Delivered'
+                    ),
+                    lineage(SessionId, RootId, Id, ParentId, NodeSessionId, IsValid, ReleasedAt, ByteLength, Path) AS (
+                      SELECT roots.SessionId, roots.RootId, revision.Id, revision.SourceRevisionId,
+                             revision.SessionId, revision.IsValid, revision.RetentionReleasedAtUtc,
+                             revision.ByteLength, ',' || revision.Id || ','
+                      FROM roots JOIN Revision revision ON revision.Id=roots.RootId
+                      UNION ALL
+                      SELECT lineage.SessionId, lineage.RootId, parent.Id, parent.SourceRevisionId,
+                             parent.SessionId, parent.IsValid, parent.RetentionReleasedAtUtc,
+                             parent.ByteLength, lineage.Path || parent.Id || ','
+                      FROM lineage JOIN Revision parent ON parent.Id=lineage.ParentId
+                      WHERE instr(lineage.Path, ',' || parent.Id || ',')=0
+                    ),
+                    valid_roots AS (
+                      SELECT SessionId, RootId FROM lineage GROUP BY SessionId, RootId
+                      HAVING MIN(CASE WHEN NodeSessionId=SessionId AND IsValid=1
+                                           AND ReleasedAt IS NULL AND ByteLength>0 THEN 1 ELSE 0 END)=1
+                         AND MAX(CASE WHEN ParentId IS NULL THEN 1 ELSE 0 END)=1
+                    )
+                    SELECT SessionId, SUM(SavedCount) AS SavedCount FROM (
+                      SELECT d.SessionId, COUNT(DISTINCT d.RevisionId) AS SavedCount
+                      FROM ArtifactDelivery d
+                      JOIN ProcessingSession s ON s.Id=d.SessionId AND s.WorkflowType='PREPARE_ASSET'
+                      JOIN SessionStep e ON e.SessionId=s.Id AND e.StepKind='ApprovedPngExport'
+                      JOIN Revision r ON r.Id=d.RevisionId AND r.SessionId=s.Id
+                      JOIN Revision source ON source.Id=r.SourceRevisionId AND source.SessionId=s.Id
+                      JOIN ReviewDecision review ON review.Id=d.ReviewId AND review.SessionId=s.Id
+                      JOIN ProcessingAttempt promotion ON promotion.SessionId=s.Id
+                        AND promotion.OutputRevisionId=r.Id AND promotion.InputRevisionId=source.Id
+                        AND promotion.ResultStatus='SUCCEEDED' AND promotion.Operation='PROMOTE_APPROVED'
+                      WHERE d.SessionId IN @ids AND d.Kind='ApprovedAssetPng' AND d.Status='Delivered'
+                        AND (s.State='COMPLETED' OR s.CurrentStep='ApprovedPngExport')
+                        AND e.State='APPROVED' AND e.CurrentRevisionId=r.Id AND e.CurrentRevisionSha=r.Sha256
+                        AND r.IsValid=1 AND r.RetentionReleasedAtUtc IS NULL AND r.Operation='PROMOTE_APPROVED'
+                        AND source.IsValid=1 AND source.RetentionReleasedAtUtc IS NULL
+                        AND source.ReviewState='APPROVED' AND source.Sha256=r.Sha256
+                        AND source.ByteLength=r.ByteLength
+                        AND EXISTS (SELECT 1 FROM valid_roots v WHERE v.SessionId=s.Id AND v.RootId=source.Id)
+                        AND d.ApprovedSha256=r.Sha256 AND d.ApprovedLength=r.ByteLength
+                        AND d.ApprovalSubjectKind='Revision' AND d.ApprovalSubjectId=source.Id
+                        AND d.PromotionSourceRevisionId=source.Id
+                        AND review.SubjectKind='REVISION' AND review.SubjectId=source.Id
+                        AND review.Decision='APPROVED' AND review.ReviewedSha256=source.Sha256
+                        AND review.Id=(SELECT latest.Id FROM ReviewDecision latest
+                          WHERE latest.SessionId=s.Id AND latest.SubjectKind='REVISION'
+                            AND latest.SubjectId=source.Id
+                          ORDER BY latest.DecidedAtUtc DESC, latest.Id DESC LIMIT 1)
+                      GROUP BY d.SessionId
+                      UNION ALL
+                      SELECT d.SessionId, COUNT(DISTINCT d.PrintOutputId) AS SavedCount
+                      FROM ArtifactDelivery d
+                      JOIN PrintOutput o ON o.Id=d.PrintOutputId AND o.SessionId=d.SessionId
+                      JOIN Revision twin ON twin.Id=o.Id AND twin.SessionId=o.SessionId
+                      JOIN ProcessingAttempt producing ON producing.SessionId=o.SessionId
+                        AND producing.OutputRevisionId=twin.Id AND producing.InputRevisionId=o.SourceRevisionId
+                        AND producing.ResultStatus='SUCCEEDED' AND producing.Operation='PHOTOSHOP_OUTPUT'
+                      JOIN ReviewDecision review ON review.Id=d.ReviewId AND review.SessionId=d.SessionId
+                      WHERE d.SessionId IN @ids AND d.Kind='ApprovedPrintTiff' AND d.Status='Delivered'
+                        AND o.IsValid=1 AND o.RecycledAtUtc IS NULL AND o.ReviewState='APPROVED'
+                        AND twin.IsValid=1 AND twin.RetentionReleasedAtUtc IS NULL
+                        AND twin.Operation='PHOTOSHOP_OUTPUT' AND twin.SourceRevisionId=o.SourceRevisionId
+                        AND twin.Sha256=o.Sha256 AND twin.ByteLength=o.ByteLength AND twin.Format='TIFF'
+                        AND EXISTS (SELECT 1 FROM valid_roots v WHERE v.SessionId=o.SessionId
+                              AND v.RootId=o.SourceRevisionId)
+                        AND d.ApprovedSha256=o.Sha256 AND d.ApprovedLength=o.ByteLength
+                        AND d.ApprovalSubjectKind='PrintOutput' AND d.ApprovalSubjectId=o.Id
+                        AND review.SubjectKind='PRINT_OUTPUT' AND review.SubjectId=o.Id
+                        AND review.Decision='APPROVED' AND review.ReviewedSha256=o.Sha256
+                        AND review.Id=(SELECT latest.Id FROM ReviewDecision latest
+                          WHERE latest.SessionId=o.SessionId AND latest.SubjectKind='PRINT_OUTPUT'
+                            AND latest.SubjectId=o.Id
+                          ORDER BY latest.DecidedAtUtc DESC, latest.Id DESC LIMIT 1)
+                      GROUP BY d.SessionId
+                    ) GROUP BY SessionId;
+                    """, new { ids = selected.Select(row => row.Id).ToArray() }, transaction,
+                        cancellationToken: cancellationToken));
+                savedCounts = history.ToDictionary(row => row.SessionId, row => row.SavedCount);
+            }
+            catch (SqliteException)
+            {
+                // A failed history read is unknown, never evidence that there was no save.
+            }
+        }
+
+        IReadOnlyList<SessionListItem> items = selected.Select(row => new SessionListItem(
             SessionId.From(Guid.Parse(row.Id)),
             Mappers.ToWorkflowType(row.WorkflowType),
             Domain.Files.OutputName.Parse(row.OutputName),
             Mappers.ToStepKind(row.CurrentStep),
             Mappers.ToSessionState(row.State),
-            Mappers.ToDateTimeOffset(row.UpdatedAtUtc))).ToList();
+            Mappers.ToDateTimeOffset(row.UpdatedAtUtc))
+        {
+            CurrentStepState = row.CurrentStepState is null ? null : Mappers.ToStepState(row.CurrentStepState),
+            HasRunningCurrentAttempt = row.HasRunningCurrentAttempt,
+            PreviouslySavedOutputCount = savedCounts is null ? null :
+                savedCounts.GetValueOrDefault(row.Id),
+        }).ToList();
+
+        transaction.Commit();
 
         return OperationResult.Ok(items);
+    }
+
+    private sealed class RecentSaveCountRow
+    {
+        public string SessionId { get; set; } = "";
+        public int SavedCount { get; set; }
     }
 
     /// <inheritdoc />

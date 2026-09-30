@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PrintFlow.App.Resources;
 using PrintFlow.Domain.Ids;
+using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
@@ -10,9 +11,8 @@ namespace PrintFlow.App.ViewModels;
 /// One "Recent Processing" row, already localised and formatted for display.
 /// </summary>
 /// <remarks>
-/// Computed once from a <see cref="SessionListItem"/>: a row is a snapshot of what persistence
-/// said, so Home refreshes by rebuilding the list rather than by mutating rows that might no
-/// longer match the database.
+/// Holds one <see cref="SessionListItem"/> snapshot. Language changes reword that same snapshot;
+/// Home refreshes by rebuilding rows when persisted facts may have changed.
 /// <para>
 /// It shows what an operator needs to recognise their work — a picture of it, their name for
 /// it, the workflow, where it got to, state, when it last changed. It deliberately shows no
@@ -20,8 +20,7 @@ namespace PrintFlow.App.ViewModels;
 /// an entry action knows which session to act on (Part 3C2 §8).
 /// </para>
 /// <para>
-/// The one thing that arrives later is <see cref="Thumbnail"/>, which is why this is observable
-/// at all. Everything else is fixed at construction; the picture is decoded off the UI thread
+/// The picture arrives later; the picture is decoded off the UI thread
 /// after the list is on screen, so opening Home never waits on image decoding (Jira 11602).
 /// A row that never receives one simply stays without a picture — that is a display state, not
 /// a problem with the job, and every other action on the row is unaffected.
@@ -29,21 +28,44 @@ namespace PrintFlow.App.ViewModels;
 /// </remarks>
 public sealed partial class RecentSessionRow : ObservableObject
 {
+    private readonly SessionListItem _item;
+
     internal RecentSessionRow(SessionListItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
 
+        _item = item;
+
         Id = item.Id;
         DisplayName = item.OutputName.Value;
-        Workflow = DisplayNames.Workflow(item.WorkflowType);
-        CurrentStep = DisplayNames.Step(item.CurrentStep);
-        State = DisplayNames.SessionState(item.State);
-        UpdatedAt = item.UpdatedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
         CanAbandon = item.CanAbandon;
         CanContinueProcessing = item.CanContinueProcessing;
         CanRemoveRecord = item.CanRemoveRecord;
         HasOpenCorrection = item.HasOpenCorrection;
     }
+
+    internal void RefreshLanguage()
+    {
+        OnPropertyChanged(nameof(Workflow));
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(State));
+        OnPropertyChanged(nameof(SaveHistoryText));
+        OnPropertyChanged(nameof(HasSaveHistoryText));
+        OnPropertyChanged(nameof(MetadataText));
+        OnPropertyChanged(nameof(WaitingForCorrectionText));
+        OnPropertyChanged(nameof(ThumbnailState));
+        OnPropertyChanged(nameof(ThumbnailName));
+        OnPropertyChanged(nameof(OpenActionLabel));
+    }
+
+    private string FormatSaveHistory() => _item.PreviouslySavedOutputCount switch
+        {
+            null => Strings.Home_RecentSaveHistoryUnavailable,
+            > 0 when _item.WorkflowType == WorkflowType.PrepareAsset => Strings.Home_RecentPngSavedPreviously,
+            > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Home_RecentTiffSavedPreviously,
+                _item.PreviouslySavedOutputCount.Value),
+            _ => string.Empty,
+        };
 
     /// <summary>
     /// Whether this handed-off job waits for a colleague's corrected picture (SCRUM-11148). The
@@ -60,16 +82,45 @@ public sealed partial class RecentSessionRow : ObservableObject
     public string DisplayName { get; }
 
     /// <summary>The localised workflow name.</summary>
-    public string Workflow { get; }
+    public string Workflow => DisplayNames.Workflow(_item.WorkflowType);
 
     /// <summary>The localised step the session is waiting on.</summary>
-    public string CurrentStep { get; }
+    public string CurrentStep => DisplayNames.Step(_item.CurrentStep);
+    public bool ShowStepInMetadata => _item.State != SessionState.Active;
+    public string MetadataText => ShowStepInMetadata
+        ? $"{Workflow} · {CurrentStep} · {UpdatedAt}"
+        : $"{Workflow} · {UpdatedAt}";
 
     /// <summary>The localised session state.</summary>
-    public string State { get; }
+    public string State => Status(_item, CurrentStep);
+
+    /// <summary>Qualified database history for exact approved outputs; no present-file claim.</summary>
+    public string SaveHistoryText => FormatSaveHistory();
+    public bool HasSaveHistoryText => SaveHistoryText.Length != 0;
+
+    private static string Status(SessionListItem item, string step)
+    {
+        string heading = item.State switch
+        {
+            SessionState.HandedOff => Strings.Session_StatusHandedOff,
+            SessionState.Completed => Strings.Session_StatusCompleted,
+            SessionState.Abandoned => Strings.SessionState_Abandoned,
+            SessionState.Active => item.CurrentStepState switch
+            {
+                StepState.ReviewRequired => Strings.Session_StatusReview,
+                StepState.Failed or StepState.RetryRequired => Strings.Session_StatusStopped,
+                StepState.Waiting or StepState.Approved or StepState.Skipped => Strings.Session_StatusInput,
+                StepState.Processing when item.HasRunningCurrentAttempt => Strings.Session_StatusProcessing,
+                _ => Strings.Home_RecentStatusUnknown,
+            },
+            _ => Strings.Home_RecentStatusUnknown,
+        };
+        return item.State == SessionState.Active && item.CurrentStepState is not null
+            ? heading + " · " + step : heading;
+    }
 
     /// <summary>When the session last changed, in the workstation's local time.</summary>
-    public string UpdatedAt { get; }
+    public string UpdatedAt => _item.UpdatedAtUtc.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
 
     /// <summary>Whether Home offers Abandon, as reported by the workflow layer.</summary>
     public bool CanAbandon { get; }

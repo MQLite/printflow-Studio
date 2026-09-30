@@ -27,6 +27,10 @@ internal static class Strings
     internal static string Session_StatusProcessing => Get(nameof(Session_StatusProcessing));
     internal static string Session_StatusReview => Get(nameof(Session_StatusReview));
     internal static string Session_StatusInput => Get(nameof(Session_StatusInput));
+    internal static string Home_RecentStatusUnknown => Get(nameof(Home_RecentStatusUnknown));
+    internal static string Home_RecentSaveHistoryUnavailable => Get(nameof(Home_RecentSaveHistoryUnavailable));
+    internal static string Home_RecentPngSavedPreviously => Get(nameof(Home_RecentPngSavedPreviously));
+    internal static string Home_RecentTiffSavedPreviously => Get(nameof(Home_RecentTiffSavedPreviously));
     internal static string Session_NextCompleted => Get(nameof(Session_NextCompleted));
     internal static string Session_NextAbandoned => Get(nameof(Session_NextAbandoned));
     internal static string Session_NextProcessing => Get(nameof(Session_NextProcessing));

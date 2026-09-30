@@ -25,6 +25,8 @@ internal sealed class SessionRow
     public int? DimensionsPixelHeight { get; set; }
     public string? DimensionsPreset { get; set; }
     public string? WhiteUnderbaseBranch { get; set; }
+    public string? CurrentStepState { get; set; }
+    public bool HasRunningCurrentAttempt { get; set; }
     public string? TrimMode { get; set; }
     public int? TrimMarginTop { get; set; }
     public int? TrimMarginRight { get; set; }

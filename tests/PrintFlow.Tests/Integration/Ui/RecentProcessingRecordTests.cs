@@ -1,6 +1,15 @@
 using System.IO;
+using System.Globalization;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using Microsoft.Data.Sqlite;
+using PrintFlow.Infrastructure.Sqlite;
 using PrintFlow.App.Resources;
+using PrintFlow.App.Localisation;
 using PrintFlow.App.ViewModels;
+using PrintFlow.App.Views;
 using PrintFlow.Domain.Attempts;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Ids;
@@ -10,6 +19,7 @@ using PrintFlow.Domain.Revisions;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Tests.Fixtures;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Delivery;
 using PrintFlow.Workflow.Ports;
 using PrintFlow.Workflow.Services;
 
@@ -34,6 +44,243 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class RecentProcessingRecordTests
 {
+    [Fact]
+    public async Task Unavailable_delivery_history_is_unknown_and_does_not_hide_the_recent_job()
+    {
+        using HomeScreenHarness harness = new();
+        harness.FilePicker.Path = harness.WriteSourceFile("unknown-history.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+        SessionId id = harness.Navigation.WorkflowSelectionFor!.Id;
+        using (SqliteConnection connection = harness.Inner.Database.Factory.Open())
+        using (SqliteCommand command = connection.CreateCommand())
+        {
+            command.CommandText = "DROP TABLE ArtifactDelivery;";
+            command.ExecuteNonQuery();
+        }
+
+        SessionListItem item = (await harness.Sessions.ListRecentAsync(CancellationToken.None)).Value
+            .Single(candidate => candidate.Id == id);
+        item.PreviouslySavedOutputCount.ShouldBeNull();
+        new RecentSessionRow(item).SaveHistoryText.ShouldBe(Strings.Home_RecentSaveHistoryUnavailable);
+    }
+
+    [Fact]
+    public async Task Historical_TIFF_save_is_not_counted_after_its_source_revision_is_invalidated()
+    {
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        SessionView review = await FinalSaveFixtures.TiffAtFinalReviewAsync(harness.Inner, harness.Sessions);
+        string folder = FinalSaveFixtures.NewFolder("recent-invalidated-source");
+        try
+        {
+            var coordinator = new FinalSaveCoordinator(harness.Sessions, FinalSaveFixtures.Delivery(harness.Inner), "tester");
+            (await coordinator.ConfirmAndSaveAsync(FinalSaveFixtures.Confirm(review, folder, "approved.tif"),
+                null, CancellationToken.None)).Delivery!.Code.ShouldBe(DeliveryCode.Delivered);
+            SessionAggregate aggregate = await FinalSaveFixtures.LoadAsync(harness.Inner, review.Id);
+            string source = aggregate.Outputs.Single().SourceRevisionId.ToString();
+            using (SqliteConnection connection = harness.Inner.Database.Factory.Open())
+            using (SqliteCommand command = connection.CreateCommand())
+            {
+                command.CommandText = "UPDATE Revision SET IsValid=0, InvalidatedAtUtc=$at, " +
+                                      "InvalidationReason='FILE_MUTATED' WHERE Id=$id;";
+                command.Parameters.AddWithValue("$at", Mappers.ToText(DateTimeOffset.UtcNow));
+                command.Parameters.AddWithValue("$id", source);
+                command.ExecuteNonQuery().ShouldBe(1);
+            }
+            (await FinalSaveFixtures.LoadAsync(harness.Inner, review.Id)).Outputs.Single().IsValid.ShouldBeTrue();
+
+            SessionListItem item = (await harness.Sessions.ListRecentAsync(CancellationToken.None)).Value
+                .Single(candidate => candidate.Id == review.Id);
+            item.PreviouslySavedOutputCount.ShouldBe(0);
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Fact]
+    public async Task Changing_language_rewords_the_existing_recent_row_without_processing()
+    {
+        using OperatorCultureScope culture = new("en");
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        var localisation = new LocalisationService(harness.Inner.Settings);
+        localisation.Use(OperatorLanguage.English);
+        HomeViewModel home = new(harness.Sessions, harness.Previews, harness.Navigation,
+            harness.FilePicker, harness.StartupStatus, harness.Readiness, localisation);
+        TiffFinalReviewFixture.Review review =
+            await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "language-review.png");
+        await home.RefreshCommand.ExecuteAsync(null);
+        RecentSessionRow row = home.RecentSessions.Single(candidate => candidate.Id == review.Id);
+        row.State.ShouldContain("Waiting for your review");
+        int attempts = (await review.ReloadAsync()).Attempts.Count;
+
+        localisation.Use(OperatorLanguage.SimplifiedChinese);
+        row.State.ShouldContain("等待你检查");
+        home.RecentSessions.Single(candidate => candidate.Id == review.Id).ShouldBeSameAs(row);
+        (await review.ReloadAsync()).Attempts.Count.ShouldBe(attempts);
+    }
+
+    [Theory]
+    [InlineData("en")]
+    [InlineData("zh-CN")]
+    public async Task Captures_synthetic_mixed_recent_status_when_requested(string language)
+    {
+        string? destination = Environment.GetEnvironmentVariable("PF_SCRUM11153_CAPTURE_DIR");
+        if (string.IsNullOrWhiteSpace(destination)) return;
+        using OperatorCultureScope culture = new(language);
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        await RecoverySurfaceTests.Seed(harness.Inner, "status-recovery");
+        harness.FilePicker.Path = harness.WriteSourceFile("long-operator-named-artwork-with-several-words-for-layout.png");
+        await harness.Home.ChooseFileCommand.ExecuteAsync(null);
+        await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "review-the-current-output.png");
+        SessionView png = await FinalSaveFixtures.PngAtFinalReviewAsync(harness.Inner, harness.Sessions);
+        string folder = FinalSaveFixtures.NewFolder("recent-capture");
+        try
+        {
+            var coordinator = new FinalSaveCoordinator(harness.Sessions, FinalSaveFixtures.Delivery(harness.Inner), "tester");
+            (await coordinator.ConfirmAndSaveAsync(FinalSaveFixtures.Confirm(png, folder, "recorded.png"),
+                null, CancellationToken.None)).Delivery!.Code.ShouldBe(DeliveryCode.Delivered);
+            (await harness.Sessions.ExecuteAsync(png.Id, new WorkflowCommand.Complete(), "tester", CancellationToken.None))
+                .IsSuccess.ShouldBeTrue();
+            await harness.Home.RefreshCommand.ExecuteAsync(null);
+            foreach (Size size in new[] { new Size(1000, 700), new Size(1920, 1040) })
+                foreach (bool expanded in new[] { false, true })
+                    WpfRendering.CapturePng(() => new HomeView { DataContext = harness.Home }, size,
+                        Path.Combine(destination, $"mixed-{language}-{size.Width:0}x{size.Height:0}-{(expanded ? "expanded" : "normal")}.png"),
+                        tree =>
+                        {
+                            if (expanded)
+                                foreach (Expander detail in tree.OfType<Expander>()) detail.IsExpanded = true;
+                            ScrollViewer lists = tree.OfType<ScrollViewer>().Single(scroll =>
+                                AutomationProperties.GetAutomationId(scroll) == "Home.Lists");
+                            lists.ScrollToEnd();
+                            tree.Root.UpdateLayout();
+                        });
+            WpfRendering.CapturePng(() => new HomeView { DataContext = harness.Home },
+                new Size(1000, 700), Path.Combine(destination, $"mixed-{language}-1000x700-long-name.png"),
+                tree =>
+                {
+                    ScrollViewer lists = tree.OfType<ScrollViewer>().Single(scroll =>
+                        AutomationProperties.GetAutomationId(scroll) == "Home.Lists");
+                    lists.ScrollToVerticalOffset(120);
+                    tree.Root.UpdateLayout();
+                });
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Theory]
+    [InlineData("en")]
+    [InlineData("zh-CN")]
+    public void Row_status_uses_current_facts_and_terminal_precedence_in_both_languages(string language)
+    {
+        FieldInfo selected = typeof(OperatorCulture).GetField("_selected", BindingFlags.Static | BindingFlags.NonPublic)!;
+        CultureInfo? previous = (CultureInfo?)selected.GetValue(null);
+        try
+        {
+            OperatorCulture.Select(CultureInfo.GetCultureInfo(language));
+            SessionListItem active = new(new SessionId(Guid.NewGuid()), WorkflowType.PrepareAsset,
+                OutputName.Parse("state-test"), StepKind.Enhancement, SessionState.Active, DateTimeOffset.UtcNow);
+            string step = Strings.Step_Enhancement;
+            new RecentSessionRow(active with { CurrentStepState = StepState.ReviewRequired }).State
+                .ShouldBe(Strings.Session_StatusReview + " · " + step);
+            new RecentSessionRow(active with { CurrentStepState = StepState.Failed }).State
+                .ShouldBe(Strings.Session_StatusStopped + " · " + step);
+            new RecentSessionRow(active with { CurrentStepState = StepState.RetryRequired }).State
+                .ShouldBe(Strings.Session_StatusStopped + " · " + step);
+            new RecentSessionRow(active with { CurrentStepState = StepState.Waiting }).State
+                .ShouldBe(Strings.Session_StatusInput + " · " + step);
+            new RecentSessionRow(active with { CurrentStepState = StepState.Processing }).State
+                .ShouldBe(Strings.Home_RecentStatusUnknown + " · " + step);
+            new RecentSessionRow(active with { CurrentStepState = StepState.Processing,
+                HasRunningCurrentAttempt = true }).State
+                .ShouldBe(Strings.Session_StatusProcessing + " · " + step);
+            new RecentSessionRow(active).State.ShouldBe(Strings.Home_RecentStatusUnknown);
+            new RecentSessionRow(active with { State = SessionState.HandedOff,
+                CurrentStepState = StepState.ReviewRequired }).State.ShouldBe(Strings.Session_StatusHandedOff);
+            new RecentSessionRow(active with { State = SessionState.Completed,
+                CurrentStepState = StepState.ReviewRequired }).State.ShouldBe(Strings.Session_StatusCompleted);
+            new RecentSessionRow(active with { State = SessionState.Abandoned,
+                CurrentStepState = StepState.ReviewRequired }).State.ShouldBe(Strings.SessionState_Abandoned);
+            new RecentSessionRow(active with { PreviouslySavedOutputCount = null }).SaveHistoryText
+                .ShouldBe(Strings.Home_RecentSaveHistoryUnavailable);
+            new RecentSessionRow(active with { PreviouslySavedOutputCount = 0 }).SaveHistoryText.ShouldBeEmpty();
+        }
+        finally { OperatorCulture.Select(previous); }
+    }
+
+    [Fact]
+    public async Task A_saved_TIFF_size_does_not_label_a_new_unreviewed_size_as_saved()
+    {
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out _);
+        SessionView first = await FinalSaveFixtures.TiffAtFinalReviewAsync(harness.Inner, harness.Sessions);
+        string folder = FinalSaveFixtures.NewFolder("recent-tiff-history");
+        try
+        {
+            var coordinator = new FinalSaveCoordinator(harness.Sessions, FinalSaveFixtures.Delivery(harness.Inner), "tester");
+            (await coordinator.ConfirmAndSaveAsync(
+                FinalSaveFixtures.Confirm(first, folder, "first.tif"), null, CancellationToken.None))
+                .Delivery!.Code.ShouldBe(DeliveryCode.Delivered);
+            (await harness.Sessions.ExecuteAsync(first.Id, new WorkflowCommand.Complete(), "tester", CancellationToken.None))
+                .IsSuccess.ShouldBeTrue();
+            (await harness.Sessions.ExecuteAsync(first.Id, new WorkflowCommand.AddAnotherSize(), "tester", CancellationToken.None))
+                .IsSuccess.ShouldBeTrue();
+            SessionView second = await FinalSaveFixtures.NextTiffSizeAsync(harness.Sessions, first.Id, 150);
+
+            await harness.Home.RefreshCommand.ExecuteAsync(null);
+            RecentSessionRow row = harness.Home.RecentSessions.Single(candidate => candidate.Id == first.Id);
+            row.State.ShouldBe(Strings.Session_StatusReview + " · " + Strings.Step_PhotoshopOutput);
+            row.SaveHistoryText.ShouldContain("1");
+            row.SaveHistoryText.ShouldContain("TIFF");
+            row.SaveHistoryText.ShouldNotContain("2");
+            second.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Fact]
+    public async Task Completed_recent_row_shows_only_an_exact_recorded_historical_save()
+    {
+        using HomeScreenHarness harness = new();
+        SessionView review = await FinalSaveFixtures.PngAtFinalReviewAsync(harness.Inner, harness.Sessions);
+        string folder = FinalSaveFixtures.NewFolder("recent-history");
+        try
+        {
+            var coordinator = new FinalSaveCoordinator(harness.Sessions, FinalSaveFixtures.Delivery(harness.Inner), "tester");
+            var saved = await coordinator.ConfirmAndSaveAsync(
+                FinalSaveFixtures.Confirm(review, folder, "recent.png"), null, CancellationToken.None);
+            saved.Delivery!.Code.ShouldBe(DeliveryCode.Delivered);
+            (await harness.Sessions.ExecuteAsync(review.Id, new WorkflowCommand.Complete(), "tester", CancellationToken.None))
+                .IsSuccess.ShouldBeTrue();
+
+            await harness.Home.RefreshCommand.ExecuteAsync(null);
+            RecentSessionRow row = harness.Home.RecentSessions.Single(candidate => candidate.Id == review.Id);
+            row.State.ShouldBe(Strings.Session_StatusCompleted);
+            RenderResult<bool> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+                () => new HomeView { DataContext = harness.Home }, WpfRendering.ReviewViewport,
+                tree => tree.OfType<TextBlock>().Any(text =>
+                    text.Text.Contains("Saved previously", StringComparison.Ordinal) ||
+                    text.Text.Contains("曾保存过", StringComparison.Ordinal)));
+            rendered.Facts.ShouldBeTrue();
+        }
+        finally { FinalSaveFixtures.Remove(folder); }
+    }
+
+    [Fact]
+    public async Task Recent_row_names_the_current_review_step_and_opening_it_does_not_process()
+    {
+        using HomeScreenHarness harness = TiffFinalReviewFixture.Harness(out SyntheticProductionTiffProcessor processor);
+        TiffFinalReviewFixture.Review review =
+            await TiffFinalReviewFixture.ReviewRequiredAsync(harness, "recent-review.png");
+
+        await harness.Home.RefreshCommand.ExecuteAsync(null);
+        RecentSessionRow row = harness.Home.RecentSessions.Single(candidate => candidate.Id == review.Id);
+        row.State.ShouldBe(Strings.Session_StatusReview + " · " + Strings.Step_PhotoshopOutput);
+        row.OpenActionLabel.ShouldBe(Strings.Home_Resume);
+
+        int attempts = (await review.ReloadAsync()).Attempts.Count;
+        await harness.Home.ResumeCommand.ExecuteAsync(row);
+        harness.Navigation.SessionFor!.Id.ShouldBe(review.Id);
+        (await review.ReloadAsync()).Attempts.Count.ShouldBe(attempts);
+    }
+
     // -------------------------------------------------------------------------------------
     // Thumbnail
     // -------------------------------------------------------------------------------------

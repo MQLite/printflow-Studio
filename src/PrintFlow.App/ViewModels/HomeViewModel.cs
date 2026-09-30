@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PrintFlow.App.Navigation;
+using PrintFlow.App.Localisation;
 using PrintFlow.App.Resources;
 using PrintFlow.App.Startup;
 using PrintFlow.Domain.Results;
@@ -43,6 +44,9 @@ public sealed partial class HomeViewModel : ObservableObject
     /// </remarks>
     private CancellationTokenSource? _thumbnails;
 
+    // A slow earlier refresh must never replace the rows from a later visit or Refresh action.
+    private int _refreshGeneration;
+
     /// <summary>
     /// The workflow a session is imported under before the operator chooses.
     /// </summary>
@@ -79,7 +83,8 @@ public sealed partial class HomeViewModel : ObservableObject
         INavigationService navigation,
         IFilePicker filePicker,
         StartupStatusAccessor startupStatus,
-        ReadinessObservationAccessor readiness)
+        ReadinessObservationAccessor readiness,
+        ILocalisationService? localisation = null)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentNullException.ThrowIfNull(previews);
@@ -95,6 +100,16 @@ public sealed partial class HomeViewModel : ObservableObject
         _startupStatus = startupStatus;
         _readinessObservations = readiness;
         Readiness = new HomeReadinessSummary(readiness.Current);
+        if (localisation is not null)
+            System.Windows.WeakEventManager<ILocalisationService, EventArgs>.AddHandler(
+                localisation, nameof(ILocalisationService.LanguageChanged), OnLanguageChanged);
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        foreach (RecentSessionRow row in RecentSessions) row.RefreshLanguage();
+        foreach (RecoverySessionRow row in RecoverySessions) row.RefreshLanguage();
+        OnPropertyChanged(string.Empty);
     }
 
     // --- SCRUM-11152: the readiness summary and the startup details behind it ------------------
@@ -266,8 +281,10 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        int generation = ++_refreshGeneration;
         ReadReadiness();
         var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
+        if (generation != _refreshGeneration) return;
         if (recovery.IsFailure)
         {
             Notice = Describe(Strings.Home_RecoveryUnavailable, recovery.Failure);
@@ -282,6 +299,7 @@ public sealed partial class HomeViewModel : ObservableObject
 
         OperationResult<IReadOnlyList<SessionListItem>> listed =
             await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
+        if (generation != _refreshGeneration) return;
 
         RecentSessions.Clear();
 

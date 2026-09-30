@@ -340,6 +340,11 @@ public sealed class ColleagueCorrectionUiTests
             "Open job to import corrected image first; no generic import, no plain Open");
         facts.Facts.Waiting.ShouldBe(2, "the card and the Recent row both say what the job waits for");
         Capture(() => new HomeView { DataContext = home }, WpfRendering.ReviewViewport, $"home-{language}-1000x700.png");
+        string? recentCaptures = Environment.GetEnvironmentVariable("PF_SCRUM11153_CAPTURE_DIR");
+        if (!string.IsNullOrWhiteSpace(recentCaptures))
+            foreach (Size size in new[] { new Size(1000, 700), new Size(1920, 1040) })
+                WpfRendering.CapturePng(() => new HomeView { DataContext = home }, size,
+                    Path.Combine(recentCaptures, $"correction-recovery-{language}-{size.Width:0}x{size.Height:0}.png"));
     }
 
     [Fact]
