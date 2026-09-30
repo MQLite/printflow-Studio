@@ -1,3 +1,19 @@
+# PF-OPUX-v1 — SCRUM-11153 Recent status handoff
+
+2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11153-impl-v1`. **Bounded implementation, safe technical verification, independent review, direct master code publication and Jira synchronization complete. SCRUM-11153 is In Review. AC1–4 pass technical checks; AC5 has synthetic layout evidence and awaits physical/human acceptance. Stop at SCRUM-11153.**
+
+Recent now shows the current step's review/stopped/input/actually running status, with handed-off/completed/abandoned precedence. A separate historical line reports only exact approved Delivered PNG or counted TIFF size records, qualified as previously saved; a failed history read is unknown. The row does not claim destination-file availability. Existing Recovery/correction-bound return, Resume/Details, Remove and Abandon remain intact. No new processing, file check, sorting or status store.
+
+- Code: [7b37f24175df5d6efd530683fc52876c6446750a](https://github.com/MQLite/printflow-Studio/commit/7b37f24175df5d6efd530683fc52876c6446750a), 12 source/test paths, normal fast-forward verified by fetch/ls-remote and authenticated GitHub commit readback.
+- Verification: final safe affected 197/197, delivery/recovery/architecture 162/162, synthetic screenshot/focused 20/20 plus 2/2 long-name captures, build 0 warnings/errors; groups overlap. Off-screen en/zh-CN at 1000×700 and 1920×1040, 96 DPI. Excluded startup/native desktop and known hanging recovery paths remain NOT RUN/NOT PASS.
+- Independent review: one fresh reviewer found three P2 defects, then rechecked fixes and representative images with no remaining actionable code finding. It did not run tests; runtime model/effort unverified.
+- Jira: To Do → In Progress → In Review, transitions 21 and 31; one evidence comment `10188`. Authenticated final readback at `2026-09-30T00:16:56.330Z`: 17 issues, 26 Blocks, 51 string labels, complete comments, exact 23-column CSV, fidelity PASS. Only 11153 received writes.
+- Review: [plan](SCRUM-11153_PLAN.md), [final copy](SCRUM-11153_COPY_REVIEW.md), [results](SCRUM-11153_RESULTS.md), [independent review](SCRUM-11153_INDEPENDENT_REVIEW.md), [CSV](SCRUM-11153_JIRA_FINAL.csv). Owner copy, physical input/non-96-DPI and Jira human acceptance remain OPEN. The local audit and complete packet record the final docs SHA separately.
+
+No deployment, production startup/migration, shared-desktop operation, feature branch/PR, force-push or other-issue writes. The prior handoff remains below as dated history.
+
+---
+
 # PF-OPUX-v1 — SCRUM-11152 signal closeout handoff
 
 2026-09-30 NZ. Task `PF-OPUX-v1-SCRUM-11152-signal-closeout-v1`. **Implementation and technical independent review PASS; code MASTER_PUSH_VERIFIED; Jira In Review. AC1–4 pass technical/automated verification. AC5 PARTIAL; owner copy acceptance and human workstation checks remain OPEN/NOT RUN. Stop at SCRUM-11152; do not begin SCRUM-11153.**

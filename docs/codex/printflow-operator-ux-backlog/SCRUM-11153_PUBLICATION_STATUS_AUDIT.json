@@ -1,0 +1,90 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11153-impl-v1",
+  "policy": "development-routing 2.4",
+  "routeOffset": 0,
+  "authority": "User-approved bounded implementation, independent review, direct master publication, SCRUM-11153-only Jira lifecycle, final readback and owner packet.",
+  "routing": {
+    "implementation": "requested Astra High UI / Sol High read projection; actual current-thread model/effort UNVERIFIED; MODEL_SWITCH_UNAVAILABLE",
+    "review": "fresh independent read-only agent requested Astra High; actual runtime model/effort UNVERIFIED; reviewer did not run tests"
+  },
+  "git": {
+    "repository": "MQLite/printflow-Studio",
+    "branch": "master",
+    "remote": "https://github.com/MQLite/printflow-Studio.git",
+    "startingHead": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+    "codeCommit": {
+      "status": "MASTER_PUSH_VERIFIED",
+      "sha": "7b37f24175df5d6efd530683fc52876c6446750a",
+      "tree": "df0b82726b392e530df5f8603366eec0af4ea5ad",
+      "parent": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+      "fileCount": 12,
+      "authenticatedGithubReadback": true,
+      "fetched": "7b37f24175df5d6efd530683fc52876c6446750a",
+      "advertised": "7b37f24175df5d6efd530683fc52876c6446750a",
+      "coAuthoredByTrailer": false
+    },
+    "documentationCommit": {
+      "status": "PENDING_DOCS_COMMIT",
+      "sha": null,
+      "note": "Final docs SHA will be recorded in a local final audit residue and owner packet; avoid self-referencing commit chain."
+    },
+    "hooksAndAutomation": "No active local hooks, core.hooksPath or .github directory; no deployment trigger found. No deployment performed.",
+    "preservedPriorAuditResidues": {
+      "SCRUM-11149_PUBLICATION_STATUS_AUDIT.json": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "SCRUM-11150_PUBLICATION_STATUS_AUDIT.json": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD",
+      "SCRUM-11151_PUBLICATION_STATUS_AUDIT.json": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228",
+      "SCRUM-11152_PUBLICATION_STATUS_AUDIT.json": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938",
+      "SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json": "81BE7F65AEF11A5C4476164B33E7BFFEDA804A94B8037C81882B94B4D966E86F"
+    }
+  },
+  "jira": {
+    "issue": "SCRUM-11153",
+    "issueId": "10883",
+    "planningId": "PF-OPUX-v1-recent-row-status",
+    "before": "To Do",
+    "implementationStart": "In Progress",
+    "final": "In Review",
+    "transitionIds": [
+      "21",
+      "31"
+    ],
+    "evidenceCommentId": "10188",
+    "marker": "PF-OPUX-v1-SCRUM-11153-impl-v1",
+    "otherIssueWrites": 0,
+    "ownerAcceptance": "OPEN"
+  },
+  "readback": {
+    "source": "Authenticated Atlassian Rovo searchJiraIssuesUsingJql full response",
+    "at": "2026-09-30T00:16:56.330Z",
+    "issueCount": 17,
+    "blocksLinks": 26,
+    "stringLabels": 51,
+    "completeCommentPages": true,
+    "csvColumns": 23,
+    "csvUtf8Bom": true,
+    "exactTimestampStrings": 34,
+    "fidelity": "PASS",
+    "integrityRegression": "18/18",
+    "privateRawSha256": "1A57FAD2B521DB50678886491CFB1403B451A6C9DCDD95B3BC54AF65AB2E863F",
+    "privateSnapshotSha256": "1B0BF1E8A2581A4A61B92A8CF79855B4843D7B0CEA0BE5CC151B89C4AEA74399",
+    "businessDrift": "11153 status only; linked-status projections on 11143/11154/11155 expected"
+  },
+  "verification": {
+    "build": "PASS; 0 warnings, 0 errors",
+    "safeAffected": "197/197 PASS",
+    "deliveryRecoveryArchitecture": "162/162 PASS",
+    "captureFocused": "20/20 PASS plus later long-name capture 2/2 PASS",
+    "groupsOverlap": true,
+    "independentReview": "Three P2 findings fixed and rechecked; no remaining actionable code finding.",
+    "excluded": "Unsafe startup/native desktop/production composition and known hanging recovery test NOT RUN/NOT PASS; physical input, non-96-DPI, novice and human copy acceptance open."
+  },
+  "fileHashes": {
+    "Export-Wave1Jira.ps1": "C79F0C5FC38783B7638D172CFC61F907CDCC9FA458F495FFABD543370FE6D17F",
+    "HANDOFF.md": "8404F689E0A73EEA1BF7EAC9000B8BEA68EBB645DBFE1499A5B73495C10E8ABE",
+    "SCRUM-11153_PLAN.md": "D8EAA02817E0F2966E854015C315F5E34ABC422140DF27C7C9F88ACEC931F442",
+    "SCRUM-11153_COPY_REVIEW.md": "192E9A605888777AC13D4CD93144212BE59040796D678FF8C8F7822F219435A0",
+    "SCRUM-11153_RESULTS.md": "4E494A7D012D212DFC62475355AAAC4415B6795AE4135AFD80306BA0B981C3A4",
+    "SCRUM-11153_INDEPENDENT_REVIEW.md": "0521BE65148EFBB4597B227DF3651B6A3131D1D3B685BAB9B6D00131A05DB157",
+    "SCRUM-11153_JIRA_FINAL.csv": "079579CD26CE6794CA357224AA63D248E146803B5288A34475DBCA51A39C15D4"
+  }
+}
