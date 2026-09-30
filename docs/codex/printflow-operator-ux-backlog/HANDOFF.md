@@ -1,3 +1,14 @@
+# SCRUM-11154 — isolated entry implementation verified
+
+2026-09-30. Task `PF-OPUX-v1-SCRUM-11154-workstation-entry-impl-v1`. Required noninteractive implementation and isolation gates passed on candidate `51123588…9EFD15`; final independent conformance PASS; authorized publication closure pending. The owner approved the final reviewed design and five choices. Approved design/review bytes and all eight earlier audit residues remain unchanged; the historical records below retain their original meaning.
+
+The actual launcher is `tools/Start-WorkstationEntry.ps1`; [runbook](SCRUM-11154_WORKSTATION_ENTRY_RUNBOOK.md) contains tested commands. Test-only real MainWindow/ShellViewModel/NavigationService and real isolated SQLite/NTFS services passed F1–F6, mapped onto existing W01–W10. Final build clean; 46 entry checks and 7 runtime boundary checks passed, with 474 unchanged architecture checks from the prior affected run. PrepareAndSmoke and the exact owned-child restart exited 0, with settled teardown and no native dispatch. The same independent reviewer found no unresolved isolation issue. See [implementation](SCRUM-11154_WORKSTATION_ENTRY_IMPLEMENTATION.md), [review](SCRUM-11154_WORKSTATION_ENTRY_IMPLEMENTATION_REVIEW.md), [plan](SCRUM-11154_WORKSTATION_ENTRY_IMPL_PLAN.md), and [current audit](SCRUM-11154_WORKSTATION_ENTRY_IMPL_PUBLICATION_STATUS_AUDIT.json).
+
+Production remains denied; processing/readiness/recycling simulated. F6 maximum-box versus actual TIFF size disagreement remains negative evidence. Writer mid-copy/adjacent/final-publication fault injections and the historical generic recovery hang remain unverified. Physical keyboard AC2, workstation screenshots AC3, owner/novice acceptance and print quality remain OPEN/NOT RUN. The consumed negative-test root is not a valid future Interactive root. No visible application, dialogs, Explorer, capture/input, live processors or SCRUM-11155 work occurred.
+
+Actual baseline master/origin `25a93f551f27f9e918fdcbbec701a1371ccc23d0`. Only SCRUM-11154 moved In Review → In Progress at commencement; publication, final In Review transition, one implementation comment and exact export are pending and will be recorded in the audit. Comments 10189/10190 and other issues remain unchanged. Policy v2.4, route_offset 0; composition/reviewer requested Astra High, separable scenarios Sol High; actual routes UNVERIFIED, root switching unavailable. No global settings changed.
+
+---
 # SCRUM-11154 — isolated workstation entry design handoff
 
 2026-09-30. Task `PF-OPUX-v1-SCRUM-11154-workstation-entry-design-v1`. **AWAITING_OWNER_REVIEW.** Design-only investigation of actual master `5e6adcf3251bded0ce3df2d127d933eecde71969`; historical product candidate `e7852f00311d5bc914eae12174e0ae84196bcc23`. SCRUM-11154 remains In Review; AC1–3 and earlier owner decisions remain open. No implementation or SCRUM-11155 work.

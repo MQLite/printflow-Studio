@@ -1,0 +1,116 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-workstation-entry-impl-v1",
+  "status": "ISOLATED_ENTRY_IMPLEMENTED_NONINTERACTIVE_VERIFIED — AWAITING_SAFE_DESKTOP_AUTHORIZATION",
+  "baseline": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
+  "approvedDesignSha256": "E31BE7B9435F457A12A525D82117D891E16FD05A77A935CA670DE7BD6C273DA3",
+  "approvedReviewSha256": "32AAA9D114BA848E236A6985880822A536E0D64BA493151B5282A84948A0CD84",
+  "ownerApproval": "Explicit approval of final design and all five owner choices; bounded implementation and NONINTERACTIVE verification authorized.",
+  "preservation": {
+    "priorDirtyAuditFiles": 8,
+    "hashManifest": "artifacts/pf-opux-scrum11154-workstation-entry/preexisting-work.json",
+    "approvedArtifactsUnchanged": true,
+    "priorHandoffByteSuffixPreserved": true
+  },
+  "routing": {
+    "policyVersion": "2.4",
+    "routeOffset": 0,
+    "compositionRequested": "gpt-6-astra/high",
+    "scenarioRequested": "gpt-6-sol/high",
+    "independentReviewRequested": "gpt-6-astra/high",
+    "actualRoutes": "UNVERIFIED without runtime metadata",
+    "mechanism": "Native isolated implementation contexts at composition and separable fixture boundaries; one fresh independent reviewer reused for checkpoint and final review.",
+    "rootLiveSwitch": "MODEL_SWITCH_UNAVAILABLE"
+  },
+  "runtimeGraphGate": "PASS: one independent reviewer released construction only after corrections, then reused for every changed candidate and final code/evidence review",
+  "runtimeEvidence": {
+    "freshBuild": "PASS; zero warnings/errors",
+    "finalEntryChecks": "46/46 PASS, zero skipped",
+    "architecture": "474 architecture checks passed in earlier 514 group; unchanged product/registration/project wiring; totals overlap and are not added",
+    "finalRuntimeChecks": "7/7 PASS, zero skipped: four diagnostic + three isolated real lease tests",
+    "prepareAndSmoke": "exit 0 PREPARED_NONINTERACTIVE; real nonshown graph, F1-F6 (eight service-fact rows), actual navigation, NativeDispatches=0",
+    "preparedMarker": "Typed candidate/scenario/run/owner binding captured after settled teardown, pool cleanup and six exact DB identity checks; later test fixture renewal invalidates its owner binding intentionally",
+    "databaseIdentity": "Both real app/lease main/WAL/SHM triples retained exact identities after host exit",
+    "ownedRestart": "exit 0; exact child PID27780/start639263443339660948; actual recovery Interrupted1/Quarantined1/stale app lock released/no new results; actual Recovery/Details/Home commands",
+    "quiescence": "Owned work settled, pending0, no late registration in graph and recovery",
+    "evidenceFiles": {
+      "build": "prepared-final-build-01.log",
+      "entryTests": "prepared-final-static.trx",
+      "runtimeTests": "runtime-boundaries-final.trx",
+      "architectureTests": "architecture-entry-static.trx",
+      "prepareLog": "prepared-20260930T054646Z.log",
+      "preparedBinding": "prepared-binding-20260930T054646Z.json",
+      "stateReadback": "state-readback-20260930T054646Z.json",
+      "restartLog": "restart-final-20260930T054646Z.log",
+      "testAssemblyBinding": "runtime-final-binding.json"
+    }
+  },
+  "desktopEvidence": "NOT_RUN; no visible windows, native dialogs, Explorer, desktop capture/input or live processors authorized",
+  "publication": {
+    "status": "NOT_PUBLISHED",
+    "verifiedInitialMaster": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
+    "origin": "https://github.com/MQLite/printflow-Studio.git",
+    "activeHooks": [],
+    "repositoryWorkflows": [],
+    "codeCommit": null,
+    "documentationCommit": null,
+    "finalObservedRemoteTip": null,
+    "githubAuthentication": "UNVERIFIED: connected get_user_login returned only Action completed, without identity evidence. Git transport verification is separate."
+  },
+  "jira": {
+    "issue": "SCRUM-11154",
+    "initialStatus": "In Review",
+    "transitions": [
+      {
+        "id": "21",
+        "from": "In Review",
+        "to": "In Progress",
+        "result": "success"
+      }
+    ],
+    "currentObservedStatus": "In Progress",
+    "commentId": null,
+    "marker": "PF-OPUX-v1-SCRUM-11154-workstation-entry-impl-v1",
+    "protectedComments": [
+      "10189",
+      "10190"
+    ],
+    "otherIssueWrites": 0
+  },
+  "export": {
+    "status": "PENDING_FINAL_WRITES",
+    "baselineAuthenticated": true,
+    "baselineIssues": 17,
+    "baselineBlocks": 26,
+    "baselineStringLabels": 51,
+    "baselineCompleteComments": 30,
+    "requiredColumns": 23,
+    "requiredEncoding": "UTF-8 BOM"
+  },
+  "packet": "PENDING_FINAL_EVIDENCE",
+  "candidate": {
+    "hash": "51123588D1C3F5790ED55119FD79106F223725C913D60981C5B0818D149EFD15",
+    "sourceHead": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
+    "provenance": "candidate-final-20260930T054646Z-graph/candidate-provenance.json",
+    "graphRoot": "runs/p-20260930T054646Z",
+    "restartRoot": "runs/c-20260930T054646Z",
+    "graphScenarioHash": "D2D8422FDEF55D1A68BD933C2194CFC0CF17AC52C86569A7EACB75F93787CE06",
+    "restartScenarioHash": "83E21F5D3CC972D3D2DA5C5EA7814A5AB0868D27C819531230B6D3105E3ED111"
+  },
+  "independentReview": {
+    "context": "Same fresh isolation reviewer reused from pre-construction checkpoint",
+    "codeAndRequiredEvidence": "PASS; no unresolved isolation finding",
+    "documentationConsistency": "PASS; final same-context conformance verdict, no unresolved isolation/required-seam/documentation finding",
+    "requestedRoute": "gpt-6-astra/high",
+    "actualRoute": "UNVERIFIED without runtime telemetry"
+  },
+  "limits": [
+    "No visible windows, native dialogs, Explorer, capture/input, live processors or Production startup/data",
+    "Physical keyboard AC2, workstation screenshots AC3, whole-journey owner/novice acceptance and production output quality OPEN/NOT RUN",
+    "F6 maximum bounds 200x150 mm versus decoded TIFF 6x5 pixels / 0.508x0.423 mm remains negative evidence",
+    "PNG approval, legacy binding, broader recovery and direct failure-notice diagnostic-navigation gaps remain qualified; see W01-W10 map",
+    "Real writer mid-copy cancellation, adjacent-temp and failed-published-file fault injections NOT RUN; real staged-failure cleanup/collision/pre-cancel passed",
+    "Historical generic recovery hang NOT PASS; owned child proof is synthetic process interruption, not power loss",
+    "Controlled same-user harness, not an adversarial OS sandbox; no OS/framework/font/cache confinement claim",
+    "Final graph root consumed by runtime negative tests/owner renewal; do not reuse its stale prepared marker for Interactive"
+  ]
+}

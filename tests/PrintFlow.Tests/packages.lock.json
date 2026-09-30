@@ -191,6 +191,12 @@
           "PrintFlow.Domain": "[0.1.0, )"
         }
       },
+      "printflow.workstationentry": {
+        "type": "Project",
+        "dependencies": {
+          "PrintFlow.App": "[0.1.0, )"
+        }
+      },
       "CommunityToolkit.Mvvm": {
         "type": "CentralTransitive",
         "requested": "[8.4.2, )",

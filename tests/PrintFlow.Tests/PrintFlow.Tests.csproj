@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PrintFlow.WorkstationEntry\PrintFlow.WorkstationEntry.csproj" />
     <ProjectReference Include="..\..\src\PrintFlow.Domain\PrintFlow.Domain.csproj" />
     <ProjectReference Include="..\..\src\PrintFlow.Workflow\PrintFlow.Workflow.csproj" />
     <ProjectReference Include="..\..\src\PrintFlow.Infrastructure\PrintFlow.Infrastructure.csproj" />
