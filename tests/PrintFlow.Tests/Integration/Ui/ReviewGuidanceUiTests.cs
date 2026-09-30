@@ -117,6 +117,8 @@ public sealed class ReviewGuidanceUiTests
         using SessionServiceHarness h = new();
         (_, SessionViewModel screen, SessionView review) = await ReviewGuidanceSetup.OpenAtAsync(h, "tiff");
 
+        screen.RejectLabel.ShouldBe(language == "en" ? "Reject this TIFF" : "驳回此 TIFF",
+            "Reject only disposes and records this review; Run step makes a later TIFF");
         screen.ReviewGuidanceReject.ShouldContain(screen.RejectLabel);
         screen.ReviewGuidanceReject.ShouldContain(screen.RetryLabel);
         screen.ReviewGuidanceReject.ShouldContain(screen.RunStepLabel);

@@ -206,6 +206,63 @@ public sealed class RecentProcessingRecordTests
         finally { OperatorCulture.Select(previous); }
     }
 
+    [Theory]
+    [InlineData("en")]
+    [InlineData("zh-CN")]
+    public void Stopped_abandoned_and_running_current_attempt_rows_render_as_distinct_states(string language)
+    {
+        using OperatorCultureScope culture = new(language);
+        using HomeScreenHarness harness = new();
+        SessionListItem seed = new(new SessionId(Guid.NewGuid()), WorkflowType.PrepareAsset,
+            OutputName.Parse("synthetic-status"), StepKind.Enhancement, SessionState.Active,
+            DateTimeOffset.UtcNow);
+        harness.Home.RecentSessions.Add(new RecentSessionRow(seed with
+        {
+            CurrentStepState = StepState.Failed,
+            OutputName = OutputName.Parse("stopped-synthetic-job"),
+        }));
+        harness.Home.RecentSessions.Add(new RecentSessionRow(seed with
+        {
+            Id = new SessionId(Guid.NewGuid()),
+            State = SessionState.Abandoned,
+            OutputName = OutputName.Parse("abandoned-synthetic-job"),
+        }));
+        harness.Home.RecentSessions.Add(new RecentSessionRow(seed with
+        {
+            Id = new SessionId(Guid.NewGuid()),
+            CurrentStepState = StepState.Processing,
+            HasRunningCurrentAttempt = true,
+            OutputName = OutputName.Parse("running-attempt-synthetic-job"),
+        }));
+
+        harness.Home.RecentSessions.Select(row => row.State).ToArray().ShouldBe([
+            Strings.Session_StatusStopped + " · " + Strings.Step_Enhancement,
+            Strings.SessionState_Abandoned,
+            Strings.Session_StatusProcessing + " · " + Strings.Step_Enhancement,
+        ]);
+
+        foreach (Size viewport in new[] { new Size(1000, 700), new Size(1920, 1040) })
+        {
+            string? destination = Environment.GetEnvironmentVariable("PF_SCRUM11154_CAPTURE_DIR");
+            if (string.IsNullOrWhiteSpace(destination))
+            {
+                WpfRendering.RenderExpectingNoBindingErrors(
+                    () => new HomeView { DataContext = harness.Home }, viewport);
+                continue;
+            }
+
+            WpfRendering.CapturePng(() => new HomeView { DataContext = harness.Home }, viewport,
+                Path.Combine(destination, $"recent-stopped-abandoned-running-{language}-{viewport.Width:0}x{viewport.Height:0}.png"),
+                tree =>
+                {
+                    ScrollViewer lists = tree.OfType<ScrollViewer>().Single(scroll =>
+                        AutomationProperties.GetAutomationId(scroll) == "Home.Lists");
+                    lists.ScrollToEnd();
+                    tree.Root.UpdateLayout();
+                });
+        }
+    }
+
     [Fact]
     public async Task A_saved_TIFF_size_does_not_label_a_new_unreviewed_size_as_saved()
     {

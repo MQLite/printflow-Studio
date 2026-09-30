@@ -640,6 +640,7 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     internal static string Session_TargetEdge => Get(nameof(Session_TargetEdge));
     internal static string Session_TargetSizeMm => Get(nameof(Session_TargetSizeMm));
     internal static string Session_TargetSizeInvalid => Get(nameof(Session_TargetSizeInvalid));
+    internal static string Session_TargetSizeUnavailable => Get(nameof(Session_TargetSizeUnavailable));
     internal static string Session_ConfirmCustomSize => Get(nameof(Session_ConfirmCustomSize));
     internal static string TargetEdge_Width => Get(nameof(TargetEdge_Width));
     internal static string TargetEdge_Height => Get(nameof(TargetEdge_Height));

@@ -220,7 +220,7 @@
   <data name="Session_TiffReviewSummary" xml:space="preserve"><value>CMYK + W1 validated · {0}</value></data>
   <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>The file's structure was checked, not its artistic or print quality.</value></data>
   <data name="Session_ApproveTiff" xml:space="preserve"><value>Approve this TIFF</value></data>
-  <data name="Session_RejectTiff" xml:space="preserve"><value>Reject and make another TIFF</value></data>
+  <data name="Session_RejectTiff" xml:space="preserve"><value>Reject this TIFF</value></data>
   <data name="OutputLocation_Working" xml:space="preserve"><value>awaiting review in Working</value></data>
   <data name="OutputLocation_Approved" xml:space="preserve"><value>in Approved</value></data>
   <data name="OutputLocation_Recycled" xml:space="preserve"><value>sent to the Recycle Bin</value></data>
@@ -388,6 +388,7 @@
   <data name="Session_TargetEdge" xml:space="preserve"><value>Target edge</value></data>
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>Target size (mm)</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>Choose Width, Height or Long edge and enter a positive size in millimetres.</value></data>
+  <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>Could not preview this size. Check the entry and job details, then try again.</value></data>
   <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>Confirm custom size</value></data>
   <data name="TargetEdge_Width" xml:space="preserve"><value>Width</value></data>
   <data name="TargetEdge_Height" xml:space="preserve"><value>Height</value></data>

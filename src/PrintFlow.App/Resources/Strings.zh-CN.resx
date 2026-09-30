@@ -69,7 +69,7 @@
   <data name="Step_BackgroundRemoval" xml:space="preserve"><value>去背景</value></data>
   <data name="Step_Trim" xml:space="preserve"><value>裁边</value></data>
   <data name="Step_ApprovedPngExport" xml:space="preserve"><value>导出已审核 PNG</value></data>
-  <data name="Step_PrintDimensions" xml:space="preserve"><value>打印尺寸</value></data>
+  <data name="Step_PrintDimensions" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop 输出</value></data>
   <data name="Flag_Skippable" xml:space="preserve"><value>可跳过</value></data>
   <data name="Flag_RequiresReview" xml:space="preserve"><value>需审核</value></data>
@@ -220,7 +220,7 @@
   <data name="Session_TiffReviewSummary" xml:space="preserve"><value>已验证 CMYK + W1 · {0}</value></data>
   <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>系统验证的是文件结构，而非画面或印刷质量。</value></data>
   <data name="Session_ApproveTiff" xml:space="preserve"><value>批准此 TIFF</value></data>
-  <data name="Session_RejectTiff" xml:space="preserve"><value>拒绝并重新生成 TIFF</value></data>
+  <data name="Session_RejectTiff" xml:space="preserve"><value>驳回此 TIFF</value></data>
   <data name="OutputLocation_Working" xml:space="preserve"><value>待审核（Working）</value></data>
   <data name="OutputLocation_Approved" xml:space="preserve"><value>已在 Approved</value></data>
   <data name="OutputLocation_Recycled" xml:space="preserve"><value>已移入回收站</value></data>
@@ -349,7 +349,7 @@
   <data name="Format_Pdf" xml:space="preserve"><value>PDF</value></data>
   <data name="Format_Unknown" xml:space="preserve"><value>未知</value></data>
   <data name="Session_MaxBoundsHeading" xml:space="preserve">
-    <value>最大打印尺寸</value>
+    <value>最大印刷尺寸</value>
   </data>
   <data name="Session_MaxBoundsHint" xml:space="preserve">
     <value>请输入打印成品允许达到的最大宽度和最大高度，单位为毫米。图像会按原图比例适应最大尺寸，既不会被拉伸，也不会被放大。固定输出分辨率：300 PPI。</value>
@@ -357,7 +357,7 @@
   <data name="Session_LabelMaxWidthMm" xml:space="preserve"><value>最大宽度（mm）</value></data>
   <data name="Session_LabelMaxHeightMm" xml:space="preserve"><value>最大高度（mm）</value></data>
   <data name="Session_LabelMaxLongEdgeMm" xml:space="preserve"><value>最大长边（mm）</value></data>
-  <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>确认最大打印尺寸</value></data>
+  <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>确认最大印刷尺寸</value></data>
   <data name="Session_MaxBoundsInvalid" xml:space="preserve">
     <value>最大宽度和最大高度都必须是大于零的毫米数值。</value>
   </data>
@@ -388,6 +388,7 @@
   <data name="Session_TargetEdge" xml:space="preserve"><value>目标边</value></data>
   <data name="Session_TargetSizeMm" xml:space="preserve"><value>目标尺寸（mm）</value></data>
   <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，并输入大于零的毫米数值。</value></data>
+  <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>无法预览此尺寸。请核对输入和任务详情，然后重试。</value></data>
   <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>确认自定义尺寸</value></data>
   <data name="TargetEdge_Width" xml:space="preserve"><value>宽度</value></data>
   <data name="TargetEdge_Height" xml:space="preserve"><value>高度</value></data>
@@ -436,13 +437,13 @@
     <value>此为计划值 — 并未运行 Photoshop。</value>
   </data>
   <data name="Session_RunReady" xml:space="preserve">
-    <value>可以运行此步骤：本图片的打印尺寸已确认。</value>
+    <value>可以运行此步骤：本图片的印刷尺寸已确认。</value>
   </data>
   <data name="Session_RunNotReady" xml:space="preserve">
-    <value>在确认本图片的打印尺寸及所需放大之前，无法运行此步骤。</value>
+    <value>在确认本图片的印刷尺寸及所需放大之前，无法运行此步骤。</value>
   </data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
-    <value>此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大打印尺寸。</value>
+    <value>此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大印刷尺寸。</value>
   </data>
   <data name="Session_ReviewMaximumBounds" xml:space="preserve"><value>重新确认最大尺寸</value></data>
   <data name="Session_HistoricalBoundsLabel" xml:space="preserve">
@@ -812,7 +813,7 @@
   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。请检查失败原因后重试。</value></data>
   <data name="Session_PreparePdf" xml:space="preserve"><value>准备 PDF 以供检查</value></data>
   <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
-  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置打印尺寸。</value></data>
+  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置印刷尺寸。</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
@@ -1042,7 +1043,7 @@
   <data name="Session_NextStopped" xml:space="preserve"><value>此步骤未完成；请查看下方提示和可用操作。</value></data>
   <data name="Session_NextOriginal" xml:space="preserve"><value>请检查原图，然后选择“{0}”。</value></data>
   <data name="Session_NextWhiteInk" xml:space="preserve"><value>请选择下方的白墨选项并确认。</value></data>
-  <data name="Session_NextDimensions" xml:space="preserve"><value>请在下方设置并确认打印尺寸。</value></data>
+  <data name="Session_NextDimensions" xml:space="preserve"><value>请在下方设置并确认印刷尺寸。</value></data>
   <data name="Session_NextBackground" xml:space="preserve"><value>请在下方选择背景去除方式。</value></data>
   <data name="Session_NextInput" xml:space="preserve"><value>请查看当前步骤，并完成下方所需操作。</value></data>
   <data name="Session_NextCrop" xml:space="preserve"><value>请绘制或调整裁边边界，然后选择“{0}”。</value></data>

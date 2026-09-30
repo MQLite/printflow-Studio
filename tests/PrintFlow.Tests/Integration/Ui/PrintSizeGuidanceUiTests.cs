@@ -247,6 +247,71 @@ public sealed class PrintSizeGuidanceUiTests
         (await FingerprintAsync(h, screen.Id)).ShouldBe(before, "no draft or refusal recorded a size");
     }
 
+    [Theory]
+    [InlineData("en", "Could not preview this size")]
+    [InlineData("zh-CN", "无法预览此尺寸")]
+    public async Task A_parsable_size_refused_by_the_existing_plan_shows_an_adjacent_hint(
+        string language, string expected)
+    {
+        using OperatorCultureScope culture = new(language);
+        using HomeScreenHarness h = new();
+        SessionViewModel screen = await PrintSizeGuidanceSetup.AtDimensionsAsync(h);
+        screen.ChooseCustomSizeCommand.Execute(null);
+        screen.SelectedTargetEdgeChoice = screen.TargetEdgeChoices.Single(c => c.Edge == TargetEdge.Width);
+        screen.CustomMillimetresText = "1000000000";
+        await screen.PreflightLoaded;
+
+        screen.Preflight.ShouldBeNull();
+        screen.CustomSizeInputHint.ShouldContain(expected);
+        screen.HasCustomSizeInputHint.ShouldBeTrue();
+        CaptureFailedSizePreview(screen, language, "plan-refusal");
+
+        screen.CustomMillimetresText = "120";
+        await screen.PreflightLoaded;
+        screen.Preflight.ShouldNotBeNull();
+        screen.HasCustomSizeInputHint.ShouldBeFalse("the refusal belongs only to the old draft");
+    }
+
+    [Theory]
+    [InlineData("en", "Could not preview this size")]
+    [InlineData("zh-CN", "无法预览此尺寸")]
+    public async Task A_non_size_preview_failure_does_not_claim_the_picture_refused_the_size(
+        string language, string expected)
+    {
+        using OperatorCultureScope culture = new(language);
+        using HomeScreenHarness h = new();
+        SessionView state = await LoadAsync(h, await PrintSizeGuidanceSetup.AtDimensionsAsync(h));
+        GatedPreflightService service = new(h.Sessions);
+        SessionViewModel screen = new(service, h.Previews, h.TiffReviews, new RecordingNavigation());
+        screen.Open(state);
+        screen.ChooseCustomSizeCommand.Execute(null);
+        screen.SelectedTargetEdgeChoice = screen.TargetEdgeChoices.Single(c => c.Edge == TargetEdge.Width);
+        service.FailNextPreview(FailureCode.PersistenceError, "synthetic repository read failure");
+        screen.CustomMillimetresText = "120";
+        await screen.PreflightLoaded;
+
+        screen.Preflight.ShouldBeNull();
+        screen.CustomSizeInputHint.ShouldContain(expected);
+        screen.CustomSizeInputHint.ShouldNotContain("picture");
+        screen.CustomSizeInputHint.ShouldNotContain("图片");
+        CaptureFailedSizePreview(screen, language, "repository-failure");
+    }
+
+    private static void CaptureFailedSizePreview(SessionViewModel screen, string language, string cause)
+    {
+        string? directory = Environment.GetEnvironmentVariable("PF_SCRUM11154_CAPTURE_DIR");
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        foreach (Size viewport in new[] { new Size(1000, 700), new Size(1920, 1040) })
+        {
+            WpfRendering.CapturePng(() => new SessionScreenView { DataContext = screen }, viewport,
+                Path.Combine(directory, $"size-{cause}-{language}-{viewport.Width:0}x{viewport.Height:0}.png"));
+        }
+    }
+
     // --- Stale responses --------------------------------------------------------------------
 
     [Fact]
@@ -626,7 +691,10 @@ public sealed class PrintSizeGuidanceUiTests
         private TaskCompletionSource? _gate;
         private TaskCompletionSource _started = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private bool _hold;
+        private OperationFailure? _nextFailure;
         public Task Started => _started.Task;
+        public void FailNextPreview(FailureCode code, string detail) =>
+            _nextFailure = OperationFailure.Create(code, detail);
         public void HoldNext()
         {
             _gate = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -637,6 +705,11 @@ public sealed class PrintSizeGuidanceUiTests
         public async Task<OperationResult<PrintDimensionsPreflight>> PreviewPrintDimensionsAsync(
             SessionId id, WorkflowCommand command, CancellationToken cancellationToken)
         {
+            if (_nextFailure is { } failure)
+            {
+                _nextFailure = null;
+                return OperationResult.Fail<PrintDimensionsPreflight>(failure);
+            }
             TaskCompletionSource? gate = _hold ? _gate : null;
             _hold = false;
             var result = await inner.PreviewPrintDimensionsAsync(id, command, cancellationToken);

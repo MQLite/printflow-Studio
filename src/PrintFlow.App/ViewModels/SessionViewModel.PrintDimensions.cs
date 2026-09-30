@@ -16,6 +16,7 @@ public sealed record PrintDimensionsPreflightRow(string Key, string Label, strin
 public sealed partial class SessionViewModel
 {
     private int _preflightGeneration;
+    private bool _draftCustomSizePreviewFailed;
 
     public PrintDimensionsPreflight? Preflight { get; private set; }
     public IReadOnlyList<PrintDimensionsPreflightRow> PreflightRows { get; private set; } = [];
@@ -31,6 +32,8 @@ public sealed partial class SessionViewModel
     {
         // A response for a previous size or upstream artwork cannot relabel the new view.
         _preflightGeneration++;
+        _draftCustomSizePreviewFailed = false;
+        NotifyCustomSizeInputHint();
         PreflightLoaded = Task.CompletedTask;
         ShowPreflight(session.Preflight, isDraft: false);
     }
@@ -43,6 +46,8 @@ public sealed partial class SessionViewModel
         }
 
         int generation = ++_preflightGeneration;
+        _draftCustomSizePreviewFailed = false;
+        NotifyCustomSizeInputHint();
         ShowPreflight(null, isDraft: true);
         WorkflowCommand? command = IsChoosingCustomSize
             ? ReadCustomSizeCommand()
@@ -63,7 +68,9 @@ public sealed partial class SessionViewModel
             return;
         }
 
+        _draftCustomSizePreviewFailed = IsChoosingCustomSize && result.IsFailure;
         ShowPreflight(result.IsSuccess ? result.Value : null, isDraft: true);
+        NotifyCustomSizeInputHint();
     }
 
     private void ShowPreflight(PrintDimensionsPreflight? preflight, bool isDraft)
@@ -124,7 +131,11 @@ public sealed partial class SessionViewModel
 
     /// <summary>Rebuilds the technical rows in the current language from the preflight already shown.</summary>
     /// <remarks>No query, no command and no new generation: a pending draft query stays current.</remarks>
-    private void RefreshPreflightLanguage() => ShowPreflight(Preflight, IsDraftPreflight);
+    private void RefreshPreflightLanguage()
+    {
+        ShowPreflight(Preflight, IsDraftPreflight);
+        NotifyCustomSizeInputHint();
+    }
 
     // --- Beginner guidance (SCRUM-11150) -------------------------------------------------
     //
@@ -209,9 +220,13 @@ public sealed partial class SessionViewModel
     /// size. The same rule as Confirm: <see cref="ReadCustomSizeCommand"/>.
     /// </summary>
     public string CustomSizeInputHint =>
-        IsChoosingCustomSize && !string.IsNullOrWhiteSpace(CustomMillimetresText) && ReadCustomSizeCommand() is null
-            ? Strings.Session_TargetSizeInvalid
-            : string.Empty;
+        !IsChoosingCustomSize || string.IsNullOrWhiteSpace(CustomMillimetresText)
+            ? string.Empty
+            : ReadCustomSizeCommand() is null
+                ? Strings.Session_TargetSizeInvalid
+                : _draftCustomSizePreviewFailed
+                    ? Strings.Session_TargetSizeUnavailable
+                    : string.Empty;
 
     public bool HasCustomSizeInputHint => CustomSizeInputHint.Length > 0;
 

@@ -26,6 +26,32 @@ public sealed class LocalisationResourceTests
     private const string ChineseResx = @"Resources\Strings.zh-CN.resx";
 
     [Fact]
+    public void The_current_print_size_step_and_guidance_use_one_Chinese_term()
+    {
+        string[] keys =
+        [
+            "Step_PrintDimensions",
+            "Session_MaxBoundsHeading",
+            "Session_MaxBoundsConfirm",
+            "Session_RunReady",
+            "Session_RunNotReady",
+            "Session_DimensionReviewRequired",
+            "Session_PdfPrepared",
+            "Session_NextDimensions",
+            "Session_PreflightHeading",
+            "Session_PreflightPrintSize",
+        ];
+
+        foreach (string key in keys)
+        {
+            string value = ValueOf(ChineseResx, key);
+            value.ShouldContain("印刷尺寸", Case.Sensitive,
+                $"{key} names the same physical print-size decision");
+            value.ShouldNotContain("打印尺寸");
+        }
+    }
+
+    [Fact]
     public void Every_English_string_has_a_zh_CN_translation()
     {
         IReadOnlySet<string> english = KeysOf(NeutralResx);
