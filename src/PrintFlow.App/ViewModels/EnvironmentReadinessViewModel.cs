@@ -44,7 +44,10 @@ public sealed class EnvironmentCheckRow
         IsAdvisory = report.Status == EnvironmentCheckStatus.Advisory;
         Phase = report.Phase;
 
-        Name = Strings.Resolve(NamePrefix + report.CheckKey);
+        // A key without a product name (only a synthetic test report has one) never reaches the
+        // operator as a resource key; its stable identifier stays in technical details.
+        string name = Strings.Resolve(NamePrefix + report.CheckKey);
+        Name = name == NamePrefix + report.CheckKey ? Strings.Resolve("Environment_UnlistedCheck") : name;
         Status = report.Status switch
         {
             EnvironmentCheckStatus.Passed => Strings.Environment_StatusPassed,
@@ -53,9 +56,10 @@ public sealed class EnvironmentCheckRow
             _ => Strings.Environment_StatusAdvisory,
         };
         Classification = IsBlocking ? Strings.Environment_Blocking : Strings.Environment_Advisory;
-        Explanation = IsBlocked && Phase == EnvironmentCheckPhase.LiveApplication
-            ? Strings.Resolve("Environment_LiveCheckNotRun")
-            : IsFailure || IsBlocked || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
+        // A check that did not run observed nothing, so its failure sentence is never shown.
+        Explanation = IsBlocked
+            ? Strings.Resolve(Phase == EnvironmentCheckPhase.LiveApplication ? "Environment_LiveCheckNotRun" : "Environment_CheckNotRun")
+            : IsFailure || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
         Detail = report.Detail;
         if (report.Lifecycle is { } lifecycle)
         {
@@ -303,7 +307,18 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     /// Derived from <see cref="EnvironmentReadinessReport.Verified"/> alone. An advisory does not
     /// enter this sentence, because an advisory does not close production work (§5).
     /// </remarks>
-    public string StatusText => IsReady ? Strings.Environment_Verified : Strings.Environment_NotVerified;
+    public string StatusText => IsReady ? Strings.Environment_Verified
+        : IsRequiredCheckNotRunOnly ? Strings.Resolve("Environment_NotConfirmedNotRun")
+        : Strings.Environment_NotVerified;
+
+    /// <summary>
+    /// Not verified because a required check did not run, with no required check failing: the
+    /// headline then says "not confirmed" rather than "failed" (SCRUM-11154 F-V2). Wording only;
+    /// <see cref="IsReady"/> and the report's own flags are unchanged.
+    /// </summary>
+    private bool IsRequiredCheckNotRunOnly => _report is { Verified: false } report &&
+        report.BlockingFailures.Any(check => check.Status == EnvironmentCheckStatus.Blocked) &&
+        !report.BlockingFailures.Any(check => check.Status == EnvironmentCheckStatus.Failed);
 
     /// <summary>Whether any advisory was reported.</summary>
     public bool HasAdvisories => Advisories.Count > 0;

@@ -1080,31 +1080,48 @@ public sealed partial class SessionService : ISessionService
     {
         OperationResult<IReadOnlyList<SessionListItem>> listed = await _repository.ListRecentAsync(
             RecentSessionLimit, _timeProvider.GetUtcNow() - RecentSessionWindow, cancellationToken);
-        if (listed.IsFailure || !listed.Value.Any(item => item.State == SessionState.HandedOff))
+        if (listed.IsFailure || !listed.Value.Any(item => item.State == SessionState.HandedOff || MayAwaitCompletion(item)))
         {
             return listed;
         }
 
-        // Only handed-off rows can be waiting for a colleague, and whether one is waiting is the
-        // same eligibility the service enforces, read from the persisted request (SCRUM-11148).
         List<SessionListItem> items = [];
         foreach (SessionListItem item in listed.Value)
         {
-            if (item.State != SessionState.HandedOff)
+            if (item.State == SessionState.HandedOff)
+            {
+                // Only handed-off rows can be waiting for a colleague, and whether one is waiting
+                // is the same eligibility the service enforces, read from the persisted request
+                // (SCRUM-11148).
+                OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(item.Id, cancellationToken);
+                bool waiting = loaded.IsSuccess && loaded.Value is { } aggregate &&
+                    CorrectionRequestEligibility.Resolve(
+                        aggregate.ToSnapshot(ConfiguredRecommendations()), aggregate.CorrectionRequests, aggregate.Attempts) is not null;
+                items.Add(item with { HasOpenCorrection = waiting });
+            }
+            else if (MayAwaitCompletion(item))
+            {
+                // A finished current step can mean the job only needs Complete. The engine's own
+                // available commands say so, exactly as the Session screen reads them; a failed
+                // read leaves it unknown rather than guessing (SCRUM-11154 F-V8).
+                OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(item.Id, cancellationToken);
+                bool? awaits = loaded.IsSuccess && loaded.Value is { } aggregate
+                    ? _engine.AvailableCommands(aggregate.ToSnapshot(ConfiguredRecommendations())).Contains(CommandKind.Complete)
+                    : null;
+                items.Add(item with { AwaitsCompletion = awaits });
+            }
+            else
             {
                 items.Add(item);
-                continue;
             }
-
-            OperationResult<SessionAggregate?> loaded = await _repository.LoadAsync(item.Id, cancellationToken);
-            bool waiting = loaded.IsSuccess && loaded.Value is { } aggregate &&
-                CorrectionRequestEligibility.Resolve(
-                    aggregate.ToSnapshot(ConfiguredRecommendations()), aggregate.CorrectionRequests, aggregate.Attempts) is not null;
-            items.Add(item with { HasOpenCorrection = waiting });
         }
 
         return OperationResult.Ok<IReadOnlyList<SessionListItem>>(items);
     }
+
+    /// <summary>Only an active job whose current step is finished can be waiting for Complete.</summary>
+    private static bool MayAwaitCompletion(SessionListItem item) =>
+        item.State == SessionState.Active && item.CurrentStepState is StepState.Approved or StepState.Skipped;
 
     /// <inheritdoc />
     public async Task<OperationResult<Unit>> RemoveFromRecentAsync(

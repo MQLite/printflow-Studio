@@ -127,7 +127,11 @@ public sealed class RecoverySurfaceLiveSmoke(ITestOutputHelper output)
                 else
                 {
                     var route = DesktopAutomation.TabTo(process, root, "Home.Recovery.Abandon");
-                    log.Add($"C: real Tab route: {DesktopAutomation.Describe(route)}; Space activates Abandon.");
+                    log.Add($"C: real Tab route: {DesktopAutomation.Describe(route)}; Space opens the Abandon confirmation (SCRUM-11154 F-V4).");
+                    DesktopAutomation.PressSpace();
+                    DesktopAutomation.Wait("confirmation opens", () => dispatcher.Invoke(() => model.IsConfirmingAbandon));
+                    var confirm = DesktopAutomation.TabTo(process, root, "Home.AbandonConfirmation.Confirm");
+                    log.Add($"C: real Tab route to the confirmation: {DesktopAutomation.Describe(confirm)}; a fresh Space confirms.");
                     DesktopAutomation.PressSpace();
                 }
 

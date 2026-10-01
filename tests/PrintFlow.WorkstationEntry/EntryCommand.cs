@@ -25,7 +25,7 @@ public static class EntryCommand
 }
 
 public sealed record EntryOptions(string Mode, string Root, string ScenarioManifest, string CandidateManifest,
-    bool SafeDesktopConfirmed, bool Resume = false, bool OwnedRestart = false, string? RestartChildToken = null)
+    bool SafeDesktopConfirmed, bool Resume = false, bool OwnedRestart = false, string? RestartChildToken = null, bool InjectHostFault = false)
 {
     public static EntryOptions Parse(string[] args)
     {
@@ -33,9 +33,9 @@ public sealed record EntryOptions(string Mode, string Root, string ScenarioManif
         for (int i = 0; i < args.Length; i++)
         {
             string key = args[i];
-            if (key is not ("--Mode" or "--Root" or "--ScenarioManifest" or "--CandidateManifest" or "--SafeDesktopConfirmed" or "--Resume" or "--OwnedRestart" or "--RestartChildToken"))
+            if (key is not ("--Mode" or "--Root" or "--ScenarioManifest" or "--CandidateManifest" or "--SafeDesktopConfirmed" or "--Resume" or "--OwnedRestart" or "--RestartChildToken" or "--InjectHostFault"))
                 throw new ArgumentException($"Unknown option '{key}'.");
-            string value = key is "--SafeDesktopConfirmed" or "--Resume" or "--OwnedRestart" ? "true" :
+            string value = key is "--SafeDesktopConfirmed" or "--Resume" or "--OwnedRestart" or "--InjectHostFault" ? "true" :
                 ++i < args.Length ? args[i] : throw new ArgumentException($"Missing value for {key}.");
             if (!values.TryAdd(key, value)) throw new ArgumentException($"Duplicate option '{key}'.");
         }
@@ -51,6 +51,10 @@ public sealed record EntryOptions(string Mode, string Root, string ScenarioManif
         if ((restart || childToken is not null) && mode != "PrepareAndSmoke") throw new ArgumentException("Owned restart is noninteractive only.");
         if (restart && (values.ContainsKey("--Resume") || childToken is not null)) throw new ArgumentException("Restart supervisor requires a fresh run and generates its own child token.");
         if (childToken is not null && (childToken.Length != 32 || !childToken.All(Uri.IsHexDigit))) throw new ArgumentException("Invalid child identity token.");
-        return new(mode, Required("--Root"), Required("--ScenarioManifest"), Required("--CandidateManifest"), acknowledged, values.ContainsKey("--Resume"), restart, childToken);
+        bool inject = values.ContainsKey("--InjectHostFault");
+        // Fault-path proof on a fresh disposable PrepareAndSmoke root only; it can never prepare.
+        if (inject && (mode != "PrepareAndSmoke" || values.ContainsKey("--Resume") || restart || childToken is not null))
+            throw new ArgumentException("Host fault injection is valid only for a fresh PrepareAndSmoke run.");
+        return new(mode, Required("--Root"), Required("--ScenarioManifest"), Required("--CandidateManifest"), acknowledged, values.ContainsKey("--Resume"), restart, childToken, inject);
     }
 }

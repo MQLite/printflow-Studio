@@ -236,11 +236,14 @@ public sealed class SharedReviewSurface : UserControl
     {
         if (_overlay is not null && _model is not null)
         {
-            _overlay.Clip = new RectangleGeometry(new Rect(0, 0, double.IsNaN(_overlay.Width) ? 0 : _overlay.Width * Math.Clamp(_model.ReviewViewport.SliderPosition, 0, 100) / 100, double.IsNaN(_overlay.Height) ? 0 : _overlay.Height));
+            // Before (the base) shows left of the divider and After (the overlay) right of it, as
+            // the "Before / After" heading and the side-by-side order read (SCRUM-11154 F-V3).
+            double width = double.IsNaN(_overlay.Width) ? 0 : _overlay.Width;
+            double fraction = Math.Clamp(_model.ReviewViewport.SliderPosition, 0, 100) / 100;
+            _overlay.Clip = new RectangleGeometry(new Rect(width * fraction, 0, width * (1 - fraction), double.IsNaN(_overlay.Height) ? 0 : _overlay.Height));
             if (_divider is not null)
             {
-                double fraction = Math.Clamp(_model.ReviewViewport.SliderPosition, 0, 100) / 100;
-                _divider.Margin = new Thickness((double.IsNaN(_overlay.Width) ? 0 : _overlay.Width) * fraction, 0, 0, 0);
+                _divider.Margin = new Thickness(width * fraction, 0, 0, 0);
                 _divider.Visibility = fraction is > 0 and < 1 ? Visibility.Visible : Visibility.Collapsed;
             }
         }

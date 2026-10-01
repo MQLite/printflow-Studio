@@ -378,6 +378,7 @@ public sealed class HomeAndWorkflowSelectionTests
         row.CanAbandon.ShouldBeTrue();
 
         await harness.Home.AbandonCommand.ExecuteAsync(row);
+        await harness.Home.ConfirmAbandonCommand.ExecuteAsync(harness.Home.PendingAbandon); // Explicit confirmation (SCRUM-11154 F-V4).
 
         OperationResult<SessionAggregate?> stored =
             await harness.Inner.Repository.LoadAsync(id, CancellationToken.None);

@@ -7,6 +7,7 @@ param(
     [Parameter(Mandatory)][string]$HostAssembly,
     [switch]$Resume,
     [switch]$OwnedRestart,
+    [switch]$InjectHostFault,
     [switch]$SafeDesktopConfirmed
 )
 Set-StrictMode -Version Latest
@@ -22,6 +23,7 @@ if ($Mode -ne 'Interactive' -and $SafeDesktopConfirmed) { throw 'Desktop acknowl
 $entryArguments=@($HostAssembly,'--Mode',$Mode,'--Root',$Root,'--ScenarioManifest',$ScenarioManifest,'--CandidateManifest',$CandidateManifest)
 if ($Resume) { $entryArguments+='--Resume' }
 if ($OwnedRestart) { $entryArguments+='--OwnedRestart' }
+if ($InjectHostFault) { $entryArguments+='--InjectHostFault' }
 if ($SafeDesktopConfirmed) { $entryArguments+='--SafeDesktopConfirmed' }
 & dotnet @entryArguments
 exit $LASTEXITCODE

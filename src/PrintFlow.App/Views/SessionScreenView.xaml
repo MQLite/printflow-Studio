@@ -1073,35 +1073,37 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
+                                    <!--
+                                        The review state is never cut off (SCRUM-11154 F-V5, observed
+                                        at 1000×700): it sits beside the name in the auto-sized column
+                                        with the location and validity, while a long name yields first
+                                        (ellipsis, full name in the tooltip and the row's accessible
+                                        name). Location says where the file actually is (Epic 11400
+                                        Part C2B §24, §25): Working until it is approved, Approved once
+                                        it has been, and the Recycle Bin once a rejection has disposed
+                                        of it — so the list never offers bytes that are not there. The
+                                        row keeps its two-line height, so the picture keeps its area.
+                                    -->
                                     <TextBlock Grid.Row="0" Grid.Column="0"
                                                Text="{Binding FileName}"
+                                               ToolTip="{Binding FileName}"
                                                FontWeight="SemiBold"
-                                               TextTrimming="CharacterEllipsis" />
+                                               TextTrimming="CharacterEllipsis"
+                                               AutomationProperties.AutomationId="Session.OutputFileName" />
 
                                     <TextBlock Grid.Row="0" Grid.Column="1"
-                                               Text="{Binding Validity}"
                                                Margin="12,0,0,0"
-                                               Opacity="0.8" />
+                                               Opacity="0.8"
+                                               AutomationProperties.AutomationId="Session.OutputState">
+                                        <Run Text="{Binding Review, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Location, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Validity, Mode=OneWay}" />
+                                    </TextBlock>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                Orientation="Horizontal"
-                                                Opacity="0.8">
-                                        <TextBlock Text="{Binding Size}" />
-                                        <TextBlock Text="  ·  " />
-                                        <TextBlock Text="{Binding Branch}" />
-                                        <TextBlock Text="  ·  " />
-                                        <TextBlock Text="{Binding Review}" />
-                                        <TextBlock Text="  ·  " />
-
-                                        <!--
-                                            Where the file actually is (Epic 11400 Part C2B §24,
-                                            §25). Working until it is approved, Approved once it
-                                            has been, and the Recycle Bin once a rejection has
-                                            disposed of it — so the list never offers bytes that
-                                            are not there.
-                                        -->
-                                        <TextBlock Text="{Binding Location}" />
-                                    </StackPanel>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               AutomationProperties.AutomationId="Session.OutputSummary">
+                                        <Run Text="{Binding Size, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Branch, Mode=OneWay}" />
+                                    </TextBlock>
 
                                     <!-- An invalidated output is dimmed, and still says so in words. -->
                                     <Grid.Style>
@@ -2015,9 +2017,16 @@
                             -->
                             <ItemsControl ItemsSource="{Binding TiffMetadata}"
                                           Margin="0,10,0,0"
+                                          IsTabStop="False"
                                           AutomationProperties.AutomationId="Session.TiffProductionMetadata"
                                           AutomationProperties.Name="{Binding TiffProductionHeading}"
                                           Visibility="{Binding HasTiffReview, Converter={StaticResource BoolToVisibility}}">
+                                <!-- A row is announced by its label, never by the record's ToString() (F-V6). -->
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="0,2">
@@ -2200,12 +2209,23 @@
                             </StackPanel>
 
                             <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
+                            <!-- Named from their visible labels (SCRUM-11154 F-V6). -->
                             <ComboBox ItemsSource="{Binding RejectionReasons}"
                                       SelectedItem="{Binding SelectedRejectionReason}"
-                                      DisplayMemberPath="Label" />
+                                      DisplayMemberPath="Label"
+                                      AutomationProperties.AutomationId="Session.RejectReason"
+                                      AutomationProperties.Name="{Binding RejectReasonLabel}">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
 
                             <TextBlock Text="{Binding RejectNotesLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <TextBox Text="{Binding RejectionNotes, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.AutomationId="Session.RejectNotes"
+                                     AutomationProperties.Name="{Binding RejectNotesLabel}"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"
                                      MinHeight="52"
@@ -2236,7 +2256,15 @@
                             <TextBlock Text="{Binding ReturnTargetLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <ComboBox ItemsSource="{Binding ReturnTargets}"
                                       SelectedItem="{Binding SelectedReturnTarget}"
-                                      DisplayMemberPath="DisplayName" />
+                                      DisplayMemberPath="DisplayName"
+                                      AutomationProperties.AutomationId="Session.ReturnTarget"
+                                      AutomationProperties.Name="{Binding ReturnTargetLabel}">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem">
+                                        <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
 
                             <Button Content="{Binding BeginReturnLabel}"
                                     Command="{Binding BeginReturnCommand}"

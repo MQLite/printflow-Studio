@@ -132,7 +132,7 @@ public sealed class SharedReviewAuthorityTests(ITestOutputHelper output)
                     SharedReviewSurfaceTests.Settle(view);
                     model.ReviewViewport.HorizontalPosition.ShouldBe(0.6, 0.005);
                     var overlay = SharedReviewSurfaceTests.Descendants<System.Windows.Controls.Grid>(view).Single(g => g.Clip is System.Windows.Media.RectangleGeometry);
-                    ((System.Windows.Media.RectangleGeometry)overlay.Clip).Rect.Width.ShouldBe(overlay.Width * 0.75, 0.01);
+                    ((System.Windows.Media.RectangleGeometry)overlay.Clip).Rect.X.ShouldBe(overlay.Width * 0.75, 0.01); // After is right of the divider (F-V3).
                 });
                 Select("ReviewModeSideBySide");
                 Sync(60, 40);

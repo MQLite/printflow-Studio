@@ -62,6 +62,9 @@ public sealed class RejectionReasonChoice
 
     /// <summary>The localised operator label.</summary>
     public string Label { get; }
+
+    /// <summary>What item automation falls back to: the label, never the type name (SCRUM-11154 F-V6).</summary>
+    public override string ToString() => Label;
 }
 
 /// <summary>
@@ -114,6 +117,9 @@ public sealed class ReturnTargetRow
 
     /// <summary>The localised step name — the only part an operator reads.</summary>
     public string DisplayName { get; }
+
+    /// <summary>What item automation falls back to: the step name, never the type name (SCRUM-11154 F-V6).</summary>
+    public override string ToString() => DisplayName;
 
     /// <summary>Its one-based position, so the list reads like the step list above it.</summary>
     public int Ordinal { get; }

@@ -142,6 +142,11 @@
   <data name="Home_AbandonDone" xml:space="preserve">
     <value>“{0}”已放弃。导入的文件、已审核的输出和历史记录均予保留。</value>
   </data>
+  <data name="Home_AbandonConfirmQuestion" xml:space="preserve"><value>放弃“{0}”？放弃后此任务不能再继续处理。已导入的文件、已审核的输出和历史记录会保留，不会删除任何文件。</value></data>
+  <data name="Home_AbandonKeep" xml:space="preserve"><value>保留任务</value></data>
+  <data name="Home_AbandonConfirm" xml:space="preserve"><value>确认放弃</value></data>
+  <data name="Home_AbandonStale" xml:space="preserve"><value>“{0}”的状态已变化，未放弃。请在列表中查看它的当前状态。</value></data>
+  <data name="Home_RecentStepComplete" xml:space="preserve"><value>完成任务</value></data>
   <data name="Home_RecentUnavailable" xml:space="preserve">
     <value>无法读取最近处理（{0}）。</value>
   </data>
@@ -288,7 +293,7 @@
     <value>未在本机找到已批准的美图程序，或版本与批准的版本不一致。请检查工作站配置。</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
-    <value>美图已启动但未在规定时间内就绪。请手动打开美图后重试。</value>
+    <value>美图未能启动或未能就绪。</value>
   </data>
   <data name="Failure_MeituWindowNotFound" xml:space="preserve">
     <value>美图正在运行，但未找到它的窗口，因此没有向它发送任何操作。</value>
@@ -786,6 +791,9 @@
   </data>
   <data name="Environment_StatusBlocked" xml:space="preserve"><value>未运行</value></data>
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>前置检查未通过，本项未运行。请先处理未通过的检查项，再重新检查。</value></data>
+  <data name="Environment_CheckNotRun" xml:space="preserve"><value>本项检查未运行，没有观察结果。</value></data>
+  <data name="Environment_UnlistedCheck" xml:space="preserve"><value>未列出的检查项</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>生产工作站环境尚未确认：有必需检查未运行。</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>必须满足</value>
   </data>

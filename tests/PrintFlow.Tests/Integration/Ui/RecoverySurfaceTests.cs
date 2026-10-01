@@ -154,6 +154,7 @@ public sealed class RecoverySurfaceTests
         HomeViewModel home = Home(h, service);
         await home.RefreshCommand.ExecuteAsync(null);
         await home.AbandonRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
+        await home.ConfirmAbandonCommand.ExecuteAsync(home.PendingAbandon); // Explicit confirmation (SCRUM-11154 F-V4).
         home.RecoverySessions.ShouldBeEmpty();
         SessionAggregate after = await Load(h, id);
         after.Session.State.ShouldBe(SessionState.Abandoned);

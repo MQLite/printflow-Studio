@@ -13,14 +13,21 @@ public sealed class ScenarioLedger
     public bool AllVerified => Scenarios.Count == 8 &&
         Scenarios.All(x => x.Status == "VERIFIED_SYNTHETIC_SERVICE_FACTS");
 
-    public void Save(string path, Action<string> validateOwnedWrite)
+    /// <summary>SHA-256 of the exact bytes <see cref="Save"/> wrote; the prepared record binds it.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? SavedSha256 { get; private set; }
+
+    public string Save(string path, Action<string> validateOwnedWrite)
     {
         ArgumentNullException.ThrowIfNull(validateOwnedWrite);
         validateOwnedWrite(path);
-        string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
-        using FileStream stream = new(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        using StreamWriter writer = new(stream);
-        writer.Write(json);
+        byte[] bytes = new System.Text.UTF8Encoding(false).GetBytes(JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        using (FileStream stream = new(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            stream.Write(bytes);
+            stream.Flush(true);
+        }
+        return SavedSha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes));
     }
 }
 

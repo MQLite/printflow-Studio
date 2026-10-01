@@ -282,6 +282,9 @@ public sealed partial class HomeViewModel : ObservableObject
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
         int generation = ++_refreshGeneration;
+        // The list is about to be rebuilt from current facts: a confirmation opened against the
+        // old rows no longer describes them (SCRUM-11154 F-V4).
+        PendingAbandon = null;
         ReadReadiness();
         var recovery = await _sessions.ListRecoveryAsync(cancellationToken).ConfigureAwait(true);
         if (generation != _refreshGeneration) return;
@@ -401,14 +404,105 @@ public sealed partial class HomeViewModel : ObservableObject
     private Task ImportRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken) =>
         RecoverAsync(row, RecoveryAction.ManualResult, cancellationToken);
 
+    /// <summary>Opens the Abandon confirmation for a recovery card. Changes nothing (SCRUM-11154 F-V4).</summary>
     [RelayCommand]
-    private Task AbandonRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken) =>
-        RecoverAsync(row, RecoveryAction.Abandon, cancellationToken);
+    private Task AbandonRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken)
+    {
+        if (row is not null && row.CanAbandon && !ListActionsBlocked) PendingAbandon = new AbandonConfirmation(row.Id, row.DisplayName, FromRecovery: true);
+        return Task.CompletedTask;
+    }
+
+    // --- SCRUM-11154 F-V4: an explicit confirmation before Abandon ----------------------------
+
+    /// <summary>
+    /// The one Abandon waiting for the operator's explicit confirmation, or null.
+    /// </summary>
+    /// <remarks>
+    /// It captures the job's identity and name when the confirmation opens; nothing later reads a
+    /// row index or the current selection. Any list refresh withdraws it, because the job it
+    /// describes may have changed.
+    /// </remarks>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsConfirmingAbandon))]
+    [NotifyPropertyChangedFor(nameof(AreListsInteractive))]
+    private AbandonConfirmation? _pendingAbandon;
+
+    public bool IsConfirmingAbandon => PendingAbandon is not null;
+
+    /// <summary>
+    /// False while a confirmation is open. Opening it moves the lists down, so the second click of
+    /// the initiating double-click could otherwise land on another job's action; the lists stay
+    /// inert until the operator keeps or confirms (SCRUM-11154 F-V4).
+    /// </summary>
+    public bool AreListsInteractive => PendingAbandon is null;
+
+    /// <summary>Busy, or waiting for the operator's answer to an open Abandon confirmation.</summary>
+    private bool ListActionsBlocked => IsBusy || PendingAbandon is not null;
+
+    public string AbandonKeepLabel => Strings.Resolve("Home_AbandonKeep");
+
+    public string AbandonConfirmLabel => Strings.Resolve("Home_AbandonConfirm");
+
+    /// <summary>Closes the confirmation. Reaches no service and changes nothing.</summary>
+    [RelayCommand]
+    private void KeepJob() => PendingAbandon = null;
+
+    /// <summary>
+    /// The single Abandon, for exactly the confirmed job.
+    /// </summary>
+    /// <remarks>
+    /// Only the confirmation currently shown counts: a stale or repeated activation for an earlier
+    /// one is ignored, and the pending state is cleared before the first await so a second
+    /// activation cannot submit twice. Eligibility is re-read through the existing authority —
+    /// the Recent listing, or the recovery resolution's own guard — before the one command.
+    /// </remarks>
+    [RelayCommand]
+    private async Task ConfirmAbandonAsync(AbandonConfirmation? confirmation, CancellationToken cancellationToken)
+    {
+        if (confirmation is null || !ReferenceEquals(confirmation, PendingAbandon) || IsBusy) return;
+        PendingAbandon = null;
+        IsBusy = true;
+        try
+        {
+            Notice = null;
+            if (confirmation.FromRecovery)
+            {
+                OperationResult<SessionView> resolved = await _sessions.ResolveRecoveryAsync(confirmation.Id, RecoveryAction.Abandon,
+                    null, Environment.UserName, cancellationToken).ConfigureAwait(true);
+                if (resolved.IsFailure && resolved.Failure.Code == FailureCode.PreconditionNotMet)
+                    Notice = Format(Strings.Resolve("Home_AbandonStale"), confirmation.DisplayName);
+                else if (resolved.IsFailure) ShowFailureNotice(Strings.Home_RecoveryFailed, resolved.Failure);
+                else Notice = Format(Strings.Home_AbandonDone, confirmation.DisplayName);
+            }
+            else
+            {
+                OperationResult<IReadOnlyList<SessionListItem>> current =
+                    await _sessions.ListRecentAsync(cancellationToken).ConfigureAwait(true);
+                if (current.IsFailure) ShowFailureNotice(Strings.Home_AbandonFailed, current.Failure);
+                else if (current.Value.FirstOrDefault(item => item.Id == confirmation.Id) is not { CanAbandon: true })
+                    Notice = Format(Strings.Resolve("Home_AbandonStale"), confirmation.DisplayName);
+                else
+                {
+                    OperationResult<SessionView> abandoned = await _sessions.ExecuteAsync(confirmation.Id,
+                        new WorkflowCommand.AbandonSession(AbandonedFromHomeReason), Environment.UserName,
+                        cancellationToken).ConfigureAwait(true);
+                    if (abandoned.IsFailure) ShowFailureNotice(Strings.Home_AbandonFailed, abandoned.Failure);
+                    else Notice = Format(Strings.Home_AbandonDone, confirmation.DisplayName);
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        await RefreshAsync(cancellationToken).ConfigureAwait(true);
+    }
 
     [RelayCommand]
     private async Task OpenRecoveryAsync(RecoverySessionRow? row, CancellationToken cancellationToken)
     {
-        if (row is null || IsBusy) return;
+        if (row is null || ListActionsBlocked) return;
         var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
         if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
         else ShowFailureNotice(Format(Strings.Home_ResumeFailed,
@@ -417,7 +511,7 @@ public sealed partial class HomeViewModel : ObservableObject
 
     private async Task RecoverAsync(RecoverySessionRow? row, RecoveryAction action, CancellationToken cancellationToken)
     {
-        if (row is null || IsBusy) return;
+        if (row is null || ListActionsBlocked) return;
         IsBusy = true;
         try
         {
@@ -485,7 +579,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task ResumeAsync(RecentSessionRow? row, CancellationToken cancellationToken)
     {
-        if (row is null || IsBusy)
+        if (row is null || ListActionsBlocked)
         {
             return;
         }
@@ -512,44 +606,22 @@ public sealed partial class HomeViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Abandons a listed session through the ordinary command path, then refreshes the list.
+    /// Opens the Abandon confirmation for a listed session; <see cref="ConfirmAbandonAsync"/> then
+    /// abandons it through the ordinary command path (SCRUM-11154 F-V4).
     /// </summary>
     /// <remarks>
     /// Nothing is deleted: the engine's <c>AbandonSession</c> records the decision and releases
     /// the automation lock, and the source snapshot, approved outputs and audit history stay
     /// exactly as they were (MVP design §6.6, Part 3C2 §10). A refusal is reported rather than
     /// worked around — the row's own <see cref="RecentSessionRow.CanAbandon"/> decides whether
-    /// the button is offered, and the engine decides whether the command is accepted.
+    /// the button is offered, and the engine decides whether the command is accepted. Opening the
+    /// confirmation issues no command.
     /// </remarks>
     [RelayCommand]
-    private async Task AbandonAsync(RecentSessionRow? row, CancellationToken cancellationToken)
+    private Task AbandonAsync(RecentSessionRow? row, CancellationToken cancellationToken)
     {
-        if (row is null || IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            Notice = null;
-            OperationResult<SessionView> abandoned = await _sessions.ExecuteAsync(
-                row.Id,
-                new WorkflowCommand.AbandonSession(AbandonedFromHomeReason),
-                Environment.UserName,
-                cancellationToken).ConfigureAwait(true);
-
-            if (abandoned.IsFailure)
-                ShowFailureNotice(Strings.Home_AbandonFailed, abandoned.Failure);
-            else
-                Notice = string.Format(CultureInfo.CurrentCulture, Strings.Home_AbandonDone, row.DisplayName);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-
-        await RefreshAsync(cancellationToken).ConfigureAwait(true);
+        if (row is not null && row.CanAbandon && !ListActionsBlocked) PendingAbandon = new AbandonConfirmation(row.Id, row.DisplayName, FromRecovery: false);
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -572,7 +644,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveRecordAsync(RecentSessionRow? row, CancellationToken cancellationToken)
     {
-        if (row is null || IsBusy)
+        if (row is null || ListActionsBlocked)
         {
             return;
         }

@@ -105,7 +105,34 @@ public sealed class OwnedPaths : IDisposable
         if (!string.Equals(full, area, StringComparison.OrdinalIgnoreCase) && !PathRules.Within(full, area))
             return "Path is outside its owned resource role.";
         if (role == "fixtures") lock (sync) if (!fixtures.ContainsKey(full)) return "Fixture was not admitted by this run.";
+        if (role is "delivery" or "export" && UnpreparedDirectory(role == "delivery" ? full : Path.GetDirectoryName(full)!))
+            return "Folder was not prepared by this run.";
         return null;
+    }
+
+    /// <summary>
+    /// True for an ordinary directory a native dialog created inside a role (its "New folder"
+    /// button): no recorded owned directory lies between it and its first protected ancestor.
+    /// Creating a folder grants no authority, so it is refused as a selection. A reparse point or
+    /// a missing component is not classified here; the following Require still refuses the run.
+    /// </summary>
+    private bool UnpreparedDirectory(string directory)
+    {
+        lock (sync)
+        {
+            if (owner is null) return false;
+            bool unprepared = false;
+            for (string? current = directory; current is not null && PathRules.Within(current, Root); current = Path.GetDirectoryName(current))
+            {
+                // The protected ancestor is verified before any nonfatal answer: a tampered marker
+                // or lost ownership is an integrity fault and throws instead of being a refusal.
+                if (owner.OwnsStateDirectory(current)) { owner.VerifyStateMarker(); break; }
+                if (protectedDirectories.TryGetValue(current, out OwnedDirectoryLease? held)) { held.Verify(); break; }
+                if (!Directory.Exists(current) || (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0) return false;
+                unprepared = true;
+            }
+            return unprepared;
+        }
     }
 
     public NativePathLease Read(string path, string role)
@@ -142,14 +169,19 @@ public sealed class OwnedPaths : IDisposable
     /// Interactive only: admits the picker fixtures this run's preparation recorded in its
     /// scenario ledger, by exact path and SHA-256. Admission holds each file before hashing it,
     /// so a changed or replaced fixture refuses instead of becoming an import authority.
+    /// The ledger bytes themselves must match the digest the completed preparation bound into
+    /// its prepared record; nothing here recomputes a digest to bless changed contents.
     /// </summary>
-    public int AdmitPreparedFixtures(string ledgerPath)
+    public int AdmitPreparedFixtures(string ledgerPath, string? preparedLedgerSha256)
     {
         string ledger = Require(ledgerPath, "evidence");
         if (!string.Equals(ledger, At("evidence", "scenario-ledger.json"), StringComparison.OrdinalIgnoreCase))
             throw new IOException("Only this run's scenario ledger can name prepared fixtures.");
+        if (string.IsNullOrEmpty(preparedLedgerSha256)) throw new IOException("No scenario ledger digest is bound to this preparation.");
         byte[] bytes;
         using (NativePathLease held = NativePathLease.ReadFile(ledger)) bytes = File.ReadAllBytes(ledger);
+        if (!string.Equals(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)), preparedLedgerSha256, StringComparison.OrdinalIgnoreCase))
+            throw new IOException("Scenario ledger bytes differ from the digest bound at preparation; prepare a fresh root.");
         using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(bytes);
         Dictionary<string, string> recorded = new(StringComparer.OrdinalIgnoreCase);
         foreach (System.Text.Json.JsonElement scenario in document.RootElement.GetProperty("Scenarios").EnumerateArray())

@@ -58,9 +58,19 @@ public sealed class ContainedNativePorts(OwnedPaths paths, IFilePicker? files = 
     {
         if (paths.SelectionRefusal(selected, role) is not { } reason) return false;
         PickerRefusals++;
-        refused?.Invoke(reason);
+        refused?.Invoke(RefusalNotice(role, reason));
         return true;
     }
+
+    /// <summary>The operator's notice for a refused native selection: Chinese, with the technical reason last.</summary>
+    public static string RefusalNotice(string role, string reason) =>
+        "SYNTHETIC 测试入口：所选位置不是本次测试准备的" + (role == "fixtures" ? "测试文件" : "文件夹") + "，未被使用，也没有更改任何数据。\n" +
+        "请改为选择已准备的测试位置：" + role switch
+        {
+            "fixtures" => @"fixtures\inputs 或 fixtures\returns 中的测试图片",
+            "delivery" => "delivery 文件夹本身（不要新建文件夹）",
+            _ => @"diagnostics\export 文件夹本身（不要新建文件夹）",
+        } + "。\n\n技术原因：" + reason;
     public ShellDispatchResult SelectInFolder(IDeliveredSelectionLease lease)
     {
         if (lease.IsDisposed) return new(false, "Disposed delivery lease.");

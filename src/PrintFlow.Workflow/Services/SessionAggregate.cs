@@ -153,6 +153,13 @@ public sealed record SessionListItem(
     /// <summary>Null means history was unavailable; zero means a successful read found no exact delivered result.</summary>
     public int? PreviouslySavedOutputCount { get; init; }
 
+    /// <summary>
+    /// Whether the engine offers Complete as this active job's next action (SCRUM-11154 F-V8):
+    /// every step is finished and the terminal result approved. Null means the list did not
+    /// establish it. Workflow state only: it says nothing about saving or delivery.
+    /// </summary>
+    public bool? AwaitsCompletion { get; init; }
+
     /// <summary>Whether Home may offer Abandon for this session.</summary>
     public bool CanAbandon => SessionStateRules.AllowsAbandon(State);
 

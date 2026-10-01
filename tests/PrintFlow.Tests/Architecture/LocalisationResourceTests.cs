@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using PrintFlow.Domain.Results;
 
 namespace PrintFlow.Tests.Architecture;
 
@@ -861,6 +862,27 @@ public sealed class LocalisationResourceTests
         // Process.Start returning no process or throwing, not just readiness after a launch.
         ValueOf(language == "en" ? NeutralResx : ChineseResx, key)
             .ShouldNotContain(unsupportedClaim, Case.Insensitive, key);
+    }
+
+    /// <summary>
+    /// SCRUM-11154 F-V9: Error Details showed "Meitu started but was not ready in time… try again"
+    /// for <c>MeituLaunchFailed</c>. Its producers are Process.Start returning nothing or throwing
+    /// (never started), the process exiting before a window, and the scripted fake failure; a
+    /// readiness timeout is a different code. The one sentence every producer shares claims
+    /// neither a start, a deadline nor a retry, and the code and message key stay as stored.
+    /// </summary>
+    [Theory]
+    [InlineData("en", "could not be started or did not become ready", new[] { "was started", "in time", "try again", "retry" })]
+    [InlineData("zh-CN", "美图未能启动或未能就绪", new[] { "已启动", "规定时间", "重试", "再试" })]
+    public void Meitu_launch_failure_sentence_claims_neither_a_start_nor_a_retry(string language, string fact, string[] unsupported)
+    {
+        string sentence = ValueOf(language == "en" ? NeutralResx : ChineseResx, "Failure_MeituLaunchFailed");
+        sentence.ShouldContain(fact);
+        foreach (string claim in unsupported) sentence.ShouldNotContain(claim, Case.Insensitive);
+
+        OperationFailure failure = OperationFailure.Create(FailureCode.MeituLaunchFailed, "Starting the accepted executable returned no process.");
+        failure.MessageKey.ShouldBe("Failure_MeituLaunchFailed");
+        failure.Code.ToString().ShouldBe("MeituLaunchFailed");
     }
 
     [Fact]

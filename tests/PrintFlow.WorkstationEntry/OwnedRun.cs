@@ -6,7 +6,13 @@ namespace PrintFlow.WorkstationEntry;
 
 public sealed record RunOwnership(string RunId, string RootIdentity, string CandidateHash, string ScenarioHash,
     int OwnerPid, long OwnerStartUtcTicks, string RunToken, string OwnerToken, string LockIdentity = "", string MutableIdentitiesJson = "{}", string DirectoryIdentitiesJson = "{}");
-public sealed record PreparedRun(string CandidateHash, string ScenarioHash, string RunToken, string OwnerToken, DateTimeOffset PreparedUtc, string Evidence);
+/// <param name="ScenarioLedgerSha256">
+/// SHA-256 of the exact scenario-ledger bytes this preparation wrote: the immutable admission
+/// manifest Interactive reads. Added 2026-10-01 (SCRUM-11154 F-V7); a record without it is an
+/// older preparation that cannot authorize Interactive and is never upgraded in place.
+/// </param>
+public sealed record PreparedRun(string CandidateHash, string ScenarioHash, string RunToken, string OwnerToken, DateTimeOffset PreparedUtc, string Evidence,
+    string? ScenarioLedgerSha256);
 
 public sealed class OwnedRun : IDisposable
 {
@@ -76,13 +82,19 @@ public sealed class OwnedRun : IDisposable
         }
         catch (ArgumentException) { /* Exact recorded PID no longer exists. */ }
         catch (System.ComponentModel.Win32Exception ex) { throw new IOException("Previous owner liveness is unknown.", ex); }
-        if (requirePrepared)
-        {
-            PreparedRun prepared = ManifestReader.ReadFile<PreparedRun>(Path.Combine(root, "state", "prepared.json")).Value;
-            if (prepared.CandidateHash != candidateHash || prepared.ScenarioHash != scenarioHash || prepared.RunToken != owner.RunToken || prepared.OwnerToken != owner.OwnerToken || prepared.Evidence != "NONINTERACTIVE_ONLY")
-                throw new ArgumentException("Interactive requires a completed matching prepared run.");
-        }
+        if (requirePrepared) VerifyPrepared(root, owner, candidateHash, scenarioHash);
         return owner;
+    }
+
+    /// <summary>The completed preparation of <paramref name="owner"/>, including its bound ledger digest.</summary>
+    public static PreparedRun VerifyPrepared(string root, RunOwnership owner, string candidateHash, string scenarioHash)
+    {
+        PreparedRun prepared = ManifestReader.ReadFile<PreparedRun>(Path.Combine(PathRules.Canonical(root), "state", "prepared.json")).Value;
+        if (prepared.CandidateHash != candidateHash || prepared.ScenarioHash != scenarioHash || prepared.RunToken != owner.RunToken || prepared.OwnerToken != owner.OwnerToken || prepared.Evidence != "NONINTERACTIVE_ONLY")
+            throw new ArgumentException("Interactive requires a completed matching prepared run.");
+        if (prepared.ScenarioLedgerSha256 is not { Length: 64 } digest || !digest.All(Uri.IsHexDigit))
+            throw new ArgumentException("Interactive requires a fresh preparation that bound its scenario ledger digest; older prepared roots cannot be upgraded.");
+        return prepared;
     }
 
     public void Dispose() { guard.Dispose(); Paths.Dispose(); rootLease.Dispose(); }

@@ -144,7 +144,9 @@ public sealed class SharedReviewSurfaceTests
             model.ZoomScale = 1.5;
             Settle(view);
             Grid overlay = Descendants<Grid>(view).Single(g => g.Clip is RectangleGeometry);
-            ((RectangleGeometry)overlay.Clip).Rect.Width.ShouldBe(overlay.Width * position / 100, 0.001);
+            // The After overlay is visible right of the divider only (F-V3).
+            ((RectangleGeometry)overlay.Clip).Rect.X.ShouldBe(overlay.Width * position / 100, 0.001);
+            ((RectangleGeometry)overlay.Clip).Rect.Width.ShouldBe(overlay.Width * (100 - position) / 100, 0.001);
             Image[] images = Descendants<Image>(view).ToArray();
             for (int i = 0; i < images.Length; i++)
             {
@@ -190,10 +192,12 @@ public sealed class SharedReviewSurfaceTests
         }, culture);
     }
 
+    // SCRUM-11154 F-V3: Before is left of the divider and After is right of it, matching the
+    // "Before / After" heading and the side-by-side order. 0 shows only After, 100 only Before.
     [Theory]
-    [InlineData(0, false, false)]
-    [InlineData(50, true, false)]
-    [InlineData(100, true, true)]
+    [InlineData(0, true, true)]
+    [InlineData(50, false, true)]
+    [InlineData(100, false, false)]
     public void Slider_boundaries_render_before_and_after_pixels(int position, bool afterLeft, bool afterRight)
     {
         WithSurface((model, view) =>
@@ -213,6 +217,122 @@ public sealed class SharedReviewSurfaceTests
             Pixel(canvas, 10, 10).ShouldBe(afterLeft ? Colors.Lime : Colors.Red);
             Pixel(canvas, 1500, 10).ShouldBe(afterRight ? Colors.Lime : Colors.Red);
         });
+    }
+
+    /// <summary>
+    /// SCRUM-11154 F-V3, observed on the workstation: the slider showed After on the left. Two
+    /// visibly asymmetric pictures — Before red|yellow, After blue with a transparent right edge —
+    /// prove which picture is on which side, that neither is mirrored, and which bitmap is which.
+    /// </summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(25)]
+    [InlineData(50)]
+    [InlineData(75)]
+    [InlineData(100)]
+    public void Slider_shows_before_left_and_after_right_without_mirroring(int position)
+    {
+        WithSurface((model, view) =>
+        {
+            ArtefactPreviewPane[] panes = UseAsymmetricPanes(model);
+            model.ReviewViewport.Background = ReviewInspectionBackground.White;
+            model.ReviewViewport.Mode = ReviewComparisonMode.Slider;
+            model.ReviewViewport.SliderPosition = position;
+            Settle(view);
+
+            AssertSides(view, position);
+            Image[] images = Descendants<Image>(view).ToArray();
+            images.Length.ShouldBe(2);
+            AutomationProperties.GetName(images[0]).ShouldBe(panes[0].Heading);
+            AutomationProperties.GetName(images[1]).ShouldBe(panes[1].Heading);
+            ((Grid)images[1].Parent).Clip.ShouldBeOfType<RectangleGeometry>("only the After overlay is clipped");
+            ((Grid)images[0].Parent).Clip.ShouldBeNull();
+            Descendants<TextBlock>(view).ShouldContain(t => t.Text == model.BeforeLabel + " / " + model.AfterLabel);
+        }, "zh-CN");
+    }
+
+    [Fact]
+    public void Slider_orientation_survives_resize_zoom_and_comparison_mode_round_trip()
+    {
+        WithSurface((model, view) =>
+        {
+            UseAsymmetricPanes(model);
+            model.ReviewViewport.Background = ReviewInspectionBackground.White;
+            model.ReviewViewport.Mode = ReviewComparisonMode.Slider;
+            model.ReviewViewport.SliderPosition = 50;
+            Settle(view);
+            AssertSides(view, 50);
+
+            Arrange(view, 1100, 520);
+            model.ZoomScale = 2;
+            Settle(view);
+            AssertSides(view, 50);
+
+            model.IsFitToViewport = true;
+            Settle(view);
+            AssertSides(view, 50);
+
+            model.ReviewViewport.Mode = ReviewComparisonMode.SideBySide;
+            Settle(view);
+            ScrollViewer before = Descendants<ScrollViewer>(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewBefore");
+            ScrollViewer after = Descendants<ScrollViewer>(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewAfter");
+            before.TranslatePoint(new Point(), view).X.ShouldBeLessThan(after.TranslatePoint(new Point(), view).X);
+
+            model.ReviewViewport.Mode = ReviewComparisonMode.Slider;
+            Settle(view);
+            AssertSides(view, 50);
+        }, "zh-CN");
+    }
+
+    private static readonly Color BeforeLeft = Colors.Red, BeforeRight = Colors.Yellow, AfterColour = Colors.Blue;
+
+    internal static ArtefactPreviewPane[] UseAsymmetricPanes(SessionViewModel model)
+    {
+        model.PreviewPanes.Clear();
+        byte[] Png(Func<int, Color> colour)
+        {
+            byte[] pixels = new byte[400 * 200 * 4];
+            for (int y = 0; y < 200; y++)
+                for (int x = 0; x < 400; x++)
+                {
+                    Color c = colour(x);
+                    int offset = (y * 400 + x) * 4;
+                    pixels[offset] = c.B; pixels[offset + 1] = c.G; pixels[offset + 2] = c.R; pixels[offset + 3] = c.A;
+                }
+            PngBitmapEncoder encoder = new();
+            encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(400, 200, 96, 96, PixelFormats.Bgra32, null, pixels, 400 * 4)));
+            using System.IO.MemoryStream stream = new();
+            encoder.Save(stream);
+            return stream.ToArray();
+        }
+        model.PreviewPanes.Add(ArtefactPreviewPane.From(model.BeforeLabel, "before.png", new ImagePreview(new RevisionId(Guid.NewGuid()), 400, 200, 400, 200, true,
+            Png(x => x < 200 ? BeforeLeft : BeforeRight))));
+        model.PreviewPanes.Add(ArtefactPreviewPane.From(model.AfterLabel, "after.png", new ImagePreview(new RevisionId(Guid.NewGuid()), 400, 200, 400, 200, true,
+            Png(x => x >= 360 ? Colors.Transparent : AfterColour))));
+        model.ReviewViewport.HorizontalPosition = 0;
+        model.ReviewViewport.VerticalPosition = 0;
+        return [.. model.PreviewPanes];
+    }
+
+    /// <summary>Samples the composed overlay canvas at fixed fractions of the picture width.</summary>
+    private static void AssertSides(SharedReviewSurface view, int position)
+    {
+        Grid canvas = (Grid)Descendants<ScrollViewer>(view).Single().Content;
+        double width = canvas.Width;
+        double divider = width * position / 100;
+        foreach (double fraction in new[] { 0.05, 0.375, 0.625, 0.95 })
+        {
+            double x = width * fraction;
+            Color expected = x < divider
+                ? (fraction < 0.5 ? BeforeLeft : BeforeRight)
+                : (fraction >= 0.9 ? Colors.White : AfterColour);
+            // Render the canvas at its own origin so a scroll offset cannot move the sample.
+            DrawingVisual visual = new();
+            using (DrawingContext drawing = visual.RenderOpen())
+                drawing.DrawRectangle(new VisualBrush(canvas) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top },
+                    null, new Rect(0, 0, Math.Ceiling(width), Math.Ceiling(canvas.Height)));
+            Pixel(visual, (int)x, 4).ShouldBe(expected, $"position {position}, sample {fraction:P0}");
+        }
     }
 
     [Theory]

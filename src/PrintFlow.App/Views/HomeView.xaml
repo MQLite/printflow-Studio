@@ -151,6 +151,41 @@
                         Padding="10,4" />
             </DockPanel>
 
+            <!--
+                The Abandon confirmation (SCRUM-11154 F-V4), in the existing inline pattern. It names
+                the exact job and the consequence, and promises no undo or deletion. "Keep the job"
+                receives focus and answers Esc; "Abandon the job" is never a default button and needs a
+                fresh gesture aimed at this confirmation, so the initiating double-click or a held key
+                cannot complete it.
+            -->
+            <Border x:Name="AbandonConfirmationPanel"
+                    DockPanel.Dock="Top"
+                    Background="#FFF4CE" BorderBrush="#E0B000" BorderThickness="1" CornerRadius="4"
+                    Padding="12,10" Margin="0,0,0,10"
+                    AutomationProperties.AutomationId="Home.AbandonConfirmation"
+                    Visibility="{Binding IsConfirmingAbandon, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding PendingAbandon.Question}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
+                               AutomationProperties.AutomationId="Home.AbandonConfirmation.Question" />
+                    <WrapPanel>
+                        <Button x:Name="AbandonKeepButton"
+                                Content="{Binding AbandonKeepLabel}"
+                                Command="{Binding KeepJobCommand}"
+                                IsCancel="True"
+                                AutomationProperties.AutomationId="Home.AbandonConfirmation.Keep"
+                                AutomationProperties.Name="{Binding AbandonKeepLabel}"
+                                Padding="14,6" Margin="0,0,8,0" />
+                        <views:ReviewApprovalButton Content="{Binding AbandonConfirmLabel}"
+                                Command="{Binding ConfirmAbandonCommand}"
+                                CommandParameter="{Binding PendingAbandon}"
+                                TargetIdentity="{Binding PendingAbandon.GestureTarget}"
+                                AutomationProperties.AutomationId="Home.AbandonConfirmation.Confirm"
+                                AutomationProperties.Name="{Binding AbandonConfirmLabel}"
+                                Padding="14,6" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
             <TextBlock DockPanel.Dock="Top"
                        Text="{Binding EmptyRecentText}"
                        Opacity="0.7"
@@ -158,7 +193,8 @@
                        Visibility="{Binding HasNoRecentSessions, Converter={StaticResource BoolToVisibility}}" />
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.AutomationId="Home.Lists">
-                <StackPanel>
+                <!-- Inert while an Abandon confirmation is open (SCRUM-11154 F-V4); scrolling still works. -->
+                <StackPanel IsEnabled="{Binding AreListsInteractive}">
                     <StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
                         <TextBlock Text="{Binding RecoveryHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
                         <ItemsControl ItemsSource="{Binding RecoverySessions}" IsTabStop="False"

@@ -396,6 +396,7 @@ public sealed class FailureGuidanceUiTests
         service.NextExecuteFailure = OperationFailure.Create(FailureCode.PreconditionNotMet, "Scripted refusal.");
 
         await home.AbandonCommand.ExecuteAsync(row);
+        await home.ConfirmAbandonCommand.ExecuteAsync(home.PendingAbandon); // Explicit confirmation (SCRUM-11154 F-V4).
 
         home.Notice.ShouldBe(Strings.Home_AbandonFailed);
         home.NoticeErrorCode.ShouldBe(nameof(FailureCode.PreconditionNotMet), "the job's stored Timeout is a different failure");

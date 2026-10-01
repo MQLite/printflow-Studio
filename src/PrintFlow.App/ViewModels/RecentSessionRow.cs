@@ -100,6 +100,18 @@ public sealed partial class RecentSessionRow : ObservableObject
 
     private static string Status(SessionListItem item, string step)
     {
+        // A finished current step: the engine's answer decides whether only Complete remains
+        // (SCRUM-11154 F-V8). Naming the finished step would read as though it still needed doing.
+        if (item.State == SessionState.Active && item.CurrentStepState is StepState.Approved or StepState.Skipped)
+        {
+            return item.AwaitsCompletion switch
+            {
+                true => Strings.Session_StatusInput + " · " + Strings.Resolve("Home_RecentStepComplete"),
+                null => Strings.Home_RecentStatusUnknown,
+                false => Strings.Session_StatusInput + " · " + step,
+            };
+        }
+
         string heading = item.State switch
         {
             SessionState.HandedOff => Strings.Session_StatusHandedOff,

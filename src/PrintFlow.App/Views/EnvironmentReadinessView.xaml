@@ -11,6 +11,17 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
         <!--
+            Each row is announced by its localised subject and keeps its stable identity (SCRUM-11154
+            F-V2): item automation reads the generated container, never the row's type name. The
+            lists themselves are named containers, not Tab stops; the details expander inside each
+            row remains the keyboard stop.
+        -->
+        <Style x:Key="CheckRowContainer" TargetType="ContentPresenter">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+            <Setter Property="AutomationProperties.AutomationId" Value="{Binding AutomationId}" />
+        </Style>
+
+        <!--
             One row template, used by all three lists. Blocking and advisory rows are told apart
             by the report's own IsBlocking flag rather than by anything decided here (§5).
         -->
@@ -153,6 +164,9 @@
                 <!-- Every failed blocking check, not only the first: an operator repairing the
                      workstation needs the whole list (§3). -->
                 <ItemsControl ItemsSource="{Binding BlockingFailures}"
+                              IsTabStop="False" Focusable="False" ItemContainerStyle="{StaticResource CheckRowContainer}"
+                              AutomationProperties.AutomationId="EnvironmentBlockingChecks"
+                              AutomationProperties.Name="{Binding BlockingHeading}"
                               ItemTemplate="{StaticResource CheckRowTemplate}"
                               Margin="0,4,0,0" />
 
@@ -163,6 +177,9 @@
                            Visibility="{Binding HasAdvisories, Converter={StaticResource BoolToVisibility}}" />
 
                 <ItemsControl ItemsSource="{Binding Advisories}"
+                              IsTabStop="False" Focusable="False" ItemContainerStyle="{StaticResource CheckRowContainer}"
+                              AutomationProperties.AutomationId="EnvironmentAdvisories"
+                              AutomationProperties.Name="{Binding AdvisoriesHeading}"
                               ItemTemplate="{StaticResource CheckRowTemplate}"
                               Margin="0,4,0,0" />
 
@@ -175,6 +192,8 @@
                                    Margin="0,10,0,0" />
 
                         <ItemsControl ItemsSource="{Binding AutomaticChecks}"
+                                      IsTabStop="False" Focusable="False" ItemContainerStyle="{StaticResource CheckRowContainer}"
+                                      AutomationProperties.Name="{Binding AutomaticChecksHeading}"
                                       AutomationProperties.AutomationId="EnvironmentAutomaticChecks"
                                       ItemTemplate="{StaticResource CheckRowTemplate}"
                                       Margin="0,4,0,0" />
@@ -185,6 +204,8 @@
                                    Margin="0,18,0,0" />
 
                         <ItemsControl ItemsSource="{Binding LiveApplicationChecks}"
+                                      IsTabStop="False" Focusable="False" ItemContainerStyle="{StaticResource CheckRowContainer}"
+                                      AutomationProperties.Name="{Binding LiveChecksHeading}"
                                       AutomationProperties.AutomationId="EnvironmentLiveChecks"
                                       ItemTemplate="{StaticResource CheckRowTemplate}"
                                       Margin="0,4,0,0" />

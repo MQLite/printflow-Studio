@@ -79,7 +79,7 @@ public sealed class InteractivePickerContainmentTests
         string returned = Fixture(root, "returns", "corrected.png", "corrected");
         string ledger = Ledger(root, (input, Hash(input)), (returned, Hash(returned)));
         using OwnedPaths paths = new(root);
-        paths.AdmitPreparedFixtures(ledger).ShouldBe(2);
+        paths.AdmitPreparedFixtures(ledger, Hash(ledger)).ShouldBe(2);
         new ContainedNativePorts(paths, new FixedFilePicker(returned)).PickSingleFile("Import", "PNG|*.png", null).ShouldBe(returned);
         Should.Throw<IOException>(() => File.WriteAllText(returned, "replaced"));
     }
@@ -90,7 +90,7 @@ public sealed class InteractivePickerContainmentTests
         string root = NewRoot(); string file = Fixture(root, "returns", "corrected.png", "corrected");
         string ledger = Ledger(root, (file, Convert.ToHexString(SHA256.HashData("other"u8.ToArray()))));
         using OwnedPaths paths = new(root);
-        Should.Throw<IOException>(() => paths.AdmitPreparedFixtures(ledger));
+        Should.Throw<IOException>(() => paths.AdmitPreparedFixtures(ledger, Hash(ledger)));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class InteractivePickerContainmentTests
         string root = NewRoot(); string file = Fixture(root, "", "loose.png", "loose");
         string ledger = Ledger(root, (file, Hash(file)));
         using OwnedPaths paths = new(root);
-        Should.Throw<IOException>(() => paths.AdmitPreparedFixtures(ledger));
+        Should.Throw<IOException>(() => paths.AdmitPreparedFixtures(ledger, Hash(ledger)));
     }
 
     private static string NewRoot()

@@ -142,6 +142,11 @@
   <data name="Home_AbandonDone" xml:space="preserve">
     <value>“{0}” was abandoned. Its imported file, approved outputs and history are kept.</value>
   </data>
+  <data name="Home_AbandonConfirmQuestion" xml:space="preserve"><value>Abandon “{0}”? After abandoning, this job cannot be processed further. Its imported file, approved outputs and history are kept; nothing is deleted.</value></data>
+  <data name="Home_AbandonKeep" xml:space="preserve"><value>Keep the job</value></data>
+  <data name="Home_AbandonConfirm" xml:space="preserve"><value>Abandon the job</value></data>
+  <data name="Home_AbandonStale" xml:space="preserve"><value>“{0}” has changed, so it was not abandoned. Check its current state in the list.</value></data>
+  <data name="Home_RecentStepComplete" xml:space="preserve"><value>Complete the job</value></data>
   <data name="Home_RecentUnavailable" xml:space="preserve">
     <value>Recent processing could not be read ({0}).</value>
   </data>
@@ -288,7 +293,7 @@
     <value>The approved Meitu program was not found on this computer, or it is not the approved version. Please check the workstation setup.</value>
   </data>
   <data name="Failure_MeituLaunchFailed" xml:space="preserve">
-    <value>Meitu was started but did not become ready in time. Please open Meitu yourself and try again.</value>
+    <value>Meitu could not be started or did not become ready.</value>
   </data>
   <data name="Failure_MeituWindowNotFound" xml:space="preserve">
     <value>Meitu is running but its window could not be found, so nothing was sent to it.</value>
@@ -797,6 +802,9 @@
   </data>
   <data name="Environment_StatusBlocked" xml:space="preserve"><value>Not run</value></data>
   <data name="Environment_LiveCheckNotRun" xml:space="preserve"><value>This check did not run because a prerequisite has not passed. Resolve the failed check first, then recheck.</value></data>
+  <data name="Environment_CheckNotRun" xml:space="preserve"><value>This check did not run, so nothing was observed.</value></data>
+  <data name="Environment_UnlistedCheck" xml:space="preserve"><value>Unlisted check</value></data>
+  <data name="Environment_NotConfirmedNotRun" xml:space="preserve"><value>Production workstation readiness is not confirmed: a required check did not run.</value></data>
   <data name="Environment_Blocking" xml:space="preserve">
     <value>Required</value>
   </data>

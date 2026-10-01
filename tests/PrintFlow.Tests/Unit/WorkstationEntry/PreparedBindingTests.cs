@@ -19,7 +19,7 @@ public sealed class PreparedBindingTests
             changed == "scenario" ? "other" : owner.ScenarioHash,
             changed == "run" ? "other" : owner.RunToken,
             changed == "owner" ? "other" : owner.OwnerToken,
-            DateTimeOffset.UtcNow, changed == "evidence" ? "PASS" : "NONINTERACTIVE_ONLY");
+            DateTimeOffset.UtcNow, changed == "evidence" ? "PASS" : "NONINTERACTIVE_ONLY", new string('A', 64));
         File.WriteAllText(Path.Combine(root, "state", "prepared.json"), JsonSerializer.Serialize(prepared));
         Should.Throw<ArgumentException>(() => OwnedRun.VerifyResume(root, owner.CandidateHash, owner.ScenarioHash, true));
     }
@@ -30,7 +30,7 @@ public sealed class PreparedBindingTests
         (string root, RunOwnership owner) = Fixture();
         Should.Throw<IOException>(() => OwnedRun.VerifyResume(root, owner.CandidateHash, owner.ScenarioHash, true));
         PreparedRun prepared = new(owner.CandidateHash, owner.ScenarioHash, owner.RunToken, owner.OwnerToken,
-            DateTimeOffset.UtcNow, "NONINTERACTIVE_ONLY");
+            DateTimeOffset.UtcNow, "NONINTERACTIVE_ONLY", new string('A', 64));
         File.WriteAllText(Path.Combine(root, "state", "prepared.json"), JsonSerializer.Serialize(prepared));
         OwnedRun.VerifyResume(root, owner.CandidateHash, owner.ScenarioHash, true).ShouldBe(owner);
     }

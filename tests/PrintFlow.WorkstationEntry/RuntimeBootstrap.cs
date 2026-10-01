@@ -30,26 +30,37 @@ public static class RuntimeBootstrap
         if (System.Reflection.Assembly.GetEntryAssembly() != typeof(Program).Assembly)
             throw new InvalidOperationException("Runtime bootstrap is only valid in its dedicated test-owned executable.");
         if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA) throw new InvalidOperationException("Runtime entry requires STA.");
+        string? preparedLedgerSha256 = null;
         if (options.Mode == "Interactive")
         {
             if (!options.SafeDesktopConfirmed) throw new ArgumentException("Fresh desktop acknowledgment is required.");
-            OwnedRun.VerifyResume(input.Plan.Root, input.CandidateHash, input.ScenarioHash, true);
+            RunOwnership prior = OwnedRun.VerifyResume(input.Plan.Root, input.CandidateHash, input.ScenarioHash, true);
+            preparedLedgerSha256 = OwnedRun.VerifyPrepared(input.Plan.Root, prior, input.CandidateHash, input.ScenarioHash).ScenarioLedgerSha256;
         }
         SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+        using HostFaultGate faults = new(Dispatcher.CurrentDispatcher);
         DispatcherFrame frame = new();
-        Task<int> task = RunAsync(input, options, output);
+        Task<int> task = RunAsync(input, options, output, faults, preparedLedgerSha256);
         _ = task.ContinueWith(_ => Dispatcher.CurrentDispatcher.BeginInvoke(() => frame.Continue = false),
             CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
         Dispatcher.PushFrame(frame);
+        if (faults.Fault is not null)
+        {
+            // The recorded fault decides the outcome. The run was cancelled by it, so a cancelled
+            // or failed teardown is reported here and never turned into success.
+            if (task.IsFaulted) output.WriteLine("HOST_FAULT teardown: " + task.Exception!.GetBaseException().Message);
+            return HostFaultGate.ExitCode;
+        }
         return task.GetAwaiter().GetResult();
     }
 
-    private static async Task<int> RunAsync(ValidatedInput input, EntryOptions options, TextWriter output)
+    private static async Task<int> RunAsync(ValidatedInput input, EntryOptions options, TextWriter output, HostFaultGate faults, string? preparedLedgerSha256)
     {
         using OwnedRun run = OwnedRun.Claim(input, options.Resume || options.Mode == "Interactive");
         OwnedPaths paths = run.Paths;
         using CancellationTokenSource cancellation = new(TimeSpan.FromMinutes(5));
         CancellationToken ct = cancellation.Token;
+        faults.CancelOnFault(cancellation);
         string databasePath = paths.Require(paths.At("state", "app.db"), "state");
         SqliteConnectionFactory database = new(databasePath);
         using (SqliteConnection migration = database.Open())
@@ -69,16 +80,15 @@ public static class RuntimeBootstrap
         PrintFlow.Domain.Files.Sha256 presetHash = PrintFlow.Domain.Files.Sha256.FromBytes(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(presetPath)));
         WorkstationPresetProvider preset = new(presetPath, PresetFixture.PresetId, PresetFixture.PresetVersion, presetHash);
         // Interactive picks may only name fixtures this run's preparation recorded and hashed.
-        int admittedFixtures = options.Mode == "Interactive" ? paths.AdmitPreparedFixtures(paths.At("evidence", "scenario-ledger.json")) : 0;
+        int admittedFixtures = options.Mode == "Interactive" ? paths.AdmitPreparedFixtures(paths.At("evidence", "scenario-ledger.json"), preparedLedgerSha256) : 0;
         List<string> pickerRefusals = [];
         ContainedNativePorts native = options.Mode == "Interactive"
             ? new(paths, new OpenFileDialogPicker(), new OpenFolderDialogPicker(), new SaveDiagnosticPackageDialog(),
                 new PrintFlow.Infrastructure.Delivery.WindowsDeliveredFileShell(), new PrintFlow.Infrastructure.Workspace.WindowsCorrectionFolderShell(),
-                message =>
+                notice =>
                 {
-                    pickerRefusals.Add(DateTimeOffset.UtcNow.ToString("o") + " " + message);
-                    MessageBox.Show("SYNTHETIC ENTRY: this selection is outside the admitted test files and was not used.\n\n" + message,
-                        "SYNTHETIC — selection refused", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    pickerRefusals.Add(DateTimeOffset.UtcNow.ToString("o") + " " + notice);
+                    MessageBox.Show(notice, "SYNTHETIC — 选择未使用", MessageBoxButton.OK, MessageBoxImage.Warning);
                 })
             : new(paths); // Every authorized run in this task uses recording/refusing delegates.
         using ServiceProvider services = EntryComposition.Build(paths, database, preset, native);
@@ -104,21 +114,24 @@ public static class RuntimeBootstrap
         DockPanel.SetDock(banner, Dock.Top);
         host.Children.Add(banner); host.Children.Add(productContent); window.Content = host;
         window.Title = "SYNTHETIC — PrintFlow Studio";
+        faults.DisableOnFault(window);
         bool graphSmokeCompleted = false;
+        string? ledgerSha256 = null;
         try
         {
             if (options.Mode == "Interactive")
             {
                 // Matching prepared ownership and fresh acknowledgment checked above; no
-                // acknowledgment is written to disk.
+                // acknowledgment is written to disk. An unexpected fault ends the wait at once:
+                // the run never waits on a Closed event that a fault may never produce.
                 TaskCompletionSource closed = new();
                 window.Closed += (_, _) => closed.TrySetResult();
                 await services.GetRequiredService<INavigationService>().GoHomeAsync(ct);
-                window.Show();
-                await closed.Task;
+                if (faults.Fault is null) window.Show();
+                await faults.WhenClosedOrFaulted(closed.Task);
                 Write(paths, "interactive-session-" + run.Ownership.OwnerToken + ".json", new { Evidence = "SYNTHETIC_ONLY", AdmittedFixtures = admittedFixtures,
-                    native.NativeDispatches, native.PickerRefusals, Refusals = pickerRefusals, ClosedUtc = DateTimeOffset.UtcNow });
-                return 0;
+                    native.NativeDispatches, native.PickerRefusals, Refusals = pickerRefusals, ClosedNormally = faults.Fault is null, ClosedUtc = DateTimeOffset.UtcNow });
+                return faults.Outcome(0);
             }
             if (options.Resume)
             {
@@ -135,22 +148,27 @@ public static class RuntimeBootstrap
                     ownedWork.Track(screen); await screen.WaitAsync(ct);
                 }
                 Write(paths, "resume-" + Guid.NewGuid().ToString("N") + ".json", new { Recovered = recovered.Value, WindowShown = false, NativeDispatches = native.NativeDispatches });
-                return 0;
+                return faults.Outcome(0);
             }
             if (options.RestartChildToken is { } childToken)
             {
                 Task child = OwnedRestart.RunChildAsync(services, run, input, childToken, ownedWork, ct);
                 ownedWork.Track(child); await child.WaitAsync(ct);
-                return 3;
+                return faults.Outcome(3);
             }
             await LeaseChecks.RunAsync(paths, "test." + input.Plan.Scenario.RunId, ct);
+            // Fault-path proof only (never Interactive or Resume; EntryOptions refuses those): an
+            // unexpected dispatcher fault, as a failing product command would raise it.
+            if (options.InjectHostFault)
+                _ = Dispatcher.CurrentDispatcher.BeginInvoke(() => throw new InvalidOperationException("SYNTHETIC injected dispatcher fault (fault-path proof)."));
             Task<ScenarioLedger> scenarios = ScenarioRunner.RunAsync(new(paths.Root, services.GetRequiredService<ISessionService>(),
                 services.GetRequiredService<IWorkspace>(), services.GetRequiredService<ISessionRepository>(),
                 services.GetRequiredService<IApprovedArtifactDeliveryService>(), services.GetRequiredService<IProductionTiffReviewService>(),
                 services.GetRequiredService<FakeMeituProcessor>(), services.GetRequiredService<FakePhotoshopOutputProcessor>(), paths.Admit,
                 path => { paths.Require(path, PathRules.Within(path, paths.At("evidence")) ? "evidence" : "fixtures"); if (File.Exists(path) || Directory.Exists(path)) throw new IOException("Owned fixture/evidence write requires CreateNew."); }, ownedWork.Track), ct);
             ownedWork.Track(scenarios);
-            ScenarioLedger ledger = await scenarios;
+            ScenarioLedger ledger = await scenarios.WaitAsync(ct);
+            ledgerSha256 = ledger.SavedSha256;
             List<string> screens = await SmokeNavigation(services, native, paths, host, ct);
             bool failed = ledger.Scenarios.Any(entry => entry.Status is "FAILED" or "BLOCKED_REQUIRED_SCENARIO" or "INCOMPLETE_CANCELLED");
             Write(paths, "graph-smoke.json", new { Screens = screens, WindowShown = false, NativeDispatches = native.NativeDispatches, ScenariosFailed = failed,
@@ -163,11 +181,11 @@ public static class RuntimeBootstrap
                     "Physical/native/editor/picker actions not actually performed remain NOT_RUN; see scenario fact limits." },
                 RegistrationAllowlist = EntryComposition.Allowlist });
             if (native.NativeDispatches != 0 || window.IsVisible) throw new InvalidOperationException("Noninteractive boundary violated.");
-            graphSmokeCompleted = !failed;
+            graphSmokeCompleted = !failed && faults.Fault is null;
             if (failed) output.WriteLine("PARTIAL: inspect runtime ledger; entry is not ready for a visible run.");
             // The return completes only after the finally block has settled and retained
             // this run's typed prepared record. Any teardown/identity/write error refuses it.
-            return failed ? 3 : 0;
+            return faults.Outcome(failed ? 3 : 0);
         }
         finally
         {
@@ -178,7 +196,8 @@ public static class RuntimeBootstrap
             ownedWork.CloseRegistration();
             bool settled = await ownedWork.WaitForQuiescenceAsync(TimeSpan.FromSeconds(20));
             void RecordQuiescence() => Write(paths, "quiescence-" + Guid.NewGuid().ToString("N") + ".json", new { OwnedTasksSettled = settled, PendingTasks = ownedWork.PendingCount,
-                LateRegistration = ownedWork.LateRegistration, WindowShown = options.Mode == "Interactive", EvidenceRetained = true, AtUtc = DateTimeOffset.UtcNow });
+                LateRegistration = ownedWork.LateRegistration, WindowShown = options.Mode == "Interactive", EvidenceRetained = true,
+                HostFault = faults.Fault?.GetType().FullName, AtUtc = DateTimeOffset.UtcNow });
             if (!settled)
             {
                 // Never release a guard/provider around a live owned operation. Terminate this
@@ -192,6 +211,14 @@ public static class RuntimeBootstrap
                 finally { Environment.Exit(4); } // Even disk-full/reporting failure cannot unwind live ownership.
             }
             else RecordQuiescence();
+            if (faults.Fault is { } fault)
+            {
+                Write(paths, "host-fault-" + Guid.NewGuid().ToString("N") + ".json", new { Evidence = "SYNTHETIC_ONLY", ExceptionType = fault.GetType().FullName, fault.Message,
+                    faults.FaultCount, TrackedOwnedWorkSettled = settled,
+                    Limitation = "OwnedWork tracks screen loads and scenario work, not every product command task.",
+                    PreparedRecordWritten = false, ExitCode = HostFaultGate.ExitCode, AtUtc = DateTimeOffset.UtcNow });
+                output.WriteLine($"HOST_FAULT: {fault.GetType().Name}: {fault.Message} Tracked owned work settled; run ended without a prepared record.");
+            }
             window.Close();
             application.Shutdown();
             services.Dispose();
@@ -200,14 +227,20 @@ public static class RuntimeBootstrap
             // still exist, so process-exit cleanup cannot delete sidecars after ownership ends.
             using (SqliteConnection leasePool = new(new SqliteConnectionStringBuilder { DataSource = paths.At("state", "automation-lease.db") }.ToString())) SqliteConnection.ClearPool(leasePool);
             if (cancellationFailure is not null) throw new IOException("Shutdown cancellation failed after owned work settled.", cancellationFailure);
-            if (graphSmokeCompleted)
+            if (graphSmokeCompleted && faults.Fault is null)
             {
                 paths.ProtectDatabase(databasePath, createNew: false);
                 paths.ProtectDatabase(paths.At("state", "automation-lease.db"), createNew: false);
+                // Bind the immutable admission manifest: the exact bytes the ledger wrote, re-read now.
+                string ledgerPath = paths.Require(paths.At("evidence", "scenario-ledger.json"), "evidence");
+                byte[] ledgerBytes;
+                using (NativePathLease heldLedger = NativePathLease.ReadFile(ledgerPath)) ledgerBytes = File.ReadAllBytes(ledgerPath);
+                if (ledgerSha256 is null || !string.Equals(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(ledgerBytes)), ledgerSha256, StringComparison.Ordinal))
+                    throw new IOException("Scenario ledger changed after it was written; no prepared record.");
                 string preparedPath = paths.Require(paths.At("state", "prepared.json"), "state");
                 using FileStream preparedFile = new(preparedPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
                 JsonSerializer.Serialize(preparedFile, new PreparedRun(input.CandidateHash, input.ScenarioHash,
-                    run.Ownership.RunToken, run.Ownership.OwnerToken, DateTimeOffset.UtcNow, "NONINTERACTIVE_ONLY"), ManifestReader.Json);
+                    run.Ownership.RunToken, run.Ownership.OwnerToken, DateTimeOffset.UtcNow, "NONINTERACTIVE_ONLY", ledgerSha256), ManifestReader.Json);
                 preparedFile.Flush(true);
                 output.WriteLine("PREPARED_NONINTERACTIVE: synthetic graph verified and owned work settled; matching prepared record retained.");
             }
@@ -220,7 +253,7 @@ public static class RuntimeBootstrap
         List<string> visited = [];
         async Task Record()
         {
-            await AwaitScreen(navigation.Current); await Dispatcher.Yield(DispatcherPriority.DataBind);
+            await AwaitScreen(navigation.Current).WaitAsync(ct); await Dispatcher.Yield(DispatcherPriority.DataBind);
             host.Measure(new Size(1000, 700)); host.Arrange(new Rect(0, 0, 1000, 700)); host.UpdateLayout();
             visited.Add(navigation.Current!.GetType().Name);
         }

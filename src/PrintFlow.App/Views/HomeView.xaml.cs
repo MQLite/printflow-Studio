@@ -1,5 +1,8 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using PrintFlow.App.ViewModels;
 
 namespace PrintFlow.App.Views;
@@ -31,6 +34,7 @@ public partial class HomeView : UserControl
     private EventHandler? _observationChanged;
     private long _subscription;
     private bool _observing;
+    private UIElement? _abandonOrigin;
 
     public HomeView()
     {
@@ -56,7 +60,28 @@ public partial class HomeView : UserControl
             }));
         };
         home.ReadinessObservations.Changed += _observationChanged;
+        home.PropertyChanged += OnHomeChanged;
         home.ReadReadiness();
+    }
+
+    /// <summary>
+    /// Focus for the Abandon confirmation (SCRUM-11154 F-V4): it moves to "Keep the job" when the
+    /// confirmation opens, so Enter or a held key can only keep the job, and returns to the button
+    /// that opened it when the operator keeps the job. Focus only; it decides nothing.
+    /// </summary>
+    private void OnHomeChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(HomeViewModel.IsConfirmingAbandon) || sender is not HomeViewModel home) return;
+        if (home.IsConfirmingAbandon)
+        {
+            _abandonOrigin = Keyboard.FocusedElement as UIElement;
+            Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() => AbandonKeepButton.Focus()));
+            return;
+        }
+        UIElement? origin = _abandonOrigin;
+        _abandonOrigin = null;
+        if (origin is not null)
+            Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() => { if (origin.IsVisible) origin.Focus(); }));
     }
 
     private void Unsubscribe()
@@ -64,6 +89,7 @@ public partial class HomeView : UserControl
         ++_subscription;
         if (_subscribedHome is { } home && _observationChanged is { } handler)
             home.ReadinessObservations.Changed -= handler;
+        if (_subscribedHome is { } subscribed) subscribed.PropertyChanged -= OnHomeChanged;
         _subscribedHome = null;
         _observationChanged = null;
     }
