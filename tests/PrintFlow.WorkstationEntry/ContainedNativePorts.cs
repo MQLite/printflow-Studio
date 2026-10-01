@@ -5,21 +5,34 @@ using PrintFlow.Workflow.Ports;
 namespace PrintFlow.WorkstationEntry;
 
 /// <summary>Only a future authorized bootstrap may supply native delegates. Smoke supplies none.</summary>
+/// <remarks>
+/// A native selection outside its owned role, or an unadmitted fixture, is refused as "no
+/// selection": the product treats it like a cancelled picker and stays on its screen. Letting that
+/// refusal escape a product command ended the visible host before its settled shutdown path.
+/// Scripted picks and owned-tree integrity faults still throw.
+/// </remarks>
 public sealed class ContainedNativePorts(OwnedPaths paths, IFilePicker? files = null,
     IDeliveryFolderPicker? folders = null, IDiagnosticPackageDestinationPicker? packages = null,
-    IDeliveredFileShell? delivered = null, ICorrectionFolderShell? corrections = null)
+    IDeliveredFileShell? delivered = null, ICorrectionFolderShell? corrections = null, Action<string>? refused = null)
     : IFilePicker, IDeliveryFolderPicker, IDiagnosticPackageDestinationPicker, IDeliveredFileShell, ICorrectionFolderShell
 {
     public int NativeDispatches { get; private set; }
+    public int PickerRefusals { get; private set; }
     public string? NextFixture { get; set; }
     public string? PickSingleFile(string dialogTitle, string filter) => PickSingleFile(dialogTitle, filter, null);
     public string? PickSingleFile(string dialogTitle, string filter, string? initialFolder)
     {
         if (initialFolder is not null) paths.Require(initialFolder, "workspace");
-        string? selected;
-        if (files is null) { selected = NextFixture; NextFixture = null; }
-        else { NativeDispatches++; selected = files.PickSingleFile(dialogTitle, filter, initialFolder); }
-        if (selected is null) return null;
+        if (files is null)
+        {
+            string? scripted = NextFixture; NextFixture = null;
+            if (scripted is null) return null;
+            using NativePathLease scriptedHeld = paths.Read(scripted, "fixtures");
+            return scripted;
+        }
+        NativeDispatches++;
+        string? selected = files.PickSingleFile(dialogTitle, filter, initialFolder);
+        if (selected is null || Refused(selected, "fixtures")) return null;
         using NativePathLease held = paths.Read(selected, "fixtures");
         return selected;
     }
@@ -29,7 +42,7 @@ public sealed class ContainedNativePorts(OwnedPaths paths, IFilePicker? files = 
         if (folders is null) return null;
         NativeDispatches++;
         string? selected = folders.PickFolder(dialogTitle, initialFolder);
-        return selected is null ? null : paths.Require(selected, "delivery");
+        return selected is null || Refused(selected, "delivery") ? null : paths.Require(selected, "delivery");
     }
     public string? PickDestination(string dialogTitle, string filter, string suggestedFileName)
     {
@@ -37,7 +50,16 @@ public sealed class ContainedNativePorts(OwnedPaths paths, IFilePicker? files = 
         if (packages is null) return null;
         NativeDispatches++;
         string? selected = packages.PickDestination(dialogTitle, filter, suggestedFileName);
-        return selected is null ? null : paths.Require(selected, "export");
+        return selected is null || Refused(selected, "export") ? null : paths.Require(selected, "export");
+    }
+    // Only an out-of-role or unadmitted selection becomes "no selection"; identity, alias and
+    // directory-protection faults from the following Read/Require still refuse the run.
+    private bool Refused(string selected, string role)
+    {
+        if (paths.SelectionRefusal(selected, role) is not { } reason) return false;
+        PickerRefusals++;
+        refused?.Invoke(reason);
+        return true;
     }
     public ShellDispatchResult SelectInFolder(IDeliveredSelectionLease lease)
     {

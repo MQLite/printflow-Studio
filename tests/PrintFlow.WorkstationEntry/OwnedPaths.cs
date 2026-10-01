@@ -90,6 +90,24 @@ public sealed class OwnedPaths : IDisposable
         return full;
     }
 
+    /// <summary>
+    /// Why an operator selection is not usable for <paramref name="role"/> (noncanonical, outside the
+    /// role, or an unadmitted fixture), or null when it may proceed to the full identity checks.
+    /// Integrity faults are deliberately not classified here; they still refuse the run.
+    /// </summary>
+    public string? SelectionRefusal(string path, string role)
+    {
+        string full;
+        try { full = PathRules.Canonical(path); }
+        catch (ArgumentException ex) { return ex.Message; }
+        string area = role switch { "fixtures" => At("fixtures"), "delivery" => At("delivery"), "export" => At("diagnostics", "export"),
+            _ => throw new IOException("Unknown selection role.") };
+        if (!string.Equals(full, area, StringComparison.OrdinalIgnoreCase) && !PathRules.Within(full, area))
+            return "Path is outside its owned resource role.";
+        if (role == "fixtures") lock (sync) if (!fixtures.ContainsKey(full)) return "Fixture was not admitted by this run.";
+        return null;
+    }
+
     public NativePathLease Read(string path, string role)
     {
         string full = Require(path, role);
@@ -118,6 +136,41 @@ public sealed class OwnedPaths : IDisposable
             fixtures.Add(full, held);
             identities.Add(full, held.Identity);
         }
+    }
+
+    /// <summary>
+    /// Interactive only: admits the picker fixtures this run's preparation recorded in its
+    /// scenario ledger, by exact path and SHA-256. Admission holds each file before hashing it,
+    /// so a changed or replaced fixture refuses instead of becoming an import authority.
+    /// </summary>
+    public int AdmitPreparedFixtures(string ledgerPath)
+    {
+        string ledger = Require(ledgerPath, "evidence");
+        if (!string.Equals(ledger, At("evidence", "scenario-ledger.json"), StringComparison.OrdinalIgnoreCase))
+            throw new IOException("Only this run's scenario ledger can name prepared fixtures.");
+        byte[] bytes;
+        using (NativePathLease held = NativePathLease.ReadFile(ledger)) bytes = File.ReadAllBytes(ledger);
+        using System.Text.Json.JsonDocument document = System.Text.Json.JsonDocument.Parse(bytes);
+        Dictionary<string, string> recorded = new(StringComparer.OrdinalIgnoreCase);
+        foreach (System.Text.Json.JsonElement scenario in document.RootElement.GetProperty("Scenarios").EnumerateArray())
+        foreach (System.Text.Json.JsonElement fact in scenario.GetProperty("Facts").EnumerateArray())
+        {
+            if (fact.GetProperty("Action").GetString() != "immutable synthetic fixture") continue;
+            System.Text.Json.JsonElement values = fact.GetProperty("Values");
+            string path = values.GetProperty("path").GetString() ?? throw new IOException("Prepared fixture lacks a path.");
+            string sha = values.GetProperty("sha256").GetString() ?? throw new IOException("Prepared fixture lacks a hash.");
+            if (!PathRules.Within(path, At("fixtures", "inputs")) && !PathRules.Within(path, At("fixtures", "returns")))
+                throw new IOException("Prepared fixture is outside the picker subtrees.");
+            if (recorded.TryGetValue(path, out string? earlier) && earlier != sha) throw new IOException("Prepared fixture has conflicting hashes.");
+            recorded[path] = sha;
+        }
+        foreach ((string path, string sha) in recorded)
+        {
+            Admit(path);
+            if (!string.Equals(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path))), sha, StringComparison.OrdinalIgnoreCase))
+                throw new IOException("Prepared fixture bytes differ from the recorded hash.");
+        }
+        return recorded.Count;
     }
 
     public void CheckWritable(string path, string role)

@@ -68,9 +68,18 @@ public static class RuntimeBootstrap
         using NativePathLease presetIdentity = NativePathLease.ReadFile(presetPath);
         PrintFlow.Domain.Files.Sha256 presetHash = PrintFlow.Domain.Files.Sha256.FromBytes(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(presetPath)));
         WorkstationPresetProvider preset = new(presetPath, PresetFixture.PresetId, PresetFixture.PresetVersion, presetHash);
+        // Interactive picks may only name fixtures this run's preparation recorded and hashed.
+        int admittedFixtures = options.Mode == "Interactive" ? paths.AdmitPreparedFixtures(paths.At("evidence", "scenario-ledger.json")) : 0;
+        List<string> pickerRefusals = [];
         ContainedNativePorts native = options.Mode == "Interactive"
             ? new(paths, new OpenFileDialogPicker(), new OpenFolderDialogPicker(), new SaveDiagnosticPackageDialog(),
-                new PrintFlow.Infrastructure.Delivery.WindowsDeliveredFileShell(), new PrintFlow.Infrastructure.Workspace.WindowsCorrectionFolderShell())
+                new PrintFlow.Infrastructure.Delivery.WindowsDeliveredFileShell(), new PrintFlow.Infrastructure.Workspace.WindowsCorrectionFolderShell(),
+                message =>
+                {
+                    pickerRefusals.Add(DateTimeOffset.UtcNow.ToString("o") + " " + message);
+                    MessageBox.Show("SYNTHETIC ENTRY: this selection is outside the admitted test files and was not used.\n\n" + message,
+                        "SYNTHETIC — selection refused", MessageBoxButton.OK, MessageBoxImage.Warning);
+                })
             : new(paths); // Every authorized run in this task uses recording/refusing delegates.
         using ServiceProvider services = EntryComposition.Build(paths, database, preset, native);
         OwnedWork ownedWork = new();
@@ -100,13 +109,15 @@ public static class RuntimeBootstrap
         {
             if (options.Mode == "Interactive")
             {
-                // Future path only: matching prepared ownership and fresh acknowledgment checked
-                // above, no acknowledgment is written to disk. Never invoked by current verification.
+                // Matching prepared ownership and fresh acknowledgment checked above; no
+                // acknowledgment is written to disk.
                 TaskCompletionSource closed = new();
                 window.Closed += (_, _) => closed.TrySetResult();
                 await services.GetRequiredService<INavigationService>().GoHomeAsync(ct);
                 window.Show();
                 await closed.Task;
+                Write(paths, "interactive-session-" + run.Ownership.OwnerToken + ".json", new { Evidence = "SYNTHETIC_ONLY", AdmittedFixtures = admittedFixtures,
+                    native.NativeDispatches, native.PickerRefusals, Refusals = pickerRefusals, ClosedUtc = DateTimeOffset.UtcNow });
                 return 0;
             }
             if (options.Resume)
