@@ -1,6 +1,8 @@
 # SCRUM-11154 workstation entry runbook
 
-**Current status: noninteractive preparation, runtime boundaries and owned restart verified; final independent conformance review PASS. Interactive remains NOT RUN.** The approved design/review remain unchanged. This is a test-only synthetic entry, with explicit isolated resources and Fake processors. It is not production or operator acceptance.
+**2026-10-01 update:** Interactive was run twice under fresh owner acknowledgments; see [SCRUM-11154_WORKSTATION_OBSERVATIONS.md](SCRUM-11154_WORKSTATION_OBSERVATIONS.md). Since code `20747aa`, Interactive admits the fixtures recorded in its own scenario ledger and returns an out-of-role or unadmitted native selection as no selection. In folder/save dialogs, do not create a new folder: that selection still ends the host. The command form below is unchanged; prepare a fresh root for every visible session.
+
+**Status at implementation: noninteractive preparation, runtime boundaries and owned restart verified; final independent conformance review PASS. Interactive was then NOT RUN.** The approved design/review remain unchanged. This is a test-only synthetic entry, with explicit isolated resources and Fake processors. It is not production or operator acceptance.
 
 ## Permitted build and static checks
 

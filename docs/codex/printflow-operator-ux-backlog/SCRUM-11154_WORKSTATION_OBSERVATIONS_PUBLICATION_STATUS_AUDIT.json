@@ -1,0 +1,106 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-workstation-observation-v1",
+  "status": "WORKSTATION_OBSERVATION_PARTIAL",
+  "baseline": "596bc05fe23b01853fdaa5122b315a66e01789ae",
+  "preservation": {
+    "priorDirtyAuditFiles": 9,
+    "priorDirtyAuditFilesStagedOrEdited": false,
+    "priorRootsPacketsAndEvidencePreserved": true,
+    "visibleRootsPreserved": ["runs/v-20260930T213235Z", "runs/v-20260930T225032Z"],
+    "unusedPreparedRoot": "runs/v-20260930T224610Z"
+  },
+  "routing": {
+    "policy": "Claude adaptation v1.2 of Codex policy 2.4",
+    "routeOffset": 0,
+    "requested": "latest Opus / High for coordination, fix, code review and evidence review",
+    "actual": "claude-opus-5-5 reported by host context for the coordinator; reviewer subagents requested model opus, runtime model UNVERIFIED",
+    "liveSwitch": "not needed"
+  },
+  "desktop": {
+    "acknowledgments": [
+      "2026-09-30T21:39:01Z owner statement bound to v-20260930T213235Z",
+      "2026-09-30T23:00:45Z owner statement bound to v-20260930T225032Z",
+      "2026-10-01T00:37:08Z owner reconfirmation after a ~68 min pause; one Approve (00:36:02-08Z) preceded it"
+    ],
+    "inputs": "Owner physical keyboard/mouse only; agent read-only UIA; one agent UIA Invoke denied by permission classifier and not executed",
+    "workstation": "1920x1040 work area, 96 DPI system and window, measured read-only",
+    "captures": "20 window-only owner captures packeted; 2 private-only excluded",
+    "sessions": [
+      { "root": "v-20260930T213235Z", "candidate": "42ABEFF2F2BDB7B0E365C0F4C81715F7AA5EF1E39CEF59411487501AFB07A3ED", "exit": 2, "shutdown": "not settled; harness refusal escaped (F-V1)" },
+      { "root": "v-20260930T225032Z", "candidate": "E46AA520A9F7B0F17BA12A8E1B6346CD9AFCD47494C421ABF6115C8A6A378AAE", "exit": 0, "shutdown": "settled quiescence; 12 admitted fixtures; 3 native dispatches; 0 picker refusals" }
+    ]
+  },
+  "testEntryFix": {
+    "commit": "20747aa404ad2200bd8ab8bbabf49bc5de683440",
+    "authorization": "Owner instruction during the visible run after the session 1 exit",
+    "paths": [
+      "tests/PrintFlow.WorkstationEntry/ContainedNativePorts.cs",
+      "tests/PrintFlow.WorkstationEntry/OwnedPaths.cs",
+      "tests/PrintFlow.WorkstationEntry/RuntimeBootstrap.cs",
+      "tests/PrintFlow.Tests/Unit/WorkstationEntry/InteractivePickerContainmentTests.cs"
+    ],
+    "productCodeChanged": false,
+    "verification": "red build (missing members) then green; fresh build 0 warnings/errors; static entry 47/47; ownership prerequisite 7/7; architecture 474/474",
+    "contentProof": "Candidate raw hash = working tree = unfiltered commit blob for all four files",
+    "review": "One independent code reviewer, two rounds, PASS WITH FINDINGS; P2 fixed; P3s recorded as F-V7",
+    "push": "596bc05..20747aa direct to origin/master; ls-remote refs/heads/master = 20747aa"
+  },
+  "evidenceReview": "One fresh independent evidence-to-claim reviewer: SUPPORTED WITH CORRECTIONS (2 P1, 7 P2, P3 items); all corrections applied before Jira and publication",
+  "acceptanceCriteria": { "AC1": "OPEN", "AC2": "PARTIAL", "AC3": "OPEN", "AC4": "RECORDED" },
+  "publication": {
+    "origin": "https://github.com/MQLite/printflow-Studio.git",
+    "activeHooks": [],
+    "repositoryWorkflows": [],
+    "codeCommit": "20747aa404ad2200bd8ab8bbabf49bc5de683440",
+    "documentationCommit": "Recorded locally after its verified push, without a self-referencing commit",
+    "documentationPaths": [
+      "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_RUNBOOK.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATION_LEDGER.json",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS_JIRA_FINAL.csv",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS_PUBLICATION_STATUS_AUDIT.json"
+    ],
+    "coAuthoredBy": false
+  },
+  "jira": {
+    "issue": "SCRUM-11154",
+    "initialStatus": "In Review",
+    "transitions": [
+      { "id": "21", "from": "In Review", "to": "In Progress", "when": "before the first visible launch" },
+      { "id": "31", "from": "In Progress", "to": "In Review", "when": "after evidence review and comment" }
+    ],
+    "currentObservedStatus": "In Review",
+    "commentId": "10192",
+    "marker": "PF-OPUX-v1-SCRUM-11154-workstation-observation-v1",
+    "markerCount": 1,
+    "protectedComments": ["10189", "10190", "10191"],
+    "otherIssueWrites": 0,
+    "doneSet": false
+  },
+  "export": {
+    "readAt": "2026-10-01T01:02:01Z",
+    "source": "Authenticated searchJiraIssuesUsingJql, project = SCRUM AND labels = pf-opux-v1, fields incl. parent, markdown",
+    "issues": 17,
+    "blocks": 26,
+    "stringLabels": 51,
+    "completeComments": 32,
+    "columns": 23,
+    "utf8Bom": true,
+    "exporterExactTimestamps": 34,
+    "exporter": "Private copy of Export-Wave1Jira.ps1 with task marker and Notes text only; Validation PASS",
+    "csv": "SCRUM-11154_WORKSTATION_OBSERVATIONS_JIRA_FINAL.csv",
+    "csvSha256": "56209C25A7B54A617F6BB8A9DF47FB87B964DEAAE95BD5E27D926F8AD6D7224F",
+    "readback": "SCRUM-11154_WORKSTATION_OBSERVATIONS_JIRA_READBACK.json (private, account-bearing, git-ignored)",
+    "fidelity": "Independent raw-vs-CSV oracle: ids, keys, summaries, statuses, raw updated strings, description/AC lines, labels, parents, Blocks pairs and comment completeness. One heuristic false positive (Epic AC) adjudicated; PASS",
+    "drift": "Against the previous authenticated readback: SCRUM-11154 updated timestamp and one new comment 10192; status In Review both times. Comments 10187/10189/10190/10191 render commit URLs as smartlink tags now, with unchanged updated timestamps (read representation, not edits). No description, AC, label, parent, priority or link-pair change on any issue.",
+    "firstAttempt": "An earlier readback at 2026-10-01T01:00:59Z omitted the parent field; the exporter refused it. Preserved privately as an incomplete attempt."
+  },
+  "limits": [
+    "zh-CN only; the en pass, held Space, stale release and a keyboard-only whole journey NOT RUN",
+    "W02 routes, other readiness states, refresh/language focus, TIFF Reject to recycle, W07 size/enlargement acceptance, Confirm-result-and-save path and Complete, uncertain export retry, combined notices, running-attempt row, confirmation dialogs and scroll offsets NOT RUN",
+    "Findings F-V2 to F-V6, F-V8, F-V9 unfixed product observations; F-V7 entry limits open; F6 known negative",
+    "Owner copy acceptance, novice validation and print quality NOT RUN",
+    "Controlled same-user harness with Fake processors; not production acceptance"
+  ]
+}

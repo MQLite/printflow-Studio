@@ -1,3 +1,16 @@
+# SCRUM-11154 — visible workstation observation (partial)
+
+2026-10-01. Task `PF-OPUX-v1-SCRUM-11154-workstation-observation-v1`. **WORKSTATION_OBSERVATION_PARTIAL.** Two visible synthetic sessions, zh-CN only, owner present and performing all physical input; agent observed through read-only UIA and saved the owner's window captures. See [observations](SCRUM-11154_WORKSTATION_OBSERVATIONS.md) and [ledger](SCRUM-11154_WORKSTATION_OBSERVATION_LEDGER.json).
+
+- Session 1 (`runs/v-20260930T213235Z`, source `596bc05`, candidate `42ABEFF2…A3ED`) ended with launcher exit 2 when a native fixture pick was refused (F-V1). On the owner's instruction the test entry was fixed, reviewed and published as code commit `20747aa404ad2200bd8ab8bbabf49bc5de683440` (tests only; no product change). Session 2 (`runs/v-20260930T225032Z`, candidate `E46AA520…8AAE`) continued from that point and closed normally with exit 0 and settled quiescence. Unused root `v-20260930T224610Z` and both visible roots are preserved; none is reusable for Interactive.
+- PASS (subchecks): positive keyboard control, neutral review landing, held Enter into a new review and on Approve with successor protection, mouse double-click remainder, picker dismissal, crop nudge/Compare/Restore/Cancel/Use, correction package/refusal/simulated return, approve≠save with exact-byte "Save approved result" delivery and Explorer selection, Error Details route, Remove-from-list file counts.
+- Findings for owner disposition: F-V2 readiness wording/raw key/accessibility, F-V3 slider before/after orientation, F-V4 Abandon without confirmation, F-V5 clipping at 1000×700, F-V6 unnamed controls, F-V7 remaining entry crash paths, F-V8 Session versus Recent status after save, F-V9 Meitu error sentence versus code. F6 stays a known negative.
+- NOT RUN (full list in the ledger): whole en pass, held Space and stale release, W02 routes, other readiness states, refresh/language focus, TIFF Reject→recycle, W07 size/enlargement acceptance, "Confirm result and save" path and Complete, uncertain export retry, combined notices, running-attempt row, confirmation dialogs, scroll offsets, owner copy acceptance, novice validation. AC1 and AC3 open, AC2 partial; not Done.
+- Evidence review: one fresh independent reviewer, SUPPORTED WITH CORRECTIONS; all corrections applied before publication.
+
+Policy v1.2 Claude adaptation, route_offset 0; Opus High requested, runtime model reported as claude-opus-5-5 by the host context. No SCRUM-11155 work.
+
+---
 # SCRUM-11154 — isolated entry implementation verified
 
 2026-09-30. Task `PF-OPUX-v1-SCRUM-11154-workstation-entry-impl-v1`. Required noninteractive implementation and isolation gates passed on candidate `51123588…9EFD15`; final independent conformance PASS; code publication and Jira/export verified; final documentation SHA and packet results are recorded locally after publication. The owner approved the final reviewed design and five choices. Approved design/review bytes and all eight earlier audit residues remain unchanged; the historical records below retain their original meaning.
