@@ -1,0 +1,306 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-zh-findings-fix-v1",
+  "status": "SCOPED_FINDINGS_TECHNICALLY_REMEDIATED — AWAITING_CHINESE_TARGETED_RECHECK",
+  "baseline": "3999287c7921a0322072603dcf0dfd0f4ea5d043",
+  "codeCommit": "f720899ee8798a344190940547f3dbda7fee5171",
+  "candidateSha256": "2AD0F5E9062B2C8244F09B88E41B9D7C0037E135A7CFA38D2D128B0FE2CBC571",
+  "preservation": {
+    "historicalAndPriorAuditFilesVerified": 744,
+    "historicalHandoffBytesRetained": true,
+    "priorAuditResiduesStagedOrEdited": false
+  },
+  "routing": {
+    "implementation": "Claude adaptation v1.2; reported claude-opus-5-5; reviewers runtime UNVERIFIED",
+    "continuationPolicy": "Codex v2.4",
+    "routeOffset": 0,
+    "normalRoute": "Sol High semantic evidence reconciliation",
+    "actualRoute": "UNVERIFIED",
+    "rootSwitch": "MODEL_SWITCH_UNAVAILABLE"
+  },
+  "verification": {
+    "verdict": "PASS",
+    "codeCommit": "f720899ee8798a344190940547f3dbda7fee5171",
+    "sourceFilesMatchCommit": 757,
+    "candidateFilesHashVerified": 808,
+    "candidateSha256": "2AD0F5E9062B2C8244F09B88E41B9D7C0037E135A7CFA38D2D128B0FE2CBC571",
+    "preservedHistoricalAndPriorAuditFiles": 744,
+    "historicalHandoffBytesRetained": true,
+    "tests": [
+      {
+        "file": "architecture.trx",
+        "total": "476",
+        "executed": "476",
+        "passed": "476",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "diagnostics.trx",
+        "total": "54",
+        "executed": "54",
+        "passed": "54",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "entry-prerequisite.trx",
+        "total": "7",
+        "executed": "7",
+        "passed": "7",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "entry-static.trx",
+        "total": "65",
+        "executed": "65",
+        "passed": "65",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "persistence-recent.trx",
+        "total": "16",
+        "executed": "16",
+        "passed": "16",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "purpose-cards.trx",
+        "total": "6",
+        "executed": "6",
+        "passed": "6",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "ui-safe.trx",
+        "total": "736",
+        "executed": "736",
+        "passed": "736",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "wave1.trx",
+        "total": "21",
+        "executed": "21",
+        "passed": "21",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      {
+        "file": "zh-captures.trx",
+        "total": "1",
+        "executed": "1",
+        "passed": "1",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      }
+    ],
+    "testExecution": "Claude final run logs parsed and re-verified on continuation; no redundant product test rerun",
+    "runtime": {
+      "AExit": 0,
+      "BExit": 5,
+      "ledgerDigestMatches": true,
+      "noWindow": true,
+      "nativeDispatches": 0,
+      "faultPreparedRecordAbsent": true
+    }
+  },
+  "jira": {
+    "issues": 17,
+    "blocksLinks": 26,
+    "labels": 51,
+    "comments": 33,
+    "commentId": "10193",
+    "markerCount": 1,
+    "status": "In Review",
+    "otherIssuesUnchanged": true,
+    "drift": [
+      {
+        "issue": "SCRUM-11154",
+        "fields": [
+          "updated",
+          "comment (10193 added; prior text content/identities/timestamps retained; cross-connector formatting differences recorded)"
+        ],
+        "embeddedLinkedStatusDrift": false
+      }
+    ],
+    "connectorEnrichment": {
+      "historicalCommentsWithAdditionalMetadata": 32,
+      "fields": "Author accountType/active/emailAddress/timeZone, updateAuthor and jsdPublic exposed by current connector; previously returned non-body values match. This is response enrichment, not an issue mutation.",
+      "bodyFormatting": [
+        {
+          "issue": "SCRUM-11152",
+          "comment": "10187",
+          "difference": "Connector renders smart links as plain URLs and preserves Markdown hard-break spaces."
+        },
+        {
+          "issue": "SCRUM-11154",
+          "comment": "10189",
+          "difference": "Connector renders smart links as plain URLs and preserves Markdown hard-break spaces."
+        },
+        {
+          "issue": "SCRUM-11154",
+          "comment": "10190",
+          "difference": "Connector renders smart links as plain URLs and preserves Markdown hard-break spaces."
+        },
+        {
+          "issue": "SCRUM-11154",
+          "comment": "10191",
+          "difference": "Connector renders smart links as plain URLs and preserves Markdown hard-break spaces."
+        }
+      ]
+    },
+    "readAt": "2026-10-01T03:48:11Z",
+    "authenticated": true,
+    "complete": true,
+    "writesOnContinuation": 0
+  },
+  "export": {
+    "columns": 23,
+    "utf8Bom": true,
+    "rows": 17,
+    "rawIssueAndReadTimestamps": 34,
+    "fidelity": "PASS",
+    "pipeline": "Build-JiraReadback.ps1 -> private task-mapped Export-ZhFindingsJira.ps1 -> Test-JiraSnapshotFidelity.ps1",
+    "exporterChange": "task marker/Notes only; same schema and timestamp algorithms"
+  },
+  "review": {
+    "implementation": "one continuing fresh read-only reviewer, four rounds, PASS WITH FINDINGS; no tests rerun",
+    "closureEvidenceReview": "PASS WITH DOCUMENTED RESIDUALS; no outstanding P1/P2. Fresh isolated read-only Sol High requested, runtime UNVERIFIED. Independently checked provisional packet member/hashes, privacy and claim consistency; no product test/build/runtime rerun.",
+    "closureCorrections": "Sharing TRX local user/machine/deployment identities and absolute paths redacted with counters/IDs/outcomes retained; F-V7.3 wording qualified to tested injected path and general residuals."
+  },
+  "publication": {
+    "origin": "https://github.com/MQLite/printflow-Studio.git",
+    "branch": "master",
+    "activeHooks": [],
+    "repositoryWorkflows": [],
+    "codeCommit": "f720899ee8798a344190940547f3dbda7fee5171",
+    "documentationCommit": null,
+    "finalObservedRemoteTip": "f720899ee8798a344190940547f3dbda7fee5171",
+    "documentationCommitNote": "Final documentation commit/tip recorded locally after publication; audit residue not recommitted.",
+    "documentationPaths": [
+      "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ACCEPTANCE_SCOPE.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_RUNBOOK.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_INDEPENDENT_REVIEW.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_JIRA_FINAL.csv",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_PLAN.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_PUBLICATION_STATUS_AUDIT.json",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_REMEDIATION.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_OPEN_ITEMS.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RETEST_CHECKLIST.md"
+    ]
+  },
+  "acceptanceCriteria": {
+    "AC1": "OPEN; English portion NOT RUN — NOT REQUIRED BY OWNER",
+    "AC2": "PARTIAL historical observed subchecks",
+    "AC3": "OPEN; historical window captures retained",
+    "AC4": "RECORDED"
+  },
+  "englishScope": "Owner instructed 不需要安排英文测试; no English workstation/journey/input/screenshots arranged; localization preserved",
+  "desktop": "No new window/dialog/Explorer/input/capture/real processor/production on this batch or continuation",
+  "stop": "No Chinese recheck, Done, production, deployment or SCRUM-11155 continuation"
+}
