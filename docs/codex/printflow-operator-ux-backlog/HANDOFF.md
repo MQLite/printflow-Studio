@@ -1,3 +1,16 @@
+# SCRUM-11154 — Chinese targeted recheck current handoff
+
+2026-10-02. `PF-OPUX-v1-SCRUM-11154-zh-targeted-recheck-v1`. **CHINESE_TARGETED_RECHECK_RECORDED — OWNER_DISPOSITION_REQUIRED.** [Results](SCRUM-11154_ZH_RECHECK_RESULTS.md), [ledger](SCRUM-11154_ZH_RECHECK_LEDGER.json), [evidence review](SCRUM-11154_ZH_RECHECK_EVIDENCE_REVIEW.md), [audit](SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json).
+
+- Candidate `D3FEAB1B…ADCD3` from `20cae9f` (0 source differences from remediation code `f720899`; fresh build outputs). Build 0/0, static 65/65, prerequisite 7/7, Validate 0, PrepareAndSmoke 0 with exact `ScenarioLedgerSha256` binding. Root `runs/q-20261001T215519Z`, consumed; not reusable.
+- One visible zh-CN session 22:18–04:36Z, owner acknowledgment bound to the run, owner did every input; agent read-only UIA. Launcher exit 0, quiescence settled, closed normally. Six owner actions followed absences without a prior renewal and are disclosed in the ledger.
+- PASS: A2, A3, A4, A6, A8–A12, B3. PARTIAL: A1 (resize not done), A7 (1000×1047 only), B1, B5–B9. BLOCKED: A5 (no Recovery candidate). FAIL: B4. NOT RUN: B2, B7/B8 remainders (owner stopped). F6 known negative. English NOT RUN — NOT REQUIRED BY OWNER.
+- New findings, not fixed: N1 Recent “状态暂不可用” for Interrupted step; N2 diagnostic preview item names; N3 unrounded millimetres; N4 Interactive fake Photoshop output is PNG bytes under .tif, shown as valid TIFF, save refused after approval. Plus nine observations.
+- Independent evidence-to-claim reviewer: corrections applied; final verdict in the evidence review. Jira: the In Progress transition was blocked by the executor's permission classifier and not retried; one evidence comment `10194` with marker `PF-OPUX-v1-SCRUM-11154-zh-targeted-recheck-v1`; SCRUM-11154 stayed In Review throughout (see audit). Not Done; SCRUM-11155 not started.
+
+Next boundary: owner disposition of N1–N4 and observations; separately authorized diagnosis/repair; any further visible run needs a fresh root and new acknowledgment.
+
+---
 # SCRUM-11154 — Chinese findings remediation current handoff
 
 2026-10-01. `PF-OPUX-v1-SCRUM-11154-zh-findings-fix-v1`. **SCOPED_FINDINGS_TECHNICALLY_REMEDIATED — AWAITING_CHINESE_TARGETED_RECHECK.** The authorized noninteractive corrective batch and its publication/export are technically complete; Chinese human acceptance remains pending. [Finding matrix](SCRUM-11154_ZH_FINDINGS_REMEDIATION.md), [plan](SCRUM-11154_ZH_FINDINGS_PLAN.md), [review summary](SCRUM-11154_ZH_FINDINGS_INDEPENDENT_REVIEW.md), [Chinese checklist](SCRUM-11154_ZH_RETEST_CHECKLIST.md), [current open items](SCRUM-11154_ZH_OPEN_ITEMS.md).

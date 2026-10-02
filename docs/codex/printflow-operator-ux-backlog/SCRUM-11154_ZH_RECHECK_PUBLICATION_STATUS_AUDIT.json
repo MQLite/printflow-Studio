@@ -1,0 +1,97 @@
+{
+  "task": "PF-OPUX-v1-SCRUM-11154-zh-targeted-recheck-v1",
+  "status": "CHINESE_TARGETED_RECHECK_RECORDED — OWNER_DISPOSITION_REQUIRED",
+  "baseline": "20cae9f5677a045f53ad30717280ad9850d66c8c",
+  "testedSource": "20cae9f5677a045f53ad30717280ad9850d66c8c (code identical to f720899ee8798a344190940547f3dbda7fee5171)",
+  "candidateSha256": "D3FEAB1B9D800568FC126F8D29EACAC3FD82213675E44CCACCAEA756E07ADCD3",
+  "run": {
+    "runId": "q-20261001T215519Z",
+    "prepareAndSmokeExit": 0,
+    "scenarioLedgerBinding": "exact local bytes F840E1A4F29B2E3EEDF98213C05ECCEFB453649A102A8C99CA2F15ED58B0E4EA",
+    "ownerAcknowledgmentUtc": "2026-10-01T22:18:02Z",
+    "interactive": "2026-10-01T22:18:22Z – 2026-10-02T04:36:15Z, exit 0, quiescence settled, closed normally",
+    "rootReusable": false,
+    "notRunOnRoot": ["Runtime7", "OwnedRestart", "separate Resume", "InjectHostFault", "link/mutation tests"]
+  },
+  "preservation": {
+    "historicalDocuments": "Only HANDOFF.md changed among tracked files: 13 added lines (new current section on top); all earlier sections byte-unchanged.",
+    "auditResidues": "11 pre-existing modified *_AUDIT.json residues untouched (last written before this task) and unstaged.",
+    "historicalRoots": "Visible roots v-20260930T213235Z, v-20260930T225032Z, unused v-20260930T224610Z, z-/zf-20261001T033046Z and earlier roots not reused or modified.",
+    "codeChanges": "None. No product, host, test, launcher, configuration or global-policy change."
+  },
+  "routing": {
+    "policy": "Claude adaptation v1.2 of the personal development-routing policy",
+    "routeOffset": 0,
+    "requestedRoute": "Opus High (coordinator and independent reviewer)",
+    "actualRoute": "Coordinator model claude-opus-5-5 per host context; effort UNVERIFIED; reviewer runtime UNVERIFIED",
+    "adjustment": "UNCHANGED"
+  },
+  "verification": {
+    "build": "0 warnings, 0 errors (isolated build/zr-20261001T215519Z)",
+    "entryStatic": "65/65",
+    "ownershipPrerequisite": "7/7",
+    "historicalResults": "736/54/476/16/21/6 from the remediation batch remain historical; not rerun"
+  },
+  "observation": {
+    "ledger": "SCRUM-11154_ZH_RECHECK_LEDGER.json",
+    "pass": ["A2", "A3", "A4", "A6", "A8", "A9", "A10", "A11", "A12", "B3"],
+    "partial": ["A1", "A7", "B1", "B5", "B6", "B7", "B8", "B9"],
+    "blocked": ["A5"],
+    "fail": ["B4"],
+    "notRun": ["B2"],
+    "newFindings": ["N1", "N2", "N3", "N4"],
+    "knownNegative": "F6",
+    "english": "NOT RUN — NOT REQUIRED BY OWNER"
+  },
+  "review": {
+    "reviewer": "one fresh read-only personal-dev-reviewer context",
+    "rounds": 3,
+    "verdict": "SUPPORTED (after SUPPORTED WITH CORRECTIONS in rounds 1–2; all corrections applied)",
+    "record": "SCRUM-11154_ZH_RECHECK_EVIDENCE_REVIEW.md"
+  },
+  "jira": {
+    "issue": "SCRUM-11154",
+    "startStatus": "In Review",
+    "transitionAttempt": "In Progress (id 21) denied by the Claude Code auto-mode permission classifier [External System Writes] at 2026-10-01T22:18Z; not executed and not retried by any other channel",
+    "comment": { "id": "10194", "marker": "PF-OPUX-v1-SCRUM-11154-zh-targeted-recheck-v1", "created": "2026-10-02T17:54:33.025+1300", "markerAbsentBeforeWrite": true },
+    "finalStatus": "In Review (never left In Review); not Done",
+    "otherIssues": "Read-only; SCRUM-11155 not started",
+    "preservedComments": "10189–10193 present with unchanged ids and created/updated timestamps"
+  },
+  "export": {
+    "readAt": "2026-10-02T04:54:48Z",
+    "query": "project = SCRUM AND labels = pf-opux-v1 ORDER BY key ASC",
+    "issues": 17,
+    "blocksLinks": 26,
+    "stringLabels": 51,
+    "comments": "complete; SCRUM-11154 has 6 (10189–10194)",
+    "snapshot": "SCRUM-11154_ZH_RECHECK_JIRA_READBACK.json (private, ignored), built from the saved raw response with Build-JiraReadback.ps1; SHA-256 07018258A17CA914C071EFFD384FEA266F74EE30AF9693CE14516EDC05DEA654",
+    "rawResponseSha256": "BD3EF4AE81AA971B4FA02159561B014F6E3818A9564C1DA3E15C100DFBF7767F (private)",
+    "csv": "SCRUM-11154_ZH_RECHECK_JIRA_FINAL.csv, 23 columns, UTF-8 BOM, 34 exact timestamp strings, exporter Validation PASS; SHA-256 5864391E386C09217DCADCF5198FCAC3A6C060A1D0C936F989BC256DB64F13AE",
+    "exporter": "Task-specific copy of the earlier exporter (task id and write-action notes only); SCRUM-11154 Write_Action COMMENT_ONLY",
+    "fidelityOracle": "Test-JiraSnapshotFidelity.ps1: PASS, 17 issues, 51 raw label elements = 51 snapshot string labels, 0 failures",
+    "driftVsPreviousSnapshot": "Against SCRUM-11154_ZH_FINDINGS_JIRA_READBACK.json: all 17 issues keep status, summary, description, labels and links; only SCRUM-11154 updated time and new comment 10194 changed. Comments 10187, 10189, 10190 and 10191 have unchanged ids and created/updated timestamps, but the current connector renders their GitHub links as smart-link markup; recorded as connector rendering differences, not byte-identical history.",
+    "privacy": "No account metadata, email or raw response in the public CSV or audit; the raw response and snapshot stay out of Git"
+  },
+  "publication": {
+    "target": "origin/master, normal push, no branch/PR/force/bypass, no Co-Authored-By trailer",
+    "stagedManifest": [
+      "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_RESULTS.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_LEDGER.json",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_EVIDENCE_REVIEW.md",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_JIRA_FINAL.csv",
+      "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json"
+    ],
+    "hooksAndCi": "No active Git hooks and no .github/workflows in the repository",
+    "commit": "Recorded locally after push (audit residue) to avoid a self-referential commit"
+  },
+  "acceptanceCriteria": {
+    "AC1": "OPEN",
+    "AC2": "PARTIAL",
+    "AC3": "OPEN",
+    "AC4": "RECORDED"
+  },
+  "desktop": "One owner-acknowledged visible synthetic session; owner input only; no display change; no production, live Meitu/Photoshop, deployment or English round",
+  "stop": "Stop at SCRUM-11154. No Done, fixes, SCRUM-11155 or further visible run without new authorization"
+}

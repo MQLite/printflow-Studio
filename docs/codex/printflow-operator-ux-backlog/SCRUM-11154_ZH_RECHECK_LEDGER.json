@@ -1,0 +1,111 @@
+{
+  "Task": "PF-OPUX-v1-SCRUM-11154-zh-targeted-recheck-v1",
+  "Result": "CHINESE_TARGETED_RECHECK_RECORDED — OWNER_DISPOSITION_REQUIRED",
+  "Language": "zh-CN only. English workstation, journey, input and screenshot checks: NOT RUN — NOT REQUIRED BY OWNER (owner: “不需要安排英文测试”).",
+  "Candidate": {
+    "SourceHead": "20cae9f5677a045f53ad30717280ad9850d66c8c",
+    "RemediationCode": "f720899ee8798a344190940547f3dbda7fee5171",
+    "SourceIdentity": "808 manifest entries compared with the remediation candidate 2AD0F5E9…C571 (build directory normalized): 0 source-file differences; 13 freshly compiled host outputs (dll/exe/pdb) differ.",
+    "CandidateManifestSha256": "D3FEAB1B9D800568FC126F8D29EACAC3FD82213675E44CCACCAEA756E07ADCD3",
+    "ScenarioManifestSha256": "910A32A33CED87713EDADF2866D4062AFAA024A276188C84D239945377B786F0",
+    "HostAssemblySha256": "CF0FC64C14E6DBC38E9D3F34F66166F47821241139F37EEE7CFCAADE5972A255",
+    "TestAssemblySha256": "4D2378E9E1718CF307755F50BEC07F8E244AEF54D79C05EEEDE1D4677333FFF0",
+    "ScenarioLedgerSha256": "F840E1A4F29B2E3EEDF98213C05ECCEFB453649A102A8C99CA2F15ED58B0E4EA"
+  },
+  "Preparation": {
+    "Build": "exit 0, 0 warnings, 0 errors (isolated artifacts path build/zr-20261001T215519Z)",
+    "StaticRefusals": "65/65",
+    "OwnershipPrerequisite": "7/7",
+    "CandidateGenerator": "exit 0 on attempt 3; attempts 1 (Windows PowerShell 5.1: PEReader type missing) and 2 (PATH dotnet without SDK 10.0.400) wrote nothing and are retained",
+    "Validate": "exit 0; root absent afterwards",
+    "PrepareAndSmoke": "exit 0 (2026-10-01T21:58:56Z–21:59:35Z); quiescence settled, WindowShown false",
+    "Binding": "prepared.json candidate/scenario/run/owner tokens match ownership and manifests; ScenarioLedgerSha256 equals the exact local unredacted evidence/scenario-ledger.json bytes; root, lock and six database identities match; prior owner exited",
+    "NotRunOnThisRoot": ["Runtime7", "OwnedRestart", "separate Resume", "InjectHostFault", "mutation/link tests"]
+  },
+  "Run": {
+    "RunId": "q-20261001T215519Z",
+    "Root": "artifacts/pf-opux-scrum11154-workstation-entry/runs/q-20261001T215519Z (new direct child, never used before)",
+    "OwnerAcknowledgmentUtc": "2026-10-01T22:18:02Z (AskUserQuestion, bound to run and candidate)",
+    "InteractiveStartUtc": "2026-10-01T22:18:22Z",
+    "InteractiveEndUtc": "2026-10-02T04:36:15Z",
+    "LauncherExitCode": 0,
+    "Quiescence": "OwnedTasksSettled true, PendingTasks 0, LateRegistration false, HostFault null, WindowShown true",
+    "InteractiveSession": "ClosedNormally true; 12 fixtures admitted; 4 native dispatches; 1 picker refusal (A12)",
+    "Display": "one 1920x1080 screen, 1920x1040 work area (read-only at 04:48Z, after the window closed; agent-verification-notes.json), 96 DPI (UIA during the run); no display setting changed",
+    "Window": "1000x700 at launch and at the first A8 capture (22:21:34Z); 1000x1047 from the second A8 capture (22:58Z) onward; a later Win+Down did not restore 1000x700. Only A8 was seen at 1000x700.",
+    "ConsentPolicy": "No fixed absence threshold exists; the agent judged when an absence was material. All four renewals preceded later consequential steps (A2; A4 abandon at 00:57:58Z and A6; A12 delivery choice at 02:33:49Z and A10 save ~02:34:50Z; B8). The 00:56:56Z and 02:33:09Z answers arrived after the steps they were first asked for (A3; B1 export run and A12 folder).",
+    "Reconfirmations": [
+      { "AtUtc": "2026-10-01T23:01:52Z", "Before": "A2–A6 Abandon", "Gap": "22:21–22:57Z" },
+      { "AtUtc": "~2026-10-02T00:56:56Z", "Before": "A3", "Gap": "23:03–00:48Z", "ChronologyLimit": "Asked in the same prompt as the round-5 steps; all A3 actions (00:48:20–00:50:06Z, including Esc/Keep) happened before the answer arrived." },
+      { "AtUtc": "2026-10-02T02:33:09Z", "Before": "A12 folder creation", "Gap": "01:58–02:29Z", "ChronologyLimit": "Asked in the same prompt as the round-17 steps; the folder was created at 02:32:34Z before the answer arrived." },
+      { "AtUtc": "2026-10-02T04:13:16Z", "Before": "B8/B2/B7", "Gap": "03:42–04:11Z" }
+    ],
+    "ActionsAfterAbsenceWithoutPriorRenewal": [
+      { "Utc": "2026-10-01T22:57:53Z", "Action": "A8 Tab traversal (non-consequential)", "Absence": "~36 min" },
+      { "Utc": "2026-10-02T00:48:20–00:50:06Z", "Action": "A3 Esc/Keep/held Enter/double-click (no job state change)", "Absence": "~1h45m" },
+      { "Utc": "2026-10-02T02:29:38Z", "Action": "B1 fresh Enter on 执行步骤 — export step ran (job state change in the session workspace)", "Absence": "~30 min" },
+      { "Utc": "2026-10-02T02:32:34Z", "Action": "A12 empty folder created in delivery", "Absence": "same episode" },
+      { "Utc": "2026-10-02T02:58:09Z", "Action": "A10 完成 (job Completed)", "Absence": "~23 min, no renewal asked" },
+      { "Utc": "2026-10-02T04:11:27Z", "Action": "B5 re-run of Photoshop output (new output)", "Absence": "~30 min" }
+    ],
+    "ConsentAssessment": "These actions were taken by the owner, within the synthetic root, under the run-bound acknowledgment, but were not preceded by a renewal after the absence. They are disclosed, not retroactively authorized.",
+    "OwnerStop": "2026-10-02T~04:35Z: “This step finished and works fine. Stop right now. Write the reports. Process next time.” B2 and B7 not started."
+  },
+  "InputProvenance": "Every application input (keyboard, mouse, native dialogs, Win+Down, window close) and every Alt+PrtScn capture was performed by the owner. The agent used only read-only UIA observation, a read-only focus trace, a read-only list-item watcher, file hashing and clipboard-to-PNG saving. No UIA Invoke/SetValue, SendInput or view-model call. PrepareAndSmoke fixture approvals are setup facts, not human approvals in this session.",
+  "Rows": [
+    { "Id": "A1", "Finding": "F-V3", "W": "W03", "Job": "correction (background review, R corrected.png)", "Result": "PARTIAL", "Actual": "Before = correction_HD.png (opaque), After = corrected.png (top rows alpha 0). Left of divider opaque / right checkerboard at ~25% (capture) and ~71% (capture after reset zoom and side-by-side round trip); 0% top checkerboard everywhere (all After, owner-reported, no capture), 100% none (all Before, capture), UIA value 100; ~75% and zoom 125% owner-reported unchanged. Two capture names say 50%/resized but UIA read 75.10 and 71.07 at window 1000x1047 (see capture-annotations.json). Owner first asked whether sides were reversed, then: “我看错了，左前右后没问题”. Window resize sub-step not achieved (UIA 1000x1047 throughout).", "Evidence": ["A1-zhCN-slider-about-25pct.png", "A1-zhCN-slider-100pct.png", "A1-zhCN-slider-50pct-after-zoom-resize-roundtrip.png", "A1-zhCN-slider-50pct-resized.png"] },
+    { "Id": "A2", "Finding": "F-V4", "W": "W10", "Job": "keep-extent (F1K, disposable)", "Result": "PASS", "Actual": "One click opened 放弃“keep-extent”？… 已导入的文件、已审核的输出和历史记录会保留，不会删除任何文件。 Keyboard focus (UIA) on 保留任务; all other row buttons disabled.", "Evidence": ["A2-zhCN-recent-abandon-confirmation-keep-extent.png", "focus-trace 23:02:22Z"] },
+    { "Id": "A3", "Finding": "F-V4", "W": "W10/W04", "Job": "keep-extent", "Result": "PASS", "Actual": "Esc and 保留任务 closed it with focus back on that row's 放弃; held Enter cycled 放弃→保留任务→放弃 without reaching 确认放弃; double-click on 放弃 did not abandon. All 12 rows unchanged. Owner-reported: after a mouse click no visible focus cue on 保留任务 (UIA focus is there; the A2 capture shows a dotted cue, possibly after the Alt key).", "Evidence": ["A3-zhCN-held-enter-double-click.png", "focus-trace 00:48:20–00:50:06Z", "uia-observations"], "ConsentLimit": "All A3 actions preceded the renewed confirmation's arrival." },
+    { "Id": "A4", "Finding": "F-V4", "W": "W10", "Job": "keep-extent", "Result": "PASS", "Actual": "Tab to 确认放弃 + one fresh Enter: only keep-extent became 已放弃; notice “keep-extent”已放弃。导入的文件、已审核的输出和历史记录均予保留。 Other 11 rows, including the same-name pair, unchanged. Focus afterwards on window root.", "Evidence": ["A4-zhCN-keep-extent-abandoned.png", "uia-observations 00:58Z"] },
+    { "Id": "A5", "Finding": "F-V4", "W": "W10", "Result": "BLOCKED", "Actual": "No Recovery card is offered: the prepared root has no interrupted recovery candidate (graph smoke: “RecoveryList: no interrupted candidate”). The stopped job appears only in Recent. No state was seeded." },
+    { "Id": "A6", "Finding": "F-V4", "W": "W10", "Job": "keep-extent (abandoned)", "Result": "PASS", "Actual": "One click on 从列表移除, no confirmation; notice “keep-extent”已从最近处理列表移除。其导入文件、已批准的成品和处理历史均予保留。 All 12 session folders identical file counts and bytes before/after.", "Evidence": ["a6-sessions-before.json", "a6-sessions-after.json", "uia-observations"], "Note": "Owner capture not saved (clipboard empty)." },
+    { "Id": "A7", "Finding": "F-V5", "W": "W03/W07", "Job": "max-box-negative (F6)", "Result": "PARTIAL", "Actual": "At 1000x1047: 尚未审核 · 待审核（Working） · 有效 fully visible beside the file name; tooltip and accessible name give max-box-negative_200mm_CMYK_W.tif in full; size line wraps. Not observed at 1000x700. F6 seen again (row 200 × 150 毫米 vs summary 0.5 × 0.4 毫米, 6 × 5 像素).", "Evidence": ["A7-zhCN-tiff-output-row.png"] },
+    { "Id": "A8", "Finding": "F-V2/F-V6", "W": "W01", "Result": "PASS", "Actual": "First capture at window 1000x700. Heading 生产工作站环境尚未确认：有必需检查未运行。; row 未列出的检查项 / 本项检查未运行，没有观察结果。 / 必须满足 · 未运行; technical identifier SyntheticEntry; lists named 正在阻止生产处理 and 提示（不影响生产处理）; owner Tab x12 always visible focus; trace shows no list Tab stops.", "Evidence": ["A8-zhCN-readiness-screen.png", "A8-zhCN-readiness-row-details.png", "focus-trace 22:58Z"] },
+    { "Id": "A9", "Finding": "F-V6", "W": "W03/W06", "Result": "PASS", "Actual": "UIA names 驳回原因, 备注（可选）, 返回至; expanded items 效果不达标/边缘错误/内容缺失/颜色问题/尺寸问题/白墨问题/其他 and 导入/原图确认/高清化; TIFF 生产信息 rows named 输出文件, 输出路径, 像素尺寸, 物理尺寸, TIFF 分辨率, 源图有效分辨率. No TiffMetadataRow {…}. Read-only UIA; no screen reader.", "Evidence": ["uia-observations", "list-item-watch.log"] },
+    { "Id": "A10", "Finding": "F-V8", "W": "W08", "Job": "correction", "Result": "PASS", "Actual": "保存已审核结果 wrote delivery/correction.png = Approved = reviewed trim revision (full SHA-256 AC63479C…CBAB equal for Revisions trimmed.png, Approved and delivery; agent-verification-notes-supplement.json). Home before Complete: 需要你操作 · 完成任务 plus 已批准的 PNG 曾保存过；请在任务详情中检查. After explicit 完成: 已完成, history line retained.", "Evidence": ["A10-zhCN-home-after-save-before-complete.png", "A10-zhCN-home-after-complete.png", "agent-verification-notes.json", "agent-verification-notes-supplement.json"], "ConsentLimit": "完成 at 02:58:09Z followed a ~23 min absence without a renewal." },
+    { "Id": "A11", "Finding": "F-V9", "W": "W09", "Job": "F1-asset (graph-smoke failure)", "Result": "PASS", "Actual": "发生了什么: 美图未能启动或未能就绪。; code MeituLaunchFailed; technical detail “Fake adapter scripted failure”; no live Meitu. 重试 shown for the failed current step.", "Evidence": ["A11-zhCN-error-details-meitu.png"] },
+    { "Id": "A12", "Finding": "F-V7", "W": "W06/W08", "Result": "PASS", "Actual": "New folder created in delivery and chosen → dialog “SYNTHETIC — 选择未使用”, nothing adopted, host continued (session record: 1 picker refusal). Dialog Cancel → no error. delivery itself → accepted. diagnostics\\export itself → PrintFlow-Diagnostics-20261002-030332-01a0f97a.zip saved. The empty 新建文件夹 remains in delivery (agent-verification-notes.json).", "Evidence": ["A12-zhCN-new-folder-refused.png", "A12-zhCN-cancel-then-delivery-accepted.png", "A12-zhCN-diagnostic-export-saved.png"], "ConsentLimit": "The folder was created before the renewed confirmation arrived." },
+    { "Id": "B1", "W": "W04", "Job": "correction", "Result": "PARTIAL", "ConsentLimit": "The fresh Enter on 执行步骤 (02:29:38Z) followed a ~30 min absence before the renewal arrived.", "Actual": "Positive control: Tab to 通过 + one Space approved only the background review; focus then window root, Trim waiting. Held Space ~2 s on 执行步骤 → trim ran on release; new trim review 待审核, focus window root, not approved. Held Space ~2 s on 通过 → only trim approved; export step waiting, no save. Then a fresh Enter on 执行步骤 ran export.", "Evidence": ["B1-zhCN-positive-space-after-background-approve.png", "B1-zhCN-held-space-run-step-new-trim-review.png", "B1-zhCN-held-space-approve-trim.png", "B1-zhCN-fresh-enter-run-export-step.png"], "Limit": "WPF buttons activate Space on release, so a residual release across a new exact target cannot occur as the checklist words it; only release completing the earlier target while the new review appears was observed. That sub-assertion is NOT RUN." },
+    { "Id": "B2", "W": "W02", "Result": "NOT RUN", "Actual": "Owner stopped the session before B2." },
+    { "Id": "B3", "W": "W07", "Job": "enlarge (F3, second size)", "Result": "PASS", "Actual": "Presets A3 横向/A3 纵向/A4/A5 and 自定义尺寸 (宽度/高度/长边); 0 mm submitted and refused (请选择宽度、高度或长边，并输入大于零的毫米数值。); 150 mm → 约 150.0 × 100.0 毫米, enlargement warning, Run gated; 仍按此尺寸处理 + W1 1 像素 → 已确认按此图片和尺寸进行放大。, Run enabled.", "Evidence": ["B3-zhCN-enlarge-job-open.png", "B3-zhCN-size-modes-invalid-zero.png", "B3-zhCN-150mm-enlargement-warning.png", "B3-zhCN-accepted-enlargement-run-enabled.png"], "Note": "Owner pressed 确认自定义尺寸 with 0 although asked not to; the refusal is recorded as observed." },
+    { "Id": "B4", "W": "W08", "Job": "enlarge", "Result": "FAIL", "Actual": "New final review offers 确认结果并保存 (distinct from 批准此 TIFF / 保存已审核结果). The same screen already showed 当前文件 格式 PNG, 600 x 400, SHA-256 DDD1625FEFC4 beside an output row claiming 1772 × 1181 像素，300 dpi … 有效 and 已验证 CMYK + W1. One activation recorded approval and promoted to Approved, then refused: 此结果不能保存：其审核记录与文件不一致。 No delivery file. Afterwards the header read 需要你操作 — 准备好后，请选择“完成”。 and the row 已通过 · 已在 Approved · 有效. See N4. TIFF Complete, previous-size choice and uncertain retry NOT RUN.", "Evidence": ["B4-zhCN-new-final-review-150mm.png", "B4-zhCN-confirm-and-save-done.png"] },
+    { "Id": "B5", "W": "W03", "Job": "Home; max-box-negative", "Result": "PARTIAL", "Actual": "Home Tab to 刷新 + Enter: focus stayed on 刷新. TIFF 驳回 (尺寸问题): row 已退回 · 已移入回收站 · 有效, file moved to the entry's simulated recycle folder (not the Windows Recycle Bin), Run required; re-run produced a separate new output row 待审核 (its file is again PNG bytes identical to F6-max-box-negative.png under a .tif name; see N4). Language-switch focus: NOT RUN — NOT REQUIRED BY OWNER.", "Evidence": ["B5-zhCN-tiff-rejected.png", "B5-zhCN-regenerated-tiff-review.png", "focus-trace 03:40Z", "agent-verification-notes.json"], "ConsentLimit": "The re-run (04:11:27Z) followed a ~30 min absence before the renewal arrived." },
+    { "Id": "B6", "W": "W01", "Result": "PARTIAL", "Actual": "Only the not-run readiness state is offered by the synthetic report (others BLOCKED, no injection). Recovery list BLOCKED (no candidate). Recent list scrolled to the bottom by the owner (capture; list exposes no ScrollPattern).", "Evidence": ["B6-zhCN-home-recent-scrolled-to-bottom.png"] },
+    { "Id": "B7", "W": "W05/W06", "Result": "PARTIAL", "Actual": "Older 152 mm output kept as its own row (已通过 · 已在 Approved · 已失效) while a new 150 mm output was produced. No older enlarge delivery existed, so delivery preservation was not shown. Ctrl nudge/border snap and note-draft refresh NOT RUN (owner stopped).", "Evidence": ["B4-zhCN-new-final-review-150mm.png"] },
+    { "Id": "B8", "W": "W09/W10", "Job": "TakeOver", "Result": "PARTIAL", "Actual": "Handed-off view: 已移交 — 自动处理已结束，请手动继续。 with 恢复自动处理 / 错误详情 / 提交手动处理结果 / 返回主页 displayed, none activated; owner: works fine. Request-bound continue/return path NOT RUN. Combined notices and actually-running rows NOT RUN (not reachable without injection).", "Evidence": ["B8-zhCN-takeover-handed-off-view.png"] },
+    { "Id": "B9", "W": "-", "Result": "PARTIAL", "Actual": "Each saved capture has file, UTC time, pixel size, SHA-256 and a state note; viewport recorded via UIA window rect (1000x700 for the first A8 capture, otherwise 1000x1047; the A12 notice capture is the 475x220 dialog). Scroll positions were not recorded except B6 'scrolled to bottom'; some notes were wrong and are corrected in capture-annotations.json.", "Evidence": ["screenshots/capture-manifest.jsonl", "screenshots/capture-annotations.json"] },
+    { "Id": "D1", "Item": "F6 maximum box vs actual TIFF", "Result": "KNOWN NEGATIVE / NOT FIXED", "Actual": "Seen again on A7 and B5 rows (200 × 150 毫米 / 2362 × 1772 像素 vs 6 × 5 像素, 0.5 × 0.4 毫米)." },
+    { "Id": "D2", "Item": "PNG KeepOriginalExtent approval, legacy binding, generic recovery, diagnostic navigation", "Result": "OPEN (unchanged)" },
+    { "Id": "D3", "Item": "Historical hanging recovery test; excluded window/UIA/startup classes", "Result": "NOT RUN — not PASS" },
+    { "Id": "D4", "Item": "English acceptance", "Result": "NOT RUN — NOT REQUIRED BY OWNER" },
+    { "Id": "D5", "Item": "Owner Chinese copy acceptance, novice validation, print quality", "Result": "NOT RUN" }
+  ],
+  "NewFindings": [
+    { "Id": "N1", "Severity": "P2", "AC": "AC1", "Summary": "Recent row for an active job whose current step is Interrupted (StopOperation) shows 状态暂不可用 · 高清化 (observed). RecentSessionRow.Status maps Failed/RetryRequired to stopped but not Interrupted; SessionViewModel.OperatorStatus groups Interrupted with Failed (source only — the StopOperation Session screen was not opened in this run)." },
+    { "Id": "N2", "Severity": "P3", "AC": "AC2", "Summary": "Diagnostic package preview list items expose DiagnosticPackagePreviewItem { Text = … } as their accessible names (same class as F-V6, different surface)." },
+    { "Id": "N3", "Severity": "P3", "AC": "AC1/AC3", "Summary": "Output row prints unrounded millimetres: 150 × 99.99133333333333 毫米." },
+    { "Id": "N4", "Severity": "P1 (pending diagnosis)", "AC": "AC1", "Summary": "In Interactive, the Fake Photoshop step wrote PNG bytes (89504E47, identical to the input) under a .tif name (also on the B5 re-run); the review screen showed 当前文件 PNG 600 x 400 beside an output row claiming a valid 1772 x 1181, 300 dpi TIFF and 已验证 CMYK + W1; Confirm result and save recorded approval and promoted it, then refused the save (审核记录与文件不一致) while the row still read 有效 and the header asked for 完成. Fail-closed, no delivery write. Cause (test-entry fake processor vs missing pre-review validation) undetermined. Bytes/hashes: agent-verification-notes.json." }
+  ],
+  "Observations": [
+    "O1 Owner-reported: mouse-opened Abandon confirmation puts focus on 保留任务 without a visible focus cue (the A2 capture shows a dotted cue, possibly after the Alt key).",
+    "O2 Held Enter toggles the confirmation open/closed rapidly (never abandons).",
+    "O3 After 确认放弃 focus lands on the window root.",
+    "O4 Draft notice 这是上次成功保存使用的文件夹 remains after an explicit folder choice.",
+    "O5 enlarge header says 请选择下方的白墨选项并确认 while the blocking item is enlargement acceptance.",
+    "O6 Entering 修改尺寸 flips the earlier 152 mm output from 有效 to 已失效.",
+    "O7 A rejected, recycled output is labelled 有效.",
+    "O8 修改尺寸, 仍按此尺寸处理 and 应用边距 have no AutomationId.",
+    "O9 Owner-reported: “点击导出诊断包并不会弹出对话框” — 导出诊断包 opens an in-window preview; the save dialog appears only from 保存诊断包 (03:07:51Z). Linked to the open diagnostic-navigation item; not an A12 failure."
+  ],
+  "OwnerStatementsSource": "Copied by the agent from the owner's chat answers; retained privately in agent-verification-notes.json.",
+  "OwnerStatements": [
+    "A1: “处理前和处理后是不是反了？” then “我看错了，左前右后没问题” — orientation question resolved; not copy acceptance.",
+    "B8: “This step finished and works fine.” — not copy acceptance or AC closure."
+  ],
+  "AcceptanceCriteria": {
+    "AC1": "OPEN — Chinese changed paths mostly pass; N1, N4 and observations need disposition; English half NOT RUN — NOT REQUIRED BY OWNER.",
+    "AC2": "PARTIAL — Abandon keyboard safety, held Space and positive controls pass on this candidate; residual release across a new target and a keyboard-only whole journey not run.",
+    "AC3": "OPEN — window-only captures at 96 DPI; only A8 at 1000x700, everything else at 1000x1047; N3.",
+    "AC4": "RECORDED — findings above."
+  }
+}
