@@ -1,0 +1,433 @@
+{
+  "initiative": "PF-AIDESIGN-v1",
+  "date": "2026-10-05",
+  "site": "https://yituoxx.atlassian.net",
+  "project": "SCRUM",
+  "branch": "codex/prompt-work-images",
+  "approvedSpec": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md",
+  "sourceRevision": "24723e4 (revision 0.2; user approval recorded separately)",
+  "items": [
+    {
+      "id": "EPIC",
+      "key": "SCRUM-11156",
+      "type": "Epic",
+      "summary": "PrintFlow AI设计素材：Prompt、附件上传与 ChatGPT Work 生图回收"
+    },
+    {
+      "id": "T01",
+      "key": "SCRUM-11157",
+      "type": "Task",
+      "summary": "建立 AI 设计独立分支的回归基线",
+      "dependencies": [],
+      "description": "## 上下文\n在 codex/prompt-work-images 隔离分支明确既有构建和测试状态，防止把已有测试问题误记为新功能回归。\n\n## 要求\n- 保留原 master 工作区及既有修改；起点 de7bca6e0a8462584b4d6bf4d16307d1335e2fb3。仅在本功能 worktree 准备实现。\n- 锁定依赖恢复、Release 构建及合适的完整回归；跨进程 WorkstationAutomationLease 测试在子进程启动前需要 Release 构建。\n- 已有证据：locked restore 和 Release build 成功；两个 lease 用例重跑通过。完整 Debug 测试停滞约 17 分钟后已终止，原因未定位，不能宣称完整回归通过。\n- 为测试停滞设置有界诊断，记录用例、进程及日志；若确认为既有缺陷，单独记录阻塞，不在本任务无界扩修。\n\n## 验收条件\n- [ ] 从隔离 worktree 重现并记录准确命令、配置、退出码、TRX 与构建警告。\n- [ ] 两个跨进程 lease 用例在 Release 前置条件满足后通过。\n- [ ] 完整回归有可审阅结果；若被既有停滞阻塞，记录定位证据、受影响范围与基线阻塞，未解决前不把该项标记 Done。\n- [ ] 包策略、安装边界及原生产基线没有被删除或整体放宽。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T01\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：无；可先行调研/验证\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T02",
+      "key": "SCRUM-11158",
+      "type": "Task",
+      "summary": "验证 Edge 上 Work 生图、附件上传和下载的网页合同",
+      "dependencies": [],
+      "description": "## 上下文\n先验证当前个人账号和真实 Work 网页支持的操作，为后续自动化给出可靠边界；可与回归基线调研并行。\n\n## 要求\n- 使用用户已有个人 Plus／Pro，不购买 API、订阅或托管。默认仅一个经过验证的 Edge 配置。\n- 观察并记录登录、Work 模式、真实文件上传控件及逐附件完成状态、输入、提交、生成中／错误／完成和原始下载操作。\n- 使用无附件需求及合成参考图＋短需求文件；确认结果能与本次对话绑定，并与参考图、头像、历史图片、缩略图区分。\n- 验证标准文件上传流程可提供真实文件，下载可唯一关联浏览器 download ID。不能调用未公开接口、复制 cookie 或以 Codex 当前工具能力冒充产品 API。\n\n## 验收条件\n- [ ] 形成网页合同、脱敏夹具与 Edge／网页验证日期；不保存账号或客户作品。\n- [ ] 无附件和带附件分别报告已验证、不可行或待验证；记录失败环节及手动降级方式。\n- [ ] 所有附件明确接收后才允许单次提交；仅出现任意图片或固定等待时间不能认定完成。\n- [ ] 真实 Work 模式、上传或下载不可验证时，自动通道保持不可用，并记录为后续实现阻塞，不用普通 Chat 静默替代。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T02\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：无；可先行调研/验证\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T03",
+      "key": "SCRUM-11159",
+      "type": "Task",
+      "summary": "实现生图请求状态、跨进程持久化及停止恢复",
+      "dependencies": [
+        "SCRUM-11157"
+      ],
+      "description": "## 上下文\n建立与网页识别解耦的协调器和可测试状态模型，保存每次尝试的输入、进度及回收身份。\n\n## 要求\n- 状态：PromptReady→Queued→Uploading→Submitted→Generating→Receiving→Validating→Importing→Imported；无附件跳过 Uploading；终态 PromptOnly／Cancelled／Interrupted／ImportFailed。\n- Workspace Root/AiDesign/Requests/<requestId>/ 保存模板版本、字段、Prompt 快照、附件清单／上传回执、stateVersion、attemptId、时间、tab/chat 身份、downloadId、候选、哈希、importedSessionId、结构化错误。\n- 通过进程间独占更新和临时文件原子替换持久化；只接收 requestId、stateVersion、attemptId 和随机令牌全部匹配的消息。\n- 每安装最多一个自动请求，使用独立浏览器占用合同，不占用 Meitu／Photoshop 工作站锁。上传总计 5 分钟、生成 10 分钟、下载 2 分钟；不自动再次提交。\n- Queued 至 Validating 接受停止，失效令牌、停止后续附件帧／提交／导入；串行决定停止与进入 Importing，Importing 不接受停止。重启未完成任务为 Interrupted，不自动上传或提交。\n- 明确重试产生新 attempt；核验后可复用本地快照，不复用上一对话上传回执。远端停止只有收到网页确认才显示成功，已上传附件不能声称撤回。\n\n## 验收条件\n- [ ] 状态及故障窗口测试验证全部附件 Uploaded 是 Submitted 的必要条件。\n- [ ] 双进程并发更新没有丢失状态；旧版本、错请求、旧 attempt、无效令牌回报均拒绝。\n- [ ] 停止与进入 Importing 的竞态有唯一确定结果，迟到上传／下载不触发导入。\n- [ ] 崩溃重启保留 Prompt、必要附件和候选，显示 Interrupted；ImportFailed 保留同一导入会话身份。\n- [ ] 并发第二个请求被明确拒绝，任何失败都保留完整手动交接内容。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T03\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11157\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T04",
+      "key": "SCRUM-11160",
+      "type": "Task",
+      "summary": "实现常用 Prompt 模板、编辑快照和附件引用",
+      "dependencies": [
+        "SCRUM-11159"
+      ],
+      "description": "## 上下文\n提供无需额外语言模型的本地模板，Prompt 可以准确引用用户选择的图片与需求文件。\n\n## 要求\n- 三个模板：单主体素材、徽章图案、文字印花；主体／文字必填检查，包含风格、颜色、构图、背景、期望比例等适用字段。\n- 生成可预览、编辑、复制的文本；保留用户原文和必须保留的文字，不调用翻译／改写 API。\n- Prompt 引用绑定稳定 attachmentId，显示与提交时映射稳定上传名及用途；删除被引用附件必须修正后才能提交。\n- 生成 Prompt 与交接指令分别保存；任务编号是元数据，不要求画在图片里；一次只要求一张可下载结果。\n- 提交冻结最终编辑文本与附件清单；复制有附件的内容包含上传名／用途和完整指令，并保留快照入口。\n\n## 验收条件\n- [ ] 三个模板的必填检查和生成文本有行为测试，用户文字未被隐式改写。\n- [ ] 同名附件用稳定上传名明确区分；Prompt 不包含冒充已上传文件的 Windows 路径。\n- [ ] 引用缺失／删除附件时阻止提交；无附件模板正常可用。\n- [ ] 编辑后的 Prompt 是实际尝试快照，后续表单编辑不能改变已提交任务。\n- [ ] 无桥接或上传失败时仍能复制完整 Prompt 与必要文件清单，界面不误称文件已上传。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T04\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11159\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T05",
+      "key": "SCRUM-11161",
+      "type": "Task",
+      "summary": "实现附件选择、不可变快照及完整性校验",
+      "dependencies": [
+        "SCRUM-11159"
+      ],
+      "description": "## 上下文\n把显式选择的参考图片和需求文件作为请求的一部分，固定其上传身份并保证原始文件不受影响。\n\n## 要求\n- 允许 PNG、JPEG、WebP、PDF、TXT、MD、CSV、DOCX、XLSX、PPTX；图片每份≤20 MiB，文档≤40 MiB，每请求≤8份且合计≤80 MiB；这是产品限制，网页更严格时降级。\n- 复制到请求拥有的 Workspace Root 快照目录，不修改原件。保存 attachmentId、顺序、原文件名、稳定上传名（attachment-01.png 等）、用途、类型、长度、SHA-256 和受管引用。\n- 规范化路径并校验归属、普通文件和内容可完整读取；宿主读取之前再次核验长度／哈希。每份保留附件都属于必要输入。\n- 只收集本次用户明确选择的文件；不扫描历史会话、客户目录或诊断包，不执行附件／Office 宏。附件不因类型自动成为输出图片。\n\n## 验收条件\n- [ ] 临界数量、单文件与总大小、格式拒绝有边界测试，失败给出明确原因。\n- [ ] 同名文件得到唯一稳定身份；原文件保持不变，快照修改或损坏被检测。\n- [ ] 用户删除／调整附件时与引用验证协同；运行中附件不可修改。\n- [ ] 路径越界、任意未授权文件及错请求快照均被拒绝。\n- [ ] 测试使用临时目录和合成附件，真实请求数据不写入 Git。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T05\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11159\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T06",
+      "key": "SCRUM-11162",
+      "type": "Task",
+      "summary": "实现 Native Messaging 宿主、分块协议和本地登记",
+      "dependencies": [
+        "SCRUM-11161"
+      ],
+      "description": "## 上下文\n以 Chromium MV3 扩展与小型 .NET stdio 宿主交接请求、附件和结果，不新增 .NET HTTP 下载器。\n\n## 要求\n- 制定版本化消息合同；浏览器官方长度前缀 JSON 协议，stdout 不混入日志。校验已登记扩展来源、宿主版本、requestId／attempt／stateVersion／令牌。\n- 只读取本请求已授权且哈希匹配的附件快照；每块原始字节≤256 KiB，带附件 ID、顺序、长度，扩展重组后验证完整长度及 SHA-256。\n- 允许目录和文件操作固定于受管请求／配置下载根目录；网页不得指令执行任意命令或任意读写。\n- 提供当前 Windows 用户 HKCU 登记／撤销工具及扩展 ID 绑定；最小权限。无服务、开机启动、计划任务、扩展商店发布或生产安装包变更。\n- 不引入 Selenium／Playwright，不删除既有包策略或网络 API 边界测试。\n\n## 验收条件\n- [ ] 协议覆盖分片乱序／缺失／重复／超限、损坏长度和哈希、无效来源及旧令牌等错误。\n- [ ] 完整文件可通过标准消息帧到达扩展；中断／停止后不继续发送附件。\n- [ ] 未配置／版本不符／来源错误有结构化状态，Prompt-only 保持可用。\n- [ ] 干净试用用户配置可登记、连通并撤销，未留下自启动服务。\n- [ ] 现有依赖与安装边界检查通过，宿主日志不泄露凭据且不会破坏 stdout 帧。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T06\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11161\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T07",
+      "key": "SCRUM-11163",
+      "type": "Task",
+      "summary": "实现 Work 网页附件上传确认和单次生图提交",
+      "dependencies": [
+        "SCRUM-11158",
+        "SCRUM-11160",
+        "SCRUM-11162"
+      ],
+      "description": "## 上下文\n将已核验的本地附件作为真实文件送入该请求拥有的 Work 对话，然后只提交一次生图需求。\n\n## 要求\n- MV3 扩展为请求新建专用标签页，验证登录和 Work 模式；复用 T02 的可观察网页合同，识别当前可见上传／输入／提交控件。\n- 真实标准文件上传流程提供附件字节；逐附件 Pending→Uploading→Uploaded，错误 Failed，停止 Cancelled。所有必要附件与本次对话接收完成证据匹配后才可提交。\n- 部分上传成功不得丢弃失败附件继续生图；路径字符串／base64-in-Prompt 不算上传；未知 UI、格式拒绝或不可自动处理交互进入明确降级。\n- 记录对话／标签页与提交身份，幂等处理重复通知，每 attempt 最多一次提交。旧上传回执不能用于新对话。\n\n## 验收条件\n- [ ] 网页夹具与真实 Edge 验证逐文件接收完成后才提交。\n- [ ] 混合图片＋文件、同名附件正确上传并被 Prompt 引用；上传失败／5分钟超时不启动生图。\n- [ ] 上传中停止不继续传帧或提交；迟到回执和重复点击不重复提交。\n- [ ] 未登录、非 Work、未知网页、额度／格式限制保留完整 Prompt 和手动上传说明。\n- [ ] 不使用未公开接口／cookie 抽取，不把普通 Chat 或模拟成功标记为 Work 支持。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T07\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11158、SCRUM-11160、SCRUM-11162\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T08",
+      "key": "SCRUM-11164",
+      "type": "Task",
+      "summary": "实现生成结果识别、下载接收和图片内容校验",
+      "dependencies": [
+        "SCRUM-11163"
+      ],
+      "description": "## 上下文\n将本次生成的原始图片可靠回收到应用拥有的本地候选，避免误用参考图或其他下载。\n\n## 要求\n- 观察生成进度／错误／完成状态，不用固定等待或任意图片作为完成证据；输出绑定 request／attempt／对话，排除上传参考图、头像、历史图、缩略图和其他标签页。\n- 使用验证过的下载操作或已暴露的网页下载链接，登记唯一 downloadId 和 complete 状态；不扫描目录找最新图片。\n- 宿主检查登记下载、配置根目录归属、普通文件及完整读取，复制到本请求 staging；实际 PNG／JPEG 非空且完整可解码，≤40 MiB、≤64百万像素。\n- 按真实类型使用扩展名、记录尺寸／透明通道／SHA-256，原子发布候选且不覆盖已有文件；不能由 Prompt 推定透明或可印花。\n- 超时（生成10分钟／下载2分钟）、断开、损坏／超限、取消后的迟到下载进入受控状态，不自动导入残缺文件。\n\n## 验收条件\n- [ ] 错对话／旧 attempt／参考图／其他下载／越界路径均拒绝。\n- [ ] 空文件、假扩展名、损坏、超限像素／字节有真实文件测试；PNG与JPEG正常回收。\n- [ ] 发布前中断只留下不可导入暂存；候选发布身份与文件哈希可复核。\n- [ ] 真实 Edge 下载能唯一关联本次结果且完整接收；无法证明时明确 PromptOnly。\n- [ ] 文件事实与任务状态准确报告，不把网页提交或下载开始称为导入成功。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T08\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11163\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T09",
+      "key": "SCRUM-11165",
+      "type": "Task",
+      "summary": "实现 AI 结果与 ProcessingSession 的事务性幂等导入",
+      "dependencies": [
+        "SCRUM-11164"
+      ],
+      "description": "## 上下文\n复用现有素材导入内部流程，同时堵住重复通知、崩溃和重启造成重复会话的窗口。\n\n## 要求\n- 新增按 requestId 的唯一关联，与新 ProcessingSession 初始创建在同一 SQLite 事务中持久化；不能在 ImportAsync 成功返回之后独立写回执。\n- 已成功关联时返回同一 Session，不复制第二次、不建立新 Revision；已建立但失败／中断返回同一会话及实际状态，复用诊断／恢复路线。\n- 不存在关联时原子创建关联与 Session，再运行现有源快照、检测、哈希和 Revision 流程。携带预期候选哈希并核对实际源快照。\n- 浏览器只交接候选，不直接创建 Session、Revision 或批准；旧手动导入无 requestId 也继续可用。成功导航到 Workflow Selection 并预选 PrepareAsset，由操作者继续。\n\n## 验收条件\n- [ ] 重复调用、并发调用、事务前后崩溃与重启均最多产生一个关联 Session。\n- [ ] 已成功重试返回同一会话且没有额外 Revision；失败／中断重试不建立第二会话。\n- [ ] 候选在交接后被改动导致哈希不符，不能报告 Imported。\n- [ ] 故障保留有效候选／会话 ID 和诊断，能进入既有恢复路径。\n- [ ] 旧手动导入及审阅／生产批准行为通过针对性回归，不把素材导入视为打印批准。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T09\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11164\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T10",
+      "key": "SCRUM-11166",
+      "type": "Task",
+      "summary": "实现 WPF AI设计页面、进度及完整手动交接",
+      "dependencies": [
+        "SCRUM-11165"
+      ],
+      "description": "## 上下文\n提供导入前的独立 AI 设计入口，自动通道和 Prompt-only／手动回收共用一份明确的需求记录。\n\n## 要求\n- 首页入口和页面：模板字段、附件选择／移除／用途，显示原文件名／上传名／类型／大小／状态，提交前明确实际上传清单，预览编辑复制 Prompt。\n- ViewModel 只依赖协调器视图合同，不直接操作网页、SQL 或任意文件。运行中禁止第二提交与修改附件，保留已启动的快照。\n- 展示上传、生图、接收、校验、导入阶段与具体失败原因；Queued至Validating含Uploading可停止，Importing临时禁用停止。\n- 只有扩展／宿主版本／来源／下载根目录／网页适配检查通过才启用自动；未配置仍可生成复制 Prompt。有附件降级提供实际快照选择／打开入口和文件用途说明。\n- 提供用户明确重试、选择手动生成图片和返回首页；手动图片走同一校验／幂等导入，不自动重新提交。通过现有 zh/en 资源实现提示、状态、错误、设置。\n\n## 验收条件\n- [ ] 有无附件、混合类型及同名文件的展示与操作在中英文均清楚可用。\n- [ ] 不可用桥接时 Prompt 功能正常；复制指令和已上传状态严格区分。\n- [ ] 停止竞态／重启中断／ImportFailed 展示真实状态，迟到结果不自动导航。\n- [ ] 手动选择有效图片导入同一请求成功；重复点击不产生第二 Session。\n- [ ] 成功进入现有 Workflow Selection 预选准备设计素材，保留后续审阅和生产流程。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T10\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11165\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    },
+    {
+      "id": "T11",
+      "key": "SCRUM-11167",
+      "type": "Task",
+      "summary": "完成真实端到端、故障恢复验收与本地试用文档",
+      "dependencies": [
+        "SCRUM-11166"
+      ],
+      "description": "## 上下文\n以真实已有账号和合成输入证明整条链路，模拟测试仅验证边界，不能代替网页能力验收。\n\n## 要求\n- 整合各模块行为测试、网页夹具及现有回归：附件限制／引用、分块完整性、全上传前置、单次提交、旧消息、停止、下载归属、异常图片、事务崩溃／重复导入。\n- 在用户明确启用的 Edge 试用配置，用无附件需求和合成参考图＋短需求文件分别完成 Work 生图、下载、本地校验和素材导入。\n- 实际验证上传失败、上传中停止、通道断开、重启后保留 Prompt／必要附件及无自动重提交；验证导入重试仍同一会话。\n- 记录纯文本自动生图、带附件自动生图、Prompt与手动回收三种能力的独立证据和状态。真实链路失败必须记录具体阻塞；只通过 mocks 不得关闭为完整自动化完成。\n- 文档包含本地构建、Edge sideload、个人账号登录、HKCU登记／撤销、路径配置、手动附件交接、排错与清理。无合并发布、生产安装改动或服务器部署。\n\n## 验收条件\n- [ ] 验收矩阵逐项关联可审阅测试／TRX／脱敏网页证据，声明实际配置与日期。\n- [ ] 两条真实成功链路分别有输入→上传（如有）→生成→downloadId→候选哈希→唯一Session证据。\n- [ ] 故障／停止／重启测试证明 Prompt及必要附件保留，无重复提交或重复导入。\n- [ ] 首次试用和撤销步骤在干净配置验证，数据存于Workspace Root且账号／客户素材不入库。\n- [ ] 既有回归通过；若真实链路或基线仍阻塞，明确标注未完成，不用降级成功替代整个 Epic 完成。\n\n## 依赖与来源\n- Planning-ID: PF-AIDESIGN-v1-T11\n- Epic: [SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156)\n- 前置依赖：SCRUM-11166\n- 规格：2026-10-05 修订0.2，用户已批准；C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 分支：codex/prompt-work-images；范围仅本Epic第一版，Linux／Google／MCP输出中转留到后续。\n"
+    }
+  ],
+  "links": [
+    {
+      "prerequisite": "SCRUM-11157",
+      "dependent": "SCRUM-11159",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11159",
+      "dependent": "SCRUM-11160",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11159",
+      "dependent": "SCRUM-11161",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11161",
+      "dependent": "SCRUM-11162",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11158",
+      "dependent": "SCRUM-11163",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11160",
+      "dependent": "SCRUM-11163",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11162",
+      "dependent": "SCRUM-11163",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11163",
+      "dependent": "SCRUM-11164",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11164",
+      "dependent": "SCRUM-11165",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11165",
+      "dependent": "SCRUM-11166",
+      "type": "Blocks"
+    },
+    {
+      "prerequisite": "SCRUM-11166",
+      "dependent": "SCRUM-11167",
+      "type": "Blocks"
+    }
+  ],
+  "verification": {
+    "date": "2026-10-05",
+    "readbackCount": 12,
+    "taskCount": 11,
+    "dependencyCount": 11,
+    "identity": true,
+    "parent": true,
+    "descriptionRequirementsAndAcceptance": true,
+    "dependencyDirection": true,
+    "status": "To Do"
+  },
+  "plannedTasks": [
+    {
+      "id": "T01",
+      "title": "建立 AI 设计独立分支的回归基线",
+      "deps": [],
+      "context": "在 codex/prompt-work-images 隔离分支明确既有构建和测试状态，防止把已有测试问题误记为新功能回归。",
+      "requirements": [
+        "保留原 master 工作区及既有修改；起点 de7bca6e0a8462584b4d6bf4d16307d1335e2fb3。仅在本功能 worktree 准备实现。",
+        "锁定依赖恢复、Release 构建及合适的完整回归；跨进程 WorkstationAutomationLease 测试在子进程启动前需要 Release 构建。",
+        "已有证据：locked restore 和 Release build 成功；两个 lease 用例重跑通过。完整 Debug 测试停滞约 17 分钟后已终止，原因未定位，不能宣称完整回归通过。",
+        "为测试停滞设置有界诊断，记录用例、进程及日志；若确认为既有缺陷，单独记录阻塞，不在本任务无界扩修。"
+      ],
+      "ac": [
+        "从隔离 worktree 重现并记录准确命令、配置、退出码、TRX 与构建警告。",
+        "两个跨进程 lease 用例在 Release 前置条件满足后通过。",
+        "完整回归有可审阅结果；若被既有停滞阻塞，记录定位证据、受影响范围与基线阻塞，未解决前不把该项标记 Done。",
+        "包策略、安装边界及原生产基线没有被删除或整体放宽。"
+      ]
+    },
+    {
+      "id": "T02",
+      "title": "验证 Edge 上 Work 生图、附件上传和下载的网页合同",
+      "deps": [],
+      "context": "先验证当前个人账号和真实 Work 网页支持的操作，为后续自动化给出可靠边界；可与回归基线调研并行。",
+      "requirements": [
+        "使用用户已有个人 Plus／Pro，不购买 API、订阅或托管。默认仅一个经过验证的 Edge 配置。",
+        "观察并记录登录、Work 模式、真实文件上传控件及逐附件完成状态、输入、提交、生成中／错误／完成和原始下载操作。",
+        "使用无附件需求及合成参考图＋短需求文件；确认结果能与本次对话绑定，并与参考图、头像、历史图片、缩略图区分。",
+        "验证标准文件上传流程可提供真实文件，下载可唯一关联浏览器 download ID。不能调用未公开接口、复制 cookie 或以 Codex 当前工具能力冒充产品 API。"
+      ],
+      "ac": [
+        "形成网页合同、脱敏夹具与 Edge／网页验证日期；不保存账号或客户作品。",
+        "无附件和带附件分别报告已验证、不可行或待验证；记录失败环节及手动降级方式。",
+        "所有附件明确接收后才允许单次提交；仅出现任意图片或固定等待时间不能认定完成。",
+        "真实 Work 模式、上传或下载不可验证时，自动通道保持不可用，并记录为后续实现阻塞，不用普通 Chat 静默替代。"
+      ]
+    },
+    {
+      "id": "T03",
+      "title": "实现生图请求状态、跨进程持久化及停止恢复",
+      "deps": [
+        "T01"
+      ],
+      "context": "建立与网页识别解耦的协调器和可测试状态模型，保存每次尝试的输入、进度及回收身份。",
+      "requirements": [
+        "状态：PromptReady→Queued→Uploading→Submitted→Generating→Receiving→Validating→Importing→Imported；无附件跳过 Uploading；终态 PromptOnly／Cancelled／Interrupted／ImportFailed。",
+        "Workspace Root/AiDesign/Requests/<requestId>/ 保存模板版本、字段、Prompt 快照、附件清单／上传回执、stateVersion、attemptId、时间、tab/chat 身份、downloadId、候选、哈希、importedSessionId、结构化错误。",
+        "通过进程间独占更新和临时文件原子替换持久化；只接收 requestId、stateVersion、attemptId 和随机令牌全部匹配的消息。",
+        "每安装最多一个自动请求，使用独立浏览器占用合同，不占用 Meitu／Photoshop 工作站锁。上传总计 5 分钟、生成 10 分钟、下载 2 分钟；不自动再次提交。",
+        "Queued 至 Validating 接受停止，失效令牌、停止后续附件帧／提交／导入；串行决定停止与进入 Importing，Importing 不接受停止。重启未完成任务为 Interrupted，不自动上传或提交。",
+        "明确重试产生新 attempt；核验后可复用本地快照，不复用上一对话上传回执。远端停止只有收到网页确认才显示成功，已上传附件不能声称撤回。"
+      ],
+      "ac": [
+        "状态及故障窗口测试验证全部附件 Uploaded 是 Submitted 的必要条件。",
+        "双进程并发更新没有丢失状态；旧版本、错请求、旧 attempt、无效令牌回报均拒绝。",
+        "停止与进入 Importing 的竞态有唯一确定结果，迟到上传／下载不触发导入。",
+        "崩溃重启保留 Prompt、必要附件和候选，显示 Interrupted；ImportFailed 保留同一导入会话身份。",
+        "并发第二个请求被明确拒绝，任何失败都保留完整手动交接内容。"
+      ]
+    },
+    {
+      "id": "T04",
+      "title": "实现常用 Prompt 模板、编辑快照和附件引用",
+      "deps": [
+        "T03"
+      ],
+      "context": "提供无需额外语言模型的本地模板，Prompt 可以准确引用用户选择的图片与需求文件。",
+      "requirements": [
+        "三个模板：单主体素材、徽章图案、文字印花；主体／文字必填检查，包含风格、颜色、构图、背景、期望比例等适用字段。",
+        "生成可预览、编辑、复制的文本；保留用户原文和必须保留的文字，不调用翻译／改写 API。",
+        "Prompt 引用绑定稳定 attachmentId，显示与提交时映射稳定上传名及用途；删除被引用附件必须修正后才能提交。",
+        "生成 Prompt 与交接指令分别保存；任务编号是元数据，不要求画在图片里；一次只要求一张可下载结果。",
+        "提交冻结最终编辑文本与附件清单；复制有附件的内容包含上传名／用途和完整指令，并保留快照入口。"
+      ],
+      "ac": [
+        "三个模板的必填检查和生成文本有行为测试，用户文字未被隐式改写。",
+        "同名附件用稳定上传名明确区分；Prompt 不包含冒充已上传文件的 Windows 路径。",
+        "引用缺失／删除附件时阻止提交；无附件模板正常可用。",
+        "编辑后的 Prompt 是实际尝试快照，后续表单编辑不能改变已提交任务。",
+        "无桥接或上传失败时仍能复制完整 Prompt 与必要文件清单，界面不误称文件已上传。"
+      ]
+    },
+    {
+      "id": "T05",
+      "title": "实现附件选择、不可变快照及完整性校验",
+      "deps": [
+        "T03"
+      ],
+      "context": "把显式选择的参考图片和需求文件作为请求的一部分，固定其上传身份并保证原始文件不受影响。",
+      "requirements": [
+        "允许 PNG、JPEG、WebP、PDF、TXT、MD、CSV、DOCX、XLSX、PPTX；图片每份≤20 MiB，文档≤40 MiB，每请求≤8份且合计≤80 MiB；这是产品限制，网页更严格时降级。",
+        "复制到请求拥有的 Workspace Root 快照目录，不修改原件。保存 attachmentId、顺序、原文件名、稳定上传名（attachment-01.png 等）、用途、类型、长度、SHA-256 和受管引用。",
+        "规范化路径并校验归属、普通文件和内容可完整读取；宿主读取之前再次核验长度／哈希。每份保留附件都属于必要输入。",
+        "只收集本次用户明确选择的文件；不扫描历史会话、客户目录或诊断包，不执行附件／Office 宏。附件不因类型自动成为输出图片。"
+      ],
+      "ac": [
+        "临界数量、单文件与总大小、格式拒绝有边界测试，失败给出明确原因。",
+        "同名文件得到唯一稳定身份；原文件保持不变，快照修改或损坏被检测。",
+        "用户删除／调整附件时与引用验证协同；运行中附件不可修改。",
+        "路径越界、任意未授权文件及错请求快照均被拒绝。",
+        "测试使用临时目录和合成附件，真实请求数据不写入 Git。"
+      ]
+    },
+    {
+      "id": "T06",
+      "title": "实现 Native Messaging 宿主、分块协议和本地登记",
+      "deps": [
+        "T05"
+      ],
+      "context": "以 Chromium MV3 扩展与小型 .NET stdio 宿主交接请求、附件和结果，不新增 .NET HTTP 下载器。",
+      "requirements": [
+        "制定版本化消息合同；浏览器官方长度前缀 JSON 协议，stdout 不混入日志。校验已登记扩展来源、宿主版本、requestId／attempt／stateVersion／令牌。",
+        "只读取本请求已授权且哈希匹配的附件快照；每块原始字节≤256 KiB，带附件 ID、顺序、长度，扩展重组后验证完整长度及 SHA-256。",
+        "允许目录和文件操作固定于受管请求／配置下载根目录；网页不得指令执行任意命令或任意读写。",
+        "提供当前 Windows 用户 HKCU 登记／撤销工具及扩展 ID 绑定；最小权限。无服务、开机启动、计划任务、扩展商店发布或生产安装包变更。",
+        "不引入 Selenium／Playwright，不删除既有包策略或网络 API 边界测试。"
+      ],
+      "ac": [
+        "协议覆盖分片乱序／缺失／重复／超限、损坏长度和哈希、无效来源及旧令牌等错误。",
+        "完整文件可通过标准消息帧到达扩展；中断／停止后不继续发送附件。",
+        "未配置／版本不符／来源错误有结构化状态，Prompt-only 保持可用。",
+        "干净试用用户配置可登记、连通并撤销，未留下自启动服务。",
+        "现有依赖与安装边界检查通过，宿主日志不泄露凭据且不会破坏 stdout 帧。"
+      ]
+    },
+    {
+      "id": "T07",
+      "title": "实现 Work 网页附件上传确认和单次生图提交",
+      "deps": [
+        "T02",
+        "T04",
+        "T06"
+      ],
+      "context": "将已核验的本地附件作为真实文件送入该请求拥有的 Work 对话，然后只提交一次生图需求。",
+      "requirements": [
+        "MV3 扩展为请求新建专用标签页，验证登录和 Work 模式；复用 T02 的可观察网页合同，识别当前可见上传／输入／提交控件。",
+        "真实标准文件上传流程提供附件字节；逐附件 Pending→Uploading→Uploaded，错误 Failed，停止 Cancelled。所有必要附件与本次对话接收完成证据匹配后才可提交。",
+        "部分上传成功不得丢弃失败附件继续生图；路径字符串／base64-in-Prompt 不算上传；未知 UI、格式拒绝或不可自动处理交互进入明确降级。",
+        "记录对话／标签页与提交身份，幂等处理重复通知，每 attempt 最多一次提交。旧上传回执不能用于新对话。"
+      ],
+      "ac": [
+        "网页夹具与真实 Edge 验证逐文件接收完成后才提交。",
+        "混合图片＋文件、同名附件正确上传并被 Prompt 引用；上传失败／5分钟超时不启动生图。",
+        "上传中停止不继续传帧或提交；迟到回执和重复点击不重复提交。",
+        "未登录、非 Work、未知网页、额度／格式限制保留完整 Prompt 和手动上传说明。",
+        "不使用未公开接口／cookie 抽取，不把普通 Chat 或模拟成功标记为 Work 支持。"
+      ]
+    },
+    {
+      "id": "T08",
+      "title": "实现生成结果识别、下载接收和图片内容校验",
+      "deps": [
+        "T07"
+      ],
+      "context": "将本次生成的原始图片可靠回收到应用拥有的本地候选，避免误用参考图或其他下载。",
+      "requirements": [
+        "观察生成进度／错误／完成状态，不用固定等待或任意图片作为完成证据；输出绑定 request／attempt／对话，排除上传参考图、头像、历史图、缩略图和其他标签页。",
+        "使用验证过的下载操作或已暴露的网页下载链接，登记唯一 downloadId 和 complete 状态；不扫描目录找最新图片。",
+        "宿主检查登记下载、配置根目录归属、普通文件及完整读取，复制到本请求 staging；实际 PNG／JPEG 非空且完整可解码，≤40 MiB、≤64百万像素。",
+        "按真实类型使用扩展名、记录尺寸／透明通道／SHA-256，原子发布候选且不覆盖已有文件；不能由 Prompt 推定透明或可印花。",
+        "超时（生成10分钟／下载2分钟）、断开、损坏／超限、取消后的迟到下载进入受控状态，不自动导入残缺文件。"
+      ],
+      "ac": [
+        "错对话／旧 attempt／参考图／其他下载／越界路径均拒绝。",
+        "空文件、假扩展名、损坏、超限像素／字节有真实文件测试；PNG与JPEG正常回收。",
+        "发布前中断只留下不可导入暂存；候选发布身份与文件哈希可复核。",
+        "真实 Edge 下载能唯一关联本次结果且完整接收；无法证明时明确 PromptOnly。",
+        "文件事实与任务状态准确报告，不把网页提交或下载开始称为导入成功。"
+      ]
+    },
+    {
+      "id": "T09",
+      "title": "实现 AI 结果与 ProcessingSession 的事务性幂等导入",
+      "deps": [
+        "T08"
+      ],
+      "context": "复用现有素材导入内部流程，同时堵住重复通知、崩溃和重启造成重复会话的窗口。",
+      "requirements": [
+        "新增按 requestId 的唯一关联，与新 ProcessingSession 初始创建在同一 SQLite 事务中持久化；不能在 ImportAsync 成功返回之后独立写回执。",
+        "已成功关联时返回同一 Session，不复制第二次、不建立新 Revision；已建立但失败／中断返回同一会话及实际状态，复用诊断／恢复路线。",
+        "不存在关联时原子创建关联与 Session，再运行现有源快照、检测、哈希和 Revision 流程。携带预期候选哈希并核对实际源快照。",
+        "浏览器只交接候选，不直接创建 Session、Revision 或批准；旧手动导入无 requestId 也继续可用。成功导航到 Workflow Selection 并预选 PrepareAsset，由操作者继续。"
+      ],
+      "ac": [
+        "重复调用、并发调用、事务前后崩溃与重启均最多产生一个关联 Session。",
+        "已成功重试返回同一会话且没有额外 Revision；失败／中断重试不建立第二会话。",
+        "候选在交接后被改动导致哈希不符，不能报告 Imported。",
+        "故障保留有效候选／会话 ID 和诊断，能进入既有恢复路径。",
+        "旧手动导入及审阅／生产批准行为通过针对性回归，不把素材导入视为打印批准。"
+      ]
+    },
+    {
+      "id": "T10",
+      "title": "实现 WPF AI设计页面、进度及完整手动交接",
+      "deps": [
+        "T09"
+      ],
+      "context": "提供导入前的独立 AI 设计入口，自动通道和 Prompt-only／手动回收共用一份明确的需求记录。",
+      "requirements": [
+        "首页入口和页面：模板字段、附件选择／移除／用途，显示原文件名／上传名／类型／大小／状态，提交前明确实际上传清单，预览编辑复制 Prompt。",
+        "ViewModel 只依赖协调器视图合同，不直接操作网页、SQL 或任意文件。运行中禁止第二提交与修改附件，保留已启动的快照。",
+        "展示上传、生图、接收、校验、导入阶段与具体失败原因；Queued至Validating含Uploading可停止，Importing临时禁用停止。",
+        "只有扩展／宿主版本／来源／下载根目录／网页适配检查通过才启用自动；未配置仍可生成复制 Prompt。有附件降级提供实际快照选择／打开入口和文件用途说明。",
+        "提供用户明确重试、选择手动生成图片和返回首页；手动图片走同一校验／幂等导入，不自动重新提交。通过现有 zh/en 资源实现提示、状态、错误、设置。"
+      ],
+      "ac": [
+        "有无附件、混合类型及同名文件的展示与操作在中英文均清楚可用。",
+        "不可用桥接时 Prompt 功能正常；复制指令和已上传状态严格区分。",
+        "停止竞态／重启中断／ImportFailed 展示真实状态，迟到结果不自动导航。",
+        "手动选择有效图片导入同一请求成功；重复点击不产生第二 Session。",
+        "成功进入现有 Workflow Selection 预选准备设计素材，保留后续审阅和生产流程。"
+      ]
+    },
+    {
+      "id": "T11",
+      "title": "完成真实端到端、故障恢复验收与本地试用文档",
+      "deps": [
+        "T10"
+      ],
+      "context": "以真实已有账号和合成输入证明整条链路，模拟测试仅验证边界，不能代替网页能力验收。",
+      "requirements": [
+        "整合各模块行为测试、网页夹具及现有回归：附件限制／引用、分块完整性、全上传前置、单次提交、旧消息、停止、下载归属、异常图片、事务崩溃／重复导入。",
+        "在用户明确启用的 Edge 试用配置，用无附件需求和合成参考图＋短需求文件分别完成 Work 生图、下载、本地校验和素材导入。",
+        "实际验证上传失败、上传中停止、通道断开、重启后保留 Prompt／必要附件及无自动重提交；验证导入重试仍同一会话。",
+        "记录纯文本自动生图、带附件自动生图、Prompt与手动回收三种能力的独立证据和状态。真实链路失败必须记录具体阻塞；只通过 mocks 不得关闭为完整自动化完成。",
+        "文档包含本地构建、Edge sideload、个人账号登录、HKCU登记／撤销、路径配置、手动附件交接、排错与清理。无合并发布、生产安装改动或服务器部署。"
+      ],
+      "ac": [
+        "验收矩阵逐项关联可审阅测试／TRX／脱敏网页证据，声明实际配置与日期。",
+        "两条真实成功链路分别有输入→上传（如有）→生成→downloadId→候选哈希→唯一Session证据。",
+        "故障／停止／重启测试证明 Prompt及必要附件保留，无重复提交或重复导入。",
+        "首次试用和撤销步骤在干净配置验证，数据存于Workspace Root且账号／客户素材不入库。",
+        "既有回归通过；若真实链路或基线仍阻塞，明确标注未完成，不用降级成功替代整个 Epic 完成。"
+      ]
+    }
+  ],
+  "plannedEpic": {
+    "summary": "PrintFlow AI设计素材：Prompt、附件上传与 ChatGPT Work 生图回收",
+    "description": "## 目标\n在 PrintFlow 中从设计需求和可选参考图片／需求文件生成可编辑的常用 Prompt，尝试通过已登录的 ChatGPT Work 网页生图，本地回收一张图片并导入现有“准备设计素材”流程。失败时仍提供完整 Prompt、必要附件清单与手动上传／回收入口。\n\n## 规格与授权来源\n- Initiative: PF-AIDESIGN-v1；用户于 2026-10-05 批准设计修订 0.2，并明确要求先创建和同步 Jira Epic & Tasks。\n- 仓库：[MQLite/printflow-Studio](https://github.com/MQLite/printflow-Studio)\n- 本地规格：C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md\n- 规格内容来源提交：24723e4；修订 0.2；批准记录随后写入同一隔离分支。规格尚未推送，以上为本地来源路径；本 Epic 与 Tasks 已包含执行所需范围和验收条件。\n- 隔离分支：codex/prompt-work-images；起点 de7bca6e0a8462584b4d6bf4d16307d1335e2fb3。保留既有 master 及工作区修改。\n- Jira 待办同步不代表已授权产品实现、合并、发布或生产部署；实施计划与执行选择后续按 Superpowers 流程处理。\n\n## 第一版范围\n- 单主体、徽章、文字印花三个本地 Prompt 模板；预览、编辑、复制，保留用户原文；支持按稳定附件 ID 引用真实上传名和用途。\n- 附件 PNG/JPEG/WebP/PDF/TXT/MD/CSV/DOCX/XLSX/PPTX；图片≤20 MiB、文档≤40 MiB、最多8份／合计80 MiB。保存拥有的不可变快照与SHA-256，原件不变；仅上传本次明确选择的文件。\n- Edge 本地 MV3 扩展＋.NET Native Messaging 宿主；以标准网页上传操作交付真实文件，全部必要附件明确接收后才提交。每次尝试最多一次生图提交。\n- 独立状态协调器、跨进程原子持久化、版本／尝试／令牌隔离；停止、超时、重启与故障均保留输入。上传5分钟／生成10分钟／下载2分钟；不自动重新上传或再次提交。\n- 请求／对话／尝试绑定生成结果；唯一浏览器downloadId、下载完成与配置目录归属证明。排除参考图／历史图／缩略图；真实PNG/JPEG≤40 MiB／64百万像素，完整校验后原子发布候选。\n- requestId唯一关联与ProcessingSession初始创建同一SQLite事务；重复／并发／崩溃恢复返回同一会话，导入源快照核对预期哈希。\n- WPF独立导入前入口、zh/en资源、逐附件与阶段状态；桥接不可用仍能使用Prompt和手动回收。成功预选PrepareAsset，由操作者继续审阅。\n\n## 费用与边界\n使用已有个人Plus／Pro，不新增订阅、收费API或托管。受现有账号功能和额度限制。Linux／Google Drive／GCS／MCP输出中转、批量生图、自动排版、生产TIFF均留到后续；本Epic不部署服务。无Selenium／Playwright、未公开ChatGPT接口、cookie提取或.NET HTTP下载器；不放宽既有包与安装边界，不改变Meitu／Photoshop驱动、生产Baselines或旧手动导入。\n\n## 完成标准\n- [ ] 真实Edge配置分别完成无附件及“合成参考图＋简短需求文件”两条Work生图→下载→校验→唯一Session链路。\n- [ ] 全部附件明确接收后才提交；上传部分失败／超时／停止不会启动生图；重复消息和旧尝试不重复提交。\n- [ ] 上传／生成／下载／校验／导入各阶段错误、取消及重启均有结构化状态和完整手动交接；Importing期间停止不可接受。\n- [ ] 候选哈希、目录归属、图片事实、事务幂等及故障窗口通过行为测试，旧功能回归结果可审阅。\n- [ ] 纯文本自动生图、带附件自动生图、Prompt与手动回收分别记录真实验证状态；只通过模拟或降级不算完整自动化完成。\n- [ ] 提供本地扩展加载、HKCU宿主登记／撤销、配置、排错与手动交接文档，无凭据／客户素材进入Git。\n\n## Task 分解\n- [SCRUM-11157](https://yituoxx.atlassian.net/browse/SCRUM-11157)（T01）：建立 AI 设计独立分支的回归基线；前置：无\n- [SCRUM-11158](https://yituoxx.atlassian.net/browse/SCRUM-11158)（T02）：验证 Edge 上 Work 生图、附件上传和下载的网页合同；前置：无\n- [SCRUM-11159](https://yituoxx.atlassian.net/browse/SCRUM-11159)（T03）：实现生图请求状态、跨进程持久化及停止恢复；前置：SCRUM-11157\n- [SCRUM-11160](https://yituoxx.atlassian.net/browse/SCRUM-11160)（T04）：实现常用 Prompt 模板、编辑快照和附件引用；前置：SCRUM-11159\n- [SCRUM-11161](https://yituoxx.atlassian.net/browse/SCRUM-11161)（T05）：实现附件选择、不可变快照及完整性校验；前置：SCRUM-11159\n- [SCRUM-11162](https://yituoxx.atlassian.net/browse/SCRUM-11162)（T06）：实现 Native Messaging 宿主、分块协议和本地登记；前置：SCRUM-11161\n- [SCRUM-11163](https://yituoxx.atlassian.net/browse/SCRUM-11163)（T07）：实现 Work 网页附件上传确认和单次生图提交；前置：SCRUM-11158、SCRUM-11160、SCRUM-11162\n- [SCRUM-11164](https://yituoxx.atlassian.net/browse/SCRUM-11164)（T08）：实现生成结果识别、下载接收和图片内容校验；前置：SCRUM-11163\n- [SCRUM-11165](https://yituoxx.atlassian.net/browse/SCRUM-11165)（T09）：实现 AI 结果与 ProcessingSession 的事务性幂等导入；前置：SCRUM-11164\n- [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166)（T10）：实现 WPF AI设计页面、进度及完整手动交接；前置：SCRUM-11165\n- [SCRUM-11167](https://yituoxx.atlassian.net/browse/SCRUM-11167)（T11）：完成真实端到端、故障恢复验收与本地试用文档；前置：SCRUM-11166\n\n## 已知基线与先行验证\nLocked restore、Release构建及两个跨进程lease用例已有通过证据；完整Debug测试曾停滞并终止，原因未定位，不能声称完整回归绿色。T01核实回归基线；T02尽早验证当前真实Work网页合同。真实网页自动操作尚未证明可行，无法识别或支持时必须明确阻塞与Prompt降级，不能静默改用普通Chat。\n"
+  }
+}
