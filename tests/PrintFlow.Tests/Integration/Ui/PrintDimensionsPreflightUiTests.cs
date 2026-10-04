@@ -45,6 +45,7 @@ public sealed class PrintDimensionsPreflightUiTests
                 model.ChooseCustomSizeCommand.Execute(null);
                 model.SelectedTargetEdgeChoice = model.TargetEdgeChoices.Single(c => c.Edge == TargetEdge.Width);
                 tree.Root.UpdateLayout();
+                ExpandTechnicalDetails(tree.Root);
                 TextBox input = Control<TextBox>(tree.Root, "TargetMillimetres");
                 SetValue(input, "25.4");
                 PumpUntil(() => model.PreflightLoaded.IsCompleted);
@@ -117,6 +118,7 @@ public sealed class PrintDimensionsPreflightUiTests
         WpfRendering.RenderExpectingNoBindingErrors(() => CreateView(h, state, "en-US"),
             WpfRendering.ReviewViewport, tree =>
             {
+                ExpandTechnicalDetails(tree.Root);
                 AssertRow(tree.Root, "GraphicBounds", artwork, label);
                 AssertRow(tree.Root, "FinalCanvas", canvas);
                 AssertRow(tree.Root, "SourcePixels", canvas);
@@ -229,6 +231,15 @@ public sealed class PrintDimensionsPreflightUiTests
         SessionViewModel model = h.Session(new RecordingNavigation());
         model.Open(state);
         return new SessionScreenView { DataContext = model };
+    }
+
+    private static void ExpandTechnicalDetails(FrameworkElement root)
+    {
+        Expander details = Control<Expander>(root, "TechnicalDetails");
+        details.IsExpanded.ShouldBeFalse("technical pixel and PPI facts start folded away");
+        details.IsExpanded = true;
+        root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
+        root.UpdateLayout();
     }
 
     private static void AssertRow(DependencyObject root, string key, string value, string? label = null)

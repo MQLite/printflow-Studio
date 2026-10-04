@@ -6,6 +6,30 @@
   "branch": "codex/prompt-work-images",
   "approvedSpec": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md",
   "sourceRevision": "24723e4 (revision 0.2; user approval recorded separately)",
+  "executionWriteback": {
+    "runId": "01a1091c-e8f2-7e52-a5da-de443424b459",
+    "date": "2026-10-05",
+    "authorization": "User authorized automatic execution of the existing 11 Tasks under development-routing v2.4 and Jira results/status writeback; no push, merge, release or deployment.",
+    "workspace": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio",
+    "baselineStatus": "PASS complete ordinary Release: exit0,13919pass/0fail/1existing interactive skip/13920total,9m51s; exact test identities exclude only seven existing WorkstationEntryPhase=Runtime methods. Dedicated runtime current verification NOT RUN; completed unfiltered exit1 evidence preserved. Fresh independent scope and source reviews clean.",
+    "browserStatus": "BLOCKED: Edge is unavailable in current browser control; real Work/upload/generation/download NOT RUN. User clarification pending; original AC unchanged.",
+    "writes": [
+      { "issueKey": "SCRUM-11156", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
+      { "issueKey": "SCRUM-11157", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
+      { "issueKey": "SCRUM-11158", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
+      { "issueKey": "SCRUM-11156", "operation": "addComment", "commentId": "10227", "purpose": "Authorized scope, isolation, routing and acceptance gates" },
+      { "issueKey": "SCRUM-11158", "operation": "addComment", "commentId": "10228", "purpose": "Observed Edge tool-access blocker and NOT RUN real acceptance" },
+      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10229", "purpose": "Initial full Release hang diagnosis; incomplete result, not Done" },
+      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10230", "purpose": "Minimal recovery fixture repair and scoped passes; remaining Startup/UI failures" },
+      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10231", "purpose": "Completed unfiltered failure, dedicated runtime authority boundary and ordinary profile pending" }
+    ],
+    "lastObservedStatuses": {
+      "observedAtUtc": "2026-10-04 23:29:47 UTC",
+      "inProgress": [ "SCRUM-11156", "SCRUM-11157", "SCRUM-11158" ],
+      "toDo": [ "SCRUM-11159", "SCRUM-11160", "SCRUM-11161", "SCRUM-11162", "SCRUM-11163", "SCRUM-11164", "SCRUM-11165", "SCRUM-11166", "SCRUM-11167" ],
+      "done": []
+    }
+  },
   "items": [
     {
       "id": "EPIC",

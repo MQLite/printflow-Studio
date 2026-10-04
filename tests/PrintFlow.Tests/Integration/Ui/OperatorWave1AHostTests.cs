@@ -26,6 +26,23 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class OperatorWave1AHostTests
 {
     [Fact]
+    public async Task Synthetic_host_language_disposal_leaves_later_rendering_in_its_ambient_language()
+    {
+        using OperatorCultureScope culture = new();
+        OperatorCulture.Select(null);
+        CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("zh-CN");
+        using (SyntheticHostData data = new())
+        {
+            data.Language.Use(OperatorLanguage.SimplifiedChinese);
+        }
+
+        // A real consumer that selects only the ambient culture must still render English.
+        await new HomeRecentAccessibilityTests()
+            .The_missing_picture_state_is_translated("en-US", "No preview");
+        OperatorCultureScope.RawSelection.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Nonvisible_seed_and_real_command_persistence_smoke()
     {
         using SyntheticHostData data = new();
@@ -54,7 +71,10 @@ public sealed class OperatorWave1AHostTests
             WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = data.Screen },
                 WpfRendering.ReviewViewport, tree =>
                 {
-                    ReviewApprovalButton approve = tree.OfType<ReviewApprovalButton>().Single();
+                    ReviewApprovalButton approve = tree.OfType<ReviewApprovalButton>()
+                        .Single(button => AutomationProperties.GetAutomationId(button) == "Session.Approve");
+                    approve.Visibility.ShouldBe(Visibility.Visible);
+                    approve.ActualHeight.ShouldBeGreaterThan(0);
                     approve.Command.ShouldBeSameAs(data.Screen.ApproveCommand);
                     approve.TargetIdentity.ShouldBe(data.Screen.ReviewTargetIdentity);
                     approve.IsDefault.ShouldBeFalse();
@@ -257,9 +277,7 @@ public sealed class OperatorWave1AHostTests
 
     private sealed class SyntheticHostData : IDisposable
     {
-        private readonly CultureInfo _culture = OperatorCulture.Current;
-        private readonly CultureInfo? _defaultCulture = CultureInfo.DefaultThreadCurrentUICulture;
-        private readonly CultureInfo _threadCulture = CultureInfo.CurrentUICulture;
+        private readonly OperatorCultureScope _culture = new();
         private SessionView? _review;
         public HomeScreenHarness Harness { get; } = new();
         public SessionViewModel Screen { get; }
@@ -339,9 +357,7 @@ public sealed class OperatorWave1AHostTests
         public void Dispose()
         {
             Harness.Dispose();
-            OperatorCulture.Select(_culture);
-            CultureInfo.DefaultThreadCurrentUICulture = _defaultCulture;
-            CultureInfo.CurrentUICulture = _threadCulture;
+            _culture.Dispose();
         }
     }
 

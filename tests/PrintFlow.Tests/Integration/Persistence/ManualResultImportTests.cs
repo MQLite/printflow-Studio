@@ -222,13 +222,15 @@ public sealed class ManualResultImportTests
         await h.FakeMeitu.HangStarted;
         var recovery = await h.CreateRecoveryService(new FakeProcessLiveness()).RecoverAsync(default);
         recovery.Value.InterruptedAttemptCount.ShouldBe(1);
-        var resumed = (await h.CreateService().LoadAsync(id, default)).Value;
+        SimulatedProcessDeath.BeginRecoveredProcess(recovery.Value);
+        var resumedService = h.CreateService();
+        var resumed = (await resumedService.LoadAsync(id, default)).Value;
         resumed.AvailableCommands.ShouldContain(CommandKind.Retry);
         resumed.AvailableCommands.ShouldContain(CommandKind.HandOff);
         resumed.AvailableCommands.ShouldContain(CommandKind.AbandonSession);
         resumed.CanSubmitManualResult.ShouldBeFalse();
-        await Must(service, id, new WorkflowCommand.HandOff(StepKind.Enhancement, "Inspect saved manual result"));
-        await Must(service, id, new WorkflowCommand.SubmitManualResult(StepKind.Enhancement, h.WriteBorderedSourcePng("saved.png")));
+        await Must(resumedService, id, new WorkflowCommand.HandOff(StepKind.Enhancement, "Inspect saved manual result"));
+        await Must(resumedService, id, new WorkflowCommand.SubmitManualResult(StepKind.Enhancement, h.WriteBorderedSourcePng("saved.png")));
         (await Load(h, id)).Attempts.ShouldContain(a => a.Operation == OperationKind.Enhance && a.Status == AttemptStatus.Interrupted);
     }
 
