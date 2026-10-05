@@ -1,8 +1,23 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $script:NativeHostName = 'com.printflow.ai_design'
-$script:NativeRegistryKey = 'Software\Microsoft\Edge\NativeMessagingHosts\com.printflow.ai_design'
 $script:NativeInstallation = [IO.Path]::Combine([Environment]::GetFolderPath('LocalApplicationData'), 'PrintFlowStudio', 'AiDesignBridge')
+function Get-NativeRegistryKey([string]$Browser) {
+    switch -CaseSensitive ($Browser) {
+        'Edge' { return 'Software\Microsoft\Edge\NativeMessagingHosts\com.printflow.ai_design' }
+        'Chrome' { return 'Software\Google\Chrome\NativeMessagingHosts\com.printflow.ai_design' }
+        default { throw 'Unsupported native messaging browser.' }
+    }
+}
+function Get-RegistryKeyForRecord($Record) {
+    $hasBrowser = $null -ne $Record.PSObject.Properties['browser']
+    $hasKey = $null -ne $Record.PSObject.Properties['registryKey']
+    if (-not $hasBrowser -and -not $hasKey) { return Get-NativeRegistryKey 'Edge' } # Existing Edge registration records.
+    if (-not $hasBrowser -or -not $hasKey) { throw 'Incomplete registration browser identity.' }
+    $expected = Get-NativeRegistryKey $Record.browser
+    if ($Record.registryKey -cne $expected) { throw 'Registration browser identity mismatch.' }
+    return $expected
+}
 function Assert-RegularPath([string]$Path, [bool]$Directory) {
     if ($Path -notmatch '^[A-Za-z]:[\\/]') { throw 'Absolute local path required.' }
     $absolute = [IO.Path]::GetFullPath($Path)

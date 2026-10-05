@@ -1,5 +1,11 @@
 # PrintFlow Prompt、附件与 Work 生图 Implementation Plan
 
+## 生效的浏览器范围修订 — 2026-10-05
+
+用户在当前续接对话明确指示“改用Chrome”。以下计划中表示验收/试用浏览器的 Edge 要求现改为当前已接入的 Windows Google Chrome；历史阻塞、历史证据及 Microsoft Edge 官方协议来源保留。沿用规格修订 0.3，其他产品目标、附件限制、单次提交、停止恢复、结果关联、唯一 browser downloadId、依赖链及真实验收门槛不变。
+
+T02 在 Chrome 真实 Work 页面完成两条合成输入链路；T06 为该浏览器准备精确 HKCU `Software/Google/Chrome/NativeMessagingHosts/com.printflow.ai_design` 登记并验证 Hello/撤销。不得用控制工具下载路径代替浏览器 downloadId。若工具不能暴露该 ID，记录控制通道限制，并通过可审阅的产品桥接试用验证，不能自行删掉要求。T07–T11 仍需前置验收实际满足后推进。本修订只改变浏览器选择，不自动授予其他 Epic、发布、部署或生产安装权限。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. 保留用户已授权的自动执行方式；按下述真实模块／独立审查边界调度，不能机械地每个 Jira Task 新开上下文。
 
 **Goal:** 在独立分支实现三个本地 Prompt 模板、必要附件快照、真实 Work 单图上传／生图／回收、事务性幂等素材导入及完整手动降级。
@@ -13,7 +19,7 @@
 ## Global Constraints
 
 - 使用已有个人 Plus／Pro，不增加订阅、收费 API 或托管；只在当前独立 worktree／分支工作，保留原 master 及其修改。
-- 第一版默认验证 Windows Microsoft Edge；改用 Chrome 验收必须有用户明确的新指示。不能用普通 Chat 或 Codex 工具能力代替产品 Work 通道。
+- 第一版默认验证 Windows Google Chrome；用户已明确选择改用 Chrome。不能用普通 Chat 或 Codex 工具能力代替产品 Work 通道。
 - 附件允许 PNG、JPEG、WebP、PDF、TXT、Markdown、CSV、DOCX、XLSX、PPTX；图片单文件上限 **20 MiB**、文档 **40 MiB**、最多 **8** 个、总计 **80 MiB**。每个保留附件均为必要输入。
 - 原始附件不变；稳定 attachmentId／上传名／用途／长度／SHA-256／受管快照引用随请求保存。每个原始字节块最多 **256 KiB**。
 - 所有必要附件明确 Uploaded 后才可 Submitted；每 attempt 最多一次提交，不自动重发。上传总计 **5 分钟**、生成 **10 分钟**、下载 **2 分钟**。
