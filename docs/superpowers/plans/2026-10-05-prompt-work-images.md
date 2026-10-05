@@ -2,21 +2,21 @@
 
 ## 当前有效的输出传输修订 — 2026-10-05
 
-用户最新要求禁止最终流程使用浏览器控制工具下载，并改为上传某个 MCP Server 或 Google Drive 特定目录，由程序监控读取；自建 MCP 本地实现现对应规格修订 0.5 第 0 节，优先于下方原浏览器下载条款。原 downloadId／下载目录验收改为稳定远端对象与版本、完整发布回执、独立读取哈希及请求／尝试关联，不能伪造下载 ID。Chrome、必要附件全部确认后单次提交、停止恢复、图片限额及幂等导入继续有效。
+用户最新要求禁止最终流程使用浏览器控制工具下载，并改为上传某个 MCP Server 或 Google Drive 特定目录，由程序监控读取；自建 MCP 本地实现与 Drive 合成实测现对应规格修订 0.6 第 0 节，优先于下方原浏览器下载条款。原 downloadId／下载目录验收改为稳定远端对象与版本、完整发布回执、独立读取哈希及请求／尝试关联，不能伪造下载 ID。Chrome、必要附件全部确认后单次提交、停止恢复、图片限额及幂等导入继续有效。
 
-用户随后提出自建 MCP。当前先完成下方本地服务验证，再取得真实 Work 可访问的连接方式和范围；外部联调优先复用已有两张结果。Google Drive 插件可发现但未连接，本轮选择独立 MCP 本地实现；Work UI 未证实外部上传。T02 仍 In Progress，T08 产品接收集成尚未开始，T07–T11 原依赖保持。T04 已实现的结果下载 DTO／事件需在 T08 明确修订，历史测试 PASS 不作为新接口证据。
+用户随后提出自建 MCP；下方本地服务已验证。用户安装 Google Drive 并选定新建 `PrintFlow-AiDesign-Results`，合成文件上传／认证读取／本地 MCP monitor 实测通过。外部联调仍复用已有两张结果；真实 Work 交接因 Chrome 控制连接超时尚未提交，不能判断 Drive 生成文件交接能力。T02 仍 In Progress，T08 产品接收集成尚未开始，T07–T11 原依赖保持。T04 已实现的结果下载 DTO／事件需在 T08 明确修订，历史测试 PASS 不作为新接口证据。
 
-下方补充任务先交付可运行的结果回执、身份／版本检查、读取适配器与监控程序；真实来源验证后再在 T08 接入产品状态机与候选导入。不同时建设两套提供方，不改账户认证／生产安装，不自动部署 Linux／MCP。Chrome 扩展 ID 仍用于后续真实输入桥接，不再用于浏览器下载验收。
+下方补充任务已交付可运行的结果回执、身份／版本检查、读取适配器与监控程序；真实来源验证后再在 T08 接入产品状态机与候选导入。Drive 当前仅为连接器与源文件探针，不是第二套完整 OAuth／changes 适配器；独立程序账户和隧道配置按用户指示延后。Chrome 扩展 ID 仍用于后续真实输入桥接，不再用于浏览器下载验收。
 
 ## 本轮补充任务 — 自建 MCP 接收服务的本地可运行验证
 
-**授权与执行：**用户继续提出自建 MCP 服务；沿用本 Epic 已授权的自动实施方式，先交付本地可审阅实现。此任务用于验证新输出边界，不能据此关闭 T02/T08 或越过 T07 的真实 Work 门槛。无公网／Linux 部署、收费服务、插件连接、生产安装或推送。下方历史浏览器范围修订中的输出 downloadId 规定已由规格 0.5 第 0 节替代。
+**授权与执行：**用户继续提出自建 MCP 服务；沿用本 Epic 已授权的自动实施方式，先交付本地可审阅实现。此任务用于验证新输出边界，不能据此关闭 T02/T08 或越过 T07 的真实 Work 门槛。无公网／Linux 部署、收费服务、自建 MCP 插件连接、生产安装或推送。下方历史浏览器范围修订中的输出 downloadId 规定已由规格 0.6 第 0 节替代。
 
 **Architecture:**独立 `tools/ai-design-result-mcp/` Node ESM 服务，使用官方 MCP 2.x SDK 提供一个真实文件接收工具。经认证的 control API 登记请求／来源、取消及只读状态／固定对象读取；独立前台 monitor 在已绑定请求范围内读取并验证，输出受管 inbox。`src` 和 installer 不增加网络客户端；此任务不连接 ProcessingSession 导入，不修改旧下载 DTO 来制造兼容成功。
 
 **Tech Stack:** Node >=20.9.0（本机实际 24.14.0）；固定 `@modelcontextprotocol/server` 2.3.0、`@modelcontextprotocol/client` 2.3.0、`@modelcontextprotocol/node` 2.1.1、Zod v4 和 sharp 0.35.5；提交独立 npm lockfile。新增依赖只在本模块，替代历史“无新增 npm”规定在本模块内的限制，不修改现有扩展／NuGet／MSI 依赖。
 
-**Spec:** `docs/superpowers/specs/2026-10-05-prompt-work-images-design.md` 第 0 节。Normal/requested route Sol 6.0 High (`gpt-6-sol/high`)，offset 0；文件持久化、取消和并发风险要求 High。架构 Astra High 完成后降到独立实现上下文，实际运行元数据单独核验；审查为真正 fresh、无父历史的 Sol High 上下文。
+**Spec:** `docs/superpowers/specs/2026-10-05-prompt-work-images-design.md` 修订 0.6 第 0 节。Normal/requested route Sol 6.0 High (`gpt-6-sol/high`)，offset 0；文件持久化、取消和并发风险要求 High。架构 Astra High 完成后降到独立实现上下文，实际运行元数据单独核验；审查为真正 fresh、无父历史的 Sol High 上下文。
 
 **Files and interfaces:**
 
@@ -41,6 +41,16 @@
 - [x] fresh review 原指示、规格第 0 节与本任务、代码和 raw 结果；修复需 RED→GREEN 并重审受影响范围。
 - [x] 写 README 可运行配置／命令、来源验证限制、密钥不进入 Git、localhost 不能自行视为已连接 Work。保留真实 Work 上传、远端认证和 Linux／tunnel 接入 NOT RUN。
 - [x] 更新本 Epic/T02/T08 的 Jira 实证与 HANDOFF／ledger，保持 4/11 Done 和原依赖；仅在最终实证满足后关闭 Tasks。提交本地可审阅变更，不 push/deploy。
+
+## Drive 连接器续接 — 2026-10-05
+
+- [x] 使用用户安装的 Google Drive 插件；按用户选择新建专用结果目录并回读目录身份，不修改分享权限。
+- [x] 上传明确的合成 16×16 PNG；回读文件身份、长度、类型与准确父目录，并通过限定目录枚举发现同一对象。
+- [x] 从认证 raw fetch 获取真实 opaque file_uri；先重现旧来源 ID 正则拒绝，再兼容有界 opaque 身份，保持来源比较、隔离、重放和跨尝试拒绝；fresh review 与父进程完整 24/24 模块及 479/479 原边界验证通过。
+- [x] 使用实际 HTTPS 源读取、官方本地 MCP client 和 monitor，独立核对原始 107 字节、尺寸与 SHA-256；不注入 fetcher，不使用浏览器下载，不保留签名 URL。
+- [x] 对原 Chrome Work 结果做有界交接尝试及一次文档支持的控制会话重置；两次均在读页面前超时，实际提交 0 次，原结果标签页保留。
+- [ ] 恢复 Chrome 控制访问后，验证已有真实 Work 结果的 Drive 上传工具调用、生成来源关联及固定对象读取。当前为 BLOCKED_PRE_SUBMISSION，不是已证明 Drive 不支持交接。
+- [ ] 按用户之后授权配置本机隧道或独立程序读取认证；本轮继续延后账户配置。产品 T08/T11 与原依赖尚未满足，不关闭 Tasks。
 
 ## 历史浏览器范围修订 — 2026-10-05（输出条款已被上方替代）
 

@@ -126,3 +126,19 @@ test('store refuses a junction storage root and a linked persisted blob', async 
   t.after(() => reopened.close());
   await assert.rejects(reopened.readBlob('linked', 'a', receipt.objectVersion, tickets.readTicket));
 });
+
+test('an independently bound opaque file URI can publish, replay, and cannot cross attempts', async t => {
+  const { store } = await fixture(t);
+  const sourceId = 'sediment://file_0123abcd'; // Synthetic shape; no real connector identity.
+  const source = { download_url: 'https://files.example.test/files/signed-object', file_id: sourceId };
+  const first = await store.enroll({ requestId: 'opaque', attemptId: 'a1', expectedFileId: sourceId });
+  await assert.rejects(store.receive({ requestId: 'opaque', attemptId: 'a1', uploadTicket: first.uploadTicket, file: { ...source, file_id: 'sediment://file_other' } }, async () => png));
+  const receipt = await store.receive({ requestId: 'opaque', attemptId: 'a1', uploadTicket: first.uploadTicket, file: source }, async () => png);
+  assert.equal(receipt.state, 'Ready');
+  assert.equal(receipt.sourceFileId, sourceId);
+  assert.deepEqual(await store.receive({ requestId: 'opaque', attemptId: 'a1', uploadTicket: first.uploadTicket, file: source }, async () => png), receipt);
+  const second = await store.enroll({ requestId: 'other', attemptId: 'a1', expectedFileId: sourceId });
+  await assert.rejects(store.receive({ requestId: 'other', attemptId: 'a1', uploadTicket: second.uploadTicket, file: source }, async () => png));
+  await assert.rejects(store.enroll({ requestId: 'bad', attemptId: 'a1', expectedFileId: 'sediment://file_\u0000bad' }));
+  await assert.rejects(store.enroll({ requestId: 'bad', attemptId: 'a2', expectedFileId: 'sediment://file_\u0085bad' }));
+});

@@ -10,11 +10,11 @@
     "effectiveOutputScope": {
       "date": "2026-10-05",
       "humanInstruction": "最终不用浏览器控制工具下载；上传MCP Server或Drive指定目录，由程序监控读取；后续提出自建MCP服务",
-      "effectiveSpecRevision": "0.5 Section 0",
+      "effectiveSpecRevision": "0.6 Section 0",
       "selectedLocalProbe": "tools/ai-design-result-mcp; separate Node ESM official MCP2 SDK service and foreground monitor",
       "supersedes": "Browser output downloadId/root acceptance and prior exclusion of output MCP/Drive service; original input/Work/single-submit/image/idempotence/dependency requirements retained",
       "completionChain": "request/attempt -> independently bound generation source -> immutable object/version -> independently read bytes/hash -> unique Session",
-      "currentStatus": "LOCAL_PROTOCOL_AND_STORE_PASS; LOCAL_MONITOR_PASS; FRESH_REVIEW_PASS; REAL_WORK_UPLOAD_NOT_RUN; PRODUCT_RECEIVER_IMPORT_NOT_IMPLEMENTED",
+      "currentStatus": "LOCAL_MCP_PASS; DRIVE_REMOTE_SYNTHETIC_PROBE_PASS; OPAQUE_SOURCE_ID_REVIEW_PASS; REAL_WORK_TRANSFER_BLOCKED_PRE_SUBMISSION; PRODUCT_IMPORT_NOT_IMPLEMENTED",
       "provenance": "Only authenticated control enrollment can bind expected source file identity; model supplied file metadata cannot elevate trust; unbound result remains received_unverified",
       "authorizationBoundary": "Local implementation/testing authorized; no public/Linux deployment, account/plugin auth changes, paid API, production installation or push",
       "connectionPreference": "Human replied: 如果能本机隧道，以本机隧道为准. Prefer a local tunnel; no Linux deployment requested. Official Secure MCP Tunnel requires separate Platform tunnel/runtime credentials, account availability remains unverified.",
@@ -100,7 +100,11 @@
       "actualRoutes": "Browser gpt-6-astra/high verified; backend gpt-6-sol/high verified; parent gpt-6.1-sol/xhigh verified with MODEL_SWITCH_UNAVAILABLE; offset 0, policy 2.4",
       "realNativeTrial": "NOT RUN; waiting for human unpacked-extension load and actual 32-character ID; controller directory-picker/sideload unavailable",
       "installationPermissions": "Current unchanged extension manifest requests nativeMessaging only; no extension install, HKCU writes, services, startup entries or production installation occurred",
-      "jiraComments": { "authorizationEpic": "10254", "T02": "10255", "T06": "10256" },
+      "jiraComments": {
+        "authorizationEpic": "10254",
+        "T02": "10255",
+        "T06": "10256"
+      },
       "taskStatuses": "Done T01/T03/T04/T05; In Progress T02/T06; To Do T07-T11 under unchanged gates",
       "originalSourceBoundary": "No src, existing C# tests, installer, project or dependency policy changes in this increment"
     },
@@ -597,7 +601,71 @@
         }
       ]
     },
-    "finalCodeCommit": "c18e94ec204f98ff314f14be2104470357c5f698"
+    "finalCodeCommit": "c18e94ec204f98ff314f14be2104470357c5f698",
+    "driveConnectorContinuation": {
+      "date": "2026-10-05",
+      "authority": "User installed Google Drive and chose new PrintFlow-AiDesign-Results; synthetic upload/read and reuse of existing Work output authorized. Independent account/tunnel configuration remains deferred.",
+      "effectiveSpecRevision": "0.6 Section 0",
+      "targetName": "PrintFlow-AiDesign-Results",
+      "exactRemoteIdentityLocation": "Ignored artifacts/ai-design-drive-trial/drive-trial-correlation.json; no signed source URL or credential in facts/Git; final probe uses private stdin",
+      "driveWrites": "Created designated folder; uploaded known synthetic PNG; folder/file metadata and bounded folder listing verified. No sharing changes.",
+      "syntheticProbe": {
+        "source": "Known synthetic local PNG, not Work generated",
+        "dimensions": "16x16",
+        "byteLength": 107,
+        "chain": "Drive upload -> authenticated connector raw file_uri -> production HTTPS fetchSourceFile with exact observed origin/path and normal pinned DNS/TLS -> official local MCP client -> immutable local object/version -> foreground monitor",
+        "result": "PASS; original bytes/length/dimensions/SHA-256 match; no injected fetcher or browser-control download",
+        "provenanceLimit": "sourceVerified applies only to the known synthetic source. No Work result binding, reference exclusion or unique Session import proof.",
+        "upstreamVersionLimit": "Drive wrapper did not expose requested version/checksum; local objectVersion is not a Drive revision.",
+        "programAuthenticationLimit": "Connector access does not grant unattended desktop Drive OAuth/changes credentials. No second full provider adapter or persistent monitor.",
+        "evidence": "artifacts/ai-design-drive-trial/drive-probe-8121975d-c89b-481f-8ae0-7f7f24ec8c0b/probe-facts.json"
+      },
+      "sourceIdentityCorrection": {
+        "scope": "expectedFileId and source file.file_id only; request/attempt strict validation unchanged",
+        "validator": "Nonblank opaque string, max512 UTF-8 bytes, rejects Unicode Cc; exact equality and hashed storage paths",
+        "preserved": "Wrong-source and cross-attempt rejection; stable replay; unbound sources remain received_unverified",
+        "developmentEvidence": "RED old regex rejects URI-shaped identity; RED Unicode control refusal; GREEN narrow fix and fresh affected review",
+        "independentReview": "Existing fresh no-parent-history gpt-6-sol/high reviewer; actual runtime previously verified; source delta PASS with24/24",
+        "logs": [
+          "artifacts/test-results/prompt-work-images-mcp/red-opaque-file-id.txt",
+          "artifacts/test-results/prompt-work-images-mcp/red-opaque-control-char.txt"
+        ]
+      },
+      "parentVerification": {
+        "module": "exit0;24passed/0failed/0skipped",
+        "boundaries": "exit0;479passed/0failed/0skipped Architecture plus NativeRegistration",
+        "logs": [
+          "artifacts/test-results/prompt-work-images-mcp/parent-npm-test-drive-opaque.log",
+          "artifacts/test-results/prompt-work-images-mcp/parent-drive-opaque-original-boundaries.log",
+          "artifacts/test-results/prompt-work-images-mcp/drive-opaque-original-boundaries.trx"
+        ],
+        "fullOrdinaryRegression": "NOT RERUN; no claim for gated Runtime acceptance"
+      },
+      "realWorkTransfer": {
+        "status": "BLOCKED_PRE_SUBMISSION",
+        "submissions": 0,
+        "uploads": 0,
+        "newGenerations": 0,
+        "browserDownloads": 0,
+        "observed": "Work composer Google Drive tool present; file info not source binding. Original source tab reacquired via supported inventory.",
+        "blocker": "Composer read timed out before command dispatch; focus emulation page-state read timed out. One documented cua reset/reinitialization reacquired original tabs but page-state read timed out again.",
+        "interpretation": "Chrome control access failure, not a Drive/file-handle rejection. Transfer capability and Work provenance untested.",
+        "recovery": "Stop blind retries; preserve both original results. Reuse text-only result after supported control recovers; hold mixed result pending first handoff outcome."
+      },
+      "route": "Reuse verified gpt-6-astra/high browser context; verified gpt-6-sol/high source implementer and fresh reviewer. Parent verified gpt-6.1-sol/xhigh MODEL_SWITCH_UNAVAILABLE; policy2.4 offset0.",
+      "jiraComments": {
+        "Epic": "10263",
+        "T02": "10264",
+        "T08": "10265"
+      },
+      "jiraReadback": {
+        "utc": "2026-10-05 04:44:43 UTC",
+        "doneTasks": 4,
+        "totalTasks": 11,
+        "statuses": "Epic/T02/T06 InProgress;T01/T03/T04/T05 Done;T07-T11 ToDo"
+      },
+      "boundaries": "No push/deploy/public listener/account setup/sharing changes/production installation/Session import/persistent monitor; local tunnel preferred later"
+    }
   },
   "items": [
     {

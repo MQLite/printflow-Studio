@@ -9,7 +9,7 @@ import { ResultStore } from '../src/store.mjs';
 import { startServer } from '../src/server.mjs';
 
 const png = await sharp({ create: { width: 2, height: 2, channels: 3, background: 'red' } }).png().toBuffer();
-const file = { download_url: 'https://files.example.test/files/f1', file_id: 'f1' };
+const file = { download_url: 'https://files.example.test/files/f1', file_id: 'sediment://file_synthetic' };
 test('real MCP client lists file parameter contract and uploads only with writer auth', async t => {
   const root = await mkdtemp(join(tmpdir(), 'pf-mcp-http-'));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -21,7 +21,7 @@ test('real MCP client lists file parameter contract and uploads only with writer
   assert.equal(noAuth.status, 401);
   const badHost = await fetch(`${address}/mcp`, { method: 'POST', headers: { host: 'evil.test', authorization: 'Bearer writer-secret', 'content-type': 'application/json' }, body: '{}' });
   assert.equal(badHost.status, 400);
-  const enrolled = await fetch(`${address}/control/attempts`, { method: 'POST', headers: { authorization: 'Bearer control-secret', 'content-type': 'application/json' }, body: JSON.stringify({ requestId: 'r1', attemptId: 'a1', expectedFileId: 'f1' }) });
+  const enrolled = await fetch(`${address}/control/attempts`, { method: 'POST', headers: { authorization: 'Bearer control-secret', 'content-type': 'application/json' }, body: JSON.stringify({ requestId: 'r1', attemptId: 'a1', expectedFileId: file.file_id }) });
   assert.equal(enrolled.status, 201);
   const tickets = await enrolled.json();
   const client = new Client({ name: 'local-contract-test', version: '1.0.0' });

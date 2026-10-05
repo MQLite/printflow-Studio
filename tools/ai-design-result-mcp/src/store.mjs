@@ -7,6 +7,10 @@ const idPattern = /^[A-Za-z0-9_-]{1,100}$/;
 const digest = value => createHash('sha256').update(value).digest('hex');
 const ticket = () => randomBytes(32).toString('base64url');
 const validId = value => { if (typeof value !== 'string' || !idPattern.test(value)) throw new Error('invalid identity'); return value; };
+const validSourceFileId = value => {
+  if (typeof value !== 'string' || !value.trim() || Buffer.byteLength(value, 'utf8') > 512 || /\p{Cc}/u.test(value)) throw new Error('invalid source identity');
+  return value;
+};
 const keyOf = (requestId, attemptId) => digest(`${validId(requestId)}\0${validId(attemptId)}`);
 const requestKey = requestId => `request-${digest(validId(requestId))}`;
 function matchTicket(secretHash, value) {
@@ -111,7 +115,7 @@ export class ResultStore {
   }
   async enroll({ requestId, attemptId, expectedFileId }) {
     const key = requestKey(requestId);
-    if (expectedFileId !== undefined) validId(expectedFileId);
+    if (expectedFileId !== undefined) validSourceFileId(expectedFileId);
     return this.#serialized(key, async () => {
       this.#checkOpen();
       try { await this.#read(requestId, attemptId); throw new Error('attempt already enrolled'); }
@@ -139,7 +143,7 @@ export class ResultStore {
     await this.#requireCurrent(requestId, attemptId);
     const before = await this.#read(requestId, attemptId);
     if (!matchTicket(before.uploadHash, uploadTicket) || before.state === 'cancelled') throw new Error('upload unauthorized');
-    if (!file || typeof file.download_url !== 'string' || !validId(file.file_id)) throw new Error('invalid file');
+    if (!file || typeof file.download_url !== 'string' || !validSourceFileId(file.file_id)) throw new Error('invalid file');
     if (before.expectedFileId && before.expectedFileId !== file.file_id) throw new Error('source mismatch');
     const bytes = await fetchFile(file);
     const facts = await inspectImage(bytes);

@@ -3,8 +3,8 @@
 | 项目 | 当前值 |
 | --- | --- |
 | 日期 | 2026-10-05（Pacific/Auckland） |
-| 修订 | 0.5：保留外部结果交接，先实现独立本地 MCP 接收器与前台监控探针 |
-| 状态 | 已授权本地自建 MCP 增量；不部署、不连接公网；真实 Work 文件交接及来源绑定仍 NOT RUN |
+| 修订 | 0.6：保留本地 MCP 边界，补充 Drive 合成实测与 opaque 文件身份兼容 |
+| 状态 | 本地模块及 Drive 合成上传／读取已验证；真实 Work 交接因 Chrome 控制连接超时尚未提交 |
 | 分支 | `codex/prompt-work-images` |
 | 起点 | `de7bca6e0a8462584b4d6bf4d16307d1335e2fb3` |
 
@@ -21,7 +21,7 @@
 - **已有 MCP 接收服务**：建议的可控交接边界。Work 调用接收工具，使用官方 `_meta["openai/fileParams"]` 文件对象交接真实结果；服务器取得完整文件并发布后返回稳定对象 ID、版本、长度和 SHA-256。程序只查询本请求／尝试的完成记录。服务地址、工具清单、认证及存储目录尚未提供。官方文件参数支持不证明当前账号能把这两张生成图片交给该工具。
 - **Google Drive 上传工具＋特定目录**：先验证连接后的工具支持把 Work 生成 PNG/JPEG 作为真实二进制文件创建在准确 folder ID 中，返回 file ID。程序使用独立的经授权读取连接监控该目录，按固定 file ID／版本读取。官方 API 支持上传与 changes 游标；ChatGPT 的 Drive 连接不自动赋予桌面程序 OAuth 凭据。若已有 Drive 桌面同步配置，可评估限定目录的同步接收，仍需完成回执与内容校验。
 
-首轮只接入用户确定且实际可用的一种提供方。此前 Google Drive 仅可发现；连接器可见也不证明它支持二进制上传。本轮 Work 生成结果菜单仅观察到 Space、文件信息、收藏、反馈，以及 viewer 的分享控件，未证实外部上传；composer 没有可见的 Drive 或指定 MCP 接收插件。用户随后提出“如果没有这类 MCP 的话，能否考虑自己做一个 MCP 服务？”，本轮据此先完成下述独立本地接收器／监控探针。已有服务器或 Drive 目录仍是可选后续接入，不再阻塞本地模块准备；目标连接、认证和真实上传不会由本地测试自动获得。
+首轮只接入用户确定且实际可用的一种提供方。用户提出自建 MCP 后，独立本地接收器／监控探针已完成。随后用户安装 Google Drive，明确选择新建 `PrintFlow-AiDesign-Results`；目录创建与 metadata 回读已成功，未更改分享权限。Work composer 已观察到 Google Drive 工具入口，原结果菜单仍未显示直接外部上传操作。合成 PNG 已通过该连接器上传到准确目录，并经认证 file_uri、实际 HTTPS 源读取、官方本地 MCP 调用和前台 monitor 完整核验。这证明合成文件交接与读取可用，尚不证明 Work 生成结果可交接，也不自动赋予桌面程序 Drive OAuth 凭据。
 
 ### 监控、接收与导入合同
 
@@ -35,9 +35,9 @@
 
 T02 验证真实 Work 文件上传到所选存储的能力；T07 保留真实输入附件与单次提交验收；T08 改为对象绑定、监控读取及严格图片接收；T11 分别证明两条链路的 request → attempt → generation result → remote object/version → independently verified bytes/hash → unique Session。原任务依赖保持，历史 PASS 不证明新接口已实现。
 
-收到目标和有效连接后，优先上传已有两条 Chrome Work 试验的结果，不重新生图，不调用浏览器控制工具下载。真实远端对象与独立读取证据才能满足验收；链接分享、本地合成文件、假上传或夹具 PASS 不等于 Work 结果上传。当前上传与监控读取均 NOT RUN，自动通道继续禁用。
+收到目标和有效连接后，优先上传已有两条 Chrome Work 试验的结果，不重新生图，不调用浏览器控制工具下载。真实远端对象与独立读取证据才能满足验收；链接分享、本地合成文件、假上传或夹具 PASS 不等于 Work 结果上传。当前合成上传与监控读取 PASS；真实 Work 交接在提交前遭遇 Chrome 控制连接超时，文档支持的会话重置／重新连接后仍不能读取页面，提交次数为 0。原两条结果保留，真实 Work 文件身份与来源关联仍未验证，自动通道继续禁用。
 
-用户授权了结果上传／读取方向及独立本地 MCP 增量；外部目标、账户与访问范围仍需明确。不得擅自创建公网服务、部署 Linux、购买服务、更改生产安装、上传客户作品或推送／发布代码。新增部署、隧道和真实账号连接须单独明确；当前可完成本地实现与测试，真实 Work 交接仍缺少已授权且可达的连接和来源身份绑定。
+用户授权了结果上传／读取方向、独立本地 MCP 增量及专用 Drive 目录中的合成试验。Drive 插件已由用户安装；独立程序账户认证与隧道配置继续按用户指示延后。不得擅自创建公网服务、部署 Linux、购买服务、更改生产安装、上传客户作品或推送／发布代码。真实 Work 交接仍需恢复 Chrome 控制连接并建立生成来源身份绑定。
 
 官方来源：[OpenAI MCP 文件参数](https://developers.openai.com/plugins/reference#file-apis)、[Work 连接 MCP 插件](https://developers.openai.com/plugins/quickstart)、[Drive 上传](https://developers.google.com/workspace/drive/api/guides/manage-uploads)、[Drive 变化游标](https://developers.google.com/workspace/drive/api/guides/manage-changes)。它们证明接口存在，未证明本账号、目标目录或生成图片交接已可用。
 
@@ -82,6 +82,8 @@ MCP 只对 Work 暴露 `save_image_result`，用途是接收一份当前尝试�
 
 四个属性必须都声明，只能要求其中 `download_url` 和 `file_id` 必填；文件名／MIME 不能作为可信格式或路径。该官方约定是平台把文件引用和临时取件 URL 交给工具，再由接收服务有界读取文件，**不涉及浏览器控制下载**。文档没有保证当前 Work 的 imagegen 输出一定可转换为该参数，也没有提供由 `file_id` 本身证明生成来源的通用机制。[文件参数规范](https://developers.openai.com/plugins/reference#file-apis)
 
+`file_id` 与 control 登记的 `expectedFileId` 是 opaque 身份，允许 URI 形状，不套用 request/attempt 的路径安全 ID 正则。实现限定为非空、非全空白、最多 512 个 UTF-8 字节并拒绝 Unicode 控制字符；完整字符串用于精确相等比较，持久来源占用路径只使用 hash，不能直接拼为路径。此兼容修订不改变来源信任：未独立绑定仍为 received_unverified，错源／跨尝试占用仍拒绝。
+
 工具标注 `readOnlyHint=false`、`destructiveHint=false`、`idempotentHint=true`，且 `openWorldHint=true` 明示它会读取外部 HTTPS 文件；这些标注不能替代服务端授权。输出须有 `outputSchema`，返回结构化 `SaveImageResultReceipt`，不返回密钥、临时 URL 或本地绝对路径。[工具描述与结果原则](https://developers.openai.com/plugins/build/mcp-server)
 
 | DTO／操作 | 关键字段与裁决 |
@@ -111,6 +113,8 @@ MCP 只对 Work 暴露 `save_image_result`，用途是接收一份当前尝试�
 最小测试边界为：SDK initialize／tools/list／tools/call 与准确四字段文件 schema；REST 与 MCP 认证角色隔离／错请求／错源／旧尝试；未绑定源始终 SourceUnverified；40 MiB／像素边界、截断、损坏图片、哈希／类型不符；origin／私网／DNS rebinding／redirect 拒绝且无凭据泄露；同一尝试并行重复和内容冲突；第二存储拥有者拒绝、活锁不回收与已退出拥有者恢复；停止发生于读取／发布前后；manifest 发布前后崩溃恢复；监控只读指定对象和不可变版本，重启／重放不重复交付。采用最少有意义的真实文件／故障窗口用例，不用穷举生成大量镜像测试。
 
 本地探针可用测试专用文件提供器，把明确的合成 PNG 经真实 MCP 调用、完整发布、有限时长轮询和独立 hash 读取跑通；报告为 `LOCAL_PROTOCOL_AND_STORE_PASS`，不能称为真实 Work 上传。前台 monitor 超时／取消会退出，不注册常驻任务；其读取通过不等于 ProcessingSession 已导入。新增模块的本地代码、测试与独立审查完成后仍不把 T02／T08／T11 或 Epic 标 Done。
+
+2026-10-05 Drive 合成实测使用 16×16、107 字节 PNG：目录与文件 metadata、目录枚举、认证 raw file_uri 均实际返回；源文件通过生产 HTTPS fetcher 获取，没有测试注入，按本次实际返回的精确 origin／完整 pathname 临时允许。官方 SDK 调用及 monitor 发布后，原始字节、长度、尺寸与 SHA-256 均与本地原件一致。Drive wrapper 未返回请求的上游 version／checksum 字段，不能宣称已证明 Drive 固定版本；本地 objectVersion 是自己的不可变发布身份。当前版本的探针通过内存及私有 stdin 传递签名 URL，不写普通报告或 Git。此探针不是无人值守 Drive 目录变化适配器。opaque 修复经过 RED→GREEN、独立复审及父进程 24/24 模块、479/479 原边界测试；实际 Work 上传和 Session 导入仍未完成。
 
 `realWorkFileTransfer=NOT_RUN` 保持到：已授权可达连接完成发现和认证；对保留的实际 Work 输出调用 `save_image_result`，取得真实平台文件参数；独立控制路径证明源文件与该次生成绑定；完成字节发布；程序按对象／版本读取并独立校验。两条原链路都要提供这组证据，不能用合成输入、链接分享、文件名或模型“已上传”的回复代替。来源无法独立绑定时保留 SourceUnverified 和手动路线，自动通道禁用。不会重新启用浏览器控制下载作为备用方案。
 
