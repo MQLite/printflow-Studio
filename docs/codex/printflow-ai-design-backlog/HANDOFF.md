@@ -1,6 +1,6 @@
 # Prompt image-generation execution handoff
 
-Updated 2026-10-05 after the corrected ordinary Release regression. Local implementation and independent review passed for the eligible T03–T06 increment. Real Edge acceptance remains blocked. Jira closing updates for T03/T05 are pending in this snapshot.
+Updated 2026-10-05 after the corrected ordinary Release regression. Local implementation and independent review passed for the eligible T03–T06 increment. Real Edge acceptance remains blocked. Jira readback at 01:53:29 UTC confirms four of eleven Tasks Done: T01, T03, T04 and T05. Epic summary comment 10252 records the remaining gate.
 
 ## Authority and workspace
 
@@ -8,7 +8,7 @@ The user approved design revision 0.2 and authorized automatic execution of the 
 
 Continue in `C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio`, branch `codex/prompt-work-images`. Preserve original `D:/Repositories/printflow-Studio` master HEAD `de7bca6e0a8462584b4d6bf4d16307d1335e2fb3` and its twelve pre-existing audit modifications. Native attachment of the existing worktree was refused because another chat owns it; direct continuation is authorized. Do not replace or archive that checkout.
 
-Original feature HEAD: `d865e7e5ce5fc7ff89923cf8fab9e9fad3c76cf9`. Local milestones: `70fa317` baseline, `001bcd6` T03, `37f447d` T04/T05. The reviewed T06 and owned-staging correction are ready for the next local commit. No push, merge, deployment, actual extension installation or HKCU registration occurred.
+Original feature HEAD: `d865e7e5ce5fc7ff89923cf8fab9e9fad3c76cf9`. Local milestones: `70fa317` baseline, `001bcd6` T03, `37f447d` T04/T05. T06 and the owned-staging correction are committed at c18e94ec204f98ff314f14be2104470357c5f698. No push, merge, deployment, actual extension installation or HKCU registration occurred.
 
 ## Canonical inputs and current gates
 
@@ -17,14 +17,14 @@ Approved spec: `docs/superpowers/specs/2026-10-05-prompt-work-images-design.md`.
 | Task / Jira | Acceptance result | Last observed Jira status |
 | --- | --- | --- |
 | T01 / SCRUM-11157 | Appropriate complete ordinary Release PASS | Done; comment 10232; commit 70fa317 |
-| T02 / SCRUM-11158 | Required Edge unavailable; Work/upload/download NOT RUN | In Progress; comment 10228 |
-| T03 / SCRUM-11159 | Original AC1–5 PASS; corrective full regression PASS | In Progress after reopening; ready for closing writeback |
+| T02 / SCRUM-11158 | Required Edge unavailable; Work/upload/download NOT RUN | In Progress; final blocker comment 10251 |
+| T03 / SCRUM-11159 | Original AC1–5 PASS; corrective full regression PASS | Done after corrected regression; comment 10248 |
 | T04 / SCRUM-11160 | Original AC1–5 PASS, literal templates and integration | Done; comment 10237; commit 37f447d |
-| T05 / SCRUM-11161 | Original AC1–5 PASS; corrective full regression PASS | In Progress after reopening; ready for closing writeback |
-| T06 / SCRUM-11162 | Local protocol/cleanup PASS; real clean-user Edge AC4 NOT RUN | In Progress; comment 10239 |
+| T05 / SCRUM-11161 | Original AC1–5 PASS; corrective full regression PASS | Done after corrected regression; comment 10249 |
+| T06 / SCRUM-11162 | Local protocol/cleanup PASS; real clean-user Edge AC4 NOT RUN | In Progress; final local evidence comment 10250 |
 | T07–T11 / SCRUM-11163…11167 | Original dependencies unmet | To Do; blocking comments 10240…10244 |
 
-Epic SCRUM-11156 remains In Progress. T03/T05 were reopened when the first feature regression exposed a cleanup boundary violation; comments 10245–10247 retain that failure. Reclose them with the corrected evidence and local commit. T06 cannot be Done from local protocol tests alone. T07 requires T02/T04/T06; T08→T09→T10→T11 retain their original gates.
+Epic SCRUM-11156 remains In Progress. T03/T05 were reopened when the first feature regression exposed a cleanup boundary violation; comments 10245–10247 retain that failure. They were reclosed only after the corrected evidence and local commit; verified transition results and final 12-issue readback are appended to the execution ledger. T06 cannot be Done from local protocol tests alone. T07 requires T02/T04/T06; T08→T09→T10→T11 retain their original gates.
 
 The required Edge provider is unavailable through the supported browser channel. The post-regression inventory at 01:47 UTC still returned Chrome `id=3` / Person 1 / extension, the in-app browser `id=2`, and MCP Apps `id=1`. The earlier Edge tab attempt failed before opening a page. The pending scope question has no answer. Connecting Edge can unlock verification; changing acceptance to Chrome requires an explicit answer. No Work page, file upload, generation or download was exercised.
 

@@ -12,8 +12,8 @@
     "authorization": "User authorized automatic execution of the existing 11 Tasks under development-routing v2.4 and Jira results/status writeback; no push, merge, release or deployment.",
     "workspace": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio",
     "baselineStatus": "PASS complete ordinary Release: exit0,13919pass/0fail/1existing interactive skip/13920total,9m51s; exact test identities exclude only seven existing WorkstationEntryPhase=Runtime methods. Dedicated runtime current verification NOT RUN; completed unfiltered exit1 evidence preserved. Fresh independent scope and source reviews clean.",
-    "browserStatus": "BLOCKED: Edge is unavailable in current browser control; real Work/upload/generation/download NOT RUN. User clarification pending; original AC unchanged.",
-    "featureIntegrationStatus": "PASS corrected complete ordinary Release: exit 0, 14021 passed / 0 failed / 1 existing interactive skip / 14022 total, 9m50s. All 13920 old ordinary identities retained plus 102 AI cases; only seven existing separately gated Runtime methods excluded. 36 frozen source/project/build/extension hashes unchanged. Renewed independent review PASS and 633 focused boundary cases PASS. Prior failed/incomplete and pre-race evidence retained. T03/T05 ready for closing writeback; T06 real Edge AC4 remains NOT RUN.",
+    "browserStatus": "BLOCKED: final post-regression supported browser inventory still lacks Edge. Real Work/upload/generation/download and T06 clean-user registration/Hello/rollback NOT RUN. T02/T06 In Progress; T07-T11 To Do under original gates. Pending scope clarification has no answer; original AC unchanged.",
+    "featureIntegrationStatus": "PASS corrected complete ordinary Release: exit 0, 14021 passed / 0 failed / 1 existing interactive skip / 14022 total, 9m50s. All 13920 old ordinary identities retained plus 102 AI cases; only seven existing separately gated Runtime methods excluded. 36 frozen source/project/build/extension hashes unchanged. Renewed independent review PASS and 633 focused boundary cases PASS. Prior failed/incomplete and pre-race evidence retained. T03/T05 reclosed Done with comments 10248/10249 and verified transition results; Epic final comment 10252, four of eleven Tasks Done; T06 real Edge AC4 remains NOT RUN.",
     "writes": [
       {
         "issueKey": "SCRUM-11156",
@@ -218,15 +218,55 @@
         "operation": "addComment",
         "commentId": "10247",
         "purpose": "Retained failed incomplete group, honest task reopening, bounded verified Astra design then actual Sol implementation"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10248",
+        "purpose": "T03 reclosure after held-identity cleanup correction, renewed review and actual complete ordinary regression"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "addComment",
+        "commentId": "10249",
+        "purpose": "T05 reclosure after batch-owned held-handle rollback correction, renewed review and actual complete ordinary regression"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11162",
+        "operation": "addComment",
+        "commentId": "10250",
+        "purpose": "T06 final local code/review/full regression evidence, explicitly incomplete real clean-Edge AC4"
+      },
+      {
+        "issueKey": "SCRUM-11158",
+        "operation": "addComment",
+        "commentId": "10251",
+        "purpose": "T02 final supported browser inventory still lacks Edge; actual Work acceptance unperformed"
+      },
+      {
+        "issueKey": "SCRUM-11156",
+        "operation": "addComment",
+        "commentId": "10252",
+        "purpose": "Final verified four-of-eleven completion, reviewed local commit and actual Edge dependency blocker"
       }
     ],
     "lastObservedStatuses": {
-      "observedAtUtc": "2026-10-05 01:19:42 UTC",
+      "observedAtUtc": "2026-10-05 01:53:29 UTC",
       "inProgress": [
         "SCRUM-11156",
         "SCRUM-11158",
-        "SCRUM-11159",
-        "SCRUM-11161",
         "SCRUM-11162"
       ],
       "toDo": [
@@ -238,7 +278,9 @@
       ],
       "done": [
         "SCRUM-11157",
-        "SCRUM-11160"
+        "SCRUM-11159",
+        "SCRUM-11160",
+        "SCRUM-11161"
       ]
     },
     "finalRegression": {
@@ -261,7 +303,171 @@
       "dedicatedRuntime": "NOT RUN; separately authorized Workstation Entry graph",
       "realEdge": "NOT RUN; Edge provider unavailable",
       "independentReview": "PASS local T03-T06 correction; gpt-6.1-sol/high exact final metadata 2026-10-05 01:33:42 UTC"
-    }
+    },
+    "finalReadback": {
+      "observedAtUtc": "2026-10-05 01:53:29 UTC",
+      "isLast": true,
+      "appliedContentFormat": "markdown",
+      "issues": [
+        {
+          "id": "10916",
+          "key": "SCRUM-11156",
+          "fields": {
+            "summary": "PrintFlow AI设计素材：Prompt、附件上传与 ChatGPT Work 生图回收",
+            "status": {
+              "name": "In Progress"
+            },
+            "issuetype": {
+              "name": "Epic"
+            }
+          }
+        },
+        {
+          "id": "10917",
+          "key": "SCRUM-11157",
+          "fields": {
+            "summary": "建立 AI 设计独立分支的回归基线",
+            "status": {
+              "name": "Done"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10918",
+          "key": "SCRUM-11158",
+          "fields": {
+            "summary": "验证 Edge 上 Work 生图、附件上传和下载的网页合同",
+            "status": {
+              "name": "In Progress"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10919",
+          "key": "SCRUM-11159",
+          "fields": {
+            "summary": "实现生图请求状态、跨进程持久化及停止恢复",
+            "status": {
+              "name": "Done"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10920",
+          "key": "SCRUM-11160",
+          "fields": {
+            "summary": "实现常用 Prompt 模板、编辑快照和附件引用",
+            "status": {
+              "name": "Done"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10921",
+          "key": "SCRUM-11161",
+          "fields": {
+            "summary": "实现附件选择、不可变快照及完整性校验",
+            "status": {
+              "name": "Done"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10922",
+          "key": "SCRUM-11162",
+          "fields": {
+            "summary": "实现 Native Messaging 宿主、分块协议和本地登记",
+            "status": {
+              "name": "In Progress"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10923",
+          "key": "SCRUM-11163",
+          "fields": {
+            "summary": "实现 Work 网页附件上传确认和单次生图提交",
+            "status": {
+              "name": "To Do"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10924",
+          "key": "SCRUM-11164",
+          "fields": {
+            "summary": "实现生成结果识别、下载接收和图片内容校验",
+            "status": {
+              "name": "To Do"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10925",
+          "key": "SCRUM-11165",
+          "fields": {
+            "summary": "实现 AI 结果与 ProcessingSession 的事务性幂等导入",
+            "status": {
+              "name": "To Do"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10926",
+          "key": "SCRUM-11166",
+          "fields": {
+            "summary": "实现 WPF AI设计页面、进度及完整手动交接",
+            "status": {
+              "name": "To Do"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        },
+        {
+          "id": "10927",
+          "key": "SCRUM-11167",
+          "fields": {
+            "summary": "完成真实端到端、故障恢复验收与本地试用文档",
+            "status": {
+              "name": "To Do"
+            },
+            "issuetype": {
+              "name": "Task"
+            }
+          }
+        }
+      ]
+    },
+    "finalCodeCommit": "c18e94ec204f98ff314f14be2104470357c5f698"
   },
   "items": [
     {
