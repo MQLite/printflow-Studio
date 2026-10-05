@@ -14,13 +14,76 @@
       "selectedLocalProbe": "tools/ai-design-result-mcp; separate Node ESM official MCP2 SDK service and foreground monitor",
       "supersedes": "Browser output downloadId/root acceptance and prior exclusion of output MCP/Drive service; original input/Work/single-submit/image/idempotence/dependency requirements retained",
       "completionChain": "request/attempt -> independently bound generation source -> immutable object/version -> independently read bytes/hash -> unique Session",
-      "currentStatus": "LOCAL_IMPLEMENTATION_IN_PROGRESS; REAL_WORK_UPLOAD_NOT_RUN; PRODUCT_RECEIVER_IMPORT_NOT_IMPLEMENTED",
+      "currentStatus": "LOCAL_PROTOCOL_AND_STORE_PASS; LOCAL_MONITOR_PASS; FRESH_REVIEW_PASS; REAL_WORK_UPLOAD_NOT_RUN; PRODUCT_RECEIVER_IMPORT_NOT_IMPLEMENTED",
       "provenance": "Only authenticated control enrollment can bind expected source file identity; model supplied file metadata cannot elevate trust; unbound result remains received_unverified",
       "authorizationBoundary": "Local implementation/testing authorized; no public/Linux deployment, account/plugin auth changes, paid API, production installation or push",
+      "connectionPreference": "Human replied: 如果能本机隧道，以本机隧道为准. Prefer a local tunnel; no Linux deployment requested. Official Secure MCP Tunnel requires separate Platform tunnel/runtime credentials, account availability remains unverified.",
+      "connectionReadiness": "Official Platform tunnel settings redirected to login; user explicitly chose to finish local version and defer account configuration. Availability/permissions remain UNVERIFIED. No tunnel-client/cloudflared/ngrok executable found by command lookup; no key/tunnel/account change.",
       "jiraScopeComment": "10257",
       "ruling": "Apply existing human-authorized automatic execution to local MCP scope adaptation; do not restart approval prompts for reversible local design and implementation; remote provisioning remains a separate boundary",
-      "route": "Architecture existing verified gpt-6-astra/high context completed; fresh no-history backend requested gpt-6-sol/high, runtime must be verified; parent gpt-6.1-sol/xhigh verified with MODEL_SWITCH_UNAVAILABLE; policy2.4 offset0",
-      "planSelfReview": "Spec and unit aligned; monitor additionally needs configured control/read bearer plus per-attempt read ticket; implementer notified. No core receiver or Session import wiring before original gates."
+      "route": "Architecture actual verified gpt-6-astra/high; fresh no-history backend and independent reviewer actual verified gpt-6-sol/high from each own rollout turn_context; parent gpt-6.1-sol/xhigh verified with MODEL_SWITCH_UNAVAILABLE; policy2.4 offset0",
+      "planSelfReview": "Spec and unit aligned; explicit monitor readBearer plus per-attempt readTicket signature agreed and recorded. No core receiver or Session import wiring before original gates.",
+      "localVerification": {
+        "node": "24.14.0",
+        "moduleTests": "parent independent final npm test exit0;23 passed/0 failed/0 skipped",
+        "lockfile": "parent npm ci --no-audit --no-fund succeeded;clean install suite22 passed before narrow final deadline fix",
+        "syntax": "parent node --check passed all11 src/test .mjs",
+        "boundaries": "parent rebuilt Architecture plus NativeRegistration exit0;479 passed/0 failed/0 skipped",
+        "logs": [
+          "artifacts/test-results/prompt-work-images-mcp/parent-npm-test-deadline-final.log",
+          "artifacts/test-results/prompt-work-images-mcp/parent-npm-ci.log",
+          "artifacts/test-results/prompt-work-images-mcp/parent-original-boundaries-final.log",
+          "artifacts/test-results/prompt-work-images-mcp/mcp-original-boundaries-final.trx"
+        ],
+        "fullOrdinaryRegression": "NOT RERUN;historical14k evidence remains historical;gatedRuntimeNOTRUN"
+      },
+      "independentReview": {
+        "agent": "/root/result_mcp_review",
+        "context": "FRESH;fork_turns none;no parent exploration history",
+        "actualModel": "gpt-6-sol",
+        "actualEffort": "high",
+        "verdict": "READY for scoped local commit;no unresolvedP0/P1/P2;affected fixes rereviewed;reviewer23/23PASS",
+        "fixed": [
+          "cancel after blob before adoption",
+          "atomic complete inbox unit and concurrent duplicate reuse",
+          "old attempt current marker/request fencing",
+          "bounded serialized decoded output",
+          "ordinary storage/inbox roots and files;flushed publication",
+          "source identity encoding/length/deadline/reserved DNS",
+          "native Node24 HTTPS lookup options.all interoperability",
+          "openWorldHint true",
+          "direct monitorOnce deadline and polling listener cleanup"
+        ],
+        "boundaryRuling": "Updater scanner alone excludes exact standalone module;original API bans/PackagingSources stay;new no-reference/publish-only/payload-policy isolation guard",
+        "declinedBehaviorRulings": [
+          "Real Work fileParams conversion and independently trusted generated source binding deferred;no account connection",
+          "Actual HTTPS Work origin/OAuth/SecureMCP Tunnel deferred by human",
+          "T08/T11 product current attempt/stateVersion/reference-image exclusion/Session import not implemented;no auto-import or task closure",
+          "Exhaustive IANA classification and live production-origin TLS not certified by representative local tests"
+        ],
+        "monitorAdoptionLimit": "Final authenticated identicalReady read is local monitor observation point;cancellation afterward requires futureT08 currentlocalattempt/stateVersion check beforeSession import;no distributedatomicityclaim",
+        "lostTicketsRecovery": "Failclosed;cancel known request/attempt then enroll fresh tracking attempt without generation replay"
+      },
+      "jiraScopeComments": {
+        "Epic": "10257",
+        "T02": "10258",
+        "T08": "10259"
+      },
+      "jiraFinalComments": {
+        "Epic": "10260",
+        "T02": "10261",
+        "T08": "10262"
+      },
+      "jiraSummaryEdits": {
+        "T02": "验证 Chrome 上 Work 生图、附件上传和 MCP 结果交接的网页合同",
+        "T08": "实现生成结果绑定、MCP 监控接收和图片内容校验"
+      },
+      "jiraReadback": {
+        "utc": "2026-10-05 04:17:42 UTC",
+        "doneTasks": 4,
+        "totalTasks": 11,
+        "statuses": "Epic/T02/T06 InProgress;T01/T03/T04/T05 Done;T07-T11 ToDo"
+      }
     },
     "chromeExecution": {
       "date": "2026-10-05",

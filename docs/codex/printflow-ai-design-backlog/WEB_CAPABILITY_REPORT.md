@@ -12,6 +12,10 @@ Google Drive plugin discovery found an available, unconnected integration; a con
 
 Sources opened: [OpenAI file parameters](https://developers.openai.com/plugins/reference#file-apis), [MCP connection](https://developers.openai.com/plugins/deploy/connect-chatgpt), [Secure MCP Tunnel requirements](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels). The documented transport possibilities do not prove existing account permissions, credentials or connection readiness. No remote service, tunnel, auth/plugin installation or product import was performed.
 
+The user prefers a local tunnel, then explicitly chose to finish the local version and defer account configuration. The official Platform tunnel settings URL redirected to the login page in the authorized Chrome session; availability and permissions remain unverified, rather than denied. No login, key creation, tunnel setup or account setting change was performed. The sign-in page and both generated-result tabs remain available for later continuation. Command lookup found no tunnel-client/cloudflared/ngrok executable. Static local bearer authentication proves only the local SDK path; [the official authentication guide](https://developers.openai.com/plugins/build/auth) says ChatGPT cannot present a custom API key, so a supported connection/authentication mapping still needs real verification.
+
+One generated result's File info showed a PNG viewer path with conversation/image identifiers and a size of 761.6 kB. The field was not labelled `file_id`. The relationship to the official MCP file parameter identity remains UNVERIFIED; the displayed path, filename and image UUID must not become trusted control enrollment. Exact trial identifiers remain only in the ignored correlation record. No output bytes were fetched or uploaded by this inspection.
+
 ## Direct observations
 
 - The supported computer/browser inventory returned one connected Chrome profile, the Codex in-app browser, and MCP Apps. It returned no connected Edge browser and no native application surfaces.

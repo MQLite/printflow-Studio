@@ -47,16 +47,18 @@ T02 验证真实 Work 文件上传到所选存储的能力；T07 保留真实输
 
 本地服务可由 CLI／SDK 客户端真实调用；这不代表 ChatGPT 网页能访问 localhost。当前官方指南支持可达 HTTPS MCP 端点，或将私有 stdio／HTTP 服务接入 Secure MCP Tunnel。后者需要 `tunnel_id`、运行凭据与独立 Platform 权限，不能由已有 Plus／Pro 推定，不能在本轮自动创建／安装／启用。公开部署与隧道均保持未执行。依据：[连接前提](https://developers.openai.com/plugins/deploy/connect-chatgpt)、[私有 MCP 隧道及权限](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)。
 
+用户随后明确“如果能本机隧道，以本机隧道为准”，当前连接优先本机隧道，Linux 不作为默认部署目标。官方 Secure MCP Tunnel 的权限／凭据条件仍需实证；本机尚未发现 tunnel-client/cloudflared/ngrok 可执行命令，未创建隧道或生成运行凭据。官方认证指南明确 ChatGPT 不支持呈交自定义 API key，因此本地 writer bearer 只证明本地 SDK 认证；隧道上游认证映射或支持的 OAuth 路径必须另行验证，不能只粘贴 localhost 地址即宣称 Work 已连接。[ChatGPT MCP 认证](https://developers.openai.com/plugins/build/auth)
+
 模块内建议落点与边界如下；仅此表是实现建议，不表示文件已经存在：
 
 | 文件 | 职责 |
 | --- | --- |
 | `package.json`、`package-lock.json` | 本模块的固定 SDK 依赖与 test/start/probe 命令 |
-| `src/server.js`、`src/mcp.js` | 有界 loopback MCP 传输、认证、准确工具描述与结构化结果 |
-| `src/source-fetch.js`、`src/image-validation.js` | 仅获取允许的临时 HTTPS 文件；限额、完整解码与 hash；无通用 URL 代理 |
-| `src/store.js` | 受控登记、隔离暂存、每尝试的串行裁决、完整发布及回执恢复 |
-| `src/cli.js`、`src/monitor.js` | 独立认证的本地登记／停止控制；有限时长的前台完成回执查询与精确对象读取 |
-| `test/*.test.js`、CLI 探针命令 | 真实本地协议、流式文件边界、发布／停止／恢复与监控行为；夹具来源明确标注为本地测试 |
+| `src/server.mjs`、`src/mcp.mjs` | 有界 loopback MCP 传输、认证、准确工具描述与结构化结果 |
+| `src/source-fetch.mjs`、`src/image-validation.mjs` | 仅获取允许的临时 HTTPS 文件；限额、完整解码与 hash；无通用 URL 代理 |
+| `src/store.mjs` | 受控登记、隔离暂存、每尝试的串行裁决、完整发布及回执恢复 |
+| `src/cli.mjs`、`src/monitor.mjs` | 独立认证的本地登记／停止控制；有限时长的前台完成回执查询与精确对象读取 |
+| `test/*.test.mjs`、CLI 探针命令 | 真实本地协议、流式文件边界、发布／停止／恢复与监控行为；夹具来源明确标注为本地测试 |
 
 HTTP 与源文件读取只存在于这个独立接入模块。`Domain`、`Workflow`、WPF、已有 NativeHost、生产安装／诊断／打包不增加网络客户端，原 `InstallerBoundaryTests` 等禁令保持。首个前台监控客户端通过独立认证的本地 REST 控制／读取端点取得准确回执和版本化字节，独立核对并写入自己的受管接收清单，证明程序可接收；它不是产品核心客户端。产品后续只通过 Infrastructure 中受管完成清单端口接入，独立复核候选，并另行满足 T08；原依赖满足前不接通核心导入。不能把外部 HTTP 客户端换名塞进核心，也不因这个隔离模块削弱全局测试。
 
@@ -86,13 +88,13 @@ MCP 只对 Work 暴露 `save_image_result`，用途是接收一份当前尝试�
 | --- | --- |
 | 本地 `EnrollResultRequest` | `requestId, attemptId, expectedFileId?`；控制身份由认证上下文取得，不能由参数冒充。生成分别限定上传／读取的随机 ticket，持久化其 hash、登记版本与撤销状态；可登记未绑定源的尝试，但不能由此进入自动接收。已登记身份的来源不可由重复调用静默改写。 |
 | `SaveImageResultInput` | `request_id, attempt_id, upload_ticket, file`；服务器把 MCP writer、有效上传 ticket、登记尝试和 source `file_id` 一并核验。 |
-| `SaveImageResultReceipt` | `schemaVersion, requestId, attemptId, status, objectId, objectVersion, sourceFileId, byteLength, sha256, mediaType, width, height, sourceVerified`；可用时附 `completedAt`。`status` 明确为 `received_unverified` 或 `Ready`；后者表示完整且源已核验的不可变发布，前者没有可导入的完成身份。 |
+| `SaveImageResultReceipt` | `schemaVersion, requestId, attemptId, state, objectId, objectVersion, sourceFileId, byteLength, sha256, mediaType, width, height, sourceVerified`；可用时附 `completedAt`。实际 wire 字段统一为 `state`，明确为 `received_unverified` 或 `Ready`；后者表示完整且源已核验的不可变发布，前者没有可导入的完成身份。 |
 | 本地 `CancelResultRequest` | 准确 request/attempt；在锁内更新登记版本并使 ticket 失效，与最终发布串行裁决。 |
 | 本地 `GetResultReceipt`／`ReadPublishedObject` | 每次验证该尝试的 read ticket，并只按准确尝试及对象版本读取；返回 Pending、received_unverified、Ready、Cancelled 或结构化错误。不提供枚举全部文件、最新文件、任意路径或任意 URL 读取。 |
 
 本地 control/read bearer 与 MCP writer bearer 分开，并增加每尝试不同的 upload/read ticket；MCP 调用者不能登记目标来源、撤销其他请求或读取任意结果。只有明确设计为本次交接的 upload ticket 可交给 Work 作为工具参数；它不证明生成来源，不写普通日志／Git，不在工具回执中回显。服务长期凭据和 read ticket 不进入 Work Prompt 或工具参数。本地探针的 bearer 功能不代表 ChatGPT OAuth／隧道已接通。未来外部连接必须明确真实身份认证和授权映射；配置与 CLI 登记结果保存在显式私有 `*.local.json`，不把密钥放命令行。日志只记录关联 ID、状态、长度和错误代码，不记录临时 URL 或认证头。
 
-本地 REST 控制面为 `POST /control/attempts`、`POST /control/attempts/{requestId}/{attemptId}/cancel`；只读接口为 `GET /results/{requestId}/{attemptId}`、`GET /results/{requestId}/{attemptId}/blob/{version}`。控制／读取认证必须独立于 `/mcp` 写入角色，read 接口还校验该尝试的 read ticket；MCP writer 访问这些端点一律拒绝。可共用严格 loopback listener，但未来外部转发只能暴露 MCP 路径，不能把控制面一并导出。对象读取仅返回完整 Ready 的固定版本，不跟随客户端路径。前台 `monitorOnce({baseUrl,requestId,attemptId,readTicket,inboxRoot})` 有总超时、取消和有限轮询间隔，复核身份及完整字节 hash 后原子发布自己的 inbox 文件和 receipt；重复读取复用同一结果，已存在文件被改则拒绝。
+本地 REST 控制面为 `POST /control/attempts`、`POST /control/attempts/{requestId}/{attemptId}/cancel`；只读接口为 `GET /results/{requestId}/{attemptId}`、`GET /results/{requestId}/{attemptId}/blob/{version}`。控制／读取认证必须独立于 `/mcp` 写入角色，read 接口还校验该尝试的 read ticket；MCP writer 访问这些端点一律拒绝。可共用严格 loopback listener，但未来外部转发只能暴露 MCP 路径，不能把控制面一并导出。对象读取仅返回完整 Ready 的固定版本，不跟随客户端路径。前台 `monitorOnce({baseUrl,requestId,attemptId,readBearer,readTicket,inboxRoot})` 有总超时、取消和有限轮询间隔，复核身份及完整字节 hash 后原子发布自己的 inbox 文件和 receipt；重复读取复用同一结果，已存在文件被改则拒绝。
 
 ### 来源、网络与完整发布
 
@@ -103,6 +105,8 @@ MCP 只对 Work 暴露 `save_image_result`，用途是接收一份当前尝试�
 5. **幂等和停止。** 同一 request/attempt 的并行调用只产生一个发布结果；相同 source ID 和相同内容返回原回执，不建立新版本。相同身份却内容不同、第二个 source ID、旧尝试、失效 ticket 均返回冲突／拒绝，不覆盖已有对象。读取过程中和发布前重新检查撤销与登记版本；取消和最终发布串行裁决。停止后收到的完整文件最多隔离保留，客户端仍以本地当前 attempt/stateVersion 重新验证，不能因服务端先前已经发布而绕过停止。重启只查询已登记对象，不重发生图或上传。
 
 ### 本地证据与真实 Work 门槛
+
+本地前台 monitor 的采纳观察点为：完整读取并独立校验后、发布 inbox 单元前，最后一次经过认证的相同 Ready 回执查询。该查询之前完成的取消／更新尝试必须使读取无效；该查询之后的取消仍必须在未来 T08 产品采纳时由本地当前 attempt/stateVersion 核验阻止导入。跨 HTTP 查询与本地文件发布不宣称分布式原子事务；本轮 inbox 是独立工具的已校验回执，不等于产品 Candidate 或已导入 Session。完整 inbox 单元使用临时目录及不覆盖的原子目录发布；重复并发读取仅在既有单元完整且回执／原始字节重新校验一致时复用。
 
 最小测试边界为：SDK initialize／tools/list／tools/call 与准确四字段文件 schema；REST 与 MCP 认证角色隔离／错请求／错源／旧尝试；未绑定源始终 SourceUnverified；40 MiB／像素边界、截断、损坏图片、哈希／类型不符；origin／私网／DNS rebinding／redirect 拒绝且无凭据泄露；同一尝试并行重复和内容冲突；第二存储拥有者拒绝、活锁不回收与已退出拥有者恢复；停止发生于读取／发布前后；manifest 发布前后崩溃恢复；监控只读指定对象和不可变版本，重启／重放不重复交付。采用最少有意义的真实文件／故障窗口用例，不用穷举生成大量镜像测试。
 

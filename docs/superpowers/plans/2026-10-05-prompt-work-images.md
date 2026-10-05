@@ -21,24 +21,26 @@
 **Files and interfaces:**
 
 - `tools/ai-design-result-mcp/package.json`, `package-lock.json`, `.gitignore`, `README.md`, `config.example.json`：只忽略 node_modules、*.local.json 和本模块运行数据；配置显式绝对 storage root、MCP/control 凭据、HTTPS 下载 origin allowlist，默认只绑定 127.0.0.1。不提交真实凭据。
-- `src/store.js`：`ResultStore.open(root)`／`enroll({requestId,attemptId,expectedFileId?})`／`cancel(requestId,attemptId)`／`receive({requestId,attemptId,uploadTicket,file},fetchFile)`／`status`／`readBlob`／`close`。单进程拥有整个 store 的独占锁；每尝试串行。持久 ticket 哈希，先完整验证再原子发布 blob 和回执；重复相同 source/hash 返回同一对象，冲突拒绝，不覆盖。
-- `src/source-fetch.js`：`fetchSourceFile(file,config)` 只取官方 fileParams 给出的允许 HTTPS origin；禁止凭据、任意本地路径、非允许 origin、private/loopback DNS、重定向，实际连接使用核验地址。读取上限 40 MiB、超时 2 分钟。合成测试通过注入 fetcher，不增加生产 localhost 源文件绕过开关。
-- `src/image-validation.js`：按真实 PNG/JPEG 解码，拒绝损坏、空文件和超过 40 MiB／64 百万像素的文件；计算真实长度、格式、尺寸、SHA-256，保持原始 bytes，不重新编码。
-- `src/mcp.js`, `src/server.js`：官方 SDK factory 和 guarded loopback Node HTTP mount；独立 bearer 认证 control/read 与 MCP writer。MCP `save_image_result` 参数 request_id、attempt_id、upload_ticket、file；file 声明 download_url/file_id/mime_type/file_name 四字段，仅前两字段 required，`_meta['openai/fileParams']=['file']`，无任意执行／路径／list-all 工具。明确写操作 annotations 和结构化输出 schema。
+- `src/store.mjs`：`ResultStore.open(root)`／`enroll({requestId,attemptId,expectedFileId?})`／`cancel(requestId,attemptId)`／`receive({requestId,attemptId,uploadTicket,file},fetchFile)`／`status`／`readBlob`／`close`。单进程拥有整个 store 的独占锁；每尝试串行。持久 ticket 哈希，先完整验证再原子发布 blob 和回执；重复相同 source/hash 返回同一对象，冲突拒绝，不覆盖。
+- `src/source-fetch.mjs`：`fetchSourceFile(file,config)` 只取官方 fileParams 给出的允许 HTTPS origin；禁止凭据、任意本地路径、非允许 origin、private/loopback DNS、重定向，实际连接使用核验地址。读取上限 40 MiB、超时 2 分钟。合成测试通过注入 fetcher，不增加生产 localhost 源文件绕过开关。
+- `src/image-validation.mjs`：按真实 PNG/JPEG 解码，拒绝损坏、空文件和超过 40 MiB／64 百万像素的文件；计算真实长度、格式、尺寸、SHA-256，保持原始 bytes，不重新编码。
+- `src/mcp.mjs`, `src/server.mjs`：官方 SDK factory 和 guarded loopback Node HTTP mount；独立 bearer 认证 control/read 与 MCP writer。MCP `save_image_result` 参数 request_id、attempt_id、upload_ticket、file；file 声明 download_url/file_id/mime_type/file_name 四字段，仅前两字段 required，`_meta['openai/fileParams']=['file']`，无任意执行／路径／list-all 工具。明确写操作 annotations 和结构化输出 schema。
 - Control `POST /control/attempts` 登记，`POST /control/attempts/:requestId/:attemptId/cancel` 取消；read `GET /results/:requestId/:attemptId` 与 `GET /results/:requestId/:attemptId/blob/:version`，每次核验该尝试 read ticket。Ready 回执含 schemaVersion、requestId、attemptId、sourceFileId、objectId、objectVersion、byteLength、sha256、mediaType、width/height、sourceVerified。工具参数不能登记或提升来源信任。
-- `src/monitor.js`, `src/cli.js`：`monitorOnce({baseUrl,requestId,attemptId,readTicket,inboxRoot})`；有限前台轮询，支持 abort／超时。按明确尝试及 Ready 回执读取固定版本，独立校验后原子发布 inbox 文件及 receipt；重复调用返回同一结果，已有文件变化拒绝。不读取 received_unverified 为 import-ready，不触发生产导入。CLI 的 enrol 凭据写入显式 *.local.json，不把密钥放命令行／普通日志。
-- `test/*.test.js`：Node test runner、临时目录与合成 PNG/JPEG，真实 loopback MCP SDK client / HTTP / monitor 试验，来源 fetcher 明确为测试注入；不冒充 Work 上传。
+- `src/monitor.mjs`, `src/cli.mjs`：`monitorOnce({baseUrl,requestId,attemptId,readBearer,readTicket,inboxRoot})`；有限前台轮询，支持 abort／超时。按明确尝试及 Ready 回执读取固定版本，独立校验后原子发布 inbox 文件及 receipt；重复调用返回同一结果，已有文件变化拒绝。不读取 received_unverified 为 import-ready，不触发生产导入。CLI 的 enrol 凭据写入显式 *.local.json，不把密钥放命令行／普通日志。
+- `test/*.test.mjs`：Node test runner、临时目录与合成 PNG/JPEG，真实 loopback MCP SDK client / HTTP / monitor 试验，来源 fetcher 明确为测试注入；不冒充 Work 上传。
 
 **Review focus:**完成回执前退出／崩溃没有可导入半文件；取消与正在读取竞争时不得发布 Ready；source_file_id 的模型自报不成为独立来源证据；同请求不同内容或重复并发不覆盖对象；私有 IP／重定向／超限流不得成为服务器任意抓取入口。
 
-- [ ] 写 failing tests，证明官方 MCP tools/list 的 fileParams/schema、未配置／错误认证、登记范围与真实 local tools/call。首次运行必须因缺少实现而 RED，保留 raw log。
-- [ ] 写持久 store 与图像行为测试：合成 PNG 和 JPEG 完整解码与 hash；损坏／超限拒绝；错 ticket/attempt/source 拒绝；来源未绑定仅 received_unverified；同对象重放稳定、内容冲突拒绝；并发和取消期间读取不能 Ready；重启保持原回执且拒绝第二 writer。运行 RED。
-- [ ] 实现上述 service/validation/fetch/store 最小代码；禁止测试注入成为生产认证、来源或路径绕过。`npm test` 达到 GREEN。
-- [ ] 写 monitor failing test，真实 local MCP upload 后读取确切对象到临时 inbox，核对 hash、sourceVerified、重复读取不多建、现有文件被改拒绝、取消／unverified 不发布。实现 monitor/CLI，重新 GREEN。
-- [ ] 用父进程独立运行模块全部行为测试及原相关 Architecture／NativeRegistration 边界测试；依赖审查不变，`git diff --check` 通过。不为纯独立模块重复 14k 全套。
-- [ ] fresh review 原指示、规格第 0 节与本任务、代码和 raw 结果；修复需 RED→GREEN 并重审受影响范围。
-- [ ] 写 README 可运行配置／命令、来源验证限制、密钥不进入 Git、localhost 不能自行视为已连接 Work。保留真实 Work 上传、远端认证和 Linux／tunnel 接入 NOT RUN。
-- [ ] 更新本 Epic/T02/T08 的 Jira 实证与 HANDOFF／ledger，保持 4/11 Done 和原依赖；仅在最终实证满足后关闭 Tasks。提交本地可审阅变更，不 push/deploy。
+**边界校准（父进程实测后补充）：**既有 `InstallerBoundaryTests.PackagingSources` 将全部 `tools` 子树视为打包输入，连本轮明确独立、不打包的 MCP SDK 依赖也扫描；首次父进程 478 项测试为 477 PASS／1 FAIL，失败为第三方 `HttpClient`／`WebRequest` 文本。仅在 updater guard 使用的新枚举排除精确 `tools/ai-design-result-mcp` 子树，其他原 PackagingSources 扫描保持不变；同时增加断言：产品／项目／solution／build／installer 不引用它或 MCP SDK，stager 只取 App publish 目录，payload policy 拒绝其脚本、npm 配置和运行时文件。其他 tools 和全部产品／打包扫描继续保留，不删除网络禁用断言、不改 API 名规避扫描。父进程持有此单一测试文件修改，fresh review 必须审查校准和新隔离断言。
+
+- [x] 写 failing tests，证明官方 MCP tools/list 的 fileParams/schema、未配置／错误认证、登记范围与真实 local tools/call。首次运行必须因缺少实现而 RED，保留 raw log。
+- [x] 写持久 store 与图像行为测试：合成 PNG 和 JPEG 完整解码与 hash；损坏／超限拒绝；错 ticket/attempt/source 拒绝；来源未绑定仅 received_unverified；同对象重放稳定、内容冲突拒绝；并发和取消期间读取不能 Ready；重启保持原回执且拒绝第二 writer。运行 RED。
+- [x] 实现上述 service/validation/fetch/store 最小代码；禁止测试注入成为生产认证、来源或路径绕过。`npm test` 达到 GREEN。
+- [x] 写 monitor failing test，真实 local MCP upload 后读取确切对象到临时 inbox，核对 hash、sourceVerified、重复读取不多建、现有文件被改拒绝、取消／unverified 不发布。实现 monitor/CLI，重新 GREEN。
+- [x] 用父进程独立运行模块全部行为测试及原相关 Architecture／NativeRegistration 边界测试；依赖审查不变，`git diff --check` 通过。不为纯独立模块重复 14k 全套。
+- [x] fresh review 原指示、规格第 0 节与本任务、代码和 raw 结果；修复需 RED→GREEN 并重审受影响范围。
+- [x] 写 README 可运行配置／命令、来源验证限制、密钥不进入 Git、localhost 不能自行视为已连接 Work。保留真实 Work 上传、远端认证和 Linux／tunnel 接入 NOT RUN。
+- [x] 更新本 Epic/T02/T08 的 Jira 实证与 HANDOFF／ledger，保持 4/11 Done 和原依赖；仅在最终实证满足后关闭 Tasks。提交本地可审阅变更，不 push/deploy。
 
 ## 历史浏览器范围修订 — 2026-10-05（输出条款已被上方替代）
 

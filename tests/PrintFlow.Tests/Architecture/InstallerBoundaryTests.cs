@@ -262,6 +262,39 @@ public sealed class InstallerBoundaryTests
     // ------------------------------------------------------------------------------------------
 
     /// <summary>
+    /// The manually run result receiver is isolated from the offline product and its packaging.
+    /// </summary>
+    [Fact]
+    public void The_standalone_ai_design_result_receiver_is_not_a_product_or_packaging_dependency()
+    {
+        IEnumerable<string> buildInputs = UpdaterBoundarySources()
+            .Concat(Directory.EnumerateFiles(Path.Combine(RepositoryRoot(), "src"), "*.csproj", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(RepositoryRoot(), "*.sln", SearchOption.TopDirectoryOnly))
+            .Concat(Directory.EnumerateFiles(RepositoryRoot(), "*.props", SearchOption.TopDirectoryOnly))
+            .Concat(Directory.EnumerateFiles(RepositoryRoot(), "*.targets", SearchOption.TopDirectoryOnly));
+        foreach (string file in buildInputs)
+        {
+            string declarations = DeclarationsOf(file);
+            declarations.ShouldNotContain("ai-design-result-mcp", Case.Insensitive, RepositoryRelative(file));
+            declarations.ShouldNotContain("@modelcontextprotocol", Case.Insensitive, RepositoryRelative(file));
+        }
+
+        string stagingScript = Declarations(@"build\installer\Build-Installer.ps1");
+        stagingScript.ShouldContain(@"publish (Join-Path $RepositoryRoot 'src\PrintFlow.App\PrintFlow.App.csproj')");
+        stagingScript.ShouldContain("Get-ChildItem -LiteralPath $PublishDir -Recurse -File");
+
+        PayloadPolicy policy = ReadPayloadPolicy();
+        foreach (string file in new[]
+                 {
+                     "ai-design-result-mcp/src/cli.mjs", "src/cli.mjs", "package.json", "package-lock.json",
+                     "receiver.local.json", "node.exe", "sharp.node", "node_modules/@modelcontextprotocol/server/dist/index.mjs",
+                 })
+        {
+            ShouldNotBeAllowed(policy, file);
+        }
+    }
+
+    /// <summary>
     /// One proportionate architecture boundary: nothing in the product or in the packaging can
     /// look for, fetch or apply a new version (§16, §35).
     /// </summary>
@@ -286,7 +319,7 @@ public sealed class InstallerBoundaryTests
 
         List<string> offenders = [];
 
-        foreach (string file in ProductAndPackagingSources())
+        foreach (string file in UpdaterBoundarySources())
         {
             string text = DeclarationsOf(file);
             foreach (string api in updaterApis)
@@ -509,6 +542,14 @@ public sealed class InstallerBoundaryTests
 
     private static IEnumerable<string> ProductAndPackagingSources() =>
         ProductSources().Concat(PackagingSources());
+
+    private static IEnumerable<string> UpdaterBoundarySources()
+    {
+        // Only this independent, manually run receiver is outside the shipped updater boundary.
+        // The isolation test above fails if a product or packaging input starts referencing it.
+        string receiverRoot = Path.Combine(RepositoryRoot(), "tools", "ai-design-result-mcp") + Path.DirectorySeparatorChar;
+        return ProductAndPackagingSources().Where(f => !f.StartsWith(receiverRoot, StringComparison.OrdinalIgnoreCase));
+    }
 
     /// <summary>
     /// A repository file with its commentary removed, so a guard reads what the file
