@@ -1,6 +1,46 @@
 # PrintFlow Prompt、附件与 Work 生图 Implementation Plan
 
-## 生效的浏览器范围修订 — 2026-10-05
+## 当前有效的输出传输修订 — 2026-10-05
+
+用户最新要求禁止最终流程使用浏览器控制工具下载，并改为上传某个 MCP Server 或 Google Drive 特定目录，由程序监控读取；自建 MCP 本地实现现对应规格修订 0.5 第 0 节，优先于下方原浏览器下载条款。原 downloadId／下载目录验收改为稳定远端对象与版本、完整发布回执、独立读取哈希及请求／尝试关联，不能伪造下载 ID。Chrome、必要附件全部确认后单次提交、停止恢复、图片限额及幂等导入继续有效。
+
+用户随后提出自建 MCP。当前先完成下方本地服务验证，再取得真实 Work 可访问的连接方式和范围；外部联调优先复用已有两张结果。Google Drive 插件可发现但未连接，本轮选择独立 MCP 本地实现；Work UI 未证实外部上传。T02 仍 In Progress，T08 产品接收集成尚未开始，T07–T11 原依赖保持。T04 已实现的结果下载 DTO／事件需在 T08 明确修订，历史测试 PASS 不作为新接口证据。
+
+下方补充任务先交付可运行的结果回执、身份／版本检查、读取适配器与监控程序；真实来源验证后再在 T08 接入产品状态机与候选导入。不同时建设两套提供方，不改账户认证／生产安装，不自动部署 Linux／MCP。Chrome 扩展 ID 仍用于后续真实输入桥接，不再用于浏览器下载验收。
+
+## 本轮补充任务 — 自建 MCP 接收服务的本地可运行验证
+
+**授权与执行：**用户继续提出自建 MCP 服务；沿用本 Epic 已授权的自动实施方式，先交付本地可审阅实现。此任务用于验证新输出边界，不能据此关闭 T02/T08 或越过 T07 的真实 Work 门槛。无公网／Linux 部署、收费服务、插件连接、生产安装或推送。下方历史浏览器范围修订中的输出 downloadId 规定已由规格 0.5 第 0 节替代。
+
+**Architecture:**独立 `tools/ai-design-result-mcp/` Node ESM 服务，使用官方 MCP 2.x SDK 提供一个真实文件接收工具。经认证的 control API 登记请求／来源、取消及只读状态／固定对象读取；独立前台 monitor 在已绑定请求范围内读取并验证，输出受管 inbox。`src` 和 installer 不增加网络客户端；此任务不连接 ProcessingSession 导入，不修改旧下载 DTO 来制造兼容成功。
+
+**Tech Stack:** Node >=20.9.0（本机实际 24.14.0）；固定 `@modelcontextprotocol/server` 2.3.0、`@modelcontextprotocol/client` 2.3.0、`@modelcontextprotocol/node` 2.1.1、Zod v4 和 sharp 0.35.5；提交独立 npm lockfile。新增依赖只在本模块，替代历史“无新增 npm”规定在本模块内的限制，不修改现有扩展／NuGet／MSI 依赖。
+
+**Spec:** `docs/superpowers/specs/2026-10-05-prompt-work-images-design.md` 第 0 节。Normal/requested route Sol 6.0 High (`gpt-6-sol/high`)，offset 0；文件持久化、取消和并发风险要求 High。架构 Astra High 完成后降到独立实现上下文，实际运行元数据单独核验；审查为真正 fresh、无父历史的 Sol High 上下文。
+
+**Files and interfaces:**
+
+- `tools/ai-design-result-mcp/package.json`, `package-lock.json`, `.gitignore`, `README.md`, `config.example.json`：只忽略 node_modules、*.local.json 和本模块运行数据；配置显式绝对 storage root、MCP/control 凭据、HTTPS 下载 origin allowlist，默认只绑定 127.0.0.1。不提交真实凭据。
+- `src/store.js`：`ResultStore.open(root)`／`enroll({requestId,attemptId,expectedFileId?})`／`cancel(requestId,attemptId)`／`receive({requestId,attemptId,uploadTicket,file},fetchFile)`／`status`／`readBlob`／`close`。单进程拥有整个 store 的独占锁；每尝试串行。持久 ticket 哈希，先完整验证再原子发布 blob 和回执；重复相同 source/hash 返回同一对象，冲突拒绝，不覆盖。
+- `src/source-fetch.js`：`fetchSourceFile(file,config)` 只取官方 fileParams 给出的允许 HTTPS origin；禁止凭据、任意本地路径、非允许 origin、private/loopback DNS、重定向，实际连接使用核验地址。读取上限 40 MiB、超时 2 分钟。合成测试通过注入 fetcher，不增加生产 localhost 源文件绕过开关。
+- `src/image-validation.js`：按真实 PNG/JPEG 解码，拒绝损坏、空文件和超过 40 MiB／64 百万像素的文件；计算真实长度、格式、尺寸、SHA-256，保持原始 bytes，不重新编码。
+- `src/mcp.js`, `src/server.js`：官方 SDK factory 和 guarded loopback Node HTTP mount；独立 bearer 认证 control/read 与 MCP writer。MCP `save_image_result` 参数 request_id、attempt_id、upload_ticket、file；file 声明 download_url/file_id/mime_type/file_name 四字段，仅前两字段 required，`_meta['openai/fileParams']=['file']`，无任意执行／路径／list-all 工具。明确写操作 annotations 和结构化输出 schema。
+- Control `POST /control/attempts` 登记，`POST /control/attempts/:requestId/:attemptId/cancel` 取消；read `GET /results/:requestId/:attemptId` 与 `GET /results/:requestId/:attemptId/blob/:version`，每次核验该尝试 read ticket。Ready 回执含 schemaVersion、requestId、attemptId、sourceFileId、objectId、objectVersion、byteLength、sha256、mediaType、width/height、sourceVerified。工具参数不能登记或提升来源信任。
+- `src/monitor.js`, `src/cli.js`：`monitorOnce({baseUrl,requestId,attemptId,readTicket,inboxRoot})`；有限前台轮询，支持 abort／超时。按明确尝试及 Ready 回执读取固定版本，独立校验后原子发布 inbox 文件及 receipt；重复调用返回同一结果，已有文件变化拒绝。不读取 received_unverified 为 import-ready，不触发生产导入。CLI 的 enrol 凭据写入显式 *.local.json，不把密钥放命令行／普通日志。
+- `test/*.test.js`：Node test runner、临时目录与合成 PNG/JPEG，真实 loopback MCP SDK client / HTTP / monitor 试验，来源 fetcher 明确为测试注入；不冒充 Work 上传。
+
+**Review focus:**完成回执前退出／崩溃没有可导入半文件；取消与正在读取竞争时不得发布 Ready；source_file_id 的模型自报不成为独立来源证据；同请求不同内容或重复并发不覆盖对象；私有 IP／重定向／超限流不得成为服务器任意抓取入口。
+
+- [ ] 写 failing tests，证明官方 MCP tools/list 的 fileParams/schema、未配置／错误认证、登记范围与真实 local tools/call。首次运行必须因缺少实现而 RED，保留 raw log。
+- [ ] 写持久 store 与图像行为测试：合成 PNG 和 JPEG 完整解码与 hash；损坏／超限拒绝；错 ticket/attempt/source 拒绝；来源未绑定仅 received_unverified；同对象重放稳定、内容冲突拒绝；并发和取消期间读取不能 Ready；重启保持原回执且拒绝第二 writer。运行 RED。
+- [ ] 实现上述 service/validation/fetch/store 最小代码；禁止测试注入成为生产认证、来源或路径绕过。`npm test` 达到 GREEN。
+- [ ] 写 monitor failing test，真实 local MCP upload 后读取确切对象到临时 inbox，核对 hash、sourceVerified、重复读取不多建、现有文件被改拒绝、取消／unverified 不发布。实现 monitor/CLI，重新 GREEN。
+- [ ] 用父进程独立运行模块全部行为测试及原相关 Architecture／NativeRegistration 边界测试；依赖审查不变，`git diff --check` 通过。不为纯独立模块重复 14k 全套。
+- [ ] fresh review 原指示、规格第 0 节与本任务、代码和 raw 结果；修复需 RED→GREEN 并重审受影响范围。
+- [ ] 写 README 可运行配置／命令、来源验证限制、密钥不进入 Git、localhost 不能自行视为已连接 Work。保留真实 Work 上传、远端认证和 Linux／tunnel 接入 NOT RUN。
+- [ ] 更新本 Epic/T02/T08 的 Jira 实证与 HANDOFF／ledger，保持 4/11 Done 和原依赖；仅在最终实证满足后关闭 Tasks。提交本地可审阅变更，不 push/deploy。
+
+## 历史浏览器范围修订 — 2026-10-05（输出条款已被上方替代）
 
 用户在当前续接对话明确指示“改用Chrome”。以下计划中表示验收/试用浏览器的 Edge 要求现改为当前已接入的 Windows Google Chrome；历史阻塞、历史证据及 Microsoft Edge 官方协议来源保留。沿用规格修订 0.3，其他产品目标、附件限制、单次提交、停止恢复、结果关联、唯一 browser downloadId、依赖链及真实验收门槛不变。
 

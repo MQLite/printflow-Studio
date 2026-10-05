@@ -2,7 +2,15 @@
 
 Date: 2026-10-05 (Pacific/Auckland). Scope: PF-AIDESIGN-v1, design revision 0.2.
 
-Current status: the user subsequently authorized Chrome ("改用Chrome"). The final Chrome trial appendix below supersedes the historical browser-scope blocker, while preserving incomplete download and automatic-channel acceptance.
+Current status: Chrome is explicitly authorized. The user subsequently replaced browser-control downloads with upload to external storage and program monitoring/reading, then requested consideration of a self-built MCP service. Historical download attempts below remain evidence, but downloadId is no longer the final output gate. Effective scope is spec revision 0.5 Section 0; local MCP functionality is being prepared separately and real Work-to-MCP upload remains NOT RUN.
+
+## Latest read-only external-transfer feasibility — 2026-10-05
+
+Existing generated-file actions expose Space, File info, Open in Space, Add to Favorites and Feedback. The viewer exposes Share; it was not invoked because link creation may mutate. No external Drive/MCP upload/export action was visible. The Work composer exposed local/Space files and existing plugins; no Drive or named custom MCP receiver was visible. This is an observation of current UI affordances, not a claim that connected file tools cannot upload results. Neither retained trial was resubmitted, downloaded, uploaded or deleted.
+
+Google Drive plugin discovery found an available, unconnected integration; a connection suggestion does not grant tool access or prove binary PNG upload. Official MCP fileParams describes a real file object with download_url/file_id and optional mime_type/file_name. The local self-MCP increment will test that schema, real local SDK calls and program reading with synthetic data. Actual Work proof must include the generated file's independently bound source identity, a real uploaded object/version and independently verified bytes/hash. Links, file names and model statements cannot substitute. Browser-control download fallback is prohibited by the latest user instruction.
+
+Sources opened: [OpenAI file parameters](https://developers.openai.com/plugins/reference#file-apis), [MCP connection](https://developers.openai.com/plugins/deploy/connect-chatgpt), [Secure MCP Tunnel requirements](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels). The documented transport possibilities do not prove existing account permissions, credentials or connection readiness. No remote service, tunnel, auth/plugin installation or product import was performed.
 
 ## Direct observations
 

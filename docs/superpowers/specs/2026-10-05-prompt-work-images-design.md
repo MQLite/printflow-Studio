@@ -3,10 +3,114 @@
 | 项目 | 当前值 |
 | --- | --- |
 | 日期 | 2026-10-05（Pacific/Auckland） |
-| 修订 | 0.3：沿用已批准的附件设计，按用户明确指示改用 Chrome 验收 |
-| 状态 | 用户已批准修订 0.2 并授权自动实施及 Jira 写回；本轮明确选择“改用Chrome” |
+| 修订 | 0.5：保留外部结果交接，先实现独立本地 MCP 接收器与前台监控探针 |
+| 状态 | 已授权本地自建 MCP 增量；不部署、不连接公网；真实 Work 文件交接及来源绑定仍 NOT RUN |
 | 分支 | `codex/prompt-work-images` |
 | 起点 | `de7bca6e0a8462584b4d6bf4d16307d1335e2fb3` |
+
+## 0. 当前有效的结果交接修订 — 2026-10-05
+
+用户最新要求：最终流程不要使用浏览器控制工具下载结果，尝试将生成结果上传到某个 MCP Server 或 Google Drive 的特定目录，由程序监控并读取。这项指示立即生效。下方第 1–12 节保留原已批准、部分已实现的本地下载方案及验收来源；其中输出采用浏览器下载、唯一 `downloadId`、仅允许本地输出交接、排除 MCP／Drive 输出连接的规定，现由本节替代。输入附件上传、Chrome／真实 Work、一次提交、停止、图片校验和幂等导入继续有效。
+
+当前流程：
+
+`需求＋附件 → Prompt → 必要附件上传确认 → Chrome Work 生图 → 上传指定存储 → 程序监控完成回执 → 读取并校验图片 → 幂等素材导入`
+
+### 接入选择与已知能力
+
+- **已有 MCP 接收服务**：建议的可控交接边界。Work 调用接收工具，使用官方 `_meta["openai/fileParams"]` 文件对象交接真实结果；服务器取得完整文件并发布后返回稳定对象 ID、版本、长度和 SHA-256。程序只查询本请求／尝试的完成记录。服务地址、工具清单、认证及存储目录尚未提供。官方文件参数支持不证明当前账号能把这两张生成图片交给该工具。
+- **Google Drive 上传工具＋特定目录**：先验证连接后的工具支持把 Work 生成 PNG/JPEG 作为真实二进制文件创建在准确 folder ID 中，返回 file ID。程序使用独立的经授权读取连接监控该目录，按固定 file ID／版本读取。官方 API 支持上传与 changes 游标；ChatGPT 的 Drive 连接不自动赋予桌面程序 OAuth 凭据。若已有 Drive 桌面同步配置，可评估限定目录的同步接收，仍需完成回执与内容校验。
+
+首轮只接入用户确定且实际可用的一种提供方。此前 Google Drive 仅可发现；连接器可见也不证明它支持二进制上传。本轮 Work 生成结果菜单仅观察到 Space、文件信息、收藏、反馈，以及 viewer 的分享控件，未证实外部上传；composer 没有可见的 Drive 或指定 MCP 接收插件。用户随后提出“如果没有这类 MCP 的话，能否考虑自己做一个 MCP 服务？”，本轮据此先完成下述独立本地接收器／监控探针。已有服务器或 Drive 目录仍是可选后续接入，不再阻塞本地模块准备；目标连接、认证和真实上传不会由本地测试自动获得。
+
+### 监控、接收与导入合同
+
+程序在生图前保存指定提供方、目标范围、requestId、attemptId 和本次交接身份。远端完成回执绑定本次生成结果、稳定对象 ID、版本／完成身份、长度和 SHA-256；文件名仅辅助诊断，不能代替对象身份，Drive file ID 也不等于版本。Work 只交接本次新生成的单张原始结果，不能采用参考图、缩略图、历史结果或其他请求的文件。存储凭据和临时文件 URL 不进入 Prompt 日志、报告或 Git。
+
+监控仅在应用运行期间执行，按提供方完成记录或经过分页、持久游标处理的指定目录变化读取。重复通知、程序重启和重放仍只导入一次；不扫描账户所有文件，不按“最新图片”猜测结果，不增加常驻系统服务或计划任务。只在远端完整发布后，按固定对象／版本读取到本请求暂存位置，独立计算长度、SHA-256 和实际格式，仍限 PNG/JPEG、40 MiB、64 百万像素，再原子发布候选并进入原幂等导入事务。半文件、错尝试、版本变化、停止后迟到文件均不能自动导入。
+
+停止使本地交接身份失效并禁止采用迟到结果，不宣称远端文件已删除。重启不再次提交生图；已知完整对象可核验后继续接收。上传或读取失败保留 Prompt、必要附件与手动图片导入。网络读取边界在提供方确定后明确到模块；保留生产、诊断、安装和包策略，不删除测试或全局放宽网络限制。已有下载 DTO／状态事件属于旧实现基线，T08 必须修订，不能填造 downloadId 来兼容远端对象。
+
+### 验收与授权边界
+
+T02 验证真实 Work 文件上传到所选存储的能力；T07 保留真实输入附件与单次提交验收；T08 改为对象绑定、监控读取及严格图片接收；T11 分别证明两条链路的 request → attempt → generation result → remote object/version → independently verified bytes/hash → unique Session。原任务依赖保持，历史 PASS 不证明新接口已实现。
+
+收到目标和有效连接后，优先上传已有两条 Chrome Work 试验的结果，不重新生图，不调用浏览器控制工具下载。真实远端对象与独立读取证据才能满足验收；链接分享、本地合成文件、假上传或夹具 PASS 不等于 Work 结果上传。当前上传与监控读取均 NOT RUN，自动通道继续禁用。
+
+用户授权了结果上传／读取方向及独立本地 MCP 增量；外部目标、账户与访问范围仍需明确。不得擅自创建公网服务、部署 Linux、购买服务、更改生产安装、上传客户作品或推送／发布代码。新增部署、隧道和真实账号连接须单独明确；当前可完成本地实现与测试，真实 Work 交接仍缺少已授权且可达的连接和来源身份绑定。
+
+官方来源：[OpenAI MCP 文件参数](https://developers.openai.com/plugins/reference#file-apis)、[Work 连接 MCP 插件](https://developers.openai.com/plugins/quickstart)、[Drive 上传](https://developers.google.com/workspace/drive/api/guides/manage-uploads)、[Drive 变化游标](https://developers.google.com/workspace/drive/api/guides/manage-changes)。它们证明接口存在，未证明本账号、目标目录或生成图片交接已可用。
+
+### 自建 MCP：本轮最小可运行边界
+
+新增独立 `tools/ai-design-result-mcp/` Node ESM 模块，不加入产品 solution、MSI 或开机项。父执行上下文已核验 Node 24.14.0 及官方模块 `@modelcontextprotocol/server`／`client` 2.3.0、`@modelcontextprotocol/node` 2.1.1 和 zod 4 可用，并核验 sharp 0.35.5 可作受限完整图片解码器；本增量允许自己的 `package.json`／锁文件，不扩大旧产品包规则。采用已核验 SDK 的 Streamable HTTP handler，默认仅绑定明确的 loopback 地址与固定 `/mcp`，私有存储根使用持久单写者所有权锁。第二进程不得并发打开同一根；崩溃后的锁回收必须先证明原拥有者已退出，不能按锁龄删除活锁，无法确认时失败关闭。限制 Host／Origin、请求体长度、并发和超时；不用手写的简化 JSON-RPC 冒充完整 MCP。工具不需要网页组件、额外生图 API 或常驻监控服务。
+
+本地服务可由 CLI／SDK 客户端真实调用；这不代表 ChatGPT 网页能访问 localhost。当前官方指南支持可达 HTTPS MCP 端点，或将私有 stdio／HTTP 服务接入 Secure MCP Tunnel。后者需要 `tunnel_id`、运行凭据与独立 Platform 权限，不能由已有 Plus／Pro 推定，不能在本轮自动创建／安装／启用。公开部署与隧道均保持未执行。依据：[连接前提](https://developers.openai.com/plugins/deploy/connect-chatgpt)、[私有 MCP 隧道及权限](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)。
+
+模块内建议落点与边界如下；仅此表是实现建议，不表示文件已经存在：
+
+| 文件 | 职责 |
+| --- | --- |
+| `package.json`、`package-lock.json` | 本模块的固定 SDK 依赖与 test/start/probe 命令 |
+| `src/server.js`、`src/mcp.js` | 有界 loopback MCP 传输、认证、准确工具描述与结构化结果 |
+| `src/source-fetch.js`、`src/image-validation.js` | 仅获取允许的临时 HTTPS 文件；限额、完整解码与 hash；无通用 URL 代理 |
+| `src/store.js` | 受控登记、隔离暂存、每尝试的串行裁决、完整发布及回执恢复 |
+| `src/cli.js`、`src/monitor.js` | 独立认证的本地登记／停止控制；有限时长的前台完成回执查询与精确对象读取 |
+| `test/*.test.js`、CLI 探针命令 | 真实本地协议、流式文件边界、发布／停止／恢复与监控行为；夹具来源明确标注为本地测试 |
+
+HTTP 与源文件读取只存在于这个独立接入模块。`Domain`、`Workflow`、WPF、已有 NativeHost、生产安装／诊断／打包不增加网络客户端，原 `InstallerBoundaryTests` 等禁令保持。首个前台监控客户端通过独立认证的本地 REST 控制／读取端点取得准确回执和版本化字节，独立核对并写入自己的受管接收清单，证明程序可接收；它不是产品核心客户端。产品后续只通过 Infrastructure 中受管完成清单端口接入，独立复核候选，并另行满足 T08；原依赖满足前不接通核心导入。不能把外部 HTTP 客户端换名塞进核心，也不因这个隔离模块削弱全局测试。
+
+### 工具文件参数与消息合同
+
+MCP 只对 Work 暴露 `save_image_result`，用途是接收一份当前尝试生成的原始图片。顶层参数为 `request_id`、`attempt_id`、`upload_ticket`、`file`，均必填；禁止额外参数、目标路径、任意存储桶、任意读取 URL 等通用能力。请求／尝试 ID 是关联值，`upload_ticket` 则是由控制面签发、限定该尝试且可撤销的上传能力，不能读取结果、取消请求或提升来源信任。`_meta["openai/fileParams"] = ["file"]`；文件对象必须严格使用以下形状：
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "download_url": { "type": "string" },
+    "file_id": { "type": "string" },
+    "mime_type": { "type": "string" },
+    "file_name": { "type": "string" }
+  },
+  "required": ["download_url", "file_id"],
+  "additionalProperties": false
+}
+```
+
+四个属性必须都声明，只能要求其中 `download_url` 和 `file_id` 必填；文件名／MIME 不能作为可信格式或路径。该官方约定是平台把文件引用和临时取件 URL 交给工具，再由接收服务有界读取文件，**不涉及浏览器控制下载**。文档没有保证当前 Work 的 imagegen 输出一定可转换为该参数，也没有提供由 `file_id` 本身证明生成来源的通用机制。[文件参数规范](https://developers.openai.com/plugins/reference#file-apis)
+
+工具标注 `readOnlyHint=false`、`destructiveHint=false`、`idempotentHint=true`，且 `openWorldHint=true` 明示它会读取外部 HTTPS 文件；这些标注不能替代服务端授权。输出须有 `outputSchema`，返回结构化 `SaveImageResultReceipt`，不返回密钥、临时 URL 或本地绝对路径。[工具描述与结果原则](https://developers.openai.com/plugins/build/mcp-server)
+
+| DTO／操作 | 关键字段与裁决 |
+| --- | --- |
+| 本地 `EnrollResultRequest` | `requestId, attemptId, expectedFileId?`；控制身份由认证上下文取得，不能由参数冒充。生成分别限定上传／读取的随机 ticket，持久化其 hash、登记版本与撤销状态；可登记未绑定源的尝试，但不能由此进入自动接收。已登记身份的来源不可由重复调用静默改写。 |
+| `SaveImageResultInput` | `request_id, attempt_id, upload_ticket, file`；服务器把 MCP writer、有效上传 ticket、登记尝试和 source `file_id` 一并核验。 |
+| `SaveImageResultReceipt` | `schemaVersion, requestId, attemptId, status, objectId, objectVersion, sourceFileId, byteLength, sha256, mediaType, width, height, sourceVerified`；可用时附 `completedAt`。`status` 明确为 `received_unverified` 或 `Ready`；后者表示完整且源已核验的不可变发布，前者没有可导入的完成身份。 |
+| 本地 `CancelResultRequest` | 准确 request/attempt；在锁内更新登记版本并使 ticket 失效，与最终发布串行裁决。 |
+| 本地 `GetResultReceipt`／`ReadPublishedObject` | 每次验证该尝试的 read ticket，并只按准确尝试及对象版本读取；返回 Pending、received_unverified、Ready、Cancelled 或结构化错误。不提供枚举全部文件、最新文件、任意路径或任意 URL 读取。 |
+
+本地 control/read bearer 与 MCP writer bearer 分开，并增加每尝试不同的 upload/read ticket；MCP 调用者不能登记目标来源、撤销其他请求或读取任意结果。只有明确设计为本次交接的 upload ticket 可交给 Work 作为工具参数；它不证明生成来源，不写普通日志／Git，不在工具回执中回显。服务长期凭据和 read ticket 不进入 Work Prompt 或工具参数。本地探针的 bearer 功能不代表 ChatGPT OAuth／隧道已接通。未来外部连接必须明确真实身份认证和授权映射；配置与 CLI 登记结果保存在显式私有 `*.local.json`，不把密钥放命令行。日志只记录关联 ID、状态、长度和错误代码，不记录临时 URL 或认证头。
+
+本地 REST 控制面为 `POST /control/attempts`、`POST /control/attempts/{requestId}/{attemptId}/cancel`；只读接口为 `GET /results/{requestId}/{attemptId}`、`GET /results/{requestId}/{attemptId}/blob/{version}`。控制／读取认证必须独立于 `/mcp` 写入角色，read 接口还校验该尝试的 read ticket；MCP writer 访问这些端点一律拒绝。可共用严格 loopback listener，但未来外部转发只能暴露 MCP 路径，不能把控制面一并导出。对象读取仅返回完整 Ready 的固定版本，不跟随客户端路径。前台 `monitorOnce({baseUrl,requestId,attemptId,readTicket,inboxRoot})` 有总超时、取消和有限轮询间隔，复核身份及完整字节 hash 后原子发布自己的 inbox 文件和 receipt；重复读取复用同一结果，已存在文件被改则拒绝。
+
+### 来源、网络与完整发布
+
+1. **来源不是模型声明。** `file_id`、文件名、模型提供的 conversation/result 字符串都不是独立来源证明。登记的 `expectedFileId` 必须来自关联当前 Work 生成结果的可信控制路径；在真实能力尚未证实时，允许完整字节进入隔离区并返回 `received_unverified`（语义 SourceUnverified），但不产生 Ready 清单或自动导入候选。错源直接拒绝。输入参考图 file ID／已知哈希和其他请求已占用源身份应拒绝；不能仅凭没有命中这些拒绝项认定是生成结果。本轮最小范围只在初次控制登记时绑定来源，未绑定对象继续隔离；后续若需补绑定，必须独立设计认证控制操作，不能由 uploader 调用或自报字段自动提升。
+2. **受限文件获取。** 只接受 HTTPS、无 userinfo／fragment、明确允许的端口，以及配置中经实际官方 fileParams 来源核验的精确 origin；默认允许列表为空，未知域名失败关闭，不能猜测一个宽泛 OpenAI/CDN 通配域名。解析并校验所有 A/AAAA 地址，拒绝 loopback、私网、链路本地、保留／特殊地址及 IP 混淆表示；连接固定到已验证地址，同时保留原主机名做正常 TLS 校验，防 DNS rebinding。禁止自动重定向、代理继承和向源站转发 MCP／控制凭据。链接失效需平台提供新文件参数，不能爬取 ChatGPT 页面、调用未公开接口或改用任意 URL。测试里的假源注入只存在测试构造器，运行配置无“关闭校验”开关。
+3. **真实字节和限额。** 成功状态且完整 EOF 后才记录完成；请求 identity encoding，拒绝意外压缩、截断和超限，流式计数至最多 40 MiB，长度头存在时必须一致，读取总时限 2 分钟。根据字节检测 PNG/JPEG，计算 SHA-256。服务端先检查尺寸／64 百万像素上限，再使用隔离模块的 sharp 完成受限解码，必须实际消费解码管线、拒绝损坏／截断，不能只读取 metadata。解码并发及像素输出内存有明确上限；原始存储字节不因解码而重编码改变。客户端仍独立核对长度／hash，产品接收模块继续原严格图片校验后才发布 Candidate。
+4. **发布是不可变的。** 存储路径由服务器生成的对象 ID 派生，不使用入参文件名；固定私有根，拒绝路径穿越、reparse/symlink 与非普通文件，隔离数据不作为程序输入。临时文件写完并 flush，最终字节不可覆盖；最后原子发布含对象 ID、不可变版本、源 ID、长度和哈希的完成 manifest。崩溃在 manifest 前只留不可导入孤立文件；manifest 后重启可按已知身份恢复。版本是服务器生成的发布身份，不是假装是上游文件版本。监控每次按该版本读同一普通文件并重算 hash，异常不导入。
+5. **幂等和停止。** 同一 request/attempt 的并行调用只产生一个发布结果；相同 source ID 和相同内容返回原回执，不建立新版本。相同身份却内容不同、第二个 source ID、旧尝试、失效 ticket 均返回冲突／拒绝，不覆盖已有对象。读取过程中和发布前重新检查撤销与登记版本；取消和最终发布串行裁决。停止后收到的完整文件最多隔离保留，客户端仍以本地当前 attempt/stateVersion 重新验证，不能因服务端先前已经发布而绕过停止。重启只查询已登记对象，不重发生图或上传。
+
+### 本地证据与真实 Work 门槛
+
+最小测试边界为：SDK initialize／tools/list／tools/call 与准确四字段文件 schema；REST 与 MCP 认证角色隔离／错请求／错源／旧尝试；未绑定源始终 SourceUnverified；40 MiB／像素边界、截断、损坏图片、哈希／类型不符；origin／私网／DNS rebinding／redirect 拒绝且无凭据泄露；同一尝试并行重复和内容冲突；第二存储拥有者拒绝、活锁不回收与已退出拥有者恢复；停止发生于读取／发布前后；manifest 发布前后崩溃恢复；监控只读指定对象和不可变版本，重启／重放不重复交付。采用最少有意义的真实文件／故障窗口用例，不用穷举生成大量镜像测试。
+
+本地探针可用测试专用文件提供器，把明确的合成 PNG 经真实 MCP 调用、完整发布、有限时长轮询和独立 hash 读取跑通；报告为 `LOCAL_PROTOCOL_AND_STORE_PASS`，不能称为真实 Work 上传。前台 monitor 超时／取消会退出，不注册常驻任务；其读取通过不等于 ProcessingSession 已导入。新增模块的本地代码、测试与独立审查完成后仍不把 T02／T08／T11 或 Epic 标 Done。
+
+`realWorkFileTransfer=NOT_RUN` 保持到：已授权可达连接完成发现和认证；对保留的实际 Work 输出调用 `save_image_result`，取得真实平台文件参数；独立控制路径证明源文件与该次生成绑定；完成字节发布；程序按对象／版本读取并独立校验。两条原链路都要提供这组证据，不能用合成输入、链接分享、文件名或模型“已上传”的回复代替。来源无法独立绑定时保留 SourceUnverified 和手动路线，自动通道禁用。不会重新启用浏览器控制下载作为备用方案。
+
+路由记录：development-routing v2.4，继承 offset 0；本节架构工作 normal/requested/actual 为 `gpt-6-astra/high`，当前子代理 rollout 已有实际运行证据。架构决策完成后，本地网络／持久化／并发实现应切换或交接实际可验证的 Sol High 上下文；普通文档整理不使 Astra 常驻。新调用上下文的实际模型必须独立验证，本节不替其声明成功切换。
 
 ## 1. 用户目标与已确认约束
 

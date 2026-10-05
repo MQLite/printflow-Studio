@@ -1,5 +1,15 @@
 # Prompt image-generation execution handoff
 
+## Effective output transport and local MCP increment — 2026-10-05
+
+The latest human instruction forbids browser-control downloads in the final flow, requests upload to an MCP server or a specific Drive folder followed by program monitoring/reading, and then asks for a self-built MCP service. This supersedes the historical output-download/downloadId clauses below. Chrome, actual Work, required input attachments, one submit, cancellation, strict image validation, idempotent import and original dependencies remain required. Do not ask again whether browser downloads should be used.
+
+Spec revision 0.5 Section 0 and the supplemental local MCP task at the top of the existing implementation plan are the effective authority. An isolated `tools/ai-design-result-mcp/` Node module is being implemented with the official MCP SDK, control-enrolled source identity, attempt-scoped upload/read tickets, immutable objects/receipts, complete image decoding and a foreground monitor. No network client or Session wiring is added to core product/installer. Source-unbound uploads remain received_unverified; uploader/model assertions never elevate source trust. Local synthetic SDK/HTTP/storage evidence cannot close T02/T08/T11.
+
+Architecture completed in the existing verified gpt-6-astra/high context. Backend now runs in a genuinely fresh no-parent-history native subagent requested gpt-6-sol/high; actual runtime evidence pending. Parent retains verified gpt-6.1-sol/xhigh with MODEL_SWITCH_UNAVAILABLE, offset 0, policy 2.4. Existing automatic-execution authorization applies to this reversible local adaptation; no repeated design/implementation approval requested. Public/Linux deployment, tunnel setup, account connections, paid services and production installation remain separate boundaries.
+
+Work result menus expose Space/file information/favorites/feedback and viewer Share; no external upload operation was established. Drive was discoverable but unconnected; a plugin connection suggestion was made, not an installation. No browser download, new generation, remote upload or settings change occurred during this read-only feasibility inspection. Existing two outputs remain available and should be reused for actual MCP upload after a reachable, authorized connection and independent source binding exist. Actual Work upload and product import remain NOT RUN; 4/11 Tasks Done. Epic scope comment 10257 records the user change. The prior extension-ID request remains relevant to future input bridge proof, not output downloads.
+
 ## Chrome authorization checkpoint — 2026-10-05
 
 The human explicitly answered **“改用Chrome”**. This resolves the browser choice recorded below: effective default/acceptance browser is now the connected Windows Google Chrome profile. Spec revision 0.3 and the plan's opening scope amendment record this instruction; SCRUM-11158 summary and description were successfully updated and echoed Chrome. Original `plannedTasks` remain historical evidence; `executionWriteback.effectiveBrowserScope` records the approved change.

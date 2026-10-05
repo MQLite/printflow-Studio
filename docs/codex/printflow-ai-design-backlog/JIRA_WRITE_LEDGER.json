@@ -7,6 +7,21 @@
   "approvedSpec": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md",
   "sourceRevision": "24723e4 (revision 0.2; user approval recorded separately)",
   "executionWriteback": {
+    "effectiveOutputScope": {
+      "date": "2026-10-05",
+      "humanInstruction": "最终不用浏览器控制工具下载；上传MCP Server或Drive指定目录，由程序监控读取；后续提出自建MCP服务",
+      "effectiveSpecRevision": "0.5 Section 0",
+      "selectedLocalProbe": "tools/ai-design-result-mcp; separate Node ESM official MCP2 SDK service and foreground monitor",
+      "supersedes": "Browser output downloadId/root acceptance and prior exclusion of output MCP/Drive service; original input/Work/single-submit/image/idempotence/dependency requirements retained",
+      "completionChain": "request/attempt -> independently bound generation source -> immutable object/version -> independently read bytes/hash -> unique Session",
+      "currentStatus": "LOCAL_IMPLEMENTATION_IN_PROGRESS; REAL_WORK_UPLOAD_NOT_RUN; PRODUCT_RECEIVER_IMPORT_NOT_IMPLEMENTED",
+      "provenance": "Only authenticated control enrollment can bind expected source file identity; model supplied file metadata cannot elevate trust; unbound result remains received_unverified",
+      "authorizationBoundary": "Local implementation/testing authorized; no public/Linux deployment, account/plugin auth changes, paid API, production installation or push",
+      "jiraScopeComment": "10257",
+      "ruling": "Apply existing human-authorized automatic execution to local MCP scope adaptation; do not restart approval prompts for reversible local design and implementation; remote provisioning remains a separate boundary",
+      "route": "Architecture existing verified gpt-6-astra/high context completed; fresh no-history backend requested gpt-6-sol/high, runtime must be verified; parent gpt-6.1-sol/xhigh verified with MODEL_SWITCH_UNAVAILABLE; policy2.4 offset0",
+      "planSelfReview": "Spec and unit aligned; monitor additionally needs configured control/read bearer plus per-attempt read ticket; implementer notified. No core receiver or Session import wiring before original gates."
+    },
     "chromeExecution": {
       "date": "2026-10-05",
       "humanBrowserInstruction": "改用Chrome",
