@@ -27,13 +27,17 @@
       { "issueKey": "SCRUM-11159", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
       { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10233", "purpose": "T03 started after real T01 gate; original Sol6.0 backend preflight route and task acceptance constraints" },
       { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10234", "purpose": "Implementation dispatch capacity limitation and verified actual Sol6.1/high generation6 fallback" },
-      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10235", "purpose": "20AI+42boundary passes, preserved atomic-read RED, two independent P2 findings and attachment-submit gap; not Done" }
+      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10235", "purpose": "20AI+42boundary passes, preserved atomic-read RED, two independent P2 findings and attachment-submit gap; not Done" },
+      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10236", "purpose": "T03 originalAC1-5,67GREEN, freshreviewPASS and exact reviewed localcommit001bcd6" },
+      { "issueKey": "SCRUM-11159", "operation": "transition", "transitionId": "41", "observedStatus": "Done" },
+      { "issueKey": "SCRUM-11160", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
+      { "issueKey": "SCRUM-11161", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" }
     ],
     "lastObservedStatuses": {
-      "observedAtUtc": "2026-10-04 23:53:00 UTC",
-      "inProgress": [ "SCRUM-11156", "SCRUM-11158", "SCRUM-11159" ],
-      "toDo": [ "SCRUM-11160", "SCRUM-11161", "SCRUM-11162", "SCRUM-11163", "SCRUM-11164", "SCRUM-11165", "SCRUM-11166", "SCRUM-11167" ],
-      "done": [ "SCRUM-11157" ]
+      "observedAtUtc": "2026-10-05 00:27:17 UTC",
+      "inProgress": [ "SCRUM-11156", "SCRUM-11158", "SCRUM-11160", "SCRUM-11161" ],
+      "toDo": [ "SCRUM-11162", "SCRUM-11163", "SCRUM-11164", "SCRUM-11165", "SCRUM-11166", "SCRUM-11167" ],
+      "done": [ "SCRUM-11157", "SCRUM-11159" ]
     }
   },
   "items": [

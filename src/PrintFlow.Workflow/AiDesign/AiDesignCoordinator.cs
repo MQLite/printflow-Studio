@@ -5,31 +5,54 @@ using PrintFlow.Domain.Results;
 namespace PrintFlow.Workflow.AiDesign;
 
 /// <summary>Application-owned local orchestration. Browser parsing and session creation remain separate ports.</summary>
-public sealed class AiDesignCoordinator(IAiDesignRequestStore store, IAiDesignChannel channel, IAiDesignBrowserLease lease, TimeProvider? clock = null, TimeSpan? bridgeCallTimeout = null) : IAiDesignCoordinator, IDisposable
+public sealed class AiDesignCoordinator(IAiDesignRequestStore store, IAiDesignChannel channel, IAiDesignBrowserLease lease, TimeProvider? clock = null, TimeSpan? bridgeCallTimeout = null, IAiDesignAttachments? attachments = null, IAiDesignAttachmentShell? attachmentShell = null) : IAiDesignCoordinator, IDisposable
 {
     private readonly TimeProvider _clock = clock ?? TimeProvider.System;
     private readonly TimeSpan _bridgeCallTimeout = bridgeCallTimeout ?? TimeSpan.FromSeconds(15);
+    private readonly IAiDesignAttachments? _attachments = attachments;
+    private readonly IAiDesignAttachmentShell? _attachmentShell = attachmentShell;
+    private readonly PromptTemplateService _templates = new();
     private readonly SemaphoreSlim _serial = new(1, 1);
     private readonly Dictionary<Guid, IDisposable> _leases = [];
     private readonly CancellationTokenSource _lifetime = new();
     private bool _disposed;
     public OperationResult<AiDesignPrompt> ComposePrompt(string templateId, IReadOnlyDictionary<string,string> fields, IReadOnlyList<AiDesignAttachment> attachments, string language)
-        => OperationResult.Fail<AiDesignPrompt>(FailureCode.AdapterUnavailable, "Templates unavailable.");
+        => _templates.Compose(templateId, fields, attachments, language);
     public Task<OperationResult<AiDesignView>> CreateDraftAsync(AiDesignPrompt prompt, CancellationToken ct) => Serial(async () =>
-        await Project(await store.CreateAsync(Guid.NewGuid(), new(prompt, []), ct), ct), ct);
+    {
+        var valid = _templates.Validate(prompt, []); if (valid.IsFailure) return OperationResult.Fail<AiDesignView>(valid.Failure);
+        return await Project(await store.CreateAsync(Guid.NewGuid(), new(prompt, []), ct), ct);
+    }, ct);
     public Task<OperationResult<AiDesignView>> SaveDraftAsync(Guid requestId, AiDesignDraft draft, CancellationToken ct) => Serial(async () =>
     {
         var r = await store.ReadAsync(requestId, ct); if (r.IsFailure) return OperationResult.Fail<AiDesignView>(r.Failure);
+        var valid = _templates.Validate(draft.Prompt, draft.Attachments); if (valid.IsFailure) return OperationResult.Fail<AiDesignView>(valid.Failure);
         return await Project(await store.ChangeAsync(r.Value.Fence, new AiDesignEvent.DraftSaved(draft.Prompt, draft.Attachments, r.Value.NextAttachmentOrder), ct), ct);
     }, ct);
-    public Task<OperationResult<AiDesignView>> AddAttachmentsAsync(Guid requestId, IReadOnlyList<SelectedAiDesignFile> files, CancellationToken ct) => Unavailable("Attachment snapshots unavailable.");
+    public Task<OperationResult<AiDesignView>> AddAttachmentsAsync(Guid requestId, IReadOnlyList<SelectedAiDesignFile> files, CancellationToken ct) => Serial(async () =>
+    {
+        if (_attachments is null) return OperationResult.Fail<AiDesignView>(FailureCode.AdapterUnavailable, "Attachment snapshots unavailable.");
+        var read = await store.ReadAsync(requestId, ct); if (read.IsFailure) return OperationResult.Fail<AiDesignView>(read.Failure);
+        var changed = await store.EditDraftAsync(read.Value.Fence, async (r, token) =>
+        {
+            var snapshots = await _attachments.SnapshotAsync(requestId, files, r.Attachments, token);
+            return snapshots.IsSuccess ? OperationResult.Ok(new AiDesignDraft(r.Prompt, snapshots.Value)) : OperationResult.Fail<AiDesignDraft>(snapshots.Failure);
+        }, ct);
+        return await Project(changed, ct);
+    }, ct);
     public Task<OperationResult<AiDesignView>> StartAsync(Guid requestId, CancellationToken ct) => Serial(async () =>
     {
         var read = await store.ReadAsync(requestId, ct); if (read.IsFailure) return OperationResult.Fail<AiDesignView>(read.Failure);
         var r = read.Value;
         if (r.State is not (AiDesignState.PromptReady or AiDesignState.PromptOnly or AiDesignState.Cancelled or AiDesignState.Interrupted) || r.ImportedSessionId is not null)
             return OperationResult.Fail<AiDesignView>(FailureCode.PreconditionNotMet, "Request cannot start automatically in this stage.");
-        if (r.Prompt.AttachmentReferences.Any(id => !r.Attachments.Any(a => a.Id == id))) return OperationResult.Fail<AiDesignView>(FailureCode.PreconditionNotMet, "Missing attachment reference.");
+        var valid = _templates.Validate(r.Prompt, r.Attachments); if (valid.IsFailure) return OperationResult.Fail<AiDesignView>(valid.Failure);
+        if (r.Attachments.Count > 0)
+        {
+            if (_attachments is null) return OperationResult.Fail<AiDesignView>(FailureCode.AdapterUnavailable, "Attachment snapshots unavailable.");
+            var verified = await _attachments.VerifyAsync(requestId, r.Attachments, ct);
+            if (verified.IsFailure) return OperationResult.Fail<AiDesignView>(verified.Failure);
+        }
         var readiness = await CheckBridge(ct);
         if (readiness.IsFailure || !readiness.Value.Available || readiness.Value.ProtocolVersion != 1 || readiness.Value.WorkspaceIdentity != store.WorkspaceIdentity || readiness.Value.ConnectionId == Guid.Empty)
         {
@@ -105,8 +128,15 @@ public sealed class AiDesignCoordinator(IAiDesignRequestStore store, IAiDesignCh
         }
         finally { _serial.Release(); }
     }
-    public Task<OperationResult<Unit>> RevealAttachmentAsync(Guid requestId, Guid attachmentId, CancellationToken ct)
-        => Task.FromResult(OperationResult.Fail<Unit>(FailureCode.AdapterUnavailable, "Attachment shell unavailable."));
+    public async Task<OperationResult<Unit>> RevealAttachmentAsync(Guid requestId, Guid attachmentId, CancellationToken ct)
+    {
+        if (_attachments is null || _attachmentShell is null) return OperationResult.Fail<Unit>(FailureCode.AdapterUnavailable, "Attachment shell unavailable.");
+        var read = await store.ReadAsync(requestId, ct); if (read.IsFailure) return OperationResult.Fail<Unit>(read.Failure);
+        var attachment = read.Value.Attachments.SingleOrDefault(a => a.Id == attachmentId);
+        if (attachment is null) return OperationResult.Fail<Unit>(FailureCode.PreconditionNotMet, "Unknown attachment.");
+        var verified = await _attachments.VerifyAsync(requestId, [attachment], ct);
+        return verified.IsSuccess ? await _attachmentShell.RevealAsync(requestId, attachment, ct) : verified;
+    }
     private async Task<OperationResult<AiDesignView>> Project(OperationResult<AiDesignRequest> result, CancellationToken ct)
     {
         if (result.IsFailure) return OperationResult.Fail<AiDesignView>(result.Failure);
@@ -116,8 +146,7 @@ public sealed class AiDesignCoordinator(IAiDesignRequestStore store, IAiDesignCh
         bool editable = !AiDesignTransitions.IsRunning(r.State) && r.ImportedSessionId is null && r.Candidate is null && r.State != AiDesignState.ImportFailed;
         var view = new AiDesignRequestView(r.RequestId, r.AttemptId, r.StateVersion, AiDesignTransitions.FreezePrompt(r.Prompt), r.Attachments.ToArray(), r.UploadReceipts.ToArray(),
             r.State, r.LastSuccessfulStage, r.CreatedAtUtc, r.UpdatedAtUtc, r.Candidate, r.ImportedSessionId, r.Failure);
-        string handoff = r.Prompt.Text + "\n\n" + r.Prompt.HandoffInstructions;
-        if (r.Attachments.Count > 0) handoff += "\nUpload these required files manually before generating:\n" + string.Join("\n", r.Attachments.OrderBy(a => a.Order).Select(a => a.UploadName + ": " + a.Purpose));
+        string handoff = _templates.RenderHandoff(r.Prompt, r.Attachments);
         return new AiDesignView(view, editable, available && editable, AiDesignTransitions.CanStop(r.State), available ? null : readiness.IsSuccess ? readiness.Value.Reason ?? "BridgeUnavailable" : "BridgeUnavailable", handoff);
     }
     private async Task<OperationResult<AiDesignView>> Serial(Func<Task<OperationResult<AiDesignView>>> action, CancellationToken ct)

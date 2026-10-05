@@ -46,3 +46,31 @@ Ruling: `UploadStarted` also binds the tab/conversation for an attachment-free Q
 Ruling: use an explicit `AiDesignRequestView` in `AiDesignView`, preserving Request projection semantics without exposing live token/fence. Cost if wrong: future WPF consumers must use the view fields rather than full authority.
 
 Candidate retry regression clears active candidate authority, retains its file metadata in `RetainedCandidates`, and keeps Importing failures in ImportFailed regardless of a caller's optional flag. Recovery does not implement the future SQLite association or fake receiver/importer success.
+
+## T04 / T05 local evidence
+
+| Evidence | Filter | Exit | Result |
+| --- | --- | --- | --- |
+| `t04-red` | `FullyQualifiedName~PromptTemplateTests` | 1 | 0 passed / 7 failed; unavailable template service |
+| `t04-green` | same | 0 | 7 passed / 0 failed |
+| `t05-red` | `FullyQualifiedName~AiDesignAttachmentTests` | 1 | 19 failed / 5 rejection assertions passed against unavailable snapshots; 24 total |
+| `t05-green` | same | 0 | 24 passed / 0 failed |
+| `t05-integration-red` | `FullyQualifiedName~Coordinator_snapshots_explicit_selection` | 1 | 0 passed / 1 failed; coordinator had no snapshot integration |
+| `t04-t05-green` | `FullyQualifiedName~PromptTemplateTests\|FullyQualifiedName~AiDesignAttachmentTests\|FullyQualifiedName~AiDesignCoordinatorTests` | 0 | **41 passed / 0 failed / 0 skipped**: 7 templates, 25 attachments/integration, 9 coordinator behaviors |
+
+| Original AC | Local evidence / status |
+| --- | --- |
+| T04 AC1 | all three required fields; Chinese/newlines/quotes/dollar literals preserved and frozen — PASS |
+| T04 AC2 | same original filename, distinct stable upload names and purposes, no filesystem paths in generated attachment text — PASS |
+| T04 AC3 | missing structured attachment ID rejects Validate and copy, no-attachment templates valid — PASS |
+| T04 AC4 | exact edited final text persists and running DraftSaved rejected — PASS |
+| T04 AC5 | complete generation/handoff separate text with manual necessary-file list; unconfigured bridge local fallback remains — PASS locally; UI is T10 |
+| T05 AC1 | 8/9 count, 20/40 MiB exact and +1, 80 MiB total and +1, eleven supported extensions, empty/unsupported rejection — PASS |
+| T05 AC2 | original bytes/hash unchanged; published readonly snapshot seals exact ID/name/hash, tamper rejected; upload order never reused after deleting all prior files — PASS |
+| T05 AC3 | saved draft removal must fix structured references; coordinator rejects running attachment changes and tampered retry — PASS |
+| T05 AC4 | exact owned path/identity seal; cross-request, absolute/traversal and real Windows junction rejection — PASS |
+| T05 AC5 | temporary synthetic files only; raw results ignored; no runtime images/tokens in source — PASS locally |
+
+Ruling: the attachment module persists a monotonic `.attachment-sequence` under its own request-scoped lock, before publishing a snapshot. Deleted and failed selections cannot reuse an order even when the retained list is empty. Cost if wrong: a consumed order may leave harmless gaps, while later modules must retain this high-water file.
+
+Ruling: immutable means an owned readonly copy plus an identity seal and mandatory same-handle length/hash verification, not a promise that a local user cannot edit filesystem bytes. The upload boundary rejects such edits. Cost if wrong: a damaged snapshot requires reselecting the original file.
