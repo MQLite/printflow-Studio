@@ -6,6 +6,7 @@ Date: 2026-10-05 (Pacific/Auckland). Scope: PF-AIDESIGN-v1, design revision 0.2.
 
 - The supported computer/browser inventory returned one connected Chrome profile, the Codex in-app browser, and MCP Apps. It returned no connected Edge browser and no native application surfaces.
 - Attempting `cua.createBrowserTab("edge", "https://chatgpt.com", {sessionName: "🧪 PrintFlow Work 验证"})` returned `Browser is not available: edge` before any page opened.
+- A later inventory recheck still listed only Chrome (`id=3`), Codex in-app browser and MCP Apps. Selecting that connected provider for documentation explicitly identified **Name: Chrome / Type: extension / ID: 3**. No tab was opened or claimed by this metadata check; no evidence supports treating this provider as Edge.
 - A clarification is pending: connect the required Edge surface, explicitly authorize a Chrome acceptance-scope change, or defer real browser acceptance while local work proceeds where dependencies allow.
 
 ## Acceptance result

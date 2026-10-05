@@ -50,7 +50,9 @@
 | T10 | SCRUM-11166 | T09 | WPF／导航／交互，Astra High |
 | T11 | SCRUM-11167 | T10 | 真实验收 Astra High；独立代码审查 Sol High，必要文件／恢复审计 Astra High |
 
-截至本计划：T01 **BLOCKED**，完整 Release 回归在 12,873 passed / 0 failed 后被120秒hang检测中止，最后活动用例为 `ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment`；基线代理正做有界单用例定位。T02 被当前工具无法连接 Edge 阻塞，见 `WEB_CAPABILITY_REPORT.md`。不得把旧 restore/build/两个 lease 或多数测试通过当作完整基线通过。T01 未满足前，只推进规划、代码阅读和独立 T02；T01 通过后，即使 T02 仍阻塞，也可完成 T03–T06 的本地工作。T07 及其依赖链不越过 T02 的真实网页门槛。不能自行把 T09/T10 提前完成后关闭 Jira；用户若明确允许调整依赖／先交付本地能力，记录新指示与局部计划变化后再做。
+规划初稿时 T01 被既有停滞阻塞。经四个测试文件的最小夹具修正及独立审查，2026-10-05 12:49 NZDT 的完整普通 Release 回归已实际 exit0：13,919 passed / 0 failed / 1既有交互skip / 13,920 total。现有 `WorkstationEntryPhase!=Runtime` 边界仅排除七项需独立 reviewed run authority 的专用用例；这些当前验收 NOT RUN，未过滤 exit1 历史证据保留。详见 `BASELINE_REPORT.md`。T01 已 Jira Done，本地提交 `70fa317`；T03–T06 的本地实现门槛已满足。
+
+T02 仍被当前工具无法连接 Edge 阻塞，见 `WEB_CAPABILITY_REPORT.md`。T07 及其依赖链不越过 T02 的真实网页门槛。T06 的本地协议通过不替代真实登记/Edge连通/撤销验收。不能自行把 T09/T10 提前完成后关闭 Jira；用户若明确允许调整依赖／先交付本地能力，记录新指示与局部计划变化后再做。
 
 使用最少自然上下文：本地后端 T03–T06 一个连续执行上下文；网页合同／适配 T02/T07/T08 可复用页面上下文；文件接收与 T09 可复用后端上下文；T10 是真实 UI 边界；最终审查必须无完整实现历史的新上下文。规划完成后重分类，不让 Astra 自动延续全部后端实现。路由 profile 固定继承 `route_offset: 0`，真实运行证据写 HANDOFF。
 

@@ -162,6 +162,12 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
+      "printflow.aidesignprobe": {
+        "type": "Project",
+        "dependencies": {
+          "PrintFlow.Infrastructure": "[0.1.0, )"
+        }
+      },
       "printflow.app": {
         "type": "Project",
         "dependencies": {
