@@ -7,6 +7,22 @@
   "approvedSpec": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio/docs/superpowers/specs/2026-10-05-prompt-work-images-design.md",
   "sourceRevision": "24723e4 (revision 0.2; user approval recorded separately)",
   "executionWriteback": {
+    "continuationCheckpoints": [
+      {
+        "runId": "01a10a0f-9975-7661-8d1e-70df65765369",
+        "date": "2026-10-05",
+        "featureHeadAtResume": "d9c66abbbdb4c4709e75d5d8bef94553fa27179f",
+        "result": "PARTIALLY_COMPLETE; original Edge connection and dependency decision still pending",
+        "observations": "Connected Chrome exposes an inactive Work button and standard file inputs. Read-only inspection only; no Work activation, upload, generation, download, installation or registry write. No implementation changes or new product test run.",
+        "scopeDecision": "PENDING_HUMAN_ANSWER; original Edge AC and T07-T11 dependencies unchanged",
+        "observedStatuses": "Done T01/T03/T04/T05; In Progress T02/T06; To Do T07-T11",
+        "actualParentRoute": "gpt-6.1-sol/xhigh verified from current rollout; MODEL_SWITCH_UNAVAILABLE; no downgrade claimed",
+        "actualBrowserRoute": "gpt-6-astra/high verified from fresh native subagent rollout; policy 2.4, inherited offset 0",
+        "jiraCommentId": "10253",
+        "report": "WEB_CAPABILITY_REPORT.md read-only continuation appendix; HANDOFF.md continuation checkpoint",
+        "historicalTrxHashRechecked": "2CFCA83E14CDC8B60E80D7D5C849FF33920B576F70AA00EA87DBB758EA145E2A"
+      }
+    ],
     "runId": "01a1091c-e8f2-7e52-a5da-de443424b459",
     "date": "2026-10-05",
     "authorization": "User authorized automatic execution of the existing 11 Tasks under development-routing v2.4 and Jira results/status writeback; no push, merge, release or deployment.",
@@ -15,6 +31,13 @@
     "browserStatus": "BLOCKED: final post-regression supported browser inventory still lacks Edge. Real Work/upload/generation/download and T06 clean-user registration/Hello/rollback NOT RUN. T02/T06 In Progress; T07-T11 To Do under original gates. Pending scope clarification has no answer; original AC unchanged.",
     "featureIntegrationStatus": "PASS corrected complete ordinary Release: exit 0, 14021 passed / 0 failed / 1 existing interactive skip / 14022 total, 9m50s. All 13920 old ordinary identities retained plus 102 AI cases; only seven existing separately gated Runtime methods excluded. 36 frozen source/project/build/extension hashes unchanged. Renewed independent review PASS and 633 focused boundary cases PASS. Prior failed/incomplete and pre-race evidence retained. T03/T05 reclosed Done with comments 10248/10249 and verified transition results; Epic final comment 10252, four of eleven Tasks Done; T06 real Edge AC4 remains NOT RUN.",
     "writes": [
+      {
+        "issueKey": "SCRUM-11158",
+        "operation": "addComment",
+        "commentId": "10253",
+        "purpose": "Continuation read-only Chrome observations; browser decision pending; original acceptance and dependencies retained",
+        "observedStatus": "In Progress"
+      },
       {
         "issueKey": "SCRUM-11156",
         "operation": "transition",

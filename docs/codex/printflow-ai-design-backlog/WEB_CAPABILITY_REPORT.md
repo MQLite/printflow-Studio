@@ -25,3 +25,17 @@ Date: 2026-10-05 (Pacific/Auckland). Scope: PF-AIDESIGN-v1, design revision 0.2.
 These observations do not prove that Edge is uninstalled or that the website cannot support the feature. They establish an execution-access blocker in this session. Connected Chrome is not evidence of Edge acceptance. No account data, cookies, customer content, or screenshots were saved.
 
 SCRUM-11158 remains incomplete. The automatic channel must stay disabled until the actual required page, upload and download contracts are verified. Preserve the existing Jira dependency on SCRUM-11158 for SCRUM-11163; do not substitute ordinary Chat or fixture success for Work acceptance.
+
+## Read-only Chrome observation appendix — 2026-10-05
+
+This bounded inspection does not change the required Edge acceptance scope. The human browser choice remains pending. Only relevant control attributes were inspected in the existing ChatGPT tab; a temporary new tab at `https://chatgpt.com/` was used to inspect the root composer without reading conversation messages.
+
+- The authenticated-looking composer surface exposes `Add files and more` and a textbox labelled `Ask ChatGPT`. Authentication was inferred from the available signed-in interface; no account menu, credentials, cookies or account details were inspected.
+- The fresh root page exposes a visible `Work` control. The accessibility representation calls it an unchecked checkbox (`Value: 0`); the DOM identifies a `button` with exact text `Work`, `type="button"`, `data-state="closed"`, and no `role` or `aria-checked` attribute. A DOM checkbox locator therefore timed out. The control was not activated. This difference is relevant when establishing the eventual selector contract; neither representation alone proves active Work mode.
+- The existing composer exposes standard `input[type="file"]` elements labelled `Attach photos or videos` (`accept="image/*,video/*"`), `Attach photos` (`accept="image/*"`), and `Attach files` (no accept attribute). All three have `multiple`. These are observed input attributes, not proof of supported file formats, actual receipt, or successful uploads in Work mode.
+- No button or link with a download-related accessible label was present in the inspected page. No generated result was requested or inspected, so this is not evidence that image download is unsupported.
+- No prompt was entered or submitted, no file was uploaded or downloaded, no Work task was created, and no settings or extensions were changed. No screenshots, account details, unrelated chat content or page identifiers were saved in this report. No supported production selector/fixture was declared from this inspection.
+
+The useful next step, after the pending browser decision, is to enter Work through the observed control in the authorized browser, then run the two planned synthetic trials and establish attachment completion, result identity, and unique browser download-ID evidence. T02 AC1–4 remain incomplete and the automatic channel remains unavailable.
+
+Routing: policy 2.4; normal/requested/execution target Astra 6.0 High (`gpt-6-astra`, `high`); inherited route offset 0, adjustment unchanged. The native subagent's own rollout `turn_context` at `2026-10-05T03:18:19.839Z` verifies actual `gpt-6-astra` / `high`; this is runtime evidence, not merely an accepted spawn request. This was a bounded webpage-contract subagent context, with no code or Jira changes.

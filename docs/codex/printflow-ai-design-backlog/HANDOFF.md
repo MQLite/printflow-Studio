@@ -1,5 +1,21 @@
 # Prompt image-generation execution handoff
 
+## Continuation checkpoint — 2026-10-05 16:22 NZDT
+
+The human requested continuation of this same Prompt image-generation task. Authority and scope remain the original eleven Tasks, automatic execution and Jira writeback under routing v2.4. The existing implementation plan is reused. Feature HEAD before this checkpoint is `d9c66abbbdb4c4709e75d5d8bef94553fa27179f`; the feature checkout was clean. Work remains in the existing isolated checkout, not the primary master workspace.
+
+- Fresh Jira readback confirms the same four Done Tasks (T01/T03/T04/T05), T02/T06 In Progress and T07–T11 To Do. No task is newly complete.
+- The supported browser inventory again exposes Chrome, the in-app browser and MCP Apps, with no Edge. Native app controls are disabled in this session. A required browser choice is pending: explicitly accept Chrome validation, connect Edge, or authorize independent local implementation while deferring browser acceptance. No answer has been received; elapsed time does not change the required Edge scope or dependencies.
+- A bounded read-only webpage-context subagent found a visible inactive Work button at the Chrome root and standard composer file inputs. Work was not activated; there was no prompt entry, upload, generation, download or extension/settings change. The temporary observation tab was closed. See the sanitized appendix in [WEB_CAPABILITY_REPORT.md](WEB_CAPABILITY_REPORT.md); observed controls are not a verified Work contract.
+- [Official browser connection instructions](https://learn.chatgpt.com/docs/chrome-extension) support Edge setup through desktop Settings → Computer Use (More browsers when needed), the official extension, and the matching installed profile. This establishes a supported setup route, not current Edge connectivity. The agent cannot perform desktop setup through the disabled native controls.
+- No implementation source or original AC was changed. The historical final ordinary TRX was found at its recorded path and its SHA-256 rechecked as `2CFCA83E14CDC8B60E80D7D5C849FF33920B576F70AA00EA87DBB758EA145E2A`. This is evidence preservation, not a new test run. No build, product test or Runtime acceptance was rerun for this observational documentation increment.
+
+Routing/context: inherited offset 0, policy 2.4. Parent coordination normal route Sol Medium; actual current rollout verifies `gpt-6.1-sol` / `xhigh`, live selector unavailable, `MODEL_SWITCH_UNAVAILABLE`; no downgrade is claimed. Webpage investigation normal/requested/actual route Astra High, verified `gpt-6-astra` / `high` in native subagent `/root/work_browser_contract`, fresh context without parent exploration history. This is a real webpage-contract boundary; it is not an independent implementation review. After that boundary remaining implementation is reclassified normally: browser adapter/UI Astra High, separable persistence/import Sol High. Implementation is not dispatched while the browser/dependency decision is unresolved.
+
+Next action: resolve the pending browser/dependency decision, then run T02's original synthetic text-only and mixed-attachment Work trials in the authorized browser. T06 still needs real registration → Hello → rollback; T07–T11 retain the original dependency gates. Preserve the existing pending question rather than asking it again. No push, merge, release, deployment, installation or registry write has occurred.
+
+## Previous execution checkpoint
+
 Updated 2026-10-05 after the corrected ordinary Release regression. Local implementation and independent review passed for the eligible T03–T06 increment. Real Edge acceptance remains blocked. Jira readback at 01:53:29 UTC confirms four of eleven Tasks Done: T01, T03, T04 and T05. Epic summary comment 10252 records the remaining gate.
 
 ## Authority and workspace
