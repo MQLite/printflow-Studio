@@ -13,31 +13,254 @@
     "workspace": "C:/Users/admin/.codex/worktrees/prompt-work-images/printflow-Studio",
     "baselineStatus": "PASS complete ordinary Release: exit0,13919pass/0fail/1existing interactive skip/13920total,9m51s; exact test identities exclude only seven existing WorkstationEntryPhase=Runtime methods. Dedicated runtime current verification NOT RUN; completed unfiltered exit1 evidence preserved. Fresh independent scope and source reviews clean.",
     "browserStatus": "BLOCKED: Edge is unavailable in current browser control; real Work/upload/generation/download NOT RUN. User clarification pending; original AC unchanged.",
+    "featureIntegrationStatus": "PASS corrected complete ordinary Release: exit 0, 14021 passed / 0 failed / 1 existing interactive skip / 14022 total, 9m50s. All 13920 old ordinary identities retained plus 102 AI cases; only seven existing separately gated Runtime methods excluded. 36 frozen source/project/build/extension hashes unchanged. Renewed independent review PASS and 633 focused boundary cases PASS. Prior failed/incomplete and pre-race evidence retained. T03/T05 ready for closing writeback; T06 real Edge AC4 remains NOT RUN.",
     "writes": [
-      { "issueKey": "SCRUM-11156", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
-      { "issueKey": "SCRUM-11157", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
-      { "issueKey": "SCRUM-11158", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
-      { "issueKey": "SCRUM-11156", "operation": "addComment", "commentId": "10227", "purpose": "Authorized scope, isolation, routing and acceptance gates" },
-      { "issueKey": "SCRUM-11158", "operation": "addComment", "commentId": "10228", "purpose": "Observed Edge tool-access blocker and NOT RUN real acceptance" },
-      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10229", "purpose": "Initial full Release hang diagnosis; incomplete result, not Done" },
-      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10230", "purpose": "Minimal recovery fixture repair and scoped passes; remaining Startup/UI failures" },
-      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10231", "purpose": "Completed unfiltered failure, dedicated runtime authority boundary and ordinary profile pending" },
-      { "issueKey": "SCRUM-11157", "operation": "addComment", "commentId": "10232", "purpose": "T01 acceptance evidence, scoped full exit0 and baseline commit70fa317" },
-      { "issueKey": "SCRUM-11157", "operation": "transition", "transitionId": "41", "observedStatus": "Done" },
-      { "issueKey": "SCRUM-11159", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
-      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10233", "purpose": "T03 started after real T01 gate; original Sol6.0 backend preflight route and task acceptance constraints" },
-      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10234", "purpose": "Implementation dispatch capacity limitation and verified actual Sol6.1/high generation6 fallback" },
-      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10235", "purpose": "20AI+42boundary passes, preserved atomic-read RED, two independent P2 findings and attachment-submit gap; not Done" },
-      { "issueKey": "SCRUM-11159", "operation": "addComment", "commentId": "10236", "purpose": "T03 originalAC1-5,67GREEN, freshreviewPASS and exact reviewed localcommit001bcd6" },
-      { "issueKey": "SCRUM-11159", "operation": "transition", "transitionId": "41", "observedStatus": "Done" },
-      { "issueKey": "SCRUM-11160", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" },
-      { "issueKey": "SCRUM-11161", "operation": "transition", "transitionId": "21", "observedStatus": "In Progress" }
+      {
+        "issueKey": "SCRUM-11156",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11158",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11156",
+        "operation": "addComment",
+        "commentId": "10227",
+        "purpose": "Authorized scope, isolation, routing and acceptance gates"
+      },
+      {
+        "issueKey": "SCRUM-11158",
+        "operation": "addComment",
+        "commentId": "10228",
+        "purpose": "Observed Edge tool-access blocker and NOT RUN real acceptance"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "addComment",
+        "commentId": "10229",
+        "purpose": "Initial full Release hang diagnosis; incomplete result, not Done"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "addComment",
+        "commentId": "10230",
+        "purpose": "Minimal recovery fixture repair and scoped passes; remaining Startup/UI failures"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "addComment",
+        "commentId": "10231",
+        "purpose": "Completed unfiltered failure, dedicated runtime authority boundary and ordinary profile pending"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "addComment",
+        "commentId": "10232",
+        "purpose": "T01 acceptance evidence, scoped full exit0 and baseline commit70fa317"
+      },
+      {
+        "issueKey": "SCRUM-11157",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10233",
+        "purpose": "T03 started after real T01 gate; original Sol6.0 backend preflight route and task acceptance constraints"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10234",
+        "purpose": "Implementation dispatch capacity limitation and verified actual Sol6.1/high generation6 fallback"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10235",
+        "purpose": "20AI+42boundary passes, preserved atomic-read RED, two independent P2 findings and attachment-submit gap; not Done"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10236",
+        "purpose": "T03 originalAC1-5,67GREEN, freshreviewPASS and exact reviewed localcommit001bcd6"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11160",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11160",
+        "operation": "addComment",
+        "commentId": "10237",
+        "purpose": "T04 originalAC1-5, template7 and combined41GREEN, freshreviewPASS, exactcommit37f447d"
+      },
+      {
+        "issueKey": "SCRUM-11160",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "addComment",
+        "commentId": "10238",
+        "purpose": "T05 originalAC1-5, attachment25 and combined41GREEN, freshreviewPASS, exactcommit37f447d"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "transition",
+        "transitionId": "41",
+        "observedStatus": "Done"
+      },
+      {
+        "issueKey": "SCRUM-11162",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11162",
+        "operation": "addComment",
+        "commentId": "10239",
+        "purpose": "T06 local development unlocked after original T05 gate; real clean-Edge registration/Hello/rollback NOT RUN"
+      },
+      {
+        "issueKey": "SCRUM-11163",
+        "operation": "addComment",
+        "commentId": "10240",
+        "purpose": "T07 original T02/T06 dependency blocker; keep ToDo and no ordinaryChat/mock substitute"
+      },
+      {
+        "issueKey": "SCRUM-11164",
+        "operation": "addComment",
+        "commentId": "10241",
+        "purpose": "T08 original T07 dependency blocker; keep ToDo"
+      },
+      {
+        "issueKey": "SCRUM-11165",
+        "operation": "addComment",
+        "commentId": "10242",
+        "purpose": "T09 original T08 dependency blocker; keep ToDo"
+      },
+      {
+        "issueKey": "SCRUM-11166",
+        "operation": "addComment",
+        "commentId": "10243",
+        "purpose": "T10 original T09 dependency blocker; keep ToDo"
+      },
+      {
+        "issueKey": "SCRUM-11167",
+        "operation": "addComment",
+        "commentId": "10244",
+        "purpose": "T11 original T10/realE2E gate blocker; keep ToDo"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "addComment",
+        "commentId": "10245",
+        "purpose": "Full ordinary integration named-cleanup failure; reopenT03 pending owned-staging fix and broader verification"
+      },
+      {
+        "issueKey": "SCRUM-11159",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "addComment",
+        "commentId": "10246",
+        "purpose": "Full ordinary integration named-cleanup failure; reopenT05 pending creation-issued batch ownership and broader verification"
+      },
+      {
+        "issueKey": "SCRUM-11161",
+        "operation": "transition",
+        "transitionId": "21",
+        "observedStatus": "In Progress"
+      },
+      {
+        "issueKey": "SCRUM-11156",
+        "operation": "addComment",
+        "commentId": "10247",
+        "purpose": "Retained failed incomplete group, honest task reopening, bounded verified Astra design then actual Sol implementation"
+      }
     ],
     "lastObservedStatuses": {
-      "observedAtUtc": "2026-10-05 00:27:17 UTC",
-      "inProgress": [ "SCRUM-11156", "SCRUM-11158", "SCRUM-11160", "SCRUM-11161" ],
-      "toDo": [ "SCRUM-11162", "SCRUM-11163", "SCRUM-11164", "SCRUM-11165", "SCRUM-11166", "SCRUM-11167" ],
-      "done": [ "SCRUM-11157", "SCRUM-11159" ]
+      "observedAtUtc": "2026-10-05 01:19:42 UTC",
+      "inProgress": [
+        "SCRUM-11156",
+        "SCRUM-11158",
+        "SCRUM-11159",
+        "SCRUM-11161",
+        "SCRUM-11162"
+      ],
+      "toDo": [
+        "SCRUM-11163",
+        "SCRUM-11164",
+        "SCRUM-11165",
+        "SCRUM-11166",
+        "SCRUM-11167"
+      ],
+      "done": [
+        "SCRUM-11157",
+        "SCRUM-11160"
+      ]
+    },
+    "finalRegression": {
+      "command": "dotnet test PrintFlowStudio.sln -c Release --no-build --no-restore --filter 'WorkstationEntryPhase!=Runtime' --blame-hang --blame-hang-timeout 120s --blame-hang-dump-type none --logger 'trx;LogFileName=group-release-ordinary-corrected.trx' --results-directory artifacts/test-results/prompt-work-images-local --verbosity minimal",
+      "exitCode": 0,
+      "passed": 14021,
+      "failed": 0,
+      "skipped": 1,
+      "total": 14022,
+      "duration": "9m50s",
+      "startUtc": "2026-10-05 01:35:41 UTC",
+      "finishUtc": "2026-10-05 01:45:38 UTC",
+      "oldOrdinaryIdentitiesRetained": 13920,
+      "newAiIdentities": 102,
+      "excludedExistingRuntime": 7,
+      "frozenFileCount": 36,
+      "sourceHashMismatchCount": 0,
+      "trx": "artifacts/test-results/prompt-work-images-local/group-release-ordinary-corrected.trx",
+      "trxSha256": "2CFCA83E14CDC8B60E80D7D5C849FF33920B576F70AA00EA87DBB758EA145E2A",
+      "dedicatedRuntime": "NOT RUN; separately authorized Workstation Entry graph",
+      "realEdge": "NOT RUN; Edge provider unavailable",
+      "independentReview": "PASS local T03-T06 correction; gpt-6.1-sol/high exact final metadata 2026-10-05 01:33:42 UTC"
     }
   },
   "items": [

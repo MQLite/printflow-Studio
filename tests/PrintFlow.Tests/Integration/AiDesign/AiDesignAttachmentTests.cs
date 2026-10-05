@@ -9,6 +9,50 @@ namespace PrintFlow.Tests.Integration.AiDesign;
 
 public sealed class AiDesignAttachmentTests
 {
+    [Fact]
+    public async Task Refused_batch_cleanup_preserves_replaced_file_and_original_snapshot_failure()
+    {
+        using TempWorkspace source=new();using TempWorkspace owned=new();Guid id=Guid.NewGuid();
+        string input=Source(source.Root,"reference.png",3);string? replacement=null;
+        var files=new FileAiDesignAttachments(owned.Root,a=>
+        {
+            replacement=Path.Combine(owned.Root,"AiDesign","Requests",id.ToString("D"),a.Snapshot.RelativePath.Replace('/',Path.DirectorySeparatorChar));
+            File.Move(replacement,replacement+".original");File.WriteAllBytes(replacement,[9]);File.SetAttributes(replacement,FileAttributes.ReadOnly|FileAttributes.Hidden);
+            throw new IOException("synthetic original snapshot failure");
+        });
+        var result=await files.SnapshotAsync(id,[new(input,"reference")],[],default);
+        result.IsFailure.ShouldBeTrue();result.Failure.TechnicalDetail.ShouldBe("AttachmentSnapshotFailed");
+        File.ReadAllBytes(replacement!).ShouldBe(new byte[]{9});
+        (File.GetAttributes(replacement!)&(FileAttributes.ReadOnly|FileAttributes.Hidden)).ShouldBe(FileAttributes.ReadOnly|FileAttributes.Hidden);
+        File.ReadAllBytes(replacement+".original").ShouldBe(new byte[3]);
+    }
+    [Theory]
+    [InlineData(false)][InlineData(true)]
+    public async Task Mid_batch_failure_or_cancel_preserves_original_old_snapshot_unknowns_and_production_sentinels(bool cancel)
+    {
+        using TempWorkspace source=new();using TempWorkspace owned=new();Guid id=Guid.NewGuid();using var stopped=new CancellationTokenSource();
+        string first=Source(source.Root,"first.png",3),second=Source(source.Root,"second.txt",4);
+        var old=(await new FileAiDesignAttachments(owned.Root).SnapshotAsync(id,[new(first,"old")],[],default)).Value;
+        string oldPath=Path.Combine(owned.Root,"AiDesign","Requests",id.ToString("D"),old[0].Snapshot.RelativePath.Replace('/',Path.DirectorySeparatorChar));
+        var sentinels=new List<(string Path,byte[] Bytes,FileAttributes Attributes)>();
+        foreach(string area in new[]{"Revision","Approved","Rejected","Production"})
+        {string folder=Path.Combine(owned.Root,area);Directory.CreateDirectory(folder);string path=Path.Combine(folder,"preserve.tiff");File.WriteAllBytes(path,[5]);File.SetAttributes(path,FileAttributes.ReadOnly|FileAttributes.Hidden);sentinels.Add((path,[5],File.GetAttributes(path)));}
+        string? currentSnapshot=null,seal=null,unknown=null;
+        var failing=new FileAiDesignAttachments(owned.Root,a=>
+        {
+            currentSnapshot=Path.Combine(owned.Root,"AiDesign","Requests",id.ToString("D"),a.Snapshot.RelativePath.Replace('/',Path.DirectorySeparatorChar));
+            seal=Path.Combine(Path.GetDirectoryName(currentSnapshot)!,"identity.json");File.Exists(seal).ShouldBeTrue();
+            unknown=Path.Combine(Path.GetDirectoryName(currentSnapshot)!,"unknown.tiff");File.WriteAllBytes(unknown,[9]);File.SetAttributes(unknown,FileAttributes.ReadOnly|FileAttributes.Hidden);
+            sentinels.Add((unknown,[9],File.GetAttributes(unknown)));
+            if(cancel)stopped.Cancel();else File.Delete(second);
+        });
+        var result=await failing.SnapshotAsync(id,[new(first,"new"),new(second,"later")],old,stopped.Token);
+        result.IsFailure.ShouldBeTrue();result.Failure.TechnicalDetail.ShouldBe(cancel?"AttachmentCancelled":"AttachmentSnapshotFailed");
+        File.Exists(currentSnapshot).ShouldBeFalse();File.Exists(seal).ShouldBeFalse();
+        foreach(var s in sentinels){File.ReadAllBytes(s.Path).ShouldBe(s.Bytes);File.GetAttributes(s.Path).ShouldBe(s.Attributes);}
+        File.ReadAllBytes(first).ShouldBe(new byte[3]);File.ReadAllBytes(oldPath).ShouldBe(new byte[3]);
+        (await new FileAiDesignAttachments(owned.Root).VerifyAsync(id,old,default)).IsSuccess.ShouldBeTrue();
+    }
     private const long MiB = 1024 * 1024;
     private static string Source(string root, string name, long length)
     { string path = Path.Combine(root,name); using var stream = new FileStream(path,FileMode.CreateNew,FileAccess.Write); stream.SetLength(length); return path; }

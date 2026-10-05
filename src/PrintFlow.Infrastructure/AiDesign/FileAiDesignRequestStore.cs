@@ -136,16 +136,9 @@ public sealed class FileAiDesignRequestStore : IAiDesignRequestStore
     }
     private async Task WriteAsync(AiDesignRequest r, CancellationToken ct)
     {
-        string authority = Authority(r.RequestId), temporary = Path.Combine(DirectoryFor(r.RequestId), $".request-{Guid.NewGuid():N}.tmp");
-        ReparsePointGuard.RefuseAncestry(authority);
-        try
-        {
-            await using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None, 65536, FileOptions.WriteThrough))
-            { await JsonSerializer.SerializeAsync(stream, r, JsonOptions, ct); await stream.FlushAsync(ct); stream.Flush(true); }
-            ct.ThrowIfCancellationRequested(); ReparsePointGuard.RefuseAncestry(authority);
-            if (File.Exists(authority)) File.Replace(temporary, authority, null); else File.Move(temporary, authority, false);
-        }
-        finally { if (File.Exists(temporary)) File.Delete(temporary); }
+        using var staged=AiDesignOwnedStagingFiles.CreateRequest(WorkspaceRoot,r.RequestId,AiDesignOwnedStagingFiles.RequestPurpose.RequestAuthority);
+        await JsonSerializer.SerializeAsync(staged.Output,r,JsonOptions,ct);
+        await staged.PublishAsync(ct);
     }
     private static bool ValidDraft(Guid id, AiDesignDraft draft) => !string.IsNullOrWhiteSpace(draft.Prompt.Text)
         && draft.Attachments.All(a => a.Snapshot.RequestId == id && a.Id != Guid.Empty && a.Order > 0)

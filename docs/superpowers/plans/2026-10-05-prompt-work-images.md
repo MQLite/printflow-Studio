@@ -281,3 +281,17 @@ Task<OperationResult<SessionView?>> FindAsync(Guid requestId, CancellationToken 
 - 架构自审已补足：浏览器主动启动native host；断线不重放；稳定附件ID与编辑文本并存；提交不确定保留位；完整像素解码；requestJSON／SQLite间崩溃由数据库唯一关联裁决。计划本身通过自审不代表实现／测试／真实网页通过。
 
 协议事实来源（2026-10-05读取）：[Microsoft Edge Native Messaging](https://learn.microsoft.com/en-us/microsoft-edge/extensions/developer-guide/native-messaging)、[Chromium Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging)、[Downloads API](https://developer.chrome.com/docs/extensions/reference/api/downloads)。这些只证明扩展协议和下载API合同；Work网页能力仍由T02真实证据决定。
+
+## 执行中集成修正：AI 自有暂存清理边界
+
+2026-10-05 首次功能组完整普通 Release 回归触发既有 PhotoshopFinalReviewBoundaryTests 具名删除禁令。失败日志及中断exit1/noTRX保留，T03/T05已重新In Progress，不能把局部157GREEN当作完整集成通过。新增有界架构检查实际 Astra6.0/high已验证；设计完成后回到已有实际Sol6.1/high后端执行上下文。
+
+最小修正新增 `Infrastructure/AiDesign/AiDesignOwnedStagingFiles.cs`，不加Domain/Workflow端口、schema或保留调度器。只有当前操作成功CreateNew后签发私有所有权对象；闭合集合从已验证Workspace/requestId或安装目录派生请求、序号、队列和心跳暂存名/发布目标，附件批次跟踪自身新建的快照/身份封印。通过现有NativeMethods核验volume/file identity及共享链接，逐边界containment/reparse检查；仅清ReadOnly位，拒绝清理保留原失败。发布消耗暂存清理权限，附件移到最终名后仍持有当前批次回滚权限，整批成功才释放。已有或从草稿移除的已提交附件不获得本批清理权限。无任意Delete(path)/RegisterExisting、无目录枚举、无Directory.Delete，保留空生成目录/崩溃遗留。
+
+迁移 FileAiDesignAttachments（失败回滚/序号）、FileAiDesignRequestStore、FileAiDesignChannel、NativeHostSession 暂存清理。将NativeHost纳入既有删除guard扫描，所有原File.Delete/Directory.Delete禁令保留；不豁免调用者或新增目录删除边界。
+
+52项针对性及627项全Architecture/AI/旧回归通过后的独立复审发现校验句柄允许FileShare.Delete、后续路径操作可命中替换文件的真实竞态，前述GREEN作为修复前历史保留。同一AstraHigh架构上下文进一步收紧：顶向下固定父目录句柄，拒绝实际打开的reparse；以DELETE/READ_ATTRIBUTES/WRITE_ATTRIBUTES及仅SHARE_READ打开已创建文件，在同一句柄核验identity/type/single-link并完成FileBasicInfo属性、FileDispositionInfo删除及NtSetInformationFile相对固定leaf改名。只复用既有NativeMethods，无路径API回退；本模块禁止File.Delete/SetAttributes/Move/Replace及枚举/Directory.Delete。成功改名后立即更新/消耗所有权，保持缓冲和同步句柄至完成；native错误映射IOException，清理拒绝仍保留原失败。Readonly位清除后若为0须设Normal，其他属性不改。
+
+guard明确识别native变更路线：SetFileInformationByHandle/NtSetInformationFile调用只允许既有Delivery/WindowsDeliveryNative.cs及新增AiDesignOwnedStagingFiles.cs的精确源码路径；不得以未使用的File.Delete白名单隐藏该路线。增加校验后并发文件/父目录替换的确定性RED-GREEN，同时证明清理实际成功、改名发布原字节、Readonly属性正确，保留校验前替换/reparse/shared-link拒绝用例。这仍是同一已授权暂存清理修正，不增加后续Task范围或批准阶段。
+
+先保留原guard精确RED及新行为RED，再验证新建失败碰撞不获权、发布后dispose不删除、批次中途失败仅清本批、原件/旧快照/未知邻居/生产区sentinels保留、文件身份替换/reparse/sharedhardlink拒绝、批次commit和草稿移除保留已提交快照。然后全部Architecture及AI/RetentionWorkspace/DiagnosticRetention/旧lease/import回归、真正独立复审，最后锁定restore/Release build/完整普通Release重跑。T02真实Edge、T06AC4及T07–T11原依赖不变。

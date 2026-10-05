@@ -14,6 +14,7 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
 {
     public const long ImageLimit = 20L * 1024 * 1024, DocumentLimit = 40L * 1024 * 1024, TotalLimit = 80L * 1024 * 1024;
     private readonly string _workspaceRoot;
+    private readonly Action<AiDesignAttachment>? _afterPrepared;
     private static readonly IReadOnlyDictionary<string,string> Types = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase)
     { [".png"]="image/png",[".jpg"]="image/jpeg",[".jpeg"]="image/jpeg",[".webp"]="image/webp",[".pdf"]="application/pdf",
       [".txt"]="text/plain",[".md"]="text/markdown",[".csv"]="text/csv",[".docx"]="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -23,10 +24,11 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
         if (!Path.IsPathFullyQualified(workspaceRoot)) throw new ArgumentException("Absolute workspace root required.",nameof(workspaceRoot));
         _workspaceRoot = Path.GetFullPath(workspaceRoot);
     }
+    internal FileAiDesignAttachments(string workspaceRoot,Action<AiDesignAttachment> afterPrepared):this(workspaceRoot)
+        =>_afterPrepared=afterPrepared;
     public async Task<OperationResult<IReadOnlyList<AiDesignAttachment>>> SnapshotAsync(Guid requestId, IReadOnlyList<SelectedAiDesignFile> selected,
         IReadOnlyList<AiDesignAttachment> existing, CancellationToken ct)
     {
-        var created = new List<string>();
         try
         {
             string root = RequestRoot(requestId); ReparsePointGuard.RefuseAncestry(root); Directory.CreateDirectory(root);
@@ -43,17 +45,16 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
                 total = checked(total+length); if (total > TotalLimit) return Reject("AttachmentTotalSizeLimit"); sizes.Add(length);
             }
             var result = existing.ToList();
+            using var batch=AiDesignOwnedStagingFiles.BeginAttachments(_workspaceRoot,requestId);
             for (int i=0;i<selected.Count;i++)
             {
                 ct.ThrowIfCancellationRequested(); string path = SelectedPath(selected[i].AbsolutePath); string ext = Path.GetExtension(path).ToLowerInvariant();
-                int order = await ReserveOrder(root,existing,ct); Guid id = Guid.NewGuid(); string name = $"attachment-{order:D2}{ext}";
-                string relative = $"Attachments/{id:N}/{name}"; string folder = Path.Combine(root,"Attachments",id.ToString("N"));
-                ReparsePointGuard.RefuseAncestry(folder); Directory.CreateDirectory(folder); created.Add(folder);
-                string staging = Path.Combine(folder,"snapshot.tmp"), final = Path.Combine(folder,name);
+                int order = await ReserveOrder(requestId,existing,ct);
+                var staged=batch.Create(order,ext);
                 await using var input = OpenRegular(path);
                 if (input.Length != sizes[i]) throw new IOException("Attachment changed after selection.");
                 using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256); long copied=0;
-                await using (var output = new FileStream(staging,FileMode.CreateNew,FileAccess.Write,FileShare.None,65536,FileOptions.WriteThrough))
+                var output=staged.Snapshot.Output;
                 {
                     byte[] buffer = new byte[65536]; int read;
                     while ((read=await input.ReadAsync(buffer,ct))>0)
@@ -61,24 +62,19 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
                     if(copied!=sizes[i] || input.Length!=copied) throw new IOException("Incomplete attachment.");
                     await output.FlushAsync(ct); output.Flush(true);
                 }
-                ct.ThrowIfCancellationRequested(); ReparsePointGuard.RefuseAncestry(final); File.Move(staging,final,false);
-                var attachment = new AiDesignAttachment(id,order,Path.GetFileName(path),name,selected[i].Purpose,Types[ext],copied,
-                    Sha256.FromBytes(hash.GetHashAndReset()),new(requestId,relative));
-                await using (var seal = new FileStream(Path.Combine(folder,"identity.json"),FileMode.CreateNew,FileAccess.Write,FileShare.None,4096,FileOptions.WriteThrough))
-                { await JsonSerializer.SerializeAsync(seal,attachment,FileAiDesignRequestStore.JsonOptions,ct); await seal.FlushAsync(ct); seal.Flush(true); }
-                File.SetAttributes(final,File.GetAttributes(final)|FileAttributes.ReadOnly); result.Add(attachment);
+                await staged.PublishSnapshotAsync(ct);
+                var attachment = new AiDesignAttachment(staged.Id,order,Path.GetFileName(path),staged.UploadName,selected[i].Purpose,Types[ext],copied,
+                    Sha256.FromBytes(hash.GetHashAndReset()),new(requestId,staged.RelativePath));
+                var seal=staged.CreateIdentity();
+                await JsonSerializer.SerializeAsync(seal.Output,attachment,FileAiDesignRequestStore.JsonOptions,ct);
+                await seal.CloseFlushedAsync(ct);
+                staged.MarkReadOnly();result.Add(attachment);_afterPrepared?.Invoke(attachment);
             }
+            batch.Commit();
             return OperationResult.Ok<IReadOnlyList<AiDesignAttachment>>(result.ToArray());
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or JsonException or OperationCanceledException or OverflowException)
         {
-            foreach(string folder in created)
-            {
-                // All cleanup targets were created by this call and remain inside its owned request root.
-                ReparsePointGuard.RefuseAncestry(folder);
-                foreach(string file in Directory.EnumerateFiles(folder)) { File.SetAttributes(file,FileAttributes.Normal); File.Delete(file); }
-                Directory.Delete(folder);
-            }
             return Reject(ex is OperationCanceledException ? "AttachmentCancelled" : "AttachmentSnapshotFailed");
         }
     }
@@ -147,19 +143,16 @@ public sealed class FileAiDesignAttachments : IAiDesignAttachments
             try { return new(path,FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None); }
             catch(IOException) when(DateTime.UtcNow<until) { await Task.Delay(20,ct); } }
     }
-    private static async Task<int> ReserveOrder(string root,IReadOnlyList<AiDesignAttachment> existing,CancellationToken ct)
+    private async Task<int> ReserveOrder(Guid requestId,IReadOnlyList<AiDesignAttachment> existing,CancellationToken ct)
     {
+        string root=RequestRoot(requestId);
         string path=Path.Combine(root,".attachment-sequence"); ReparsePointGuard.RefuseAncestry(path);
         int previous=existing.Count==0?0:existing.Max(a=>a.Order);
         if(File.Exists(path)) { string text=await File.ReadAllTextAsync(path,ct); if(!int.TryParse(text,out int saved)||saved<0) throw new IOException("Invalid attachment sequence."); previous=Math.Max(previous,saved); }
-        int next=checked(previous+1); string tmp=Path.Combine(root,$".sequence-{Guid.NewGuid():N}.tmp");
-        try
-        {
-            await using(var output=new FileStream(tmp,FileMode.CreateNew,FileAccess.Write,FileShare.None,4096,FileOptions.WriteThrough))
-            { byte[] bytes=System.Text.Encoding.ASCII.GetBytes(next.ToString(System.Globalization.CultureInfo.InvariantCulture)); await output.WriteAsync(bytes,ct); await output.FlushAsync(ct); output.Flush(true); }
-            if(File.Exists(path))File.Replace(tmp,path,null);else File.Move(tmp,path,false);
-        }
-        finally{if(File.Exists(tmp))File.Delete(tmp);}
+        int next=checked(previous+1);
+        using var staged=AiDesignOwnedStagingFiles.CreateRequest(_workspaceRoot,requestId,AiDesignOwnedStagingFiles.RequestPurpose.AttachmentSequence);
+        byte[] bytes=System.Text.Encoding.ASCII.GetBytes(next.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        await staged.Output.WriteAsync(bytes,ct);await staged.PublishAsync(ct);
         return next;
     }
     private static OperationResult<IReadOnlyList<AiDesignAttachment>> Reject(string reason)=>OperationResult.Fail<IReadOnlyList<AiDesignAttachment>>(FailureCode.PreconditionNotMet,reason);

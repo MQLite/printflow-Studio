@@ -121,7 +121,7 @@ public sealed class PhotoshopFinalReviewBoundaryTests
 
         implementations.ShouldBe(["PrintFlow.Infrastructure.Workspace.RecycleBin"]);
 
-        foreach (string project in new[] { "PrintFlow.Domain", "PrintFlow.Workflow", "PrintFlow.Infrastructure", "PrintFlow.App" })
+        foreach (string project in new[] { "PrintFlow.Domain", "PrintFlow.Workflow", "PrintFlow.Infrastructure", "PrintFlow.App", "PrintFlow.NativeHost" })
         {
             foreach (string file in SourceFiles(project))
             {
@@ -138,12 +138,42 @@ public sealed class PhotoshopFinalReviewBoundaryTests
                 // SCRUM-11122's package writer deletes only its exact randomly named staging
                 // file or a just-published archive whose final validation failed. It receives no
                 // Revision/output deletion authority and never enumerates a directory.
+                // AI staging has one exact Infrastructure boundary. It issues ownership only
+                // after successful CreateNew, validates volume/file identity and a single link,
+                // pins parents and the file through held-handle mutations, and cleans only
+                // unpublished per-operation files. It never enumerates, deletes
+                // directories, adopts old snapshots or receives Session/Revision disposal authority.
+                bool aiStagingBoundary=string.Equals(file, Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
+                    "AiDesign", "AiDesignOwnedStagingFiles.cs"), StringComparison.OrdinalIgnoreCase);
                 if (name is not ("FakeAdapterExecution.cs" or "FileWorkspace.cs" or
                                  "LocalDiagnosticFileStore.cs" or
                                  "DiagnosticPackageArchiveWriter.cs" or
                                  "ProductionLiveWorkstationVerifier.cs"))
                 {
                     source.ShouldNotContain("File.Delete(", Case.Sensitive, $"{name} deletes a file outright.");
+                }
+
+                // Held mutations must not become an alternate spelling of a caller's delete.
+                // Existing Delivery owns its independent held staging operations; AI adds only
+                // this one exact Infrastructure source boundary, including the NativeHost scan.
+                bool deliveryNativeBoundary=string.Equals(file,Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
+                    "Delivery","WindowsDeliveryNative.cs"),StringComparison.OrdinalIgnoreCase);
+                bool deliveryFileBoundary=string.Equals(file,Path.Combine(ProjectDirectory("PrintFlow.Infrastructure"),
+                    "Delivery","WindowsDeliveryFileSystem.cs"),StringComparison.OrdinalIgnoreCase);
+                if (!aiStagingBoundary && !deliveryNativeBoundary)
+                {
+                    foreach(string nativeMutation in new[]{"NativeMethods.SetFileInformationByHandle(","NativeMethods.NtSetInformationFile("})
+                        source.ShouldNotContain(nativeMutation,Case.Sensitive,$"{name} bypasses named held-file ownership with '{nativeMutation}'.");
+                }
+                if (!aiStagingBoundary && !deliveryFileBoundary)
+                {
+                    foreach(string heldMutation in new[]{"WindowsDeliveryNative.DeleteHeldFile(","WindowsDeliveryNative.RenameNoReplace("})
+                        source.ShouldNotContain(heldMutation,Case.Sensitive,$"{name} bypasses named held-file ownership with '{heldMutation}'.");
+                }
+                if(aiStagingBoundary)
+                {
+                    foreach(string pathnameMutation in new[]{"File.Delete(","File.SetAttributes(","File.Move(","File.Replace(","Directory.Enumerate","Directory.Delete("})
+                        source.ShouldNotContain(pathnameMutation,Case.Sensitive,$"AI staging must mutate the verified handle, never '{pathnameMutation}'.");
                 }
 
                 if (name is not ("FileWorkspace.cs" or "ProductionLiveWorkstationVerifier.cs"))
