@@ -6,6 +6,8 @@ using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Definitions;
 using PrintFlow.Workflow.Engine;
+using PrintFlow.Workflow.Ports;
+using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
 
@@ -18,6 +20,30 @@ public enum GuidedSessionPage
 
 public sealed partial class SessionViewModel
 {
+    public bool ShowsGuidedProcessing => GuidedPage == GuidedSessionPage.Processing;
+    public bool ShowsGuidedImageWorkspace => !ShowsGuidedProcessing;
+    public bool ShowsGuidedDetailsColumn => !ShowsGuidedProcessing;
+    public bool ShowsGuidedTechnicalDetails => !ShowsGuidedProcessing;
+    public string GuidedProcessingApplication => UsesPhotoshop ? "Photoshop"
+        : _runtime.DrivesExternalApplication ? Strings.Resolve("Session_GuidedMeitu") : "PrintFlow";
+    public string GuidedProcessingState => _runtime.State switch
+    {
+        AutomationRuntimeState.StopRequested => Strings.Resolve("Session_GuidedStopping"),
+        AutomationRuntimeState.TakeOverRequested => Strings.Resolve("Session_GuidedTakingOver"),
+        _ => Strings.Session_StatusProcessing,
+    };
+    public string GuidedProcessingNotice => StoppingNotice ?? (_runtime.Phase switch
+    {
+        ExternalOperationPhase.OperationRequested => Strings.Resolve("Session_GuidedPhaseRequested"),
+        ExternalOperationPhase.Busy => Strings.Resolve("Session_GuidedPhaseBusy"),
+        ExternalOperationPhase.CompletedBeforeExport => Strings.Resolve("Session_GuidedPhaseProcessed"),
+        ExternalOperationPhase.ExportPrepared => Strings.Resolve("Session_GuidedPhaseExportPrepared"),
+        ExternalOperationPhase.ExportConfirmed => Strings.Resolve("Session_GuidedPhaseWriting"),
+        ExternalOperationPhase.OutputValidated => Strings.Resolve("Session_GuidedPhaseValidated"),
+        ExternalOperationPhase.UnknownOrBlocked => Strings.Resolve("Session_GuidedPhaseUnknown"),
+        _ => Strings.Resolve("Session_GuidedPhaseStarting"),
+    });
+    public string GuidedProcessingWait => Strings.Resolve("Session_GuidedProcessingWait");
     public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
     public bool ShowsGuidedPdfSource => ShowsGuidedSourceDetails && HasPdfSource;
     public bool ShowsGuidedPsdSource => ShowsGuidedSourceDetails && HasPsdSource;
@@ -125,6 +151,14 @@ public sealed partial class SessionViewModel
 
     private void NotifyGuidedPresentation()
     {
+        OnPropertyChanged(nameof(ShowsGuidedProcessing));
+        OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
+        OnPropertyChanged(nameof(ShowsGuidedDetailsColumn));
+        OnPropertyChanged(nameof(ShowsGuidedTechnicalDetails));
+        OnPropertyChanged(nameof(GuidedProcessingApplication));
+        OnPropertyChanged(nameof(GuidedProcessingState));
+        OnPropertyChanged(nameof(GuidedProcessingNotice));
+        OnPropertyChanged(nameof(GuidedProcessingWait));
         OnPropertyChanged(nameof(GuidedPage));
         OnPropertyChanged(nameof(GuidedCurrentTitle));
         OnPropertyChanged(nameof(GuidedCurrentStatus));

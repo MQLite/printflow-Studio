@@ -1340,4 +1340,16 @@
   <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>正在保存您的选择…</value></data>
   <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>本次原始文件：{0}（原件保持不变）</value></data>
   <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>更换路线（尚无处理结果）</value></data>
+  <data name="Session_GuidedMeitu" xml:space="preserve"><value>美图</value></data>
+  <data name="Session_GuidedPhaseBusy" xml:space="preserve"><value>应用报告正在处理。</value></data>
+  <data name="Session_GuidedPhaseExportPrepared" xml:space="preserve"><value>正在准备导出位置。</value></data>
+  <data name="Session_GuidedPhaseProcessed" xml:space="preserve"><value>处理已结束，尚未开始导出。</value></data>
+  <data name="Session_GuidedPhaseRequested" xml:space="preserve"><value>已发出处理请求，正在等待应用报告状态。</value></data>
+  <data name="Session_GuidedPhaseStarting" xml:space="preserve"><value>正在准备此步骤，尚未收到处理进度。</value></data>
+  <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>应用状态未知或受到阻塞，PrintFlow 正在等待安全结果。</value></data>
+  <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>输出校验已完成，正在准备结果供你审核。</value></data>
+  <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>已确认导出，输出文件可能仍在写入。</value></data>
+  <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前没有可靠的百分比，请等待。成功后仍需你检查并审核结果。</value></data>
+  <data name="Session_GuidedStopping" xml:space="preserve"><value>正在停止本次处理</value></data>
+  <data name="Session_GuidedTakingOver" xml:space="preserve"><value>正在交由你接管</value></data>
 </root>

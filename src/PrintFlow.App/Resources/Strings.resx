@@ -1351,4 +1351,16 @@
   <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>Saving your choice…</value></data>
   <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>Original file for this task: {0} (kept unchanged)</value></data>
   <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>Change route (no processed result yet)</value></data>
+  <data name="Session_GuidedMeitu" xml:space="preserve"><value>Meitu</value></data>
+  <data name="Session_GuidedPhaseBusy" xml:space="preserve"><value>The application reports that it is processing.</value></data>
+  <data name="Session_GuidedPhaseExportPrepared" xml:space="preserve"><value>The export destination is being prepared.</value></data>
+  <data name="Session_GuidedPhaseProcessed" xml:space="preserve"><value>Processing has finished; export has not started.</value></data>
+  <data name="Session_GuidedPhaseRequested" xml:space="preserve"><value>The operation was requested. Waiting for the application to report its state.</value></data>
+  <data name="Session_GuidedPhaseStarting" xml:space="preserve"><value>Preparing this step. No processing progress has been reported yet.</value></data>
+  <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>The application state is unknown or blocked. PrintFlow is waiting for a safe outcome.</value></data>
+  <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>The output has been validated. Preparing the result for your review.</value></data>
+  <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>Export was confirmed; the output may still be writing.</value></data>
+  <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>No reliable percentage is available. Please wait; a successful result still needs your review.</value></data>
+  <data name="Session_GuidedStopping" xml:space="preserve"><value>Stopping this operation</value></data>
+  <data name="Session_GuidedTakingOver" xml:space="preserve"><value>Handing control to you</value></data>
 </root>

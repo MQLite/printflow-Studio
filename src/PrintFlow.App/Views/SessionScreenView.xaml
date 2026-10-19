@@ -501,7 +501,31 @@
                 <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Border Grid.ColumnSpan="2" Padding="32" MaxWidth="680" VerticalAlignment="Center"
+                    Background="{DynamicResource PF.Brush.Surface}" CornerRadius="10"
+                    AutomationProperties.AutomationId="Session.Processing"
+                    Visibility="{Binding ShowsGuidedProcessing, Converter={StaticResource BoolToVisibility}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{Binding GuidedProcessingApplication}" FontSize="16" Foreground="{DynamicResource PF.Brush.Muted}"
+                                   AutomationProperties.AutomationId="Session.Processing.Application" />
+                        <TextBlock Text="{Binding CurrentStep}" FontSize="26" FontWeight="SemiBold" Margin="0,8,0,16" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding GuidedProcessingState}" FontSize="18" FontWeight="SemiBold"
+                                   AutomationProperties.AutomationId="Session.Processing.State" />
+                        <ProgressBar IsIndeterminate="True" Height="6" Margin="0,16,0,16"
+                                     AutomationProperties.AutomationId="Session.Processing.Progress"
+                                     AutomationProperties.Name="{Binding GuidedProcessingState}" />
+                        <TextBlock Text="{Binding GuidedProcessingNotice}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding GuidedProcessingWait}" TextWrapping="Wrap" Margin="0,12,0,0"
+                                   Foreground="{DynamicResource PF.Brush.Muted}" />
+                        <StackPanel Margin="0,12,0,0" Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                            <local:NoticeErrorDetails />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <Grid Grid.Column="0" Margin="0,0,20,0" Visibility="{Binding ShowsGuidedImageWorkspace, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -1063,7 +1087,8 @@
             </Border>
             </Grid>
 
-            <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding ShowsGuidedDetailsColumn, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
                     <StackPanel Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}"
                                 AutomationProperties.AutomationId="Session.ActionFailure">
@@ -1263,7 +1288,7 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
-<local:SessionExpander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
+<local:SessionExpander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails" Visibility="{Binding ShowsGuidedTechnicalDetails, Converter={StaticResource BoolToVisibility}}">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
                             <TextBlock Text="{Binding ArtefactHeading}" FontSize="15" FontWeight="SemiBold" />
