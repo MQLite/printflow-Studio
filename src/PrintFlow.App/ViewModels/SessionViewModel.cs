@@ -26,6 +26,7 @@ public sealed class SessionStepRow
         ArgumentNullException.ThrowIfNull(step);
 
         Ordinal = step.Ordinal + 1;
+        Kind = step.Step;
         Name = DisplayNames.Step(step.Step);
         State = step.Step == StepKind.Trim && step.State == StepState.Skipped
             ? Strings.Session_OriginalExtentRetained : DisplayNames.StepState(step.State);
@@ -33,6 +34,8 @@ public sealed class SessionStepRow
     }
 
     public int Ordinal { get; }
+
+    public StepKind Kind { get; }
 
     public string Name { get; }
 
@@ -2473,7 +2476,7 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
-        IsConfirmingReturn = true;
+        CaptureReturn(SelectedReturnTarget!);
     }
 
     /// <summary>
@@ -2485,7 +2488,11 @@ public sealed partial class SessionViewModel : ObservableObject
     /// command and reaches no service.
     /// </remarks>
     [RelayCommand]
-    private void CancelReturn() => IsConfirmingReturn = false;
+    private void CancelReturn()
+    {
+        _returnIntent = null;
+        IsConfirmingReturn = false;
+    }
 
     /// <summary>
     /// Returns to the chosen step through the ordinary command path (§3, §6).
@@ -2500,13 +2507,24 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ConfirmReturnAsync(CancellationToken cancellationToken)
     {
-        if (SelectedReturnTarget is not { } target)
+        if (!IsConfirmingReturn || _returnIntent is not { } intent ||
+            intent.Context != NavigationContext(_session) || SelectedReturnTarget?.Step != intent.Target.Step ||
+            !IsLiveInteractionAllowed || IsBusy)
         {
             return;
         }
 
+        CancelReturn();
         await RunAsync(
-            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
+            new WorkflowCommand.ReturnToStep(intent.Target.Step), cancellationToken).ConfigureAwait(true);
+        if (intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
+        {
+            _customPresetContext = intent.Preset is { } named ? SizePresets.FirstOrDefault(choice => choice.Preset == named) : null;
+            SelectedTargetEdgeChoice = intent.Edge is { } selected ? TargetEdgeChoices.Single(choice => choice.Edge == selected) : null;
+            CustomMillimetresText = intent.Millimetres is { } value ? SizeText.MillimetresValue(value) : null;
+            IsChoosingCustomSize = true;
+            NotifyCustomSizeStateChanged();
+        }
     }
 
     // --- Background removal authority (Part C2B2 §5, §6, §10, §11) ------------------------
@@ -2693,38 +2711,13 @@ public sealed partial class SessionViewModel : ObservableObject
             cancellationToken).ConfigureAwait(true);
     }
 
-    private async Task ReturnToSizeAndEditAsync(
-        SizePreset? preset,
-        TargetEdge? edge,
-        decimal? millimetres,
-        CancellationToken cancellationToken)
+    private Task ReturnToSizeAndEditAsync(
+        SizePreset? preset, TargetEdge? edge, decimal? millimetres, CancellationToken cancellationToken)
     {
-        if (ReviewBoundsTarget is not { } target)
-        {
-            return;
-        }
-
-        await RunAsync(
-            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
-
-        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true)
-        {
-            return;
-        }
-
-        _customPresetContext = preset is { } named
-            ? SizePresets.FirstOrDefault(choice => choice.Preset == named)
-            : null;
-        SelectedTargetEdgeChoice = edge is { } selected
-            ? TargetEdgeChoices.Single(choice => choice.Edge == selected)
-            : null;
-        CustomMillimetresText = millimetres is { } value
-            ? SizeText.MillimetresValue(value)
-            : null;
-        IsChoosingCustomSize = true;
-        NotifyCustomSizeStateChanged();
+        if (ReviewBoundsTarget is { } target)
+            CaptureReturn(target, preset, edge, millimetres, editSize: true);
+        return Task.CompletedTask;
     }
-
     /// <summary>Records exactly one operator-selected decimal target through the service path.</summary>
     [RelayCommand]
     private async Task ConfirmCustomSizeAsync(CancellationToken cancellationToken)
@@ -2748,7 +2741,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ContinueWithSizeAsync(CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy || !CanAuthoriseEnlargement)
+        if (_session is null || IsBusy || !IsLiveInteractionAllowed || !CanAuthoriseEnlargement)
         {
             return;
         }
@@ -2853,7 +2846,7 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         SelectedReturnTarget = target;
-        IsConfirmingReturn = true;
+        CaptureReturn(target);
     }
 
     /// <summary>
@@ -2909,6 +2902,19 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken)
     {
+        if (IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
+        if (HasPageDraft())
+        {
+            _leaveIntent = new LeaveIntent(NavigationContext(_session), LeaveHomeAsync);
+            IsConfirmingDraftLeave = true;
+            NotifyNavigation();
+            return;
+        }
+        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task LeaveHomeAsync(CancellationToken cancellationToken)
+    {
         ClearPreviews();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
     }
@@ -2950,7 +2956,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// trim adjustment is open (SCRUM-11147): an Approve pressed then would approve the old
     /// result while the operator believes they are confirming the new boundary.
     /// </summary>
-    private bool Allows(CommandKind kind) => !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
+    private bool Allows(CommandKind kind) => IsLiveInteractionAllowed && !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
 
     /// <summary>What the workflow layer offers, regardless of what this screen is showing.</summary>
     private bool Offers(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
@@ -3169,6 +3175,7 @@ public sealed partial class SessionViewModel : ObservableObject
         // Changing the destination puts the confirmation away: what was confirmed a moment ago
         // was a warning about a different step.
         IsConfirmingReturn = false;
+        _returnIntent = null;
         OnPropertyChanged(nameof(CanBeginReturn));
     }
 
@@ -3369,7 +3376,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task RunServiceAsync(
         Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy)
+        if (_session is null || IsBusy || !IsLiveInteractionAllowed)
         {
             return;
         }
@@ -3488,6 +3495,14 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private void Show(SessionView session)
     {
+        bool sameNavigationContext = NavigationContext(_session) == NavigationContext(session);
+        var preservedDraft = sameNavigationContext ? CapturePageDraft() : ((string Signature, Action Restore)?)null;
+        if (!sameNavigationContext)
+        {
+            KeepDraft();
+            CloseHistory();
+            ClearPendingDecisions();
+        }
         if (session.CompletionCleanup is { IsComplete: false })
             Notice = Strings.Session_CompletionCleanupPending;
         // A trim adjustment survives a refresh of the very same review of the very same source —
@@ -3501,7 +3516,7 @@ public sealed partial class SessionViewModel : ObservableObject
         ShowCommittedPreflight(session);
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
-        if (!keepTrimDraft) ResetZoom();
+        if (!keepTrimDraft && !(sameNavigationContext && IsCropping && session.CanManualCrop)) ResetZoom();
 
         // The crop surface belongs to the state that needed one. A rectangle drawn against the
         // file the operator was looking at a moment ago must not survive into a state showing a
@@ -3511,7 +3526,7 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             _trimAdjustTarget = session.TrimAdjustment;
         }
-        else
+        else if (!sameNavigationContext || IsAdjustingTrim || IsCropping && !session.CanManualCrop)
         {
             ClearCropState();
         }
@@ -3734,6 +3749,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
         // The final-save section is rebuilt from the same view; operator drafts are kept by key.
         ShowFinalSave(session);
+        if (preservedDraft is { } draft) draft.Restore();
+        else _cleanDraft = CapturePageDraft();
+        OnPropertyChanged(nameof(HistorySteps));
     }
 
     private void OnOperatorLanguageChanged(object? sender, EventArgs e)

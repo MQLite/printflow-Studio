@@ -1316,6 +1316,18 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>诊断记录清理未完成，下次启动时会重试。此提示不表示工作站已通过检查。</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>生成前确认</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>当前步骤</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>完成当前步骤后继续</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>修改白墨选择</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>可查看历史</value></data></root>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>生成前确认</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>当前步骤</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>完成当前步骤后继续</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>修改白墨选择</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>可查看历史</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>步骤历史</value></data>
+  <data name="Session_HistoryNotice" xml:space="preserve"><value>只读浏览。历史结果不能在此确认，也不会替换当前结果。</value></data>
+  <data name="Session_HistoryOpen" xml:space="preserve"><value>查看历史</value></data>
+  <data name="Session_HistoryClose" xml:space="preserve"><value>回到当前步骤</value></data>
+  <data name="Session_HistoryValid" xml:space="preserve"><value>记录有效</value></data>
+  <data name="Session_HistoryInvalid" xml:space="preserve"><value>已失效的记录</value></data>
+  <data name="Session_HistoryBytesReleased" xml:space="preserve"><value>预览文件已按保留规则释放</value></data>
+  <data name="Session_DraftLeaveHeading" xml:space="preserve"><value>保留尚未提交的输入？</value></data>
+  <data name="Session_DraftLeaveNotice" xml:space="preserve"><value>当前页面有尚未提交的输入。可继续编辑，或放弃本页输入后离开；这些输入尚未确认或保存。</value></data>
+  <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
+  <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
+  <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”。需要重新处理：{1}。依赖这些步骤的尺寸、输出结果及审核需要重新完成；已有历史记录保留。</value></data>
+</root>
 
 

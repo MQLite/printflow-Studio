@@ -452,7 +452,7 @@ public sealed class TrimAdjustmentUiTests
             Image? proposed = tree.OfType<Image>().SingleOrDefault(i => AutomationProperties.GetAutomationId(i) == "Session.TrimAdjust.ProposedImage");
 
             // Clipping: every shown button of the left (preview/crop) column ends inside that column.
-            Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+            Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
             double columnRight = content.ColumnDefinitions[0].ActualWidth;
             FrameworkElement leftColumn = content.Children.OfType<FrameworkElement>().First(c => Grid.GetColumn(c) == 0);
             var clippedButtons = tree.OfType<ButtonBase>()

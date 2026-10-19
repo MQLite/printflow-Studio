@@ -70,6 +70,8 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"d-{culture.Name}.png", 2000, 1000));
             await UseA4Async(adjustPreset);
             await adjustPreset.AdjustSizeCommand.ExecuteAsync(null);
+            adjustPreset.IsConfirmingReturn.ShouldBeTrue();
+            await adjustPreset.ConfirmReturnCommand.ExecuteAsync(null);
             adjustPreset.HasCustomPresetContext.ShouldBeTrue();
             Render(adjustPreset);
 
@@ -78,6 +80,8 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"d2-{culture.Name}.png", 2000, 1800));
             await UseA5Async(adjustA5);
             await adjustA5.AdjustSizeCommand.ExecuteAsync(null);
+            adjustA5.IsConfirmingReturn.ShouldBeTrue();
+            await adjustA5.ConfirmReturnCommand.ExecuteAsync(null);
             adjustA5.HasCustomPresetContext.ShouldBeTrue();
             adjustA5.CustomPresetContext.ShouldContain("A5");
             adjustA5.CustomPresetRecommendation.ShouldBe(culture.Name == "zh-CN"
@@ -98,6 +102,8 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"f-{culture.Name}.png", 4000, 2000));
             await UseA4Async(exceeded);
             await exceeded.AdjustSizeCommand.ExecuteAsync(null);
+            exceeded.IsConfirmingReturn.ShouldBeTrue();
+            await exceeded.ConfirmReturnCommand.ExecuteAsync(null);
             await CompleteCustomFormAsync(exceeded, TargetEdge.LongEdge, "300");
             exceeded.HasPresetLimitNotice.ShouldBeTrue();
             exceeded.NeedsEnlargementAuthority.ShouldBeFalse();

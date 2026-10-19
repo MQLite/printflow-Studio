@@ -1327,6 +1327,18 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>Change white ink choice</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data></root>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>Change white ink choice</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data>  <data name="Session_HistoryHeading" xml:space="preserve"><value>Step history</value></data>
+  <data name="Session_HistoryNotice" xml:space="preserve"><value>Read only. Historical results cannot be approved or used as the current result.</value></data>
+  <data name="Session_HistoryOpen" xml:space="preserve"><value>View history</value></data>
+  <data name="Session_HistoryClose" xml:space="preserve"><value>Back to current step</value></data>
+  <data name="Session_HistoryValid" xml:space="preserve"><value>Valid record</value></data>
+  <data name="Session_HistoryInvalid" xml:space="preserve"><value>Superseded record</value></data>
+  <data name="Session_HistoryBytesReleased" xml:space="preserve"><value>Preview bytes released</value></data>
+  <data name="Session_DraftLeaveHeading" xml:space="preserve"><value>Keep this unfinished input?</value></data>
+  <data name="Session_DraftLeaveNotice" xml:space="preserve"><value>This page has unfinished input. Keep editing, or discard this page draft and leave. Nothing has been confirmed or saved.</value></data>
+  <data name="Session_KeepDraft" xml:space="preserve"><value>Keep editing</value></data>
+  <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
+  <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
+</root>
 
 

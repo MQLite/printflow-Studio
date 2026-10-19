@@ -60,6 +60,8 @@ public sealed class FlexibleSizeUiTests
 
         await screen.UsePresetCommand.ExecuteAsync(a4);
         await screen.AdjustSizeCommand.ExecuteAsync(null);
+        screen.IsConfirmingReturn.ShouldBeTrue();
+        await screen.ConfirmReturnCommand.ExecuteAsync(null);
 
         screen.IsChoosingCustomSize.ShouldBeTrue();
         screen.HasCustomPresetContext.ShouldBeTrue();
@@ -111,6 +113,10 @@ public sealed class FlexibleSizeUiTests
         screen.HasUsableEnlargementAuthority.ShouldBeTrue();
 
         await screen.ChangeSizeCommand.ExecuteAsync(null);
+
+        screen.IsConfirmingReturn.ShouldBeTrue();
+
+        await screen.ConfirmReturnCommand.ExecuteAsync(null);
         screen.SelectedTargetEdgeChoice = screen.TargetEdgeChoices
             .Single(choice => choice.Edge == TargetEdge.Width);
         screen.CustomMillimetresText = "120";
@@ -158,6 +164,8 @@ public sealed class FlexibleSizeUiTests
         await screen.UsePresetCommand.ExecuteAsync(
             screen.SizePresets.Single(choice => choice.Preset == SizePreset.A4));
         await screen.AdjustSizeCommand.ExecuteAsync(null);
+        screen.IsConfirmingReturn.ShouldBeTrue();
+        await screen.ConfirmReturnCommand.ExecuteAsync(null);
         screen.SelectedTargetEdgeChoice = screen.TargetEdgeChoices
             .Single(choice => choice.Edge == TargetEdge.LongEdge);
         screen.CustomMillimetresText = "100";

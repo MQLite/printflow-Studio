@@ -80,6 +80,7 @@ internal sealed class FinalSaveTarget
     public bool NameEdited { get; set; }
     public bool FolderEdited { get; set; }
     public bool FolderFromPreference { get; set; }
+    public (string Name, string Folder)? NavigationDraft { get; set; }
 
     public DeliveryOffer? Offer { get; set; }
     public ArtifactRefusal Refusal { get; set; } = ArtifactRefusal.None;
@@ -219,9 +220,10 @@ public partial class SessionViewModel
     /// old result. Read-only actions on an already delivered copy — checking it and opening its
     /// folder — stay, and the section says why the rest has gone.
     /// </summary>
-    internal FinalSaveDisplay WhileAdjustingTrim(FinalSaveDisplay display) => !IsAdjustingTrim ? display : display with
+    internal FinalSaveDisplay WhileAdjustingTrim(FinalSaveDisplay display) => !IsAdjustingTrim && IsLiveInteractionAllowed ? display : display with
     {
-        Alert = JoinLines(Strings.FinalSave_TrimAdjustOpen, display.Alert),
+        Alert = JoinLines(IsAdjustingTrim ? Strings.FinalSave_TrimAdjustOpen :
+            IsViewingHistory ? Strings.Session_HistoryNotice : Strings.Session_DraftLeaveNotice, display.Alert),
         CanConfirmAndSave = false,
         CanSaveApproved = false,
         CanRetryRecorded = false,
@@ -260,6 +262,7 @@ public partial class SessionViewModel
         set
         {
             if (SelectedSave is not { } target || !SaveDisplay.IsEditable || value == target.FileName) return;
+            target.NavigationDraft ??= (target.FileName, target.Folder);
             target.FileName = value ?? string.Empty;
             target.NameEdited = true;
             target.Generation++;
@@ -587,7 +590,7 @@ public partial class SessionViewModel
 
     private async Task ReconcileSelectedAsync()
     {
-        if (IsAdjustingTrim || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
+        if (!IsLiveInteractionAllowed || IsAdjustingTrim || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
             _finalSaveOperation is not null || IsBusy) return;
         await RunDeliveryStepAsync(target, RecordedFolder(target, deliveryId), false, async progress =>
             new DeliveryFact(await _finalSave.ReconcileAsync(deliveryId, progress, CancellationToken.None).ConfigureAwait(false))).ConfigureAwait(true);
@@ -643,6 +646,7 @@ public partial class SessionViewModel
     {
         if (SelectedSave is not { } target || SaveDisplay.Suggestion is not { } suggestion || !SaveDisplay.IsEditable) return;
         // Edits the draft only. Saving under the suggested name needs another explicit action.
+        target.NavigationDraft ??= (target.FileName, target.Folder);
         target.FileName = suggestion;
         target.NameEdited = true;
         target.Generation++;
@@ -658,6 +662,7 @@ public partial class SessionViewModel
         // Dismissal changes nothing: draft, approval and remembered folder all stay as they were.
         if (string.IsNullOrWhiteSpace(picked) || !ReferenceEquals(SelectedSave, target) || !SaveDisplay.IsEditable) return;
         if (picked == target.Folder) return;
+        target.NavigationDraft ??= (target.FileName, target.Folder);
         target.Folder = picked;
         target.FolderEdited = true;
         target.FolderFromPreference = false;

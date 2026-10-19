@@ -472,8 +472,18 @@
                 <TextBlock Text="{Binding StepsHeading}" FontWeight="SemiBold" Margin="0,0,0,12" />
                 <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{StaticResource PF.StepNavigation}"
                               AutomationProperties.AutomationId="Session.StepList" AutomationProperties.Name="{Binding StepsHeading}" />
+                <Expander Header="{Binding HistoryHeading}" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.HistorySelector">
+                    <StackPanel Margin="0,8,0,0">
+                        <ComboBox ItemsSource="{Binding HistorySteps}" SelectedItem="{Binding SelectedHistoryStep}" DisplayMemberPath="Name"
+                                  AutomationProperties.Name="{Binding HistoryHeading}" />
+                        <Button Content="{Binding HistoryLabel}" Command="{Binding ViewHistoryCommand}" CommandParameter="{Binding SelectedHistoryStep}"
+                                Margin="0,8,0,0" AutomationProperties.AutomationId="Session.ViewHistory" />
+                    </StackPanel>
+                </Expander>
             </StackPanel>
-        </ScrollViewer><Grid Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace">
+        </ScrollViewer><Grid Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace"
+                              Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"
+                              IsEnabled="{Binding IsLiveInteractionAllowed}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="2*" />
@@ -523,7 +533,7 @@
                     </Style>
                 </DockPanel.Style>
 
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding PreviewHeading}"
                                FontSize="16"
@@ -531,7 +541,7 @@
                                VerticalAlignment="Center" />
 
                     <!-- Zoom (§12) and, through the panes' scrollbars, pan (§13). -->
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0">
                         <TextBlock Text="{Binding ZoomLabel}"
                                    VerticalAlignment="Center"
                                    Opacity="0.75"
@@ -557,8 +567,8 @@
                                 AutomationProperties.Name="{Binding ResetZoomLabel}"
                                 Command="{Binding ResetZoomCommand}"
                                 Padding="10,4" />
-                    </StackPanel>
-                </DockPanel>
+                    </WrapPanel>
+                </StackPanel>
 
                 <local:SharedReviewSurface />
             </DockPanel>
@@ -587,14 +597,14 @@
                     </Style>
                 </DockPanel.Style>
 
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding TiffReviewModeHeading}"
                                FontSize="16"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center" />
 
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0">
                         <TextBlock Text="{Binding ZoomLabel}"
                                    VerticalAlignment="Center"
                                    Opacity="0.75"
@@ -620,8 +630,8 @@
                                 AutomationProperties.Name="{Binding ResetZoomLabel}"
                                 Command="{Binding ResetZoomCommand}"
                                 Padding="10,4" />
-                    </StackPanel>
-                </DockPanel>
+                    </WrapPanel>
+                </StackPanel>
 
                 <local:TiffReviewSurface />
             </DockPanel>
@@ -648,7 +658,7 @@
             -->
             <DockPanel Grid.Row="1" Margin="0,14,0,0"
                        Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}">
-                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8" LastChildFill="False">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding ManualCropHeading}"
                                FontSize="16"
@@ -667,7 +677,7 @@
                                Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}" />
 
                     <!-- Zoom acts on the adjust surface; Compare shows both pictures fitted, so it is hidden there. -->
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0"
                                 Visibility="{Binding ShowsCropSurface, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding ZoomLabel}"
                                    VerticalAlignment="Center"
@@ -688,8 +698,8 @@
                         <Button Content="{Binding ResetZoomLabel}"
                                 Command="{Binding ResetZoomCommand}"
                                 Padding="10,4" />
-                    </StackPanel>
-                </DockPanel>
+                    </WrapPanel>
+                </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
                     <!--
@@ -2119,6 +2129,7 @@
                         file states no legality rule of its own, which is what §4's "do not
                         duplicate ReturnToStep legality in WPF" asks for.
                     -->
+                    <Expander Header="{Binding ReturnHeading}" IsExpanded="{Binding IsConfirmingReturn, Mode=OneWay}" Visibility="{Binding CanReturnToStep, Converter={StaticResource BoolToVisibility}}">
                     <Border BorderBrush="#22000000"
                             BorderThickness="1"
                             CornerRadius="6"
@@ -2167,7 +2178,7 @@
                                     Margin="0,10,0,0"
                                     Visibility="{Binding IsConfirmingReturn, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding ReturnConfirmQuestion}"
+                                    <TextBlock Text="{Binding ReturnImpact}"
                                                TextWrapping="Wrap"
                                                Foreground="#5A4500" />
 
@@ -2185,6 +2196,7 @@
                             </Border>
                         </StackPanel>
                     </Border>
+                    </Expander>
                 </StackPanel>
             </ScrollViewer>
         </Grid>
@@ -2193,7 +2205,8 @@
             Actions (§4). Every button's visibility comes from AvailableCommands, which is the
             engine's own answer — the screen states no workflow rule of its own.
         -->
-        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.ActionBar"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.ActionBar"
+              IsEnabled="{Binding IsLiveInteractionAllowed}" Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
 
             <WrapPanel Orientation="Horizontal">
                 <WrapPanel.Resources>
@@ -2399,6 +2412,43 @@
                     AutomationProperties.AutomationId="Session.BackToHome"
                     AutomationProperties.Name="{Binding BackLabel}"
                     Padding="14,6" /></Grid>
+        <Border Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" Padding="20" Background="{DynamicResource PF.Brush.Surface}"
+                AutomationProperties.AutomationId="Session.HistoryWorkspace"
+                Visibility="{Binding IsViewingHistory, Converter={StaticResource BoolToVisibility}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="{Binding HistoryStepName}" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding HistoryNotice}" TextWrapping="Wrap" Margin="0,12,0,16" />
+                    <Image Source="{Binding HistoryPreview.Payload, Converter={StaticResource PreviewPayload}}" MaxHeight="300" Stretch="Uniform" />
+                    <TextBlock Text="{Binding HistoryPreview.Unavailable}" TextWrapping="Wrap" Margin="0,8,0,8" />
+                    <ItemsControl ItemsSource="{Binding HistoryFacts}">
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                            <Border Padding="12" Margin="0,0,0,10" BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="1">
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                            </Border>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="{Binding HistoryCloseLabel}" Command="{Binding CloseHistoryCommand}"
+                            HorizontalAlignment="Left" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.CloseHistory" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+        <Border Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Surface}"
+                BorderBrush="{DynamicResource PF.Brush.Primary}" BorderThickness="2" Padding="24" Margin="20"
+                MaxWidth="600" VerticalAlignment="Center" Panel.ZIndex="10"
+                AutomationProperties.AutomationId="Session.DraftLeave"
+                Visibility="{Binding IsConfirmingDraftLeave, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+                <TextBlock Text="{Binding DraftLeaveHeading}" FontSize="20" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding DraftLeaveNotice}" TextWrapping="Wrap" Margin="0,12,0,18" />
+                <WrapPanel>
+                    <Button Content="{Binding KeepDraftLabel}" Command="{Binding KeepDraftCommand}" Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="Session.KeepDraft" />
+                    <Button Content="{Binding DiscardDraftLabel}" Command="{Binding DiscardDraftAndLeaveCommand}" Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="Session.DiscardDraft" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>
 
