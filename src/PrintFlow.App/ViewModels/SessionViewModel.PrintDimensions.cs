@@ -270,6 +270,8 @@ public sealed partial class SessionViewModel
 
     partial void OnIsChoosingCustomSizeChanged(bool value)
     {
+        OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
+        OnPropertyChanged(nameof(RecommendedCommand));
         NotifyCustomSizeInputHint();
         RequestDraftPreflight();
     }

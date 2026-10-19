@@ -11,7 +11,7 @@
              AutomationProperties.AutomationId="Screen.Session"
              AutomationProperties.Name="{Binding SessionName}">
 
-    <UserControl.Resources>
+    <UserControl.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" /></ResourceDictionary.MergedDictionaries>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <local:PreviewPayloadConverter x:Key="PreviewPayload" />
         <local:RecommendedCommandConverter x:Key="RecommendedCommand" />
@@ -42,7 +42,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="RecommendedAction" TargetType="Button">
+        <Style x:Key="RecommendedAction" TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
@@ -52,9 +52,9 @@
                         </MultiBinding>
                     </DataTrigger.Binding>
                     <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="BorderBrush" Value="#174D83" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
                     <Setter Property="BorderThickness" Value="2" />
-                    <Setter Property="Background" Value="#E1EEFA" />
+                    <Setter Property="Background" Value="{DynamicResource PF.Brush.Primary}" /><Setter Property="Foreground" Value="White" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -193,30 +193,10 @@
                                 <Setter Property="Margin" Value="0,0,8,6" />
                             </Style>
                         </WrapPanel.Resources>
-                        <local:ReviewApprovalButton Content="{Binding ConfirmAndSaveLabel}"
-                                Style="{StaticResource {x:Type Button}}"
-                                TargetIdentity="{Binding ConfirmAndSaveIdentity}"
-                                Command="{Binding ConfirmAndSaveCommand}"
-                                AutomationProperties.AutomationId="Session.FinalSave.ConfirmAndSave"
-                                AutomationProperties.Name="{Binding ConfirmAndSaveLabel}"
-                                Visibility="{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}" />
-                        <local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
-                                Style="{StaticResource {x:Type Button}}"
-                                TargetIdentity="{Binding SaveApprovedIdentity}"
-                                Command="{Binding SaveApprovedCommand}"
-                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
-                                AutomationProperties.Name="{Binding SaveApprovedLabel}"
-                                Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
-                        <local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
-                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
-                                AutomationProperties.Name="{Binding RetryRecordedLabel}"
-                                Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
-                        <local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
-                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
-                                AutomationProperties.Name="{Binding CheckAgainLabel}"
-                                Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
+                        
+                        
+                        
+                        
                         <Button Content="{Binding OpenFolderLabel}" Command="{Binding OpenContainingFolderCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.OpenFolder"
                                 AutomationProperties.Name="{Binding OpenFolderLabel}"
@@ -230,10 +210,7 @@
                                 AutomationProperties.AutomationId="Session.FinalSave.SaveAnotherCopy"
                                 AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
                                 Visibility="{Binding CanSaveAnotherCopy, Converter={StaticResource BoolToVisibility}}" />
-                        <Button Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
-                                AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
-                                AutomationProperties.Name="{Binding UseSuggestionLabel}"
-                                Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
+                        
                         <Button Content="{Binding CancelSaveLabel}" Command="{Binding CancelSaveCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.Cancel"
                                 AutomationProperties.Name="{Binding CancelSaveLabel}"
@@ -254,9 +231,9 @@
                 </StackPanel>
             </Border>
         </DataTemplate>
-    </UserControl.Resources>
+    </ResourceDictionary></UserControl.Resources>
 
-    <Grid Margin="24">
+    <Grid Margin="16" Background="{DynamicResource PF.Brush.Canvas}" TextElement.FontFamily="{DynamicResource PF.Font.Family}" TextElement.FontSize="14"><Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -267,13 +244,13 @@
         </Grid.RowDefinitions>
 
         <!-- Session identity (§3). -->
-        <DockPanel Grid.Row="0">
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
             <TextBlock DockPanel.Dock="Right" Text="{Binding Workflow}" VerticalAlignment="Center"
                        Margin="12,0,0,0" Opacity="0.85" />
             <TextBlock Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
         </DockPanel>
 
-        <Border Grid.Row="1" x:Name="OperatorStatusPanel" Margin="0,6,0,0" Padding="10,4"
+        <Border Grid.Row="1" Grid.ColumnSpan="2" x:Name="OperatorStatusPanel" Margin="0,6,0,0" Padding="10,4"
                 Background="#F3F7FA"
                 Focusable="True" KeyboardNavigation.IsTabStop="True"
                 AutomationProperties.AutomationId="Session.OperatorStatus"
@@ -284,14 +261,14 @@
                     <Setter Property="BorderThickness" Value="1" />
                     <Style.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter Property="BorderBrush" Value="#174D83" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
                             <Setter Property="BorderThickness" Value="2" />
                         </Trigger>
                     </Style.Triggers>
                 </Style>
             </Border.Style>
             <TextBlock TextWrapping="Wrap">
-                <Run Text="{Binding StatusHeading, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" /><Run Text=" — " />
+                <Run Text="{Binding GuidedCurrentTitle, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" /><Run Text=" · " /><Run Text="{Binding GuidedCurrentStatus, Mode=OneWay}" /><Run Text=" — " />
                 <Run Text="{Binding NextStepText, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding StatusReason, Mode=OneWay}" />
             </TextBlock>
         </Border>
@@ -300,7 +277,7 @@
             The fake-adapter warning (§8). Deliberately loud: an operator must never mistake a
             generated test file for production output.
         -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="2" Grid.ColumnSpan="2"
                 Background="#FFF4CE"
                 BorderBrush="#E0B000"
                 BorderThickness="1"
@@ -326,7 +303,7 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
             <!-- Automation has ended for this session; nothing here restarts it (§14). -->
             <TextBlock Text="{Binding HandedOffNotice}"
                        TextWrapping="Wrap"
@@ -490,10 +467,16 @@
 
         </StackPanel>
 
-        <Grid Grid.Row="4" Margin="0,14,0,0">
+                <ScrollViewer Grid.Row="4" Grid.Column="0" Margin="0,14,16,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <TextBlock Text="{Binding StepsHeading}" FontWeight="SemiBold" Margin="0,0,0,12" />
+                <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{StaticResource PF.StepNavigation}"
+                              AutomationProperties.AutomationId="Session.StepList" AutomationProperties.Name="{Binding StepsHeading}" />
+            </StackPanel>
+        </ScrollViewer><Grid Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" Margin="0,0,20,0">
@@ -502,59 +485,6 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-
-            <!-- Step list (§3). -->
-            <DockPanel Grid.Row="0">
-                <TextBlock DockPanel.Dock="Top"
-                           Text="{Binding StepsHeading}"
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           Margin="0,0,0,8" />
-
-                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                    <ItemsControl ItemsSource="{Binding Steps}"
-                                  IsTabStop="False"
-                                  AutomationProperties.AutomationId="Session.StepList"
-                                  AutomationProperties.Name="{Binding StepsHeading}">
-                        <!--
-                            A row announces the step it is, not the class that produced it: an
-                            item's accessible name is read from its generated container, so
-                            leaving this unset makes a screen reader say "SessionStepRow".
-                        -->
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,3">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="30" />
-                                        <ColumnDefinition Width="240" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock Grid.Column="0" Text="{Binding Ordinal}" Opacity="0.6" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Name}" />
-                                    <TextBlock Grid.Column="2" Text="{Binding State}" Opacity="0.8" />
-
-                                    <Grid.Style>
-                                        <Style TargetType="Grid">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                    <Setter Property="TextElement.FontWeight" Value="SemiBold" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </DockPanel>
 
             <!--
                 Image review (Epic 11200 Part C1 §7–§16). One pane when there is a single
@@ -790,14 +720,7 @@
                                    AutomationProperties.AutomationId="Session.TrimAdjust.SourceUnavailable"
                                    Visibility="{Binding IsTrimSourceUnavailable, Converter={StaticResource BoolToVisibility}}" />
                         <WrapPanel>
-                            <local:ReviewApprovalButton Content="{Binding UseThisTrimLabel}"
-                                    Style="{StaticResource RecommendedAction}"
-                                    TargetIdentity="{Binding UseThisTrimIdentity}"
-                                    Command="{Binding UseThisTrimCommand}"
-                                    IsEnabled="{Binding CanUseThisTrim}"
-                                    AutomationProperties.AutomationId="Session.TrimAdjust.Use"
-                                    AutomationProperties.Name="{Binding UseThisTrimLabel}"
-                                    Padding="14,6" Margin="0,0,8,4" />
+                            
                             <Button Content="{Binding RestoreSuggestionLabel}"
                                     Command="{Binding RestoreAutomaticSuggestionCommand}"
                                     IsEnabled="{Binding CanRestoreAutomaticSuggestion}"
@@ -875,12 +798,7 @@
                             Apply is the only control on this surface that reaches the service.
                             Cancel calls a command that touches nothing at all (§22).
                         -->
-                        <Button Content="{Binding ApplyManualCropLabel}"
-                                AutomationProperties.AutomationId="Session.ApplyManualCrop" AutomationProperties.Name="{Binding ApplyManualCropLabel}"
-                                Command="{Binding ApplyManualCropCommand}"
-                                IsEnabled="{Binding CanApplyManualCrop}"
-                                Padding="14,6"
-                                Margin="0,0,8,0" />
+                        
                         <Button Content="{Binding CancelManualCropLabel}"
                                 AutomationProperties.AutomationId="Session.CancelManualCrop" AutomationProperties.Name="{Binding CancelManualCropLabel}"
                                 Command="{Binding CancelManualCropCommand}"
@@ -1159,13 +1077,7 @@
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
                             <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
                             <WrapPanel Margin="0,10,0,0">
-                                <local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
-                                        TargetIdentity="{Binding AskIdentity}"
-                                        Command="{Binding PrepareCorrectionFilesCommand}"
-                                        IsEnabled="{Binding CanPrepareCorrection}"
-                                        AutomationProperties.AutomationId="Session.Correction.Prepare"
-                                        AutomationProperties.Name="{Binding CorrectionPrepareLabel}"
-                                        Padding="14,6" Margin="0,0,8,4" />
+                                
                                 <Button Content="{Binding CorrectionCancelLabel}"
                                         Command="{Binding CancelAskColleagueCommand}"
                                         IsEnabled="{Binding CanCancelAskColleague}"
@@ -1226,14 +1138,7 @@
                                        AutomationProperties.LiveSetting="Assertive"
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
                             <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
-                            <local:ReviewApprovalButton x:Name="ImportCorrectedButton"
-                                    Content="{Binding CorrectionImportLabel}"
-                                    TargetIdentity="{Binding ImportIdentity}"
-                                    Command="{Binding ImportCorrectedImageCommand}"
-                                    IsEnabled="{Binding CanImportCorrectedImage}"
-                                    AutomationProperties.AutomationId="Session.Correction.Import"
-                                    AutomationProperties.Name="{Binding CorrectionImportLabel}"
-                                    HorizontalAlignment="Left" Padding="14,6" FontWeight="SemiBold" />
+                            
                             <Expander Header="{Binding CorrectionOtherOptionsLabel}" Margin="0,10,0,0"
                                       AutomationProperties.AutomationId="Session.Correction.OtherOptions"
                                       AutomationProperties.Name="{Binding CorrectionOtherOptionsLabel}"
@@ -1336,7 +1241,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
+<Expander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
                             <TextBlock Text="{Binding ArtefactHeading}" FontSize="15" FontWeight="SemiBold" />
@@ -1403,6 +1308,7 @@
                         </StackPanel>
                     </Border>
 
+</Expander>
                     <!--
                         Background removal, reviewed-content authority (Epic 11300 Part C2B2
                         §3–§9). Visible exactly while CanAuthoriseAutomaticSelection is true,
@@ -1586,11 +1492,7 @@
                                          Text="{Binding LeftMarginText, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
-                            <Button Content="{Binding ApplyTrimMarginLabel}"
-                                    Command="{Binding ApplyTrimMarginCommand}"
-                                    HorizontalAlignment="Left"
-                                    Padding="14,6"
-                                    Margin="0,10,0,0" />
+                            
 
                             <!-- The persisted decision, so it says what Run Step would do (§18). -->
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
@@ -1698,12 +1600,7 @@
                                                Margin="0,6,0,0"
                                                AutomationProperties.AutomationId="Session.PrintDimensions.TargetSizeHint"
                                                Visibility="{Binding HasCustomSizeInputHint, Converter={StaticResource BoolToVisibility}}" />
-                                    <Button Content="{Binding ConfirmCustomSizeLabel}"
-                                            Command="{Binding ConfirmCustomSizeCommand}"
-                                            AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
-                                            HorizontalAlignment="Left"
-                                            Padding="14,6"
-                                            Margin="0,10,0,0" />
+                                    
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -1955,12 +1852,7 @@
                                 </ListBox.ItemContainerStyle>
                             </ListBox>
 
-                            <Button Content="{Binding ConfirmWhiteUnderbaseLabel}"
-                                    Command="{Binding SelectWhiteUnderbaseCommand}"
-                                    IsEnabled="{Binding CanConfirmWhiteUnderbase}"
-                                    HorizontalAlignment="Left"
-                                    Padding="14,6"
-                                    Margin="0,10,0,0" />
+                            
 
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding BranchLabel}" Opacity="0.75" Margin="0,0,8,0" />
@@ -2314,8 +2206,9 @@
             Actions (§4). Every button's visibility comes from AvailableCommands, which is the
             engine's own answer — the screen states no workflow rule of its own.
         -->
-        <DockPanel Grid.Row="5" Margin="0,14,0,0" LastChildFill="False">
-            <WrapPanel DockPanel.Dock="Left" Orientation="Horizontal">
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.ActionBar"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+
+            <WrapPanel Orientation="Horizontal">
                 <WrapPanel.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
                         <Setter Property="Padding" Value="14,6" />
@@ -2323,6 +2216,76 @@
                     </Style>
                 </WrapPanel.Resources>
 
+
+<Button Content="{Binding ApplyTrimMarginLabel}"
+                                    Command="{Binding ApplyTrimMarginCommand}"
+                                    HorizontalAlignment="Left"
+                                    Padding="14,6"
+                                    Margin="0,10,0,0"  Visibility="{Binding CanSetTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding ConfirmCustomSizeLabel}"
+                                            Command="{Binding ConfirmCustomSizeCommand}"
+                                            AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
+                                            HorizontalAlignment="Left"
+                                            Padding="14,6"
+                                            Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedCustomSizeAction, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding ConfirmWhiteUnderbaseLabel}"
+                                    Command="{Binding SelectWhiteUnderbaseCommand}"
+                                    IsEnabled="{Binding CanConfirmWhiteUnderbase}"
+                                    HorizontalAlignment="Left"
+                                    Padding="14,6"
+                                    Margin="0,10,0,0"  Visibility="{Binding CanSelectWhiteUnderbase, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding UseThisTrimLabel}"
+                                    Style="{StaticResource RecommendedAction}"
+                                    TargetIdentity="{Binding UseThisTrimIdentity}"
+                                    Command="{Binding UseThisTrimCommand}"
+                                    IsEnabled="{Binding CanUseThisTrim}"
+                                    AutomationProperties.AutomationId="Session.TrimAdjust.Use"
+                                    AutomationProperties.Name="{Binding UseThisTrimLabel}"
+                                    Padding="14,6" Margin="0,0,8,4"  Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding ApplyManualCropLabel}"
+                                AutomationProperties.AutomationId="Session.ApplyManualCrop" AutomationProperties.Name="{Binding ApplyManualCropLabel}"
+                                Command="{Binding ApplyManualCropCommand}"
+                                IsEnabled="{Binding CanApplyManualCrop}"
+                                Padding="14,6"
+                                Margin="0,0,8,0"  Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
+                                        TargetIdentity="{Binding AskIdentity}"
+                                        Command="{Binding PrepareCorrectionFilesCommand}"
+                                        IsEnabled="{Binding CanPrepareCorrection}"
+                                        AutomationProperties.AutomationId="Session.Correction.Prepare"
+                                        AutomationProperties.Name="{Binding CorrectionPrepareLabel}"
+                                        Padding="14,6" Margin="0,0,8,4"  Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton x:Name="ImportCorrectedButton"
+                                    Content="{Binding CorrectionImportLabel}"
+                                    TargetIdentity="{Binding ImportIdentity}"
+                                    Command="{Binding ImportCorrectedImageCommand}"
+                                    IsEnabled="{Binding CanImportCorrectedImage}"
+                                    AutomationProperties.AutomationId="Session.Correction.Import"
+                                    AutomationProperties.Name="{Binding CorrectionImportLabel}"
+                                    HorizontalAlignment="Left" Padding="14,6" FontWeight="SemiBold"  Visibility="{Binding CanImportCorrectedImage, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding ConfirmAndSaveLabel}"
+                                Style="{StaticResource {x:Type Button}}"
+                                TargetIdentity="{Binding ConfirmAndSaveIdentity}"
+                                Command="{Binding ConfirmAndSaveCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.ConfirmAndSave"
+                                AutomationProperties.Name="{Binding ConfirmAndSaveLabel}"  Visibility="{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
+                                Style="{StaticResource {x:Type Button}}"
+                                TargetIdentity="{Binding SaveApprovedIdentity}"
+                                Command="{Binding SaveApprovedCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
+                                AutomationProperties.Name="{Binding SaveApprovedLabel}"  Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
+                                AutomationProperties.Name="{Binding RetryRecordedLabel}"  Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
+                                AutomationProperties.Name="{Binding CheckAgainLabel}"  Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
+                                AutomationProperties.Name="{Binding UseSuggestionLabel}"  Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{Binding ConfirmOriginalLabel}"
                         Command="{Binding ConfirmOriginalCommand}"
                         AutomationProperties.AutomationId="Session.ConfirmOriginal"
@@ -2424,12 +2387,14 @@
                         Visibility="{Binding CanAddAnotherSize, Converter={StaticResource BoolToVisibility}}" />
             </WrapPanel>
 
-            <Button DockPanel.Dock="Right"
+
+                    <Button Grid.Column="1"
                     Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
                     AutomationProperties.AutomationId="Session.BackToHome"
                     AutomationProperties.Name="{Binding BackLabel}"
-                    Padding="14,6" />
-        </DockPanel>
+                    Padding="14,6" /></Grid>
     </Grid>
 </UserControl>
+
+

@@ -89,6 +89,7 @@ public partial class SessionViewModel
             if (CanRetry) return RetryCommand;
             if (CanManualCrop) return BeginManualCropCommand;
             if (IsStoppedStep) return null;
+            if (ShowsGuidedCustomSizeAction) return ConfirmCustomSizeCommand;
             if (CanConfirmOriginal) return ConfirmOriginalCommand;
             if (CanRunStep) return RunStepCommand;
             if (_session?.CurrentStep is null && FinalSaveRecommendation is { } save) return save;

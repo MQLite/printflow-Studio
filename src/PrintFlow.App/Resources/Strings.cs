@@ -20,6 +20,7 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_GuidedTechnicalDetails => Get(nameof(Session_GuidedTechnicalDetails));
     internal static string Session_NextCrop => Get(nameof(Session_NextCrop));
     internal static string Session_StatusHandedOff => Get(nameof(Session_StatusHandedOff));
     internal static string Session_StatusCompleted => Get(nameof(Session_StatusCompleted));

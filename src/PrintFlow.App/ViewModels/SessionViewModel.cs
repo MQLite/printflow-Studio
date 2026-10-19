@@ -3582,6 +3582,7 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             Steps.Add(new SessionStepRow(step, isCurrent: step == session.CurrentStep));
         }
+        RefreshGuidedPresentation();
 
         // Rebuilt wholesale from what the service returned, like everything else here: an
         // output whose review state or validity changed must not survive as the row this

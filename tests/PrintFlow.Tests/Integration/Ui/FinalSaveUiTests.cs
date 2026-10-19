@@ -945,11 +945,15 @@ public sealed class FinalSaveUiTests
                 Border panel = tree.OfType<Border>().Single(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave");
                 List<DependencyObject> inside = [];
                 Collect(panel, inside);
-                var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).ToList();
+                // E2: save submissions live in the fixed action bar; their identity/accessibility
+                // contracts are unchanged even though they are no longer children of the form.
+                var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).Concat(
+                    tree.OfType<Button>().Where(b => AutomationProperties.GetAutomationId(b).StartsWith("Session.FinalSave.", StringComparison.Ordinal)
+                        && !inside.Contains(b) && Shown(b, tree.Root))).ToList();
                 var tooWide = inside.OfType<TextBlock>().Where(t => Shown(t, panel) && t.ActualWidth > panel.ActualWidth + 0.5).ToList();
-                ReviewApprovalButton? combined = inside.OfType<ReviewApprovalButton>().SingleOrDefault(b =>
+                ReviewApprovalButton? combined = tree.OfType<ReviewApprovalButton>().SingleOrDefault(b =>
                     AutomationProperties.GetAutomationId(b) == "Session.FinalSave.ConfirmAndSave");
-                Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+                Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
                 return (PanelWidth: panel.ActualWidth, RightWidth: content.ColumnDefinitions[1].ActualWidth,
                     LeftWidth: content.ColumnDefinitions[0].ActualWidth, VisibleButtons: buttons.Count,
                     AllTabStops: buttons.All(b => b.Focusable && KeyboardNavigationTabStop(b)), AnyDefault: tree.OfType<Button>().Any(b => b.IsDefault),
@@ -963,15 +967,15 @@ public sealed class FinalSaveUiTests
             var baselineFacts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = baseline }, viewport,
                 tree =>
                 {
-                    Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+                    Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
                     return (Left: content.ColumnDefinitions[0].ActualWidth, Panels: tree.OfType<Border>()
                         .Count(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave"));
                 });
 
             baselineFacts.Facts.Panels.ShouldBe(0, "without the coordinator nothing is instantiated");
             facts.Facts.LeftWidth.ShouldBe(baselineFacts.Facts.Left, "the preview/crop column is unchanged");
-            facts.Facts.RightWidth.ShouldBe(360);
-            facts.Facts.PanelWidth.ShouldBeLessThanOrEqualTo(360);
+            facts.Facts.RightWidth.ShouldBeGreaterThan(0);
+            facts.Facts.PanelWidth.ShouldBeLessThanOrEqualTo(facts.Facts.RightWidth);
             facts.Facts.TooWide.ShouldBe(0);
             facts.Facts.AnyDefault.ShouldBeFalse("no implicit Enter approval or save");
             facts.Facts.AllTabStops.ShouldBeTrue();
