@@ -1,0 +1,9 @@
+{
+  "HeightDip": 100,
+  "ScreenshotSha256": "ECEB062C01343D7A0B752BC6BF2323F7E437EF4E48A9630CE90ACAAE72EE188B",
+  "State": "selection-before-review",
+  "Dpi": 96,
+  "WidthDip": 500,
+  "ReviewedHead": "9140f85f5a063fde34d96c1ad98ea032ade2c5d9",
+  "Method": "Reviewer-provided image; explicit non-adorner WPF renderer in isolated process; synthetic active focus/selection; no App or Window.Show"
+}

@@ -39,3 +39,19 @@ Home 的1000/1280图为滚动至导入按钮后的状态；上部环境内容在
 NOT RUN：物理键盘焦点、屏幕阅读器、真实100%/125%/150%窗口缩放和跨显示器、中文新手、英文人工走查、工作站/生产应用/客户数据。焦点模板与合成事件测试不等同于这些验证。
 
 回归原始记录见 [checks](checks/)；精确基线差异见 [baseline-comparison.json](checks/baseline-comparison.json)。
+
+## 审查后的选区对比度修复
+
+以下图独立于原21张代表页/组件证据，均为500×100 DIP、96 DPI、合成选择/焦点，已逐张检查。没有物理键盘或生产窗口。当前宿主默认 adorner 路径未复现白字；原问题及对应修复后图来自独立进程显式选择的另一非 adorner 路径，不证明生产默认行为。
+
+| 图 | 渲染条件 | 检查结果 |
+| --- | --- | --- |
+| [修复前](selection-before-review.png) / [JSON](selection-before-review.json) | 审查者显式非 adorner、活动选区 | 白字在浅色选区上难读 |
+| [活动修复后](selection-active-modern-after.png) / [JSON](selection-active-modern-after.json) | 独立进程显式非 adorner | 深色文字、浅色选区清晰；415 ink / 3041 selection pixels |
+| [非活动修复后](selection-inactive-modern-after.png) / [JSON](selection-inactive-modern-after.json) | 同上，合成非活动选区 | 深色文字、浅色选区清晰；415 ink / 3041 selection pixels |
+| [活动默认路径](selection-active-native-default-after.png) / [JSON](selection-active-native-default-after.json) | 不改变宿主默认设置 | 深色文字可读；不把离屏 adorner 背景缺失当成完整窗口选区效果 |
+| [非活动默认路径](selection-inactive-native-default-after.png) / [JSON](selection-inactive-native-default-after.json) | 同上 | 深色文字可读；相同限制 |
+
+[独立捕获脚本](checks/capture-selection-modern.ps1)只可在全新一次性 `pwsh -NoProfile -STA` 进程运行；它读取当前主题，验证显式 Ink 画刷及实际选区/字形像素，保存源文件和图像 SHA-256。没有改动产品/测试运行时配置或整个测试套件的开关。修复测试的 RED/GREEN、最终构建及回归见 [执行结果](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11177_RESULTS.md)。
+
+修复后广筛1269通过/14失败/1跳过，全部40项Guided通过；14项失败的名称和错误信息与基线及审查快照完全匹配，见 [修复后比较](checks/review-fix-baseline-comparison.json)。广筛仍为FAIL，未扩大范围修复遗留失败。

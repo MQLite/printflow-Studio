@@ -1,8 +1,15 @@
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Input;
 using PrintFlow.Tests.Fixtures;
 
@@ -109,5 +116,83 @@ public sealed class GuidedThemeResourceTests
             return 0;
         });
         rendered.BindingErrors.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Selected_output_text_remains_readable_in_active_and_inactive_selection(bool active)
+    {
+        const string text = "客户输出名称 selected output name";
+        Size viewport = new(500, 100);
+        Func<UserControl> create = () =>
+        {
+            TextBox input = new() { Text = text, IsInactiveSelectionHighlightEnabled = true };
+            input.SetResourceReference(FrameworkElement.StyleProperty, "PF.Input.TextBox");
+            return GuidedThemeFixture.Host(new Border { Padding = new Thickness(20), Child = input });
+        };
+        var rendered = WpfRendering.RenderExpectingNoBindingErrors(create, viewport, tree =>
+        {
+            Application.Current.ShouldBeNull();
+            TextBox input = tree.OfType<TextBox>().Single();
+            PrepareSelection(input, active);
+            tree.Root.UpdateLayout();
+            input.IsSelectionActive.ShouldBe(active);
+            input.SelectedText.ShouldBe(text);
+            Rect first = input.GetRectFromCharacterIndex(0);
+            Rect last = input.GetRectFromCharacterIndex(text.Length - 1, trailingEdge: true);
+            Rect selected = input.TransformToAncestor(tree.Root).TransformBounds(
+                new Rect(first.TopLeft, new Point(last.Right, first.Bottom)));
+            selected.Width.ShouldBeGreaterThan(100);
+            RenderTargetBitmap bitmap = new(500, 100, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(tree.Root);
+            byte[] pixels = new byte[500 * 100 * 4];
+            bitmap.CopyPixels(pixels, 500 * 4, 0);
+            int inkPixels = 0;
+            for (int y = (int)Math.Ceiling(selected.Top); y < Math.Floor(selected.Bottom); y++)
+                for (int x = (int)Math.Ceiling(selected.Left); x < Math.Floor(selected.Right); x++)
+                {
+                    int i = ((y * 500) + x) * 4;
+                    if (Math.Abs(pixels[i] - 0x2A) <= 20 && Math.Abs(pixels[i + 1] - 0x2E) <= 20 &&
+                        Math.Abs(pixels[i + 2] - 0x20) <= 20 && pixels[i + 3] == 255) inkPixels++;
+                }
+            inkPixels.ShouldBeGreaterThan(100, "selected glyphs must remain dark and readable on the pale selection");
+            input.SelectionTextBrush.ShouldBeOfType<SolidColorBrush>().Color.ShouldBe(Color.FromRgb(0x20, 0x2E, 0x2A));
+            input.SelectionTextBrush.ShouldBeSameAs(tree.Root.FindResource("PF.Brush.Ink"));
+            return new { Active = active, SelectedCharacters = input.SelectionLength, InkPixels = inkPixels,
+                SelectionText = input.SelectionTextBrush.ToString(), SelectionSurface = input.SelectionBrush.ToString() };
+        });
+
+        string? directory = Environment.GetEnvironmentVariable("PF_11177_CAPTURE_DIR");
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            string stem = active ? "selection-active-native-default-after" : "selection-inactive-native-default-after";
+            string path = Path.Combine(directory, stem + ".png");
+            WpfRendering.CapturePng(create, viewport, path, tree =>
+                PrepareSelection(tree.OfType<TextBox>().Single(), active));
+            File.WriteAllText(Path.Combine(directory, stem + ".json"), JsonSerializer.Serialize(new
+            {
+                State = stem, WidthDip = 500, HeightDip = 100, Dpi = 96,
+                ScreenshotSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))),
+                Method = "offscreen WPF; native runtime defaults unchanged; synthetic selection/focus, no physical keyboard or Window.Show",
+                rendered.Facts,
+            }, new JsonSerializerOptions { WriteIndented = true }));
+        }
+    }
+
+    private static void PrepareSelection(TextBox input, bool active)
+    {
+        // Set native read-only focus/selection flags only in this offscreen fixture; no desktop focus or input.
+        input.SetValue((DependencyPropertyKey)typeof(UIElement)
+            .GetField("IsKeyboardFocusedPropertyKey", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!, active);
+        input.SelectAll();
+        input.SetValue((DependencyPropertyKey)typeof(TextBoxBase)
+            .GetField("IsSelectionActivePropertyKey", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!, active);
+        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+        object selection = typeof(TextBoxBase).GetProperty("TextSelectionInternal", flags)!.GetValue(input)!;
+        selection.GetType().GetMethod("Highlight", flags)!.Invoke(selection, []);
+        input.UpdateLayout();
+        Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+        input.UpdateLayout();
     }
 }

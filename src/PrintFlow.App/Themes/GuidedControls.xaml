@@ -83,6 +83,7 @@
     <Setter Property="Background" Value="{DynamicResource PF.Brush.Surface}" />
     <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
     <Setter Property="SelectionBrush" Value="{DynamicResource PF.Brush.Selection}" />
+    <Setter Property="SelectionTextBrush" Value="{DynamicResource PF.Brush.Ink}" />
     <Setter Property="SelectionOpacity" Value="1" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
   </Style>

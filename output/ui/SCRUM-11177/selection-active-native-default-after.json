@@ -1,0 +1,15 @@
+{
+  "State": "selection-active-native-default-after",
+  "WidthDip": 500,
+  "HeightDip": 100,
+  "Dpi": 96,
+  "ScreenshotSha256": "D0B7476D9E76597E27FE6BC3E73392005561EE8C267DE3D50FD97E932CF9D0D0",
+  "Method": "offscreen WPF; native runtime defaults unchanged; synthetic selection/focus, no physical keyboard or Window.Show",
+  "Facts": {
+    "Active": true,
+    "SelectedCharacters": 27,
+    "InkPixels": 415,
+    "SelectionText": "#FF202E2A",
+    "SelectionSurface": "#FFE8F4EF"
+  }
+}

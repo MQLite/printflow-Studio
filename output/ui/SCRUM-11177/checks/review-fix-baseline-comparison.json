@@ -1,0 +1,300 @@
+{
+  "Baseline": {
+    "Total": 1244,
+    "Passed": 1228,
+    "Failed": 15,
+    "Skipped": 1
+  },
+  "ReviewedSnapshot": {
+    "Total": 1282,
+    "Passed": 1267,
+    "Failed": 14,
+    "Skipped": 1
+  },
+  "Fix": {
+    "Total": 1284,
+    "Passed": 1269,
+    "Failed": 14,
+    "Skipped": 1
+  },
+  "NewFailures": [],
+  "BaselineFailuresNotReproduced": [
+    "PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Tiff_shows_backend_physical_size_keeps_older_size_selectable_and_late_results_stay_with_their_item"
+  ],
+  "FailureComparisons": [
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "Shouldly.ShouldAssertException : rendered.Facts\r\n    should be\r\n\"No preview\"\r\n    but was\r\n\"无预览\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    \r\nExpected Value | N    o    \\s   p    r    e    v    i    e    w    \r\nActual Value   | 无    预    览                                       \r\nExpected Code  | 78   111  32   112  114  101  118  105  101  119  \r\nActual Code    | 260803904435272                                   "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "Shouldly.ShouldAssertException : english.Single(label => label.Id == \"Home.RemoveSessionRecord\").Name\r\n    should be\r\n\"Remove from list\"\r\n    but was\r\n\"从列表移除\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   \r\nExpected Value | R    e    m    o    v    e    \\s   f    r    o    m    \\s   l    i    s    t    \r\nActual Value   | 从    列    表    移    除                                                           \r\nExpected Code  | 82   101  109  111  118  101  32   102  114  111  109  32   108  105  115  116  \r\nActual Code    | 2017421015349203122738500                                                       "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"manual\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"review\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"waiting\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: \"en-US\", tight: \"Tight\", uniform: \"Uniform margin\", edge: \"Per-edge margin\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Tight\"\r\n    but was\r\n\"紧贴选区\"\r\n    difference\r\nDifference     |  |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    \r\nExpected Value | T    i    g    h    t    \r\nActual Value   | 紧    贴    选    区         \r\nExpected Code  | 84   105  103  104  116  \r\nActual Code    | 32039361483687321306     "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: \"en-US\", heading: \"Manual crop\", selected: \"Selected bounds\", applied: \"Applied crop bounds\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : model.ManualCropHeading\r\n    should be\r\n\"Manual crop\"\r\n    but was\r\n\"手动裁切\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   \r\nExpected Value | M    a    n    u    a    l    \\s   c    r    o    p    \r\nActual Value   | 手    动    裁    切                                       \r\nExpected Code  | 77   97   110  117  97   108  32   99   114  111  112  \r\nActual Code    | 25163211603500920999                                   "
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "Shouldly.ShouldAssertException : selectedBefore\r\n    should be null but was\r\nzh-CN\r\n\r\nAdditional Info:\r\n    the application never unselects, so a test starting with a selection inherited a leak"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains more than one element"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"automatic\", label: \"Artwork content\", artwork: \"5 × 5 px\", canvas: \"9 × 9 px\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"keep\", label: \"Artwork extent\", artwork: \"Full original canvas\", canvas: \"12 × 10 px\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"manual\", label: \"Selected artwork\", artwork: \"6 × 5 px\", canvas: \"10 × 9 px\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"en-US\", effectiveLabel: \"Effective source resolution\", normalStatus: \"No enlargement required\", enlargementStatus: \"Enlargement required\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "TestName": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"zh-CN\", effectiveLabel: \"源图有效分辨率\", normalStatus: \"无需放大\", enlargementStatus: \"需要放大\")",
+      "PresentInBaseline": true,
+      "ExactMessageMatchesBaseline": true,
+      "PresentInReviewedSnapshot": true,
+      "ExactMessageMatchesReviewedSnapshot": true,
+      "Message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    }
+  ],
+  "Guided": [
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.PageHeader\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Route_cards_keep_exact_commands_parameters_and_three_workflows",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Home_keeps_import_warnings_and_recent_actions",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.All_five_states_show_text_and_distinct_current_marker",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Selected_output_text_remains_readable_in_active_and_inactive_selection(active: False)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: \"Error\", heading: \"处理未完成\", explanation: \"请检查失败原因，再选择可用操作。\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Focused_selected_and_disabled_controls_remain_distinguishable",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Long_Chinese_source_and_failure_text_keep_actions_reachable(width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Selected_output_text_remains_readable_in_active_and_inactive_selection(active: True)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.FormSection\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Standalone_adopted_views_resolve_theme_without_application",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Styled_review_approval_preserves_target_and_gesture_guard",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Tokens_resolve_to_approved_values",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Long_button_labels_wrap_instead_of_losing_the_action",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.TaskCard\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Long_Chinese_source_and_failure_text_keep_actions_reachable(width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: \"Warning\", heading: \"请先完成检查\", explanation: \"缺少必要条件，已有输入会保留。\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Future_steps_are_not_tab_stops_or_invokable",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Dictionary_loads_without_production_application",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Loading_is_indeterminate_and_does_not_hide_legal_stop",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Long_step_text_wraps_without_overlapping_neighbours",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Replacing_items_does_not_execute_or_change_business_state",
+      "outcome": "Passed"
+    }
+  ]
+}
