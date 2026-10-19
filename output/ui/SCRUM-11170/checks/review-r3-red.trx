@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="698b973f-b518-45f1-b634-3a323487648a" name="admin@DESKTOP-0BG8884 2026-10-19 18:34:27" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T18:34:27.8927724+13:00" queuing="2026-10-19T18:34:27.8927727+13:00" start="2026-10-19T18:34:22.8034135+13:00" finish="2026-10-19T18:34:28.0660648+13:00" />
+  <TestSettings name="default" id="e7f9164c-65bb-42ca-9e80-31e05c839866">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_18_34_27" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="3a937376-a8eb-48a2-b69d-c31ede883ce5" testId="fb932e22-6ef9-dcc4-6034-2132afd9a039" testName="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.7390004" startTime="2026-10-19T18:34:26.3747876+13:00" endTime="2026-10-19T18:34:27.1194903+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3a937376-a8eb-48a2-b69d-c31ede883ce5">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs:line 52&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d6fda485-3931-4461-ad61-aa4961cc79a9" testId="235b3da8-70b0-403f-8f9b-68f64c216f49" testName="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3061217" startTime="2026-10-19T18:34:27.1316869+13:00" endTime="2026-10-19T18:34:27.4268357+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d6fda485-3931-4461-ad61-aa4961cc79a9">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs:line 52&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="10275b5f-4c3a-4a3e-bc5d-604d17ff46e1" testId="5436d6ac-89ef-88a7-54fc-a8d6b656ed0d" testName="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving" computerName="DESKTOP-0BG8884" duration="00:00:00.5583010" startTime="2026-10-19T18:34:27.4291996+13:00" endTime="2026-10-19T18:34:27.9870008+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="10275b5f-4c3a-4a3e-bc5d-604d17ff46e1">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs:line 24&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: False)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="235b3da8-70b0-403f-8f9b-68f64c216f49">
+      <Execution id="d6fda485-3931-4461-ad61-aa4961cc79a9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests" name="A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: True)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="fb932e22-6ef9-dcc4-6034-2132afd9a039">
+      <Execution id="3a937376-a8eb-48a2-b69d-c31ede883ce5" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests" name="A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="5436d6ac-89ef-88a7-54fc-a8d6b656ed0d">
+      <Execution id="10275b5f-4c3a-4a3e-bc5d-604d17ff46e1" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests" name="Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="fb932e22-6ef9-dcc4-6034-2132afd9a039" executionId="3a937376-a8eb-48a2-b69d-c31ede883ce5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="235b3da8-70b0-403f-8f9b-68f64c216f49" executionId="d6fda485-3931-4461-ad61-aa4961cc79a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5436d6ac-89ef-88a7-54fc-a8d6b656ed0d" executionId="10275b5f-4c3a-4a3e-bc5d-604d17ff46e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="0" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.11]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.20]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.97]       Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+[xUnit.net 00:00:03.97]           should be&#xD;
+[xUnit.net 00:00:03.97]       0&#xD;
+[xUnit.net 00:00:03.97]           but was&#xD;
+[xUnit.net 00:00:03.97]       1&#xD;
+[xUnit.net 00:00:03.97]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.97]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs(52,0): at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:03.97]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:03.97]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:03.97]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.28]       Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+[xUnit.net 00:00:04.28]           should be&#xD;
+[xUnit.net 00:00:04.28]       0&#xD;
+[xUnit.net 00:00:04.28]           but was&#xD;
+[xUnit.net 00:00:04.28]       1&#xD;
+[xUnit.net 00:00:04.28]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.28]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs(52,0): at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.28]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(Boolean rename)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.28]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.28]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]       Shouldly.ShouldAssertException : h.Navigation.GoHomeCount&#xD;
+[xUnit.net 00:00:04.84]           should be&#xD;
+[xUnit.net 00:00:04.84]       0&#xD;
+[xUnit.net 00:00:04.84]           but was&#xD;
+[xUnit.net 00:00:04.84]       1&#xD;
+[xUnit.net 00:00:04.84]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.84]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportDraftTests.cs(24,0): at PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T18:34:27.1220809+13:00">
+        <Text>[xUnit.net 00:00:03.97]     PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T18:34:27.4271953+13:00">
+        <Text>[xUnit.net 00:00:04.28]     PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(rename: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T18:34:27.9873132+13:00">
+        <Text>[xUnit.net 00:00:04.84]     PrintFlow.Tests.Integration.Ui.GuidedImportDraftTests.Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

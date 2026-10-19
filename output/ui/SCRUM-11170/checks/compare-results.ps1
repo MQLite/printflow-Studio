@@ -1,4 +1,4 @@
-param([string]$Current = 'e3-ui-architecture-final2.trx')
+param([string]$Current = 'review-ui-architecture-final2.trx')
 $ErrorActionPreference = 'Stop'
 function Counters($run) { $c=$run.TestRun.ResultSummary.Counters; [ordered]@{ Total=[int]$c.total; Passed=[int]$c.passed; Failed=[int]$c.failed; NotExecuted=[int]$c.notExecuted; Executed=[int]$c.executed } }
 $baselinePath = Join-Path $PSScriptRoot '../../SCRUM-11169/checks/review-ui-architecture-final.trx'

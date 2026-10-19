@@ -9,6 +9,7 @@ using PrintFlow.App.Startup;
 using PrintFlow.Domain.Results;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Commands;
+using PrintFlow.Workflow.Engine;
 using PrintFlow.Workflow.Services;
 
 namespace PrintFlow.App.ViewModels;
@@ -548,7 +549,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
         if (row is null || ListActionsBlocked) return;
         var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
         if (!_active) return;
-        if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
+        if (loaded.IsSuccess) OpenContinuedSession(loaded.Value);
         else ShowFailureNotice(Format(Strings.Home_ResumeFailed,
             row.HasOpenCorrection ? row.OpenCorrectionLabel : row.OpenLabel), loaded.Failure);
     }
@@ -571,7 +572,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
             await RefreshAsync(cancellationToken).ConfigureAwait(true);
             if (!_active) return;
             if (result.IsFailure) ShowFailureNotice(Strings.Home_RecoveryFailed, result.Failure);
-            else if (action != RecoveryAction.Abandon) _navigation.GoToSession(result.Value);
+            else if (action != RecoveryAction.Abandon) OpenContinuedSession(result.Value);
         }
         finally { IsBusy = false; }
     }
@@ -646,12 +647,24 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
                 return;
             }
 
-            _navigation.GoToSession(loaded.Value);
+            OpenContinuedSession(loaded.Value);
         }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    private void OpenContinuedSession(SessionView session)
+    {
+        // Import's temporary route is not recorded user intent (choosing that same route
+        // has no persistent effect). Ask again only before the original is confirmed.
+        // Processing, interrupted and review states retain their existing recovery location.
+        if (session.CurrentStep is { Step: StepKind.OriginalConfirmation, State: StepState.Waiting } &&
+            session.AvailableCommands.Contains(CommandKind.SelectWorkflow))
+            _navigation.GoToWorkflowSelection(session);
+        else
+            _navigation.GoToSession(session);
     }
 
     /// <summary>

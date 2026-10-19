@@ -124,17 +124,38 @@ public sealed class WorkflowChoice : ObservableObject
 /// </remarks>
 public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntryScreenLifetime
 {
+    public sealed record DraftLeaveRequest(long Generation);
     private bool _active = true;
     private long _generation;
-    public string InteractionIdentity => $"{_generation}|{_session?.Id}";
+    public string InteractionIdentity => $"{_generation}|{_session?.Id}|{IsConfirmingDraftLeave}";
     public string RouteChangeHint => Strings.Resolve(_session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true
         ? "WorkflowSelection_GuidedChangeAllowed" : "WorkflowSelection_GuidedChangeLocked");
     public string ProgressLabel => Strings.Resolve("WorkflowSelection_GuidedProgress");
+    private DraftLeaveRequest? _pendingLeave;
+    public DraftLeaveRequest? PendingLeave
+    {
+        get => _pendingLeave;
+        private set
+        {
+            if (!SetProperty(ref _pendingLeave, value)) return;
+            OnPropertyChanged(nameof(IsConfirmingDraftLeave));
+            NotifyEligibility();
+            OnPropertyChanged(nameof(InteractionIdentity));
+        }
+    }
+    public bool IsConfirmingDraftLeave => PendingLeave is not null;
+    public bool CanInteractWithPage => _active && !IsConfirmingDraftLeave;
+    public bool CanGoHome => CanInteractWithPage && !IsBusy;
+    public string DraftLeaveHeading => Strings.Session_DraftLeaveHeading;
+    public string DraftLeaveNotice => Strings.Session_DraftLeaveNotice;
+    public string KeepDraftLabel => Strings.Session_KeepDraft;
+    public string DiscardDraftLabel => Strings.Session_DiscardDraft;
 
     public void Deactivate()
     {
         _active = false;
         ++_generation;
+        PendingLeave = null;
         IsBusy = false;
         NotifyEligibility();
         OnPropertyChanged(nameof(InteractionIdentity));
@@ -147,6 +168,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
         OnPropertyChanged(nameof(CanSelect));
         OnPropertyChanged(nameof(CanEditOutputName));
         OnPropertyChanged(nameof(RouteChangeHint));
+        OnPropertyChanged(nameof(CanInteractWithPage));
+        OnPropertyChanged(nameof(CanGoHome));
     }
     private readonly ISessionService _sessions;
     private readonly IArtefactPreviewService _previews;
@@ -267,7 +290,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
     /// lives in the engine; this is a reading of its answer, not a second copy of it.
     /// </remarks>
     public bool CanSelect =>
-        _active && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
+        CanInteractWithPage && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
 
     /// <summary>
     /// Whether the Output Name may still be edited, as the engine reports it.
@@ -278,7 +301,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
     /// box and an accepted command must not be able to disagree.
     /// </remarks>
     public bool CanEditOutputName =>
-        _active && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
+        CanInteractWithPage && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
 
     /// <summary>Points the screen at the session it is choosing a workflow for.</summary>
     /// <remarks>
@@ -291,6 +314,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
 
         ++_generation;
         _active = true;
+        PendingLeave = null;
         IsBusy = false;
         _session = session;
         Notice = CanSelect ? null : Strings.WorkflowSelection_Locked;
@@ -303,9 +327,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
         OnPropertyChanged(nameof(SessionName));
         OnPropertyChanged(nameof(SourceFileName));
         OnPropertyChanged(nameof(HasSourceFileName));
-        OnPropertyChanged(nameof(CanSelect));
-        OnPropertyChanged(nameof(CanEditOutputName));
-        OnPropertyChanged(nameof(RouteChangeHint));
+        NotifyEligibility();
         OnPropertyChanged(nameof(InteractionIdentity));
 
         Preview = null;
@@ -364,7 +386,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
     [RelayCommand]
     private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancellationToken)
     {
-        if (choice is null || _session is null || IsBusy || !_active)
+        if (choice is null || _session is null || IsBusy || !CanInteractWithPage)
         {
             return;
         }
@@ -500,7 +522,35 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntr
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken)
     {
-        if (!_active) return;
+        if (!CanGoHome) return;
+        if (_session is not null && !string.Equals(OutputName, SessionName, StringComparison.Ordinal))
+        {
+            PendingLeave = new DraftLeaveRequest(_generation);
+            return;
+        }
+        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    [RelayCommand]
+    private void KeepDraft(DraftLeaveRequest? request)
+    {
+        if (!OwnsLeave(request)) return;
+        PendingLeave = null;
+    }
+
+    [RelayCommand]
+    private async Task DiscardDraftAndLeaveAsync(DraftLeaveRequest? request, CancellationToken cancellationToken)
+    {
+        if (!OwnsLeave(request)) return;
+        OutputName = SessionName;
+        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    private bool OwnsLeave(DraftLeaveRequest? request) => request is not null &&
+        ReferenceEquals(request, PendingLeave) && Owns(request.Generation) && !IsBusy;
+
+    private async Task LeaveHomeAsync(CancellationToken cancellationToken)
+    {
         Deactivate();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
     }

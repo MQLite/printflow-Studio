@@ -25,6 +25,36 @@ public sealed class GuidedImportVisualEvidenceTests
     [InlineData(1000, 700)]
     [InlineData(1280, 720)]
     [InlineData(1920, 1080)]
+    public async Task Reviewed_resume_and_draft_decision_fit_supported_viewports(int width, int height)
+    {
+        using OperatorCultureScope culture = new("zh-CN"); using HomeScreenHarness h = new();
+        string source = h.Inner.WriteBorderedSourcePng("继续处理—保留原件.png");
+        var imported = (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset, source, "继续处理的合成图案", "tester", default)).Value;
+        await h.Home.RefreshCommand.ExecuteAsync(null);
+        await h.Home.ResumeCommand.ExecuteAsync(h.Home.RecentSessions.Single());
+        h.Navigation.SessionFor.ShouldBeNull();
+        var route = h.WorkflowSelection(h.Navigation); route.Open(h.Navigation.WorkflowSelectionFor.ShouldNotBeNull());
+        await route.PreviewLoaded;
+        if (width == 1000)
+            Capture(() => new WorkflowSelectionView { DataContext = route }, new Size(width, height), "review-resume-route", source,
+                route.Workflows.Select(w => w.AutomationId).Append("WorkflowSelection.Back").ToArray());
+
+        // A fresh model prevents sharing dispatcher-owned preview state between renders.
+        var draft = h.WorkflowSelection(h.Navigation); draft.Open(imported); await draft.PreviewLoaded;
+        draft.OutputName = "尚未保存的新输出名称"; await draft.BackToHomeCommand.ExecuteAsync(null);
+        Capture(() => new WorkflowSelectionView { DataContext = draft }, new Size(width, height), "review-draft-leave", source,
+            ["WorkflowSelection.KeepDraft", "WorkflowSelection.DiscardDraft"], tree =>
+            {
+                GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName").IsEnabled.ShouldBeFalse();
+                GuidedImportHomeTests.Find<Button>(tree, "WorkflowSelection.Back").IsEnabled.ShouldBeFalse();
+                foreach (var choice in draft.Workflows) GuidedImportHomeTests.Find<Button>(tree, choice.AutomationId).IsEnabled.ShouldBeFalse();
+            });
+    }
+
+    [Theory]
+    [InlineData(1000, 700)]
+    [InlineData(1280, 720)]
+    [InlineData(1920, 1080)]
     public async Task Chinese_home_routes_and_original_steps_fit_the_supported_viewports(int width, int height)
     {
         using OperatorCultureScope culture = new("zh-CN");

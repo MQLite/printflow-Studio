@@ -61,3 +61,11 @@
 Self-review: all I01/I02 AC map to tasks 1-3; I03 integration remains blocked while unavailable-entry AC is tested. Existing authority/tests cover format sniffing, snapshot preservation and route lock. No new persistence or AI execution.
 Routing post-plan: NormalRoute gpt-6-astra/high; RouteOffset=0; RequestedRoute/ExecutionTarget unchanged; ActualRoute verified by parent session 01a15273-3593-7c80-af03-4203e055fc1e turn_context 2026-10-19T04:37:27.245Z. Every immediate unit mixes WPF interaction/visuals with transient UI ownership; splitting would duplicate the same lifetime/control context. CONTINUE Native. Reevaluate at major boundary; no claimed model switch.
 Authorization ruling: existing approved v2 and latest PLAN_EXECUTE/Native authorization permit execution after self-review without re-requesting approval. Cost if wrong: user may prefer revisiting the already approved arrangement; no external publication is made.
+
+### Review correction pass (R1/R3 only)
+- [x] Verify independent findings against actual service/state semantics and record accepted costs; defer R2 explicitly.
+- [x] Add real failing resume/draft/busy/focus cases before each required production change; retain raw failures.
+- [x] Preserve explicit route decisions on unconfirmed resume, actual later progress and recovery location.
+- [x] Preserve route-name drafts through explicit Keep/Discard, modal identity guards and neutral focus; busy Back disabled.
+- [x] Render and inspect the resumed chooser and draft dialog; four supplemental Chinese PNG/JSON pairs.
+- [x] Finish sequential safe broad, compare exact inherited failures, commit review/fix evidence and return to controller for final targeted verification.

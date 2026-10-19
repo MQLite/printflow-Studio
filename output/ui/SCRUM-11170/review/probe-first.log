@@ -1,0 +1,6 @@
+Workspace: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\58e46cfc53014a5db76b91f0d4b58718
+Database: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\2896cca6ca534d34b35e83900aa5aafe.db
+{"Probe":"BackWithoutRouteThenContinue","WasExplicitSelectInvoked":false,"ResumedRoute":"PrepareAsset","ResumedStep":"OriginalConfirmation","Destination":"Session","CanConfirmOriginal":true}
+Workspace: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\0a4ef40c764a468385fd8bb348a89eb2
+Database: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\9e9f19f85dc5446c9a992e89c5ddaa20.db
+{"Probe":"CancelCommittedImport","Persisted":1,"ContinueRows":0,"RecentRows":0,"Notice":"\u5DF2\u53D6\u6D88\u5BFC\u5165\u7B49\u5F85\u3002\u82E5\u4EFB\u52A1\u5DF2\u521B\u5EFA\uFF0C\u53EF\u5728\u6700\u8FD1\u4EFB\u52A1\u4E2D\u627E\u5230\uFF1B\u539F\u6587\u4EF6\u4FDD\u6301\u4E0D\u53D8\u3002"}

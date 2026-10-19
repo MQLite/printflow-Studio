@@ -35,7 +35,7 @@
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource PF.Brush.Canvas}">
-    <Grid Margin="{DynamicResource PF.Padding.Card}">
+    <Grid Margin="{DynamicResource PF.Padding.Card}" IsEnabled="{Binding CanInteractWithPage}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -43,7 +43,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <HeaderedContentControl Grid.Row="0" Style="{StaticResource PF.PageHeader}" Header="{Binding Heading}" />
+        <HeaderedContentControl x:Name="RouteHeading" Focusable="True" Grid.Row="0" Style="{StaticResource PF.PageHeader}" Header="{Binding Heading}" />
 
         <!--
             The source context: what was imported, what it looks like, and what the produced
@@ -179,11 +179,29 @@
             <local:NoticeErrorDetails />
             <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
+                    IsEnabled="{Binding CanGoHome}"
                     AutomationProperties.AutomationId="WorkflowSelection.Back"
                     AutomationProperties.Name="{Binding BackLabel}"
                     HorizontalAlignment="Left" />
         </StackPanel>
         </ContentControl>
     </Grid>
+    <Border Background="{DynamicResource PF.Brush.Surface}" BorderBrush="{DynamicResource PF.Brush.Primary}"
+            BorderThickness="2" Padding="24" Margin="20" MaxWidth="600" VerticalAlignment="Center" Panel.ZIndex="10"
+            AutomationProperties.AutomationId="WorkflowSelection.DraftLeave"
+            Visibility="{Binding IsConfirmingDraftLeave, Converter={StaticResource BoolToVisibility}}">
+        <StackPanel>
+            <TextBlock x:Name="DraftLeaveHeadingText" Focusable="True" Text="{Binding DraftLeaveHeading}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding DraftLeaveNotice}" TextWrapping="Wrap" Margin="0,12,0,18" />
+            <WrapPanel>
+                <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Content="{Binding KeepDraftLabel}"
+                        Command="{Binding KeepDraftCommand}" CommandParameter="{Binding PendingLeave}" Margin="0,0,12,8"
+                        AutomationProperties.AutomationId="WorkflowSelection.KeepDraft" />
+                <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding DiscardDraftLabel}"
+                        Command="{Binding DiscardDraftAndLeaveCommand}" CommandParameter="{Binding PendingLeave}" Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="WorkflowSelection.DiscardDraft" />
+            </WrapPanel>
+        </StackPanel>
+    </Border>
     </Grid>
 </UserControl>

@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c7dad4de-7914-4d09-9415-f224372f4d20" name="admin@DESKTOP-0BG8884 2026-10-19 18:39:48" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T18:39:48.7392975+13:00" queuing="2026-10-19T18:39:48.7392977+13:00" start="2026-10-19T18:39:43.6729578+13:00" finish="2026-10-19T18:39:49.2945994+13:00" />
+  <TestSettings name="default" id="e99a9340-519c-4666-88b1-69abe01ff33f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_18_39_48" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a0c3f227-d05c-400a-8e59-cea0a72a0262" testId="d6efed7c-1c68-edb7-1565-658a918a986e" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5271233" startTime="2026-10-19T18:39:48.2499927+13:00" endTime="2026-10-19T18:39:48.7693739+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0c3f227-d05c-400a-8e59-cea0a72a0262" />
+    <UnitTestResult executionId="2030435c-1f76-4be8-8ef4-3da3283fc6c1" testId="efd46ced-eb4f-b17b-0c8a-4202c4763be9" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:01.0159409" startTime="2026-10-19T18:39:47.2226431+13:00" endTime="2026-10-19T18:39:48.2410512+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2030435c-1f76-4be8-8ef4-3da3283fc6c1" />
+    <UnitTestResult executionId="28f59cc2-8357-4238-b369-be429003fe17" testId="ffa66d00-0435-5475-17c0-064f79d5109c" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.3698157" startTime="2026-10-19T18:39:48.7702468+13:00" endTime="2026-10-19T18:39:49.1395639+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="28f59cc2-8357-4238-b369-be429003fe17" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ffa66d00-0435-5475-17c0-064f79d5109c">
+      <Execution id="28f59cc2-8357-4238-b369-be429003fe17" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Reviewed_resume_and_draft_decision_fit_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d6efed7c-1c68-edb7-1565-658a918a986e">
+      <Execution id="a0c3f227-d05c-400a-8e59-cea0a72a0262" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Reviewed_resume_and_draft_decision_fit_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Reviewed_resume_and_draft_decision_fit_supported_viewports(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="efd46ced-eb4f-b17b-0c8a-4202c4763be9">
+      <Execution id="2030435c-1f76-4be8-8ef4-3da3283fc6c1" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Reviewed_resume_and_draft_decision_fit_supported_viewports" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d6efed7c-1c68-edb7-1565-658a918a986e" executionId="a0c3f227-d05c-400a-8e59-cea0a72a0262" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="efd46ced-eb4f-b17b-0c8a-4202c4763be9" executionId="2030435c-1f76-4be8-8ef4-3da3283fc6c1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ffa66d00-0435-5475-17c0-064f79d5109c" executionId="28f59cc2-8357-4238-b369-be429003fe17" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="3" executed="3" passed="3" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.10]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.18]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.13]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

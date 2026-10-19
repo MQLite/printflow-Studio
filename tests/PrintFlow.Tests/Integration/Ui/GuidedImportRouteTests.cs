@@ -72,7 +72,7 @@ public sealed class GuidedImportRouteTests
         Task pending = m.SelectCommand.ExecuteAsync(m.Workflows.Last());
         await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
         if (rename) { m.Open(b); m.Notice = "B remains current"; }
-        else await m.BackToHomeCommand.ExecuteAsync(null);
+        else m.Deactivate(); // External navigation retires a pending operation; busy Back is intentionally disabled.
         gate.Release.SetResult(); await pending;
         h.Navigation.SessionFor.ShouldBeNull();
         if (rename)
