@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-19",
+  "reviewedHead": "9140f85f5a063fde34d96c1ad98ea032ade2c5d9",
+  "productFixCommit": "af040950c1a73441d5b9868f8e61d4b32ff04ff8",
+  "mechanism": "Controller parsed committed raw baseline/final TRX independently and reran the final focused tests.",
+  "baseline": {
+    "total": 1244,
+    "passed": 1228,
+    "failed": 15,
+    "outcomes": [
+      {
+        "outcome": "Failed",
+        "count": 15
+      },
+      {
+        "outcome": "NotExecuted",
+        "count": 1
+      },
+      {
+        "outcome": "Passed",
+        "count": 1228
+      }
+    ]
+  },
+  "final": {
+    "total": 1284,
+    "passed": 1269,
+    "failed": 14,
+    "outcomes": [
+      {
+        "outcome": "Failed",
+        "count": 14
+      },
+      {
+        "outcome": "NotExecuted",
+        "count": 1
+      },
+      {
+        "outcome": "Passed",
+        "count": 1269
+      }
+    ]
+  },
+  "parentFocusedTests": {
+    "total": 40,
+    "passed": 40,
+    "failed": 0
+  },
+  "newOrChangedFailures": [],
+  "allFinalFailuresMatchBaselineNamesAndMessages": true,
+  "finalSaveBaselineCaseNotReproducedNotClaimedFixed": true,
+  "independentReview": "One fresh isolated Astra High review; one TDD fix pass, no second review dispatched.",
+  "physicalKeyboardDpiNoviceProduction": "NOT RUN"
+}

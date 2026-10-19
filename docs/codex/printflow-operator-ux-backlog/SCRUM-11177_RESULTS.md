@@ -2,6 +2,8 @@
 
 日期：2026-10-19（Pacific/Auckland）。范围：获批五项 Native 计划，WPF 共享主题、六类展示组件、首页/路线页接入及合成离屏证据。全新上下文[独立整体审查](SCRUM-11177_REVIEW.md)已检查 `de7bca6..9140f85`，发现一项 Important；以下另记一次 TDD 修复及其验证。本文件不表示合并、发布、工作站或 Epic 验收通过。
 
+收口状态：实现、独立审查和一次修复验证已完成；控制会话于2026-10-19将 [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177) 转为 **In Review**，未关闭任务或 Epic。控制会话独立复跑最终40项新增测试并核对基线/最终 TRX，[审计记录](../../../output/ui/SCRUM-11177/checks/controller-final-audit.json)与[原始复跑 TRX](../../../output/ui/SCRUM-11177/checks/scrum-11177-parent-final-guided.trx)已保留。分支保留供评审，未合并、推送或部署；下一步为本项评审/后续验证，后续 Epic 需另行授权。
+
 ## 实现与原始验收条件
 
 | 条件 | 交付与证据 |
