@@ -525,7 +525,7 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-            <Grid Grid.Column="0" Margin="0,0,20,0" Visibility="{Binding ShowsGuidedImageWorkspace, Converter={StaticResource BoolToVisibility}}">
+            <Grid Grid.Column="0" Grid.ColumnSpan="{Binding GuidedImageColumnSpan}" Margin="0,0,20,0" Visibility="{Binding ShowsGuidedImageWorkspace, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />

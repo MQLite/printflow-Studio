@@ -22,8 +22,9 @@ public sealed partial class SessionViewModel
 {
     public bool ShowsGuidedProcessing => GuidedPage == GuidedSessionPage.Processing;
     public bool ShowsGuidedImageWorkspace => !ShowsGuidedProcessing;
-    public bool ShowsGuidedDetailsColumn => !ShowsGuidedProcessing;
-    public bool ShowsGuidedTechnicalDetails => !ShowsGuidedProcessing;
+    public bool ShowsGuidedDetailsColumn => !ShowsGuidedProcessing && GuidedPage != GuidedSessionPage.Crop;
+    public bool ShowsGuidedTechnicalDetails => ShowsGuidedDetailsColumn;
+    public int GuidedImageColumnSpan => GuidedPage == GuidedSessionPage.Crop ? 2 : 1;
     public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review;
     public string GuidedProcessingApplication => UsesPhotoshop ? "Photoshop"
         : _runtime.DrivesExternalApplication ? Strings.Resolve("Session_GuidedMeitu") : "PrintFlow";
@@ -156,6 +157,7 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
         OnPropertyChanged(nameof(ShowsGuidedDetailsColumn));
         OnPropertyChanged(nameof(ShowsGuidedTechnicalDetails));
+        OnPropertyChanged(nameof(GuidedImageColumnSpan));
         OnPropertyChanged(nameof(ExpandsGuidedFinalSave));
         OnPropertyChanged(nameof(GuidedProcessingApplication));
         OnPropertyChanged(nameof(GuidedProcessingState));
