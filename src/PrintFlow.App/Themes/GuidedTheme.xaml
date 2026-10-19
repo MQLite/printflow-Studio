@@ -3,5 +3,6 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="GuidedTokens.xaml" />
     <ResourceDictionary Source="GuidedControls.xaml" />
+    <ResourceDictionary Source="GuidedComponents.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
