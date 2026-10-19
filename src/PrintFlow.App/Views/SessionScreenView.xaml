@@ -497,8 +497,8 @@
                               Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"
                               IsEnabled="{Binding CanInteractWithLivePage}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="280" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.ColumnSpan="2" Padding="32" MaxWidth="680" VerticalAlignment="Center"
@@ -1103,7 +1103,7 @@
                         is stated in words; no button here is a default button, and the two
                         consequential ones use the fresh-gesture guard bound to their exact target.
                     -->
-                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                    <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12"
                             AutomationProperties.AutomationId="Session.Correction.AskPanel"
                             Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
@@ -1275,6 +1275,10 @@
                         No button here is a default button, and approving or saving buttons use
                         the fresh-gesture input guard bound to the exact target and draft.
                     -->
+                    <local:SessionExpander Header="{Binding FinalSaveHeading}" Style="{StaticResource PF.Disclosure}"
+                                           IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
+                                           Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
+                                           AutomationProperties.AutomationId="Session.FinalSave.Options">
                     <ContentControl Focusable="False" IsTabStop="False">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
@@ -1288,6 +1292,7 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
+                    </local:SessionExpander>
 <local:SessionExpander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails" Visibility="{Binding ShowsGuidedTechnicalDetails, Converter={StaticResource BoolToVisibility}}">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>

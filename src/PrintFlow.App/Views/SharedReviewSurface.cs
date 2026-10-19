@@ -18,6 +18,7 @@ public sealed class SharedReviewSurface : UserControl
     private readonly WrapPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
     private readonly Grid _host = new();
     private readonly Slider _slider = new() { Minimum = 0, Maximum = 100, SmallChange = 1, LargeChange = 10, Width = 160 };
+    private readonly Button _actualSize = new() { Content = "100%", Padding = new Thickness(10, 4, 10, 4) };
     private readonly List<(RadioButton Button, ReviewComparisonMode Mode)> _modes = [];
     private readonly List<(RadioButton Button, ReviewInspectionBackground Background)> _backgrounds = [];
     private readonly List<Image> _images = [];
@@ -49,7 +50,7 @@ public sealed class SharedReviewSurface : UserControl
         AutomationProperties.SetAutomationId(_slider, "Session.ReviewComparisonSlider");
         AutomationProperties.SetName(_slider, Strings.Session_ReviewComparisonSlider);
         _slider.ValueChanged += (_, _) => { if (!_updating && _model is not null) _model.ReviewViewport.SliderPosition = _slider.Value; };
-        _toolbar.Children.Add(_slider); Button actual = new() { Content = "100%", Padding = new Thickness(10, 4, 10, 4) };
+        _toolbar.Children.Add(_slider); Button actual = _actualSize;
         AutomationProperties.SetAutomationId(actual, "Session.ReviewActualSize");
         AutomationProperties.SetName(actual, "100%");
         actual.Click += (_, _) => { if (_model is not null) { _model.IsFitToViewport = false; _model.ZoomScale = 1; } };
@@ -201,8 +202,15 @@ public sealed class SharedReviewSurface : UserControl
         {
             button.IsChecked = _model.ReviewViewport.Mode == mode;
             button.IsEnabled = mode == ReviewComparisonMode.SideBySide || (_images.Count == 2 && _model.PreviewPanes.All(p => p.HasImage));
+            button.Visibility = _images.Count == 2 && _images.All(i => i.Source is not null) ? Visibility.Visible : Visibility.Collapsed;
         }
-        foreach (var (button, background) in _backgrounds) button.IsChecked = _model.ReviewViewport.Background == background;
+        bool hasImage = _images.Any(i => i.Source is not null);
+        foreach (var (button, background) in _backgrounds)
+        {
+            button.IsChecked = _model.ReviewViewport.Background == background;
+            button.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
+        }
+        _actualSize.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
         _slider.Visibility = IsSlider ? Visibility.Visible : Visibility.Collapsed;
         _slider.Value = _model.ReviewViewport.SliderPosition;
         Brush brush = _model.ReviewViewport.Background switch { ReviewInspectionBackground.White => Brushes.White, ReviewInspectionBackground.Black => Brushes.Black, _ => TryFindResource("TransparencyCheckerboard") as Brush ?? _checkerboard };
