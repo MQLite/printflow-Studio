@@ -154,3 +154,11 @@ Minor仍延期：GuidedSessionVisualEvidenceTests中的ReferenceEquals(null,null
 视觉修复后在review-renders重新捕获39张主页面及JSON，合成源图SHA256不变。checks/review-render-comparison.json记录37张与审查前字节完全相同；仅1920宽度draft-leave和return-confirmation两张变化，历史披露入口在模态期间正确显示禁用。这两张新旧图均已逐张查看。最新主图以review-renders为准；原renders及16张补充说明图保留，补充说明布局未改。review-evidence-index.json记录新39图、2张本轮已查看；不能把37张相同图重复算成人工查看。原55图/20张查看索引继续保留其历史性质。
 
 修复提交为aa3a3eb98dbcaa5a2a71727a91a074a7237e0d30（相对审查目标9fe125e）。提交后执行dotnet test --no-restore --filter FullyQualifiedName~GuidedSession，重新编译并通过85/85，记录为checks/review-postcommit.trx。35个源码/测试文件SHA256与GitBlobId、完整base→HEAD source.diff已重建；53原动作合同、原55图/39JSON及新增39图/39JSON全部校验通过。最终补充提交只写这些验证/文档记录，不改变src/tests。最终广筛之后的源码差异仅为新文件EOF空白清理；提交后重新编译验证覆盖最终字节。
+
+## 控制会话最终核验与交付状态
+
+2026-10-19，用户尚未验收E2；SCRUM-11169与11178～11181均已实际转为In Review，transition结果在output/ui/SCRUM-11169/checks/jira-final-status.json。SCRUM-11177已按用户明确验收转Done；未关闭其他Epic，未发送Jira评论。
+
+控制会话对ea28185对应最终源码独立运行全部GuidedSession非截图类：82/82通过（e2-parent-after-review.trx）。再次直接读取最终安全广域TRX，确认1358项中1344通过/14失败，14项与E1同名同消息；35源码/Git blob、原55图/39JSON、新39图/39JSON和53原动作记录核验通过。检查两张变化的1920模态图及最终1280审核页，主检出的src/tests没有差异。aa3a3eb至ea28185没有src/tests变更，后续控制会话提交亦只涉及文档、验证和状态证据。独立整体审查只有一次，六项Important经一次统一TDD修复，未再审。
+
+当前截图入口：output/ui/SCRUM-11169/INDEX.md及review-renders；审查前renders继续保留。Minor延期、未归因Tab/Space、11项排除、真实设备/生产NOT RUN、首次三个可见窗口事件保持上述结论。没有合并、推送、部署或进入E3。分支与工作树保留供验收；完整执行账本已纳入Git。

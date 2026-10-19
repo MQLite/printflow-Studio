@@ -39,4 +39,17 @@ GuidedSessionVisualEvidenceTests.cs:153：ReferenceEquals(b.Command, model.Recom
 
 ## 一次修复状态
 
-2026-10-19：6项Important均交回原Astra/high执行者，以逐项RED→GREEN、一次安全广域回归及相关行为验证完成。没有第二审查或修Minor。最终修复提交、用例和结果待交回后补记。
+2026-10-19：6项Important均在同一Astra/high执行上下文完成一次TDD修复，提交aa3a3eb；ea28185仅补验证记录。没有第二审查或修Minor。
+
+| 项 | RED→GREEN证据 |
+| --- | --- |
+| 1 | GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit；同/改分支与失败保留 |
+| 2 | Draft_modal_blocks_retained_and_fresh_crop_entry_without_losing_the_selection；旧/新provider、直接命令及Keep/Discard |
+| 3 | Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits + Refused_trim_keeps_the_draft_and_does_not_move_the_confirmed_baseline |
+| 4 | GuidedSessionEditorInputTests；旧Value/Selection/ExpandCollapse、隐藏/卸载/重绑/排队、新合法输入及模式接口兼容性 |
+| 5 | GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard + A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft |
+| 6 | Opening_a_presentation_retires_old_save_success_failure_and_finally；7种真实可控交付时点，后端offer校验保留 |
+
+目标组47/47；提交后重新编译85/85；安全UI/Architecture1344通过/14继承失败（11项排除）；流程/持久化277/277。父会话再次独立复验82/82，校验35源码/原55图/新39图/53动作记录；原始TRX的14个失败与E1同名同消息。修复后两张1920模态图的历史入口变为禁用，另37张主图字节相同；父会话查看两张变化及最终审核页。原始审查结论保留为审查时事实，后续测试验证不称再次独立审查通过。
+
+全部6项Important按TDD证据关闭；Minor延期，Tab/Space与设备/生产限制按上述裁定保留。SCRUM-11169与11178～11181为In Review，尚未获得用户对E2的验收。没有合并/推送/部署；证据见controller-final-audit.json及jira-final-status.json。
