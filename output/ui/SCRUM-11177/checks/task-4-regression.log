@@ -1,0 +1,97 @@
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:12.15]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [419 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    the last recovery action is reachable after scrolling
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 586
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:12.92]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [392 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    the last recovery action is reachable after scrolling
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 586
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:14.03]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "en") [FAIL]
+[xUnit.net 00:00:14.44]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "zh-CN") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "en") [439 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    list viewport 120px
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(String language) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 646
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(language: "zh-CN") [413 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts.RecoveryReachable
+    should be
+True
+    but was
+False
+
+Additional Info:
+    list viewport 120px
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.With_everything_expanded_the_notice_and_the_last_recovery_action_stay_reachable(String language) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 646
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\TestResults\scrum-11177-adoption.trx
+
+失败!  - 失败:     4，通过:   177，已跳过:     0，总计:   181，持续时间: 24 s - PrintFlow.Tests.dll (net10.0)

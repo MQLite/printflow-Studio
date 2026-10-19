@@ -1,0 +1,27 @@
+{
+  "State": "components-loading",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "offscreen WPF; no Window.Show or desktop input",
+  "SourceSha256": null,
+  "ScreenshotSha256": "C02C438E07D967394C72FE9D389FF6BC1E27E27FB326060F30DD2C247B5D7C46",
+  "Measurements": {
+    "ActionBar": {
+      "X": 24,
+      "Y": 617,
+      "Width": 952,
+      "Height": 59
+    },
+    "Content": {
+      "X": 268,
+      "Y": 111.43333333333334,
+      "Width": 708,
+      "Height": 489.56666666666666
+    },
+    "ContinueEnabled": false,
+    "StopEnabled": true,
+    "CommandExecutions": 0
+  }
+}
