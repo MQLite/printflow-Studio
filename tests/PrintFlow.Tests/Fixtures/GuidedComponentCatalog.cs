@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Input;
+using PrintFlow.App.Controls;
 
 namespace PrintFlow.Tests.Fixtures;
 
@@ -84,8 +85,32 @@ internal static class GuidedComponentCatalog
             Margin = new Thickness(0, 0, 0, 16),
         };
         AutomationProperties.SetAutomationId(scroll, "GuidedCatalog.Content");
-        Grid.SetRow(scroll, 1);
-        layout.Children.Add(scroll);
+        Grid workspace = new();
+        workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(220) });
+        workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(24) });
+        workspace.ColumnDefinitions.Add(new ColumnDefinition());
+        ItemsControl steps = Styled(new ItemsControl
+        {
+            ItemsSource = new[]
+            {
+                new GuidedStepItem("import", "导入图片", "已保留原图", "已完成", GuidedStepState.Completed),
+                new GuidedStepItem("check", "检查原图", "请核对当前内容", "当前步骤", GuidedStepState.Current),
+                new GuidedStepItem("process", "处理图片", "等待前一步完成", "待进行", GuidedStepState.Pending),
+                new GuidedStepItem("save", "核实保存", "需要检查保存结果", "需要注意", GuidedStepState.Attention),
+                new GuidedStepItem("optional", "可选增强", "已选择保留当前图片", "已跳过", GuidedStepState.Skipped),
+            },
+        }, "PF.StepNavigation");
+        ScrollViewer stepScroll = new()
+        {
+            Content = steps, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, IsTabStop = false,
+            Margin = new Thickness(0, 0, 0, 16),
+        };
+        workspace.Children.Add(stepScroll);
+        Grid.SetColumn(scroll, 2);
+        workspace.Children.Add(scroll);
+        Grid.SetRow(workspace, 1);
+        layout.Children.Add(workspace);
 
         WrapPanel buttons = new();
         Button primary = Styled(new Button
