@@ -23,8 +23,36 @@ namespace PrintFlow.App.ViewModels;
 /// record — the closest it comes to the file system is passing the path a dialog or a drop
 /// handed it straight to <see cref="ISessionService.ImportAsync"/> (plan §17.4, Part 3C2 §5).
 /// </remarks>
-public sealed partial class HomeViewModel : ObservableObject
+public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifetime
 {
+    private bool _active = true;
+    private CancellationTokenSource? _import;
+    public bool IsImporting => _import is not null;
+    public bool CanStartImport => _active && !IsBusy && !IsConfirmingAbandon;
+    public string ImportProgress => Strings.Resolve("Home_GuidedImporting");
+    public string CancelImportLabel => Strings.Resolve("Home_GuidedCancelImport");
+    public string AiUnavailable => Strings.Resolve("Home_GuidedAiUnavailable");
+    public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
+    public string EnvironmentDetailsLabel => Strings.Resolve("Home_GuidedEnvironmentDetails");
+    public IEnumerable<RecentSessionRow> ContinueSessions => RecentSessions.Where(x => x.CanContinueProcessing || x.HasOpenCorrection);
+    public IEnumerable<RecentSessionRow> HistorySessions => RecentSessions.Where(x => !x.CanContinueProcessing && !x.HasOpenCorrection);
+    public bool HasContinueSessions => ContinueSessions.Any();
+    public bool HasNoContinueSessions => !HasContinueSessions;
+    public bool HasHistorySessions => HistorySessions.Any();
+
+    public void Deactivate()
+    {
+        _active = false;
+        ++_refreshGeneration;
+        _import?.Cancel();
+        _thumbnails?.Cancel();
+        OnPropertyChanged(nameof(CanStartImport));
+    }
+
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanStartImport));
+
+    [RelayCommand]
+    private void CancelImport() => _import?.Cancel();
     private readonly ISessionService _sessions;
     private readonly IArtefactPreviewService _previews;
     private readonly INavigationService _navigation;
@@ -262,8 +290,12 @@ public sealed partial class HomeViewModel : ObservableObject
     /// starts no live check (SCRUM-11152).
     /// </remarks>
     [RelayCommand]
-    private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
+    private async Task ShowEnvironmentAsync(CancellationToken cancellationToken)
+    {
+        if (!_active) return;
+        Deactivate();
         await _navigation.GoToEnvironmentReadinessAsync(cancellationToken).ConfigureAwait(true);
+    }
 
     /// <summary>
     /// Opens Settings (SCRUM-11118).
@@ -274,13 +306,18 @@ public sealed partial class HomeViewModel : ObservableObject
     /// or written.
     /// </remarks>
     [RelayCommand]
-    private async Task ShowSettingsAsync(CancellationToken cancellationToken) =>
+    private async Task ShowSettingsAsync(CancellationToken cancellationToken)
+    {
+        if (!_active) return;
+        Deactivate();
         await _navigation.GoToSettingsAsync(cancellationToken).ConfigureAwait(true);
+    }
 
     /// <summary>Reloads Recent Processing from persistence.</summary>
     [RelayCommand]
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
+        if (!_active) return;
         int generation = ++_refreshGeneration;
         // The list is about to be rebuilt from current facts: a confirmation opened against the
         // old rows no longer describes them (SCRUM-11154 F-V4).
@@ -320,6 +357,11 @@ public sealed partial class HomeViewModel : ObservableObject
 
         OnPropertyChanged(nameof(HasNoRecentSessions));
 
+        OnPropertyChanged(nameof(ContinueSessions));
+        OnPropertyChanged(nameof(HistorySessions));
+        OnPropertyChanged(nameof(HasContinueSessions));
+        OnPropertyChanged(nameof(HasNoContinueSessions));
+        OnPropertyChanged(nameof(HasHistorySessions));
         ThumbnailsLoaded = StartThumbnailLoad([.. RecentSessions]);
     }
 
@@ -424,6 +466,7 @@ public sealed partial class HomeViewModel : ObservableObject
     /// </remarks>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsConfirmingAbandon))]
+    [NotifyPropertyChangedFor(nameof(CanStartImport))]
     [NotifyPropertyChangedFor(nameof(AreListsInteractive))]
     private AbandonConfirmation? _pendingAbandon;
 
@@ -437,7 +480,7 @@ public sealed partial class HomeViewModel : ObservableObject
     public bool AreListsInteractive => PendingAbandon is null;
 
     /// <summary>Busy, or waiting for the operator's answer to an open Abandon confirmation.</summary>
-    private bool ListActionsBlocked => IsBusy || PendingAbandon is not null;
+    private bool ListActionsBlocked => !_active || IsBusy || PendingAbandon is not null;
 
     public string AbandonKeepLabel => Strings.Resolve("Home_AbandonKeep");
 
@@ -534,6 +577,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task ChooseFileAsync(CancellationToken cancellationToken)
     {
+        if (!CanStartImport) return;
         string? chosen = _filePicker.PickSingleFile(Strings.Home_ChooseFile, Strings.Home_ImportFilter);
         if (chosen is null)
         {
@@ -555,6 +599,7 @@ public sealed partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task DropFilesAsync(IReadOnlyList<string>? paths, CancellationToken cancellationToken)
     {
+        if (!CanStartImport) return;
         if (paths is null || paths.Count == 0)
         {
             Notice = Strings.Home_DropNothing;
@@ -670,12 +715,15 @@ public sealed partial class HomeViewModel : ObservableObject
 
     private async Task ImportAsync(string sourceAbsolutePath, CancellationToken cancellationToken)
     {
-        if (IsBusy)
+        if (!CanStartImport)
         {
             return;
         }
 
         IsBusy = true;
+        using var import = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _import = import;
+        OnPropertyChanged(nameof(IsImporting));
         try
         {
             Notice = null;
@@ -684,7 +732,9 @@ public sealed partial class HomeViewModel : ObservableObject
                 sourceAbsolutePath,
                 outputName: null,
                 operatorName: Environment.UserName,
-                cancellationToken).ConfigureAwait(true);
+                import.Token).ConfigureAwait(true);
+
+            if (!_active) return;
 
             if (imported.IsFailure)
             {
@@ -697,10 +747,21 @@ public sealed partial class HomeViewModel : ObservableObject
                 return;
             }
 
+            if (import.IsCancellationRequested)
+            {
+                Notice = Strings.Resolve("Home_GuidedImportCancelled");
+                return;
+            }
             _navigation.GoToWorkflowSelection(imported.Value);
+        }
+        catch (OperationCanceledException) when (import.IsCancellationRequested)
+        {
+            if (_active) Notice = Strings.Resolve("Home_GuidedImportCancelled");
         }
         finally
         {
+            _import = null;
+            OnPropertyChanged(nameof(IsImporting));
             IsBusy = false;
         }
     }

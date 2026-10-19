@@ -1328,4 +1328,10 @@
   <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”。需要重新处理：{1}。依赖这些步骤的尺寸、输出结果及审核需要重新完成；已有历史记录保留。</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI 设计暂不可用。选择本地图片后，可使用三条现有路线。</value></data>
+  <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
+  <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
+  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
+  <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
+  <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
 </root>

@@ -1339,4 +1339,10 @@
   <data name="Session_KeepDraft" xml:space="preserve"><value>Keep editing</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
+  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI design is not available yet. Choose a local image to use any of the three routes.</value></data>
+  <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
+  <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
+  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
+  <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
+  <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
 </root>

@@ -39,6 +39,7 @@ public partial class HomeView : UserControl
     public HomeView()
     {
         InitializeComponent();
+        _ = new EntryActionScope(this);
         Loaded += (_, _) => { _observing = true; Subscribe(); };
         Unloaded += (_, _) => { _observing = false; Unsubscribe(); };
         DataContextChanged += (_, _) => { Unsubscribe(); if (_observing) Subscribe(); };

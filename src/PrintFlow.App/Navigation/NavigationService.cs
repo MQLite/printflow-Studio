@@ -87,6 +87,7 @@ public sealed class NavigationService : INavigationService
 
     private void Show(object viewModel)
     {
+        if (Current is IEntryScreenLifetime entry) entry.Deactivate();
         Current = viewModel;
         CurrentChanged?.Invoke(this, EventArgs.Empty);
     }
