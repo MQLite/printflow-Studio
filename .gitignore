@@ -102,3 +102,6 @@ desktop.ini
 !tests/PrintFlow.Tests/Fixtures/synthetic/
 !tests/PrintFlow.Tests/Fixtures/synthetic/*.png
 !tests/PrintFlow.Tests/Fixtures/Pdf/*.pdf
+
+# E5 execution scratch is retained locally; durable evidence lives under output/ui/SCRUM-11172.
+/.superpowers/sdd/2026-10-20-scrum-11172-guided-completion/

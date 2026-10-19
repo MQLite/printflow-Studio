@@ -1391,4 +1391,17 @@
   <data name="Session_CompletionFinished" xml:space="preserve"><value>Task completed</value></data>
   <data name="Session_CompletionAbandoned" xml:space="preserve"><value>Task abandoned</value></data>
   <data name="Session_CompletionNotFinished" xml:space="preserve"><value>Task not completed yet</value></data>
+  <data name="Session_RecoveryCorrectionStages" xml:space="preserve"><value>Prepare files → give them to a colleague → explicitly import the correction → review again</value></data>
+  <data name="Session_RecoveryCorrectionReview" xml:space="preserve"><value>The correction has been imported. Review this image again before approving it; importing does not approve it.</value></data>
+  <data name="Session_RecoveryPrepare" xml:space="preserve"><value>Prepare a colleague correction</value></data>
+  <data name="Session_RecoveryWaiting" xml:space="preserve"><value>Waiting for the corrected image</value></data>
+  <data name="Session_RecoveryHandedOff" xml:space="preserve"><value>Handed off — choose how to continue</value></data>
+  <data name="Session_RecoveryStopped" xml:space="preserve"><value>Processing stopped</value></data>
+  <data name="Session_RecoveryPreparePreserved" xml:space="preserve"><value>The original and existing review remain. Preparing files creates copies for the colleague; you send them yourself.</value></data>
+  <data name="Session_RecoveryWaitingPreserved" xml:space="preserve"><value>The original and existing results remain. Give the prepared files to your colleague yourself. PrintFlow waits for your explicit import; it does not watch the folder.</value></data>
+  <data name="Session_RecoveryPhotoshopPreserved" xml:space="preserve"><value>The original and recorded results remain. Manual TIFF import is not supported.</value></data>
+  <data name="Session_RecoveryPreserved" xml:space="preserve"><value>The original and recorded results remain. No new result has been approved by reopening this task. Follow any external-application notice before continuing.</value></data>
+  <data name="Session_RecoveryBusy" xml:space="preserve"><value>Wait for the current action to finish.</value></data>
+  <data name="Session_RecoveryNoAction" xml:space="preserve"><value>Read the reason and error details. This page currently offers no automatic recovery action.</value></data>
+  <data name="Session_RecoveryNext" xml:space="preserve"><value>Available next actions: {0}. None starts automatically.</value></data>
 </root>

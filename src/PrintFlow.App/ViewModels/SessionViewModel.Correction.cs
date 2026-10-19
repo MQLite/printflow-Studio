@@ -607,6 +607,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyCorrectionState()
     {
+        NotifyGuidedRecovery();
         OnPropertyChanged(nameof(CorrectionHandoff));
         OnPropertyChanged(nameof(CanAskColleague));
         OnPropertyChanged(nameof(CanPrepareCorrection));

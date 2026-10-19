@@ -1380,4 +1380,17 @@
   <data name="Session_CompletionFinished" xml:space="preserve"><value>任务已完成</value></data>
   <data name="Session_CompletionAbandoned" xml:space="preserve"><value>任务已放弃</value></data>
   <data name="Session_CompletionNotFinished" xml:space="preserve"><value>任务尚未完成</value></data>
+  <data name="Session_RecoveryCorrectionStages" xml:space="preserve"><value>准备文件 → 交给同事 → 显式导入修正图片 → 重新审核</value></data>
+  <data name="Session_RecoveryCorrectionReview" xml:space="preserve"><value>修正图片已导入。请重新审核这张图片后再批准；导入不等于批准。</value></data>
+  <data name="Session_RecoveryPrepare" xml:space="preserve"><value>准备同事修正</value></data>
+  <data name="Session_RecoveryWaiting" xml:space="preserve"><value>等待修正后的图片</value></data>
+  <data name="Session_RecoveryHandedOff" xml:space="preserve"><value>已移交，选择如何继续</value></data>
+  <data name="Session_RecoveryStopped" xml:space="preserve"><value>处理已停止</value></data>
+  <data name="Session_RecoveryPreparePreserved" xml:space="preserve"><value>原件和现有审核结果保留。准备文件会生成供同事使用的副本，请自行交给同事。</value></data>
+  <data name="Session_RecoveryWaitingPreserved" xml:space="preserve"><value>原件和现有结果保留。请将准备好的文件自行交给同事。PrintFlow 等待你显式导入，不会监视文件夹。</value></data>
+  <data name="Session_RecoveryPhotoshopPreserved" xml:space="preserve"><value>原件和已记录的结果保留。不支持手动 TIFF 回导。</value></data>
+  <data name="Session_RecoveryPreserved" xml:space="preserve"><value>原件和已记录的结果保留。重新打开任务不会批准新结果。继续前请先查看外部软件提示。</value></data>
+  <data name="Session_RecoveryBusy" xml:space="preserve"><value>请等待当前操作结束。</value></data>
+  <data name="Session_RecoveryNoAction" xml:space="preserve"><value>请查看原因和错误详情。当前页面没有可执行的自动恢复操作。</value></data>
+  <data name="Session_RecoveryNext" xml:space="preserve"><value>当前可选操作：{0}。不会自动开始。</value></data>
 </root>

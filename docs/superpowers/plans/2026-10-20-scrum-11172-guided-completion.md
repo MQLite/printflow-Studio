@@ -52,11 +52,11 @@
 
 **Interfaces:** Consume `IsAskingColleague`, `ShowsCorrectionPanel`, `CorrectionActivity`, `CorrectionHandoff`, `CorrectionReturn`, `IsHandedOff`, `IsStoppedStep`, current command eligibility and existing import/reentry identities. Produce `ShowsGuidedRecovery`, `GuidedRecoveryHeading`, `GuidedRecoveryPreserved`, `GuidedRecoveryNext`, `GuidedCorrectionStages` presentation text and `NotifyGuidedRecovery()`.
 
-- [ ] Write tests `Correction_prepare_wait_import_and_review_remain_explicit`, `Photoshop_takeover_has_no_manual_tiff_import`, and `Stopped_restored_page_only_names_executable_actions`. Assert existing fake flow identities, zero implicit external starts, no approval on reimport/restore, and exactly lawful retry/reentry/manual actions.
-- [ ] Run `e5-f02-red` with `FullyQualifiedName~GuidedCompletionRecoveryTests`; expected missing branch guidance/layout assertion failures.
-- [ ] Make correction/recovery a focused branch with preparation/handoff/wait/reimport/re-review explanation, preserved-input notice and qualified next action. Reuse existing buttons and keep repair/missing files/unfinished import facts visible. Reentry prepares a new attempt without starting it.
-- [ ] Run `e5-f02-green` including `GuidedCompletionRecoveryTests|ColleagueCorrection|RecoverySurface|GuidedImportResume|GuidedSessionProjection`. Expected GREEN.
-- [ ] Commit explicit Task 2 files and ledger evidence.
+- [x] Write tests `Correction_prepare_wait_import_and_review_remain_explicit`, `Photoshop_takeover_has_no_manual_tiff_import`, and `Stopped_restored_page_only_names_executable_actions`. Assert existing fake flow identities, zero implicit external starts, no approval on reimport/restore, and exactly lawful retry/reentry/manual actions.
+- [x] Run `e5-f02-red` with `FullyQualifiedName~GuidedCompletionRecoveryTests`; expected missing branch guidance/layout assertion failures.
+- [x] Make correction/recovery a focused branch with preparation/handoff/wait/reimport/re-review explanation, preserved-input notice and qualified next action. Reuse existing buttons and keep repair/missing files/unfinished import facts visible. Reentry prepares a new attempt without starting it.
+- [x] Run `e5-f02-green` including `GuidedCompletionRecoveryTests|ColleagueCorrection|RecoverySurface|GuidedImportResume|GuidedSessionProjection`. Expected GREEN.
+- [x] Commit explicit Task 2 files and ledger evidence.
 
 ### Task 3: F03 recent tasks and readonly history
 

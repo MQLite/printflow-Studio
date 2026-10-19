@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="825333e5-977c-4501-bd3b-0082d24cc6d4" name="admin@DESKTOP-0BG8884 2026-10-20 11:03:32" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T11:03:32.4624253+13:00" queuing="2026-10-20T11:03:32.4624256+13:00" start="2026-10-20T11:03:26.6205613+13:00" finish="2026-10-20T11:03:36.7437746+13:00" />
+  <TestSettings name="default" id="072cfdc6-7a5b-4136-9122-6843f731d608">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_11_03_32" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="369680d3-e85b-4208-abe7-0decbc1ca45d" testId="0b43d99d-7872-9b35-6333-8a3aca29dbef" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity" computerName="DESKTOP-0BG8884" duration="00:00:00.6520682" startTime="2026-10-20T11:03:35.9466555+13:00" endTime="2026-10-20T11:03:36.5980004+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="369680d3-e85b-4208-abe7-0decbc1ca45d">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+    should be&#xD;
+"处理已停止"&#xD;
+    but was&#xD;
+""&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    &#xD;
+Expected Value | 处    理    已    停    止    &#xD;
+Actual Value   |                          &#xD;
+Expected Code  | 2278829702240502057227490&#xD;
+Actual Code    |                          </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 129&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="89b42a98-4e08-4d7e-be00-42f00cd9e484" testId="0ae142c8-cff8-acc2-4c10-ea0c7601f64d" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;reopened&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:02.0255849" startTime="2026-10-20T11:03:30.3996883+13:00" endTime="2026-10-20T11:03:32.4318601+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="89b42a98-4e08-4d7e-be00-42f00cd9e484">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+    should be&#xD;
+"等待修正后的图片"&#xD;
+    but was&#xD;
+""&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    5    6    7    &#xD;
+Expected Value | 等    待    修    正    后    的    图    片    &#xD;
+Actual Value   |                                         &#xD;
+Expected Code  | 3156124453204622749121518303402227029255&#xD;
+Actual Code    |                                         </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2fcfd8d7-263e-47c5-8a42-a923374b030f" testId="6c1da723-5d8e-1f7f-ddde-1e0fb62a77cb" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.6534979" startTime="2026-10-20T11:03:34.6830405+13:00" endTime="2026-10-20T11:03:35.3360448+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2fcfd8d7-263e-47c5-8a42-a923374b030f">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : model.GuidedPage&#xD;
+    should be&#xD;
+GuidedSessionPage.Recovery&#xD;
+    but was&#xD;
+GuidedSessionPage.Preflight</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(Boolean photoshop) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 102&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3f28a30f-89ee-4ceb-ade9-80fc8cb4cbe0" testId="99bb6685-2baa-6bc4-a2fb-46e1b773a692" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6084436" startTime="2026-10-20T11:03:35.3370709+13:00" endTime="2026-10-20T11:03:35.9452388+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3f28a30f-89ee-4ceb-ade9-80fc8cb4cbe0">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+    should be&#xD;
+"已移交，选择如何继续"&#xD;
+    but was&#xD;
+""&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    5    6    7    8    9    &#xD;
+Expected Value | 已    移    交    ，    选    择    如    何    继    续    &#xD;
+Actual Value   |                                                   &#xD;
+Expected Code  | 24050312272013265292368732532122914203093248732493&#xD;
+Actual Code    |                                                   </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(Boolean photoshop) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 106&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1333e3b7-9a9c-4bfa-ab4f-5c7de0f4b2b0" testId="81b272dc-f2ea-1f9e-7aa0-debfc60a82a1" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;returned&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.8213362" startTime="2026-10-20T11:03:33.8604149+13:00" endTime="2026-10-20T11:03:34.6802923+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1333e3b7-9a9c-4bfa-ab4f-5c7de0f4b2b0">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.Correction.ReturnReview", string.Empty)&#xD;
+    should contain (case insensitive comparison)&#xD;
+"重新审核"&#xD;
+    but was actually&#xD;
+""</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 55&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="20755374-c3be-407d-8d03-2fe3f94022cb" testId="e0e2b599-19fd-ea60-99d3-5b4797a36dfe" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;prepare&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.7237888" startTime="2026-10-20T11:03:32.4493318+13:00" endTime="2026-10-20T11:03:33.1569738+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="20755374-c3be-407d-8d03-2fe3f94022cb">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+    should be&#xD;
+"准备同事修正"&#xD;
+    but was&#xD;
+""&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    5    &#xD;
+Expected Value | 准    备    同    事    修    正    &#xD;
+Actual Value   |                               &#xD;
+Expected Code  | 209342279121516201072046227491&#xD;
+Actual Code    |                               </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="15bf8017-037c-43c0-8c1a-9fcbcaa4d6b3" testId="fd468431-3800-834b-cdaf-ab4d414c3b02" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;waiting&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.7006637" startTime="2026-10-20T11:03:33.1591465+13:00" endTime="2026-10-20T11:03:33.8583216+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15bf8017-037c-43c0-8c1a-9fcbcaa4d6b3">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+    should be&#xD;
+"等待修正后的图片"&#xD;
+    but was&#xD;
+""&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    5    6    7    &#xD;
+Expected Value | 等    待    修    正    后    的    图    片    &#xD;
+Actual Value   |                                         &#xD;
+Expected Code  | 3156124453204622749121518303402227029255&#xD;
+Actual Code    |                                         </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="99bb6685-2baa-6bc4-a2fb-46e1b773a692">
+      <Execution id="3f28a30f-89ee-4ceb-ade9-80fc8cb4cbe0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Handoff_reopens_with_only_supported_manual_paths_and_never_restarts" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;returned&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="81b272dc-f2ea-1f9e-7aa0-debfc60a82a1">
+      <Execution id="1333e3b7-9a9c-4bfa-ab4f-5c7de0f4b2b0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Correction_prepare_wait_import_and_review_remain_explicit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;prepare&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e0e2b599-19fd-ea60-99d3-5b4797a36dfe">
+      <Execution id="20755374-c3be-407d-8d03-2fe3f94022cb" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Correction_prepare_wait_import_and_review_remain_explicit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6c1da723-5d8e-1f7f-ddde-1e0fb62a77cb">
+      <Execution id="2fcfd8d7-263e-47c5-8a42-a923374b030f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Handoff_reopens_with_only_supported_manual_paths_and_never_restarts" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;reopened&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0ae142c8-cff8-acc2-4c10-ea0c7601f64d">
+      <Execution id="89b42a98-4e08-4d7e-be00-42f00cd9e484" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Correction_prepare_wait_import_and_review_remain_explicit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: &quot;waiting&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="fd468431-3800-834b-cdaf-ab4d414c3b02">
+      <Execution id="15bf8017-037c-43c0-8c1a-9fcbcaa4d6b3" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Correction_prepare_wait_import_and_review_remain_explicit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0b43d99d-7872-9b35-6333-8a3aca29dbef">
+      <Execution id="369680d3-e85b-4208-abe7-0decbc1ca45d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests" name="Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0b43d99d-7872-9b35-6333-8a3aca29dbef" executionId="369680d3-e85b-4208-abe7-0decbc1ca45d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0ae142c8-cff8-acc2-4c10-ea0c7601f64d" executionId="89b42a98-4e08-4d7e-be00-42f00cd9e484" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6c1da723-5d8e-1f7f-ddde-1e0fb62a77cb" executionId="2fcfd8d7-263e-47c5-8a42-a923374b030f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="99bb6685-2baa-6bc4-a2fb-46e1b773a692" executionId="3f28a30f-89ee-4ceb-ade9-80fc8cb4cbe0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="81b272dc-f2ea-1f9e-7aa0-debfc60a82a1" executionId="1333e3b7-9a9c-4bfa-ab4f-5c7de0f4b2b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e0e2b599-19fd-ea60-99d3-5b4797a36dfe" executionId="20755374-c3be-407d-8d03-2fe3f94022cb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fd468431-3800-834b-cdaf-ab4d414c3b02" executionId="15bf8017-037c-43c0-8c1a-9fcbcaa4d6b3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="7" executed="7" passed="0" failed="7" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.28]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.37]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.44]       Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+[xUnit.net 00:00:05.44]           should be&#xD;
+[xUnit.net 00:00:05.44]       "等待修正后的图片"&#xD;
+[xUnit.net 00:00:05.44]           but was&#xD;
+[xUnit.net 00:00:05.44]       ""&#xD;
+[xUnit.net 00:00:05.44]           difference&#xD;
+[xUnit.net 00:00:05.44]       Difference     |  |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:05.44]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:05.44]       Index          | 0    1    2    3    4    5    6    7    &#xD;
+[xUnit.net 00:00:05.44]       Expected Value | 等    待    修    正    后    的    图    片    &#xD;
+[xUnit.net 00:00:05.44]       Actual Value   |                                         &#xD;
+[xUnit.net 00:00:05.44]       Expected Code  | 3156124453204622749121518303402227029255&#xD;
+[xUnit.net 00:00:05.44]       Actual Code    |                                         &#xD;
+[xUnit.net 00:00:05.44]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.44]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(60,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage)&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.44]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.16]       Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+[xUnit.net 00:00:06.16]           should be&#xD;
+[xUnit.net 00:00:06.16]       "准备同事修正"&#xD;
+[xUnit.net 00:00:06.16]           but was&#xD;
+[xUnit.net 00:00:06.16]       ""&#xD;
+[xUnit.net 00:00:06.16]           difference&#xD;
+[xUnit.net 00:00:06.16]       Difference     |  |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:06.16]                      | \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:06.16]       Index          | 0    1    2    3    4    5    &#xD;
+[xUnit.net 00:00:06.16]       Expected Value | 准    备    同    事    修    正    &#xD;
+[xUnit.net 00:00:06.16]       Actual Value   |                               &#xD;
+[xUnit.net 00:00:06.16]       Expected Code  | 209342279121516201072046227491&#xD;
+[xUnit.net 00:00:06.16]       Actual Code    |                               &#xD;
+[xUnit.net 00:00:06.16]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(60,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage)&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.16]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.16]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.86]       Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+[xUnit.net 00:00:06.86]           should be&#xD;
+[xUnit.net 00:00:06.86]       "等待修正后的图片"&#xD;
+[xUnit.net 00:00:06.86]           but was&#xD;
+[xUnit.net 00:00:06.86]       ""&#xD;
+[xUnit.net 00:00:06.86]           difference&#xD;
+[xUnit.net 00:00:06.86]       Difference     |  |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:06.86]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:06.86]       Index          | 0    1    2    3    4    5    6    7    &#xD;
+[xUnit.net 00:00:06.86]       Expected Value | 等    待    修    正    后    的    图    片    &#xD;
+[xUnit.net 00:00:06.86]       Actual Value   |                                         &#xD;
+[xUnit.net 00:00:06.86]       Expected Code  | 3156124453204622749121518303402227029255&#xD;
+[xUnit.net 00:00:06.86]       Actual Code    |                                         &#xD;
+[xUnit.net 00:00:06.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.86]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(60,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage)&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.68]       Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.Correction.ReturnReview", string.Empty)&#xD;
+[xUnit.net 00:00:07.68]           should contain (case insensitive comparison)&#xD;
+[xUnit.net 00:00:07.68]       "重新审核"&#xD;
+[xUnit.net 00:00:07.68]           but was actually&#xD;
+[xUnit.net 00:00:07.68]       ""&#xD;
+[xUnit.net 00:00:07.68]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.68]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(55,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage)&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.68]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.68]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.34]       Shouldly.ShouldAssertException : model.GuidedPage&#xD;
+[xUnit.net 00:00:08.34]           should be&#xD;
+[xUnit.net 00:00:08.34]       GuidedSessionPage.Recovery&#xD;
+[xUnit.net 00:00:08.34]           but was&#xD;
+[xUnit.net 00:00:08.34]       GuidedSessionPage.Preflight&#xD;
+[xUnit.net 00:00:08.34]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.34]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(102,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(Boolean photoshop)&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.34]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.95]       Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+[xUnit.net 00:00:08.95]           should be&#xD;
+[xUnit.net 00:00:08.95]       "已移交，选择如何继续"&#xD;
+[xUnit.net 00:00:08.95]           but was&#xD;
+[xUnit.net 00:00:08.95]       ""&#xD;
+[xUnit.net 00:00:08.95]           difference&#xD;
+[xUnit.net 00:00:08.95]       Difference     |  |    |    |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:08.95]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:08.95]       Index          | 0    1    2    3    4    5    6    7    8    9    &#xD;
+[xUnit.net 00:00:08.95]       Expected Value | 已    移    交    ，    选    择    如    何    继    续    &#xD;
+[xUnit.net 00:00:08.95]       Actual Value   |                                                   &#xD;
+[xUnit.net 00:00:08.95]       Expected Code  | 24050312272013265292368732532122914203093248732493&#xD;
+[xUnit.net 00:00:08.95]       Actual Code    |                                                   &#xD;
+[xUnit.net 00:00:08.95]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.95]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(106,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(Boolean photoshop)&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.95]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.60]       Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)&#xD;
+[xUnit.net 00:00:09.60]           should be&#xD;
+[xUnit.net 00:00:09.60]       "处理已停止"&#xD;
+[xUnit.net 00:00:09.60]           but was&#xD;
+[xUnit.net 00:00:09.60]       ""&#xD;
+[xUnit.net 00:00:09.60]           difference&#xD;
+[xUnit.net 00:00:09.60]       Difference     |  |    |    |    |    |   &#xD;
+[xUnit.net 00:00:09.60]                      | \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:09.60]       Index          | 0    1    2    3    4    &#xD;
+[xUnit.net 00:00:09.60]       Expected Value | 处    理    已    停    止    &#xD;
+[xUnit.net 00:00:09.60]       Actual Value   |                          &#xD;
+[xUnit.net 00:00:09.60]       Expected Code  | 2278829702240502057227490&#xD;
+[xUnit.net 00:00:09.60]       Actual Code    |                          &#xD;
+[xUnit.net 00:00:09.60]       Stack Trace:&#xD;
+[xUnit.net 00:00:09.60]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs(129,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity()&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.60]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.61]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:32.4346948+13:00">
+        <Text>[xUnit.net 00:00:05.44]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "reopened") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:33.1573414+13:00">
+        <Text>[xUnit.net 00:00:06.16]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "prepare") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:33.8591446+13:00">
+        <Text>[xUnit.net 00:00:06.86]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "waiting") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:34.6805815+13:00">
+        <Text>[xUnit.net 00:00:07.68]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "returned") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:35.3362991+13:00">
+        <Text>[xUnit.net 00:00:08.34]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:35.9455051+13:00">
+        <Text>[xUnit.net 00:00:08.95]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Handoff_reopens_with_only_supported_manual_paths_and_never_restarts(photoshop: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:03:36.5982658+13:00">
+        <Text>[xUnit.net 00:00:09.60]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

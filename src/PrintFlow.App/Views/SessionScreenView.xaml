@@ -1150,6 +1150,24 @@
             <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto"
                           Visibility="{Binding ShowsGuidedDetailsColumn, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
+                    <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}"
+                            BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12"
+                            Visibility="{Binding ShowsGuidedRecovery, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding GuidedRecoveryHeading}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       AutomationProperties.AutomationId="Session.RecoveryGuidance.Heading" />
+                            <TextBlock Text="{Binding GuidedCorrectionStages}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Visibility="{Binding ShowsGuidedCorrectionStages, Converter={StaticResource BoolToVisibility}}"
+                                       AutomationProperties.AutomationId="Session.Correction.Flow" />
+                            <TextBlock Text="{Binding GuidedRecoveryPreserved}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       AutomationProperties.AutomationId="Session.RecoveryGuidance.Preserved" />
+                            <TextBlock Text="{Binding GuidedRecoveryNext}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                                       AutomationProperties.AutomationId="Session.RecoveryGuidance.Next" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="{Binding GuidedCorrectionReview}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,12"
+                               Visibility="{Binding ShowsGuidedCorrectionReview, Converter={StaticResource BoolToVisibility}}"
+                               AutomationProperties.AutomationId="Session.Correction.ReturnReview" />
                     <StackPanel Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}"
                                 AutomationProperties.AutomationId="Session.ActionFailure">
                         <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
