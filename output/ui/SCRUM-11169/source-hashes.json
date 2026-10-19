@@ -16,18 +16,13 @@
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Correction.cs",
-    "Sha256": "509712710DBC3AC26BA68BE188E7862DFD2E109E8035C5C6A06BAD70B195BDAD",
-    "GitBlobId": "d46fad0e9ad3ce3cd80d81a19fabae6d1c031190"
-  },
-  {
-    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.cs",
-    "Sha256": "8DFC1419F3EE0AD94F9C9FDD7DC3D2B2074076E4A53343717B77C34BE6C9ECFE",
-    "GitBlobId": "7638beff82f448f8d0ec503821fb783a591072c9"
+    "Sha256": "E82E4A223384FA2A3D95A2432408C2676A5593DC8CFB98DE2E257BFD4E3C0EAE",
+    "GitBlobId": "95bceadd7a7d7b5c0ae8692414fc944e7911c617"
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.FinalSave.cs",
-    "Sha256": "DC83B024622EA23BDDB17478279BD219C8DE497AF7DCF6DF131B53648A00A3B1",
-    "GitBlobId": "5974072c166628584ea88a29fe3bad1f41bbcab8"
+    "Sha256": "C67E5AFD5A610B152F3D737C7EBFD55F49C8A1675D85F18995A7D77F86B0861A",
+    "GitBlobId": "6ecc04726f50219fe810c09003b75b513dc4882b"
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
@@ -36,8 +31,8 @@
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Navigation.cs",
-    "Sha256": "86DC2D601B37FE174DEB5A06E40F5E1AF0FC3B5CC80B2BF4567B9A1FFED04096",
-    "GitBlobId": "8ceaeb7f6bad04bf3ff7d3bd9f0c1334cca53c7f"
+    "Sha256": "2BACE1D8A809F947CDC3491F72B52394407E1DD60548DD6A684DFAE992DE06D1",
+    "GitBlobId": "74a5f34c409ee84d8bd9070be9faf0b5fdcb88d4"
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.OperatorStatus.cs",
@@ -51,8 +46,13 @@
   },
   {
     "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.TrimAdjust.cs",
-    "Sha256": "C15E478DF1C2F735C1632F3EBA5DE8C13D01705F825B82E2503830476C319E84",
-    "GitBlobId": "f75b5b6f103cb557488223dad68d6a172c308054"
+    "Sha256": "8491F322A217269CCD59229122CA3045F52A7EBBBD0EA03A04F1A1B064282799",
+    "GitBlobId": "cd89290acdfebae49680d187a57dc3f007d9e5a0"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.cs",
+    "Sha256": "E49929C3C0DC8D8878A2A6E7DE37BAE6F19E182351A2FDFE6A60F94F2A3175DE",
+    "GitBlobId": "ce1459492bf038f9f5a10279cc381a17317fddcf"
   },
   {
     "Path": "src/PrintFlow.App/Views/ReviewApprovalButton.cs",
@@ -70,9 +70,14 @@
     "GitBlobId": "b5360b123234b6d51f9e1d7edd6181f5fe247d5b"
   },
   {
+    "Path": "src/PrintFlow.App/Views/SessionEditorControls.cs",
+    "Sha256": "A7BE9FCCF650A9E1D419F8327A80FA3D363411DD78F3F205B887F02F261F72FA",
+    "GitBlobId": "022ba5a9f06a9195db35b9f83271efa10cc6ac68"
+  },
+  {
     "Path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
-    "Sha256": "5F29B807A1570D06376E75790D2F252B74B2BA886A8220A876A1D7420B723844",
-    "GitBlobId": "e6ab9f9394073d6f939739d974d31ddced9ec3e2"
+    "Sha256": "E7D6AB458C4B9FE6D44E28F05CB9A62583883C5C34D1CE59BEE90DB11A44649E",
+    "GitBlobId": "80406338a8dc5441967375c2b889174a3cd01b16"
   },
   {
     "Path": "src/PrintFlow.App/Views/SessionScreenView.xaml.cs",
@@ -110,6 +115,11 @@
     "GitBlobId": "e6ceac6f98a0c78b22279775c3d045d0a3d50def"
   },
   {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionEditorInputTests.cs",
+    "Sha256": "783A640D7B36A77EBB438975F8AFBC3EF9286783D8EAC298D0C4E022E029AA72",
+    "GitBlobId": "3bc8b89cf82d6c96df687cbdbe4a4bae055125e3"
+  },
+  {
     "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionInputTests.cs",
     "Sha256": "269D742DB135F028AFD10EA398F2569BEECF6F9127A0716AFD717AB57B6D7BDE",
     "GitBlobId": "bfef2f1162afabd0eb7e6a461d8a11b57113be53"
@@ -123,6 +133,16 @@
     "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionProjectionTests.cs",
     "Sha256": "F1282EF9198B5CB823C587F550FFE365F91DBAA5AF2F7014BB991B4344C8B4C1",
     "GitBlobId": "8bc208ac0b94b38e7dc090a468d1232e21ae6ae5"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionReviewFixTests.cs",
+    "Sha256": "D6CFE828ED59EC50134A9321F148C512536EB08ED0281FF7F7EB8912DD2089FA",
+    "GitBlobId": "c92b62f4428af68390f1077d4f6f175820d5f084"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionSaveOwnershipTests.cs",
+    "Sha256": "709E9BFC20C72B0812D9874C13246F4837A0B8FCB7E9BBAD5B9BA6CC9128C616",
+    "GitBlobId": "b9647740ca3a726bfef693eaf7f01af56b1b3f2e"
   },
   {
     "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionShellTests.cs",

@@ -152,3 +152,5 @@ Minor仍延期：GuidedSessionVisualEvidenceTests中的ReferenceEquals(null,null
 修复后最终安全广筛review-ui-architecture-final.trx：1344 PASS / 14 FAIL / 0 SKIP，总计1358；新增30个测试全部通过。checks/review-baseline-comparison.json确认14个失败名称和错误消息与E1逐一完全相同，NewFailureNames与BaselineFailuresNotReproduced均为空。仍明确排除原11项可见/opt-in方法；不是全量PASS。流程/持久化16类review-workflow-persistence-final.trx：277 PASS / 0 FAIL / 0 SKIP。两项均使用已审计脚本，脚本新增RunName参数只为保留前次结果。
 
 视觉修复后在review-renders重新捕获39张主页面及JSON，合成源图SHA256不变。checks/review-render-comparison.json记录37张与审查前字节完全相同；仅1920宽度draft-leave和return-confirmation两张变化，历史披露入口在模态期间正确显示禁用。这两张新旧图均已逐张查看。最新主图以review-renders为准；原renders及16张补充说明图保留，补充说明布局未改。review-evidence-index.json记录新39图、2张本轮已查看；不能把37张相同图重复算成人工查看。原55图/20张查看索引继续保留其历史性质。
+
+修复提交为aa3a3eb98dbcaa5a2a71727a91a074a7237e0d30（相对审查目标9fe125e）。提交后执行dotnet test --no-restore --filter FullyQualifiedName~GuidedSession，重新编译并通过85/85，记录为checks/review-postcommit.trx。35个源码/测试文件SHA256与GitBlobId、完整base→HEAD source.diff已重建；53原动作合同、原55图/39JSON及新增39图/39JSON全部校验通过。最终补充提交只写这些验证/文档记录，不改变src/tests。最终广筛之后的源码差异仅为新文件EOF空白清理；提交后重新编译验证覆盖最终字节。

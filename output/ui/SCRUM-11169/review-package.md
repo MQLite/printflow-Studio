@@ -1,6 +1,6 @@
 # SCRUM-11169 post-review repair handoff
 
-The sole fresh whole-branch review of `9fe125eaf3104049192f3c766278db60adab6ecb` is complete. The controlling chat retained6 Important/0 Critical and authorized one unified TDD repair. All6 have been addressed in this same worktree. This is the repair/evidence handoff, not a request for another review. Final commit IDs are recorded by the handoff and execution ledger.
+The sole fresh whole-branch review of `9fe125eaf3104049192f3c766278db60adab6ecb` is complete. The controlling chat retained6 Important/0 Critical and authorized one unified TDD repair. All6 have been addressed in this same worktree. This is the repair/evidence handoff, not a request for another review. Repair implementation commit: `aa3a3eb98dbcaa5a2a71727a91a074a7237e0d30`; the final evidence-only commit is recorded by the handoff.
 
 Baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Implementation: `1665381` G01, `a203805` G02, `dd1ee8e` G03, `c49d3a5` G04, `fe19772` Task5, `9fe125e` pre-review evidence. Worktree: `C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-Studio`; branch `codex/scrum-11169-guided-shell`. Main checkout and untracked `output/imagegen` reference gallery remain outside this change. No push, merge, deployment, production application, real adapters, uploads or later Epic work.
 
@@ -9,7 +9,7 @@ Baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Implementati
 - `docs/codex/printflow-operator-ux-backlog/SCRUM-11169_REVIEW.md`: original sole review; `review/Program.cs` and `review/probe-output.txt` preserve its original probes.
 - `docs/codex/printflow-operator-ux-backlog/SCRUM-11169_RESULTS.md`: AC map, all6 repair dispositions, RED/GREEN records, current final counts, rulings, anomalies and NOT RUN boundaries.
 - `docs/printflow/guided-session-navigation.md`: operator/developer navigation, draft, input and async ownership contracts.
-- `source.diff`, `source-hashes.json`, `checks/source-evidence-revision.json`: full baseline-to-final source/test diff and committed blob/working-byte hashes. Refresh runs after the implementation commit.
+- `source.diff`, `source-hashes.json`, `checks/source-evidence-revision.json`: full baseline-to-final source/test diff and committed blob/working-byte hashes. All35 source/test files and53 action contracts were refreshed and verified after the implementation commit.
 - `checks/review-editor-input-audit.json`:30 editor controls plus7 disclosures; retained native pattern contracts and offscreen test boundaries.
 - `action-identity-comparison.json`: original53 action controls retain command, parameter, exact identity, gesture guard, automation ID and default/cancel settings, each once; refreshed against final XAML.
 
@@ -24,7 +24,7 @@ R6 tests preserve real offer authority: same-ID reopen can invalidate an old off
 - Unified focused repair/input group: **47 PASS / 0 FAIL / 0 SKIP**, `checks/review-fixes-complete.trx`.
 - Audited UI/Architecture: **1344 PASS / 14 FAIL / 0 SKIP,1358 total**, `checks/review-ui-architecture-final.trx`. All14 names and error messages exactly match E1. `checks/review-baseline-comparison.json` has no new/missing failure. The unchanged11 visible/opt-in exclusions remain NOT RUN in this repair.
 - Audited16-class workflow/persistence: **277 PASS / 0 FAIL / 0 SKIP**, `checks/review-workflow-persistence-final.trx`.
-- Post-commit fresh compile/GuidedSession verification is recorded separately in the execution ledger and `checks/review-postcommit.trx`.
+- Post-commit fresh compile/all GuidedSession: **85 PASS / 0 FAIL / 0 SKIP** on `aa3a3eb`, recorded in `checks/review-postcommit.trx`.
 - Final primary images are in `review-renders/`:39 PNG+JSON at96DPI.37 are byte-identical to pre-review images; the2 changed1920-wide modal images show the history disclosure disabled. Both before/after pairs were inspected. `review-evidence-index.json` and `checks/review-render-comparison.json` record the details.
 - Original55 page images/20 executor inspections remain under the original index;16 supplementary guidance images retain unchanged layouts. These are historical counts, not additional post-review inspection. No human or native accessibility acceptance is claimed.
 
