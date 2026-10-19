@@ -2114,9 +2114,11 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(session);
         _openGeneration++;
-        if (_serviceOperationGeneration is not null)
+        if (_serviceOperationGeneration is not null || _finalSaveOperation is not null)
         {
             _serviceOperationGeneration = null;
+            // Retire presentation ownership only; the old save keeps its own durable intent.
+            _finalSaveOperation = null;
             IsBusy = false;
         }
         Show(session);
@@ -2387,7 +2389,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void BeginManualCrop()
     {
-        if (!CanManualCrop || IsBusy)
+        if (!CanInteractWithLivePage || !CanManualCrop || IsBusy)
         {
             return;
         }
@@ -2406,7 +2408,10 @@ public sealed partial class SessionViewModel : ObservableObject
     /// property of what the code can do, not of what it happens to do today.
     /// </remarks>
     [RelayCommand]
-    private void CancelManualCrop() => ClearCropState();
+    private void CancelManualCrop()
+    {
+        if (CanInteractWithLivePage && !IsBusy) ClearCropState();
+    }
 
     /// <summary>
     /// Submits the drawn rectangle through the ordinary command path (§12).
@@ -2446,7 +2451,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <returns>True when the drag produced a usable rectangle.</returns>
     public bool TrySetCropSelection(CropSurfaceLayout layout, double x1, double y1, double x2, double y2)
     {
-        if (!IsCropping)
+        if (!CanInteractWithLivePage || !IsCropping || IsBusy)
         {
             return false;
         }
@@ -2625,7 +2630,9 @@ public sealed partial class SessionViewModel : ObservableObject
             return Task.CompletedTask;
         }
 
-        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken);
+        var submittedDraft = CapturePageDraft();
+        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken,
+            _ => _cleanDraft = submittedDraft);
     }
 
     /// <summary>
@@ -2640,7 +2647,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void ApplyPreset(SizePresetChoice? preset)
     {
-        if (preset is null)
+        if (!CanInteractWithLivePage || IsBusy || preset is null)
         {
             return;
         }
@@ -2658,7 +2665,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task UsePresetAsync(
         SizePresetChoice? preset, CancellationToken cancellationToken)
     {
-        if (preset is null || _session?.Sizing.CanSetPresetFitSize != true)
+        if (!CanInteractWithLivePage || IsBusy || preset is null || _session?.Sizing.CanSetPresetFitSize != true)
         {
             return;
         }
@@ -2675,7 +2682,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void ChooseCustomSize()
     {
-        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true || IsBusy)
+        if (!CanInteractWithLivePage || _session?.Sizing.CanSetCustomTargetEdgeSize != true || IsBusy)
         {
             return;
         }
@@ -2840,7 +2847,14 @@ public sealed partial class SessionViewModel : ObservableObject
         SelectedWhiteUnderbaseChoice is { } choice
             ? RunAsync(
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(choice.Branch, JustificationFor(choice.Branch)),
-                cancellationToken)
+                cancellationToken, applied =>
+                {
+                    _isChoosingGuidedWhiteInk = false;
+                    SelectedWhiteUnderbaseChoice = WhiteUnderbaseChoices.FirstOrDefault(c => c.Branch == applied.WhiteUnderbaseBranch);
+                    _cleanDraft = CapturePageDraft();
+                    NotifyGuidedPresentation();
+                    NotifyOperatorStatusChanged();
+                })
             : Task.CompletedTask;
 
     /// <summary>
@@ -3344,16 +3358,16 @@ public sealed partial class SessionViewModel : ObservableObject
     /// adjustment itself: every other action is hidden, and this refuses it even if something
     /// invoked it anyway (SCRUM-11147). The service's exact-target checks stay the authority.
     /// </remarks>
-    private Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken) =>
+    private Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken, Action<SessionView>? onApplied = null) =>
         command is null || (IsAdjustingTrim && command is not WorkflowCommand.AdjustTrimFromReview)
             ? Task.CompletedTask
-            : RunServiceAsync(id => _sessions.ExecuteAsync(id, command, Environment.UserName, cancellationToken), cancellationToken);
+            : RunServiceAsync(id => _sessions.ExecuteAsync(id, command, Environment.UserName, cancellationToken), cancellationToken, onApplied);
 
     /// <summary>
     /// Runs one service call with the screen's ordinary busy, notice and refresh handling.
     /// </summary>
     private async Task RunServiceAsync(
-        Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken)
+        Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken, Action<SessionView>? onApplied = null)
     {
         if (_session is null || IsBusy || !CanInteractWithLivePage)
         {
@@ -3388,6 +3402,7 @@ public sealed partial class SessionViewModel : ObservableObject
             }
 
             Show(result.Value);
+            onApplied?.Invoke(result.Value);
             await PreviewsLoaded.ConfigureAwait(true);
         }
         finally

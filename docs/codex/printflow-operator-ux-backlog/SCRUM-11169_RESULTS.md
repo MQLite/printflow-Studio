@@ -2,7 +2,7 @@
 
 本轮按用户“SCRUM-11177 通过，请继续推进 SCRUM-11169，沿用已批准视觉和 Native”的授权实施 G01–G04。交付左侧只读步骤、当前步骤专属页面、固定操作栏、只读历史、捕获身份的返回确认、临时草稿离开决策，以及恢复/异步/旧输入保护。业务工作流继续决定合法命令、审核与下游失效。
 
-状态：G01–G04实现、视觉证据、受限回归及Task5提交后验证已完成，已准备交回控制会话进行最终全新上下文整体审查。未 push、merge、deploy、启动生产 App 或进入后续 Epic；本记录不等于真人验收、生产验证或 Jira Done。首轮广筛误执行三个无条件 Window.Show 测试，详见下面的边界更正；不再声称整个测试过程离屏。
+状态：G01–G04及Task5已完成；控制会话对9fe125e完成唯一一次全新整体审查，维持6项Important、0项Critical。本轮按Native完成六项统一TDD修复；47项目标回归、277项流程/持久化通过，最终安全广筛1344通过/14继承失败，无新增失败。审查原文见SCRUM-11169_REVIEW.md，修复与最终证据见本文末节，交回控制会话最终处置。未 push、merge、deploy、启动生产 App 或进入后续 Epic；本记录不等于真人验收、生产验证或 Jira Done。首轮广筛误执行三个无条件 Window.Show 测试，详见下面的边界更正；不再声称整个测试过程离屏。
 
 ## 范围与实现
 
@@ -61,7 +61,7 @@
 | G05 视觉/投影/壳最终 | 22 / 0 / 0 | 39张PNG；13状态×3尺寸；真实布局修复后 |
 | G05 布局合同/保存最终 | 145 / 0 / 0 | 保留说明、警告、几何与保存身份断言；含16张补充审核PNG |
 | 首轮 UI + Architecture | 1282 / 56 / 1（1339） | 14个E1同名失败；42个新失败，另误执行3个窗口测试 |
-| 最终安全 UI + Architecture 子集 | 1314 / 14 / 0（1328） | 14个失败与E1同名且错误消息完全一致；明确排除11个可见/opt-in测试，不能称全量通过 |
+| 审查前安全 UI + Architecture 子集 | 1314 / 14 / 0（1328） | 14个失败与E1同名且错误消息完全一致；明确排除11个可见/opt-in测试，不能称全量通过；修复后的1358项见末节 |
 | workflow/persistence 回归 | 277 / 0 / 0 | 经审计16类：导航/审批/恢复/源文件/路线/保存；原业务状态与持久事实 |
 | Task5 提交后验证 | 55 / 0 / 0 | 重新编译fe19772后的GuidedSession全部用例；task-done范围c49d3a5..fe19772 |
 
@@ -103,7 +103,7 @@ JSON记录96 DPI、图片SHA256、同一源图SHA256、当前页面、动作矩�
 
 geometry/review-png另含16张中英文审核说明补充PNG；其中最终1000×700中文TIFF审核页已查看。evidence-index.json共55张页面，20张标记执行者已查看；英文自动布局/渲染不等于英文人工走查。source-hashes.json记录当前源码/测试SHA256，action-identity-comparison.json逐一比较基线53个原按钮：Command、CommandParameter、TargetIdentity、IsGestureGuarded、AutomationId、IsDefault、IsCancel均未变，且各保留一个实例。
 
-最终图片捕获/145项布局回归及1328项安全广筛之后，源码只清理尾随空白与EOF空行；没有行为修改，故未仅为格式重渲染。最终31个文件SHA256及source.diff已重新生成，随后重新编译的55项提交后用例通过。SHA256对应当前工作树字节（对换行敏感），每行GitBlobId另锚定已提交内容；后续证据提交没有源码/测试变更。checks/verify-evidence.ps1已核对这些哈希、55图、39主JSON及53动作记录。
+审查前的图片捕获/145项布局回归及1328项安全广筛之后，源码只清理尾随空白与EOF空行；没有行为修改，故当时未仅为格式重渲染。9fe125e的31个文件SHA256及source.diff已重新生成，随后重新编译的55项提交后用例通过。SHA256对应工作树字节（对换行敏感），每行GitBlobId另锚定已提交内容；当时的证据提交没有源码/测试变更。审查后的行为修复及重新捕获另记于末节，不能继续套用“只有空白变更”的说明。
 
 初次新捕获测试修改已经在另一个STA渲染的模型，触发 CollectionView 跨线程限制（3 FAIL）；捕获改为对同一真实持久会话新建只读展示快照，驱动模型保持未绑定。该项是测试生命周期修正，不作为产品修复。未设置 PF_11169_CAPTURE_DIR 时仍运行布局断言，截图生成本身为NOT RUN。
 
@@ -125,3 +125,30 @@ geometry/review-png另含16张中英文审核说明补充PNG；其中最终1000�
 生产App启动、真实工作站 opt-in、物理键鼠注入/真实UIA客户端、真实多DPI/多显示器、真实美图/Photoshop、生产印刷TIFF/CMYK/W1、客户文件、外部上传、收费服务、真实新手中文走查、英文人工走查、发布/合并/推送均未执行。Window.Show与WPF原生窗口焦点遍历曾误执行三个测试，按上文单独记录，不能列为NOT RUN。源文件准备中的本地测试PDF不代表客户PDF或生产Photoshop验证。
 
 SCRUM-11139/11154/11155 的未完成验收及旧缺陷保持原状态。后续E3–E6、底层流程设计、草稿持久化、其他仓库和发布需要另行授权。
+
+## 唯一审查后的统一TDD修复
+
+审查目标9fe125e，发现与原始探针保留在SCRUM-11169_REVIEW.md及output/ui/SCRUM-11169/review/。执行上下文仍为控制会话已核实的Native Astra/high；输入生命周期、草稿基线和异步保存所有权相互关联，未宣称降档。没有再次委派审查或扩大到Minor/继承失败。
+
+| 项 | 实际修复与证据 |
+| --- | --- |
+| R1 白墨相同分支重确认卡页 | 成功提交后明确退出编辑并采纳确认分支；同分支、改分支、拒绝保留草稿3个用例。review-r1-r3-red中的同分支用例原为WhiteInk而非Preflight。 |
+| R2 模态层期间手工裁切入口可清草稿 | 顶行入口及普通编辑命令服从CanInteractWithLivePage；裁边/修正取消及尺寸入口同样保护，停止/接管保持运行时资格。2个RED均真实丢失[3,2→9,7)选区；GREEN保留旧provider、fresh provider、直接命令、Keep/Discard与持久聚合检查。 |
+| R3 已确认裁边没有成为基线 | RunService仅成功且仍属本展示时推进到捕获的提交草稿；同上下文刷新不擦除后来编辑，失败不推进。2个RED分别误报dirty及Discard回Tight0；GREEN与真实持久Uniform2比较。 |
+| R4 编辑输入旧引用越界 | 30个编辑控件改为SessionTextBox/ComboBox/ListBox/RadioButton；7个Expander也保护旧展开引用。捕获Scope、DataContext、可见祖先、启用和加载生命周期；所有可变模式依请求的PatternInterface包装，保留原生读模式。文本覆盖换任务、排队、隐藏表单、隐藏控件、卸载/重载、隐藏后重显、同VM真实步骤更新；选择覆盖Combo/List/Radio，另有合法当前输入与接口兼容性测试。 |
+| R5 成功保存后的草稿基线过旧 | 只在请求ID、代际、名称、文件夹一致且Delivered/AlreadyDelivered时结束保存草稿，下一编辑再捕获最近确认值。真实临时文件confirmed-output.png及目标文件夹、失败/未决不丢草稿/事实均验证。RED2包含回到初始名称以及失败后漏问草稿。 |
+| R6 旧保存拥有新展示busy/finally | FinalSaveOperation记录Open代数，并以操作对象确认所有权；Open新任务或同ID重开退休旧展示所有权。结果/错误/进度/刷新/finally均受保护。7个可控交付用例覆盖成功、失败、B并发busy、同ID重开、已交付后丢确认与旧offer拒绝；持久事实只归原任务。RED6均复现新展示仍Busy。 |
+
+最终目标组review-fixes-complete.trx：47 PASS、0 FAIL、0 SKIP，包括原GuidedSessionInputTests。原始RED、编译错误、中间GREEN失败均保留，不能只引用最后PASS。R1/R3原运行3 PASS/3 FAIL；R2 0/2；R4初次0/9，其中6项为真实文本/Radio越界、3项为WPF旧项目虚拟化拒绝；R5 1/2；R6 0/6。R4另补模式兼容性与披露控件各1个真实RED。
+
+R4审计为checks/review-editor-input-audit.json。当前Session XAML没有绑定业务草稿的CheckBox、ToggleButton或Slider；内部滚动/文本选择/裁切指针不是新增的Value/Range草稿字段。原生条目读语义保留。Combo选择测试用纯ItemsPresenter测试模板实体化条目，未打开Popup或Window；允许WPF对不存在的旧条目抛ElementNotAvailableException作为安全拒绝，同时必须证明新条目仍可选择。初次测试的3项虚拟化异常不是3个产品缺陷，保留原日志而明确其性质。真实UIA客户端兼容性仍NOT RUN。
+
+R6 Ruling：同ID重开会合法重新GetOffer，使停在校验前的旧offer失效。review-r6-green曾64 PASS/1 FAIL，因为测试误要求这次旧offer仍交付。按控制会话裁定，不放宽后端offer；迟到成功改为真实交付完成后暂缓回展示，迟到失败同时覆盖丢确认及旧offer RequestConflict。代价是测试增加两个明确的时点和额外真实临时文件检查，保留原始失败。后端交付/审批身份没有变化。
+
+R4 Ruling：优先包装原生可变pattern而不复制业务逻辑或复建整棵控件树。代价是5个薄控件及输入生命周期维护。首版依runtime接口先后包装时，Combo的Selection误成Value；review-r4-pattern-red真实复现，现按请求模式分派。未完成广筛因此被主动中止（review-ui-architecture-interrupted.log，无完成TRX/计数），修正后再运行最终安全广筛，不是第二轮审查。祖先事件在DataContext变化/卸载时解绑，避免旧树保留监听。
+
+Minor仍延期：GuidedSessionVisualEvidenceTests中的ReferenceEquals(null,null)会让无RecommendedCommand页面的ReviewActualSize在JSON中误标Recommended=true；实际按钮样式不受影响，未修改本项或借新截图宣称修复。首轮可见Tab焦点失败、一次Space fresh-activation异常及14项继承故障继续保留原限制；后续PASS不自动解释它们。
+
+修复后最终安全广筛review-ui-architecture-final.trx：1344 PASS / 14 FAIL / 0 SKIP，总计1358；新增30个测试全部通过。checks/review-baseline-comparison.json确认14个失败名称和错误消息与E1逐一完全相同，NewFailureNames与BaselineFailuresNotReproduced均为空。仍明确排除原11项可见/opt-in方法；不是全量PASS。流程/持久化16类review-workflow-persistence-final.trx：277 PASS / 0 FAIL / 0 SKIP。两项均使用已审计脚本，脚本新增RunName参数只为保留前次结果。
+
+视觉修复后在review-renders重新捕获39张主页面及JSON，合成源图SHA256不变。checks/review-render-comparison.json记录37张与审查前字节完全相同；仅1920宽度draft-leave和return-confirmation两张变化，历史披露入口在模态期间正确显示禁用。这两张新旧图均已逐张查看。最新主图以review-renders为准；原renders及16张补充说明图保留，补充说明布局未改。review-evidence-index.json记录新39图、2张本轮已查看；不能把37张相同图重复算成人工查看。原55图/20张查看索引继续保留其历史性质。

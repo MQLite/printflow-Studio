@@ -1,38 +1,43 @@
-# SCRUM-11169 whole-branch review package
+# SCRUM-11169 post-review repair handoff
 
-Review baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Final review target is the HEAD reported by the controlling chat after Task5 evidence is committed. Implementation commits: `1665381` G01, `a203805` G02, `dd1ee8e` G03, `c49d3a5` G04, `fe19772` Task5 polish/evidence. The final follow-up commit adds only verification records and ignored-by-default PNGs. Review the entire branch once in a fresh context; this package is not a review verdict.
+The sole fresh whole-branch review of `9fe125eaf3104049192f3c766278db60adab6ecb` is complete. The controlling chat retained6 Important/0 Critical and authorized one unified TDD repair. All6 have been addressed in this same worktree. This is the repair/evidence handoff, not a request for another review. Final commit IDs are recorded by the handoff and execution ledger.
 
-Worktree: `C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-Studio`; branch `codex/scrum-11169-guided-shell`. Main checkout and untracked `output/imagegen` reference gallery are outside this change. No push, merge, deployment, production application, real adapters, uploads or later Epic work is authorized.
+Baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Implementation: `1665381` G01, `a203805` G02, `dd1ee8e` G03, `c49d3a5` G04, `fe19772` Task5, `9fe125e` pre-review evidence. Worktree: `C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-Studio`; branch `codex/scrum-11169-guided-shell`. Main checkout and untracked `output/imagegen` reference gallery remain outside this change. No push, merge, deployment, production application, real adapters, uploads or later Epic work.
 
 ## Start here
 
-- `docs/codex/printflow-operator-ux-backlog/SCRUM-11169_RESULTS.md`: AC/code/test map, exact test scope/counts, rulings, anomalies and NOT RUN boundaries.
-- `docs/printflow/guided-session-navigation.md`: page projection, history, return capture, draft lifetime and input/async contracts.
-- `docs/superpowers/plans/2026-10-19-scrum-11169-guided-shell.md`: approved task plan and verification correction.
-- `source.diff`: baseline-to-final source/test patch; `source-hashes.json` pins 31 source/test file contents. Use Git for authoritative final diff.
-- `evidence-index.json`: 55 page images, 20 inspected by executor. `renders/` has 39 states/sizes and JSON measurements; `geometry/` retains old/new/without-guidance rectangles and 16 supplementary review images.
-- `action-identity-comparison.json`: all 53 original action controls retain their command, parameter, exact identity, gesture guard, automation ID and default/cancel settings, each present once.
+- `docs/codex/printflow-operator-ux-backlog/SCRUM-11169_REVIEW.md`: original sole review; `review/Program.cs` and `review/probe-output.txt` preserve its original probes.
+- `docs/codex/printflow-operator-ux-backlog/SCRUM-11169_RESULTS.md`: AC map, all6 repair dispositions, RED/GREEN records, current final counts, rulings, anomalies and NOT RUN boundaries.
+- `docs/printflow/guided-session-navigation.md`: operator/developer navigation, draft, input and async ownership contracts.
+- `source.diff`, `source-hashes.json`, `checks/source-evidence-revision.json`: full baseline-to-final source/test diff and committed blob/working-byte hashes. Refresh runs after the implementation commit.
+- `checks/review-editor-input-audit.json`:30 editor controls plus7 disclosures; retained native pattern contracts and offscreen test boundaries.
+- `action-identity-comparison.json`: original53 action controls retain command, parameter, exact identity, gesture guard, automation ID and default/cancel settings, each once; refreshed against final XAML.
 
-## Risk-focused review
+## Repair outcomes
 
-1. Pure page projection must preserve original route legality, required review and explicit white-ink selection; no UI step navigation may confer command authority.
-2. Immutable history facts and separately loaded previews must never become executable active results. Captured return intent must not retarget or survive a changed task/result.
-3. Five draft categories must preserve temporary input on keep/refresh and discard only UI state; confirmed dimensions, approvals, output and save history remain persisted business facts.
-4. General gesture/UIA scope is independent of exact approval identity. Check hidden/unloaded/rebound trees, retained and queued UIA providers, key release/repeat and double-click boundaries. Async success/failure/runtime/finally from A must not overwrite B.
-5. Layout changes must keep fixed legal actions, stop/takeover, current mandatory choices and long Chinese guidance visible/reachable at 1000×700. Geometry fixture changes preserve safety/identity assertions; review their meaning, not just passing totals.
+R1 explicitly finishes successful white-ink editing, including reconfirming the same branch. R3 advances the confirmed trim baseline only on matching success. R2 blocks ordinary entry/cancel/edit commands during history/return/draft decisions while stop/takeover keep their runtime authority. R4 captures the presentation lifetime for all session editing providers and disclosure patterns; fresh current providers retain native interfaces and behavior. R5 ends only a matching successfully delivered save draft so the next discard returns to its latest confirmed name/folder. R6 retires old save presentation ownership on Open, including same-ID reopen, without cancelling its persistent intent or letting its progress/result/error/finally alter the new presentation.
 
-## Verification boundaries that must remain visible
+R6 tests preserve real offer authority: same-ID reopen can invalidate an old offer before validation. Late success is held after actual durable delivery, while RequestConflict and lost acknowledgement cover failures. Original test-boundary failure is retained. R4 preserves safe native stale-item refusal and uses an offscreen ItemsPresenter test template to materialize Combo items without opening a Popup/Window. Its initial multiple-interface wrapper defect is preserved as RED and fixed by selecting the requested PatternInterface. The interrupted first broad attempt has no completion counters and remains in the logs.
 
-- Final audited UI/Architecture subset: **1314 PASS / 14 FAIL / 0 SKIP, 1328 total**. All 14 names and error messages match E1 exactly (`checks/baseline-comparison.json`). This excludes 11 visible/opt-in methods; it is not a full-suite PASS.
-- Audited 16-class workflow/persistence subset: **277 PASS / 0 FAIL / 0 SKIP**. Final layout/guidance/save contract subset: **145 PASS / 0 FAIL / 0 SKIP**.
-- After committing `fe19772`, a fresh build and all GuidedSession tests passed **55 / 55**; task-done records `c49d3a5..fe19772`. Only trailing whitespace/EOF cleanup separates the earlier rendered source from this source. The 31 SHA256 hashes and full source.diff were regenerated; GitBlobId also pins committed content. No source/test edits occur in the final evidence commit.
-- The first broad run mistakenly executed three existing unconditional `Window.Show` tests. Their finally blocks closed them and the testhost exited. Preserve raw results and `checks/visible-window-audit.md`; no further visible execution is authorized. Seven opt-in guard-return `Passed` outcomes are not live verification.
-- `PrintDimensionsPreflightUiTests.Keyboard_traverses_the_bound_custom_size_controls_and_panel_does_not_trap_focus` failed in that initial run (`confirm.IsKeyboardFocused`: expected true, actual false). Its source/assertions are unchanged; exclusion leaves it **UNVERIFIED**, not fixed or passed.
-- `GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Space)` once failed only the fresh-activation count (expected 1, actual 0), after stale-key rejection passed. Later passes do not establish a fix. Modifier/focus/scheduling causes remain hypotheses.
-- Human Chinese/English walkthrough, actual keyboard/mouse, real UIA client, multiple DPI/monitors, real Photoshop/Meitu/production TIFF/customer files remain NOT RUN. Offscreen rendering cannot certify those behaviors.
+## Final verification
 
-## Reproduction within the allowed boundary
+- Unified focused repair/input group: **47 PASS / 0 FAIL / 0 SKIP**, `checks/review-fixes-complete.trx`.
+- Audited UI/Architecture: **1344 PASS / 14 FAIL / 0 SKIP,1358 total**, `checks/review-ui-architecture-final.trx`. All14 names and error messages exactly match E1. `checks/review-baseline-comparison.json` has no new/missing failure. The unchanged11 visible/opt-in exclusions remain NOT RUN in this repair.
+- Audited16-class workflow/persistence: **277 PASS / 0 FAIL / 0 SKIP**, `checks/review-workflow-persistence-final.trx`.
+- Post-commit fresh compile/GuidedSession verification is recorded separately in the execution ledger and `checks/review-postcommit.trx`.
+- Final primary images are in `review-renders/`:39 PNG+JSON at96DPI.37 are byte-identical to pre-review images; the2 changed1920-wide modal images show the history disclosure disabled. Both before/after pairs were inspected. `review-evidence-index.json` and `checks/review-render-comparison.json` record the details.
+- Original55 page images/20 executor inspections remain under the original index;16 supplementary guidance images retain unchanged layouts. These are historical counts, not additional post-review inspection. No human or native accessibility acceptance is claimed.
 
-Run `output/ui/SCRUM-11169/checks/run-safe-ui.ps1` for the audited UI/Architecture filter. Do not substitute the old unqualified filter. Run `run-workflow-persistence.ps1` for the audited 16-class persistence subset. `verify-evidence.ps1`, `compare-baseline.ps1` and `index-runs.ps1` regenerate integrity/comparison/index records. Original failed/aborted runs are retained.
+## Retained limitations
 
-After review, the controlling chat owns disposition and Jira updates. No executor-created review agent, Jira closure, push or merge has occurred.
+The sole review's Minor evidence defect remains deferred: when RecommendedCommand is null, some JSON falsely marks the read-only ReviewActualSize action recommended via ReferenceEquals(null,null). Actual button style is unaffected. New screenshots do not repair that metadata.
+
+The initial pre-review broad run mistakenly executed3 existing unconditional Window.Show methods; their finally blocks closed them and the testhost exited. Preserve `checks/visible-window-audit.md` and the raw initial results. Seven opt-in guard-return Passed outcomes are not live verification. No further visible execution occurred in this repair.
+
+The original visible Tab-focus failure remains UNVERIFIED because its test is excluded, not fixed. The once-observed Space fresh-activation count failure remains unexplained; later passes do not establish a fix.14 inherited failures remain outside repair scope. Native keyboard/mouse/UIA clients, real DPI/monitors, beginner/English human walkthroughs, external applications and production output remain NOT RUN.
+
+## Reproduce allowed checks
+
+Use `checks/run-safe-ui.ps1 -RunName review-ui-architecture-final` with the unchanged exclusion list, not an unqualified UI filter. Use `checks/run-workflow-persistence.ps1 -RunName review-workflow-persistence-final` for the audited persistence subset. `compare-baseline.ps1 -CurrentFile review-ui-architecture-final.trx -OutputFile review-baseline-comparison.json`, `index-runs.ps1`, `refresh-source-evidence.ps1` and `verify-evidence.ps1` maintain the records. Refresh source evidence after committing the final source/test contents.
+
+The controlling chat owns final disposition and Jira updates. No executor-created reviewer or second review, Jira closure, push or merge occurred.

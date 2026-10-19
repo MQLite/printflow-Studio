@@ -108,7 +108,7 @@ public sealed partial class SessionViewModel
 
     public bool CanPrepareCorrection => CanInteractWithLivePage && IsAskingColleague && !IsBusy && _session?.CanAskColleague == true;
 
-    public bool CanCancelAskColleague => IsAskingColleague && !IsBusy;
+    public bool CanCancelAskColleague => CanInteractWithLivePage && IsAskingColleague && !IsBusy;
 
     /// <summary>The handed-off panel (S3): the request still grants an import.</summary>
     public bool ShowsCorrectionPanel => CorrectionHandoff is { CanImport: true };
@@ -119,7 +119,7 @@ public sealed partial class SessionViewModel
     public bool CanImportCorrectedImage => CanInteractWithLivePage && CorrectionHandoff is { CanImport: true } && !IsBusy && !IsAdjustingTrim;
 
     /// <summary>Read-only: stays available in S3 while nothing is running.</summary>
-    public bool CanOpenCorrectionFolder => ShowsCorrectionPanel && _correctionShell is not null;
+    public bool CanOpenCorrectionFolder => CanInteractWithLivePage && ShowsCorrectionPanel && _correctionShell is not null;
 
     public bool CanRepairCorrectionFiles => CanInteractWithLivePage && CorrectionHandoff is { CanImport: true, MissingFiles: true } && !IsBusy;
 
@@ -237,7 +237,7 @@ public sealed partial class SessionViewModel
     [RelayCommand]
     private void CancelAskColleague()
     {
-        if (!IsAskingColleague || IsBusy)
+        if (!CanCancelAskColleague)
         {
             return;
         }

@@ -113,7 +113,7 @@
                     <StackPanel Margin="0,8,0,0"
                                 Visibility="{Binding HasMultipleFinalSaveTargets, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding FinalSaveTargetLabel}" Style="{StaticResource MetadataLabel}" />
-                        <ComboBox ItemsSource="{Binding FinalSaveTargets}"
+                        <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
                                   DisplayMemberPath="Label"
                                   IsEnabled="{Binding IsSaveDraftEditable}"
@@ -135,19 +135,19 @@
                                 Visibility="{Binding HasFinalSaveRecords, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding FinalSaveRecordsLabel}" Style="{StaticResource MetadataLabel}" />
                         <!-- Labels carry full folders, so they wrap rather than clip. -->
-                        <ComboBox ItemsSource="{Binding FinalSaveRecords}"
+                        <local:SessionComboBox ItemsSource="{Binding FinalSaveRecords}"
                                   SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
                                   HorizontalContentAlignment="Stretch"
                                   TextSearch.TextPath="Label"
                                   IsEnabled="{Binding IsSaveDraftEditable}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Record"
                                   AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
-                            <ComboBox.ItemTemplate>
+                            <local:SessionComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
                                 </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                            </local:SessionComboBox.ItemTemplate>
+                        </local:SessionComboBox>
                     </StackPanel>
 
                     <!-- The draft is shown only while a save of this result is possible. -->
@@ -156,13 +156,13 @@
                                    AutomationProperties.AutomationId="Session.FinalSave.Summary" />
 
                         <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,2" />
-                        <TextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        <local:SessionTextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  IsEnabled="{Binding IsSaveDraftEditable}"
                                  AutomationProperties.AutomationId="Session.FinalSave.FileName"
                                  AutomationProperties.Name="{Binding SaveFileNameLabel}" />
 
                         <TextBlock Text="{Binding SaveFolderLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,2" />
-                        <TextBox Text="{Binding SaveFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                        <local:SessionTextBox Text="{Binding SaveFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                                  AutomationProperties.AutomationId="Session.FinalSave.Folder"
                                  AutomationProperties.Name="{Binding SaveFolderLabel}" />
                         <local:SessionActionButton Content="{Binding ChangeLocationLabel}" Command="{Binding ChangeLocationCommand}"
@@ -182,7 +182,7 @@
                     <StackPanel Margin="0,8,0,0"
                                 Visibility="{Binding HasFinalSaveSavedPath, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding SavedPathLabel}" Style="{StaticResource MetadataLabel}" />
-                        <TextBox Text="{Binding FinalSaveSavedPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                        <local:SessionTextBox Text="{Binding FinalSaveSavedPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                                  AutomationProperties.AutomationId="Session.FinalSave.SavedPath"
                                  AutomationProperties.Name="{Binding SavedPathLabel}" />
                     </StackPanel>
@@ -222,13 +222,13 @@
                                AutomationProperties.AutomationId="Session.FinalSave.OpenNotice"
                                Visibility="{Binding HasFinalSaveOpenNotice, Converter={StaticResource BoolToVisibility}}" />
 
-                    <Expander Header="{Binding FinalSaveDetailsLabel}" Margin="0,6,0,0"
+                    <local:SessionExpander Header="{Binding FinalSaveDetailsLabel}" Margin="0,6,0,0"
                               AutomationProperties.AutomationId="Session.FinalSave.Details"
                               AutomationProperties.Name="{Binding FinalSaveDetailsLabel}"
                               Visibility="{Binding HasFinalSaveDetails, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox Text="{Binding FinalSaveDetails, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                        <local:SessionTextBox Text="{Binding FinalSaveDetails, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                                  AutomationProperties.Name="{Binding FinalSaveDetailsLabel}" />
-                    </Expander>
+                    </local:SessionExpander>
                 </StackPanel>
             </Border>
         </DataTemplate>
@@ -432,6 +432,7 @@
                            Opacity="0.75" />
                 <local:SessionActionButton Content="{Binding ReenterAutomationLabel}"
                         Command="{Binding ReenterAutomationCommand}"
+                        IsEnabled="{Binding CanInteractWithLivePage}"
                         AutomationProperties.AutomationId="Session.ReenterAutomation"
                         AutomationProperties.Name="{Binding ReenterAutomationLabel}"
                         HorizontalAlignment="Left"
@@ -459,6 +460,7 @@
             -->
             <local:SessionActionButton Content="{Binding BeginManualCropLabel}"
                     Command="{Binding BeginManualCropCommand}"
+                    IsEnabled="{Binding CanInteractWithLivePage}"
                     AutomationProperties.AutomationId="Session.BeginManualCrop"
                     AutomationProperties.Name="{Binding BeginManualCropLabel}"
                     HorizontalAlignment="Left"
@@ -473,14 +475,18 @@
                 <TextBlock Text="{Binding StepsHeading}" FontWeight="SemiBold" Margin="0,0,0,12" />
                 <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{StaticResource PF.StepNavigation}"
                               AutomationProperties.AutomationId="Session.StepList" AutomationProperties.Name="{Binding StepsHeading}" />
-                <Expander Header="{Binding HistoryHeading}" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.HistorySelector">
+                <local:SessionExpander Header="{Binding HistoryHeading}" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.HistorySelector">
+                    <local:SessionExpander.Style><Style TargetType="Expander"><Style.Triggers>
+                        <DataTrigger Binding="{Binding IsConfirmingDraftLeave}" Value="True"><Setter Property="IsEnabled" Value="False" /></DataTrigger>
+                        <DataTrigger Binding="{Binding IsConfirmingReturn}" Value="True"><Setter Property="IsEnabled" Value="False" /></DataTrigger>
+                    </Style.Triggers></Style></local:SessionExpander.Style>
                     <StackPanel Margin="0,8,0,0">
-                        <ComboBox ItemsSource="{Binding HistorySteps}" SelectedItem="{Binding SelectedHistoryStep}" DisplayMemberPath="Name"
+                        <local:SessionComboBox ItemsSource="{Binding HistorySteps}" SelectedItem="{Binding SelectedHistoryStep}" DisplayMemberPath="Name"
                                   AutomationProperties.Name="{Binding HistoryHeading}" />
                         <local:SessionActionButton Content="{Binding HistoryLabel}" Command="{Binding ViewHistoryCommand}" CommandParameter="{Binding SelectedHistoryStep}"
                                 Margin="0,8,0,0" AutomationProperties.AutomationId="Session.ViewHistory" />
                     </StackPanel>
-                </Expander>
+                </local:SessionExpander>
             </StackPanel>
         </ScrollViewer><Grid Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace"
                               Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"
@@ -755,30 +761,30 @@
                     <StackPanel Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="{Binding ManualCropAdjustmentLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <RadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0"
+                        <local:SessionRadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0"
                                      AutomationProperties.AutomationId="Session.ManualCropModeTight" AutomationProperties.Name="{Binding ManualCropTightLabel}" />
-                        <RadioButton Content="{Binding ManualCropUniformLabel}" IsChecked="{Binding IsManualCropUniform}" GroupName="ManualCropMode" Margin="0,0,14,0"
+                        <local:SessionRadioButton Content="{Binding ManualCropUniformLabel}" IsChecked="{Binding IsManualCropUniform}" GroupName="ManualCropMode" Margin="0,0,14,0"
                                      AutomationProperties.AutomationId="Session.ManualCropModeUniform" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
-                        <RadioButton Content="{Binding ManualCropPerEdgeLabel}" IsChecked="{Binding IsManualCropPerEdge}" GroupName="ManualCropMode"
+                        <local:SessionRadioButton Content="{Binding ManualCropPerEdgeLabel}" IsChecked="{Binding IsManualCropPerEdge}" GroupName="ManualCropMode"
                                      AutomationProperties.AutomationId="Session.ManualCropModePerEdge" AutomationProperties.Name="{Binding ManualCropPerEdgeLabel}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{Binding IsManualCropUniform, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox Text="{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}" Width="64" Padding="5,3"
+                        <local:SessionTextBox Text="{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}" Width="64" Padding="5,3"
                                  AutomationProperties.AutomationId="Session.ManualCropUniformMargin" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
                         <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
                     </StackPanel>
                     <WrapPanel Margin="0,0,0,6" Visibility="{Binding IsManualCropPerEdge, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding TrimLeftLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <TextBox Text="{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                        <local:SessionTextBox Text="{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
                                  AutomationProperties.AutomationId="Session.ManualCropMarginLeft" AutomationProperties.Name="{Binding TrimLeftLabel}" />
                         <TextBlock Text="{Binding TrimTopLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <TextBox Text="{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                        <local:SessionTextBox Text="{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
                                  AutomationProperties.AutomationId="Session.ManualCropMarginTop" AutomationProperties.Name="{Binding TrimTopLabel}" />
                         <TextBlock Text="{Binding TrimRightLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <TextBox Text="{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
+                        <local:SessionTextBox Text="{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
                                  AutomationProperties.AutomationId="Session.ManualCropMarginRight" AutomationProperties.Name="{Binding TrimRightLabel}" />
                         <TextBlock Text="{Binding TrimBottomLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <TextBox Text="{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3"
+                        <local:SessionTextBox Text="{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3"
                                  AutomationProperties.AutomationId="Session.ManualCropMarginBottom" AutomationProperties.Name="{Binding TrimBottomLabel}" />
                         <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
                     </WrapPanel>
@@ -1074,7 +1080,7 @@
                             <TextBlock Text="{Binding AskColleagueLabel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding AskColleagueHint}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,8" />
                             <Label Content="{Binding CorrectionNoteLabel}" Target="{Binding ElementName=CorrectionNoteBox}" Padding="0,0,0,2" />
-                            <TextBox x:Name="CorrectionNoteBox"
+                            <local:SessionTextBox x:Name="CorrectionNoteBox"
                                      Text="{Binding CorrectionNote, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="False" TextWrapping="Wrap" MaxLength="1000" MinHeight="26"
                                      AutomationProperties.AutomationId="Session.Correction.Note"
@@ -1116,7 +1122,7 @@
                                        AutomationProperties.AutomationId="Session.Correction.Reference" />
                             <TextBlock Text="{Binding CorrectionWorkingText}" TextWrapping="Wrap" Margin="12,0,0,2"
                                        AutomationProperties.AutomationId="Session.Correction.Working" />
-                            <TextBox Text="{Binding CorrectionFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                            <local:SessionTextBox Text="{Binding CorrectionFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
                                      BorderThickness="0" Background="Transparent" Padding="0" Margin="12,0,0,4"
                                      AutomationProperties.AutomationId="Session.Correction.Folder"
                                      AutomationProperties.Name="{Binding CorrectionFolderText}" />
@@ -1150,7 +1156,7 @@
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
                             <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
 
-                            <Expander Header="{Binding CorrectionOtherOptionsLabel}" Margin="0,10,0,0"
+                            <local:SessionExpander Header="{Binding CorrectionOtherOptionsLabel}" Margin="0,10,0,0"
                                       AutomationProperties.AutomationId="Session.Correction.OtherOptions"
                                       AutomationProperties.Name="{Binding CorrectionOtherOptionsLabel}"
                                       Visibility="{Binding ShowsReenterAutomationInCorrection, Converter={StaticResource BoolToVisibility}}">
@@ -1162,7 +1168,7 @@
                                             AutomationProperties.Name="{Binding ReenterAutomationLabel}"
                                             HorizontalAlignment="Left" Padding="12,4" />
                                 </StackPanel>
-                            </Expander>
+                            </local:SessionExpander>
                         </StackPanel>
                     </Border>
 
@@ -1252,7 +1258,7 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
-<Expander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
+<local:SessionExpander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
                             <TextBlock Text="{Binding ArtefactHeading}" FontSize="15" FontWeight="SemiBold" />
@@ -1319,7 +1325,7 @@
                         </StackPanel>
                     </Border>
 
-</Expander>
+</local:SessionExpander>
                     <!--
                         Background removal, reviewed-content authority (Epic 11300 Part C2B2
                         §3–§9). Visible exactly while CanAuthoriseAutomaticSelection is true,
@@ -1427,7 +1433,7 @@
                                 parameter whose zero is meaningful, and no non-zero safety margin
                                 is ever added on the operator's behalf.
                             -->
-                            <ListBox ItemsSource="{Binding TrimModes}"
+                            <local:SessionListBox ItemsSource="{Binding TrimModes}"
                                      SelectedItem="{Binding SelectedTrimMode}"
                                      DisplayMemberPath="Label"
                                      BorderThickness="0"
@@ -1439,18 +1445,18 @@
                                     out: an item announces its own label rather than the class
                                     the label came from.
                                 -->
-                                <ListBox.ItemContainerStyle>
+                                <local:SessionListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
                                     </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
+                                </local:SessionListBox.ItemContainerStyle>
+                            </local:SessionListBox>
 
                             <!-- Uniform: one non-negative pixel count (§11). -->
                             <StackPanel Margin="0,8,0,0"
                                         Visibility="{Binding IsUniformMargin, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding TrimMarginLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Text="{Binding UniformMarginText, UpdateSourceTrigger=PropertyChanged}"
+                                <local:SessionTextBox Text="{Binding UniformMarginText, UpdateSourceTrigger=PropertyChanged}"
                                          HorizontalAlignment="Left"
                                          MinWidth="80" />
                             </StackPanel>
@@ -1474,22 +1480,22 @@
 
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="{Binding TrimTopLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="0"
+                                <local:SessionTextBox Grid.Row="1" Grid.Column="0"
                                          Text="{Binding TopMarginText, UpdateSourceTrigger=PropertyChanged}" />
 
                                 <TextBlock Grid.Row="0" Grid.Column="2"
                                            Text="{Binding TrimRightLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="2"
+                                <local:SessionTextBox Grid.Row="1" Grid.Column="2"
                                          Text="{Binding RightMarginText, UpdateSourceTrigger=PropertyChanged}" />
 
                                 <TextBlock Grid.Row="0" Grid.Column="4"
                                            Text="{Binding TrimBottomLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="4"
+                                <local:SessionTextBox Grid.Row="1" Grid.Column="4"
                                          Text="{Binding BottomMarginText, UpdateSourceTrigger=PropertyChanged}" />
 
                                 <TextBlock Grid.Row="0" Grid.Column="6"
                                            Text="{Binding TrimLeftLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="1" Grid.Column="6"
+                                <local:SessionTextBox Grid.Row="1" Grid.Column="6"
                                          Text="{Binding LeftMarginText, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
@@ -1575,7 +1581,7 @@
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Grid.Column="0"
                                                    Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                        <ComboBox Grid.Row="1" Grid.Column="0"
+                                        <local:SessionComboBox Grid.Row="1" Grid.Column="0"
                                                   ItemsSource="{Binding TargetEdgeChoices}"
                                                   SelectedItem="{Binding SelectedTargetEdgeChoice}"
                                                   AutomationProperties.AutomationId="Session.PrintDimensions.TargetEdge"
@@ -1583,7 +1589,7 @@
                                                   DisplayMemberPath="Label" />
                                         <TextBlock Grid.Row="0" Grid.Column="2"
                                                    Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                        <TextBox Grid.Row="1" Grid.Column="2"
+                                        <local:SessionTextBox Grid.Row="1" Grid.Column="2"
                                                  AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
                                                  AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
@@ -1628,7 +1634,7 @@
                                        AutomationProperties.AutomationId="Session.PrintDimensions.DraftEnlargementNote"
                                        Visibility="{Binding HasPreflightEnlargementNote, Converter={StaticResource BoolToVisibility}}" />
                             <!-- The unchanged pixel and PPI facts, one click away. View state only. -->
-                            <Expander Header="{Binding SizeTechnicalDetailsLabel}"
+                            <local:SessionExpander Header="{Binding SizeTechnicalDetailsLabel}"
                                       Margin="0,8,0,0"
                                       AutomationProperties.AutomationId="Session.PrintDimensions.TechnicalDetails"
                                       AutomationProperties.Name="{Binding SizeTechnicalDetailsLabel}">
@@ -1649,7 +1655,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            </Expander>
+                            </local:SessionExpander>
                         </StackPanel>
                     </Border>
 
@@ -1735,7 +1741,7 @@
                                                     Converter={StaticResource BoolToVisibility}}" />
 
                             <!-- The plan's unchanged pixel, PPI and edge facts (SCRUM-11150). View state only. -->
-                            <Expander Header="{Binding SizeTechnicalDetailsLabel}"
+                            <local:SessionExpander Header="{Binding SizeTechnicalDetailsLabel}"
                                       Margin="0,8,0,0"
                                       AutomationProperties.AutomationId="Session.Preparation.TechnicalDetails"
                                       AutomationProperties.Name="{Binding SizeTechnicalDetailsLabel}">
@@ -1760,7 +1766,7 @@
                                                Margin="0,4,0,0"
                                                Visibility="{Binding NeedsEnlargementAuthority, Converter={StaticResource BoolToVisibility}}" />
                                 </StackPanel>
-                            </Expander>
+                            </local:SessionExpander>
                         </StackPanel>
                     </Border>
 
@@ -1830,19 +1836,19 @@
                                        Opacity="0.7"
                                        Margin="0,6,0,0" />
 
-                            <ListBox ItemsSource="{Binding WhiteUnderbaseChoices}"
+                            <local:SessionListBox ItemsSource="{Binding WhiteUnderbaseChoices}"
                                      SelectedItem="{Binding SelectedWhiteUnderbaseChoice}"
                                      DisplayMemberPath="Label"
                                      BorderThickness="0"
                                      Margin="0,8,0,0"
                                      AutomationProperties.AutomationId="Session.WhiteUnderbaseChoices"
                                      AutomationProperties.Name="{Binding WhiteUnderbaseHeading}">
-                                <ListBox.ItemContainerStyle>
+                                <local:SessionListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
                                     </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
+                                </local:SessionListBox.ItemContainerStyle>
+                            </local:SessionListBox>
 
 
 
@@ -1943,7 +1949,7 @@
                             <StackPanel Margin="0,8,0,0"
                                         Visibility="{Binding HasTiffReview, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding TiffOutputPathLabel}" Opacity="0.7" />
-                                <TextBox Text="{Binding TiffOutputPath, Mode=OneWay}"
+                                <local:SessionTextBox Text="{Binding TiffOutputPath, Mode=OneWay}"
                                          IsReadOnly="True"
                                          IsReadOnlyCaretVisible="True"
                                          BorderThickness="0"
@@ -2094,20 +2100,20 @@
 
                             <TextBlock Text="{Binding RejectReasonLabel}" Opacity="0.6" Margin="0,10,0,4" />
                             <!-- Named from their visible labels (SCRUM-11154 F-V6). -->
-                            <ComboBox ItemsSource="{Binding RejectionReasons}"
+                            <local:SessionComboBox ItemsSource="{Binding RejectionReasons}"
                                       SelectedItem="{Binding SelectedRejectionReason}"
                                       DisplayMemberPath="Label"
                                       AutomationProperties.AutomationId="Session.RejectReason"
                                       AutomationProperties.Name="{Binding RejectReasonLabel}">
-                                <ComboBox.ItemContainerStyle>
+                                <local:SessionComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
                                         <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
                                     </Style>
-                                </ComboBox.ItemContainerStyle>
-                            </ComboBox>
+                                </local:SessionComboBox.ItemContainerStyle>
+                            </local:SessionComboBox>
 
                             <TextBlock Text="{Binding RejectNotesLabel}" Opacity="0.6" Margin="0,10,0,4" />
-                            <TextBox Text="{Binding RejectionNotes, UpdateSourceTrigger=PropertyChanged}"
+                            <local:SessionTextBox Text="{Binding RejectionNotes, UpdateSourceTrigger=PropertyChanged}"
                                      AutomationProperties.AutomationId="Session.RejectNotes"
                                      AutomationProperties.Name="{Binding RejectNotesLabel}"
                                      TextWrapping="Wrap"
@@ -2124,7 +2130,7 @@
                         file states no legality rule of its own, which is what §4's "do not
                         duplicate ReturnToStep legality in WPF" asks for.
                     -->
-                    <Expander Header="{Binding ReturnHeading}" IsExpanded="{Binding IsConfirmingReturn, Mode=OneWay}" Visibility="{Binding CanReturnToStep, Converter={StaticResource BoolToVisibility}}">
+                    <local:SessionExpander Header="{Binding ReturnHeading}" IsExpanded="{Binding IsConfirmingReturn, Mode=OneWay}" Visibility="{Binding CanReturnToStep, Converter={StaticResource BoolToVisibility}}">
                     <Border BorderBrush="#22000000"
                             BorderThickness="1"
                             CornerRadius="6"
@@ -2139,17 +2145,17 @@
                                        Margin="0,6,0,0" />
 
                             <TextBlock Text="{Binding ReturnTargetLabel}" Opacity="0.6" Margin="0,10,0,4" />
-                            <ComboBox ItemsSource="{Binding ReturnTargets}"
+                            <local:SessionComboBox ItemsSource="{Binding ReturnTargets}"
                                       SelectedItem="{Binding SelectedReturnTarget}"
                                       DisplayMemberPath="DisplayName"
                                       AutomationProperties.AutomationId="Session.ReturnTarget"
                                       AutomationProperties.Name="{Binding ReturnTargetLabel}">
-                                <ComboBox.ItemContainerStyle>
+                                <local:SessionComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
                                         <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
                                     </Style>
-                                </ComboBox.ItemContainerStyle>
-                            </ComboBox>
+                                </local:SessionComboBox.ItemContainerStyle>
+                            </local:SessionComboBox>
 
                             <local:SessionActionButton Content="{Binding BeginReturnLabel}"
                                     Command="{Binding BeginReturnCommand}"
@@ -2168,7 +2174,7 @@
 
                         </StackPanel>
                     </Border>
-                    </Expander>
+                    </local:SessionExpander>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

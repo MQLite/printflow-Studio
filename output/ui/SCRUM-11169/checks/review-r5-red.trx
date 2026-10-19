@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="b6af9344-c3b1-4d01-91d2-8152e882ac8b" name="admin@DESKTOP-0BG8884 2026-10-19 16:45:17" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T16:45:17.2986835+13:00" queuing="2026-10-19T16:45:17.2986838+13:00" start="2026-10-19T16:45:12.0296435+13:00" finish="2026-10-19T16:45:17.9624569+13:00" />
+  <TestSettings name="default" id="ee406228-09ad-4eb6-acf5-51cef5ab026f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_16_45_17" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="cbb4dc2e-95b7-4164-90ec-a334346a3037" testId="1a7049d2-ca61-c106-c43e-b2c1e9cb0527" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: False)" computerName="DESKTOP-0BG8884" duration="00:00:01.0652559" startTime="2026-10-19T16:45:15.7795684+13:00" endTime="2026-10-19T16:45:16.8476867+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cbb4dc2e-95b7-4164-90ec-a334346a3037" />
+    <UnitTestResult executionId="01289434-0180-4ec0-9a60-2997afa5ec9c" testId="416aaee4-a932-c0cc-3292-4562277d61e1" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.3762109" startTime="2026-10-19T16:45:16.8569063+13:00" endTime="2026-10-19T16:45:17.2299654+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01289434-0180-4ec0-9a60-2997afa5ec9c">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave&#xD;
+    should be&#xD;
+True&#xD;
+    but was&#xD;
+False</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 74&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 95&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="65df12f0-2f0b-4a2c-8c6e-e8779e8be3d6" testId="6b90be64-c9d7-8e43-068a-c8c9f78b0a65" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard" computerName="DESKTOP-0BG8884" duration="00:00:00.6489087" startTime="2026-10-19T16:45:17.2365991+13:00" endTime="2026-10-19T16:45:17.8802443+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="65df12f0-2f0b-4a2c-8c6e-e8779e8be3d6">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.SaveFileNameText&#xD;
+    should be&#xD;
+"confirmed-output.png"&#xD;
+    but was&#xD;
+"keep-extent.png"&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   &#xD;
+Expected Value | c    o    n    f    i    r    m    e    d    -    o    u    t    p    u    t    .    p    n    g    &#xD;
+Actual Value   | k    e    e    p    -    e    x    t    e    n    t    .    p    n    g                             &#xD;
+Expected Code  | 99   111  110  102  105  114  109  101  100  45   111  117  116  112  117  116  46   112  110  103  &#xD;
+Actual Code    | 107  101  101  112  45   101  120  116  101  110  116  46   112  110  103                           </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 39&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6b90be64-c9d7-8e43-068a-c8c9f78b0a65">
+      <Execution id="65df12f0-2f0b-4a2c-8c6e-e8779e8be3d6" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests" name="A_saved_name_and_folder_are_the_baseline_for_the_next_discard" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1a7049d2-ca61-c106-c43e-b2c1e9cb0527">
+      <Execution id="cbb4dc2e-95b7-4164-90ec-a334346a3037" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests" name="A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="416aaee4-a932-c0cc-3292-4562277d61e1">
+      <Execution id="01289434-0180-4ec0-9a60-2997afa5ec9c" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests" name="A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1a7049d2-ca61-c106-c43e-b2c1e9cb0527" executionId="cbb4dc2e-95b7-4164-90ec-a334346a3037" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="416aaee4-a932-c0cc-3292-4562277d61e1" executionId="01289434-0180-4ec0-9a60-2997afa5ec9c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b90be64-c9d7-8e43-068a-c8c9f78b0a65" executionId="65df12f0-2f0b-4a2c-8c6e-e8779e8be3d6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.27]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.32]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.36]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.84]       Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave&#xD;
+[xUnit.net 00:00:04.84]           should be&#xD;
+[xUnit.net 00:00:04.84]       True&#xD;
+[xUnit.net 00:00:04.84]           but was&#xD;
+[xUnit.net 00:00:04.84]       False&#xD;
+[xUnit.net 00:00:04.84]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.84]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs(74,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs(95,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.84]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.49]       Shouldly.ShouldAssertException : m.SaveFileNameText&#xD;
+[xUnit.net 00:00:05.49]           should be&#xD;
+[xUnit.net 00:00:05.49]       "confirmed-output.png"&#xD;
+[xUnit.net 00:00:05.49]           but was&#xD;
+[xUnit.net 00:00:05.49]       "keep-extent.png"&#xD;
+[xUnit.net 00:00:05.49]           difference&#xD;
+[xUnit.net 00:00:05.49]       Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:05.49]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:05.49]       Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   &#xD;
+[xUnit.net 00:00:05.49]       Expected Value | c    o    n    f    i    r    m    e    d    -    o    u    t    p    u    t    .    p    n    g    &#xD;
+[xUnit.net 00:00:05.49]       Actual Value   | k    e    e    p    -    e    x    t    e    n    t    .    p    n    g                             &#xD;
+[xUnit.net 00:00:05.49]       Expected Code  | 99   111  110  102  105  114  109  101  100  45   111  117  116  112  117  116  46   112  110  103  &#xD;
+[xUnit.net 00:00:05.49]       Actual Code    | 107  101  101  112  45   101  120  116  101  110  116  46   112  110  103                           &#xD;
+[xUnit.net 00:00:05.49]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.49]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard()&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.49]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.49]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.50]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:45:17.2324841+13:00">
+        <Text>[xUnit.net 00:00:04.84]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:45:17.8805839+13:00">
+        <Text>[xUnit.net 00:00:05.49]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,581 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c3da2a70-b49e-4e7f-9064-52d8ff0a67c9" name="admin@DESKTOP-0BG8884 2026-10-19 16:53:37" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T16:53:37.5296180+13:00" queuing="2026-10-19T16:53:37.5296182+13:00" start="2026-10-19T16:53:32.1277937+13:00" finish="2026-10-19T16:53:42.6748787+13:00" />
+  <TestSettings name="default" id="9fd44fef-1a37-4d3a-958a-409cade5241d">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_16_53_37" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="9817b230-6bc5-4530-ac6a-e557ce567051" testId="ffa22ce6-611e-8f97-7b7d-c2b88ed74e2c" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;radio&quot;, queued: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.7478141" startTime="2026-10-19T16:53:41.7793817+13:00" endTime="2026-10-19T16:53:42.5267196+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9817b230-6bc5-4530-ac6a-e557ce567051">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : Drain(); Selected(second, kind)&#xD;
+    should be&#xD;
+"False"&#xD;
+    but was&#xD;
+"True"&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |   &#xD;
+               | \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    3    4    &#xD;
+Expected Value | F    a    l    s    e    &#xD;
+Actual Value   | T    r    u    e         &#xD;
+Expected Code  | 70   97   108  115  101  &#xD;
+Actual Code    | 84   114  117  101       </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 66&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 75&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c205c466-9357-425b-82d6-cdd02f6f1798" testId="a03692dc-29a7-9b84-ac44-c268143b89f3" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;combo&quot;, queued: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5694429" startTime="2026-10-19T16:53:40.5079317+13:00" endTime="2026-10-19T16:53:41.0880701+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c205c466-9357-425b-82d6-cdd02f6f1798">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 66&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+   at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+   at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)&#xD;
+   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)&#xD;
+   at System.Windows.Threading.DispatcherOperation.InvokeImpl()&#xD;
+   at MS.Internal.CulturePreservingExecutionContext.CallbackWrapper(Object obj)&#xD;
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at MS.Internal.CulturePreservingExecutionContext.Run(CulturePreservingExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+   at System.Windows.Threading.DispatcherOperation.Invoke()&#xD;
+   at System.Windows.Threading.Dispatcher.ProcessQueue()&#xD;
+   at System.Windows.Threading.Dispatcher.WndProcHook(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean&amp; handled)&#xD;
+   at MS.Win32.HwndWrapper.WndProc(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean&amp; handled)&#xD;
+   at MS.Win32.HwndSubclass.DispatcherCallbackOperation(Object o)&#xD;
+   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)&#xD;
+   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)&#xD;
+   at System.Windows.Threading.Dispatcher.LegacyInvokeImpl(DispatcherPriority priority, TimeSpan timeout, Delegate method, Object args, Int32 numArgs)&#xD;
+   at System.Windows.Threading.Dispatcher.Invoke(DispatcherPriority priority, Delegate method, Object arg)&#xD;
+   at MS.Win32.HwndSubclass.SubclassWndProc(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam)&#xD;
+   at MS.Win32.UnsafeNativeMethods.DispatchMessage(MSG&amp; msg)&#xD;
+   at System.Windows.Threading.Dispatcher.PushFrameImpl(DispatcherFrame frame)&#xD;
+   at System.Windows.Threading.DispatcherOperation.Wait(TimeSpan timeout)&#xD;
+   at System.Windows.Threading.Dispatcher.InvokeImpl(DispatcherOperation operation, CancellationToken cancellationToken, TimeSpan timeout)&#xD;
+   at System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)&#xD;
+   at System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Drain() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 92&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 75&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f4956b8f-9ad8-47b3-b12f-b9ea6a43fc91" testId="4d090f86-754f-7462-d75c-24acd74827e4" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;task&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.6169091" startTime="2026-10-19T16:53:37.5172813+13:00" endTime="2026-10-19T16:53:38.1100350+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f4956b8f-9ad8-47b3-b12f-b9ea6a43fc91">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+    should be&#xD;
+"222"&#xD;
+    but was&#xD;
+"999"&#xD;
+    difference&#xD;
+Difference     |  |    |    |   &#xD;
+               | \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    &#xD;
+Expected Value | 2    2    2    &#xD;
+Actual Value   | 9    9    9    &#xD;
+Expected Code  | 50   50   50   &#xD;
+Actual Code    | 57   57   57   </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 41&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="14c503a3-95b7-432f-ad75-958c6107d5ae" testId="7d2ab723-9588-e7ad-3345-ea30244fe886" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;step&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5408571" startTime="2026-10-19T16:53:38.1121899+13:00" endTime="2026-10-19T16:53:38.6515740+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14c503a3-95b7-432f-ad75-958c6107d5ae">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+    should be&#xD;
+"111"&#xD;
+    but was&#xD;
+"999"&#xD;
+    difference&#xD;
+Difference     |  |    |    |   &#xD;
+               | \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    &#xD;
+Expected Value | 1    1    1    &#xD;
+Actual Value   | 9    9    9    &#xD;
+Expected Code  | 49   49   49   &#xD;
+Actual Code    | 57   57   57   </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 41&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9de025af-0b38-4987-a388-fb79d10d73fc" testId="1b4b76f4-873d-1a2e-77be-249d6357b894" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;list&quot;, queued: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6363482" startTime="2026-10-19T16:53:39.7909888+13:00" endTime="2026-10-19T16:53:40.5068018+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9de025af-0b38-4987-a388-fb79d10d73fc">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 66&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+   at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+   at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 74&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3964d05b-0b8e-4f40-9567-0062dddbe5f4" testId="50e7f38a-79a5-8ac5-8ac4-eca59d7f1e0c" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;queued-task&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:01.6313566" startTime="2026-10-19T16:53:35.8538002+13:00" endTime="2026-10-19T16:53:37.4917107+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3964d05b-0b8e-4f40-9567-0062dddbe5f4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+    should be&#xD;
+"222"&#xD;
+    but was&#xD;
+"999"&#xD;
+    difference&#xD;
+Difference     |  |    |    |   &#xD;
+               | \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    &#xD;
+Expected Value | 2    2    2    &#xD;
+Actual Value   | 9    9    9    &#xD;
+Expected Code  | 50   50   50   &#xD;
+Actual Code    | 57   57   57   </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 41&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="139fb561-b6c2-42f3-9f0e-d477885ce5d0" testId="41e49626-7112-4729-e292-a7a9e8021f3e" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;unloaded&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5593086" startTime="2026-10-19T16:53:38.6528508+13:00" endTime="2026-10-19T16:53:39.2118015+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="139fb561-b6c2-42f3-9f0e-d477885ce5d0">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+    should be&#xD;
+"111"&#xD;
+    but was&#xD;
+"999"&#xD;
+    difference&#xD;
+Difference     |  |    |    |   &#xD;
+               | \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    &#xD;
+Expected Value | 1    1    1    &#xD;
+Actual Value   | 9    9    9    &#xD;
+Expected Code  | 49   49   49   &#xD;
+Actual Code    | 57   57   57   </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 41&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="51c24c8c-4e69-44c6-90cd-02f58833a75d" testId="8c520e82-a8ce-ad49-a6e0-22b239e06a00" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;hidden&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5761457" startTime="2026-10-19T16:53:39.2130847+13:00" endTime="2026-10-19T16:53:39.7887422+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="51c24c8c-4e69-44c6-90cd-02f58833a75d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+    should be&#xD;
+"111"&#xD;
+    but was&#xD;
+"999"&#xD;
+    difference&#xD;
+Difference     |  |    |    |   &#xD;
+               | \|/  \|/  \|/  &#xD;
+Index          | 0    1    2    &#xD;
+Expected Value | 1    1    1    &#xD;
+Actual Value   | 9    9    9    &#xD;
+Expected Code  | 49   49   49   &#xD;
+Actual Code    | 57   57   57   </Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 41&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2c9a2adb-f507-4cdf-bd20-544e89f1822d" testId="576338a5-4cb3-ae59-2ad7-96e838675ae4" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;combo&quot;, queued: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6893494" startTime="2026-10-19T16:53:41.0900909+13:00" endTime="2026-10-19T16:53:41.7780969+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2c9a2adb-f507-4cdf-bd20-544e89f1822d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 66&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+   at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+   at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+   at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 74&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;step&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="7d2ab723-9588-e7ad-3345-ea30244fe886">
+      <Execution id="14c503a3-95b7-432f-ad75-958c6107d5ae" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_text_input_cannot_edit_a_retired_or_hidden_presentation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;hidden&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8c520e82-a8ce-ad49-a6e0-22b239e06a00">
+      <Execution id="51c24c8c-4e69-44c6-90cd-02f58833a75d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_text_input_cannot_edit_a_retired_or_hidden_presentation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;combo&quot;, queued: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a03692dc-29a7-9b84-ac44-c268143b89f3">
+      <Execution id="c205c466-9357-425b-82d6-cdd02f6f1798" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_selection_cannot_change_the_next_task_but_current_selection_works" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;queued-task&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="50e7f38a-79a5-8ac5-8ac4-eca59d7f1e0c">
+      <Execution id="3964d05b-0b8e-4f40-9567-0062dddbe5f4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_text_input_cannot_edit_a_retired_or_hidden_presentation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;radio&quot;, queued: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ffa22ce6-611e-8f97-7b7d-c2b88ed74e2c">
+      <Execution id="9817b230-6bc5-4530-ac6a-e557ce567051" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_selection_cannot_change_the_next_task_but_current_selection_works" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;combo&quot;, queued: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="576338a5-4cb3-ae59-2ad7-96e838675ae4">
+      <Execution id="2c9a2adb-f507-4cdf-bd20-544e89f1822d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_selection_cannot_change_the_next_task_but_current_selection_works" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;task&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4d090f86-754f-7462-d75c-24acd74827e4">
+      <Execution id="f4956b8f-9ad8-47b3-b12f-b9ea6a43fc91" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_text_input_cannot_edit_a_retired_or_hidden_presentation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: &quot;unloaded&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="41e49626-7112-4729-e292-a7a9e8021f3e">
+      <Execution id="139fb561-b6c2-42f3-9f0e-d477885ce5d0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_text_input_cannot_edit_a_retired_or_hidden_presentation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: &quot;list&quot;, queued: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1b4b76f4-873d-1a2e-77be-249d6357b894">
+      <Execution id="9de025af-0b38-4987-a388-fb79d10d73fc" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_selection_cannot_change_the_next_task_but_current_selection_works" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="ffa22ce6-611e-8f97-7b7d-c2b88ed74e2c" executionId="9817b230-6bc5-4530-ac6a-e557ce567051" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a03692dc-29a7-9b84-ac44-c268143b89f3" executionId="c205c466-9357-425b-82d6-cdd02f6f1798" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d090f86-754f-7462-d75c-24acd74827e4" executionId="f4956b8f-9ad8-47b3-b12f-b9ea6a43fc91" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7d2ab723-9588-e7ad-3345-ea30244fe886" executionId="14c503a3-95b7-432f-ad75-958c6107d5ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b4b76f4-873d-1a2e-77be-249d6357b894" executionId="9de025af-0b38-4987-a388-fb79d10d73fc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="50e7f38a-79a5-8ac5-8ac4-eca59d7f1e0c" executionId="3964d05b-0b8e-4f40-9567-0062dddbe5f4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="41e49626-7112-4729-e292-a7a9e8021f3e" executionId="139fb561-b6c2-42f3-9f0e-d477885ce5d0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8c520e82-a8ce-ad49-a6e0-22b239e06a00" executionId="51c24c8c-4e69-44c6-90cd-02f58833a75d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="576338a5-4cb3-ae59-2ad7-96e838675ae4" executionId="2c9a2adb-f507-4cdf-bd20-544e89f1822d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="9" executed="9" passed="0" failed="9" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.29]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.34]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.01]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.01]       ---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+[xUnit.net 00:00:05.01]           should be&#xD;
+[xUnit.net 00:00:05.01]       "222"&#xD;
+[xUnit.net 00:00:05.01]           but was&#xD;
+[xUnit.net 00:00:05.01]       "999"&#xD;
+[xUnit.net 00:00:05.01]           difference&#xD;
+[xUnit.net 00:00:05.01]       Difference     |  |    |    |   &#xD;
+[xUnit.net 00:00:05.01]                      | \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:05.01]       Index          | 0    1    2    &#xD;
+[xUnit.net 00:00:05.01]       Expected Value | 2    2    2    &#xD;
+[xUnit.net 00:00:05.01]       Actual Value   | 9    9    9    &#xD;
+[xUnit.net 00:00:05.01]       Expected Code  | 50   50   50   &#xD;
+[xUnit.net 00:00:05.01]       Actual Code    | 57   57   57   &#xD;
+[xUnit.net 00:00:05.01]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary)&#xD;
+[xUnit.net 00:00:05.01]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.01]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.01]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.62]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.62]       ---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+[xUnit.net 00:00:05.62]           should be&#xD;
+[xUnit.net 00:00:05.62]       "222"&#xD;
+[xUnit.net 00:00:05.62]           but was&#xD;
+[xUnit.net 00:00:05.62]       "999"&#xD;
+[xUnit.net 00:00:05.62]           difference&#xD;
+[xUnit.net 00:00:05.62]       Difference     |  |    |    |   &#xD;
+[xUnit.net 00:00:05.62]                      | \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:05.62]       Index          | 0    1    2    &#xD;
+[xUnit.net 00:00:05.62]       Expected Value | 2    2    2    &#xD;
+[xUnit.net 00:00:05.62]       Actual Value   | 9    9    9    &#xD;
+[xUnit.net 00:00:05.62]       Expected Code  | 50   50   50   &#xD;
+[xUnit.net 00:00:05.62]       Actual Code    | 57   57   57   &#xD;
+[xUnit.net 00:00:05.62]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary)&#xD;
+[xUnit.net 00:00:05.62]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.62]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.16]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.16]       ---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+[xUnit.net 00:00:06.16]           should be&#xD;
+[xUnit.net 00:00:06.16]       "111"&#xD;
+[xUnit.net 00:00:06.17]           but was&#xD;
+[xUnit.net 00:00:06.17]       "999"&#xD;
+[xUnit.net 00:00:06.17]           difference&#xD;
+[xUnit.net 00:00:06.17]       Difference     |  |    |    |   &#xD;
+[xUnit.net 00:00:06.17]                      | \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:06.17]       Index          | 0    1    2    &#xD;
+[xUnit.net 00:00:06.17]       Expected Value | 1    1    1    &#xD;
+[xUnit.net 00:00:06.17]       Actual Value   | 9    9    9    &#xD;
+[xUnit.net 00:00:06.17]       Expected Code  | 49   49   49   &#xD;
+[xUnit.net 00:00:06.17]       Actual Code    | 57   57   57   &#xD;
+[xUnit.net 00:00:06.17]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary)&#xD;
+[xUnit.net 00:00:06.17]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.17]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.17]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.72]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.73]       ---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+[xUnit.net 00:00:06.73]           should be&#xD;
+[xUnit.net 00:00:06.73]       "111"&#xD;
+[xUnit.net 00:00:06.73]           but was&#xD;
+[xUnit.net 00:00:06.73]       "999"&#xD;
+[xUnit.net 00:00:06.73]           difference&#xD;
+[xUnit.net 00:00:06.73]       Difference     |  |    |    |   &#xD;
+[xUnit.net 00:00:06.73]                      | \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:06.73]       Index          | 0    1    2    &#xD;
+[xUnit.net 00:00:06.73]       Expected Value | 1    1    1    &#xD;
+[xUnit.net 00:00:06.73]       Actual Value   | 9    9    9    &#xD;
+[xUnit.net 00:00:06.73]       Expected Code  | 49   49   49   &#xD;
+[xUnit.net 00:00:06.73]       Actual Code    | 57   57   57   &#xD;
+[xUnit.net 00:00:06.73]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary)&#xD;
+[xUnit.net 00:00:06.73]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.73]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.30]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.30]       ---- Shouldly.ShouldAssertException : first.CustomMillimetresText&#xD;
+[xUnit.net 00:00:07.30]           should be&#xD;
+[xUnit.net 00:00:07.30]       "111"&#xD;
+[xUnit.net 00:00:07.30]           but was&#xD;
+[xUnit.net 00:00:07.30]       "999"&#xD;
+[xUnit.net 00:00:07.30]           difference&#xD;
+[xUnit.net 00:00:07.30]       Difference     |  |    |    |   &#xD;
+[xUnit.net 00:00:07.30]                      | \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:07.30]       Index          | 0    1    2    &#xD;
+[xUnit.net 00:00:07.30]       Expected Value | 1    1    1    &#xD;
+[xUnit.net 00:00:07.30]       Actual Value   | 9    9    9    &#xD;
+[xUnit.net 00:00:07.30]       Expected Code  | 49   49   49   &#xD;
+[xUnit.net 00:00:07.30]       Actual Code    | 57   57   57   &#xD;
+[xUnit.net 00:00:07.30]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(String boundary)&#xD;
+[xUnit.net 00:00:07.30]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.30]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_text_input_cannot_edit_a_retired_or_hidden_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.02]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:08.02]       ---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。&#xD;
+[xUnit.net 00:00:08.02]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued)&#xD;
+[xUnit.net 00:00:08.02]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.02]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:08.02]            at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+[xUnit.net 00:00:08.02]            at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+[xUnit.net 00:00:08.02]            at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+[xUnit.net 00:00:08.02]            at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(74,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:08.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.60]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:08.60]       ---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。&#xD;
+[xUnit.net 00:00:08.60]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued)&#xD;
+[xUnit.net 00:00:08.60]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.60]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.DispatcherOperation.InvokeImpl()&#xD;
+[xUnit.net 00:00:08.60]            at MS.Internal.CulturePreservingExecutionContext.CallbackWrapper(Object obj)&#xD;
+[xUnit.net 00:00:08.60]            at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:08.60]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.60]            at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:08.60]            at MS.Internal.CulturePreservingExecutionContext.Run(CulturePreservingExecutionContext executionContext, ContextCallback callback, Object state)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.DispatcherOperation.Invoke()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.ProcessQueue()&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.WndProcHook(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean&amp; handled)&#xD;
+[xUnit.net 00:00:08.60]            at MS.Win32.HwndWrapper.WndProc(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam, Boolean&amp; handled)&#xD;
+[xUnit.net 00:00:08.60]            at MS.Win32.HwndSubclass.DispatcherCallbackOperation(Object o)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.LegacyInvokeImpl(DispatcherPriority priority, TimeSpan timeout, Delegate method, Object args, Int32 numArgs)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.Invoke(DispatcherPriority priority, Delegate method, Object arg)&#xD;
+[xUnit.net 00:00:08.60]            at MS.Win32.HwndSubclass.SubclassWndProc(IntPtr hwnd, Int32 msg, IntPtr wParam, IntPtr lParam)&#xD;
+[xUnit.net 00:00:08.60]            at MS.Win32.UnsafeNativeMethods.DispatchMessage(MSG&amp; msg)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.PushFrameImpl(DispatcherFrame frame)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.DispatcherOperation.Wait(TimeSpan timeout)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.InvokeImpl(DispatcherOperation operation, CancellationToken cancellationToken, TimeSpan timeout)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority, CancellationToken cancellationToken, TimeSpan timeout)&#xD;
+[xUnit.net 00:00:08.60]            at System.Windows.Threading.Dispatcher.Invoke(Action callback, DispatcherPriority priority)&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(92,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Drain()&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(75,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:08.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:09.29]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:09.29]       ---- System.Windows.Automation.ElementNotAvailableException : 元素不存在，或者已经虚拟化；如果支持 VirtualizedItem 模式，请使用该模式。&#xD;
+[xUnit.net 00:00:09.29]       Stack Trace:&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued)&#xD;
+[xUnit.net 00:00:09.29]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:09.29]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:09.29]            at System.Windows.Automation.Peers.ItemAutomationPeer.ThrowElementNotAvailableException()&#xD;
+[xUnit.net 00:00:09.29]            at System.Windows.Automation.Peers.ItemAutomationPeer.IsEnabledCore()&#xD;
+[xUnit.net 00:00:09.29]            at System.Windows.Automation.Peers.AutomationPeer.IsEnabled()&#xD;
+[xUnit.net 00:00:09.29]            at System.Windows.Automation.Peers.SelectorItemAutomationPeer.System.Windows.Automation.Provider.ISelectionItemProvider.Select()&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(74,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:09.29]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:10.04]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:10.04]       ---- Shouldly.ShouldAssertException : Drain(); Selected(second, kind)&#xD;
+[xUnit.net 00:00:10.04]           should be&#xD;
+[xUnit.net 00:00:10.04]       "False"&#xD;
+[xUnit.net 00:00:10.04]           but was&#xD;
+[xUnit.net 00:00:10.04]       "True"&#xD;
+[xUnit.net 00:00:10.04]           difference&#xD;
+[xUnit.net 00:00:10.04]       Difference     |  |    |    |    |    |   &#xD;
+[xUnit.net 00:00:10.04]                      | \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:10.04]       Index          | 0    1    2    3    4    &#xD;
+[xUnit.net 00:00:10.04]       Expected Value | F    a    l    s    e    &#xD;
+[xUnit.net 00:00:10.04]       Actual Value   | T    r    u    e         &#xD;
+[xUnit.net 00:00:10.04]       Expected Code  | 70   97   108  115  101  &#xD;
+[xUnit.net 00:00:10.04]       Actual Code    | 84   114  117  101       &#xD;
+[xUnit.net 00:00:10.04]       Stack Trace:&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(String kind, Boolean queued)&#xD;
+[xUnit.net 00:00:10.04]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:10.04]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(75,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Captured_selection_cannot_change_the_next_task_but_current_selection_works&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:10.04]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:10.05]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:37.4943299+13:00">
+        <Text>[xUnit.net 00:00:05.01]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: "queued-task") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:38.1104810+13:00">
+        <Text>[xUnit.net 00:00:05.62]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: "task") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:38.6520962+13:00">
+        <Text>[xUnit.net 00:00:06.16]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: "step") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:39.2120660+13:00">
+        <Text>[xUnit.net 00:00:06.72]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: "unloaded") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:39.7890155+13:00">
+        <Text>[xUnit.net 00:00:07.30]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_text_input_cannot_edit_a_retired_or_hidden_presentation(boundary: "hidden") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:40.5070929+13:00">
+        <Text>[xUnit.net 00:00:08.02]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: "list", queued: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:41.0885026+13:00">
+        <Text>[xUnit.net 00:00:08.60]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: "combo", queued: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:41.7783630+13:00">
+        <Text>[xUnit.net 00:00:09.29]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: "combo", queued: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:53:42.5269770+13:00">
+        <Text>[xUnit.net 00:00:10.04]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_selection_cannot_change_the_next_task_but_current_selection_works(kind: "radio", queued: False) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

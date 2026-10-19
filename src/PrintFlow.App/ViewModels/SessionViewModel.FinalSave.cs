@@ -148,10 +148,11 @@ public partial class SessionViewModel
     private FinalSaveOperation? _finalSaveOperation;
 
     /// <summary>The in-flight operation; its identity filters every late observation.</summary>
-    private sealed class FinalSaveOperation(Guid operationId, string key, CancellationTokenSource cancellation)
+    private sealed class FinalSaveOperation(Guid operationId, string key, long openGeneration, CancellationTokenSource cancellation)
     {
         public Guid OperationId { get; } = operationId;
         public string Key { get; } = key;
+        public long OpenGeneration { get; } = openGeneration;
         public CancellationTokenSource Cancellation { get; } = cancellation;
         public FinalSaveStage? Stage { get; set; }
         public DeliveryPhase? Phase { get; set; }
@@ -599,7 +600,7 @@ public partial class SessionViewModel
     [RelayCommand]
     private async Task CheckSavedFileAsync()
     {
-        if (_finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
+        if (!CanCheckSavedFile || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
             _finalSaveOperation is not null || IsBusy) return;
         await RunDeliveryStepAsync(target, null, true, async _ =>
             new ObservationFact(await _finalSave.CheckAsync(deliveryId, CancellationToken.None).ConfigureAwait(false))).ConfigureAwait(true);
@@ -618,7 +619,7 @@ public partial class SessionViewModel
     [RelayCommand]
     private async Task OpenContainingFolderAsync()
     {
-        if (_finalSave is null || _fileShell is null || SelectedSave is not { } target ||
+        if (!CanOpenContainingFolder || _finalSave is null || _fileShell is null || SelectedSave is not { } target ||
             SaveDisplay.DeliveryId is not { } deliveryId || _finalSaveOperation is not null || IsBusy) return;
         System.Windows.Threading.Dispatcher? dispatcher = System.Windows.Application.Current?.Dispatcher;
         IDeliveredFileShell shell = _fileShell;
@@ -629,15 +630,19 @@ public partial class SessionViewModel
         operation.IsVerifyingSaved = true;
         try
         {
-            target.LastOpen = await Task.Run(() => _finalSave.OpenContainingFolderAsync(deliveryId, Dispatch, CancellationToken.None))
+            var opened = await Task.Run(() => _finalSave.OpenContainingFolderAsync(deliveryId, Dispatch, CancellationToken.None))
                 .ConfigureAwait(true);
+            if (!OwnsFinalSaveOperation(operation)) return;
+            target.LastOpen = opened;
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
+            if (!OwnsFinalSaveOperation(operation)) return;
             target.LastOpen = new OpenFolderOutcome(deliveryId, OpenFolderCode.ShellFailed, null, ex.Message);
         }
         finally { EndFinalSaveOperation(operation); }
         // A metadata load abandoned because this operation started is run again afterwards (T1).
+        if (operation.OpenGeneration != _openGeneration) return;
         if (_finalSaveSession is { } current) FinalSaveFactsLoaded = LoadFinalSaveFactsAsync(current, ++_finalSaveFactsGeneration);
     }
 
@@ -680,7 +685,7 @@ public partial class SessionViewModel
 
     private FinalSaveOperation BeginFinalSaveOperation(FinalSaveTarget target, string? folder, Guid? operationId = null)
     {
-        FinalSaveOperation operation = new(operationId ?? Guid.NewGuid(), target.Key, new CancellationTokenSource()) { Folder = folder };
+        FinalSaveOperation operation = new(operationId ?? Guid.NewGuid(), target.Key, _openGeneration, new CancellationTokenSource()) { Folder = folder };
         _finalSaveOperation = operation;
         target.LastOpen = null;
         target.ActionError = null;
@@ -702,11 +707,16 @@ public partial class SessionViewModel
 
     private void EndFinalSaveOperation(FinalSaveOperation operation)
     {
-        if (ReferenceEquals(_finalSaveOperation, operation)) _finalSaveOperation = null;
+        bool current = OwnsFinalSaveOperation(operation);
+        if (current) _finalSaveOperation = null;
         operation.Cancellation.Dispose();
+        if (!current) return;
         IsBusy = false;
         NotifyFinalSaveChanged();
     }
+
+    private bool OwnsFinalSaveOperation(FinalSaveOperation operation) =>
+        operation.OpenGeneration == _openGeneration && ReferenceEquals(_finalSaveOperation, operation);
 
     private async Task RunFinalSaveAsync(FinalSaveTarget target, Guid operationId, string folder,
         Func<IProgress<FinalSaveObservation>, CancellationToken, Task<FinalSaveResult>> run)
@@ -720,7 +730,7 @@ public partial class SessionViewModel
         IProgress<FinalSaveObservation> progress = new Progress<FinalSaveObservation>(observation =>
         {
             // Posted to this screen's context. Anything from another or finished operation is ignored.
-            if (!ReferenceEquals(_finalSaveOperation, operation) || observation.OperationId != operation.OperationId) return;
+            if (!OwnsFinalSaveOperation(operation) || observation.OperationId != operation.OperationId) return;
             operation.Stage = observation.Stage;
             if (observation.Delivery is { } delivered)
             {
@@ -733,11 +743,14 @@ public partial class SessionViewModel
         try
         {
             FinalSaveResult result = await Task.Run(() => run(progress, operation.Cancellation.Token)).ConfigureAwait(true);
+            if (!OwnsFinalSaveOperation(operation)) return;
             target.Fact = result.Delivery is { } delivered ? new DeliveryFact(delivered) : new ApprovalFact(result);
+            AcceptConfirmedSaveDraft(target, result.Delivery);
             refreshed = result.Session;
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
+            if (!OwnsFinalSaveOperation(operation)) return;
             // Approval, preparation or publication may or may not have happened: nothing is
             // claimed here. The earlier fact stays, and the screen is rebuilt from authority.
             target.ActionError = ex.Message;
@@ -748,6 +761,7 @@ public partial class SessionViewModel
         finally { EndFinalSaveOperation(operation); }
 
         // The screen is rebuilt from authority after approval; the save result stays with its own key.
+        if (operation.OpenGeneration != _openGeneration) return;
         if (refreshed is not null && refreshed.Id == _session?.Id) Show(refreshed);
         else if (uncertain) await RefreshAsync(CancellationToken.None).ConfigureAwait(true);
         else if (_finalSaveSession is { } current) FinalSaveFactsLoaded = LoadFinalSaveFactsAsync(current, ++_finalSaveFactsGeneration);
@@ -768,21 +782,44 @@ public partial class SessionViewModel
         operation.Stage = FinalSaveStage.Saving;
         IProgress<DeliveryProgress> progress = new Progress<DeliveryProgress>(delivered =>
         {
-            if (!ReferenceEquals(_finalSaveOperation, operation)) return;
+            if (!OwnsFinalSaveOperation(operation)) return;
             operation.Phase = delivered.Phase;
             operation.Progress = delivered.Phase == DeliveryPhase.Copying && delivered.TotalBytes > 0
                 ? (double)delivered.BytesCopied / delivered.TotalBytes : operation.Progress;
             NotifyFinalSaveChanged();
         });
-        try { target.Fact = await Task.Run(() => run(progress)).ConfigureAwait(true); }
-        catch (Exception ex) when (ex is not OutOfMemoryException) { target.ActionError = ex.Message; }
+        try
+        {
+            object fact = await Task.Run(() => run(progress)).ConfigureAwait(true);
+            if (!OwnsFinalSaveOperation(operation)) return;
+            target.Fact = fact;
+            if (target.Fact is DeliveryFact delivery) AcceptConfirmedSaveDraft(target, delivery.Outcome);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            if (!OwnsFinalSaveOperation(operation)) return;
+            target.ActionError = ex.Message;
+        }
         finally { EndFinalSaveOperation(operation); }
+        if (operation.OpenGeneration != _openGeneration) return;
         if (_finalSaveSession is { } current) FinalSaveFactsLoaded = LoadFinalSaveFactsAsync(current, ++_finalSaveFactsGeneration);
     }
 
     private sealed record DeliveryFact(DeliveryOutcome Outcome);
     private sealed record ObservationFact(DeliveryFileObservation Observation);
     private sealed record ApprovalFact(FinalSaveResult? Result, string? Error = null);
+
+    private static void AcceptConfirmedSaveDraft(FinalSaveTarget target, DeliveryOutcome? outcome)
+    {
+        if (outcome?.Code is not (DeliveryCode.Delivered or DeliveryCode.AlreadyDelivered) ||
+            target.Captured is not { } captured || captured.RequestId != outcome.RequestId ||
+            captured.Generation != target.Generation || captured.Folder != target.Folder ||
+            captured.FileName != EffectiveName(target.FileName, target.Kind).Effective) return;
+        // The next edit starts from this confirmed intent. Retain its request and delivery facts.
+        target.NavigationDraft = null;
+        target.NameEdited = false;
+        target.FolderEdited = false;
+    }
 
     // --- Presentation ---------------------------------------------------------------------
 

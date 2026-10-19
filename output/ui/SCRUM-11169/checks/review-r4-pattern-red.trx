@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="72c942fc-1b74-4c88-ba8a-e9e265417db6" name="admin@DESKTOP-0BG8884 2026-10-19 17:01:28" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:01:28.8377736+13:00" queuing="2026-10-19T17:01:28.8377737+13:00" start="2026-10-19T17:01:23.5951569+13:00" finish="2026-10-19T17:01:28.8426313+13:00" />
+  <TestSettings name="default" id="2cd3836b-97a2-4ca4-90b6-542a75225230">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_01_28" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="b26a78fd-5274-4ac5-a00f-60770aa6b956" testId="9a0708df-3178-3f4d-6844-d2f0903eb19e" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Automation_patterns_keep_the_requested_native_interface" computerName="DESKTOP-0BG8884" duration="00:00:01.4573316" startTime="2026-10-19T17:01:27.2053864+13:00" endTime="2026-10-19T17:01:28.6701270+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b26a78fd-5274-4ac5-a00f-60770aa6b956">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : peer.GetPattern(PatternInterface.Selection)&#xD;
+    should be assignable to&#xD;
+System.Windows.Automation.Provider.ISelectionProvider&#xD;
+    but was&#xD;
+PrintFlow.App.Views.SessionInputGuard+CapturedValue</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Automation_patterns_keep_the_requested_native_interface() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 23&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c.&lt;Automation_patterns_keep_the_requested_native_interface&gt;b__0_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 27&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Automation_patterns_keep_the_requested_native_interface" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9a0708df-3178-3f4d-6844-d2f0903eb19e">
+      <Execution id="b26a78fd-5274-4ac5-a00f-60770aa6b956" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Automation_patterns_keep_the_requested_native_interface" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="9a0708df-3178-3f4d-6844-d2f0903eb19e" executionId="b26a78fd-5274-4ac5-a00f-60770aa6b956" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="1" executed="1" passed="0" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.27]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.17]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.21]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.70]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.70]       ---- Shouldly.ShouldAssertException : peer.GetPattern(PatternInterface.Selection)&#xD;
+[xUnit.net 00:00:04.70]           should be assignable to&#xD;
+[xUnit.net 00:00:04.70]       System.Windows.Automation.Provider.ISelectionProvider&#xD;
+[xUnit.net 00:00:04.70]           but was&#xD;
+[xUnit.net 00:00:04.70]       PrintFlow.App.Views.SessionInputGuard+CapturedValue&#xD;
+[xUnit.net 00:00:04.70]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(23,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Automation_patterns_keep_the_requested_native_interface()&#xD;
+[xUnit.net 00:00:04.70]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.70]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c.&lt;Automation_patterns_keep_the_requested_native_interface&gt;b__0_1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.70]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:04.72]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:01:28.6726315+13:00">
+        <Text>[xUnit.net 00:00:04.70]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Automation_patterns_keep_the_requested_native_interface [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

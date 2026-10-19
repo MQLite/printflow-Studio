@@ -90,7 +90,7 @@ public sealed partial class SessionViewModel
     private void CaptureReturn(ReturnTargetRow target, SizePreset? preset = null, TargetEdge? edge = null,
         decimal? millimetres = null, bool editSize = false)
     {
-        if (!IsLiveInteractionAllowed || IsBusy || _finalSaveOperation is not null ||
+        if (!CanInteractWithLivePage || IsBusy || _finalSaveOperation is not null ||
             _session?.ReturnTargets.Any(offered => offered.Step == target.Step) != true) return;
         RequestLeave(() =>
         {
@@ -117,8 +117,7 @@ public sealed partial class SessionViewModel
 
     private bool HasPageDraft() => _cleanDraft is { } clean && CapturePageDraft().Signature != clean.Signature ||
         IsCropping || IsAdjustingTrim || IsAskingColleague ||
-        SelectedSave is { } save && (save.NameEdited || save.FolderEdited) &&
-            (save.Captured is null || save.Captured.Value.Generation != save.Generation);
+        SelectedSave is { NavigationDraft: not null } save && (save.NameEdited || save.FolderEdited);
 
     [RelayCommand]
     private void KeepDraft()
@@ -184,6 +183,9 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(CanApprove)); OnPropertyChanged(nameof(CanReject));
         OnPropertyChanged(nameof(CanAskColleague)); OnPropertyChanged(nameof(CanPrepareCorrection));
         OnPropertyChanged(nameof(CanImportCorrectedImage)); OnPropertyChanged(nameof(CanRepairCorrectionFiles));
+        OnPropertyChanged(nameof(CanCancelAskColleague)); OnPropertyChanged(nameof(CanOpenCorrectionFolder));
+        OnPropertyChanged(nameof(CanAdjustTrim)); OnPropertyChanged(nameof(CanRestoreAutomaticSuggestion));
+        OnPropertyChanged(nameof(CanUseThisTrim));
         NotifyOperatorStatusChanged();
         NotifyFinalSaveChanged();
     }

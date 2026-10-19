@@ -1,0 +1,60 @@
+{
+  "task": "SCRUM-11169",
+  "reviewedImplementationHead": "9fe125eaf3104049192f3c766278db60adab6ecb",
+  "base": "7fd87f6ef7ac349633af19aa04355def00c79b41",
+  "controllerActualRoute": "gpt-6.1-sol/xhigh; MODEL_SWITCH_UNAVAILABLE in controller",
+  "executorActualRoute": {
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "session": "01a151e0-b939-7122-9a42-544a9aeabb73",
+    "runtimeEvidence": "C:/Users/admin/.codex/sessions/2026/10/19/rollout-2026-10-19T14-57-24-01a151e0-b939-7122-9a42-544a9aeabb73.jsonl"
+  },
+  "reviewerActualRoute": {
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "session": "01a1522f-e4d6-7560-9633-17f7ebf74092",
+    "runtimeEvidence": "C:/Users/admin/.codex/sessions/2026/10/19/rollout-2026-10-19T16-23-53-01a1522f-e4d6-7560-9633-17f7ebf74092.jsonl",
+    "independence": "fork_turns:none; single read-only whole-branch review"
+  },
+  "parentFocusedRun": {
+    "trx": "checks/e2-parent-final-guided.trx",
+    "passed": 52,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "GuidedSessionShellTests|GuidedSessionProjectionTests|GuidedSessionNavigationTests|GuidedSessionInputTests",
+    "sourceTestsChanged": false
+  },
+  "rawSafeUiAudit": {
+    "total": 1328,
+    "passed": 1314,
+    "failed": 14,
+    "skipped": 0,
+    "baselineFailureCount": 14,
+    "newOrChangedFailureNamesOrMessages": 0,
+    "scope": "Audited UI/Architecture subset, 11 explicit visible/opt-in exclusions; not full-suite PASS"
+  },
+  "integrity": {
+    "sourceAndTestFiles": 31,
+    "pagePngs": 55,
+    "mainJsons": 39,
+    "originalActionRecords": 53,
+    "result": "PASS via inspected verify-evidence.ps1, source SHA256/GitBlobId and image/source hashes"
+  },
+  "parentImagesViewed": [
+    "renders/review-required-1280x720.png",
+    "renders/white-ink-explicit-1000x700.png",
+    "renders/history-readonly-1000x700.png",
+    "renders/return-confirmation-1000x700.png",
+    "renders/draft-leave-1000x700.png",
+    "renders/processing-stop-takeover-1000x700.png",
+    "renders/source-PrepareCustomerDesign-1920x1080.png"
+  ],
+  "boundaries": [
+    "First broad run mistakenly showed 3 existing test windows, closed in finally; raw evidence preserved; not authorized human acceptance.",
+    "7 Live_* guard-return Passed outcomes do not mean live UIA PASS.",
+    "Initial visible keyboard focus failure and one unexplained fresh Space activation anomaly remain for final review; exclusions/later passes do not prove fixes.",
+    "Physical keyboard/mouse, real UIA client, real DPI/monitors, external production apps and novice acceptance NOT RUN.",
+    "No push/merge/deploy or later Epic work."
+  ],
+  "reviewStatus": "IN_PROGRESS"
+}

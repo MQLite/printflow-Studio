@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="cfa836d8-0cb9-4433-8ee6-8da8746f5668" name="admin@DESKTOP-0BG8884 2026-10-19 16:38:32" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T16:38:32.3246717+13:00" queuing="2026-10-19T16:38:32.3246720+13:00" start="2026-10-19T16:38:26.6828516+13:00" finish="2026-10-19T16:38:33.4946784+13:00" />
+  <TestSettings name="default" id="a766b8a7-acae-4653-8a92-95cb08336b4f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_16_38_32" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="d9a53889-8a28-4b7a-85a3-49aa5da8fccc" testId="33d27658-ada1-a6f6-6a83-e519784bdb1c" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.2738287" startTime="2026-10-19T16:38:33.1394208+13:00" endTime="2026-10-19T16:38:33.4128674+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d9a53889-8a28-4b7a-85a3-49aa5da8fccc">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 66&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b3a5ea95-f8ad-48d3-976b-289b37ba51b0" testId="014abd65-46b6-b380-c874-308a2c436e5f" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.3137421" startTime="2026-10-19T16:38:32.2070104+13:00" endTime="2026-10-19T16:38:32.5202759+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b3a5ea95-f8ad-48d3-976b-289b37ba51b0" />
+    <UnitTestResult executionId="002f3a36-4de7-46dc-b668-bbdda4fd24e8" testId="3bac774d-a5eb-16d8-ae79-44896dddda4c" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Refused_trim_keeps_the_draft_and_does_not_move_the_confirmed_baseline" computerName="DESKTOP-0BG8884" duration="00:00:01.0552476" startTime="2026-10-19T16:38:30.7966897+13:00" endTime="2026-10-19T16:38:31.8536994+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="002f3a36-4de7-46dc-b668-bbdda4fd24e8" />
+    <UnitTestResult executionId="c80280b6-f1bf-4f5c-8cda-03fa64ae6202" testId="ef829498-d7ce-887e-c20f-697a8862abcb" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.3093251" startTime="2026-10-19T16:38:32.8333849+13:00" endTime="2026-10-19T16:38:33.1383841+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c80280b6-f1bf-4f5c-8cda-03fa64ae6202">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.SelectedTrimMode.Mode&#xD;
+    should be&#xD;
+TrimMode.UniformMargin&#xD;
+    but was&#xD;
+TrimMode.TightCrop</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 70&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="763c05fe-58f2-4ff7-a2f0-92f92120a735" testId="724e7584-8fea-215d-58e5-3ceb2897e086" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3032771" startTime="2026-10-19T16:38:32.5204674+13:00" endTime="2026-10-19T16:38:32.8286836+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="763c05fe-58f2-4ff7-a2f0-92f92120a735">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.GuidedPage&#xD;
+    should be&#xD;
+GuidedSessionPage.Preflight&#xD;
+    but was&#xD;
+GuidedSessionPage.WhiteInk</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(Boolean changeBranch, Boolean refuse) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 36&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e164dd88-2c1f-4bd5-997d-0016714e69d9" testId="65e7ec66-a89b-7127-4022-4bb1748ffb9e" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: True, refuse: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3503536" startTime="2026-10-19T16:38:31.8630782+13:00" endTime="2026-10-19T16:38:32.2062014+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e164dd88-2c1f-4bd5-997d-0016714e69d9" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="33d27658-ada1-a6f6-6a83-e519784bdb1c">
+      <Execution id="d9a53889-8a28-4b7a-85a3-49aa5da8fccc" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: True, refuse: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="65e7ec66-a89b-7127-4022-4bb1748ffb9e">
+      <Execution id="e164dd88-2c1f-4bd5-997d-0016714e69d9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Reconfirming_white_ink_finishes_only_a_successful_edit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="014abd65-46b6-b380-c874-308a2c436e5f">
+      <Execution id="b3a5ea95-f8ad-48d3-976b-289b37ba51b0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Reconfirming_white_ink_finishes_only_a_successful_edit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Refused_trim_keeps_the_draft_and_does_not_move_the_confirmed_baseline" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="3bac774d-a5eb-16d8-ae79-44896dddda4c">
+      <Execution id="002f3a36-4de7-46dc-b668-bbdda4fd24e8" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Refused_trim_keeps_the_draft_and_does_not_move_the_confirmed_baseline" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="724e7584-8fea-215d-58e5-3ceb2897e086">
+      <Execution id="763c05fe-58f2-4ff7-a2f0-92f92120a735" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Reconfirming_white_ink_finishes_only_a_successful_edit" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ef829498-d7ce-887e-c20f-697a8862abcb">
+      <Execution id="c80280b6-f1bf-4f5c-8cda-03fa64ae6202" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests" name="Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="33d27658-ada1-a6f6-6a83-e519784bdb1c" executionId="d9a53889-8a28-4b7a-85a3-49aa5da8fccc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="014abd65-46b6-b380-c874-308a2c436e5f" executionId="b3a5ea95-f8ad-48d3-976b-289b37ba51b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3bac774d-a5eb-16d8-ae79-44896dddda4c" executionId="002f3a36-4de7-46dc-b668-bbdda4fd24e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ef829498-d7ce-887e-c20f-697a8862abcb" executionId="c80280b6-f1bf-4f5c-8cda-03fa64ae6202" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="724e7584-8fea-215d-58e5-3ceb2897e086" executionId="763c05fe-58f2-4ff7-a2f0-92f92120a735" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="65e7ec66-a89b-7127-4022-4bb1748ffb9e" executionId="e164dd88-2c1f-4bd5-997d-0016714e69d9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="3" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.56]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.64]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.68]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.74]       Shouldly.ShouldAssertException : m.GuidedPage&#xD;
+[xUnit.net 00:00:05.74]           should be&#xD;
+[xUnit.net 00:00:05.74]       GuidedSessionPage.Preflight&#xD;
+[xUnit.net 00:00:05.74]           but was&#xD;
+[xUnit.net 00:00:05.74]       GuidedSessionPage.WhiteInk&#xD;
+[xUnit.net 00:00:05.74]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.74]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs(36,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(Boolean changeBranch, Boolean refuse)&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.74]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.05]       Shouldly.ShouldAssertException : m.SelectedTrimMode.Mode&#xD;
+[xUnit.net 00:00:06.05]           should be&#xD;
+[xUnit.net 00:00:06.05]       TrimMode.UniformMargin&#xD;
+[xUnit.net 00:00:06.05]           but was&#xD;
+[xUnit.net 00:00:06.05]       TrimMode.TightCrop&#xD;
+[xUnit.net 00:00:06.05]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs(70,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit)&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.05]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.05]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.32]       Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave&#xD;
+[xUnit.net 00:00:06.32]           should be&#xD;
+[xUnit.net 00:00:06.32]       False&#xD;
+[xUnit.net 00:00:06.32]           but was&#xD;
+[xUnit.net 00:00:06.32]       True&#xD;
+[xUnit.net 00:00:06.32]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.32]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit)&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.32]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.33]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:38:32.8311207+13:00">
+        <Text>[xUnit.net 00:00:05.74]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:38:33.1387581+13:00">
+        <Text>[xUnit.net 00:00:06.05]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T16:38:33.4131572+13:00">
+        <Text>[xUnit.net 00:00:06.32]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: False) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

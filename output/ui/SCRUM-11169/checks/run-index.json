@@ -1,5 +1,13 @@
 [
   {
+    "File": "e2-parent-final-guided.trx",
+    "Passed": 52,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 52,
+    "Outcome": "Completed"
+  },
+  {
     "File": "e2-targeted-baseline.trx",
     "Passed": 49,
     "Failed": 0,
@@ -342,5 +350,157 @@
     "Skipped": 0,
     "Total": 1,
     "Outcome": "Failed"
+  },
+  {
+    "File": "review-fixes-complete.trx",
+    "Passed": 47,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 47,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-fixes-pattern-final.trx",
+    "Passed": 46,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 46,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-fixes-targeted-final.trx",
+    "Passed": 45,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 45,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-fixes-targeted.trx",
+    "Passed": 44,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 44,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-r1-r3-green.trx",
+    "Passed": 6,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 6,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-r1-r3-red.trx",
+    "Passed": 3,
+    "Failed": 3,
+    "Skipped": 0,
+    "Total": 6,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r2-green.trx",
+    "Passed": 52,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 52,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-r2-red.trx",
+    "Passed": 0,
+    "Failed": 2,
+    "Skipped": 0,
+    "Total": 2,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r4-disclosure-red.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r4-pattern-red.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r4-r6-green.trx",
+    "Passed": 17,
+    "Failed": 2,
+    "Skipped": 0,
+    "Total": 19,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r4-red.trx",
+    "Passed": 0,
+    "Failed": 9,
+    "Skipped": 0,
+    "Total": 9,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r5-green.trx",
+    "Passed": 58,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 58,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-r5-red.trx",
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0,
+    "Total": 3,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r6-final.trx",
+    "Passed": 65,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 65,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "review-r6-green.trx",
+    "Passed": 64,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 65,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-r6-red.trx",
+    "Passed": 0,
+    "Failed": 6,
+    "Skipped": 0,
+    "Total": 6,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-ui-architecture-final.trx",
+    "Passed": 1344,
+    "Failed": 14,
+    "Skipped": 0,
+    "Total": 1358,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "review-workflow-persistence-final.trx",
+    "Passed": 277,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 277,
+    "Outcome": "Completed"
   }
 ]
