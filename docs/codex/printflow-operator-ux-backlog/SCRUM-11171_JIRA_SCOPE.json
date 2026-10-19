@@ -1,0 +1,190 @@
+{
+  "date": "2026-10-20",
+  "timezone": "Pacific/Auckland",
+  "userAuthorization": "SCRUM-11170 通过。请继续推进 SCRUM-11171，沿用已批准的视觉风格和 Native 执行方式。",
+  "cloudId": "6ea5df13-e1e2-4df3-bb4b-691a3fb8626c",
+  "issues": {
+    "SCRUM-11170": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10930\",\"key\":\"SCRUM-11170\",\"fields\":{\"summary\":\"引导式界面改版：开始任务、导入与路线选择\",\"description\":\"Planning-ID：PF-GUX-v2-E3\\n\\n## 目标\\n\\n让用户从首页清楚进入本地图像任务，并在明确目标后逐步确认输入和处理路线。\\n\\n## 范围\\n\\n首页、本地单文件导入、来源确认、路线卡片及 AI 设计的条件接入；不改变原有先导入再选择路线的业务约束。\\n\\n## Epic 验收条件\\n\\n1. 首页突出开始新任务和继续待处理任务，设置、诊断和历史信息位于次级位置。\\n2. 导入、路线选择、原图确认各有清晰当前任务，不同时铺开后续裁切、印刷参数或保存表单。\\n3. 素材路线只展示 PNG 相关步骤；客户设计与直接 TIFF 路线只展示各自需要的处理步骤。\\n4. AI 页面仅在 SCRUM-11156 对应功能实际具备后接入；未具备时不展示可用承诺，不阻塞三条现有路线。\\n\\n## 子项范围\\n\\n* I01：重做首页与单文件导入，突出开始任务和继续处理\\n* I02：把路线选择和原图确认拆成清晰的引导步骤\\n* I03：为 AI 设计提供统一的分步界面接入与手动交接布局\\n\\n## 共同范围与约束\\n\\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）。用户要求：全面美化使用界面，改为一步一步指导操作、单步尽量仅显示相关内容的引导式应用。本轮授权为生成 Scrum 待办与 Epics；所有条目是待规划/待开发，不代表已完成或自动进入实施。\\n\\n推荐体验：步骤导航＋当前任务工作区＋固定操作栏；一个推荐主操作，低频/技术内容按需展开，相关辅助动作与关键阻塞仍可见。最终样式及详细交互需经过设计评审。\\n\\n保持一任务一图片、三条既有路线、原件和 InputSnapshot、合法命令、必要人工审核、精确结果身份、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁、原有回收/保留和本地隐私合同。AI 相关外部传输沿用 SCRUM-11156 已有明确选取/上传范围，本次不扩大。保留现有 zh-CN/en 资源，中文为人工验收主语言，不增加英文人工测试。\\n\\n不包含新增图片编辑器、批量处理、订单/账号系统、自动打印、自动通过审核、新云服务、收费服务、发布或生产变更。保留工作区已有修改；本次不改产品代码。\\n\\n## 与既有工作衔接\\n\\n复用 [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139) 的术语、状态、审核、裁切、保存、修正和最近任务能力；它及 SCRUM-11154/11155 的未完成验收和已知缺陷保持原状态。本轮是信息架构和视觉重组，不重建底层能力，不把旧功能验收转写为通过。\\n\\n[SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156) / [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166) 的 AI 业务功能继续由原 Epic 负责，新界面仅有条件接入；不作为三条核心路线交付的阻塞。\\n\\n## 计划依据与证据状态\\n\\n基于本地 master de7bca6e0a8462584b4d6bf4d16307d1335e2fb3 的 WPF XAML、ViewModels、WorkflowCatalog/TransitionTable、MVP 设计、术语及历史交接材料，并于本轮读取既有 Jira 状态。未运行应用、未采集新界面截图、未执行真人走查；规划判断不构成产品验证。\\n\\n## Scrum 组织\\n\\n建议 Sprint 0：体验蓝图与原型评审；Sprint 1：共享组件与引导框架；Sprint 2：导入/导航/恢复；Sprint 3：处理审核/保存辅助页/条件 AI 接入；Sprint 4：集成、布局键盘和真实新手验收。仅为分组与顺序建议，待容量评估和估点后拆分，不承诺每组能在一个 Sprint 完成；本次不创建/启动实际 Sprint，不指派人员、工期或故事点。按依赖顺序取入待办。\\n\\nReady：当前范围、旧能力复用边界、依赖及验收条件明确；涉及交互/状态变更的实现先有经评审设计。Done：实现和适当行为/视觉检查有证据、关键缺陷处置明确、人工验收单独记录；模拟不代替真人或生产证据。\",\"status\":{\"name\":\"In Review\",\"statusCategory\":{\"name\":\"In Progress\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10001\",\"name\":\"Epic\"},\"created\":\"2026-10-19T11:07:37.923+1300\",\"updated\":\"2026-10-19T18:57:00.241+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-wave-2\",\"printflow\"],\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0035v:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11182": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10942\",\"key\":\"SCRUM-11182\",\"fields\":{\"summary\":\"重做首页与单文件导入，突出开始任务和继续处理\",\"description\":\"Planning-ID：PF-GUX-v2-I01  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为初次使用者，我希望打开应用就能开始一个图片任务。\\n\\n## 验收条件\\n\\n1. 首页突出导入一张图片/拖入文件及继续待处理任务，环境摘要简明，历史和设置为次级入口。\\n2. 拖放和文件选择共用单文件校验，明确不支持格式、多文件和损坏文件的处理方式，原件保持不变。\\n3. 导入中和失败给出清晰反馈；已存在活动任务时按原规则处理，不静默覆盖或自动切换路线。\\n4. 导入成功进入路线选择/输入确认的合法步骤，保留当前源图摘要和必要预览。\\n\\n## 前置依赖\\n\\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\\n\\n## Scrum 分组\\n\\n建议 Sprint 2（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11170](https://yituoxx.atlassian.net/browse/SCRUM-11170)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"In Review\",\"statusCategory\":{\"name\":\"In Progress\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:15.723+1300\",\"updated\":\"2026-10-19T18:57:01.541+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-i01\",\"pf-gux-wave-2\",\"printflow\"],\"parent\":{\"id\":\"10930\",\"key\":\"SCRUM-11170\",\"fields\":{\"summary\":\"引导式界面改版：开始任务、导入与路线选择\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10052\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11179\",\"fields\":{\"summary\":\"按业务状态生成步骤进度与当前步骤专属内容\",\"status\":{\"name\":\"Done\"}}}},{\"id\":\"10053\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11183\",\"fields\":{\"summary\":\"把路线选择和原图确认拆成清晰的引导步骤\",\"status\":{\"name\":\"In Review\"}}}},{\"id\":\"10065\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11192\",\"fields\":{\"summary\":\"重做最近任务和待处理入口并准确定位继续步骤\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0038g:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11183": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10943\",\"key\":\"SCRUM-11183\",\"fields\":{\"summary\":\"把路线选择和原图确认拆成清晰的引导步骤\",\"description\":\"Planning-ID：PF-GUX-v2-I02  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望知道哪条路线适合我，以及本次将使用哪张图。\\n\\n## 验收条件\\n\\n1. 三张路线卡明确适用输入、结果 PNG/TIFF、是否需要印刷尺寸；由用户明确选择，不自动猜测。\\n2. 保留先导入后选路线及首个处理结果生成后不能切换路线的限制；返回入口说明当前可否修改。\\n3. 原图确认显示当前图、名称及当前必需选择，PDF 页面/尺寸与 PSD 白墨信息仅在对应输入和合法时机显示。\\n4. 未开始处理前不铺开后续审核、裁切、印刷和保存表单；复用既有预检与输入快照机制。\\n\\n## 前置依赖\\n\\n* [SCRUM-11182](https://yituoxx.atlassian.net/browse/SCRUM-11182)：重做首页与单文件导入，突出开始任务和继续处理\\n\\n## Scrum 分组\\n\\n建议 Sprint 2（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11170](https://yituoxx.atlassian.net/browse/SCRUM-11170)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"In Review\",\"statusCategory\":{\"name\":\"In Progress\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:16.978+1300\",\"updated\":\"2026-10-19T18:57:02.671+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-i02\",\"pf-gux-wave-2\",\"printflow\"],\"parent\":{\"id\":\"10930\",\"key\":\"SCRUM-11170\",\"fields\":{\"summary\":\"引导式界面改版：开始任务、导入与路线选择\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10053\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11182\",\"fields\":{\"summary\":\"重做首页与单文件导入，突出开始任务和继续处理\",\"status\":{\"name\":\"In Review\"}}}},{\"id\":\"10078\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11195\",\"fields\":{\"summary\":\"验收窗口缩放、中文布局、键盘和辅助技术可操作性\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0038s:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11171": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\",\"description\":\"Planning-ID：PF-GUX-v2-E4\\n\\n## 目标\\n\\n将自动处理、人工审核、裁切及印刷设置拆成聚焦的操作阶段，让图片和当前决策成为视觉中心。\\n\\n## 范围\\n\\n运行进度与接管、共享审核、边界调整、印刷尺寸、白墨及生产前确认；复用现有处理器和安全契约。\\n\\n## Epic 验收条件\\n\\n1. 自动处理阶段只展示当前执行、真实状态及合法停止/接管动作，审核前不自动批准或自动开始后续步骤。\\n2. 审核阶段图片占主区域，检查要点、通过/驳回/求助与对比工具随当前结果展示；审批绑定精确结果。\\n3. 裁切独立工作区保留原建议、取消、确认及合法返回；多尺寸与放大授权不因界面合并而共用审批。\\n4. 白墨、300 PPI、CMYK、尺寸、TIFF 校验和环境门禁保持原规则；风险和阻塞原因在相应步骤可见。\\n\\n## 子项范围\\n\\n* P01：将自动处理改为独立进度步骤并保留停止和接管入口\\n* P02：重做图片审核工作区，让大图、检查要点和决策聚焦\\n* P03：将裁切调整做成单独工作区并清楚返回审核\\n* P04：将印刷尺寸设置做成聚焦表单与实时结果预览\\n* P05：按需呈现白墨选项与 TIFF 生成前确认\\n\\n## 共同范围与约束\\n\\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）。用户要求：全面美化使用界面，改为一步一步指导操作、单步尽量仅显示相关内容的引导式应用。本轮授权为生成 Scrum 待办与 Epics；所有条目是待规划/待开发，不代表已完成或自动进入实施。\\n\\n推荐体验：步骤导航＋当前任务工作区＋固定操作栏；一个推荐主操作，低频/技术内容按需展开，相关辅助动作与关键阻塞仍可见。最终样式及详细交互需经过设计评审。\\n\\n保持一任务一图片、三条既有路线、原件和 InputSnapshot、合法命令、必要人工审核、精确结果身份、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁、原有回收/保留和本地隐私合同。AI 相关外部传输沿用 SCRUM-11156 已有明确选取/上传范围，本次不扩大。保留现有 zh-CN/en 资源，中文为人工验收主语言，不增加英文人工测试。\\n\\n不包含新增图片编辑器、批量处理、订单/账号系统、自动打印、自动通过审核、新云服务、收费服务、发布或生产变更。保留工作区已有修改；本次不改产品代码。\\n\\n## 与既有工作衔接\\n\\n复用 [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139) 的术语、状态、审核、裁切、保存、修正和最近任务能力；它及 SCRUM-11154/11155 的未完成验收和已知缺陷保持原状态。本轮是信息架构和视觉重组，不重建底层能力，不把旧功能验收转写为通过。\\n\\n[SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156) / [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166) 的 AI 业务功能继续由原 Epic 负责，新界面仅有条件接入；不作为三条核心路线交付的阻塞。\\n\\n## 计划依据与证据状态\\n\\n基于本地 master de7bca6e0a8462584b4d6bf4d16307d1335e2fb3 的 WPF XAML、ViewModels、WorkflowCatalog/TransitionTable、MVP 设计、术语及历史交接材料，并于本轮读取既有 Jira 状态。未运行应用、未采集新界面截图、未执行真人走查；规划判断不构成产品验证。\\n\\n## Scrum 组织\\n\\n建议 Sprint 0：体验蓝图与原型评审；Sprint 1：共享组件与引导框架；Sprint 2：导入/导航/恢复；Sprint 3：处理审核/保存辅助页/条件 AI 接入；Sprint 4：集成、布局键盘和真实新手验收。仅为分组与顺序建议，待容量评估和估点后拆分，不承诺每组能在一个 Sprint 完成；本次不创建/启动实际 Sprint，不指派人员、工期或故事点。按依赖顺序取入待办。\\n\\nReady：当前范围、旧能力复用边界、依赖及验收条件明确；涉及交互/状态变更的实现先有经评审设计。Done：实现和适当行为/视觉检查有证据、关键缺陷处置明确、人工验收单独记录；模拟不代替真人或生产证据。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10001\",\"name\":\"Epic\"},\"created\":\"2026-10-19T11:07:39.197+1300\",\"updated\":\"2026-10-19T11:07:39.278+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-wave-3\",\"printflow\"],\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0035y:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11185": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10945\",\"key\":\"SCRUM-11185\",\"fields\":{\"summary\":\"将自动处理改为独立进度步骤并保留停止和接管入口\",\"description\":\"Planning-ID：PF-GUX-v2-P01  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望自动处理时知道正在做什么和何时需要我操作。\\n\\n## 验收条件\\n\\n1. 仅显示当前处理阶段、应用名称、真实状态和已有进度；没有可靠百分比时使用不定进度并说明等待。\\n2. 运行、停止中、失败、接管和等待人工有不同内容，停止和接管沿用 Meitu/Photoshop 各自语义。\\n3. 成功进入待审核界面，不自动通过、不跳过检查、不默认触发下一步。\\n4. 关键环境阻塞、测试模式与外部应用保留状态保持可见；不因导航或界面折叠失去停止入口。\\n\\n## 前置依赖\\n\\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\\n\\n## Scrum 分组\\n\\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11171](https://yituoxx.atlassian.net/browse/SCRUM-11171)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:19.791+1300\",\"updated\":\"2026-10-19T11:09:15.877+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-p01\",\"pf-gux-wave-3\",\"printflow\"],\"parent\":{\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10056\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11179\",\"fields\":{\"summary\":\"按业务状态生成步骤进度与当前步骤专属内容\",\"status\":{\"name\":\"Done\"}}}},{\"id\":\"10057\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11186\",\"fields\":{\"summary\":\"重做图片审核工作区，让大图、检查要点和决策聚焦\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i00397:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11186": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10946\",\"key\":\"SCRUM-11186\",\"fields\":{\"summary\":\"重做图片审核工作区，让大图、检查要点和决策聚焦\",\"description\":\"Planning-ID：PF-GUX-v2-P02  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望看清当前结果，并知道要检查哪些问题。\\n\\n## 验收条件\\n\\n1. 增强、去背景、裁切和 TIFF 使用一致审核骨架，展示当前结果和本步骤 2–4 条检查要点。\\n2. 保留 Before 左/After 右、对比/缩放/平移和透明背景查看，工具仅在其有意义的审核中出现。\\n3. 通过、驳回、请同事修正和调整裁切仅在合法时显示；通过不被描述为已保存。\\n4. 审批仍绑定当前任务、步骤、结果版本和精确文件内容；文件失效、预览失败或切换后旧审批不可用。\\n\\n## 前置依赖\\n\\n* [SCRUM-11185](https://yituoxx.atlassian.net/browse/SCRUM-11185)：将自动处理改为独立进度步骤并保留停止和接管入口\\n\\n## Scrum 分组\\n\\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11171](https://yituoxx.atlassian.net/browse/SCRUM-11171)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:21.187+1300\",\"updated\":\"2026-10-19T11:09:23.296+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-p02\",\"pf-gux-wave-3\",\"printflow\"],\"parent\":{\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10057\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11185\",\"fields\":{\"summary\":\"将自动处理改为独立进度步骤并保留停止和接管入口\",\"status\":{\"name\":\"To Do\"}}}},{\"id\":\"10058\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11187\",\"fields\":{\"summary\":\"将裁切调整做成单独工作区并清楚返回审核\",\"status\":{\"name\":\"To Do\"}}}},{\"id\":\"10061\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11190\",\"fields\":{\"summary\":\"把最终审核、保存和完成整理成可理解的收尾步骤\",\"status\":{\"name\":\"To Do\"}}}},{\"id\":\"10064\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11191\",\"fields\":{\"summary\":\"将同事修正、人工接管和恢复显示为独立引导分支\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0039a:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11187": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10947\",\"key\":\"SCRUM-11187\",\"fields\":{\"summary\":\"将裁切调整做成单独工作区并清楚返回审核\",\"description\":\"Planning-ID：PF-GUX-v2-P03  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望调整边缘时专注图片，不被印刷和保存参数干扰。\\n\\n## 验收条件\\n\\n1. 进入裁切时展示边界、边角手柄、缩放、恢复自动建议、取消和使用此裁切，隐藏无关表单。\\n2. 取消不修改当前批准/待审结果，使用新裁切按既有规则产生新结果并回到必要审核。\\n3. 保持原建议及图像非破坏性，当前裁切与自动建议可比较，非法范围有就地反馈。\\n4. 鼠标与键盘都能完成基本调整，边界焦点和中文单位可读；复用 SCRUM-11147 能力。\\n\\n## 前置依赖\\n\\n* [SCRUM-11186](https://yituoxx.atlassian.net/browse/SCRUM-11186)：重做图片审核工作区，让大图、检查要点和决策聚焦\\n\\n## Scrum 分组\\n\\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11171](https://yituoxx.atlassian.net/browse/SCRUM-11171)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:22.465+1300\",\"updated\":\"2026-10-19T11:09:38.865+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-p03\",\"pf-gux-wave-3\",\"printflow\"],\"parent\":{\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10058\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11186\",\"fields\":{\"summary\":\"重做图片审核工作区，让大图、检查要点和决策聚焦\",\"status\":{\"name\":\"To Do\"}}}},{\"id\":\"10077\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11195\",\"fields\":{\"summary\":\"验收窗口缩放、中文布局、键盘和辅助技术可操作性\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0039k:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11188": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10948\",\"key\":\"SCRUM-11188\",\"fields\":{\"summary\":\"将印刷尺寸设置做成聚焦表单与实时结果预览\",\"description\":\"Planning-ID：PF-GUX-v2-P04  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望输入目标尺寸时立即理解实际输出和放大风险。\\n\\n## 验收条件\\n\\n1. 只在打印路线的合法尺寸步骤展示预设/自定义选择、比例、毫米、像素和当前尺寸预览。\\n2. 区分最大边界与实际图片尺寸，数值使用可读精度并保留校验所需原值，不把当前 F6 已知问题当成修复。\\n3. 放大风险紧邻相关输入，额外放大授权独立明确；无效尺寸阻止继续并说明原因。\\n4. 添加另一尺寸复用已批准来源但保留独立尺寸/生成/审核/保存身份，不沿用其他尺寸审批。\\n\\n## 前置依赖\\n\\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\\n\\n## Scrum 分组\\n\\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11171](https://yituoxx.atlassian.net/browse/SCRUM-11171)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:23.905+1300\",\"updated\":\"2026-10-19T11:09:18.963+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-p04\",\"pf-gux-wave-3\",\"printflow\"],\"parent\":{\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10059\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11179\",\"fields\":{\"summary\":\"按业务状态生成步骤进度与当前步骤专属内容\",\"status\":{\"name\":\"Done\"}}}},{\"id\":\"10060\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11189\",\"fields\":{\"summary\":\"按需呈现白墨选项与 TIFF 生成前确认\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0039m:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11189": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"appliedContentFormat\":\"markdown\",\"id\":\"10949\",\"key\":\"SCRUM-11189\",\"fields\":{\"summary\":\"按需呈现白墨选项与 TIFF 生成前确认\",\"description\":\"Planning-ID：PF-GUX-v2-P05  \\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\\n\\n## 用户价值 / 目标\\n\\n作为操作者，我希望只在需要时选择白墨并确认当前生产参数。\\n\\n## 验收条件\\n\\n1. 仅在对应 PSD/白墨分支需要时显示选择；其他路线或输入不出现无关配置。\\n2. 生成前摘要展示当前尺寸、实际输出、白墨选择及必要风险，技术细节可展开但阻塞原因始终可见。\\n3. 300 PPI、CMYK、W1、环境门禁与生产预设来自原业务校验；继续按钮不能绕过门禁。\\n4. 返回编辑按既有规则失效下游，生成完成进入精确 TIFF 的最终审核。\\n\\n## 前置依赖\\n\\n* [SCRUM-11188](https://yituoxx.atlassian.net/browse/SCRUM-11188)：将印刷尺寸设置做成聚焦表单与实时结果预览\\n\\n## Scrum 分组\\n\\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11171](https://yituoxx.atlassian.net/browse/SCRUM-11171)。\\n\\n## 实现与验收边界\\n\\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\\n\\n## 验证要求与来源\\n\\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\\n\\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。\",\"status\":{\"name\":\"To Do\",\"statusCategory\":{\"name\":\"To Do\"}},\"assignee\":null,\"reporter\":{\"accountId\":\"557058:869390a0-49f0-499e-93d7-abceb4c9b74f\",\"displayName\":\"张鸣谦\"},\"priority\":{\"name\":\"High\"},\"issuetype\":{\"id\":\"10004\",\"name\":\"Story\"},\"created\":\"2026-10-19T11:08:25.481+1300\",\"updated\":\"2026-10-19T11:09:21.031+1300\",\"labels\":[\"guided-ui\",\"pf-guided-ux-v2\",\"pf-gux-p05\",\"pf-gux-wave-3\",\"printflow\"],\"parent\":{\"id\":\"10931\",\"key\":\"SCRUM-11171\",\"fields\":{\"summary\":\"引导式界面改版：处理、图片审核与印刷准备\"}},\"subtasks\":[],\"comment\":{\"total\":0},\"issuelinks\":[{\"id\":\"10060\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"inwardIssue\":{\"key\":\"SCRUM-11188\",\"fields\":{\"summary\":\"将印刷尺寸设置做成聚焦表单与实时结果预览\",\"status\":{\"name\":\"To Do\"}}}},{\"id\":\"10062\",\"type\":{\"name\":\"Blocks\",\"inward\":\"is blocked by\",\"outward\":\"blocks\"},\"outwardIssue\":{\"key\":\"SCRUM-11190\",\"fields\":{\"summary\":\"把最终审核、保存和完成整理成可理解的收尾步骤\",\"status\":{\"name\":\"To Do\"}}}}],\"customFields\":{\"Rank\":{\"id\":\"customfield_10019\",\"value\":\"0|i0039v:\"}}}}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    }
+  },
+  "statusTransitions": {
+    "SCRUM-11170": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11170 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11182": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11182 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11183": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11183 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11171": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11171 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11185": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11185 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11186": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11186 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11187": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11187 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11188": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11188 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    },
+    "SCRUM-11189": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"data\":{\"message\":\"Issue SCRUM-11189 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+        }
+      ],
+      "structuredContent": null,
+      "isError": false
+    }
+  }
+}
