@@ -1,0 +1,56 @@
+{
+  "State": "history-readonly",
+  "Page": "Review",
+  "Language": "zh-CN",
+  "WidthDip": 1280,
+  "HeightDip": 720,
+  "Dpi": 96,
+  "CaptureKind": "offscreen WPF; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "7DFFEBE26C3571E6BEE094F198981EDCC9B9DC9BA84829AE7323F1E604124679",
+  "Measurements": {
+    "MainSurface": {
+      "X": 206,
+      "Y": 179.74666666666667,
+      "Width": 1058,
+      "Height": 524.2533333333333
+    },
+    "FocusName": "OperatorStatusPanel",
+    "Actions": [
+      {
+        "Id": "Session.CloseHistory",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 226,
+          "Y": 642,
+          "Width": 112,
+          "Height": 42
+        },
+        "Recommended": true
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 147.63333333333344,
+        "ViewportHeight": 524.2533333333333
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 0
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 0
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 56.69,
+        "ViewportHeight": 426.25333333333333
+      }
+    ],
+    "PreviewCount": 1
+  }
+}

@@ -273,6 +273,7 @@ public sealed partial class SessionViewModel
     {
         OnPropertyChanged(nameof(GuidedInteractionIdentity));
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
+        OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
         OnPropertyChanged(nameof(RecommendedCommand));
         NotifyCustomSizeInputHint();
         RequestDraftPreflight();

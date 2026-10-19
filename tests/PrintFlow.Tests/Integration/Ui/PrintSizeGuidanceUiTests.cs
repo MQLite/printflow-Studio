@@ -473,6 +473,8 @@ public sealed class PrintSizeGuidanceUiTests
         screen.EnlargementPlainWarning.ShouldBeEmpty();
 
         await screen.ChangeSizeCommand.ExecuteAsync(null);
+        screen.IsConfirmingReturn.ShouldBeTrue();
+        await screen.ConfirmReturnCommand.ExecuteAsync(null);
         screen.SelectedTargetEdgeChoice = screen.TargetEdgeChoices.Single(c => c.Edge == TargetEdge.Width);
         screen.CustomMillimetresText = "120";
         await screen.PreflightLoaded;
@@ -492,6 +494,9 @@ public sealed class PrintSizeGuidanceUiTests
         using OperatorCultureScope culture = new("en");
         using HomeScreenHarness h = new();
         SessionViewModel screen = await PrintSizeGuidanceSetup.OpenStateAsync(h, "preset");
+        // E2 shows the required explicit white choice before the preparation/details page.
+        screen.SelectedWhiteUnderbaseChoice = screen.WhiteUnderbaseChoices[0];
+        await screen.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
         PrintDimensionsPreflight facts = screen.Preflight.ShouldNotBeNull();
 
         screen.PreflightRows.Select(r => r.Key).ShouldBe(

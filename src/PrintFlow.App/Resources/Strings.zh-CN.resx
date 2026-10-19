@@ -1329,5 +1329,3 @@
   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”。需要重新处理：{1}。依赖这些步骤的尺寸、输出结果及审核需要重新完成；已有历史记录保留。</value></data>
 </root>
-
-

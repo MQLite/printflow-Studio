@@ -1,0 +1,127 @@
+{
+  "State": "preflight",
+  "Page": "Preflight",
+  "Language": "zh-CN",
+  "WidthDip": 1280,
+  "HeightDip": 720,
+  "Dpi": 96,
+  "CaptureKind": "offscreen WPF; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "D83648366FC222C86E471A87979E62A4957717DC54F0108381BEC2674327DB07",
+  "Measurements": {
+    "MainSurface": {
+      "X": 16,
+      "Y": 662,
+      "Width": 1248,
+      "Height": 42
+    },
+    "FocusName": "OperatorStatusPanel",
+    "Actions": [
+      {
+        "Id": "Session.ReviewZoomOut",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 272,
+          "Y": 245.34,
+          "Width": 50,
+          "Height": 42
+        },
+        "Recommended": false
+      },
+      {
+        "Id": "Session.ReviewZoomIn",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 328,
+          "Y": 245.34,
+          "Width": 50,
+          "Height": 42
+        },
+        "Recommended": false
+      },
+      {
+        "Id": "Session.ReviewResetZoom",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 384,
+          "Y": 245.34,
+          "Width": 78,
+          "Height": 42
+        },
+        "Recommended": false
+      },
+      {
+        "Id": "Session.ReviewActualSize",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 571,
+          "Y": 295.34000000000003,
+          "Width": 59.086666666666666,
+          "Height": 42
+        },
+        "Recommended": false
+      },
+      {
+        "Id": "Session.WhiteUnderbase.Change",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 853.8,
+          "Y": 470.72333333333336,
+          "Width": 110,
+          "Height": 42
+        },
+        "Recommended": false
+      },
+      {
+        "Id": "Session.RunStep",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 16,
+          "Y": 662,
+          "Width": 84,
+          "Height": 42
+        },
+        "Recommended": true
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "Bounds": {
+          "X": 1178,
+          "Y": 662,
+          "Width": 86,
+          "Height": 42
+        },
+        "Recommended": false
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 443.77666666666664
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 249.22999999999996
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 7.153333333333308,
+        "ViewportHeight": 443.77666666666664
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 0
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 0
+      }
+    ],
+    "PreviewCount": 1
+  }
+}

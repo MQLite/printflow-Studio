@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="32b5c448-d77c-42ff-ad05-6a030ac8f2c8" name="admin@DESKTOP-0BG8884 2026-10-19 15:53:09" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:53:09.1117305+13:00" queuing="2026-10-19T15:53:09.1117308+13:00" start="2026-10-19T15:52:58.6410337+13:00" finish="2026-10-19T15:53:21.2104240+13:00" />
+  <TestSettings name="default" id="25f5933e-c31b-4ea0-8e8d-4c8f744395c0">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_53_09" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="80839d99-270a-457e-834b-f731d17f8da4" testId="4d29d42c-47b0-a443-1ecb-713adb04b9fb" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:06.8065689" startTime="2026-10-19T15:53:02.2662768+13:00" endTime="2026-10-19T15:53:09.0835518+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="80839d99-270a-457e-834b-f731d17f8da4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : r.Right&#xD;
+    should be less than or equal to&#xD;
+720.5d&#xD;
+    but was&#xD;
+740.69d&#xD;
+&#xD;
+Additional Info:&#xD;
+    history-readonly</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String sourceHash) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 117&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.CaptureSnapshot(HomeScreenHarness h, SessionViewModel live, Size viewport, String state, String sourceHash) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 111&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 71&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Inside(Rect r, Size viewport, String label) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 174&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.&lt;&gt;c__DisplayClass2_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 138&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ad3957f1-80de-4274-ad85-fd608cb9e8c6" testId="abec0490-f39c-8390-bbce-9a2dfca8013b" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:06.6858910" startTime="2026-10-19T15:53:14.3881863+13:00" endTime="2026-10-19T15:53:21.0546977+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad3957f1-80de-4274-ad85-fd608cb9e8c6" />
+    <UnitTestResult executionId="4f0b0023-70e0-4027-a82d-287ab0e8dfb8" testId="a97c7875-be6a-4c9a-8f78-ea36fc6b99e1" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:05.2830699" startTime="2026-10-19T15:53:09.0996012+13:00" endTime="2026-10-19T15:53:14.3679014+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f0b0023-70e0-4027-a82d-287ab0e8dfb8">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : r.Right&#xD;
+    should be less than or equal to&#xD;
+700.5d&#xD;
+    but was&#xD;
+759.1666666666667d&#xD;
+&#xD;
+Additional Info:&#xD;
+    history-readonly</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String sourceHash) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 117&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.CaptureSnapshot(HomeScreenHarness h, SessionViewModel live, Size viewport, String state, String sourceHash) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 111&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 71&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Inside(Rect r, Size viewport, String label) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 174&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.&lt;&gt;c__DisplayClass2_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs:line 138&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4d29d42c-47b0-a443-1ecb-713adb04b9fb">
+      <Execution id="80839d99-270a-457e-834b-f731d17f8da4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests" name="Chinese_guided_states_have_visible_actions_and_capture_real_Wpf" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="abec0490-f39c-8390-bbce-9a2dfca8013b">
+      <Execution id="ad3957f1-80de-4274-ad85-fd608cb9e8c6" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests" name="Chinese_guided_states_have_visible_actions_and_capture_real_Wpf" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a97c7875-be6a-4c9a-8f78-ea36fc6b99e1">
+      <Execution id="4f0b0023-70e0-4027-a82d-287ab0e8dfb8" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests" name="Chinese_guided_states_have_visible_actions_and_capture_real_Wpf" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4d29d42c-47b0-a443-1ecb-713adb04b9fb" executionId="80839d99-270a-457e-834b-f731d17f8da4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="abec0490-f39c-8390-bbce-9a2dfca8013b" executionId="ad3957f1-80de-4274-ad85-fd608cb9e8c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a97c7875-be6a-4c9a-8f78-ea36fc6b99e1" executionId="4f0b0023-70e0-4027-a82d-287ab0e8dfb8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.18]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.23]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:10.07]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:10.07]       ---- Shouldly.ShouldAssertException : r.Right&#xD;
+[xUnit.net 00:00:10.07]           should be less than or equal to&#xD;
+[xUnit.net 00:00:10.07]       720.5d&#xD;
+[xUnit.net 00:00:10.07]           but was&#xD;
+[xUnit.net 00:00:10.07]       740.69d&#xD;
+[xUnit.net 00:00:10.07]       &#xD;
+[xUnit.net 00:00:10.07]       Additional Info:&#xD;
+[xUnit.net 00:00:10.07]           history-readonly&#xD;
+[xUnit.net 00:00:10.07]       Stack Trace:&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(117,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String sourceHash)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(111,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.CaptureSnapshot(HomeScreenHarness h, SessionViewModel live, Size viewport, String state, String sourceHash)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(71,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:10.07]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:10.07]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(174,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Inside(Rect r, Size viewport, String label)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(138,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.&lt;&gt;c__DisplayClass2_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:10.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:15.35]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:15.35]       ---- Shouldly.ShouldAssertException : r.Right&#xD;
+[xUnit.net 00:00:15.35]           should be less than or equal to&#xD;
+[xUnit.net 00:00:15.35]       700.5d&#xD;
+[xUnit.net 00:00:15.35]           but was&#xD;
+[xUnit.net 00:00:15.35]       759.1666666666667d&#xD;
+[xUnit.net 00:00:15.35]       &#xD;
+[xUnit.net 00:00:15.35]       Additional Info:&#xD;
+[xUnit.net 00:00:15.36]           history-readonly&#xD;
+[xUnit.net 00:00:15.36]       Stack Trace:&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(117,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String sourceHash)&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(111,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.CaptureSnapshot(HomeScreenHarness h, SessionViewModel live, Size viewport, String state, String sourceHash)&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(71,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:15.36]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:15.36]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:15.36]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(174,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Inside(Rect r, Size viewport, String label)&#xD;
+[xUnit.net 00:00:15.37]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionVisualEvidenceTests.cs(138,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.&lt;&gt;c__DisplayClass2_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:15.37]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:15.37]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:22.05]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:53:09.0861669+13:00">
+        <Text>[xUnit.net 00:00:10.07]     PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:53:14.3682590+13:00">
+        <Text>[xUnit.net 00:00:15.35]     PrintFlow.Tests.Integration.Ui.GuidedSessionVisualEvidenceTests.Chinese_guided_states_have_visible_actions_and_capture_real_Wpf(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

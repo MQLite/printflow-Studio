@@ -1,0 +1,338 @@
+[
+  {
+    "File": "e2-targeted-baseline.trx",
+    "Passed": 49,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 49,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "e2-ui-architecture-before-contract-updates.trx",
+    "Passed": 1282,
+    "Failed": 56,
+    "Skipped": 1,
+    "Total": 1339,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "e2-ui-architecture-final.trx",
+    "Passed": 1314,
+    "Failed": 14,
+    "Skipped": 0,
+    "Total": 1328,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "e2-workflow-persistence-final.trx",
+    "Passed": 277,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 277,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g01-form-red.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g01-green.trx",
+    "Passed": 5,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 5,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g01-red.trx",
+    "Passed": 0,
+    "Failed": 5,
+    "Skipped": 0,
+    "Total": 5,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g01-regression-fixed.trx",
+    "Passed": 75,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 75,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g01-regression.trx",
+    "Passed": 56,
+    "Failed": 19,
+    "Skipped": 0,
+    "Total": 75,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g01-task-done.trx",
+    "Passed": 75,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 75,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g02-actions-red.trx",
+    "Passed": 0,
+    "Failed": 2,
+    "Skipped": 0,
+    "Total": 2,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g02-green.trx",
+    "Passed": 9,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 10,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g02-red.trx",
+    "Passed": 0,
+    "Failed": 10,
+    "Skipped": 0,
+    "Total": 10,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g02-regression.trx",
+    "Passed": 64,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 64,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g02-task-done.trx",
+    "Passed": 64,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 64,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g03-drafts-and-size.trx",
+    "Passed": 70,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 70,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g03-final-regression.trx",
+    "Passed": 580,
+    "Failed": 16,
+    "Skipped": 0,
+    "Total": 596,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g03-first-green.trx",
+    "Passed": 5,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 5,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g03-navigation-geometry-final.trx",
+    "Passed": 37,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 37,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g03-red.trx",
+    "Passed": 1,
+    "Failed": 4,
+    "Skipped": 0,
+    "Total": 5,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g03-regression.trx",
+    "Passed": 97,
+    "Failed": 5,
+    "Skipped": 0,
+    "Total": 102,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g03-task-done.trx",
+    "Passed": 125,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 125,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g03-trim-geometry.trx",
+    "Passed": 11,
+    "Failed": 5,
+    "Skipped": 0,
+    "Total": 16,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-extended-input-dispatch-fixed.trx",
+    "Passed": 17,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 17,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g04-extended-input.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-final-input-dialog.trx",
+    "Passed": 18,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 18,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g04-final-regression.trx",
+    "Passed": 95,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 95,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g04-first-green.trx",
+    "Passed": 8,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 8,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g04-modal-focus.trx",
+    "Passed": 108,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 109,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-red.trx",
+    "Passed": 0,
+    "Failed": 8,
+    "Skipped": 0,
+    "Total": 8,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-regression-dispatch-fixed.trx",
+    "Passed": 165,
+    "Failed": 1,
+    "Skipped": 1,
+    "Total": 167,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-regression.trx",
+    "Passed": 32,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 33,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-return-surface-red.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g04-task-done.trx",
+    "Passed": 95,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 95,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g05-contract-final.trx",
+    "Passed": 145,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 145,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g05-contract-updates.trx",
+    "Passed": 103,
+    "Failed": 3,
+    "Skipped": 0,
+    "Total": 106,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g05-render-final.trx",
+    "Passed": 9,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 9,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g05-render-fixed.trx",
+    "Passed": 2,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 3,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g05-render-initial.trx",
+    "Passed": 0,
+    "Failed": 3,
+    "Skipped": 0,
+    "Total": 3,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g05-render-snapshots.trx",
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0,
+    "Total": 3,
+    "Outcome": "Failed"
+  },
+  {
+    "File": "g05-visual-polish-final.trx",
+    "Passed": 22,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 22,
+    "Outcome": "Completed"
+  },
+  {
+    "File": "g05-white-choices-red.trx",
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0,
+    "Total": 1,
+    "Outcome": "Failed"
+  }
+]

@@ -223,7 +223,7 @@ public partial class SessionViewModel
     internal FinalSaveDisplay WhileAdjustingTrim(FinalSaveDisplay display) => !IsAdjustingTrim && CanInteractWithLivePage ? display : display with
     {
         Alert = JoinLines(IsAdjustingTrim ? Strings.FinalSave_TrimAdjustOpen :
-            IsViewingHistory ? Strings.Session_HistoryNotice : Strings.Session_DraftLeaveNotice, display.Alert),
+            IsViewingHistory ? Strings.Session_HistoryNotice : IsConfirmingReturn ? ReturnImpact : Strings.Session_DraftLeaveNotice, display.Alert),
         CanConfirmAndSave = false,
         CanSaveApproved = false,
         CanRetryRecorded = false,

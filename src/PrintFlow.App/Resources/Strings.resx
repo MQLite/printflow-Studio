@@ -1340,5 +1340,3 @@
   <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
   <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
 </root>
-
-

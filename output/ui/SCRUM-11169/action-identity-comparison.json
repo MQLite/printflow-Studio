@@ -1,0 +1,2599 @@
+[
+  {
+    "Id": "Session.FinalSave.ChangeLocation",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ChangeLocationCommand}",
+        "After": "{Binding ChangeLocationCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.ChangeLocation",
+        "After": "Session.FinalSave.ChangeLocation",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.ConfirmAndSave",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ConfirmAndSaveCommand}",
+        "After": "{Binding ConfirmAndSaveCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding ConfirmAndSaveIdentity}",
+        "After": "{Binding ConfirmAndSaveIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.ConfirmAndSave",
+        "After": "Session.FinalSave.ConfirmAndSave",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.SaveApproved",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding SaveApprovedCommand}",
+        "After": "{Binding SaveApprovedCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding SaveApprovedIdentity}",
+        "After": "{Binding SaveApprovedIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.SaveApproved",
+        "After": "Session.FinalSave.SaveApproved",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.RetryRecorded",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RetryRecordedSaveCommand}",
+        "After": "{Binding RetryRecordedSaveCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding RecordedActionIdentity}",
+        "After": "{Binding RecordedActionIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.RetryRecorded",
+        "After": "Session.FinalSave.RetryRecorded",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.CheckAgain",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CheckSaveAgainCommand}",
+        "After": "{Binding CheckSaveAgainCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding RecordedActionIdentity}",
+        "After": "{Binding RecordedActionIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.CheckAgain",
+        "After": "Session.FinalSave.CheckAgain",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.OpenFolder",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding OpenContainingFolderCommand}",
+        "After": "{Binding OpenContainingFolderCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.OpenFolder",
+        "After": "Session.FinalSave.OpenFolder",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.CheckSaved",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CheckSavedFileCommand}",
+        "After": "{Binding CheckSavedFileCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.CheckSaved",
+        "After": "Session.FinalSave.CheckSaved",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.SaveAnotherCopy",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding SaveAnotherCopyCommand}",
+        "After": "{Binding SaveAnotherCopyCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding RecordedActionIdentity}",
+        "After": "{Binding RecordedActionIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.SaveAnotherCopy",
+        "After": "Session.FinalSave.SaveAnotherCopy",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.UseSuggestion",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding UseSuggestedNameCommand}",
+        "After": "{Binding UseSuggestedNameCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.UseSuggestion",
+        "After": "Session.FinalSave.UseSuggestion",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.FinalSave.Cancel",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CancelSaveCommand}",
+        "After": "{Binding CancelSaveCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.FinalSave.Cancel",
+        "After": "Session.FinalSave.Cancel",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Stop",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding StopAutomationCommand}",
+        "After": "{Binding StopAutomationCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Stop",
+        "After": "Session.Stop",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TakeOver",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginTakeOverCommand}",
+        "After": "{Binding BeginTakeOverCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TakeOver",
+        "After": "Session.TakeOver",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TakeOverConfirm",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ConfirmTakeOverCommand}",
+        "After": "{Binding ConfirmTakeOverCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TakeOverConfirm",
+        "After": "Session.TakeOverConfirm",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TakeOverCancel",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CancelTakeOverCommand}",
+        "After": "{Binding CancelTakeOverCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TakeOverCancel",
+        "After": "Session.TakeOverCancel",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReenterAutomation",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ReenterAutomationCommand}",
+        "After": "{Binding ReenterAutomationCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReenterAutomation",
+        "After": "Session.ReenterAutomation",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.BeginManualCrop",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginManualCropCommand}",
+        "After": "{Binding BeginManualCropCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.BeginManualCrop",
+        "After": "Session.BeginManualCrop",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReviewZoomOut",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ZoomOutCommand}",
+        "After": "{Binding ZoomOutCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReviewZoomOut",
+        "After": "Session.ReviewZoomOut",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReviewZoomIn",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ZoomInCommand}",
+        "After": "{Binding ZoomInCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReviewZoomIn",
+        "After": "Session.ReviewZoomIn",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReviewResetZoom",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ResetZoomCommand}",
+        "After": "{Binding ResetZoomCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReviewResetZoom",
+        "After": "Session.ReviewResetZoom",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TiffReviewZoomOut",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ZoomOutCommand}",
+        "After": "{Binding ZoomOutCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TiffReviewZoomOut",
+        "After": "Session.TiffReviewZoomOut",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TiffReviewZoomIn",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ZoomInCommand}",
+        "After": "{Binding ZoomInCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TiffReviewZoomIn",
+        "After": "Session.TiffReviewZoomIn",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TiffReviewResetZoom",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ResetZoomCommand}",
+        "After": "{Binding ResetZoomCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TiffReviewResetZoom",
+        "After": "Session.TiffReviewResetZoom",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TrimAdjust.Use",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding UseThisTrimCommand}",
+        "After": "{Binding UseThisTrimCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding UseThisTrimIdentity}",
+        "After": "{Binding UseThisTrimIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TrimAdjust.Use",
+        "After": "Session.TrimAdjust.Use",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TrimAdjust.Restore",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RestoreAutomaticSuggestionCommand}",
+        "After": "{Binding RestoreAutomaticSuggestionCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TrimAdjust.Restore",
+        "After": "Session.TrimAdjust.Restore",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TrimAdjust.Cancel",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CancelTrimAdjustCommand}",
+        "After": "{Binding CancelTrimAdjustCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TrimAdjust.Cancel",
+        "After": "Session.TrimAdjust.Cancel",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TrimAdjust.CompareToggle",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ToggleTrimCompareCommand}",
+        "After": "{Binding ToggleTrimCompareCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TrimAdjust.CompareToggle",
+        "After": "Session.TrimAdjust.CompareToggle",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ApplyManualCrop",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ApplyManualCropCommand}",
+        "After": "{Binding ApplyManualCropCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ApplyManualCrop",
+        "After": "Session.ApplyManualCrop",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.CancelManualCrop",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CancelManualCropCommand}",
+        "After": "{Binding CancelManualCropCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.CancelManualCrop",
+        "After": "Session.CancelManualCrop",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.Prepare",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding PrepareCorrectionFilesCommand}",
+        "After": "{Binding PrepareCorrectionFilesCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding AskIdentity}",
+        "After": "{Binding AskIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.Prepare",
+        "After": "Session.Correction.Prepare",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.Cancel",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CancelAskColleagueCommand}",
+        "After": "{Binding CancelAskColleagueCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.Cancel",
+        "After": "Session.Correction.Cancel",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.OpenFolder",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding OpenCorrectionFolderCommand}",
+        "After": "{Binding OpenCorrectionFolderCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.OpenFolder",
+        "After": "Session.Correction.OpenFolder",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.Repair",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RepairCorrectionFilesCommand}",
+        "After": "{Binding RepairCorrectionFilesCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.Repair",
+        "After": "Session.Correction.Repair",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.Import",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ImportCorrectedImageCommand}",
+        "After": "{Binding ImportCorrectedImageCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding ImportIdentity}",
+        "After": "{Binding ImportIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.Import",
+        "After": "Session.Correction.Import",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Correction.ReenterAutomation",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ReenterAutomationCommand}",
+        "After": "{Binding ReenterAutomationCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Correction.ReenterAutomation",
+        "After": "Session.Correction.ReenterAutomation",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReviewGuidance.AskColleague",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginAskColleagueCommand}",
+        "After": "{Binding BeginAskColleagueCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReviewGuidance.AskColleague",
+        "After": "Session.ReviewGuidance.AskColleague",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ReviewGuidance.AdjustTrim",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginTrimAdjustCommand}",
+        "After": "{Binding BeginTrimAdjustCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ReviewGuidance.AdjustTrim",
+        "After": "Session.ReviewGuidance.AdjustTrim",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.PrintDimensions.CustomSize",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ChooseCustomSizeCommand}",
+        "After": "{Binding ChooseCustomSizeCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.PrintDimensions.CustomSize",
+        "After": "Session.PrintDimensions.CustomSize",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.PrintDimensions.ConfirmSize",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ConfirmCustomSizeCommand}",
+        "After": "{Binding ConfirmCustomSizeCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.PrintDimensions.ConfirmSize",
+        "After": "Session.PrintDimensions.ConfirmSize",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ConfirmOriginal",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ConfirmOriginalCommand}",
+        "After": "{Binding ConfirmOriginalCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ConfirmOriginal",
+        "After": "Session.ConfirmOriginal",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.RunStep",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RunStepCommand}",
+        "After": "{Binding RunStepCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.RunStep",
+        "After": "Session.RunStep",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Approve",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding ApproveCommand}",
+        "After": "{Binding ApproveCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding ReviewTargetIdentity}",
+        "After": "{Binding ReviewTargetIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Approve",
+        "After": "Session.Approve",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Reject",
+    "BeforeType": "ReviewApprovalButton",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RejectCommand}",
+        "After": "{Binding RejectCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "{Binding RejectTargetIdentity}",
+        "After": "{Binding RejectTargetIdentity}",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "{Binding IsRejectGestureGuarded}",
+        "After": "{Binding IsRejectGestureGuarded}",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Reject",
+        "After": "Session.Reject",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.AskColleague",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginAskColleagueCommand}",
+        "After": "{Binding BeginAskColleagueCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.AskColleague",
+        "After": "Session.AskColleague",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.TrimAdjust.Begin",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BeginTrimAdjustCommand}",
+        "After": "{Binding BeginTrimAdjustCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.TrimAdjust.Begin",
+        "After": "Session.TrimAdjust.Begin",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Retry",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding RetryCommand}",
+        "After": "{Binding RetryCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Retry",
+        "After": "Session.Retry",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.ErrorDetails",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding OpenErrorDetailsCommand}",
+        "After": "{Binding OpenErrorDetailsCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.ErrorDetails",
+        "After": "Session.ErrorDetails",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Skip",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding SkipCommand}",
+        "After": "{Binding SkipCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Skip",
+        "After": "Session.Skip",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.KeepOriginalExtent",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding KeepOriginalExtentCommand}",
+        "After": "{Binding KeepOriginalExtentCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.KeepOriginalExtent",
+        "After": "Session.KeepOriginalExtent",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.SubmitManualResult",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding SubmitManualResultCommand}",
+        "After": "{Binding SubmitManualResultCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.SubmitManualResult",
+        "After": "Session.SubmitManualResult",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.HandOff",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding HandOffCommand}",
+        "After": "{Binding HandOffCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.HandOff",
+        "After": "Session.HandOff",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.Complete",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding CompleteCommand}",
+        "After": "{Binding CompleteCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.Complete",
+        "After": "Session.Complete",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.AddAnotherSize",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding AddAnotherSizeCommand}",
+        "After": "{Binding AddAnotherSizeCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.AddAnotherSize",
+        "After": "Session.AddAnotherSize",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  },
+  {
+    "Id": "Session.BackToHome",
+    "BeforeType": "Button",
+    "AfterCount": 1,
+    "Attributes": [
+      {
+        "Name": "Command",
+        "Before": "{Binding BackToHomeCommand}",
+        "After": "{Binding BackToHomeCommand}",
+        "Equal": true
+      },
+      {
+        "Name": "CommandParameter",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "TargetIdentity",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsGestureGuarded",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "AutomationProperties.AutomationId",
+        "Before": "Session.BackToHome",
+        "After": "Session.BackToHome",
+        "Equal": true
+      },
+      {
+        "Name": "IsDefault",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      },
+      {
+        "Name": "IsCancel",
+        "Before": "",
+        "After": "",
+        "Equal": true
+      }
+    ]
+  }
+]

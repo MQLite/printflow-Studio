@@ -27,9 +27,12 @@ public sealed class GuidedSessionShellTests
         {
             Button confirm = Find<Button>(tree, "Session.PrintDimensions.ConfirmSize");
             confirm.Visibility.ShouldBe(Visibility.Collapsed);
+            Button entry = Find<Button>(tree, "Session.PrintDimensions.CustomSize");
+            Ancestors(entry).ShouldContain(Find<FrameworkElement>(tree, "Session.ActionBar"));
             model.ChooseCustomSizeCommand.Execute(null);
             tree.Root.UpdateLayout();
             confirm.Visibility.ShouldBe(Visibility.Visible);
+            entry.Visibility.ShouldBe(Visibility.Collapsed);
             model.RecommendedCommand.ShouldBeSameAs(model.ConfirmCustomSizeCommand);
             Ancestors(confirm).ShouldContain(Find<FrameworkElement>(tree, "Session.ActionBar"));
             return true;

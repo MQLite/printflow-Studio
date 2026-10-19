@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9d594956-f0e9-4a18-8cc4-3d0a6e08237e" name="admin@DESKTOP-0BG8884 2026-10-19 15:30:56" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:30:56.1743097+13:00" queuing="2026-10-19T15:30:56.1743102+13:00" start="2026-10-19T15:30:50.8995124+13:00" finish="2026-10-19T15:31:05.1296716+13:00" />
+  <TestSettings name="default" id="d0150d1a-f850-4a18-8fdc-34ca1bf9572e">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_30_56" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="082c7eed-7dea-4d4a-a662-695fbf5d805a" testId="6552f630-6e42-b458-6731-dd99ef78c07a" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;en&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.5928392" startTime="2026-10-19T15:30:56.8218098+13:00" endTime="2026-10-19T15:30:57.4137267+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="082c7eed-7dea-4d4a-a662-695fbf5d805a" />
+    <UnitTestResult executionId="0d0fdd33-8fb2-48d9-a239-068740b84f64" testId="cb7d3d2e-fe1b-d313-90bc-e25ec6fb3025" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;invalid&quot;, language: &quot;en&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.5359831" startTime="2026-10-19T15:31:02.7381612+13:00" endTime="2026-10-19T15:31:03.2734377+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d0fdd33-8fb2-48d9-a239-068740b84f64" />
+    <UnitTestResult executionId="40e6f58d-1490-450a-82dd-6ffca7142da2" testId="63ec67e8-c755-4e19-1214-5879ca6d1e27" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;border&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.5665031" startTime="2026-10-19T15:30:57.4140596+13:00" endTime="2026-10-19T15:30:57.9806597+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40e6f58d-1490-450a-82dd-6ffca7142da2" />
+    <UnitTestResult executionId="ddfe69e2-9ec7-490e-be1a-2be1e4959b0f" testId="a8ba01c2-35d1-c3cd-e563-11234a1e1ac3" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;design&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.6152181" startTime="2026-10-19T15:31:00.4180669+13:00" endTime="2026-10-19T15:31:01.0336247+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ddfe69e2-9ec7-490e-be1a-2be1e4959b0f" />
+    <UnitTestResult executionId="590ef161-07fe-4036-a7e0-a50440865129" testId="d2a2eaa1-5fe2-9003-8b41-0102c488de41" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;tiny&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.5871123" startTime="2026-10-19T15:30:59.8318326+13:00" endTime="2026-10-19T15:31:00.4179132+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="590ef161-07fe-4036-a7e0-a50440865129" />
+    <UnitTestResult executionId="a33a3180-c3c8-4b62-9f64-9814f8373455" testId="31d02f14-436e-cba4-b31d-4942ccacc85e" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;border&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:01.6121603" startTime="2026-10-19T15:30:54.5280411+13:00" endTime="2026-10-19T15:30:56.1459833+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a33a3180-c3c8-4b62-9f64-9814f8373455">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+    should be empty but had&#xD;
+1&#xD;
+    item and was&#xD;
+["|Reset zoom"]&#xD;
+&#xD;
+Additional Info:&#xD;
+    no control of the image column is cut off at its right edge</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs:line 475&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="95559b6e-fafc-4c60-a254-9f11ca8dc2ea" testId="fce1796a-e135-66f1-5f1a-5382638ddbda" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;small&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.6158468" startTime="2026-10-19T15:30:58.6274232+13:00" endTime="2026-10-19T15:30:59.2435371+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="95559b6e-fafc-4c60-a254-9f11ca8dc2ea" />
+    <UnitTestResult executionId="897a464e-9f83-49b5-83dd-c4007cd55315" testId="0068f11c-f4cc-16a9-1172-3c229dcdd20b" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;invalid&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5414883" startTime="2026-10-19T15:31:04.4318486+13:00" endTime="2026-10-19T15:31:04.9725010+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="897a464e-9f83-49b5-83dd-c4007cd55315" />
+    <UnitTestResult executionId="595729cc-5986-4947-926e-85d9cdd8e6df" testId="74b67e96-cd4b-0237-21cc-602f7b5e5299" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;small&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5865694" startTime="2026-10-19T15:31:03.8435697+13:00" endTime="2026-10-19T15:31:04.4304874+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="595729cc-5986-4947-926e-85d9cdd8e6df">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+    should be empty but had&#xD;
+1&#xD;
+    item and was&#xD;
+["|Reset zoom"]&#xD;
+&#xD;
+Additional Info:&#xD;
+    no control of the image column is cut off at its right edge</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs:line 475&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="78b61af7-1fed-4336-98e5-10aac20e4bd8" testId="6298dcd6-6f11-d513-7fea-5348e4b11163" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;tiny&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5511326" startTime="2026-10-19T15:31:02.1865051+13:00" endTime="2026-10-19T15:31:02.7370088+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="78b61af7-1fed-4336-98e5-10aac20e4bd8">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+    should be empty but had&#xD;
+1&#xD;
+    item and was&#xD;
+["|Reset zoom"]&#xD;
+&#xD;
+Additional Info:&#xD;
+    no control of the image column is cut off at its right edge</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs:line 475&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="394981c4-a6e2-4430-a988-0071d2b6e960" testId="ed667d03-787d-67df-a3e4-53bcdbb32ba1" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;design&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5463640" startTime="2026-10-19T15:31:01.6381746+13:00" endTime="2026-10-19T15:31:02.1851770+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="394981c4-a6e2-4430-a988-0071d2b6e960">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+    should be empty but had&#xD;
+1&#xD;
+    item and was&#xD;
+["|Reset zoom"]&#xD;
+&#xD;
+Additional Info:&#xD;
+    no control of the image column is cut off at its right edge</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs:line 475&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="82cb783c-98d0-4733-990e-5fa09ad247ff" testId="1798e3a7-a229-d056-cc52-5a3442825037" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.6462335" startTime="2026-10-19T15:30:57.9808080+13:00" endTime="2026-10-19T15:30:58.6272855+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="82cb783c-98d0-4733-990e-5fa09ad247ff" />
+    <UnitTestResult executionId="88c5de01-eccc-4b7a-b472-fc3535643d4f" testId="e20b15d1-ab44-1f96-5e2b-8e640221b1ec" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.5685973" startTime="2026-10-19T15:31:03.2735837+13:00" endTime="2026-10-19T15:31:03.8431674+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88c5de01-eccc-4b7a-b472-fc3535643d4f" />
+    <UnitTestResult executionId="5b738a31-d19d-4182-98af-937b8fa78c9b" testId="575e9779-c31a-c80b-8b84-70f0449c9207" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5859476" startTime="2026-10-19T15:30:59.2437046+13:00" endTime="2026-10-19T15:30:59.8304428+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5b738a31-d19d-4182-98af-937b8fa78c9b">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+    should be empty but had&#xD;
+1&#xD;
+    item and was&#xD;
+["|Reset zoom"]&#xD;
+&#xD;
+Additional Info:&#xD;
+    no control of the image column is cut off at its right edge</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs:line 475&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5bfdb8ed-9329-43fa-9837-adfb2bc44e89" testId="c4a10599-b19a-1fd1-9e3f-182f2075b2a7" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;compare&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" computerName="DESKTOP-0BG8884" duration="00:00:00.6037699" startTime="2026-10-19T15:31:01.0337622+13:00" endTime="2026-10-19T15:31:01.6380157+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bfdb8ed-9329-43fa-9837-adfb2bc44e89" />
+    <UnitTestResult executionId="8775fd5d-8744-4299-a209-347601c89bd9" testId="9c1fec3c-0c81-6714-e195-cbe492097bcf" testName="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;compare&quot;, language: &quot;en&quot;, width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.6731727" startTime="2026-10-19T15:30:56.1624290+13:00" endTime="2026-10-19T15:30:56.8205652+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8775fd5d-8744-4299-a209-347601c89bd9" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="575e9779-c31a-c80b-8b84-70f0449c9207">
+      <Execution id="5b738a31-d19d-4182-98af-937b8fa78c9b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;tiny&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d2a2eaa1-5fe2-9003-8b41-0102c488de41">
+      <Execution id="590ef161-07fe-4036-a7e0-a50440865129" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;compare&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9c1fec3c-0c81-6714-e195-cbe492097bcf">
+      <Execution id="8775fd5d-8744-4299-a209-347601c89bd9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;design&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ed667d03-787d-67df-a3e4-53bcdbb32ba1">
+      <Execution id="394981c4-a6e2-4430-a988-0071d2b6e960" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;small&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="74b67e96-cd4b-0237-21cc-602f7b5e5299">
+      <Execution id="595729cc-5986-4947-926e-85d9cdd8e6df" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;invalid&quot;, language: &quot;en&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="cb7d3d2e-fe1b-d313-90bc-e25ec6fb3025">
+      <Execution id="0d0fdd33-8fb2-48d9-a239-068740b84f64" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;tiny&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6298dcd6-6f11-d513-7fea-5348e4b11163">
+      <Execution id="78b61af7-1fed-4336-98e5-10aac20e4bd8" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;border&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="63ec67e8-c755-4e19-1214-5879ca6d1e27">
+      <Execution id="40e6f58d-1490-450a-82dd-6ffca7142da2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;invalid&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0068f11c-f4cc-16a9-1172-3c229dcdd20b">
+      <Execution id="897a464e-9f83-49b5-83dd-c4007cd55315" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e20b15d1-ab44-1f96-5e2b-8e640221b1ec">
+      <Execution id="88c5de01-eccc-4b7a-b472-fc3535643d4f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;small&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="fce1796a-e135-66f1-5f1a-5382638ddbda">
+      <Execution id="95559b6e-fafc-4c60-a254-9f11ca8dc2ea" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;design&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a8ba01c2-35d1-c3cd-e563-11234a1e1ac3">
+      <Execution id="ddfe69e2-9ec7-490e-be1a-2be1e4959b0f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;zh-CN&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1798e3a7-a229-d056-cc52-5a3442825037">
+      <Execution id="82cb783c-98d0-4733-990e-5fa09ad247ff" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;adjust&quot;, language: &quot;en&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6552f630-6e42-b458-6731-dd99ef78c07a">
+      <Execution id="082c7eed-7dea-4d4a-a662-695fbf5d805a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;compare&quot;, language: &quot;zh-CN&quot;, width: 1920, height: 1040)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="c4a10599-b19a-1fd1-9e3f-182f2075b2a7">
+      <Execution id="5bfdb8ed-9329-43fa-9837-adfb2bc44e89" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: &quot;border&quot;, language: &quot;en&quot;, width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="31d02f14-436e-cba4-b31d-4942ccacc85e">
+      <Execution id="a33a3180-c3c8-4b62-9f64-9814f8373455" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests" name="Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6552f630-6e42-b458-6731-dd99ef78c07a" executionId="082c7eed-7dea-4d4a-a662-695fbf5d805a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cb7d3d2e-fe1b-d313-90bc-e25ec6fb3025" executionId="0d0fdd33-8fb2-48d9-a239-068740b84f64" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="63ec67e8-c755-4e19-1214-5879ca6d1e27" executionId="40e6f58d-1490-450a-82dd-6ffca7142da2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a8ba01c2-35d1-c3cd-e563-11234a1e1ac3" executionId="ddfe69e2-9ec7-490e-be1a-2be1e4959b0f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d2a2eaa1-5fe2-9003-8b41-0102c488de41" executionId="590ef161-07fe-4036-a7e0-a50440865129" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="31d02f14-436e-cba4-b31d-4942ccacc85e" executionId="a33a3180-c3c8-4b62-9f64-9814f8373455" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fce1796a-e135-66f1-5f1a-5382638ddbda" executionId="95559b6e-fafc-4c60-a254-9f11ca8dc2ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0068f11c-f4cc-16a9-1172-3c229dcdd20b" executionId="897a464e-9f83-49b5-83dd-c4007cd55315" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="74b67e96-cd4b-0237-21cc-602f7b5e5299" executionId="595729cc-5986-4947-926e-85d9cdd8e6df" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6298dcd6-6f11-d513-7fea-5348e4b11163" executionId="78b61af7-1fed-4336-98e5-10aac20e4bd8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed667d03-787d-67df-a3e4-53bcdbb32ba1" executionId="394981c4-a6e2-4430-a988-0071d2b6e960" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1798e3a7-a229-d056-cc52-5a3442825037" executionId="82cb783c-98d0-4733-990e-5fa09ad247ff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e20b15d1-ab44-1f96-5e2b-8e640221b1ec" executionId="88c5de01-eccc-4b7a-b472-fc3535643d4f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="575e9779-c31a-c80b-8b84-70f0449c9207" executionId="5b738a31-d19d-4182-98af-937b8fa78c9b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c4a10599-b19a-1fd1-9e3f-182f2075b2a7" executionId="5bfdb8ed-9329-43fa-9837-adfb2bc44e89" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c1fec3c-0c81-6714-e195-cbe492097bcf" executionId="8775fd5d-8744-4299-a209-347601c89bd9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="16" executed="16" passed="11" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.24]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.16]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.20]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.85]       Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+[xUnit.net 00:00:04.85]           should be empty but had&#xD;
+[xUnit.net 00:00:04.85]       1&#xD;
+[xUnit.net 00:00:04.85]           item and was&#xD;
+[xUnit.net 00:00:04.85]       ["|Reset zoom"]&#xD;
+[xUnit.net 00:00:04.85]       &#xD;
+[xUnit.net 00:00:04.85]       Additional Info:&#xD;
+[xUnit.net 00:00:04.85]           no control of the image column is cut off at its right edge&#xD;
+[xUnit.net 00:00:04.85]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.85]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs(475,0): at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height)&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.85]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.53]       Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+[xUnit.net 00:00:08.53]           should be empty but had&#xD;
+[xUnit.net 00:00:08.53]       1&#xD;
+[xUnit.net 00:00:08.53]           item and was&#xD;
+[xUnit.net 00:00:08.53]       ["|Reset zoom"]&#xD;
+[xUnit.net 00:00:08.53]       &#xD;
+[xUnit.net 00:00:08.53]       Additional Info:&#xD;
+[xUnit.net 00:00:08.53]           no control of the image column is cut off at its right edge&#xD;
+[xUnit.net 00:00:08.53]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.53]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs(475,0): at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height)&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.53]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.53]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:10.89]       Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+[xUnit.net 00:00:10.89]           should be empty but had&#xD;
+[xUnit.net 00:00:10.89]       1&#xD;
+[xUnit.net 00:00:10.89]           item and was&#xD;
+[xUnit.net 00:00:10.89]       ["|Reset zoom"]&#xD;
+[xUnit.net 00:00:10.89]       &#xD;
+[xUnit.net 00:00:10.89]       Additional Info:&#xD;
+[xUnit.net 00:00:10.89]           no control of the image column is cut off at its right edge&#xD;
+[xUnit.net 00:00:10.89]       Stack Trace:&#xD;
+[xUnit.net 00:00:10.89]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs(475,0): at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height)&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:10.89]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:10.89]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:11.44]       Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+[xUnit.net 00:00:11.44]           should be empty but had&#xD;
+[xUnit.net 00:00:11.44]       1&#xD;
+[xUnit.net 00:00:11.44]           item and was&#xD;
+[xUnit.net 00:00:11.44]       ["|Reset zoom"]&#xD;
+[xUnit.net 00:00:11.44]       &#xD;
+[xUnit.net 00:00:11.44]       Additional Info:&#xD;
+[xUnit.net 00:00:11.44]           no control of the image column is cut off at its right edge&#xD;
+[xUnit.net 00:00:11.44]       Stack Trace:&#xD;
+[xUnit.net 00:00:11.44]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs(475,0): at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height)&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:11.44]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:11.44]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:13.13]       Shouldly.ShouldAssertException : facts.Facts.Clipped&#xD;
+[xUnit.net 00:00:13.13]           should be empty but had&#xD;
+[xUnit.net 00:00:13.13]       1&#xD;
+[xUnit.net 00:00:13.13]           item and was&#xD;
+[xUnit.net 00:00:13.13]       ["|Reset zoom"]&#xD;
+[xUnit.net 00:00:13.13]       &#xD;
+[xUnit.net 00:00:13.13]       Additional Info:&#xD;
+[xUnit.net 00:00:13.13]           no control of the image column is cut off at its right edge&#xD;
+[xUnit.net 00:00:13.13]       Stack Trace:&#xD;
+[xUnit.net 00:00:13.13]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\TrimAdjustmentUiTests.cs(475,0): at PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(String state, String language, Double width, Double height)&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:13.13]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:13.13]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:13.68]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:30:56.1484010+13:00">
+        <Text>[xUnit.net 00:00:04.85]     PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: "border", language: "en", width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:30:59.8307759+13:00">
+        <Text>[xUnit.net 00:00:08.53]     PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: "adjust", language: "en", width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:31:02.1855273+13:00">
+        <Text>[xUnit.net 00:00:10.89]     PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: "design", language: "en", width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:31:02.7372592+13:00">
+        <Text>[xUnit.net 00:00:11.44]     PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: "tiny", language: "en", width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:31:04.4341322+13:00">
+        <Text>[xUnit.net 00:00:13.13]     PrintFlow.Tests.Integration.Ui.TrimAdjustmentUiTests.Rendered_adjustment_keeps_handles_whole_controls_reachable_and_text_wrapped(state: "small", language: "en", width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

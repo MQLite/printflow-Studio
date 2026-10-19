@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="85c5db39-329e-4eec-ab5c-f8e3e00ee05c" name="admin@DESKTOP-0BG8884 2026-10-19 15:03:21" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:03:21.8240989+13:00" queuing="2026-10-19T15:03:21.8240991+13:00" start="2026-10-19T15:03:15.7235585+13:00" finish="2026-10-19T15:03:23.6950875+13:00" />
+  <TestSettings name="default" id="b39b852e-f41e-4efe-9526-9c4d98d1f731">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_03_21" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="88e593d2-f42c-44e5-8837-269c803a7c2e" testId="252ec2cf-771b-29ca-83c6-eae3ddc75885" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.4853484" startTime="2026-10-19T15:03:22.1378605+13:00" endTime="2026-10-19T15:03:22.6208941+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88e593d2-f42c-44e5-8837-269c803a7c2e">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 94&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 28&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3c488e0b-401b-4f91-b540-f0b35e9f3394" testId="ce3b7a93-5ea9-38e7-c83e-4a8cb1cea99f" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Technical_metadata_is_disclosed_without_hiding_failure_or_stop" computerName="DESKTOP-0BG8884" duration="00:00:00.4492489" startTime="2026-10-19T15:03:22.6232750+13:00" endTime="2026-10-19T15:03:23.0720271+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c488e0b-401b-4f91-b540-f0b35e9f3394">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Technical_metadata_is_disclosed_without_hiding_failure_or_stop() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 70&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 94&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c.&lt;Technical_metadata_is_disclosed_without_hiding_failure_or_stop&gt;b__2_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 72&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f46f2765-f905-4cd5-b71b-c810c4c894b2" testId="94bd56fa-8846-bad6-0bff-912d5df248b3" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.5172439" startTime="2026-10-19T15:03:21.6290706+13:00" endTime="2026-10-19T15:03:22.1349533+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f46f2765-f905-4cd5-b71b-c810c4c894b2">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 94&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 28&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d9500667-9b15-4236-ae55-b5bc5b5203cb" testId="35ebe70e-150f-7b67-cf23-605dba78b233" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:01.3000211" startTime="2026-10-19T15:03:20.3053939+13:00" endTime="2026-10-19T15:03:21.6159878+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d9500667-9b15-4236-ae55-b5bc5b5203cb">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 94&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 28&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e0357a51-2217-4996-a591-437792e90498" testId="c1c99100-de8b-5eb6-7af9-1d567e83800b" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Current_input_actions_are_in_the_fixed_bar" computerName="DESKTOP-0BG8884" duration="00:00:00.4615435" startTime="2026-10-19T15:03:23.0736572+13:00" endTime="2026-10-19T15:03:23.5343260+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e0357a51-2217-4996-a591-437792e90498">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Current_input_actions_are_in_the_fixed_bar() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 53&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 94&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass1_0.&lt;Current_input_actions_are_in_the_fixed_bar&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs:line 55&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="94bd56fa-8846-bad6-0bff-912d5df248b3">
+      <Execution id="f46f2765-f905-4cd5-b71b-c810c4c894b2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests" name="Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="252ec2cf-771b-29ca-83c6-eae3ddc75885">
+      <Execution id="88e593d2-f42c-44e5-8837-269c803a7c2e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests" name="Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Technical_metadata_is_disclosed_without_hiding_failure_or_stop" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ce3b7a93-5ea9-38e7-c83e-4a8cb1cea99f">
+      <Execution id="3c488e0b-401b-4f91-b540-f0b35e9f3394" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests" name="Technical_metadata_is_disclosed_without_hiding_failure_or_stop" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="35ebe70e-150f-7b67-cf23-605dba78b233">
+      <Execution id="d9500667-9b15-4236-ae55-b5bc5b5203cb" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests" name="Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Current_input_actions_are_in_the_fixed_bar" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="c1c99100-de8b-5eb6-7af9-1d567e83800b">
+      <Execution id="e0357a51-2217-4996-a591-437792e90498" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests" name="Current_input_actions_are_in_the_fixed_bar" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="252ec2cf-771b-29ca-83c6-eae3ddc75885" executionId="88e593d2-f42c-44e5-8837-269c803a7c2e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ce3b7a93-5ea9-38e7-c83e-4a8cb1cea99f" executionId="3c488e0b-401b-4f91-b540-f0b35e9f3394" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94bd56fa-8846-bad6-0bff-912d5df248b3" executionId="f46f2765-f905-4cd5-b71b-c810c4c894b2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="35ebe70e-150f-7b67-cf23-605dba78b233" executionId="d9500667-9b15-4236-ae55-b5bc5b5203cb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c1c99100-de8b-5eb6-7af9-1d567e83800b" executionId="e0357a51-2217-4996-a591-437792e90498" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="5" executed="5" passed="0" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.61]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.15]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.19]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.53]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.53]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:05.53]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(25,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.54]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.54]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.54]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:05.54]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(94,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(28,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.05]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.05]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:06.05]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(25,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.05]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.05]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.05]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:06.05]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(94,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(28,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.05]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.54]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.54]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:06.54]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(25,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.54]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.54]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.54]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:06.54]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(94,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(28,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass0_0.&lt;Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.54]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.99]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.99]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:06.99]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(70,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Technical_metadata_is_disclosed_without_hiding_failure_or_stop()&#xD;
+[xUnit.net 00:00:06.99]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.99]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.99]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:06.99]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(94,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(72,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c.&lt;Technical_metadata_is_disclosed_without_hiding_failure_or_stop&gt;b__2_1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.45]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.45]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:07.45]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(53,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Current_input_actions_are_in_the_fixed_bar()&#xD;
+[xUnit.net 00:00:07.45]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.45]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.45]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:07.45]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:07.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(94,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:07.46]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionShellTests.cs(55,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.&lt;&gt;c__DisplayClass1_0.&lt;Current_input_actions_are_in_the_fixed_bar&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.46]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.46]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.47]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:03:21.6188568+13:00">
+        <Text>[xUnit.net 00:00:05.53]     PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:03:22.1357730+13:00">
+        <Text>[xUnit.net 00:00:06.05]     PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:03:22.6212142+13:00">
+        <Text>[xUnit.net 00:00:06.54]     PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:03:23.0723132+13:00">
+        <Text>[xUnit.net 00:00:06.99]     PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Technical_metadata_is_disclosed_without_hiding_failure_or_stop [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:03:23.5345980+13:00">
+        <Text>[xUnit.net 00:00:07.45]     PrintFlow.Tests.Integration.Ui.GuidedSessionShellTests.Current_input_actions_are_in_the_fixed_bar [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="35dd7781-7f4e-4231-a4bb-7dcd2d30951f" name="admin@DESKTOP-0BG8884 2026-10-19 15:20:50" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:20:50.0597747+13:00" queuing="2026-10-19T15:20:50.0597749+13:00" start="2026-10-19T15:20:44.4338501+13:00" finish="2026-10-19T15:20:50.7836078+13:00" />
+  <TestSettings name="default" id="1d6eb74a-d4a5-437e-9cda-1f835db26a30">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_20_50" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="577e4fbe-0e1f-4efe-a2e3-518c63ad697c" testId="8a738d98-6e27-a2e6-4df3-fbfb3ea2d645" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.History_is_readonly_and_cannot_approve_the_live_result" computerName="DESKTOP-0BG8884" duration="00:00:00.3394535" startTime="2026-10-19T15:20:49.4585362+13:00" endTime="2026-10-19T15:20:49.7943642+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="577e4fbe-0e1f-4efe-a2e3-518c63ad697c">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : info&#xD;
+    should not be null but was&#xD;
+&#xD;
+Additional Info:&#xD;
+    ViewHistoryCommand must exist</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Read[T](Object target, String property) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 101&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Command(Object target, String property) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 104&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.History_is_readonly_and_cannot_approve_the_live_result() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 41&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9533c520-088f-48d9-8465-5943d618717e" testId="6906ca37-ab7b-b741-4d2f-e44835338d47" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.2774893" startTime="2026-10-19T15:20:50.3767899+13:00" endTime="2026-10-19T15:20:50.6555582+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9533c520-088f-48d9-8465-5943d618717e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : nav.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(Boolean discard) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 66&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e10989de-a452-4071-b86a-15b61434a792" testId="aa27f2a1-068f-86ab-c8a4-721ca1d5849e" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Return_confirmation_cannot_be_retargeted_or_reused" computerName="DESKTOP-0BG8884" duration="00:00:00.3161025" startTime="2026-10-19T15:20:49.8001453+13:00" endTime="2026-10-19T15:20:50.1109539+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e10989de-a452-4071-b86a-15b61434a792">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : after.Steps&#xD;
+    should be&#xD;
+[SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]&#xD;
+    but was&#xD;
+[SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]&#xD;
+    difference&#xD;
+[SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, *SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }*, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Return_confirmation_cannot_be_retargeted_or_reused() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 26&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9d8ae42b-432f-4d52-98d9-a616079553da" testId="9161cee9-cda9-9713-0b68-dd37393db927" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Same_context_reload_preserves_dimension_draft" computerName="DESKTOP-0BG8884" duration="00:00:00.9065351" startTime="2026-10-19T15:20:48.5400485+13:00" endTime="2026-10-19T15:20:49.4487853+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d8ae42b-432f-4d52-98d9-a616079553da" />
+    <UnitTestResult executionId="df9be9d4-7d73-47cc-8bce-01cf11b21581" testId="85a19693-3148-c556-309c-3965e2f11889" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.2643334" startTime="2026-10-19T15:20:50.1122137+13:00" endTime="2026-10-19T15:20:50.3760249+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="df9be9d4-7d73-47cc-8bce-01cf11b21581">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : nav.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(Boolean discard) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs:line 66&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.History_is_readonly_and_cannot_approve_the_live_result" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8a738d98-6e27-a2e6-4df3-fbfb3ea2d645">
+      <Execution id="577e4fbe-0e1f-4efe-a2e3-518c63ad697c" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests" name="History_is_readonly_and_cannot_approve_the_live_result" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="85a19693-3148-c556-309c-3965e2f11889">
+      <Execution id="df9be9d4-7d73-47cc-8bce-01cf11b21581" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests" name="Dirty_dimensions_require_keep_or_discard_before_home" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Same_context_reload_preserves_dimension_draft" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9161cee9-cda9-9713-0b68-dd37393db927">
+      <Execution id="9d8ae42b-432f-4d52-98d9-a616079553da" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests" name="Same_context_reload_preserves_dimension_draft" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Return_confirmation_cannot_be_retargeted_or_reused" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="aa27f2a1-068f-86ab-c8a4-721ca1d5849e">
+      <Execution id="e10989de-a452-4071-b86a-15b61434a792" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests" name="Return_confirmation_cannot_be_retargeted_or_reused" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6906ca37-ab7b-b741-4d2f-e44835338d47">
+      <Execution id="9533c520-088f-48d9-8465-5943d618717e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests" name="Dirty_dimensions_require_keep_or_discard_before_home" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8a738d98-6e27-a2e6-4df3-fbfb3ea2d645" executionId="577e4fbe-0e1f-4efe-a2e3-518c63ad697c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6906ca37-ab7b-b741-4d2f-e44835338d47" executionId="9533c520-088f-48d9-8465-5943d618717e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aa27f2a1-068f-86ab-c8a4-721ca1d5849e" executionId="e10989de-a452-4071-b86a-15b61434a792" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9161cee9-cda9-9713-0b68-dd37393db927" executionId="9d8ae42b-432f-4d52-98d9-a616079553da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="85a19693-3148-c556-309c-3965e2f11889" executionId="df9be9d4-7d73-47cc-8bce-01cf11b21581" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="5" executed="5" passed="1" failed="4" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.63]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.69]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.73]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.02]       Shouldly.ShouldAssertException : info&#xD;
+[xUnit.net 00:00:05.02]           should not be null but was&#xD;
+[xUnit.net 00:00:05.02]       &#xD;
+[xUnit.net 00:00:05.02]       Additional Info:&#xD;
+[xUnit.net 00:00:05.02]           ViewHistoryCommand must exist&#xD;
+[xUnit.net 00:00:05.02]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(101,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Read[T](Object target, String property)&#xD;
+[xUnit.net 00:00:05.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(104,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Command(Object target, String property)&#xD;
+[xUnit.net 00:00:05.02]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(41,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.History_is_readonly_and_cannot_approve_the_live_result()&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.02]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.33]       Shouldly.ShouldAssertException : after.Steps&#xD;
+[xUnit.net 00:00:05.33]           should be&#xD;
+[xUnit.net 00:00:05.33]       [SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]&#xD;
+[xUnit.net 00:00:05.33]           but was&#xD;
+[xUnit.net 00:00:05.33]       [SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]&#xD;
+[xUnit.net 00:00:05.33]           difference&#xD;
+[xUnit.net 00:00:05.33]       [SessionStep { Step = Import, Ordinal = 0, State = Approved, CurrentRevisionId = 01a151f6-2bf9-7eb7-84b3-583c865f8138, CurrentRevisionSha256 = 7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B, SkipReason = , AttemptCount = 1, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = True }, SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Approved, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, SessionStep { Step = Enhancement, Ordinal = 2, State = Skipped, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = File already satisfies this step, AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = True, HasResult = False }, *SessionStep { Step = BackgroundRemoval, Ordinal = 3, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }*, SessionStep { Step = Trim, Ordinal = 4, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, SessionStep { Step = ApprovedPngExport, Ordinal = 5, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }]&#xD;
+[xUnit.net 00:00:05.33]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.33]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(26,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Return_confirmation_cannot_be_retargeted_or_reused()&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.33]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.33]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.60]       Shouldly.ShouldAssertException : nav.GoHomeCount&#xD;
+[xUnit.net 00:00:05.60]           should be&#xD;
+[xUnit.net 00:00:05.60]       0&#xD;
+[xUnit.net 00:00:05.60]           but was&#xD;
+[xUnit.net 00:00:05.60]       1&#xD;
+[xUnit.net 00:00:05.60]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.60]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(Boolean discard)&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.60]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.60]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.88]       Shouldly.ShouldAssertException : nav.GoHomeCount&#xD;
+[xUnit.net 00:00:05.88]           should be&#xD;
+[xUnit.net 00:00:05.88]       0&#xD;
+[xUnit.net 00:00:05.88]           but was&#xD;
+[xUnit.net 00:00:05.88]       1&#xD;
+[xUnit.net 00:00:05.88]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.88]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionNavigationTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(Boolean discard)&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.88]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.88]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.89]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:20:49.7970327+13:00">
+        <Text>[xUnit.net 00:00:05.02]     PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.History_is_readonly_and_cannot_approve_the_live_result [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:20:50.1113011+13:00">
+        <Text>[xUnit.net 00:00:05.33]     PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Return_confirmation_cannot_be_retargeted_or_reused [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:20:50.3764718+13:00">
+        <Text>[xUnit.net 00:00:05.60]     PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:20:50.6562537+13:00">
+        <Text>[xUnit.net 00:00:05.88]     PrintFlow.Tests.Integration.Ui.GuidedSessionNavigationTests.Dirty_dimensions_require_keep_or_discard_before_home(discard: False) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

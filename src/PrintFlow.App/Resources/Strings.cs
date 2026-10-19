@@ -1349,4 +1349,3 @@ internal static string Session_PdfPrepared => Get(nameof(Session_PdfPrepared));
     private static string Get(string key) =>
         Manager.GetString(key, OperatorCulture.Current) ?? key;
 }
-

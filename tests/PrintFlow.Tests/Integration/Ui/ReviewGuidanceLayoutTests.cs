@@ -13,7 +13,7 @@ namespace PrintFlow.Tests.Integration.Ui;
 
 /// <summary>
 /// SCRUM-11149 layout: the "What to check" section sits in the right-hand details column and the
-/// picture under review keeps exactly the area it had before the section existed. Off-screen WPF
+/// picture under review keeps the same area with or without guidance in the E2 shell. Off-screen WPF
 /// at 96 DPI only; no window, UIA or input.
 /// </summary>
 [Collection(SqliteCollection.Name)]
@@ -69,18 +69,30 @@ public sealed class ReviewGuidanceLayoutTests
             Rect column = Bounds(details, tree.Root);
             int tooWide = guidance is null ? 0 : tree.OfType<TextBlock>()
                 .Count(t => Shown(t) && IsInside(t, guidance) && t.ActualWidth > guidance.ActualWidth + 0.5);
+            // E2 intentionally replaces the old top table with a left navigation rail.
+            // Keep the original no-image-area-cost contract within this new shell: hiding
+            // the guidance in its details column must not change the image rectangle.
+            if (guidance is not null) guidance.Visibility = Visibility.Collapsed;
+            tree.Root.UpdateLayout();
+            Rect withoutGuidance = Bounds(surface, tree.Root);
+            if (guidance is not null) guidance.Visibility = Visibility.Visible;
+            tree.Root.UpdateLayout();
             return (Image: image, Column: column, Guidance: guidance is null ? (Rect?)null : Bounds(guidance, tree.Root),
                 GuidanceInColumn: guidance is not null && IsInside(guidance, details), TooWide: tooWide,
-                ExtentHeight: details.ExtentHeight, ViewportHeight: details.ViewportHeight);
+                ExtentHeight: details.ExtentHeight, ViewportHeight: details.ViewportHeight,
+                WithoutGuidance: withoutGuidance, PreviousLayout: BaselineImageArea[(step, width)]);
         });
 
         Record(step, language, width, height, facts.Facts);
         facts.Facts.Image.Width.ShouldBeGreaterThan(0);
         facts.Facts.Image.Height.ShouldBeGreaterThan(0);
-        Rect before = BaselineImageArea[(step, width)];
+        Rect before = facts.Facts.WithoutGuidance;
         foreach ((double actual, double expected) in new[] { (facts.Facts.Image.X, before.X), (facts.Facts.Image.Y, before.Y),
                      (facts.Facts.Image.Width, before.Width), (facts.Facts.Image.Height, before.Height) })
-            actual.ShouldBe(expected, 0.01, $"the {step} picture keeps its {width:0}×{height:0} area");
+            actual.ShouldBe(expected, 0.01, $"guidance does not consume the {step} picture area in the guided shell");
+        facts.Facts.Image.Left.ShouldBeGreaterThanOrEqualTo(190);
+        facts.Facts.Image.Right.ShouldBeLessThanOrEqualTo(facts.Facts.Column.Left);
+        facts.Facts.Image.Bottom.ShouldBeLessThanOrEqualTo(height);
 
         Rect guidance = facts.Facts.Guidance.ShouldNotBeNull("the section is shown beside every reviewed step");
         facts.Facts.GuidanceInColumn.ShouldBeTrue("the section lives in the scrollable details column");

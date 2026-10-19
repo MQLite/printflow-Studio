@@ -1,0 +1,41 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:08.70]     PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Source_preparation_is_current_before_any_print_input_and_failure_does_not_advance(extension: "pdf") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Source_preparation_is_current_before_any_print_input_and_failure_does_not_advance(extension: "pdf") [273 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : Page(model)
+    should be
+"Failure"
+    but was
+"SourcePreparation"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   
+Expected Value | F    a    i    l    u    r    e                                                      
+Actual Value   | S    o    u    r    c    e    P    r    e    p    a    r    a    t    i    o    n    
+Expected Code  | 70   97   105  108  117  114  101                                                    
+Actual Code    | 83   111  117  114  99   101  80   114  101  112  97   114  97   116  105  111  110  
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Source_preparation_is_current_before_any_print_input_and_failure_does_not_advance(String extension) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 131
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\g02-green.trx
+
+失败!  - 失败:     1，通过:     9，已跳过:     0，总计:    10，持续时间: 5 s - PrintFlow.Tests.dll (net10.0)

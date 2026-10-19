@@ -1,0 +1,126 @@
+[
+  {
+    "Path": "src/PrintFlow.App/Resources/Strings.cs",
+    "Sha256": "18529849C8793AB3A7B0F852ED61A6406D04AD548145800AB09217638538E081"
+  },
+  {
+    "Path": "src/PrintFlow.App/Resources/Strings.resx",
+    "Sha256": "0B705C296B4771BC22F6848AE94676579B630B7D8D623FFB1AAAA3561513299C"
+  },
+  {
+    "Path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+    "Sha256": "4B6E01F29A2E35F5C00852A9F43646F7B25B4C6B35ECDD5114AEAA85893C59D3"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Correction.cs",
+    "Sha256": "509712710DBC3AC26BA68BE188E7862DFD2E109E8035C5C6A06BAD70B195BDAD"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.cs",
+    "Sha256": "8DFC1419F3EE0AD94F9C9FDD7DC3D2B2074076E4A53343717B77C34BE6C9ECFE"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.FinalSave.cs",
+    "Sha256": "DC83B024622EA23BDDB17478279BD219C8DE497AF7DCF6DF131B53648A00A3B1"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
+    "Sha256": "2E1A659C969B52BBE8DA7D250DDE5EC3FE3C829A48869BB40A5B5530924F892A"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.Navigation.cs",
+    "Sha256": "86DC2D601B37FE174DEB5A06E40F5E1AF0FC3B5CC80B2BF4567B9A1FFED04096"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.OperatorStatus.cs",
+    "Sha256": "432DA213DC6D6E92A66A22974CC4405EBCB15A009A95F9CA124384182EFD7E6B"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.PrintDimensions.cs",
+    "Sha256": "0765652C9D8684A7C336629E707D0563904AF696565BBB1412AE8C47A2CDDFDB"
+  },
+  {
+    "Path": "src/PrintFlow.App/ViewModels/SessionViewModel.TrimAdjust.cs",
+    "Sha256": "C15E478DF1C2F735C1632F3EBA5DE8C13D01705F825B82E2503830476C319E84"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/ReviewApprovalButton.cs",
+    "Sha256": "CBED56174A2A106F4C342196F36371C9C02137FFB71D94B4F31C2B111EF38F97"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SessionActionButton.cs",
+    "Sha256": "E0EDC55844847792676CBAB270CA355F8928F21C0F7BBE8D7535E769BBD5E09F"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SessionActionScope.cs",
+    "Sha256": "262CCB1B8F6D3611A7D4FBA57B9AE41E8169C197579CC566C4AD06AB56B69ED3"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "Sha256": "5F29B807A1570D06376E75790D2F252B74B2BA886A8220A876A1D7420B723844"
+  },
+  {
+    "Path": "src/PrintFlow.App/Views/SessionScreenView.xaml.cs",
+    "Sha256": "5971975F05609D86470727352D750B887233A7D7F8329A26D85A28ADB67D05A2"
+  },
+  {
+    "Path": "src/PrintFlow.Workflow/Services/SessionHistoryView.cs",
+    "Sha256": "F8E95A605981FA497A4541F9F4F06A3C412B01BACCACBC11D05BA4FA7345B34E"
+  },
+  {
+    "Path": "src/PrintFlow.Workflow/Services/SessionView.cs",
+    "Sha256": "AC394BA1EDCD102B081A92E4AA2490BE015C2227068CBDFB47CA1848BEDFE1D6"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/FailureGuidanceLayoutTests.cs",
+    "Sha256": "AA2C112BE9064247295CA325479F7D0E2AF16FBC65B608B63EBBD45CBBFF288E"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/FinalSaveUiTests.cs",
+    "Sha256": "83148B8533CE818F1E44AA1E0ABD7B757212658D7C0DC25873F02532E265EC13"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/FlexibleSizeRenderingTests.cs",
+    "Sha256": "638AD863761568A339021F43F65C9CD1E4C0EB1EDBDC66A86A948218004649EF"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/FlexibleSizeUiTests.cs",
+    "Sha256": "CF6D85044F39143817BBA32CF4E349CF7CA296627A9F5235518DFEC50B1F82C1"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionInputTests.cs",
+    "Sha256": "269D742DB135F028AFD10EA398F2569BEECF6F9127A0716AFD717AB57B6D7BDE"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionNavigationTests.cs",
+    "Sha256": "3AA9D4783F9E31950C08B58E3604799E9937E51C1F69A890E0C2230C2588461E"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionProjectionTests.cs",
+    "Sha256": "F1282EF9198B5CB823C587F550FFE365F91DBAA5AF2F7014BB991B4344C8B4C1"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionShellTests.cs",
+    "Sha256": "24EB75D4601E62236F80DC12295410E7FDC03728036650AF9E77045CFD93B231"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/GuidedSessionVisualEvidenceTests.cs",
+    "Sha256": "92569E821148A1B8DB7832E17AE2ED446E714E801DCA776C3BC93686A44A2C7B"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/PrintSizeGuidanceLayoutTests.cs",
+    "Sha256": "80576D60A0168747491AD65B1448BF66F0F90332106A50FB504770F9F9689801"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/PrintSizeGuidanceUiTests.cs",
+    "Sha256": "24288AC9E285CDC1FD2FCA22539639652E69656219D80530F1FC80E8C960391E"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/ReviewGuidanceLayoutTests.cs",
+    "Sha256": "7D329476504A8985E9F21D0689DCF4AC47B783D614D992E1144CF1617C8299E4"
+  },
+  {
+    "Path": "tests/PrintFlow.Tests/Integration/Ui/TrimAdjustmentUiTests.cs",
+    "Sha256": "1EBD5D353E4274632645A522A69A7CFB0423DDB0508F9E459847677092FC9F57"
+  }
+]

@@ -1,0 +1,542 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="e690c07c-809f-49d0-917c-f2f101208264" name="admin@DESKTOP-0BG8884 2026-10-19 15:35:31" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:35:31.0775509+13:00" queuing="2026-10-19T15:35:31.0775511+13:00" start="2026-10-19T15:35:25.3176268+13:00" finish="2026-10-19T15:35:34.6981199+13:00" />
+  <TestSettings name="default" id="333d70b1-40c1-4a81-9488-3a21ebc9cbe2">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_35_31" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="38d2d39f-8837-4de7-b880-2b8ca6396e8d" testId="902c522f-9b5d-b7d8-ba41-65829eb1cbd5" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.3971559" startTime="2026-10-19T15:35:34.1277105+13:00" endTime="2026-10-19T15:35:34.5217637+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="38d2d39f-8837-4de7-b880-2b8ca6396e8d">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.Notice&#xD;
+    should be&#xD;
+"new task notice"&#xD;
+    but was&#xD;
+"该操作未能完成。美图秀秀或 Photoshop 未在规定时间内完成，PrintFlow 已停止等待。该程序可能仍在运行，请先检查再继续。本次尝试的结果没有被采用；PrintFlow 不会更改你的原始文件。屏幕顶部的状态会显示你现在可以做什么。如果不确定，请展开下方的“错误详情”，并请同事或主管帮忙。"&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   ...  &#xD;
+Expected Value | n    e    w    \s   t    a    s    k    \s   n    o    t    i    c    e                                  ...  &#xD;
+Actual Value   | 该    操    作    未    能    完    成    。    美    图    秀    秀    或    \s   P    h    o    t    o    s    h    ...  &#xD;
+Expected Code  | 110  101  119  32   116  97   115  107  32   110  111  116  105  99   101                                ...  &#xD;
+Actual Code    | 3581325805203162641033021234362510412290326542227031168311682511032   80   104  111  116  111  115  104  ...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39   40   41   ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  o    p    \s   未    在    规    定    时    间    内    完    成    ，    P    r    i    n    t    F    l    o    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  111  112  32   2641022312352682345026102383882086923436251046529280   114  105  110  116  70   108  111  ...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  42   43   44   45   46   47   48   49   50   51   52   53   54   55   56   57   58   59   60   61   62   ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  w    \s   已    停    止    等    待    。    该    程    序    可    能    仍    在    运    行    ，    请    先    检    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  119  32   24050205722749031561244531229035813312432420721487330212017322312368163489265292358312080826816...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  63   64   65   66   67   68   69   70   71   72   73   74   75   76   77   78   79   80   81   82   83   ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  查    再    继    续    。    本    次    尝    试    的    结    果    没    有    被    采    用    ；    P    r    i    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  26597208773248732493122902641227425235813579730340324672652427809263773498737319299926530780   114  105  ...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  84   85   86   87   88   89   90   91   92   93   94   95   96   97   98   99   100  101  102  103  104  ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  n    t    F    l    o    w    \s   不    会    更    改    你    的    原    始    文    件    。    屏    幕    顶    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  110  116  70   108  111  119  32   1998120250263562591320320303402140722987259912021412290236312414939030...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  105  106  107  108  109  110  111  112  113  114  115  116  117  118  119  120  121  122  123  124  125  ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  部    的    状    态    会    显    示    你    现    在    可    以    做    什    么    。    如    果    不    确    定    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  370963034029366245772025026174310342032029616223122148720197205702016020040122902291426524199813083023450...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | ...  126  127  128  129  130  131  132  133  134  135  136  137  138  139  140  141  142  143  144  145  146  ...  &#xD;
+Expected Value | ...                                                                                                           ...  &#xD;
+Actual Value   | ...  ，    请    展    开    下    方    的    “    错    误    详    情    ”    ，    并    请    同    事    或    主    管    ...  &#xD;
+Expected Code  | ...                                                                                                           ...  &#xD;
+Actual Code    | ...  652923583123637243201997926041303408220 381693582335814247738221 6529224182358312151620107251102002731649...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | ...  129  130  131  132  133  134  135  136  137  138  139  140  141  142  143  144  145  146  147  148  149  &#xD;
+Expected Value | ...                                                                                                           &#xD;
+Actual Value   | ...  开    下    方    的    “    错    误    详    情    ”    ，    并    请    同    事    或    主    管    帮    忙    。    &#xD;
+Expected Code  | ...                                                                                                           &#xD;
+Actual Code    | ...  243201997926041303408220 381693582335814247738221 6529224182358312151620107251102002731649241102453712290</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(Boolean failure) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 121&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b56ae1cf-7068-464c-9401-705a5efb0831" testId="0083a61a-943c-129e-ffdb-b683c69ddcdf" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Retained_invoke_provider_cannot_operate_the_next_task" computerName="DESKTOP-0BG8884" duration="00:00:01.2068792" startTime="2026-10-19T15:35:30.4148945+13:00" endTime="2026-10-19T15:35:31.6104142+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b56ae1cf-7068-464c-9401-705a5efb0831">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Retained_invoke_provider_cannot_operate_the_next_task() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 30&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Retained_invoke_provider_cannot_operate_the_next_task&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 39&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b4e40656-7ff3-4ad6-a697-2ff30084099d" testId="2c7f1b56-309e-07f1-da8c-f2cc581828c8" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Return)" computerName="DESKTOP-0BG8884" duration="00:00:00.5683904" startTime="2026-10-19T15:35:31.6122849+13:00" endTime="2026-10-19T15:35:32.1796065+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4e40656-7ff3-4ad6-a697-2ff30084099d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+1&#xD;
+    but was&#xD;
+2&#xD;
+&#xD;
+Additional Info:&#xD;
+    a down/repeat/release cannot cross the task boundary</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(Key key) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 74&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass2_0.&lt;Held_key_release_and_double_click_do_not_activate_new_context&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 84&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="48ec2476-21cb-4f8c-b6d4-874847f217df" testId="e2ce26bb-d002-05f8-7e18-43d4ebc704aa" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.4962438" startTime="2026-10-19T15:35:33.2615558+13:00" endTime="2026-10-19T15:35:33.7576263+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="48ec2476-21cb-4f8c-b6d4-874847f217df">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(Boolean unload) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 53&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Hidden_or_unloaded_controls_refuse_retained_invocation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 61&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="13bbc91b-7d9f-447f-8e5d-2bc06a546a57" testId="ae6a1ddb-fccd-f187-9a03-cc4360f3739b" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5127319" startTime="2026-10-19T15:35:32.7490578+13:00" endTime="2026-10-19T15:35:33.2605454+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13bbc91b-7d9f-447f-8e5d-2bc06a546a57">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(Boolean unload) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 53&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Hidden_or_unloaded_controls_refuse_retained_invocation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 61&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ae96b728-3a10-44dc-9aa6-1b63d7ae9f93" testId="4e27dc64-493b-4471-dab2-2f99b7b06e57" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Old_finally_cannot_clear_new_task_busy_operation" computerName="DESKTOP-0BG8884" duration="00:00:00.8432834" startTime="2026-10-19T15:35:29.5524137+13:00" endTime="2026-10-19T15:35:30.4011934+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ae96b728-3a10-44dc-9aa6-1b63d7ae9f93">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.IsBusy&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    opening B retires only A's screen busy ownership</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Old_finally_cannot_clear_new_task_busy_operation() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 141&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cca1b103-5aab-4375-8cc1-01c94564ffc8" testId="a44a42fe-cd0d-8639-238b-7b82be398f5b" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3633188" startTime="2026-10-19T15:35:33.7590225+13:00" endTime="2026-10-19T15:35:34.1238835+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cca1b103-5aab-4375-8cc1-01c94564ffc8">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : m.Id&#xD;
+    should be&#xD;
+01a15203-a906-76d5-b5df-532ebb3c9d9c&#xD;
+    but was&#xD;
+01a15203-a8dc-7532-a046-087124653c2b</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(Boolean failure) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 120&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9dab1a90-8647-4fdf-ba84-3e106003d26f" testId="202d4a89-1eb0-0d89-55f6-f92369b85a40" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Space)" computerName="DESKTOP-0BG8884" duration="00:00:00.5666587" startTime="2026-10-19T15:35:32.1807595+13:00" endTime="2026-10-19T15:35:32.7470380+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9dab1a90-8647-4fdf-ba84-3e106003d26f">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1&#xD;
+&#xD;
+Additional Info:&#xD;
+    a down/repeat/release cannot cross the task boundary</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(Key key) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 74&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass2_0.&lt;Held_key_release_and_double_click_do_not_activate_new_context&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs:line 84&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ae6a1ddb-fccd-f187-9a03-cc4360f3739b">
+      <Execution id="13bbc91b-7d9f-447f-8e5d-2bc06a546a57" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Hidden_or_unloaded_controls_refuse_retained_invocation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Retained_invoke_provider_cannot_operate_the_next_task" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0083a61a-943c-129e-ffdb-b683c69ddcdf">
+      <Execution id="b56ae1cf-7068-464c-9401-705a5efb0831" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Retained_invoke_provider_cannot_operate_the_next_task" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Return)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="2c7f1b56-309e-07f1-da8c-f2cc581828c8">
+      <Execution id="b4e40656-7ff3-4ad6-a697-2ff30084099d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Held_key_release_and_double_click_do_not_activate_new_context" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Old_finally_cannot_clear_new_task_busy_operation" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4e27dc64-493b-4471-dab2-2f99b7b06e57">
+      <Execution id="ae96b728-3a10-44dc-9aa6-1b63d7ae9f93" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Old_finally_cannot_clear_new_task_busy_operation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a44a42fe-cd0d-8639-238b-7b82be398f5b">
+      <Execution id="cca1b103-5aab-4375-8cc1-01c94564ffc8" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Late_success_or_failure_cannot_replace_new_task_or_its_notice" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: False)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e2ce26bb-d002-05f8-7e18-43d4ebc704aa">
+      <Execution id="48ec2476-21cb-4f8c-b6d4-874847f217df" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Hidden_or_unloaded_controls_refuse_retained_invocation" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Space)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="202d4a89-1eb0-0d89-55f6-f92369b85a40">
+      <Execution id="9dab1a90-8647-4fdf-ba84-3e106003d26f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Held_key_release_and_double_click_do_not_activate_new_context" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: True)" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="902c522f-9b5d-b7d8-ba41-65829eb1cbd5">
+      <Execution id="38d2d39f-8837-4de7-b880-2b8ca6396e8d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests" name="Late_success_or_failure_cannot_replace_new_task_or_its_notice" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="902c522f-9b5d-b7d8-ba41-65829eb1cbd5" executionId="38d2d39f-8837-4de7-b880-2b8ca6396e8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0083a61a-943c-129e-ffdb-b683c69ddcdf" executionId="b56ae1cf-7068-464c-9401-705a5efb0831" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2c7f1b56-309e-07f1-da8c-f2cc581828c8" executionId="b4e40656-7ff3-4ad6-a697-2ff30084099d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e2ce26bb-d002-05f8-7e18-43d4ebc704aa" executionId="48ec2476-21cb-4f8c-b6d4-874847f217df" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae6a1ddb-fccd-f187-9a03-cc4360f3739b" executionId="13bbc91b-7d9f-447f-8e5d-2bc06a546a57" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e27dc64-493b-4471-dab2-2f99b7b06e57" executionId="ae96b728-3a10-44dc-9aa6-1b63d7ae9f93" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a44a42fe-cd0d-8639-238b-7b82be398f5b" executionId="cca1b103-5aab-4375-8cc1-01c94564ffc8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="202d4a89-1eb0-0d89-55f6-f92369b85a40" executionId="9dab1a90-8647-4fdf-ba84-3e106003d26f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="8" executed="8" passed="0" failed="8" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.66]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.80]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.85]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.73]       Shouldly.ShouldAssertException : m.IsBusy&#xD;
+[xUnit.net 00:00:04.73]           should be&#xD;
+[xUnit.net 00:00:04.73]       False&#xD;
+[xUnit.net 00:00:04.73]           but was&#xD;
+[xUnit.net 00:00:04.73]       True&#xD;
+[xUnit.net 00:00:04.73]       &#xD;
+[xUnit.net 00:00:04.73]       Additional Info:&#xD;
+[xUnit.net 00:00:04.73]           opening B retires only A's screen busy ownership&#xD;
+[xUnit.net 00:00:04.73]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.73]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(141,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Old_finally_cannot_clear_new_task_busy_operation()&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.73]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.73]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.94]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.94]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:05.94]           should be&#xD;
+[xUnit.net 00:00:05.94]       0&#xD;
+[xUnit.net 00:00:05.94]           but was&#xD;
+[xUnit.net 00:00:05.94]       1&#xD;
+[xUnit.net 00:00:05.94]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(30,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Retained_invoke_provider_cannot_operate_the_next_task()&#xD;
+[xUnit.net 00:00:05.94]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.94]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Retained_invoke_provider_cannot_operate_the_next_task&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.94]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.51]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.51]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:06.51]           should be&#xD;
+[xUnit.net 00:00:06.51]       1&#xD;
+[xUnit.net 00:00:06.51]           but was&#xD;
+[xUnit.net 00:00:06.51]       2&#xD;
+[xUnit.net 00:00:06.51]       &#xD;
+[xUnit.net 00:00:06.51]       Additional Info:&#xD;
+[xUnit.net 00:00:06.51]           a down/repeat/release cannot cross the task boundary&#xD;
+[xUnit.net 00:00:06.51]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(74,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(Key key)&#xD;
+[xUnit.net 00:00:06.51]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.51]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(84,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass2_0.&lt;Held_key_release_and_double_click_do_not_activate_new_context&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.51]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.07]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.07]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:07.07]           should be&#xD;
+[xUnit.net 00:00:07.07]       0&#xD;
+[xUnit.net 00:00:07.07]           but was&#xD;
+[xUnit.net 00:00:07.07]       1&#xD;
+[xUnit.net 00:00:07.07]       &#xD;
+[xUnit.net 00:00:07.07]       Additional Info:&#xD;
+[xUnit.net 00:00:07.07]           a down/repeat/release cannot cross the task boundary&#xD;
+[xUnit.net 00:00:07.07]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(74,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(Key key)&#xD;
+[xUnit.net 00:00:07.07]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.07]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(84,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass2_0.&lt;Held_key_release_and_double_click_do_not_activate_new_context&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.07]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.59]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.59]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:07.59]           should be&#xD;
+[xUnit.net 00:00:07.59]       0&#xD;
+[xUnit.net 00:00:07.59]           but was&#xD;
+[xUnit.net 00:00:07.59]       1&#xD;
+[xUnit.net 00:00:07.59]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(53,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(Boolean unload)&#xD;
+[xUnit.net 00:00:07.59]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.59]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(61,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Hidden_or_unloaded_controls_refuse_retained_invocation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.59]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.08]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:08.08]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:08.08]           should be&#xD;
+[xUnit.net 00:00:08.08]       0&#xD;
+[xUnit.net 00:00:08.08]           but was&#xD;
+[xUnit.net 00:00:08.08]       1&#xD;
+[xUnit.net 00:00:08.08]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(53,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(Boolean unload)&#xD;
+[xUnit.net 00:00:08.08]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.08]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(61,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.&lt;&gt;c__DisplayClass1_0.&lt;Hidden_or_unloaded_controls_refuse_retained_invocation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:08.08]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.45]       Shouldly.ShouldAssertException : m.Id&#xD;
+[xUnit.net 00:00:08.45]           should be&#xD;
+[xUnit.net 00:00:08.45]       01a15203-a906-76d5-b5df-532ebb3c9d9c&#xD;
+[xUnit.net 00:00:08.45]           but was&#xD;
+[xUnit.net 00:00:08.45]       01a15203-a8dc-7532-a046-087124653c2b&#xD;
+[xUnit.net 00:00:08.45]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.45]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(Boolean failure)&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.45]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.86]       Shouldly.ShouldAssertException : m.Notice&#xD;
+[xUnit.net 00:00:08.86]           should be&#xD;
+[xUnit.net 00:00:08.86]       "new task notice"&#xD;
+[xUnit.net 00:00:08.86]           but was&#xD;
+[xUnit.net 00:00:08.86]       "该操作未能完成。美图秀秀或 Photoshop 未在规定时间内完成，PrintFlow 已停止等待。该程序可能仍在运行，请先检查再继续。本次尝试的结果没有被采用；PrintFlow 不会更改你的原始文件。屏幕顶部的状态会显示你现在可以做什么。如果不确定，请展开下方的“错误详情”，并请同事或主管帮忙。"&#xD;
+[xUnit.net 00:00:08.86]           difference&#xD;
+[xUnit.net 00:00:08.86]       Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | n    e    w    \s   t    a    s    k    \s   n    o    t    i    c    e                                  ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | 该    操    作    未    能    完    成    。    美    图    秀    秀    或    \s   P    h    o    t    o    s    h    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | 110  101  119  32   116  97   115  107  32   110  111  116  105  99   101                                ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | 3581325805203162641033021234362510412290326542227031168311682511032   80   104  111  116  111  115  104  ...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38   39   40   41   ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  o    p    \s   未    在    规    定    时    间    内    完    成    ，    P    r    i    n    t    F    l    o    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  111  112  32   2641022312352682345026102383882086923436251046529280   114  105  110  116  70   108  111  ...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  42   43   44   45   46   47   48   49   50   51   52   53   54   55   56   57   58   59   60   61   62   ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  w    \s   已    停    止    等    待    。    该    程    序    可    能    仍    在    运    行    ，    请    先    检    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  119  32   24050205722749031561244531229035813312432420721487330212017322312368163489265292358312080826816...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  63   64   65   66   67   68   69   70   71   72   73   74   75   76   77   78   79   80   81   82   83   ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  查    再    继    续    。    本    次    尝    试    的    结    果    没    有    被    采    用    ；    P    r    i    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  26597208773248732493122902641227425235813579730340324672652427809263773498737319299926530780   114  105  ...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  84   85   86   87   88   89   90   91   92   93   94   95   96   97   98   99   100  101  102  103  104  ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  n    t    F    l    o    w    \s   不    会    更    改    你    的    原    始    文    件    。    屏    幕    顶    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  110  116  70   108  111  119  32   1998120250263562591320320303402140722987259912021412290236312414939030...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  105  106  107  108  109  110  111  112  113  114  115  116  117  118  119  120  121  122  123  124  125  ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  部    的    状    态    会    显    示    你    现    在    可    以    做    什    么    。    如    果    不    确    定    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  370963034029366245772025026174310342032029616223122148720197205702016020040122902291426524199813083023450...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  126  127  128  129  130  131  132  133  134  135  136  137  138  139  140  141  142  143  144  145  146  ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  ，    请    展    开    下    方    的    “    错    误    详    情    ”    ，    并    请    同    事    或    主    管    ...  &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           ...  &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  652923583123637243201997926041303408220 381693582335814247738221 6529224182358312151620107251102002731649...  &#xD;
+[xUnit.net 00:00:08.86]       &#xD;
+[xUnit.net 00:00:08.86]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:08.86]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:08.86]       Index          | ...  129  130  131  132  133  134  135  136  137  138  139  140  141  142  143  144  145  146  147  148  149  &#xD;
+[xUnit.net 00:00:08.86]       Expected Value | ...                                                                                                           &#xD;
+[xUnit.net 00:00:08.86]       Actual Value   | ...  开    下    方    的    “    错    误    详    情    ”    ，    并    请    同    事    或    主    管    帮    忙    。    &#xD;
+[xUnit.net 00:00:08.86]       Expected Code  | ...                                                                                                           &#xD;
+[xUnit.net 00:00:08.86]       Actual Code    | ...  243201997926041303408220 381693582335814247738221 6529224182358312151620107251102002731649241102453712290&#xD;
+[xUnit.net 00:00:08.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.86]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionInputTests.cs(121,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(Boolean failure)&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.86]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.86]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:30.4036774+13:00">
+        <Text>[xUnit.net 00:00:04.73]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Old_finally_cannot_clear_new_task_busy_operation [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:31.6110169+13:00">
+        <Text>[xUnit.net 00:00:05.94]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Retained_invoke_provider_cannot_operate_the_next_task [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:32.1799320+13:00">
+        <Text>[xUnit.net 00:00:06.51]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Return) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:32.7473235+13:00">
+        <Text>[xUnit.net 00:00:07.07]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Space) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:33.2608120+13:00">
+        <Text>[xUnit.net 00:00:07.59]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:33.7579058+13:00">
+        <Text>[xUnit.net 00:00:08.08]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Hidden_or_unloaded_controls_refuse_retained_invocation(unload: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:34.1246345+13:00">
+        <Text>[xUnit.net 00:00:08.45]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:35:34.5314132+13:00">
+        <Text>[xUnit.net 00:00:08.86]     PrintFlow.Tests.Integration.Ui.GuidedSessionInputTests.Late_success_or_failure_cannot_replace_new_task_or_its_notice(failure: True) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

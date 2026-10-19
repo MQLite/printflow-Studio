@@ -63,6 +63,7 @@ public partial class SessionViewModel
             if (CanManualCrop) return FormatNext(Strings.Session_NextAction, BeginManualCropLabel);
             if (IsStoppedStep) return Strings.Session_NextStopped;
             if (CanConfirmOriginal) return FormatNext(Strings.Session_NextOriginal, ConfirmOriginalLabel);
+            if (ShowsGuidedDimensions) return Strings.Session_NextDimensions;
             if (ShowsGuidedWhiteInk) return Strings.Session_NextWhiteInk;
             if (ShowsGuidedEnlargement) return FormatNext(Strings.Session_NextAction, ContinueWithSizeLabel);
             if (CanRunStep) return FormatNext(Strings.Session_NextAction, RunStepLabel);

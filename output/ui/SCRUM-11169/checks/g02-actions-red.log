@@ -1,0 +1,52 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:04.03]     PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run [823 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : model.RecommendedCommand
+    should be same as
+CommunityToolkit.Mvvm.Input.AsyncRelayCommand (43156878)
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 170
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:04.97]     PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar [939 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : GuidedSessionShellTests.Ancestors(confirm)
+    should contain
+System.Windows.Controls.Grid (23327356)
+    but was actually
+[System.Windows.Controls.StackPanel (41362659), System.Windows.Controls.StackPanel (7592968), System.Windows.Controls.Border (15962040), System.Windows.Controls.StackPanel (55619406), System.Windows.Controls.StackPanel (65019658), System.Windows.Controls.Border (23998419), System.Windows.Controls.StackPanel (56351695), System.Windows.Controls.ScrollContentPresenter (16479749), System.Windows.Controls.Grid (49082446), System.Windows.Controls.ScrollViewer (38392800), System.Windows.Controls.Grid (62772636), System.Windows.Controls.Grid (29532276), System.Windows.Controls.ContentPresenter (32724255), System.Windows.Controls.Border (3532638), PrintFlow.App.Views.SessionScreenView (10665485)]
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 196
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.<>c__DisplayClass6_0.<Current_background_authorisation_confirmation_is_in_the_fixed_bar>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 199
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\g02-actions-red.trx
+
+失败!  - 失败:     2，通过:     0，已跳过:     0，总计:     2，持续时间: 1 s - PrintFlow.Tests.dll (net10.0)

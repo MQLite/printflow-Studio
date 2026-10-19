@@ -194,10 +194,10 @@
                                 <Setter Property="Margin" Value="0,0,8,6" />
                             </Style>
                         </WrapPanel.Resources>
-                        
-                        
-                        
-                        
+
+
+
+
                         <local:SessionActionButton Content="{Binding OpenFolderLabel}" Command="{Binding OpenContainingFolderCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.OpenFolder"
                                 AutomationProperties.Name="{Binding OpenFolderLabel}"
@@ -211,7 +211,7 @@
                                 AutomationProperties.AutomationId="Session.FinalSave.SaveAnotherCopy"
                                 AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
                                 Visibility="{Binding CanSaveAnotherCopy, Converter={StaticResource BoolToVisibility}}" />
-                        
+
                         <local:SessionActionButton Content="{Binding CancelSaveLabel}" Command="{Binding CancelSaveCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.Cancel"
                                 AutomationProperties.Name="{Binding CancelSaveLabel}"
@@ -731,7 +731,7 @@
                                    AutomationProperties.AutomationId="Session.TrimAdjust.SourceUnavailable"
                                    Visibility="{Binding IsTrimSourceUnavailable, Converter={StaticResource BoolToVisibility}}" />
                         <WrapPanel>
-                            
+
                             <local:SessionActionButton Content="{Binding RestoreSuggestionLabel}"
                                     Command="{Binding RestoreAutomaticSuggestionCommand}"
                                     IsEnabled="{Binding CanRestoreAutomaticSuggestion}"
@@ -809,7 +809,7 @@
                             Apply is the only control on this surface that reaches the service.
                             Cancel calls a command that touches nothing at all (§22).
                         -->
-                        
+
                         <local:SessionActionButton Content="{Binding CancelManualCropLabel}"
                                 AutomationProperties.AutomationId="Session.CancelManualCrop" AutomationProperties.Name="{Binding CancelManualCropLabel}"
                                 Command="{Binding CancelManualCropCommand}"
@@ -1088,7 +1088,7 @@
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
                             <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
                             <WrapPanel Margin="0,10,0,0">
-                                
+
                                 <local:SessionActionButton Content="{Binding CorrectionCancelLabel}"
                                         Command="{Binding CancelAskColleagueCommand}"
                                         IsEnabled="{Binding CanCancelAskColleague}"
@@ -1149,7 +1149,7 @@
                                        AutomationProperties.LiveSetting="Assertive"
                                        Visibility="{Binding HasCorrectionMessage, Converter={StaticResource BoolToVisibility}}" />
                             <local:NoticeErrorDetails Code="{Binding CorrectionErrorCode}" />
-                            
+
                             <Expander Header="{Binding CorrectionOtherOptionsLabel}" Margin="0,10,0,0"
                                       AutomationProperties.AutomationId="Session.Correction.OtherOptions"
                                       AutomationProperties.Name="{Binding CorrectionOtherOptionsLabel}"
@@ -1174,26 +1174,6 @@
                                AutomationProperties.AutomationId="Session.Correction.Identical"
                                Visibility="{Binding IsCorrectionIdenticalToSent, Converter={StaticResource BoolToVisibility}}" />
 
-                    <!--
-                        Final review and save (SCRUM-11145). Present only for a final review, an
-                        approved final result or its recorded saves. Every state is stated in
-                        words; paths are selectable text; technical identities stay in details.
-                        No button here is a default button, and approving or saving buttons use
-                        the fresh-gesture input guard bound to the exact target and draft.
-                    -->
-                    <ContentControl Focusable="False" IsTabStop="False">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Content" Value="{x:Null}" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
-                                        <Setter Property="Content" Value="{Binding}" />
-                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
 
                     <!--
                         What to check (SCRUM-11149). Read-only guidance for the result under review:
@@ -1252,6 +1232,26 @@
                         </StackPanel>
                     </Border>
 
+                    <!--
+                        Final review and save (SCRUM-11145). Present only for a final review, an
+                        approved final result or its recorded saves. Every state is stated in
+                        words; paths are selectable text; technical identities stay in details.
+                        No button here is a default button, and approving or saving buttons use
+                        the fresh-gesture input guard bound to the exact target and draft.
+                    -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFinalSave}" Value="True">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 <Expander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
@@ -1352,7 +1352,7 @@
                                            TextWrapping="Wrap"
                                            Opacity="0.8" />
 
-                                
+
 
                                 <!--
                                     The confirmation (§11). It says Meitu decides the subject on
@@ -1371,9 +1371,9 @@
                                                    TextWrapping="Wrap" />
 
                                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                            
 
-                                            
+
+
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -1493,7 +1493,7 @@
                                          Text="{Binding LeftMarginText, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
-                            
+
 
                             <!-- The persisted decision, so it says what Run Step would do (§18). -->
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
@@ -1548,12 +1548,6 @@
                                        Opacity="0.8"
                                        Margin="0,4,0,6"
                                        AutomationProperties.AutomationId="Session.PrintDimensions.CustomHelp" />
-                            <local:SessionActionButton Content="{Binding CustomSizeLabel}"
-                                    Command="{Binding ChooseCustomSizeCommand}"
-                                    AutomationProperties.AutomationId="Session.PrintDimensions.CustomSize"
-                                    HorizontalAlignment="Left"
-                                    Padding="14,6"
-                                    Margin="0,4,0,0" />
 
                             <Border BorderBrush="#22000000"
                                     BorderThickness="1"
@@ -1601,7 +1595,7 @@
                                                Margin="0,6,0,0"
                                                AutomationProperties.AutomationId="Session.PrintDimensions.TargetSizeHint"
                                                Visibility="{Binding HasCustomSizeInputHint, Converter={StaticResource BoolToVisibility}}" />
-                                    
+
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -1720,7 +1714,7 @@
                                                 Command="{Binding ChangeSizeCommand}"
                                                 Padding="12,5"
                                                 Margin="0,0,8,0" />
-                                        
+
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -1850,7 +1844,7 @@
                                 </ListBox.ItemContainerStyle>
                             </ListBox>
 
-                            
+
 
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding BranchLabel}" Opacity="0.75" Margin="0,0,8,0" />
@@ -2171,7 +2165,7 @@
                                 and history is kept — and says nothing about files, because
                                 ReturnToStep deletes none (§6).
                             -->
-                            
+
                         </StackPanel>
                     </Border>
                     </Expander>
@@ -2206,6 +2200,11 @@
                                             HorizontalAlignment="Left"
                                             Padding="14,6"
                                             Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedCustomSizeAction, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Content="{Binding CustomSizeLabel}"
+                          Command="{Binding ChooseCustomSizeCommand}"
+                          AutomationProperties.AutomationId="Session.PrintDimensions.CustomSize"
+                          Padding="14,6" Margin="0,10,0,0"
+                          Visibility="{Binding ShowsGuidedCustomSizeEntry, Converter={StaticResource BoolToVisibility}}" />
 <local:SessionActionButton Content="{Binding ConfirmWhiteUnderbaseLabel}"
                                     Command="{Binding SelectWhiteUnderbaseCommand}"
                                     IsEnabled="{Binding CanConfirmWhiteUnderbase}"
@@ -2393,7 +2392,9 @@
         <Border Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" Padding="20" Background="{DynamicResource PF.Brush.Surface}"
                 AutomationProperties.AutomationId="Session.HistoryWorkspace"
                 Visibility="{Binding IsViewingHistory, Converter={StaticResource BoolToVisibility}}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel>
                     <TextBlock x:Name="HistoryHeadingText" Focusable="True" Text="{Binding HistoryStepName}" FontSize="22" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding HistoryNotice}" TextWrapping="Wrap" Margin="0,12,0,16" />
@@ -2406,10 +2407,11 @@
                             </Border>
                         </DataTemplate></ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <local:SessionActionButton Content="{Binding HistoryCloseLabel}" Command="{Binding CloseHistoryCommand}"
-                            HorizontalAlignment="Left" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.CloseHistory" />
                 </StackPanel>
             </ScrollViewer>
+                <local:SessionActionButton Grid.Row="1" Content="{Binding HistoryCloseLabel}" Command="{Binding CloseHistoryCommand}"
+                        HorizontalAlignment="Left" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.CloseHistory" />
+            </Grid>
         </Border>
         <Border Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Surface}"
                 BorderBrush="{DynamicResource PF.Brush.Primary}" BorderThickness="2" Padding="24" Margin="20"
@@ -2445,7 +2447,3 @@
         </Border>
     </Grid>
 </UserControl>
-
-
-
-

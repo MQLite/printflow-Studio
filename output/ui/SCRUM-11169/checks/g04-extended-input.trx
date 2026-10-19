@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="4d5602b4-850e-4bfb-aa02-3f0bbc3bba2e" name="admin@DESKTOP-0BG8884 2026-10-19 15:40:43" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:40:43.5595647+13:00" queuing="2026-10-19T15:40:43.5595649+13:00" start="2026-10-19T15:40:37.9481229+13:00" finish="2026-10-19T15:40:46.5194494+13:00" />
+  <TestSettings name="default" id="6569ff88-89a9-4ece-9a8b-43f3ef61b27f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_40_43" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="9272dc05-07b1-4fdb-acfd-b18a56958935" testId="31e629a4-99fc-0ee4-f1d5-0af3b0f01fb7" testName="PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review" computerName="DESKTOP-0BG8884" duration="00:00:01.5318705" startTime="2026-10-19T15:40:41.9934535+13:00" endTime="2026-10-19T15:40:43.5302965+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9272dc05-07b1-4fdb-acfd-b18a56958935">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\SessionAccessibilityTests.cs:line 335&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="31e629a4-99fc-0ee4-f1d5-0af3b0f01fb7">
+      <Execution id="9272dc05-07b1-4fdb-acfd-b18a56958935" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests" name="Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="31e629a4-99fc-0ee4-f1d5-0af3b0f01fb7" executionId="9272dc05-07b1-4fdb-acfd-b18a56958935" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="1" executed="1" passed="0" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.41]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.56]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.62]   Starting:    PrintFlow.Tests&#xD;
+Unhandled exception. System.InvalidOperationException: �����߳��޷����ʴ˶�����Ϊ��һ���߳�ӵ�иö���&#xD;
+   at System.Windows.Threading.Dispatcher.&lt;VerifyAccess&gt;g__ThrowVerifyAccess|7_0()&#xD;
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)&#xD;
+   at System.Windows.Controls.Primitives.ButtonBase.get_Command()&#xD;
+   at System.Windows.Controls.Primitives.ButtonBase.UpdateCanExecute()&#xD;
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.&lt;set_ExecutionTask&gt;g__MonitorTask|26_0(AsyncRelayCommand this, Task task) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 243&#xD;
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;ThrowAsync&gt;b__124_1(Object state)&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+   at System.Threading.Thread.StartCallback()&#xD;
+Unhandled exception. System.InvalidOperationException: �����߳��޷����ʴ˶�����Ϊ��һ���߳�ӵ�иö���&#xD;
+   at System.Windows.Threading.Dispatcher.&lt;VerifyAccess&gt;g__ThrowVerifyAccess|7_0()&#xD;
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)&#xD;
+   at PrintFlow.App.Views.SessionScreenView.get_Model() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 76&#xD;
+   at PrintFlow.App.Views.SessionScreenView.FocusNewContext() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 506&#xD;
+   at PrintFlow.App.Views.SessionScreenView.OnModelPropertyChanged(Object sender, PropertyChangedEventArgs e) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 450&#xD;
+   at CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(PropertyChangedEventArgs e) in /_/src/CommunityToolkit.Mvvm/ComponentModel/ObservableObject.cs:line 49&#xD;
+   at CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(String propertyName) in /_/src/CommunityToolkit.Mvvm/ComponentModel/ObservableObject.cs:line 75&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyGuidedPresentation() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.Guided.cs:line 116&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyOperatorStatusChanged() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.OperatorStatus.cs:line 144&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.OnIsBusyChanged(Boolean value) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3133&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.set_IsBusy(Boolean value) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\obj\Debug\net10.0-windows10.0.19041.0\CommunityToolkit.Mvvm.SourceGenerators\CommunityToolkit.Mvvm.SourceGenerators.ObservablePropertyGenerator\PrintFlow.App.ViewModels.SessionViewModel.g.cs:line 170&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3399&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.SubmitManualResultAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 2369&#xD;
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.AwaitAndThrowIfFailed(Task executionTask) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 351&#xD;
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;ThrowAsync&gt;b__124_1(Object state)&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+   at System.Threading.Thread.StartCallback()&#xD;
+[xUnit.net 00:00:05.20]       System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:05.20]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.20]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:05.20]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:05.20]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\SessionAccessibilityTests.cs(335,0): at PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review()&#xD;
+[xUnit.net 00:00:05.20]         --- End of stack trace from previous location ---&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:40:43.5327438+13:00">
+        <Text>[xUnit.net 00:00:05.20]     PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.Invoking_the_rendered_button_imports_the_chosen_file_and_asks_for_review [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:40:46.5065240+13:00">
+        <Text>活动的测试运行已中止。原因: 测试主机进程崩溃 : Unhandled exception. System.InvalidOperationException: �����߳��޷����ʴ˶�����Ϊ��һ���߳�ӵ�иö���&#xD;
+   at System.Windows.Threading.Dispatcher.&lt;VerifyAccess&gt;g__ThrowVerifyAccess|7_0()&#xD;
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)&#xD;
+   at System.Windows.Controls.Primitives.ButtonBase.get_Command()&#xD;
+   at System.Windows.Controls.Primitives.ButtonBase.UpdateCanExecute()&#xD;
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.&lt;set_ExecutionTask&gt;g__MonitorTask|26_0(AsyncRelayCommand this, Task task) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 243&#xD;
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;ThrowAsync&gt;b__124_1(Object state)&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+   at System.Threading.Thread.StartCallback()&#xD;
+Unhandled exception. System.InvalidOperationException: �����߳��޷����ʴ˶�����Ϊ��һ���߳�ӵ�иö���&#xD;
+   at System.Windows.Threading.Dispatcher.&lt;VerifyAccess&gt;g__ThrowVerifyAccess|7_0()&#xD;
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)&#xD;
+   at PrintFlow.App.Views.SessionScreenView.get_Model() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 76&#xD;
+   at PrintFlow.App.Views.SessionScreenView.FocusNewContext() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 506&#xD;
+   at PrintFlow.App.Views.SessionScreenView.OnModelPropertyChanged(Object sender, PropertyChangedEventArgs e) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\Views\SessionScreenView.xaml.cs:line 450&#xD;
+   at CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(PropertyChangedEventArgs e) in /_/src/CommunityToolkit.Mvvm/ComponentModel/ObservableObject.cs:line 49&#xD;
+   at CommunityToolkit.Mvvm.ComponentModel.ObservableObject.OnPropertyChanged(String propertyName) in /_/src/CommunityToolkit.Mvvm/ComponentModel/ObservableObject.cs:line 75&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyGuidedPresentation() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.Guided.cs:line 116&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyOperatorStatusChanged() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.OperatorStatus.cs:line 144&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.OnIsBusyChanged(Boolean value) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3133&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.set_IsBusy(Boolean value) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\obj\Debug\net10.0-windows10.0.19041.0\CommunityToolkit.Mvvm.SourceGenerators\CommunityToolkit.Mvvm.SourceGenerators.ObservablePropertyGenerator\PrintFlow.App.ViewModels.SessionViewModel.g.cs:line 170&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3399&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.SubmitManualResultAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 2369&#xD;
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.AwaitAndThrowIfFailed(Task executionTask) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 351&#xD;
+   at System.Threading.Tasks.Task.&lt;&gt;c.&lt;ThrowAsync&gt;b__124_1(Object state)&#xD;
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()&#xD;
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()&#xD;
+   at System.Threading.Thread.StartCallback()&#xD;
+</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

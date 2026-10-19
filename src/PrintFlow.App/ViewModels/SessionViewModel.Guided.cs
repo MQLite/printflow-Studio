@@ -53,11 +53,12 @@ public sealed partial class SessionViewModel
     public string GuidedTechnicalDetailsLabel => Strings.Session_GuidedTechnicalDetails;
     public bool ShowsGuidedDimensions => GuidedPage == GuidedSessionPage.Dimensions && CanChooseFlexibleSize;
     public bool ShowsGuidedCustomSizeAction => ShowsGuidedDimensions && IsChoosingCustomSize;
+    public bool ShowsGuidedCustomSizeEntry => ShowsGuidedDimensions && !IsChoosingCustomSize;
     public bool ShowsGuidedWhiteInk => GuidedPage == GuidedSessionPage.WhiteInk && CanSelectWhiteUnderbase;
     public bool ShowsGuidedPreparation => HasPreparationPlan && GuidedPage is
-        GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
+        GuidedSessionPage.Dimensions or GuidedSessionPage.Preflight;
     public bool ShowsGuidedPreflight => HasPrintDimensionsPreflight && GuidedPage is
-        GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
+        GuidedSessionPage.Dimensions or GuidedSessionPage.Preflight;
     public bool ShowsGuidedBackgroundDecision => _session?.CurrentStep?.Step == StepKind.BackgroundRemoval &&
         GuidedPage == GuidedSessionPage.Ready && CanAuthoriseAutomaticSelection;
     public bool ShowsGuidedTrimParameters => _session?.CurrentStep?.Step == StepKind.Trim &&
@@ -114,6 +115,7 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(GuidedCurrentStatus));
         OnPropertyChanged(nameof(GuidedInteractionIdentity));
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
+        OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
         OnPropertyChanged(nameof(ShowsGuidedDimensions));
         OnPropertyChanged(nameof(ShowsGuidedWhiteInk));
         OnPropertyChanged(nameof(ShowsGuidedPreparation));

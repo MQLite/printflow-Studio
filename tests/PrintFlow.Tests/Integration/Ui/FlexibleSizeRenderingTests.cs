@@ -114,6 +114,7 @@ public sealed class FlexibleSizeRenderingTests
                 harness, Source(harness, $"g-{culture.Name}.png", 40, 20));
             await CustomAsync(warning, TargetEdge.LongEdge, "100");
             warning.NeedsEnlargementAuthority.ShouldBeTrue();
+            await ChooseBranchAsync(warning);
             RenderWarning(warning);
 
             // H. enlargement authorised.

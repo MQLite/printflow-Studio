@@ -49,11 +49,11 @@
 
 **Interfaces:** consumes current SessionViewModel properties, RecommendedCommand and exact action identities. Produces `GuidedCurrentTitle`, `GuidedCurrentStatus`, `GuidedSteps` and fixed `Session.ActionBar` / `Session.CurrentWorkspace` surfaces. Existing controls keep their commands and identities; no generic approval proxy.
 
-- [ ] Write failing real WPF tests `Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed`, `Current_input_actions_are_in_the_fixed_bar`, `Technical_metadata_is_disclosed_without_hiding_failure_or_stop`. Assert action rectangles inside 1000×700 and outside workspace scrolling, no duplicate automation IDs for moved controls, existing approval identity binding intact.
-- [ ] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionShellTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing layout failure.
-- [ ] Reorganize shell into left steps, current workspace and fixed bottom actions; reuse shared theme. Move primary input/review/save actions to fixed controls with their existing command/visibility/identity contracts. Put metadata and low-frequency return details behind explicit disclosures; keep critical warnings and stop/takeover visible. Extend styling recommendation only for existing legal current-form submissions.
-- [ ] Run the shell suite and relevant SessionAccessibility/OperatorStatus/FinalSave tests; record any intentional geometry contract update separately.
-- [ ] Commit `feat: add guided session shell with fixed legal actions`.
+- [x] Write failing real WPF tests `Navigation_is_left_of_current_workspace_and_primary_actions_remain_fixed`, `Current_input_actions_are_in_the_fixed_bar`, `Technical_metadata_is_disclosed_without_hiding_failure_or_stop`. Assert action rectangles inside 1000×700 and outside workspace scrolling, no duplicate automation IDs for moved controls, existing approval identity binding intact.
+- [x] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionShellTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing layout failure.
+- [x] Reorganize shell into left steps, current workspace and fixed bottom actions; reuse shared theme. Move primary input/review/save actions to fixed controls with their existing command/visibility/identity contracts. Put metadata and low-frequency return details behind explicit disclosures; keep critical warnings and stop/takeover visible. Extend styling recommendation only for existing legal current-form submissions.
+- [x] Run the shell suite and relevant SessionAccessibility/OperatorStatus/FinalSave tests; record any intentional geometry contract update separately.
+- [x] Commit `feat: add guided session shell with fixed legal actions`.
 
 ### Task 2: G02 — State projection and current-only content
 
@@ -61,11 +61,11 @@
 
 **Interfaces:** consumes persisted `SessionView.Steps`, `CurrentStep`, `AvailableCommands`, source format, Sizing and white-ink state. Produces `GuidedPage` enum (source/ready/processing/review/dimensions/white-ink/preflight/crop/correction/failure/save/completed), `GuidedSteps` display states and `ShowsGuided*` booleans. Projection only narrows visibility; services retain command authority.
 
-- [ ] Write failing tests across three actual service routes: import→confirm→optional process/skip→required review→trim→dimensions→white ink→TIFF review→save/another size. Assert literal step sequences, pending steps non-executable, current/finished/skipped/attention states, no white ink before current print preparation, no print content on PNG route, direct TIFF has no Meitu/trim; use source-preparation fixtures for PDF/PSD.
-- [ ] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionProjectionTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing projection/current-only failure.
-- [ ] Implement pure presentation mapping from the existing read model/catalog and display state. Gate forms by current page while retaining existing legality checks. Do not infer new command eligibility or run transitions through navigation.
-- [ ] Run projection suite plus `SessionControlsTests`, source-preparation/white-ink and completion tests. Future/hidden actions must be absent from normal UIA traversal; direct stale invocation is additionally guarded in Task 4.
-- [ ] Commit `feat: project guided steps from persisted workflow state`.
+- [x] Write failing tests across three actual service routes: import→confirm→optional process/skip→required review→trim→dimensions→white ink→TIFF review→save/another size. Assert literal step sequences, pending steps non-executable, current/finished/skipped/attention states, no white ink before current print preparation, no print content on PNG route, direct TIFF has no Meitu/trim; use source-preparation fixtures for PDF/PSD.
+- [x] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionProjectionTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing projection/current-only failure.
+- [x] Implement pure presentation mapping from the existing read model/catalog and display state. Gate forms by current page while retaining existing legality checks. Do not infer new command eligibility or run transitions through navigation.
+- [x] Run projection suite plus `SessionControlsTests`, source-preparation/white-ink and completion tests. Future/hidden actions must be absent from normal UIA traversal; direct stale invocation is additionally guarded in Task 4.
+- [x] Commit `feat: project guided steps from persisted workflow state`.
 
 ### Task 3: G03 — Readonly history, captured return and draft leave
 
@@ -73,11 +73,11 @@
 
 **Interfaces:** `SessionHistoryView` contains immutable step/revision facts only. `ViewHistoryCommand(SessionStepRow)` selects a history snapshot, `CloseHistoryCommand` restores live view without service calls. `BeginReturn` captures current task/step/result/target and computed display impact; `ConfirmReturn` accepts only that still-current capture and calls existing ReturnToStep. `KeepDraftCommand` cancels leave; `DiscardDraftAndLeaveCommand` discards page draft then resumes captured Home/history/return intent.
 
-- [ ] Write failing tests `History_does_not_change_persisted_state_or_approval`, `Return_cancel_has_no_mutation`, `Return_confirmation_cannot_be_retargeted_or_reused`, `Confirmed_return_invalidates_downstream_with_existing_lineage_rules`, and parameterized dirty-page navigation tests (dimensions/white ink/save/correction/crop). Assert actual repo state/revisions/reviews unchanged on view/cancel/preserve, original draft unchanged on keep, discard resets only UI state, no draft persistence.
-- [ ] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionNavigationTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing safeguards.
-- [ ] Add readonly projection from already-loaded revisions; history never receives an executable SessionView. Implement identity-bound return confirmation and explicit impact text listing target/downstream steps, dimensions, outputs and approvals that must be redone. Implement transient draft leave state; dismiss pending intent on changed task/result; keep means continue editing.
-- [ ] Run navigation suite plus `ReturnAndTrimControlsUiTests`, `ReturnToStepTests`, correction/crop/save regressions.
-- [ ] Commit `feat: add safe guided history and draft navigation`.
+- [x] Write failing tests `History_does_not_change_persisted_state_or_approval`, `Return_cancel_has_no_mutation`, `Return_confirmation_cannot_be_retargeted_or_reused`, `Confirmed_return_invalidates_downstream_with_existing_lineage_rules`, and parameterized dirty-page navigation tests (dimensions/white ink/save/correction/crop). Assert actual repo state/revisions/reviews unchanged on view/cancel/preserve, original draft unchanged on keep, discard resets only UI state, no draft persistence.
+- [x] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionNavigationTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe missing safeguards.
+- [x] Add readonly projection from already-loaded revisions; history never receives an executable SessionView. Implement identity-bound return confirmation and explicit impact text listing target/downstream steps, dimensions, outputs and approvals that must be redone. Implement transient draft leave state; dismiss pending intent on changed task/result; keep means continue editing.
+- [x] Run navigation suite plus `ReturnAndTrimControlsUiTests`, `ReturnToStepTests`, correction/crop/save regressions.
+- [x] Commit `feat: add safe guided history and draft navigation`.
 
 ### Task 4: G04 — Recovery positioning and stale-input protection
 
@@ -85,11 +85,11 @@
 
 **Interfaces:** presentation identity includes session, current step/state/result and transient page. General input guards capture context at gesture start and UIA pattern acquisition; exact ReviewApprovalButton target identity remains independent. Service-call adoption captures an open-generation and session identity; stale results/refresh/runtime callbacks are ignored. Recovery continues to consume service-loaded state and never launches work.
 
-- [ ] Write failing tests for hidden/unloaded action invocation, stale UIA invoke provider after step/task change, Enter/Space repeat/release and double-click across contexts, duplicate outstanding commands, delayed success/failure arriving after Open(B), and recovery of input/review/interrupted states with zero adapter starts.
-- [ ] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionInputTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe the stale-adoption/input failures.
-- [ ] Implement narrowly scoped guards and neutral visible focus on context change; cancel/context-check callbacks and draft intents. Do not replace service approval validation or recover more than persisted contracts support. Keep stop/takeover independent of generic busy suppression.
-- [ ] Run input suite plus existing exact-review/focus/automation/RecoverySurface and StartupRecovery tests.
-- [ ] Commit `fix: bind guided input and async refresh to current session`.
+- [x] Write failing tests for hidden/unloaded action invocation, stale UIA invoke provider after step/task change, Enter/Space repeat/release and double-click across contexts, duplicate outstanding commands, delayed success/failure arriving after Open(B), and recovery of input/review/interrupted states with zero adapter starts.
+- [x] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter FullyQualifiedName~GuidedSessionInputTests --results-directory output/ui/SCRUM-11169/checks --logger trx` and observe the stale-adoption/input failures.
+- [x] Implement narrowly scoped guards and neutral visible focus on context change; cancel/context-check callbacks and draft intents. Do not replace service approval validation or recover more than persisted contracts support. Keep stop/takeover independent of generic busy suppression.
+- [x] Run input suite plus existing exact-review/focus/automation/RecoverySurface and StartupRecovery tests.
+- [x] Commit `fix: bind guided input and async refresh to current session`.
 
 ### Task 5: E2 evidence, regression and handoff
 
@@ -97,13 +97,17 @@
 
 **Interfaces:** uses real final SessionScreenView, synthetic sources and service harness. Captures local PNGs, SHA256/source hashes, DIP bounds, 96 DPI and command/focus/scroll facts; never displays a production Window.
 
-- [ ] Add/run representative render assertions for Chinese three routes, review/processing/failure, history, return confirmation, draft leave and recovered state at 1000×700/1280×720/1920×1080.
-- [ ] Inspect each selected PNG via view_image; correct genuine layout defects with targeted evidence, preserving safety assertions.
-- [ ] Run `dotnet test tests/PrintFlow.Tests/PrintFlow.Tests.csproj --filter 'FullyQualifiedName~Integration.Ui|FullyQualifiedName~Architecture' --results-directory output/ui/SCRUM-11169/checks --logger 'trx;LogFileName=e2-ui-architecture-final.trx'`; compare every nonpass by exact name/error against E1 baseline. Record broad suite truthfully even when all failures are inherited.
-- [ ] Run relevant workflow/persistence navigation, approval, recovery, source, route and save regression suite; preserve workstation/production excluded tests as NOT RUN.
-- [ ] Write AC/code/test map, exhaustive Rulings with cost, baseline comparison, remaining failures and NOT RUN list, usage and evidence index; save source diff and review package. Commit exact paths only, never reference gallery.
+- [x] Add/run representative render assertions for Chinese three routes, review/processing/failure, history, return confirmation, draft leave and recovered state at 1000×700/1280×720/1920×1080.
+- [x] Inspect each selected PNG via view_image; correct genuine layout defects with targeted evidence, preserving safety assertions.
+- [x] Run the audited `output/ui/SCRUM-11169/checks/run-safe-ui.ps1` UI/Architecture filter; compare every nonpass by exact name/error against E1 baseline. It excludes the eleven visible/opt-in paths listed in safe-ui-exclusions.json; exclusion is NOT RUN, never PASS. Preserve the original broader run and its boundary incident separately.
+- [x] Run relevant workflow/persistence navigation, approval, recovery, source, route and save regression suite; preserve workstation/production excluded tests as NOT RUN.
+- [x] Write AC/code/test map, exhaustive Rulings with cost, baseline comparison, remaining failures and NOT RUN list, usage and evidence index; save source diff and review package. Commit exact paths only, never reference gallery.
 - [ ] Report HEAD/commits/evidence/counts to parent and stop before the single fresh whole-branch review.
 
 ## Plan self-review
 
 All G01–G04 ACs map above; readonly history extension has no new mutable authority; fixed controls retain specific approval contracts; show-only page mapping is not a second engine. Plan has explicit verification and no unresolved product/persistence decision. Existing user authorization covers implementation after this concrete plan; parent receives path and decisions before execution.
+
+## Task5 verification correction
+
+The initially planned unqualified UI/Architecture filter was unsafe: three existing tests call Window.Show without an opt-in. Its first execution showed three test windows; all close in finally and the testhost exited. Preserve the original TRX (e2-ui-architecture-before-contract-updates.trx), exact audit, results and cleanup evidence in output/ui/SCRUM-11169/checks/visible-window-audit.md. Seven Live_* guard-return results do not constitute live verification. Subsequent runs use the audited filter above, leaving all excluded tests and assertions unchanged. This correction narrows execution to the already authorized boundary; it does not permit another visible test run.
