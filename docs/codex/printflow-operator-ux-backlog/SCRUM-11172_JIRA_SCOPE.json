@@ -1,0 +1,833 @@
+{
+  "epic": {
+    "id": "10932",
+    "key": "SCRUM-11172",
+    "fields": {
+      "summary": "引导式界面改版：保存交付、恢复与辅助页面",
+      "description": "Planning-ID：PF-GUX-v2-E5\n\n## 目标\n\n使保存、恢复、最近任务、设置与错误处理遵循同一引导结构，并让用户准确理解任务和文件状态。\n\n## 范围\n\n最终保存、多尺寸结果、同事修正回导、失败恢复、最近任务、环境检查和设置页面的视觉与信息组织。\n\n## Epic 验收条件\n\n1. 最终审核、批准、保存到所选文件夹、流程完成分别呈现真实状态，保存失败不可显示交付成功。\n2. 同事修正、手动接管和回导只提供既有规则允许的路径，不增加 Photoshop 手动 TIFF 回导。\n3. 最近任务可区分待审核、停止、已移交、完成和保存历史，继续入口定位正确步骤。\n4. 设置和技术详情按需展开，关键安全信息保持可见；错误提供原因、保留内容及真实可行下一步。\n\n## 子项范围\n\n* F01：把最终审核、保存和完成整理成可理解的收尾步骤\n* F02：将同事修正、人工接管和恢复显示为独立引导分支\n* F03：重做最近任务和待处理入口并准确定位继续步骤\n* F04：统一环境检查、设置和技术详情的页面层级\n* F05：统一错误、空状态、确认对话框与就地反馈\n\n## 共同范围与约束\n\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）。用户要求：全面美化使用界面，改为一步一步指导操作、单步尽量仅显示相关内容的引导式应用。本轮授权为生成 Scrum 待办与 Epics；所有条目是待规划/待开发，不代表已完成或自动进入实施。\n\n推荐体验：步骤导航＋当前任务工作区＋固定操作栏；一个推荐主操作，低频/技术内容按需展开，相关辅助动作与关键阻塞仍可见。最终样式及详细交互需经过设计评审。\n\n保持一任务一图片、三条既有路线、原件和 InputSnapshot、合法命令、必要人工审核、精确结果身份、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁、原有回收/保留和本地隐私合同。AI 相关外部传输沿用 SCRUM-11156 已有明确选取/上传范围，本次不扩大。保留现有 zh-CN/en 资源，中文为人工验收主语言，不增加英文人工测试。\n\n不包含新增图片编辑器、批量处理、订单/账号系统、自动打印、自动通过审核、新云服务、收费服务、发布或生产变更。保留工作区已有修改；本次不改产品代码。\n\n## 与既有工作衔接\n\n复用 [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139) 的术语、状态、审核、裁切、保存、修正和最近任务能力；它及 SCRUM-11154/11155 的未完成验收和已知缺陷保持原状态。本轮是信息架构和视觉重组，不重建底层能力，不把旧功能验收转写为通过。\n\n[SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156) / [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166) 的 AI 业务功能继续由原 Epic 负责，新界面仅有条件接入；不作为三条核心路线交付的阻塞。\n\n## 计划依据与证据状态\n\n基于本地 master de7bca6e0a8462584b4d6bf4d16307d1335e2fb3 的 WPF XAML、ViewModels、WorkflowCatalog/TransitionTable、MVP 设计、术语及历史交接材料，并于本轮读取既有 Jira 状态。未运行应用、未采集新界面截图、未执行真人走查；规划判断不构成产品验证。\n\n## Scrum 组织\n\n建议 Sprint 0：体验蓝图与原型评审；Sprint 1：共享组件与引导框架；Sprint 2：导入/导航/恢复；Sprint 3：处理审核/保存辅助页/条件 AI 接入；Sprint 4：集成、布局键盘和真实新手验收。仅为分组与顺序建议，待容量评估和估点后拆分，不承诺每组能在一个 Sprint 完成；本次不创建/启动实际 Sprint，不指派人员、工期或故事点。按依赖顺序取入待办。\n\nReady：当前范围、旧能力复用边界、依赖及验收条件明确；涉及交互/状态变更的实现先有经评审设计。Done：实现和适当行为/视觉检查有证据、关键缺陷处置明确、人工验收单独记录；模拟不代替真人或生产证据。",
+      "status": {
+        "description": "",
+        "name": "To Do",
+        "id": "10000",
+        "statusCategory": {
+          "id": 2,
+          "key": "new",
+          "colorName": "blue-gray",
+          "name": "To Do"
+        }
+      }
+    },
+    "appliedContentFormat": "markdown"
+  },
+  "children": [
+    {
+      "id": "10950",
+      "key": "SCRUM-11190",
+      "fields": {
+        "summary": "把最终审核、保存和完成整理成可理解的收尾步骤",
+        "description": "Planning-ID：PF-GUX-v2-F01  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望确认结果后知道保存在哪里以及任务是否完成。\n\n## 验收条件\n\n1. 最终审核到保存展示明确过渡，文件名和目标目录在当前保存步骤可查看、修改和确认。\n2. 批准、保存中、已保存、保存失败/不确定及流程完成分别显示；不能把内部 Approved 路径当作已交付。\n3. 冲突、选取取消、重试和打开文件夹复用现有精确内容校验；打开前确认当前文件存在。\n4. 多尺寸各自展示审核/保存状态，完成动作沿用既有资格；复用 SCRUM-11144/11145 而不新建第二套导出。\n\n## 前置依赖\n\n* [SCRUM-11186](https://yituoxx.atlassian.net/browse/SCRUM-11186)：重做图片审核工作区，让大图、检查要点和决策聚焦\n* [SCRUM-11189](https://yituoxx.atlassian.net/browse/SCRUM-11189)：按需呈现白墨选项与 TIFF 生成前确认\n\n## Scrum 分组\n\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11172](https://yituoxx.atlassian.net/browse/SCRUM-11172)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "issuelinks": [
+          {
+            "id": "10061",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10946",
+              "key": "SCRUM-11186",
+              "fields": {
+                "summary": "重做图片审核工作区，让大图、检查要点和决策聚焦",
+                "status": {
+                  "description": "",
+                  "name": "In Review",
+                  "id": "10002",
+                  "statusCategory": {
+                    "id": 4,
+                    "key": "indeterminate",
+                    "colorName": "yellow",
+                    "name": "In Progress"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10062",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10949",
+              "key": "SCRUM-11189",
+              "fields": {
+                "summary": "按需呈现白墨选项与 TIFF 生成前确认",
+                "status": {
+                  "description": "",
+                  "name": "In Review",
+                  "id": "10002",
+                  "statusCategory": {
+                    "id": 4,
+                    "key": "indeterminate",
+                    "colorName": "yellow",
+                    "name": "In Progress"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10072",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "id": "10955",
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "description": "",
+                  "name": "To Do",
+                  "id": "10000",
+                  "statusCategory": {
+                    "id": 2,
+                    "key": "new",
+                    "colorName": "blue-gray",
+                    "name": "To Do"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          }
+        ],
+        "status": {
+          "description": "",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    },
+    {
+      "id": "10951",
+      "key": "SCRUM-11191",
+      "fields": {
+        "summary": "将同事修正、人工接管和恢复显示为独立引导分支",
+        "description": "Planning-ID：PF-GUX-v2-F02  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望交接出去或处理中断后有明确的后续操作。\n\n## 验收条件\n\n1. 去背景求助分支逐步解释准备文件、交给同事、等待、显式导入和重新审核，清晰显示已移交状态。\n2. Meitu 手动结果与 Photoshop 接管按原有支持边界显示，不提供无资格回导或自动侦测文件。\n3. 错误/恢复分支只显示当前可执行的重试、回到自动处理或手动入口；保留原输入和结果身份。\n4. 恢复结束返回真实当前步骤；不能将恢复视为新审批，也不能静默重启中断外部处理。\n\n## 前置依赖\n\n* [SCRUM-11181](https://yituoxx.atlassian.net/browse/SCRUM-11181)：恢复任务时定位真实步骤并防止重复操作和焦点穿透\n* [SCRUM-11186](https://yituoxx.atlassian.net/browse/SCRUM-11186)：重做图片审核工作区，让大图、检查要点和决策聚焦\n\n## Scrum 分组\n\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11172](https://yituoxx.atlassian.net/browse/SCRUM-11172)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "issuelinks": [
+          {
+            "id": "10063",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10941",
+              "key": "SCRUM-11181",
+              "fields": {
+                "summary": "恢复任务时定位真实步骤并防止重复操作和焦点穿透",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10064",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10946",
+              "key": "SCRUM-11186",
+              "fields": {
+                "summary": "重做图片审核工作区，让大图、检查要点和决策聚焦",
+                "status": {
+                  "description": "",
+                  "name": "In Review",
+                  "id": "10002",
+                  "statusCategory": {
+                    "id": 4,
+                    "key": "indeterminate",
+                    "colorName": "yellow",
+                    "name": "In Progress"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10073",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "id": "10955",
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "description": "",
+                  "name": "To Do",
+                  "id": "10000",
+                  "statusCategory": {
+                    "id": 2,
+                    "key": "new",
+                    "colorName": "blue-gray",
+                    "name": "To Do"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          }
+        ],
+        "status": {
+          "description": "",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    },
+    {
+      "id": "10952",
+      "key": "SCRUM-11192",
+      "fields": {
+        "summary": "重做最近任务和待处理入口并准确定位继续步骤",
+        "description": "Planning-ID：PF-GUX-v2-F03  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望从最近任务立即找到需要我处理的工作。\n\n## 验收条件\n\n1. 以清晰任务卡/列表区分待审核、需输入、停止、已移交、已完成与保存历史；状态文案来自真实业务值。\n2. 继续进入正确引导步骤；历史只读查看不能把旧结果恢复为当前批准内容。\n3. 保存历史与此刻文件存在分别表达；删除列表记录不被暗示为删除源文件或结果文件。\n4. 修复范围内不得继续显示无法理解的内部枚举；SCRUM-11154 的 N1 等旧缺陷有来源和处置记录。\n\n## 前置依赖\n\n* [SCRUM-11182](https://yituoxx.atlassian.net/browse/SCRUM-11182)：重做首页与单文件导入，突出开始任务和继续处理\n* [SCRUM-11181](https://yituoxx.atlassian.net/browse/SCRUM-11181)：恢复任务时定位真实步骤并防止重复操作和焦点穿透\n\n## Scrum 分组\n\n建议 Sprint 2（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11172](https://yituoxx.atlassian.net/browse/SCRUM-11172)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "issuelinks": [
+          {
+            "id": "10065",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10942",
+              "key": "SCRUM-11182",
+              "fields": {
+                "summary": "重做首页与单文件导入，突出开始任务和继续处理",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10066",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10941",
+              "key": "SCRUM-11181",
+              "fields": {
+                "summary": "恢复任务时定位真实步骤并防止重复操作和焦点穿透",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10074",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "id": "10955",
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "description": "",
+                  "name": "To Do",
+                  "id": "10000",
+                  "statusCategory": {
+                    "id": 2,
+                    "key": "new",
+                    "colorName": "blue-gray",
+                    "name": "To Do"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          }
+        ],
+        "status": {
+          "description": "",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    },
+    {
+      "id": "10953",
+      "key": "SCRUM-11193",
+      "fields": {
+        "summary": "统一环境检查、设置和技术详情的页面层级",
+        "description": "Planning-ID：PF-GUX-v2-F04  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望辅助页面整洁，并快速知道需要解决什么。\n\n## 验收条件\n\n1. 环境页用摘要和逐项结果解释已检查、未检查、过期和阻塞，不把历史就绪显示为当前生产许可。\n2. 设置按任务相关分组，常用项优先，高级和技术信息按需展开；保留原有设置校验与语言资源。\n3. 返回来源任务保留合法业务状态和可支持草稿，不因浏览设置启动自动化。\n4. 环境诊断仍需用户明确触发，不自动修复、改变工作站配置或放宽自动化锁。\n\n## 前置依赖\n\n* [SCRUM-11178](https://yituoxx.atlassian.net/browse/SCRUM-11178)：建立步骤导航、当前任务区与固定操作栏的应用壳\n* [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)：在 WPF 落地共享主题资源与引导界面组件\n\n## Scrum 分组\n\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11172](https://yituoxx.atlassian.net/browse/SCRUM-11172)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "issuelinks": [
+          {
+            "id": "10067",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10938",
+              "key": "SCRUM-11178",
+              "fields": {
+                "summary": "建立步骤导航、当前任务区与固定操作栏的应用壳",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10068",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10937",
+              "key": "SCRUM-11177",
+              "fields": {
+                "summary": "在 WPF 落地共享主题资源与引导界面组件",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10075",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "id": "10955",
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "description": "",
+                  "name": "To Do",
+                  "id": "10000",
+                  "statusCategory": {
+                    "id": 2,
+                    "key": "new",
+                    "colorName": "blue-gray",
+                    "name": "To Do"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          }
+        ],
+        "status": {
+          "description": "",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    },
+    {
+      "id": "10954",
+      "key": "SCRUM-11194",
+      "fields": {
+        "summary": "统一错误、空状态、确认对话框与就地反馈",
+        "description": "Planning-ID：PF-GUX-v2-F05  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望遇到问题时知道发生了什么、保留了什么和下一步能做什么。\n\n## 验收条件\n\n1. 各步骤统一加载、空、无预览、校验失败、失败和成功反馈，提示靠近相关内容。\n2. 错误以中文说明原因、保留内容及当前真实可行动作；错误码和详情可查看，调用栈不占据主工作区。\n3. 放弃任务、返回失效和危险动作确认绑定当前任务/结果，取消无副作用；刷新后旧确认不可执行。\n4. 保存不确定、诊断可用性与多个并存提示分别保留事实，不用临时 toast 掩盖关键阻塞。\n\n## 前置依赖\n\n* [SCRUM-11178](https://yituoxx.atlassian.net/browse/SCRUM-11178)：建立步骤导航、当前任务区与固定操作栏的应用壳\n\n## Scrum 分组\n\n建议 Sprint 3（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11172](https://yituoxx.atlassian.net/browse/SCRUM-11172)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "issuelinks": [
+          {
+            "id": "10069",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "id": "10938",
+              "key": "SCRUM-11178",
+              "fields": {
+                "summary": "建立步骤导航、当前任务区与固定操作栏的应用壳",
+                "status": {
+                  "description": "",
+                  "name": "Done",
+                  "id": "10003",
+                  "statusCategory": {
+                    "id": 3,
+                    "key": "done",
+                    "colorName": "green",
+                    "name": "Done"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10004",
+                  "description": "Stories track functionality or features expressed as user goals.",
+                  "name": "Story",
+                  "subtask": false,
+                  "entityId": "20c8c1b0-d01f-4a81-bde2-f18e789f1098",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "10076",
+            "type": {
+              "id": "10000",
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "id": "10955",
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "description": "",
+                  "name": "To Do",
+                  "id": "10000",
+                  "statusCategory": {
+                    "id": 2,
+                    "key": "new",
+                    "colorName": "blue-gray",
+                    "name": "To Do"
+                  }
+                },
+                "priority": {
+                  "name": "High",
+                  "id": "2"
+                },
+                "issuetype": {
+                  "id": "10003",
+                  "description": "Tasks track small, distinct pieces of work.",
+                  "name": "Task",
+                  "subtask": false,
+                  "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                  "hierarchyLevel": 0
+                }
+              }
+            }
+          }
+        ],
+        "status": {
+          "description": "",
+          "name": "To Do",
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        }
+      }
+    }
+  ],
+  "startupTransitions": [
+    {
+      "key": "SCRUM-11171",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11171 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11185",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11185 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11186",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11186 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11187",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11187 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11188",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11188 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11189",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11189 transitioned successfully\",\"transitionId\":41,\"statusName\":\"Done\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11172",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11172 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11190",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11190 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11191",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11191 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11192",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11192 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11193",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11193 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11194",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11194 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ]
+}
