@@ -100,5 +100,6 @@
     "spaceFreshActivation": "UNEXPLAINED; later passes not proof of fix",
     "jiraStatus": "In Review"
   },
-  "primaryProductSourceDiff": "Empty; original master and pre-existing documentation preserved"
+  "primaryProductSourceDiff": "Empty; original master and pre-existing documentation preserved",
+  "scratchCleanup": {"status": "POLICY_REJECTED_RETAINED", "action": "Remove this plan's git-ignored scratch directory after archiving the ledger", "reasonReturned": "blocked by policy", "executed": false, "alternateDeletionAttempted": false}
 }
