@@ -6,6 +6,10 @@
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
              xmlns:views="clr-namespace:PrintFlow.App.Views"
              mc:Ignorable="d"
+             Background="{DynamicResource PF.Brush.Canvas}"
+             Foreground="{DynamicResource PF.Brush.Ink}"
+             FontFamily="{DynamicResource PF.Font.Family}"
+             FontSize="{DynamicResource PF.Font.Body}"
              d:DataContext="{d:DesignInstance Type=vm:HomeViewModel}"
              AllowDrop="True"
              DragOver="OnDragOver"
@@ -14,6 +18,10 @@
              AutomationProperties.Name="{Binding Title}">
 
     <UserControl.Resources>
+      <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+          <ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" />
+        </ResourceDictionary.MergedDictionaries>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <!--
             The same converter the review surface uses, for the same reason: the one stream in
@@ -21,38 +29,37 @@
             (Epic 11200 Part C1 §29).
         -->
         <views:PreviewPayloadConverter x:Key="PreviewPayload" />
+          </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid x:Name="LayoutRoot" Margin="24" SizeChanged="OnLayoutSizeChanged">
+    <Grid Background="{DynamicResource PF.Brush.Canvas}">
+    <Grid x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" LastChildFill="True">
-            <Button DockPanel.Dock="Right"
+            <Button Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
                     VerticalAlignment="Center"
                     Content="{Binding SettingsLabel}"
                     Command="{Binding ShowSettingsCommand}"
                     AutomationProperties.AutomationId="Home.ShowSettings"
-                    AutomationProperties.Name="{Binding SettingsLabel}"
-                    Padding="10,4" />
-            <TextBlock Text="{Binding Title}"
-                       FontSize="26"
-                       FontWeight="SemiBold" />
+                    AutomationProperties.Name="{Binding SettingsLabel}" />
+            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding Title}" />
         </DockPanel>
 
         <!-- SCRUM-11152: what Production Readiness last observed in this run, in words, with its
              one way to that screen. The button only navigates; nothing here starts a check. -->
-        <!-- SCRUM-11152: everything between the title and the lists. It scrolls on its own only
-             when it would take more than its share of the height (code-behind), so the Recovery
-             and Recent lists below always keep room to scroll to their last action. -->
+        <!-- Reserve both scroll areas after the title. The 3:2 allocation leaves room for the
+             42-DIP actions in Recovery/Recent even with every upper disclosure expanded.
+             The existing code-behind maximum remains an additional upper bound. -->
         <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
                       AutomationProperties.AutomationId="Home.Upper">
         <StackPanel>
         <StackPanel Margin="0,8,0,14">
-            <Border BorderBrush="#33000000" BorderThickness="1" CornerRadius="6" Padding="14,10">
+            <Border Style="{StaticResource PF.Card}">
                 <StackPanel>
                     <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
                                AutomationProperties.AutomationId="Home.Readiness.Heading" />
@@ -67,7 +74,7 @@
                                Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
                     <TextBlock Text="{Binding Readiness.HintText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0"
                                AutomationProperties.AutomationId="Home.Readiness.Hint" />
-                    <Expander Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
+                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
                               AutomationProperties.AutomationId="Home.Readiness.Details"
                               AutomationProperties.Name="{Binding Readiness.DetailsLabel}"
                               Visibility="{Binding Readiness.HasTechnicalDetail, Converter={StaticResource BoolToVisibility}}">
@@ -75,27 +82,35 @@
                                  TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
                                  AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
                     </Expander>
-                    <Button Content="{Binding EnvironmentLabel}"
+                    <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
                             Command="{Binding ShowEnvironmentCommand}"
                             AutomationProperties.AutomationId="Home.ShowEnvironment"
                             AutomationProperties.Name="{Binding EnvironmentLabel}"
-                            Padding="10,4"
                             Margin="0,8,0,0"
                             HorizontalAlignment="Left" />
                 </StackPanel>
             </Border>
 
             <!-- Startup warnings stay visible; only the counts that need no action fold away. -->
-            <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
+                                    Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding PresetDetailText}" TextWrapping="Wrap" FontWeight="SemiBold"
                        AutomationProperties.AutomationId="Home.Startup.PresetWarning"
                        Visibility="{Binding HasPresetWarning, Converter={StaticResource BoolToVisibility}}" />
-            <TextBlock Text="{Binding RecoveryNotRunText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0"
+            </HeaderedContentControl>
+            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
+                                    Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding RecoveryNotRunText}" TextWrapping="Wrap" FontWeight="SemiBold"
                        AutomationProperties.AutomationId="Home.Startup.RecoveryNotRun"
                        Visibility="{Binding HasRecoveryNotRunWarning, Converter={StaticResource BoolToVisibility}}" />
-            <TextBlock Text="{Binding RetentionWarningText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0"
+            </HeaderedContentControl>
+            <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
+                                    Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding RetentionWarningText}" TextWrapping="Wrap" FontWeight="SemiBold"
                        AutomationProperties.AutomationId="Home.Startup.RetentionWarning"
                        Visibility="{Binding HasRetentionWarning, Converter={StaticResource BoolToVisibility}}" />
-            <Expander Header="{Binding StartupDetailsLabel}" Margin="0,6,0,0"
+            </HeaderedContentControl>
+            <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding StartupDetailsLabel}" Margin="0,8,0,0"
                       AutomationProperties.AutomationId="Home.StartupDetails"
                       AutomationProperties.Name="{Binding StartupDetailsLabel}">
                 <StackPanel Margin="0,4,0,0">
@@ -112,22 +127,16 @@
 
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
              drop anywhere rather than hunt for a target. -->
-        <Border
-                BorderBrush="#33000000"
-                BorderThickness="1"
-                CornerRadius="6"
-                Padding="16">
+        <HeaderedContentControl Style="{StaticResource PF.TaskCard}" Header="{Binding ImportHeading}">
             <StackPanel>
-                <TextBlock Text="{Binding ImportHeading}" FontSize="16" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
-                <Button Content="{Binding ChooseFileLabel}"
+                <Button Style="{StaticResource PF.Button.Primary}" Content="{Binding ChooseFileLabel}"
                         Command="{Binding ChooseFileCommand}"
                         AutomationProperties.AutomationId="Home.ChooseFile"
                         AutomationProperties.Name="{Binding ChooseFileLabel}"
-                        Padding="14,6"
                         HorizontalAlignment="Left" />
             </StackPanel>
-        </Border>
+        </HeaderedContentControl>
 
         <StackPanel>
             <TextBlock Text="{Binding Notice}"
@@ -141,14 +150,13 @@
         </StackPanel>
         </ScrollViewer>
 
-        <DockPanel Grid.Row="2" Margin="0,18,0,0">
+        <DockPanel Grid.Row="2" Margin="0,16,0,0">
             <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
-                <Button DockPanel.Dock="Right"
+                <Button Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
                         Content="{Binding RefreshLabel}"
                         Command="{Binding RefreshCommand}"
                         AutomationProperties.AutomationId="Home.Refresh"
-                        AutomationProperties.Name="{Binding RefreshLabel}"
-                        Padding="10,4" />
+                        AutomationProperties.Name="{Binding RefreshLabel}" />
             </DockPanel>
 
             <!--
@@ -160,28 +168,27 @@
             -->
             <Border x:Name="AbandonConfirmationPanel"
                     DockPanel.Dock="Top"
-                    Background="#FFF4CE" BorderBrush="#E0B000" BorderThickness="1" CornerRadius="4"
-                    Padding="12,10" Margin="0,0,0,10"
+                    Style="{StaticResource PF.Card}"
+                    Background="{DynamicResource PF.Brush.Warning}" BorderBrush="{DynamicResource PF.Brush.WarningInk}"
+                    Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,12"
                     AutomationProperties.AutomationId="Home.AbandonConfirmation"
                     Visibility="{Binding IsConfirmingAbandon, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
                     <TextBlock Text="{Binding PendingAbandon.Question}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
                                AutomationProperties.AutomationId="Home.AbandonConfirmation.Question" />
                     <WrapPanel>
-                        <Button x:Name="AbandonKeepButton"
+                        <Button Style="{StaticResource PF.Button.Secondary}" x:Name="AbandonKeepButton"
                                 Content="{Binding AbandonKeepLabel}"
                                 Command="{Binding KeepJobCommand}"
                                 IsCancel="True"
                                 AutomationProperties.AutomationId="Home.AbandonConfirmation.Keep"
-                                AutomationProperties.Name="{Binding AbandonKeepLabel}"
-                                Padding="14,6" Margin="0,0,8,0" />
-                        <views:ReviewApprovalButton Content="{Binding AbandonConfirmLabel}"
+                                AutomationProperties.Name="{Binding AbandonKeepLabel}" Margin="0,0,8,0" />
+                        <views:ReviewApprovalButton Style="{StaticResource PF.Button.Danger}" Content="{Binding AbandonConfirmLabel}"
                                 Command="{Binding ConfirmAbandonCommand}"
                                 CommandParameter="{Binding PendingAbandon}"
                                 TargetIdentity="{Binding PendingAbandon.GestureTarget}"
                                 AutomationProperties.AutomationId="Home.AbandonConfirmation.Confirm"
-                                AutomationProperties.Name="{Binding AbandonConfirmLabel}"
-                                Padding="14,6" />
+                                AutomationProperties.Name="{Binding AbandonConfirmLabel}" />
                     </WrapPanel>
                 </StackPanel>
             </Border>
@@ -208,7 +215,8 @@
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="#FFF9EE" BorderBrush="#E5C58B" BorderThickness="1" CornerRadius="6" Padding="14" Margin="0,0,0,8">
+                                    <Border Style="{StaticResource PF.Card}" Background="{DynamicResource PF.Brush.Warning}"
+                                            BorderBrush="{DynamicResource PF.Brush.WarningInk}" Margin="0,0,0,8">
                                         <StackPanel>
                                             <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
                                             <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,10" />
@@ -219,21 +227,21 @@
                                                        AutomationProperties.AutomationId="Home.Recovery.WaitingForCorrection"
                                                        Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
                                             <WrapPanel>
-                                                <Button Content="{Binding OpenCorrectionLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenCorrectionLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.OpenCorrection" AutomationProperties.Name="{Binding OpenCorrectionLabel}"
-                                                        Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
-                                                <Button Content="{Binding RestartLabel}" Command="{Binding DataContext.RestartRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                        Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding RestartLabel}" Command="{Binding DataContext.RestartRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.Restart" AutomationProperties.Name="{Binding RestartLabel}"
-                                                        Visibility="{Binding CanRestart, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
-                                                <Button Content="{Binding ManualResultLabel}" Command="{Binding DataContext.ImportRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                        Visibility="{Binding CanRestart, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding ManualResultLabel}" Command="{Binding DataContext.ImportRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.ManualResult" AutomationProperties.Name="{Binding ManualResultLabel}"
-                                                        Visibility="{Binding CanImport, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
-                                                <Button Content="{Binding OpenLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                        Visibility="{Binding CanImport, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.Open" AutomationProperties.Name="{Binding OpenLabel}"
-                                                        Visibility="{Binding ShowsPlainOpen, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
-                                                <Button Content="{Binding AbandonLabel}" Command="{Binding DataContext.AbandonRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                        Visibility="{Binding ShowsPlainOpen, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+                                                <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding AbandonLabel}" Command="{Binding DataContext.AbandonRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
                                                         AutomationProperties.AutomationId="Home.Recovery.Abandon" AutomationProperties.Name="{Binding AbandonLabel}"
-                                                        Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" Padding="12,6" Margin="0,0,8,4" />
+                                                        Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
                                             </WrapPanel>
                                             <TextBlock Text="{Binding NoActions}" Visibility="{Binding HasNoActions, Converter={StaticResource BoolToVisibility}}" TextWrapping="Wrap" />
                                         </StackPanel>
@@ -261,7 +269,7 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderBrush="#22000000" BorderThickness="0,0,0,1" Padding="6,10">
+                            <Border Style="{StaticResource PF.Card}" Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,8">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -279,10 +287,10 @@
                                             Width="64" Height="64"
                                             Margin="0,0,12,0"
                                             VerticalAlignment="Center"
-                                            Background="#0F000000"
-                                            BorderBrush="#22000000"
+                                            Background="{DynamicResource PF.Image.Checkerboard}"
+                                            BorderBrush="{DynamicResource PF.Brush.Border}"
                                             BorderThickness="1"
-                                            CornerRadius="4">
+                                            CornerRadius="{DynamicResource PF.Corner.Control}">
                                         <Grid>
                                             <!--
                                                 The identity sits on the Image and on the neutral
@@ -299,7 +307,7 @@
                                                    AutomationProperties.Name="{Binding ThumbnailName}"
                                                    Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVisibility}}" />
                                             <TextBlock Text="{Binding ThumbnailState}"
-                                                       FontSize="10"
+                                                       FontSize="{DynamicResource PF.Font.Auxiliary}"
                                                        Opacity="0.6"
                                                        TextWrapping="Wrap"
                                                        TextAlignment="Center"
@@ -311,7 +319,7 @@
                                     </Border>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="14" />
+                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="{DynamicResource PF.Font.Body}" />
                                         <TextBlock Text="{Binding MetadataText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.75" />
                                         <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
                                                    AutomationProperties.AutomationId="Home.RecentStatus"
@@ -333,16 +341,15 @@
                                             the screen: a driver picks the row by its accessible name
                                             — the operator's own output name — and then the action.
                                         -->
-                                        <Button Content="{Binding OpenActionLabel}"
+                                        <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenActionLabel}"
                                                 Command="{Binding DataContext.ResumeCommand,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}"
                                                 AutomationProperties.AutomationId="Home.ResumeSession"
                                                 AutomationProperties.Name="{Binding OpenActionLabel}"
-                                                Padding="12,4"
                                                 Margin="0,0,8,0" />
                                         <!-- Offered only where the workflow layer says Abandon is legal (§10). -->
-                                        <Button Content="{Binding DataContext.AbandonLabel,
+                                        <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.AbandonLabel,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 Command="{Binding DataContext.AbandonCommand,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -350,7 +357,6 @@
                                                 AutomationProperties.AutomationId="Home.AbandonSession"
                                                 AutomationProperties.Name="{Binding DataContext.AbandonLabel,
                                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                Padding="12,4"
                                                 Margin="0,0,8,0"
                                                 Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
                                         <!--
@@ -359,7 +365,7 @@
                                             being worked on or waiting for a recovery decision
                                             (Jira 11602). Abandon and this are never both offered.
                                         -->
-                                        <Button Content="{Binding DataContext.RemoveLabel,
+                                        <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.RemoveLabel,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 Command="{Binding DataContext.RemoveRecordCommand,
                                                                   RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -367,7 +373,6 @@
                                                 AutomationProperties.AutomationId="Home.RemoveSessionRecord"
                                                 AutomationProperties.Name="{Binding DataContext.RemoveLabel,
                                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                Padding="12,4"
                                                 Visibility="{Binding CanRemoveRecord, Converter={StaticResource BoolToVisibility}}" />
                                     </StackPanel>
                                 </Grid>
@@ -378,5 +383,6 @@
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>
+    </Grid>
     </Grid>
 </UserControl>
