@@ -2113,7 +2113,12 @@ public sealed partial class SessionViewModel : ObservableObject
     public void Open(SessionView session)
     {
         ArgumentNullException.ThrowIfNull(session);
-
+        _openGeneration++;
+        if (_serviceOperationGeneration is not null)
+        {
+            _serviceOperationGeneration = null;
+            IsBusy = false;
+        }
         Show(session);
         Notice = null;
     }
@@ -2515,9 +2520,10 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         CancelReturn();
+        long generation = _openGeneration;
         await RunAsync(
             new WorkflowCommand.ReturnToStep(intent.Target.Step), cancellationToken).ConfigureAwait(true);
-        if (intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
+        if (generation == _openGeneration && intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
         {
             _customPresetContext = intent.Preset is { } named ? SizePresets.FirstOrDefault(choice => choice.Preset == named) : null;
             SelectedTargetEdgeChoice = intent.Edge is { } selected ? TargetEdgeChoices.Single(choice => choice.Edge == selected) : null;
@@ -2729,9 +2735,10 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
+        long generation = _openGeneration;
         await RunAsync(command, cancellationToken).ConfigureAwait(true);
 
-        if (_session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
+        if (generation == _openGeneration && _session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
         {
             IsChoosingCustomSize = false;
         }
@@ -2739,42 +2746,14 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>Confirms only the exact enlargement the service currently offers.</summary>
     [RelayCommand]
-    private async Task ContinueWithSizeAsync(CancellationToken cancellationToken)
+    private Task ContinueWithSizeAsync(CancellationToken cancellationToken)
     {
         if (_session is null || IsBusy || !IsLiveInteractionAllowed || !CanAuthoriseEnlargement)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            Notice = null;
-            OperationResult<SessionView> result = await _sessions
-                .AuthoriseCurrentEnlargementAsync(
-                    _session.Id,
-                    _session.Sizing.EnlargementOfferId ?? Guid.Empty,
-                    Environment.UserName,
-                    cancellationToken)
-                .ConfigureAwait(true);
-
-            if (result.IsFailure)
-            {
-                ShowActionFailure(result.Failure, ActionFailureScreen.Pending);
-                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
-                await PreviewsLoaded.ConfigureAwait(true);
-                return;
-            }
-
-            Show(result.Value);
-            await PreviewsLoaded.ConfigureAwait(true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+            return Task.CompletedTask;
+        Guid offer = _session.Sizing.EnlargementOfferId ?? Guid.Empty;
+        return RunServiceAsync(id => _sessions.AuthoriseCurrentEnlargementAsync(
+            id, offer, Environment.UserName, cancellationToken), cancellationToken);
     }
-
     /// <summary>
     /// Confirms the typed maximum bounds through the ordinary command path
     /// (§3; Epic 11400 Part B1A.2B §7).
@@ -2956,7 +2935,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// trim adjustment is open (SCRUM-11147): an Approve pressed then would approve the old
     /// result while the operator believes they are confirming the new boundary.
     /// </summary>
-    private bool Allows(CommandKind kind) => IsLiveInteractionAllowed && !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
+    private bool Allows(CommandKind kind) => CanInteractWithLivePage && !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
 
     /// <summary>What the workflow layer offers, regardless of what this screen is showing.</summary>
     private bool Offers(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
@@ -3376,16 +3355,21 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task RunServiceAsync(
         Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy || !IsLiveInteractionAllowed)
+        if (_session is null || IsBusy || !CanInteractWithLivePage)
         {
             return;
         }
 
+        SessionId id = _session.Id;
+        long generation = _openGeneration;
+        _serviceOperationGeneration = generation;
+        bool IsCurrent() => generation == _openGeneration && _session?.Id == id;
         IsBusy = true;
         try
         {
             Notice = null;
-            OperationResult<SessionView> result = await call(_session.Id).ConfigureAwait(true);
+            OperationResult<SessionView> result = await call(id).ConfigureAwait(true);
+            if (!IsCurrent()) return;
 
             if (result.IsFailure)
             {
@@ -3396,7 +3380,9 @@ public sealed partial class SessionViewModel : ObservableObject
                 // attempt is persisted before the failure returns. Re-reading is what keeps the
                 // screen showing the database rather than the last thing that worked. Only a
                 // successful re-read lets the notice point at the status line (SCRUM-11151).
-                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
+                bool refreshed = await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                if (!IsCurrent()) return;
+                SettleActionFailure(result.Failure, refreshed);
                 await PreviewsLoaded.ConfigureAwait(true);
                 return;
             }
@@ -3406,9 +3392,16 @@ public sealed partial class SessionViewModel : ObservableObject
         }
         finally
         {
-            IsBusy = false;
+            if (IsCurrent() && _serviceOperationGeneration == generation)
+            {
+                _serviceOperationGeneration = null;
+                IsBusy = false;
+            }
         }
     }
+
+    private long _openGeneration;
+    private long? _serviceOperationGeneration;
 
     /// <summary>
     /// Adopts the workflow layer's live automation state (Epic 11300 Part D2A §28).
@@ -3425,12 +3418,14 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private void OnAutomationRuntimeChanged(object? sender, AutomationRuntimeView runtime)
     {
-        AutomationRuntimeView adopted = _session is not null && runtime.SessionId == _session.Id
-            ? runtime
-            : AutomationRuntimeView.Idle;
+        long generation = _openGeneration;
 
         void Apply()
         {
+            if (generation != _openGeneration || _session is not { } session) return;
+            if (runtime.SessionId is not null && runtime.SessionId != session.Id) return;
+            AutomationRuntimeView adopted = runtime.SessionId == session.Id
+                ? runtime : _sessions.GetAutomationRuntime(session.Id);
             _runtime = adopted;
 
             // A takeover confirmation left standing after the run has ended would offer to take
@@ -3475,8 +3470,11 @@ public sealed partial class SessionViewModel : ObservableObject
             return false;
         }
 
+        SessionId id = _session.Id;
+        long generation = _openGeneration;
         OperationResult<SessionView> reloaded =
-            await _sessions.LoadAsync(_session.Id, cancellationToken).ConfigureAwait(true);
+            await _sessions.LoadAsync(id, cancellationToken).ConfigureAwait(true);
+        if (generation != _openGeneration || _session?.Id != id) return false;
 
         if (reloaded.IsSuccess)
         {
@@ -3499,6 +3497,7 @@ public sealed partial class SessionViewModel : ObservableObject
         var preservedDraft = sameNavigationContext ? CapturePageDraft() : ((string Signature, Action Restore)?)null;
         if (!sameNavigationContext)
         {
+            _isChoosingGuidedWhiteInk = false;
             KeepDraft();
             CloseHistory();
             ClearPendingDecisions();

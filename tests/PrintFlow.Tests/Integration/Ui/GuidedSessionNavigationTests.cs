@@ -235,6 +235,25 @@ public sealed class GuidedSessionNavigationTests
         m.IsConfirmingDraftLeave.ShouldBeFalse();
     }
 
+    [Fact]
+    public async Task Return_impact_is_visible_without_scrolling_and_blocks_underlying_actions()
+    {
+        using HomeScreenHarness h = new();
+        var m = await GuidedSessionProjectionTests.Open(h, WorkflowType.PrepareAsset);
+        await m.ConfirmOriginalCommand.ExecuteAsync(null);
+        m.SelectedReturnTarget = m.ReturnTargets.First(); m.BeginReturnCommand.Execute(null);
+        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = m }, new Size(1000, 700), tree =>
+        {
+            var prompt = GuidedSessionShellTests.Find<FrameworkElement>(tree, "Session.ReturnConfirmation");
+            GuidedSessionProjectionTests.Shown(prompt).ShouldBeTrue();
+            var bounds = prompt.TransformToAncestor(tree.Root).TransformBounds(new Rect(new Point(), prompt.RenderSize));
+            bounds.Bottom.ShouldBeLessThanOrEqualTo(700); bounds.Top.ShouldBeGreaterThanOrEqualTo(0);
+            GuidedSessionShellTests.Find<FrameworkElement>(tree, "Session.ActionBar").IsEnabled.ShouldBeFalse();
+            m.ReturnImpact.ShouldContain(m.SelectedReturnTarget!.DisplayName);
+            return true;
+        });
+    }
+
     internal static T Read<T>(object target, string property)
     {
         var info = target.GetType().GetProperty(property);

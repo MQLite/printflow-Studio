@@ -8,7 +8,7 @@ namespace PrintFlow.App.Views;
 /// Keeps a physical approval gesture attached to the result on which it began.
 /// This is transient input handling; the bound command remains the approval authority.
 /// </summary>
-public sealed class ReviewApprovalButton : Button
+public sealed class ReviewApprovalButton : SessionActionButton
 {
     public static readonly DependencyProperty TargetIdentityProperty = DependencyProperty.Register(
         nameof(TargetIdentity), typeof(string), typeof(ReviewApprovalButton),
@@ -37,12 +37,15 @@ public sealed class ReviewApprovalButton : Button
     private Key? _key;
     private string? _keyTarget;
     private string? _mouseTarget;
+    private InputStamp? _keyScope;
 
     private static void OnTargetChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
     {
         ReviewApprovalButton button = (ReviewApprovalButton)sender;
         button._keyTarget = null;
         button._mouseTarget = null;
+        button._keyScope = null;
+        button.InvalidateInput();
         if (button.IsMouseCaptured) button.ReleaseMouseCapture();
     }
 
@@ -54,6 +57,7 @@ public sealed class ReviewApprovalButton : Button
         {
             _key = e.Key;
             _keyTarget = TargetIdentity;
+            _keyScope = CaptureInput();
         }
     }
 
@@ -61,9 +65,10 @@ public sealed class ReviewApprovalButton : Button
     {
         if (!IsGestureGuarded || e.Key is not (Key.Enter or Key.Space)) { base.OnKeyUp(e); return; }
         e.Handled = true;
-        bool approve = _key == e.Key && _keyTarget is not null && _keyTarget == TargetIdentity;
+        bool approve = _key == e.Key && _keyTarget is not null && _keyTarget == TargetIdentity && IsCurrentInput(_keyScope);
         _key = null;
         _keyTarget = null;
+        _keyScope = null;
         // Both keys activate on release. A down/repeat from the previous target is never
         // converted into a new approval, even if focus returned to this button meanwhile.
         if (approve) OnClick();

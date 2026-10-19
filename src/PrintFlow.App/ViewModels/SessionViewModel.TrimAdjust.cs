@@ -234,12 +234,13 @@ public sealed partial class SessionViewModel
             return;
         }
 
+        long generation = _openGeneration;
         await RunAsync(new WorkflowCommand.AdjustTrimFromReview(
             target.ResultRevisionId, target.ResultSha256, target.PreTrimRevisionId, target.PreTrimSha256, kept),
             cancellationToken).ConfigureAwait(true);
 
         // Said only when a new result from this source really is the one now under review.
-        if (Notice is null && _session is { CurrentStep: { Step: StepKind.Trim, State: StepState.ReviewRequired } } session &&
+        if (generation == _openGeneration && Notice is null && _session is { CurrentStep: { Step: StepKind.Trim, State: StepState.ReviewRequired } } session &&
             session.CurrentArtefact is { IsCurrentStepResult: true } shown && shown.RevisionId != target.ResultRevisionId &&
             session.UpstreamArtefact?.RevisionId == target.PreTrimRevisionId)
         {
@@ -333,7 +334,11 @@ public sealed partial class SessionViewModel
         NotifyOperatorStatusChanged();
     }
 
-    partial void OnIsComparingTrimChanged(bool value) => NotifyTrimAdjustState();
+    partial void OnIsComparingTrimChanged(bool value)
+    {
+        OnPropertyChanged(nameof(GuidedInteractionIdentity));
+        NotifyTrimAdjustState();
+    }
 
     private void NotifyTrimAdjustPanes()
     {

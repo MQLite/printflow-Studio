@@ -34,6 +34,9 @@ public partial class SessionViewModel
     {
         get
         {
+            if (IsConfirmingDraftLeave) return DraftLeaveNotice;
+            if (IsConfirmingReturn) return ReturnImpact;
+            if (IsViewingHistory) return HistoryNotice;
             // A job waiting for a colleague says so, and names the one way back (SCRUM-11148).
             if (IsHandedOff && ShowsCorrectionPanel)
                 return CorrectionActivity == CorrectionActivity.Checking ? CorrectionActivityText
@@ -79,6 +82,9 @@ public partial class SessionViewModel
         get
         {
             if (IsBusy) return null;
+            if (IsConfirmingDraftLeave) return KeepDraftCommand;
+            if (IsConfirmingReturn) return ConfirmReturnCommand;
+            if (IsViewingHistory) return CloseHistoryCommand;
             if (IsHandedOff && ShowsCorrectionPanel) return CanImportCorrectedImage ? ImportCorrectedImageCommand : null;
             if (IsHandedOff) return CanReenterAutomation ? ReenterAutomationCommand : null;
             if (_session?.State == SessionState.Completed) return FinalSaveRecommendation;

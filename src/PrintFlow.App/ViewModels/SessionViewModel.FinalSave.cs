@@ -220,7 +220,7 @@ public partial class SessionViewModel
     /// old result. Read-only actions on an already delivered copy — checking it and opening its
     /// folder — stay, and the section says why the rest has gone.
     /// </summary>
-    internal FinalSaveDisplay WhileAdjustingTrim(FinalSaveDisplay display) => !IsAdjustingTrim && IsLiveInteractionAllowed ? display : display with
+    internal FinalSaveDisplay WhileAdjustingTrim(FinalSaveDisplay display) => !IsAdjustingTrim && CanInteractWithLivePage ? display : display with
     {
         Alert = JoinLines(IsAdjustingTrim ? Strings.FinalSave_TrimAdjustOpen :
             IsViewingHistory ? Strings.Session_HistoryNotice : Strings.Session_DraftLeaveNotice, display.Alert),
@@ -590,7 +590,7 @@ public partial class SessionViewModel
 
     private async Task ReconcileSelectedAsync()
     {
-        if (!IsLiveInteractionAllowed || IsAdjustingTrim || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
+        if (!CanInteractWithLivePage || IsAdjustingTrim || _finalSave is null || SelectedSave is not { } target || SaveDisplay.DeliveryId is not { } deliveryId ||
             _finalSaveOperation is not null || IsBusy) return;
         await RunDeliveryStepAsync(target, RecordedFolder(target, deliveryId), false, async progress =>
             new DeliveryFact(await _finalSave.ReconcileAsync(deliveryId, progress, CancellationToken.None).ConfigureAwait(false))).ConfigureAwait(true);
@@ -1220,5 +1220,6 @@ public partial class SessionViewModel
         foreach (FinalSaveTargetRow row in FinalSaveTargets) row.Refresh();
         OnPropertyChanged(nameof(RecommendedCommand));
         OnPropertyChanged(nameof(NextStepText));
+        OnPropertyChanged(nameof(GuidedInteractionIdentity));
     }
 }

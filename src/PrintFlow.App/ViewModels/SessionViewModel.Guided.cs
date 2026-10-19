@@ -49,6 +49,7 @@ public sealed partial class SessionViewModel
         _ => CurrentStep.Length > 0 ? CurrentStep : StatusHeading,
     };
     public string GuidedCurrentStatus => StatusHeading;
+    public string GuidedInteractionIdentity => $"{NavigationContext(_session)}|{GuidedPage}|{IsViewingHistory}|{SelectedHistory?.Step}|{IsConfirmingDraftLeave}|{IsConfirmingReturn}|{IsConfirmingAutomaticSelection}|{IsChoosingCustomSize}|{IsComparingTrim}|{SelectedSave?.Key}";
     public string GuidedTechnicalDetailsLabel => Strings.Session_GuidedTechnicalDetails;
     public bool ShowsGuidedDimensions => GuidedPage == GuidedSessionPage.Dimensions && CanChooseFlexibleSize;
     public bool ShowsGuidedCustomSizeAction => ShowsGuidedDimensions && IsChoosingCustomSize;
@@ -80,7 +81,6 @@ public sealed partial class SessionViewModel
 
     private void RefreshGuidedPresentation()
     {
-        _isChoosingGuidedWhiteInk = false;
         GuidedSteps.Clear();
         if (_session is not null)
         {
@@ -112,6 +112,7 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(GuidedPage));
         OnPropertyChanged(nameof(GuidedCurrentTitle));
         OnPropertyChanged(nameof(GuidedCurrentStatus));
+        OnPropertyChanged(nameof(GuidedInteractionIdentity));
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
         OnPropertyChanged(nameof(ShowsGuidedDimensions));
         OnPropertyChanged(nameof(ShowsGuidedWhiteInk));
@@ -128,4 +129,5 @@ public sealed partial class SessionViewModel
     }
 
     partial void OnIsConfirmingAutomaticSelectionChanged(bool value) => NotifyOperatorStatusChanged();
+    partial void OnIsConfirmingReturnChanged(bool value) => NotifyNavigation();
 }

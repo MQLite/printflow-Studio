@@ -40,6 +40,7 @@ public sealed partial class SessionViewModel
     public string DiscardDraftLabel => Strings.Session_DiscardDraft;
     public bool ShowsLiveWorkspace => !IsViewingHistory;
     public bool IsLiveInteractionAllowed => !IsViewingHistory && !IsConfirmingDraftLeave;
+    public bool CanInteractWithLivePage => IsLiveInteractionAllowed && !IsConfirmingReturn;
     public string ReturnImpact => _returnIntent is { } intent && _session is { } session
         ? string.Format(Strings.Session_ReturnImpact, DisplayNames.Step(intent.Target.Step),
             string.Join(" → ", session.Steps.Where(s => s.Ordinal >= intent.Target.Ordinal - 1).Select(s => DisplayNames.Step(s.Step))))
@@ -53,7 +54,7 @@ public sealed partial class SessionViewModel
     private void ViewHistory(SessionStepRow? row)
     {
         row ??= SelectedHistoryStep;
-        if (row is null || _session is null || IsBusy || _finalSaveOperation is not null ||
+        if (row is null || _session is null || IsBusy || IsConfirmingReturn || _finalSaveOperation is not null ||
             !_session.History.Any(h => h.Step == row.Kind && (h.Revisions.Count > 0 || h.State == StepState.Skipped))) return;
         SessionHistoryView history = _session.History.First(h => h.Step == row.Kind);
         RequestLeave(() =>
@@ -97,6 +98,7 @@ public sealed partial class SessionViewModel
             _returnIntent = new ReturnIntent(NavigationContext(_session), target, preset, edge, millimetres, editSize);
             IsConfirmingReturn = true;
             OnPropertyChanged(nameof(ReturnImpact));
+            OnPropertyChanged(nameof(GuidedInteractionIdentity));
         });
     }
 
@@ -173,6 +175,7 @@ public sealed partial class SessionViewModel
     {
         OnPropertyChanged(nameof(ShowsLiveWorkspace));
         OnPropertyChanged(nameof(IsLiveInteractionAllowed));
+        OnPropertyChanged(nameof(CanInteractWithLivePage));
         OnPropertyChanged(nameof(SelectedHistory));
         OnPropertyChanged(nameof(HistoryFacts));
         OnPropertyChanged(nameof(HistoryStepName));
