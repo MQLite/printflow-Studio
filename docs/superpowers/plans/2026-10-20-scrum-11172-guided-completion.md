@@ -64,11 +64,11 @@
 
 **Interfaces:** Consume immutable `SessionListItem`/command qualifications and existing Home resume/remove/abandon commands. Produce presentation `GuidedStateLabel`, `GuidedNextAction`/equivalent localized row guidance; leave stored enums and read-only history authority unchanged. No new status persistence.
 
-- [ ] Write tests `Recent_interrupted_and_unknown_states_use_operator_language`, `Recent_saved_history_does_not_claim_present_files`, `Recent_resume_projects_real_guided_page_and_history_is_read_only`. Assert interrupted→stopped, unknown values→neutral localized fallback in scoped surfaces, saved-history qualification, remove label meaning, and no approval/external-run side effects on continue/history.
-- [ ] Run `e5-f03-red` with `FullyQualifiedName~GuidedCompletionRecentTests`; expected assertion failures for missing localized/guided states.
-- [ ] Add legible recent status/action hierarchy and translated fallback; keep separate saved-history and wait-for-correction facts. Document bounded N1 presentation coverage and remaining legacy defects.
-- [ ] Run `e5-f03-green` including `GuidedCompletionRecentTests|RecentProcessing|RecentPending|HomeRecentAccessibility|GuidedImportHome|GuidedImportResume`. Expected GREEN.
-- [ ] Commit explicit Task 3 files and ledger evidence.
+- [x] Write tests `Recent_interrupted_and_unknown_states_use_operator_language`, `Recent_saved_history_does_not_claim_present_files`, `Recent_resume_projects_real_guided_page_and_history_is_read_only`. Assert interrupted→stopped, unknown values→neutral localized fallback in scoped surfaces, saved-history qualification, remove label meaning, and no approval/external-run side effects on continue/history.
+- [x] Run `e5-f03-red` with `FullyQualifiedName~GuidedCompletionRecentTests`; expected assertion failures for missing localized/guided states.
+- [x] Add legible recent status/action hierarchy and translated fallback; keep separate saved-history and wait-for-correction facts. Document bounded N1 presentation coverage and remaining legacy defects.
+- [x] Run `e5-f03-green` including `GuidedCompletionRecentTests|RecentProcessing|RecentPending|HomeRecentAccessibility|GuidedImportHome|GuidedImportResume`. Expected GREEN.
+- [x] Commit explicit Task 3 files and ledger evidence.
 
 ### Task 4: F04 readiness and settings hierarchy
 

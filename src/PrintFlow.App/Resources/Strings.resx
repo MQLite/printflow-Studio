@@ -1404,4 +1404,11 @@
   <data name="Session_RecoveryBusy" xml:space="preserve"><value>Wait for the current action to finish.</value></data>
   <data name="Session_RecoveryNoAction" xml:space="preserve"><value>Read the reason and error details. This page currently offers no automatic recovery action.</value></data>
   <data name="Session_RecoveryNext" xml:space="preserve"><value>Available next actions: {0}. None starts automatically.</value></data>
+  <data name="Home_RecentUnknownWorkflow" xml:space="preserve"><value>Unrecognized workflow</value></data>
+  <data name="Home_RecentUnknownStep" xml:space="preserve"><value>Unrecognized step</value></data>
+  <data name="Home_RecentNextCorrection" xml:space="preserve"><value>Open details to import the correction, then review it.</value></data>
+  <data name="Home_RecentNextSaved" xml:space="preserve"><value>Continue to the actual step and check the current file. Saved history does not confirm it still exists.</value></data>
+  <data name="Home_RecentNextContinue" xml:space="preserve"><value>Continue opens the actual current step. Processing will not start automatically.</value></data>
+  <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>Open handoff details to see the currently supported ways to continue.</value></data>
+  <data name="Home_RecentNextHistory" xml:space="preserve"><value>View the processing record. Open details to check the current file; saved history alone cannot confirm it.</value></data>
 </root>

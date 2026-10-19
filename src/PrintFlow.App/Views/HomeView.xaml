@@ -86,9 +86,12 @@
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="{DynamicResource PF.Font.Body}" />
                                         <TextBlock Text="{Binding MetadataText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.75" />
-                                        <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+                                        <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="6" Padding="8,4" Margin="0,6,12,4"
+                                                HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold"
                                                    AutomationProperties.AutomationId="Home.RecentStatus"
                                                    AutomationProperties.Name="{Binding State}" />
+                                        </Border>
                                         <TextBlock Text="{Binding SaveHistoryText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.8"
                                                    AutomationProperties.AutomationId="Home.RecentSaveHistory"
                                                    AutomationProperties.Name="{Binding SaveHistoryText}"
@@ -97,6 +100,9 @@
                                         <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
                                                    AutomationProperties.AutomationId="Home.RecentWaitingForCorrection"
                                                    Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
+                                        <TextBlock Text="{Binding GuidedNextAction}" TextWrapping="Wrap" Margin="0,4,12,0"
+                                                   Foreground="{DynamicResource PF.Brush.Muted}"
+                                                   AutomationProperties.AutomationId="Home.RecentNext" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

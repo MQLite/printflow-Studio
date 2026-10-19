@@ -1393,4 +1393,11 @@
   <data name="Session_RecoveryBusy" xml:space="preserve"><value>请等待当前操作结束。</value></data>
   <data name="Session_RecoveryNoAction" xml:space="preserve"><value>请查看原因和错误详情。当前页面没有可执行的自动恢复操作。</value></data>
   <data name="Session_RecoveryNext" xml:space="preserve"><value>当前可选操作：{0}。不会自动开始。</value></data>
+  <data name="Home_RecentUnknownWorkflow" xml:space="preserve"><value>未识别的流程</value></data>
+  <data name="Home_RecentUnknownStep" xml:space="preserve"><value>未识别的步骤</value></data>
+  <data name="Home_RecentNextCorrection" xml:space="preserve"><value>打开详情导入修正图片，之后仍需重新审核。</value></data>
+  <data name="Home_RecentNextSaved" xml:space="preserve"><value>继续查看实际步骤并核实当前文件。保存历史不代表文件仍存在。</value></data>
+  <data name="Home_RecentNextContinue" xml:space="preserve"><value>继续将打开实际当前步骤，不会自动开始处理。</value></data>
+  <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>打开移交详情，查看当前允许的后续操作。</value></data>
+  <data name="Home_RecentNextHistory" xml:space="preserve"><value>查看处理记录。请打开详情核实当前文件；仅有保存历史无法确认。</value></data>
 </root>

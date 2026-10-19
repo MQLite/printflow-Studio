@@ -1,0 +1,72 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:06.47]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files [FAIL]
+[xUnit.net 00:00:06.74]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "en", stopped: "Stopped", workflow: "Unrecognized workflow", step: "Unrecognized step") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files [851 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts
+    should contain an element satisfying the condition
+t.Contains("当前文件")
+    but does not
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 55
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "en", stopped: "Stopped", workflow: "Unrecognized workflow", step: "Unrecognized step") [264 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State
+    should contain (case insensitive comparison)
+"Stopped"
+    but was actually
+"Status unavailable · Original Confirmation"
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 27
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.99]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "zh-CN", stopped: "已停止", workflow: "未识别的流程", step: "未识别的步骤") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "zh-CN", stopped: "已停止", workflow: "未识别的流程", step: "未识别的步骤") [250 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State
+    should contain (case insensitive comparison)
+"已停止"
+    but was actually
+"状态暂不可用 · 原图确认"
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 27
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f03-red.trx
+
+失败!  - 失败:     3，通过:     2，已跳过:     0，总计:     5，持续时间: 3 s - PrintFlow.Tests.dll (net10.0)

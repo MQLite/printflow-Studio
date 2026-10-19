@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="034e56c9-cdaf-4eae-a0db-8fcb5ab433f1" name="admin@DESKTOP-0BG8884 2026-10-20 11:09:13" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T11:09:13.0892954+13:00" queuing="2026-10-20T11:09:13.0892956+13:00" start="2026-10-20T11:09:07.3789644+13:00" finish="2026-10-20T11:09:14.9329019+13:00" />
+  <TestSettings name="default" id="77b154d0-24e0-4635-9ce5-7a46742c7703">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_11_09_13" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="9557ec8c-6315-4b0b-b962-14cacbdb300a" testId="6056c44d-aaab-fc6f-f2ec-c19154af36b3" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_resume_projects_real_guided_page_and_history_is_read_only(completed: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.4105516" startTime="2026-10-20T11:09:12.9982126+13:00" endTime="2026-10-20T11:09:13.4007523+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9557ec8c-6315-4b0b-b962-14cacbdb300a" />
+    <UnitTestResult executionId="7eaecd10-7564-41a0-8811-da814587c39d" testId="2b9167b2-e03f-f800-5ce5-35a5b3bce2ba" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: &quot;zh-CN&quot;, stopped: &quot;已停止&quot;, workflow: &quot;未识别的流程&quot;, step: &quot;未识别的步骤&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.2501919" startTime="2026-10-20T11:09:14.5236475+13:00" endTime="2026-10-20T11:09:14.7735817+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7eaecd10-7564-41a0-8811-da814587c39d">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State&#xD;
+    should contain (case insensitive comparison)&#xD;
+"已停止"&#xD;
+    but was actually&#xD;
+"状态暂不可用 · 原图确认"</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 27&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="183c3819-2a9c-4a29-8850-a9c91259ed22" testId="272355d5-0261-3a1a-736e-591cc6658363" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: &quot;en&quot;, stopped: &quot;Stopped&quot;, workflow: &quot;Unrecognized workflow&quot;, step: &quot;Unrecognized step&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.2646240" startTime="2026-10-20T11:09:14.2629034+13:00" endTime="2026-10-20T11:09:14.5226745+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="183c3819-2a9c-4a29-8850-a9c91259ed22">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State&#xD;
+    should contain (case insensitive comparison)&#xD;
+"Stopped"&#xD;
+    but was actually&#xD;
+"Status unavailable · Original Confirmation"</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 27&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0e20fec5-dae3-4548-8276-5187bd835670" testId="1cd0f385-cc98-718b-d9d5-a017d53e945e" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_resume_projects_real_guided_page_and_history_is_read_only(completed: True)" computerName="DESKTOP-0BG8884" duration="00:00:01.4122884" startTime="2026-10-20T11:09:11.5749255+13:00" endTime="2026-10-20T11:09:12.9891512+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e20fec5-dae3-4548-8276-5187bd835670" />
+    <UnitTestResult executionId="f88e23a6-5cce-4928-b918-78e4b5673c90" testId="6e90e4bc-a2eb-5cbd-9cd7-c6c4c6efd4f5" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files" computerName="DESKTOP-0BG8884" duration="00:00:00.8512017" startTime="2026-10-20T11:09:13.4021973+13:00" endTime="2026-10-20T11:09:14.2576240+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f88e23a6-5cce-4928-b918-78e4b5673c90">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : rendered.Facts&#xD;
+    should contain an element satisfying the condition&#xD;
+t.Contains("当前文件")&#xD;
+    but does not</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs:line 55&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_resume_projects_real_guided_page_and_history_is_read_only(completed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1cd0f385-cc98-718b-d9d5-a017d53e945e">
+      <Execution id="0e20fec5-dae3-4548-8276-5187bd835670" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests" name="Recent_resume_projects_real_guided_page_and_history_is_read_only" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: &quot;en&quot;, stopped: &quot;Stopped&quot;, workflow: &quot;Unrecognized workflow&quot;, step: &quot;Unrecognized step&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="272355d5-0261-3a1a-736e-591cc6658363">
+      <Execution id="183c3819-2a9c-4a29-8850-a9c91259ed22" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests" name="Recent_interrupted_and_unknown_states_use_operator_language" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6e90e4bc-a2eb-5cbd-9cd7-c6c4c6efd4f5">
+      <Execution id="f88e23a6-5cce-4928-b918-78e4b5673c90" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests" name="Recent_saved_history_does_not_claim_present_files" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_resume_projects_real_guided_page_and_history_is_read_only(completed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="6056c44d-aaab-fc6f-f2ec-c19154af36b3">
+      <Execution id="9557ec8c-6315-4b0b-b962-14cacbdb300a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests" name="Recent_resume_projects_real_guided_page_and_history_is_read_only" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: &quot;zh-CN&quot;, stopped: &quot;已停止&quot;, workflow: &quot;未识别的流程&quot;, step: &quot;未识别的步骤&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="2b9167b2-e03f-f800-5ce5-35a5b3bce2ba">
+      <Execution id="7eaecd10-7564-41a0-8811-da814587c39d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests" name="Recent_interrupted_and_unknown_states_use_operator_language" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6056c44d-aaab-fc6f-f2ec-c19154af36b3" executionId="9557ec8c-6315-4b0b-b962-14cacbdb300a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2b9167b2-e03f-f800-5ce5-35a5b3bce2ba" executionId="7eaecd10-7564-41a0-8811-da814587c39d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="272355d5-0261-3a1a-736e-591cc6658363" executionId="183c3819-2a9c-4a29-8850-a9c91259ed22" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1cd0f385-cc98-718b-d9d5-a017d53e945e" executionId="0e20fec5-dae3-4548-8276-5187bd835670" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6e90e4bc-a2eb-5cbd-9cd7-c6c4c6efd4f5" executionId="f88e23a6-5cce-4928-b918-78e4b5673c90" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="5" executed="5" passed="2" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.56]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.66]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.76]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:06.47]       Shouldly.ShouldAssertException : rendered.Facts&#xD;
+[xUnit.net 00:00:06.47]           should contain an element satisfying the condition&#xD;
+[xUnit.net 00:00:06.47]       t.Contains("当前文件")&#xD;
+[xUnit.net 00:00:06.47]           but does not&#xD;
+[xUnit.net 00:00:06.47]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.47]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs(55,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files()&#xD;
+[xUnit.net 00:00:06.47]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.47]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.47]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.47]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.47]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.47]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.48]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.48]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.48]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.48]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.74]       Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State&#xD;
+[xUnit.net 00:00:06.74]           should contain (case insensitive comparison)&#xD;
+[xUnit.net 00:00:06.74]       "Stopped"&#xD;
+[xUnit.net 00:00:06.74]           but was actually&#xD;
+[xUnit.net 00:00:06.74]       "Status unavailable · Original Confirmation"&#xD;
+[xUnit.net 00:00:06.74]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.74]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step)&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.74]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.74]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.99]       Shouldly.ShouldAssertException : new RecentSessionRow(item with { CurrentStepState = StepState.Interrupted }).State&#xD;
+[xUnit.net 00:00:06.99]           should contain (case insensitive comparison)&#xD;
+[xUnit.net 00:00:06.99]       "已停止"&#xD;
+[xUnit.net 00:00:06.99]           but was actually&#xD;
+[xUnit.net 00:00:06.99]       "状态暂不可用 · 原图确认"&#xD;
+[xUnit.net 00:00:06.99]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.99]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecentTests.cs(27,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(String language, String stopped, String workflow, String step)&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.99]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.99]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.99]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:09:14.2599749+13:00">
+        <Text>[xUnit.net 00:00:06.47]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_saved_history_does_not_claim_present_files [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:09:14.5231911+13:00">
+        <Text>[xUnit.net 00:00:06.74]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "en", stopped: "Stopped", workflow: "Unrecognized workflow", step: "Unrecognized step") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:09:14.7738871+13:00">
+        <Text>[xUnit.net 00:00:06.99]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecentTests.Recent_interrupted_and_unknown_states_use_operator_language(language: "zh-CN", stopped: "已停止", workflow: "未识别的流程", step: "未识别的步骤") [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>
