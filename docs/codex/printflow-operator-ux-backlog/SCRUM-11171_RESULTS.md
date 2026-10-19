@@ -78,3 +78,11 @@
 新增两张中文最小窗口截图已逐张检查并写入最终清单，最终证据合计30张。原28张与所有中间证据保留。完整广筛1424/14和持久化277/277是R1之前的检查；此次仅改裁切的条件化消息放置，使用受影响筛选补充验证，不将旧广筛冒充修正后的结果。两个早期键盘激活零次失败仍根因未定，不声称修复或继承；真实键盘/UIA/DPI/新手/生产验收仍NOT RUN。
 
 修正后`r1-crop-failure-affected.trx`：**251/251通过，0失败、0跳过**。覆盖全部GuidedProcessing、FailureGuidance、TrimAdjustment（含持久化）、ManualCropUi/Adjustment、CropHandleGesture、ReturnAndTrimControls及GuidedSessionProjection/Shell；过滤与原排除保存。30张最终图像哈希一致，主检出13个跟踪文件仍与启动快照一致。`r1-validation.json`明确修正后的结果与修正前完整广筛之间的边界。独立审查R1已由原执行者修正，控制会话最终集中验证待完成；本记录不冒充第二次独立审查或用户验收。
+
+## 控制会话最终核验（2026-10-20）
+
+技术实现已完成，SCRUM-11171及11185–11189已转为 **In Review**，等待用户验收。最终产品/测试修正提交 `62afc10f5ddd32d0f37812179735e96cd52d3f1a`；控制会话在该提交实跑 `controller-final-e4.trx`：**34/34通过，0失败、0跳过**，包括全部本轮GuidedProcessing和未修改的两组按键保护。R1修正后受影响回归251/251；完整广筛1424通过/14精确继承失败及持久化277/277明确为修正前证据。
+
+唯一独立整体审查发现的R1已由原Native上下文复现、修正，控制会话核对21行只读XAML、两张错误截图及最终全部30张图片哈希。两个首轮按键激活零次现象仍根因未定，不因后来通过而称已修复。真实键盘/设备UIA/DPI/工作站/新手/生产仍NOT RUN。继承11项排除相同，另排除Smoke；主检出原状态和13项跟踪文件哈希保持不变。
+
+最终机器核验见 [controller-final-verification.json](../../../output/ui/SCRUM-11171/checks/controller-final-verification.json)，Jira原始回执见 [jira-final-status.json](../../../output/ui/SCRUM-11171/checks/jira-final-status.json)。实际Native UI与独立审查均Astra/high，控制会话gpt-6.1-sol/xhigh；纯持久化的请求Sol/high无法原位切换已披露。Windows/local、development-routing v2.4、RouteOffset=0。分支与工作树保留；未合并、推送、部署、生产操作、进入后续Epic或发送Jira评论，scratch保留。

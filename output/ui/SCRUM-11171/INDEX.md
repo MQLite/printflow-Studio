@@ -53,3 +53,11 @@ Initial image inspection found narrow unrelated source forms, a duplicate disabl
 - [white-ink-1000x700](screens-verified/white-ink-1000x700.png) — [metadata](screens-verified/white-ink-1000x700.json)
 - [white-ink-1280x720](screens-verified/white-ink-1280x720.png) — [metadata](screens-verified/white-ink-1280x720.json)
 - [white-ink-1920x1080](screens-verified/white-ink-1920x1080.png) — [metadata](screens-verified/white-ink-1920x1080.json)
+
+## 控制会话最终核验（2026-10-20）
+
+技术实现已完成，SCRUM-11171及11185–11189已转为 **In Review**，等待用户验收。最终产品/测试修正提交 `62afc10f5ddd32d0f37812179735e96cd52d3f1a`；控制会话在该提交实跑 `controller-final-e4.trx`：**34/34通过，0失败、0跳过**，包括全部本轮GuidedProcessing和未修改的两组按键保护。R1修正后受影响回归251/251；完整广筛1424通过/14精确继承失败及持久化277/277明确为修正前证据。
+
+唯一独立整体审查发现的R1已由原Native上下文复现、修正，控制会话核对21行只读XAML、两张错误截图及最终全部30张图片哈希。两个首轮按键激活零次现象仍根因未定，不因后来通过而称已修复。真实键盘/设备UIA/DPI/工作站/新手/生产仍NOT RUN。继承11项排除相同，另排除Smoke；主检出原状态和13项跟踪文件哈希保持不变。
+
+最终机器核验见 [controller-final-verification.json](../../../output/ui/SCRUM-11171/checks/controller-final-verification.json)，Jira原始回执见 [jira-final-status.json](../../../output/ui/SCRUM-11171/checks/jira-final-status.json)。实际Native UI与独立审查均Astra/high，控制会话gpt-6.1-sol/xhigh；纯持久化的请求Sol/high无法原位切换已披露。Windows/local、development-routing v2.4、RouteOffset=0。分支与工作树保留；未合并、推送、部署、生产操作、进入后续Epic或发送Jira评论，scratch保留。
