@@ -1345,4 +1345,8 @@
   <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
+  <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>Selection waiting cancelled. Reopen the task to read its current saved state.</value></data>
+  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>No processing has started. You can change route until the first processed result exists. Back keeps this task in recent tasks.</value></data>
+  <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>A processed result already exists, so this route is locked. Back keeps the task and its results.</value></data>
+  <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>Saving your choice…</value></data>
 </root>

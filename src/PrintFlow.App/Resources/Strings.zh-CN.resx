@@ -1334,4 +1334,8 @@
   <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
+  <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>已取消选择等待。重新打开任务可查看当前已保存的状态。</value></data>
+  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。</value></data>
+  <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>已有处理结果，当前路线已锁定。返回首页会保留任务和结果。</value></data>
+  <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>正在保存您的选择…</value></data>
 </root>

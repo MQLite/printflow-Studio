@@ -122,8 +122,32 @@ public sealed class WorkflowChoice : ObservableObject
 /// <see cref="IArtefactPreviewService"/>, which cannot write a file or advance a session.
 /// </para>
 /// </remarks>
-public sealed partial class WorkflowSelectionViewModel : ObservableObject
+public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntryScreenLifetime
 {
+    private bool _active = true;
+    private long _generation;
+    public string InteractionIdentity => $"{_generation}|{_session?.Id}";
+    public string RouteChangeHint => Strings.Resolve(_session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true
+        ? "WorkflowSelection_GuidedChangeAllowed" : "WorkflowSelection_GuidedChangeLocked");
+    public string ProgressLabel => Strings.Resolve("WorkflowSelection_GuidedProgress");
+
+    public void Deactivate()
+    {
+        _active = false;
+        ++_generation;
+        IsBusy = false;
+        NotifyEligibility();
+        OnPropertyChanged(nameof(InteractionIdentity));
+    }
+
+    private bool Owns(long generation) => _active && generation == _generation;
+    partial void OnIsBusyChanged(bool value) => NotifyEligibility();
+    private void NotifyEligibility()
+    {
+        OnPropertyChanged(nameof(CanSelect));
+        OnPropertyChanged(nameof(CanEditOutputName));
+        OnPropertyChanged(nameof(RouteChangeHint));
+    }
     private readonly ISessionService _sessions;
     private readonly IArtefactPreviewService _previews;
     private readonly INavigationService _navigation;
@@ -243,7 +267,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     /// lives in the engine; this is a reading of its answer, not a second copy of it.
     /// </remarks>
     public bool CanSelect =>
-        _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
+        _active && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
 
     /// <summary>
     /// Whether the Output Name may still be edited, as the engine reports it.
@@ -254,7 +278,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     /// box and an accepted command must not be able to disagree.
     /// </remarks>
     public bool CanEditOutputName =>
-        _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
+        _active && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
 
     /// <summary>Points the screen at the session it is choosing a workflow for.</summary>
     /// <remarks>
@@ -265,6 +289,9 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(session);
 
+        ++_generation;
+        _active = true;
+        IsBusy = false;
         _session = session;
         Notice = CanSelect ? null : Strings.WorkflowSelection_Locked;
 
@@ -278,6 +305,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
         OnPropertyChanged(nameof(HasSourceFileName));
         OnPropertyChanged(nameof(CanSelect));
         OnPropertyChanged(nameof(CanEditOutputName));
+        OnPropertyChanged(nameof(RouteChangeHint));
+        OnPropertyChanged(nameof(InteractionIdentity));
 
         Preview = null;
         OnPropertyChanged(nameof(HasPreview));
@@ -322,7 +351,7 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
         {
             // Only for the session still on screen. A load that started before the operator went
             // back and imported something else publishes nothing.
-            if (!ReferenceEquals(_session, session))
+            if (!_active || !ReferenceEquals(_session, session))
             {
                 return;
             }
@@ -335,11 +364,14 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     [RelayCommand]
     private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancellationToken)
     {
-        if (choice is null || _session is null || IsBusy)
+        if (choice is null || _session is null || IsBusy || !_active)
         {
             return;
         }
 
+        long generation = _generation;
+        SessionView session = _session;
+        string typed = OutputName ?? string.Empty;
         IsBusy = true;
         try
         {
@@ -349,8 +381,9 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
             // the race §19 describes: a workflow started against the session's old name while the
             // box on screen showed a new one. If the name cannot be accepted, nothing starts
             // (§20) — the operator stays here with a sentence explaining why.
-            OperationResult<SessionView> named = await CommitOutputNameAsync(cancellationToken)
+            OperationResult<SessionView> named = await CommitOutputNameAsync(session, typed, generation, cancellationToken)
                 .ConfigureAwait(true);
+            if (!Owns(generation) || cancellationToken.IsCancellationRequested) return;
             if (named.IsFailure)
             {
                 return;
@@ -361,6 +394,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
                 new WorkflowCommand.SelectWorkflow(choice.Type),
                 Environment.UserName,
                 cancellationToken).ConfigureAwait(true);
+
+            if (!Owns(generation) || cancellationToken.IsCancellationRequested) return;
 
             if (selected.IsFailure)
             {
@@ -376,9 +411,13 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
 
             _navigation.GoToSession(selected.Value);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (Owns(generation)) Notice = Strings.Resolve("WorkflowSelection_GuidedCancelled");
+        }
         finally
         {
-            IsBusy = false;
+            if (Owns(generation)) IsBusy = false;
         }
     }
 
@@ -397,11 +436,9 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     /// unchanged value would write a metadata transaction for a decision nobody made.
     /// </para>
     /// </remarks>
-    private async Task<OperationResult<SessionView>> CommitOutputNameAsync(CancellationToken cancellationToken)
+    private async Task<OperationResult<SessionView>> CommitOutputNameAsync(
+        SessionView session, string typed, long generation, CancellationToken cancellationToken)
     {
-        SessionView session = _session!;
-
-        string typed = OutputName ?? string.Empty;
         if (string.Equals(typed, session.OutputName.Value, StringComparison.Ordinal))
         {
             return OperationResult.Ok(session);
@@ -425,6 +462,8 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
             new WorkflowCommand.SetOutputName(validated.Name),
             Environment.UserName,
             cancellationToken).ConfigureAwait(true);
+
+        if (!Owns(generation) || cancellationToken.IsCancellationRequested) return renamed;
 
         if (renamed.IsFailure)
         {
@@ -459,8 +498,12 @@ public sealed partial class WorkflowSelectionViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
+    private async Task BackToHomeAsync(CancellationToken cancellationToken)
+    {
+        if (!_active) return;
+        Deactivate();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
 
     // --- SCRUM-11151: failure notices whose code sits under Error details ------------------
 

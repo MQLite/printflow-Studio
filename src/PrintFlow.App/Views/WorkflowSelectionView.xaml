@@ -83,7 +83,7 @@
                                TextWrapping="Wrap"
                                Margin="10"
                                Opacity="0.75"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
                 </Grid>
             </Border>
 
@@ -106,7 +106,7 @@
 
                 <HeaderedContentControl Style="{StaticResource PF.FormSection}" Header="{Binding OutputNameLabel}">
                 <StackPanel>
-                <TextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
+                <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding CanEditOutputName}"
                          AutomationProperties.AutomationId="WorkflowSelection.OutputName"
                          AutomationProperties.Name="{Binding OutputNameLabel}"
@@ -130,35 +130,25 @@
             <StackPanel>
                 <TextBlock Text="{Binding Hint}" TextWrapping="Wrap" Margin="0,0,0,10" Opacity="0.7" />
 
-                <ItemsControl ItemsSource="{Binding Workflows}">
+                <ItemsControl ItemsSource="{Binding Workflows}" HorizontalContentAlignment="Stretch">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource PF.Card}" Margin="{DynamicResource PF.Margin.Section}">
+                            <Border Style="{StaticResource PF.Card}" Margin="0,0,12,0" Padding="16">
                                 <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>                                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
                                         <TextBlock Text="{Binding Title}" TextWrapping="Wrap" FontSize="{DynamicResource PF.Font.Body}" FontWeight="SemiBold" Margin="0,0,0,8" />
                                         <TextBlock Text="{Binding Purpose}" TextWrapping="Wrap" Margin="0,0,0,4" />
                                         <TextBlock Text="{Binding Result}" TextWrapping="Wrap" Margin="0,0,0,4" />
                                         <TextBlock Text="{Binding Dimensions}" TextWrapping="Wrap" Margin="0,0,0,8" />
-                                        <ItemsControl ItemsSource="{Binding Steps}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="8,1,0,1" Opacity="0.8" />
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+
                                     </StackPanel>
 
                                     <!-- Enabled by the engine's own AvailableCommands, so the button
                                          is offered on exactly the rule that would accept it (§7).
                                          The identity comes from the catalogue entry's workflow type
                                          and never from its translated title (§22). -->
-                                    <Button Style="{StaticResource PF.Button.Secondary}" Grid.Column="1"
+                                    <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Grid.Row="1"
                                             Content="{Binding DataContext.SelectLabel,
                                                               RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             Command="{Binding DataContext.SelectCommand,
@@ -168,7 +158,7 @@
                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             AutomationProperties.AutomationId="{Binding AutomationId}"
                                             AutomationProperties.Name="{Binding Title}"
-                                            VerticalAlignment="Center" />
+                                            VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -179,6 +169,8 @@
 
         <ContentControl Grid.Row="3" Style="{StaticResource PF.ActionBar}" Margin="0,16,0,0">
         <StackPanel>
+            <TextBlock Text="{Binding RouteChangeHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,0,0,8" AutomationProperties.AutomationId="WorkflowSelection.ChangeHint" />
+            <TextBlock Text="{Binding ProgressLabel}" TextWrapping="Wrap" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="WorkflowSelection.Progress" />
             <TextBlock Text="{Binding Notice}"
                        AutomationProperties.AutomationId="WorkflowSelection.Notice"
                        TextWrapping="Wrap"
@@ -186,7 +178,7 @@
                        Margin="0,0,0,8" />
             <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
             <local:NoticeErrorDetails />
-            <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
+            <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
                     AutomationProperties.AutomationId="WorkflowSelection.Back"
                     AutomationProperties.Name="{Binding BackLabel}"
