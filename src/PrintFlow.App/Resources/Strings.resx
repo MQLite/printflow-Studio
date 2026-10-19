@@ -1371,4 +1371,24 @@
   <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>White ink: {0}</value></data>
   <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>Your selection also records the stated artwork classification as the reason. Choose it for this finished design.</value></data>
   <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>Source PSD/PDF spot or white-ink channels are not reused. This choice generates the production W1 channel.</value></data>
+  <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>Save the approved result</value></data>
+  <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>Task completed · delivery record</value></data>
+  <data name="Session_CompletionNotice" xml:space="preserve"><value>Approval, saving to your folder and completing the task are separate. An internal approved file is not a delivered file.</value></data>
+  <data name="Session_CompletionApproved" xml:space="preserve"><value>Result approved</value></data>
+  <data name="Session_CompletionNotApproved" xml:space="preserve"><value>Not approved yet</value></data>
+  <data name="Session_CompletionPngPreparing" xml:space="preserve"><value>Approved · PNG preparation required</value></data>
+  <data name="Session_CompletionUnavailable" xml:space="preserve"><value>This result is not available for saving</value></data>
+  <data name="Session_CompletionNotSaved" xml:space="preserve"><value>Not saved to a delivery folder</value></data>
+  <data name="Session_CompletionWorking" xml:space="preserve"><value>Saving or verifying · please wait</value></data>
+  <data name="Session_CompletionSaved" xml:space="preserve"><value>Save verified</value></data>
+  <data name="Session_CompletionSavedPreviously" xml:space="preserve"><value>Save recorded · current file not checked</value></data>
+  <data name="Session_CompletionSaveFailed" xml:space="preserve"><value>Save failed · not delivered</value></data>
+  <data name="Session_CompletionCollision" xml:space="preserve"><value>Name conflict · not saved</value></data>
+  <data name="Session_CompletionUncertain" xml:space="preserve"><value>Save outcome needs verification</value></data>
+  <data name="Session_CompletionMissing" xml:space="preserve"><value>Saved previously · file now missing</value></data>
+  <data name="Session_CompletionChanged" xml:space="preserve"><value>Saved previously · file has changed</value></data>
+  <data name="Session_CompletionUnknown" xml:space="preserve"><value>Current save status unavailable</value></data>
+  <data name="Session_CompletionFinished" xml:space="preserve"><value>Task completed</value></data>
+  <data name="Session_CompletionAbandoned" xml:space="preserve"><value>Task abandoned</value></data>
+  <data name="Session_CompletionNotFinished" xml:space="preserve"><value>Task not completed yet</value></data>
 </root>

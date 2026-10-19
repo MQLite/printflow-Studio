@@ -1360,4 +1360,24 @@
   <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>白墨：{0}</value></data>
   <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>选择同时记录对应的图案分类理由，请根据本次完整成品设计判断。</value></data>
   <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>源 PSD/PDF 的专色或白墨通道不会沿用。本次选择用于生成生产 W1 通道。</value></data>
+  <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>保存已批准的结果</value></data>
+  <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>任务完成 · 保存记录</value></data>
+  <data name="Session_CompletionNotice" xml:space="preserve"><value>审核通过、保存到所选文件夹和完成任务是独立状态。内部批准文件不代表已交付。</value></data>
+  <data name="Session_CompletionApproved" xml:space="preserve"><value>结果已批准</value></data>
+  <data name="Session_CompletionNotApproved" xml:space="preserve"><value>尚未批准</value></data>
+  <data name="Session_CompletionPngPreparing" xml:space="preserve"><value>已批准 · 等待准备 PNG</value></data>
+  <data name="Session_CompletionUnavailable" xml:space="preserve"><value>此结果当前不可保存</value></data>
+  <data name="Session_CompletionNotSaved" xml:space="preserve"><value>尚未保存到交付文件夹</value></data>
+  <data name="Session_CompletionWorking" xml:space="preserve"><value>正在保存或核实，请等待</value></data>
+  <data name="Session_CompletionSaved" xml:space="preserve"><value>已核实保存</value></data>
+  <data name="Session_CompletionSavedPreviously" xml:space="preserve"><value>有保存记录，当前文件待核实</value></data>
+  <data name="Session_CompletionSaveFailed" xml:space="preserve"><value>保存失败，尚未交付</value></data>
+  <data name="Session_CompletionCollision" xml:space="preserve"><value>同名冲突，尚未保存</value></data>
+  <data name="Session_CompletionUncertain" xml:space="preserve"><value>保存结果待核实</value></data>
+  <data name="Session_CompletionMissing" xml:space="preserve"><value>曾保存，当前文件缺失</value></data>
+  <data name="Session_CompletionChanged" xml:space="preserve"><value>曾保存，当前文件已变化</value></data>
+  <data name="Session_CompletionUnknown" xml:space="preserve"><value>当前保存状态无法核实</value></data>
+  <data name="Session_CompletionFinished" xml:space="preserve"><value>任务已完成</value></data>
+  <data name="Session_CompletionAbandoned" xml:space="preserve"><value>任务已放弃</value></data>
+  <data name="Session_CompletionNotFinished" xml:space="preserve"><value>任务尚未完成</value></data>
 </root>

@@ -17,7 +17,12 @@ namespace PrintFlow.App.ViewModels;
 /// <summary>One result the final-save section can act on: a pending final review or an approved artifact.</summary>
 public sealed class FinalSaveTargetRow : ObservableObject
 {
-    internal FinalSaveTargetRow(FinalSaveTarget target) => Target = target;
+    private readonly Func<FinalSaveTarget, string> _deliveryStatus;
+    internal FinalSaveTargetRow(FinalSaveTarget target, Func<FinalSaveTarget, string> deliveryStatus)
+    {
+        Target = target;
+        _deliveryStatus = deliveryStatus;
+    }
 
     internal FinalSaveTarget Target { get; }
 
@@ -27,7 +32,14 @@ public sealed class FinalSaveTargetRow : ObservableObject
         Target.PendingReview is not null ? Strings.FinalSave_TargetPending : Strings.FinalSave_TargetApproved,
         Target.KnownFileName ?? Target.FileName);
 
-    internal void Refresh() => OnPropertyChanged(nameof(Label));
+    public string DeliveryStatus => _deliveryStatus(Target);
+    public override string ToString() => Label + " · " + DeliveryStatus;
+
+    internal void Refresh()
+    {
+        OnPropertyChanged(nameof(Label));
+        OnPropertyChanged(nameof(DeliveryStatus));
+    }
 }
 
 /// <summary>
@@ -347,7 +359,7 @@ public partial class SessionViewModel
             foreach (FinalSaveTarget target in discovered)
             {
                 if (!_finalSaveRows.TryGetValue(target.Key, out FinalSaveTargetRow? row))
-                    _finalSaveRows[target.Key] = row = new FinalSaveTargetRow(target);
+                    _finalSaveRows[target.Key] = row = new FinalSaveTargetRow(target, TargetDeliveryStatus);
                 FinalSaveTargets.Add(row);
             }
         }
@@ -1255,6 +1267,7 @@ public partial class SessionViewModel
         SyncFinalSaveRecords();
         foreach (string property in FinalSaveProperties) OnPropertyChanged(property);
         foreach (FinalSaveTargetRow row in FinalSaveTargets) row.Refresh();
+        NotifyGuidedCompletion();
         OnPropertyChanged(nameof(RecommendedCommand));
         OnPropertyChanged(nameof(NextStepText));
         OnPropertyChanged(nameof(GuidedInteractionIdentity));

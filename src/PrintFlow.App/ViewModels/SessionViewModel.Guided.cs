@@ -31,6 +31,7 @@ public sealed partial class SessionViewModel
     {
         GuidedSessionPage.Review => new(280),
         GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight => new(340),
+        GuidedSessionPage.Save or GuidedSessionPage.Completed => new(4, System.Windows.GridUnitType.Star),
         _ => new(2, System.Windows.GridUnitType.Star),
     };
     public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review;
@@ -80,6 +81,7 @@ public sealed partial class SessionViewModel
         _ when IsCropping || IsAdjustingTrim => GuidedSessionPage.Crop,
         _ when IsReviewRequired => GuidedSessionPage.Review,
         _ when IsStoppedStep => GuidedSessionPage.Failure,
+        { CurrentStep.Step: StepKind.ApprovedPngExport } => GuidedSessionPage.Save,
         { CurrentStep: null } => GuidedSessionPage.Save,
         { CurrentStep.Step: StepKind.OriginalConfirmation, OriginalSourceFormat: ImageFormat.Pdf or ImageFormat.Psd }
             => GuidedSessionPage.SourcePreparation,
@@ -96,7 +98,7 @@ public sealed partial class SessionViewModel
         GuidedSessionPage.WhiteInk => WhiteUnderbaseHeading,
         GuidedSessionPage.SourcePreparation => RunStepLabel,
         GuidedSessionPage.Preflight => Strings.Session_GuidedPreflight,
-        GuidedSessionPage.Save => FinalSaveHeading,
+        GuidedSessionPage.Save or GuidedSessionPage.Completed when HasFinalSave => GuidedCompletionHeading,
         _ => CurrentStep.Length > 0 ? CurrentStep : StatusHeading,
     };
     public string GuidedCurrentStatus => StatusHeading;
@@ -161,6 +163,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyGuidedPresentation()
     {
+        NotifyGuidedCompletion();
         OnPropertyChanged(nameof(ShowsGuidedProcessing));
         OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
         OnPropertyChanged(nameof(ShowsGuidedPreviewTools));

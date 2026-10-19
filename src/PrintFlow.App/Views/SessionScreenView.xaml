@@ -104,25 +104,45 @@
 
         <!-- Final review and save section (SCRUM-11145); instantiated only while it applies. -->
         <DataTemplate x:Key="FinalSaveTemplate">
-            <Border BorderBrush="#174D83" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,14"
+            <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,14"
                     AutomationProperties.AutomationId="Session.FinalSave"
                     AutomationProperties.Name="{Binding FinalSaveHeading}">
                 <StackPanel>
                     <TextBlock Text="{Binding FinalSaveHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                    <StackPanel Margin="0,8,0,4" Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}">
+                        <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="6" Padding="10,8">
+                            <StackPanel>
+                                <TextBlock Text="{Binding GuidedApprovalState}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                           AutomationProperties.AutomationId="Session.Completion.Approval" />
+                                <TextBlock Text="{Binding GuidedDeliveryState}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           AutomationProperties.AutomationId="Session.Completion.Delivery" />
+                                <TextBlock Text="{Binding GuidedCompletionState}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           AutomationProperties.AutomationId="Session.Completion.Workflow" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
 
                     <StackPanel Margin="0,8,0,0"
                                 Visibility="{Binding HasMultipleFinalSaveTargets, Converter={StaticResource BoolToVisibility}}">
                         <TextBlock Text="{Binding FinalSaveTargetLabel}" Style="{StaticResource MetadataLabel}" />
                         <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
                                   SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
-                                  DisplayMemberPath="Label"
+                                  TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
                                   IsEnabled="{Binding IsSaveDraftEditable}"
                                   AutomationProperties.AutomationId="Session.FinalSave.Target"
-                                  AutomationProperties.Name="{Binding FinalSaveTargetLabel}" />
+                                  AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
+                            <local:SessionComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding DeliveryStatus}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </local:SessionComboBox.ItemTemplate>
+                        </local:SessionComboBox>
                     </StackPanel>
 
-                    <TextBlock Text="{Binding FinalSaveStatus}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
-                               AutomationProperties.AutomationId="Session.FinalSave.Status" />
                     <TextBlock Text="{Binding FinalSaveAlert}" TextWrapping="Wrap" Margin="0,6,0,0" Foreground="#8A1F11"
                                AutomationProperties.AutomationId="Session.FinalSave.Alert"
                                Visibility="{Binding HasFinalSaveAlert, Converter={StaticResource BoolToVisibility}}" />
@@ -152,9 +172,6 @@
 
                     <!-- The draft is shown only while a save of this result is possible. -->
                     <StackPanel Visibility="{Binding ShowsSaveDraft, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Text="{Binding SaveSummary}" TextWrapping="Wrap" Margin="0,8,0,0"
-                                   AutomationProperties.AutomationId="Session.FinalSave.Summary" />
-
                         <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,2" />
                         <local:SessionTextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  IsEnabled="{Binding IsSaveDraftEditable}"
@@ -174,7 +191,14 @@
                         <TextBlock Text="{Binding SaveDraftNotice}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
                                    AutomationProperties.AutomationId="Session.FinalSave.DraftNotice"
                                    Visibility="{Binding HasSaveDraftNotice, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding SaveSummary}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   AutomationProperties.AutomationId="Session.FinalSave.Summary" />
                     </StackPanel>
+                    <TextBlock Text="{Binding FinalSaveStatus}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                               AutomationProperties.AutomationId="Session.FinalSave.Status" />
+                    <TextBlock Text="{Binding GuidedCompletionNotice}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}"
+                               AutomationProperties.AutomationId="Session.Completion.Notice"
+                               Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}" />
                     <TextBlock Text="{Binding FinalSaveSecondary}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
                                AutomationProperties.AutomationId="Session.FinalSave.Secondary"
                                Visibility="{Binding HasFinalSaveSecondary, Converter={StaticResource BoolToVisibility}}" />

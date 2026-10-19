@@ -40,11 +40,11 @@
 
 **Interfaces:** Consume existing `GuidedPage`, `SaveDisplay: FinalSaveDisplay`, `DescribeFinalSave(FinalSaveTarget?)`, `FinalSaveTargets`, exact save commands/identities and `CanComplete`. Produce presentation-only `ShowsGuidedCompletion`, `GuidedCompletionHeading`, `GuidedCompletionNotice`, `GuidedApprovalState`, `GuidedDeliveryState`, `GuidedCompletionState` and per-target `DeliveryStatus`. Notification hook `NotifyGuidedCompletion()` is called by existing guided/save refresh paths.
 
-- [ ] Write tests `Approved_result_enters_save_without_claiming_delivery`, `Each_size_retains_its_own_review_and_delivery_summary`, and `Uncertain_collision_cancel_and_completed_are_distinct`. Assert approval-only performs zero deliveries; actual synthetic save changes delivery text while completion remains pending; completed-without-save remains truthful; per-size states derive independently; canceled folder keeps draft/identity; uncertainty is never success.
-- [ ] Run `e5-f01-red` with `FullyQualifiedName~GuidedCompletionSaveTests`; expected behavioral assertion failures for absent completion projection/layout, after compile/setup issues separately resolved.
-- [ ] Implement the presentation projection and focused save/completed summary; keep filename/folder editable through existing controls, existing exact save/open/conflict/cancel/retry mechanics and fixed bar. Per-size rows display both review and save facts from `DescribeFinalSave`, never from file extension/path alone.
-- [ ] Run `e5-f01-green` including `GuidedCompletionSaveTests|FinalSaveUiTests|GuidedSessionSaveOwnershipTests|GuidedProcessingReviewTests`. Expected GREEN; retain known baseline differences explicitly.
-- [ ] Commit explicit Task 1 files plus plan/safety audit/ledger evidence. Record ruling costs and actual tests.
+- [x] Write tests `Approved_result_enters_save_without_claiming_delivery`, `Each_size_retains_its_own_review_and_delivery_summary`, and `Uncertain_collision_cancel_and_completed_are_distinct`. Assert approval-only performs zero deliveries; actual synthetic save changes delivery text while completion remains pending; completed-without-save remains truthful; per-size states derive independently; canceled folder keeps draft/identity; uncertainty is never success.
+- [x] Run `e5-f01-red` with `FullyQualifiedName~GuidedCompletionSaveTests`; expected behavioral assertion failures for absent completion projection/layout, after compile/setup issues separately resolved.
+- [x] Implement the presentation projection and focused save/completed summary; keep filename/folder editable through existing controls, existing exact save/open/conflict/cancel/retry mechanics and fixed bar. Per-size rows display both review and save facts from `DescribeFinalSave`, never from file extension/path alone.
+- [x] Run `e5-f01-green` including `GuidedCompletionSaveTests|FinalSaveUiTests|GuidedSessionSaveOwnershipTests|GuidedProcessingReviewTests`. Expected GREEN; retain known baseline differences explicitly.
+- [x] Commit explicit Task 1 files plus plan/safety audit/ledger evidence. Record ruling costs and actual tests.
 
 ### Task 2: F02 correction and recovery branch
 
