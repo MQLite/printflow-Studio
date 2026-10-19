@@ -811,8 +811,8 @@
   <data name="Failure_PsdUnreadable" xml:space="preserve"><value>PSD 已损坏或无法读取。未生成准备图像。</value></data>
   <data name="Failure_PsdUnsupported" xml:space="preserve"><value>无法自动准备此 PSD。需使用包含 Photoshop 兼容合成图的 RGB 8 位 PSD。</value></data>
   <data name="Session_PreparePsd" xml:space="preserve"><value>准备 PSD 以供检查</value></data>
-  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
-  <data name="Session_PsdPrepared" xml:space="preserve"><value>原始文件：PSD（保持不变）。显示的 PNG 是 Photoshop 生成的受管栅格副本。请检查此副本后继续。</value></data>
+  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通道保留。</value></data>
+  <data name="Session_PsdPrepared" xml:space="preserve"><value>原始文件：PSD（保持不变）。显示的 PNG 是 Photoshop 生成的受管栅格副本。源文件中已有的专色或白墨通道不会作为生产通道沿用。请检查此副本后继续。</value></data>
   <data name="Failure_PdfUnreadable" xml:space="preserve"><value>PDF 已损坏或无法读取，未生成准备图像。请导入可读取的单页 PDF。</value></data>
   <data name="Failure_PdfEncrypted" xml:space="preserve"><value>不支持受密码保护或加密的 PDF，未生成准备图像。</value></data>
   <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>此 PDF 包含多页。此工作流程仅接受单页 PDF。</value></data>
@@ -820,8 +820,8 @@
   <data name="Failure_SourceImageUnreadable" xml:space="preserve"><value>无法从该文件读取图像——文件不完整或已损坏。未开始任何处理，您的文件未被更改。</value></data>
   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。请检查失败原因后重试。</value></data>
   <data name="Session_PreparePdf" xml:space="preserve"><value>准备 PDF 以供检查</value></data>
-  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
-  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置印刷尺寸。</value></data>
+  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。</value></data>
+  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。</value></data>
   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
@@ -1338,4 +1338,6 @@
   <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。</value></data>
   <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>已有处理结果，当前路线已锁定。返回首页会保留任务和结果。</value></data>
   <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>正在保存您的选择…</value></data>
+  <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>本次原始文件：{0}（原件保持不变）</value></data>
+  <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>更换路线（尚无处理结果）</value></data>
 </root>

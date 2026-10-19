@@ -305,6 +305,9 @@
         </Border>
 
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
+            <TextBlock Text="{Binding OriginalSourceSummary}" TextWrapping="Wrap"
+                       AutomationProperties.AutomationId="Session.OriginalSourceSummary"
+                       Visibility="{Binding ShowsGuidedSourceDetails, Converter={StaticResource BoolToVisibility}}" />
             <!-- Automation has ended for this session; nothing here restarts it (§14). -->
             <TextBlock Text="{Binding HandedOffNotice}"
                        TextWrapping="Wrap"
@@ -314,9 +317,11 @@
 
             <!-- The error surface: a localised sentence and a stable code, never a trace (§15). -->
             <TextBlock Text="{Binding PdfSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
-                       Visibility="{Binding HasPdfSource, Converter={StaticResource BoolToVisibility}}" />
+                       AutomationProperties.AutomationId="Session.PdfSourceNotice"
+                       Visibility="{Binding ShowsGuidedPdfSource, Converter={StaticResource BoolToVisibility}}" />
             <TextBlock Text="{Binding PsdSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
-                       Visibility="{Binding HasPsdSource, Converter={StaticResource BoolToVisibility}}" />
+                       AutomationProperties.AutomationId="Session.PsdSourceNotice"
+                       Visibility="{Binding ShowsGuidedPsdSource, Converter={StaticResource BoolToVisibility}}" />
 
             <TextBlock TextWrapping="Wrap"
                        FontWeight="SemiBold"
@@ -2386,6 +2391,11 @@
                         AutomationProperties.AutomationId="Session.AddAnotherSize"
                         AutomationProperties.Name="{Binding AddAnotherSizeLabel}"
                         Visibility="{Binding CanAddAnotherSize, Converter={StaticResource BoolToVisibility}}" />
+                <local:SessionActionButton Content="{Binding ChangeRouteLabel}"
+                        Command="{Binding ChangeRouteCommand}"
+                        AutomationProperties.AutomationId="Session.ChangeRoute"
+                        AutomationProperties.Name="{Binding ChangeRouteLabel}"
+                        Visibility="{Binding CanChangeRoute, Converter={StaticResource BoolToVisibility}}" />
             </WrapPanel>
 
 

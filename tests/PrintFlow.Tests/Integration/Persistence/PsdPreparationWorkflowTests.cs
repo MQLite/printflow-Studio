@@ -209,7 +209,7 @@ public sealed class PsdPreparationWorkflowTests
         stored.Attempts.Single(a => a.Operation == OperationKind.PreparePsd).PsdInspection.ShouldNotBeNull();
     }
 
-    private sealed class PsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
+    internal sealed class PsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
     {
         public string AdapterId => "test-psd-boundary-v1";
         public AdapterExecutionMode Mode { get; init; } = AdapterExecutionMode.Fake;

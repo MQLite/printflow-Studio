@@ -5,6 +5,7 @@ using PrintFlow.App.Resources;
 using PrintFlow.Domain.Files;
 using PrintFlow.Domain.Sessions;
 using PrintFlow.Workflow.Definitions;
+using PrintFlow.Workflow.Engine;
 
 namespace PrintFlow.App.ViewModels;
 
@@ -17,6 +18,20 @@ public enum GuidedSessionPage
 
 public sealed partial class SessionViewModel
 {
+    public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
+    public bool ShowsGuidedPdfSource => ShowsGuidedSourceDetails && HasPdfSource;
+    public bool ShowsGuidedPsdSource => ShowsGuidedSourceDetails && HasPsdSource;
+    public string OriginalSourceSummary => string.Format(System.Globalization.CultureInfo.CurrentCulture,
+        Strings.Resolve("Session_GuidedOriginalFile"), _session?.SourceFileName ?? string.Empty);
+    public bool CanChangeRoute => !IsBusy && Allows(CommandKind.SelectWorkflow);
+    public string ChangeRouteLabel => Strings.Resolve("Session_GuidedChangeRoute");
+
+    [RelayCommand(CanExecute = nameof(CanChangeRoute))]
+    private void ChangeRoute()
+    {
+        if (!CanChangeRoute || _session is not { } session) return;
+        RequestLeave(() => { ClearPreviews(); _navigation.GoToWorkflowSelection(session); });
+    }
     private bool _isChoosingGuidedWhiteInk;
     public ObservableCollection<GuidedStepItem> GuidedSteps { get; } = [];
     public GuidedSessionPage GuidedPage => _session switch
@@ -114,6 +129,12 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(GuidedCurrentTitle));
         OnPropertyChanged(nameof(GuidedCurrentStatus));
         OnPropertyChanged(nameof(GuidedInteractionIdentity));
+        OnPropertyChanged(nameof(ShowsGuidedSourceDetails));
+        OnPropertyChanged(nameof(ShowsGuidedPdfSource));
+        OnPropertyChanged(nameof(ShowsGuidedPsdSource));
+        OnPropertyChanged(nameof(OriginalSourceSummary));
+        OnPropertyChanged(nameof(CanChangeRoute));
+        ChangeRouteCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
         OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
         OnPropertyChanged(nameof(ShowsGuidedDimensions));
