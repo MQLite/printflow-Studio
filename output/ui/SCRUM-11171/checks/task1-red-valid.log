@@ -1,0 +1,37 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.17]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [1 s]
+  错误消息:
+   System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。
+  堆栈跟踪:
+     at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593
+   at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3496
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3397
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:05.86]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False) [684 ms]
+  错误消息:
+   System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。
+  堆栈跟踪:
+     at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593
+   at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3496
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3397
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59
+--- End of stack trace from previous location ---
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\output\ui\SCRUM-11171\checks\task1-red-valid.trx
+
+失败!  - 失败:     2，通过:     1，已跳过:     0，总计:     3，持续时间: 2 s - PrintFlow.Tests.dll (net10.0)

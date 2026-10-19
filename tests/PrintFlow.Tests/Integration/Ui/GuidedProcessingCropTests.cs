@@ -30,6 +30,7 @@ public sealed class GuidedProcessingCropTests
                 ImageShare = imageColumn.ActualWidth / workspace.ActualWidth,
                 Technical = GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<FrameworkElement>(tree, "Session.TechnicalDetails")),
                 Save = tree.OfType<TextBox>().Where(t => AutomationProperties.GetAutomationId(t) == "Session.FinalSave.FileName").Any(GuidedSessionProjectionTests.Shown),
+                DuplicateApply = GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<Button>(tree, "Session.ApplyManualCrop")),
                 Handles = tree.OfType<Thumb>().Count(t => AutomationProperties.GetAutomationId(t).StartsWith("Session.TrimAdjust.Handle.") && GuidedSessionProjectionTests.Shown(t)),
                 Actions = new[] { "Session.TrimAdjust.Restore", "Session.TrimAdjust.Cancel", "Session.TrimAdjust.CompareToggle", "Session.TrimAdjust.Use" }
                     .Select(id => GuidedSessionShellTests.Find<Button>(tree, id)).Select(b => GuidedSessionProjectionTests.Shown(b) && b.ActualHeight > 0).ToArray(),
@@ -38,6 +39,7 @@ public sealed class GuidedProcessingCropTests
         result.Facts.ImageShare.ShouldBeGreaterThan(0.95, "crop owns the workspace instead of leaving a column of unrelated forms");
         result.Facts.Technical.ShouldBeFalse();
         result.Facts.Save.ShouldBeFalse();
+        result.Facts.DuplicateApply.ShouldBeFalse("adjusting trim has one apply action");
         result.Facts.Handles.ShouldBe(8);
         result.Facts.Actions.ShouldAllBe(a => a);
     }

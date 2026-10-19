@@ -47,6 +47,7 @@ public sealed class GuidedProcessingTests
                     }).ToArray(),
                     Technical = GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<FrameworkElement>(tree, "Session.TechnicalDetails")),
                     Preview = GuidedSessionProjectionTests.Shown(tree.OfType<SharedReviewSurface>().Single()),
+                    ChangeRoute = snapshot.CanChangeRoute,
                 };
             });
             rendered.Facts.ProgressShown.ShouldBeTrue("processing needs a focused progress surface");
@@ -55,6 +56,7 @@ public sealed class GuidedProcessingTests
             rendered.Facts.Actions.ShouldAllBe(a => a);
             rendered.Facts.Technical.ShouldBeFalse();
             rendered.Facts.Preview.ShouldBeFalse();
+            rendered.Facts.ChangeRoute.ShouldBeFalse("a reloaded running session must not offer route changes");
         }
         finally
         {

@@ -22,11 +22,17 @@ public sealed partial class SessionViewModel
 {
     public bool ShowsGuidedProcessing => GuidedPage == GuidedSessionPage.Processing;
     public bool ShowsGuidedImageWorkspace => !ShowsGuidedProcessing;
+    public bool ShowsGuidedPreviewTools => GuidedPage is not
+        (GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight);
     public bool ShowsGuidedDetailsColumn => !ShowsGuidedProcessing && GuidedPage != GuidedSessionPage.Crop;
     public bool ShowsGuidedTechnicalDetails => ShowsGuidedDetailsColumn;
     public int GuidedImageColumnSpan => GuidedPage == GuidedSessionPage.Crop ? 2 : 1;
-    public System.Windows.GridLength GuidedDetailsWidth => new(GuidedPage is
-        GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight ? 340 : 280);
+    public System.Windows.GridLength GuidedDetailsWidth => GuidedPage switch
+    {
+        GuidedSessionPage.Review => new(280),
+        GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight => new(340),
+        _ => new(2, System.Windows.GridUnitType.Star),
+    };
     public bool ExpandsGuidedFinalSave => GuidedPage != GuidedSessionPage.Review;
     public string GuidedProcessingApplication => UsesPhotoshop ? "Photoshop"
         : _runtime.DrivesExternalApplication ? Strings.Resolve("Session_GuidedMeitu") : "PrintFlow";
@@ -53,7 +59,7 @@ public sealed partial class SessionViewModel
     public bool ShowsGuidedPsdSource => ShowsGuidedSourceDetails && HasPsdSource;
     public string OriginalSourceSummary => string.Format(System.Globalization.CultureInfo.CurrentCulture,
         Strings.Resolve("Session_GuidedOriginalFile"), _session?.SourceFileName ?? string.Empty);
-    public bool CanChangeRoute => !IsBusy && Allows(CommandKind.SelectWorkflow);
+    public bool CanChangeRoute => !IsBusy && !IsAutomaticallyProcessing && Allows(CommandKind.SelectWorkflow);
     public string ChangeRouteLabel => Strings.Resolve("Session_GuidedChangeRoute");
 
     [RelayCommand(CanExecute = nameof(CanChangeRoute))]
@@ -157,6 +163,7 @@ public sealed partial class SessionViewModel
     {
         OnPropertyChanged(nameof(ShowsGuidedProcessing));
         OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
+        OnPropertyChanged(nameof(ShowsGuidedPreviewTools));
         OnPropertyChanged(nameof(ShowsGuidedDetailsColumn));
         OnPropertyChanged(nameof(ShowsGuidedTechnicalDetails));
         OnPropertyChanged(nameof(GuidedImageColumnSpan));

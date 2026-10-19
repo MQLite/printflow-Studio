@@ -1,0 +1,145 @@
+{
+  "State": "processing",
+  "Language": "zh-CN",
+  "WidthDip": 1920,
+  "HeightDip": 1080,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no App/Window.Show, desktop input or real external application",
+  "ScreenshotSha256": "1BFAA2119CB631B820AA2AB0A54490222E39C2F8DE910B1DA8E3E33DB0CB0D1E",
+  "EssentialActions": [
+    "Session.Stop",
+    "Session.TakeOver"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Session.Stop",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 16,
+            "Y": 165.74666666666667
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 58,
+            "Height": 73.90666666666667
+          },
+          "X": 16,
+          "Y": 165.74666666666667,
+          "Width": 58,
+          "Height": 73.90666666666667,
+          "Left": 16,
+          "Top": 165.74666666666667,
+          "Right": 74,
+          "Bottom": 239.65333333333334,
+          "TopLeft": {
+            "X": 16,
+            "Y": 165.74666666666667
+          },
+          "TopRight": {
+            "X": 74,
+            "Y": 165.74666666666667
+          },
+          "BottomLeft": {
+            "X": 16,
+            "Y": 239.65333333333334
+          },
+          "BottomRight": {
+            "X": 74,
+            "Y": 239.65333333333334
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.TakeOver",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 82,
+            "Y": 165.74666666666667
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 170,
+            "Height": 73.90666666666667
+          },
+          "X": 82,
+          "Y": 165.74666666666667,
+          "Width": 170,
+          "Height": 73.90666666666667,
+          "Left": 82,
+          "Top": 165.74666666666667,
+          "Right": 252,
+          "Bottom": 239.65333333333334,
+          "TopLeft": {
+            "X": 82,
+            "Y": 165.74666666666667
+          },
+          "TopRight": {
+            "X": 252,
+            "Y": 165.74666666666667
+          },
+          "BottomLeft": {
+            "X": 82,
+            "Y": 239.65333333333334
+          },
+          "BottomRight": {
+            "X": 252,
+            "Y": 239.65333333333334
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 1818,
+            "Y": 1022
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 86,
+            "Height": 42
+          },
+          "X": 1818,
+          "Y": 1022,
+          "Width": 86,
+          "Height": 42,
+          "Left": 1818,
+          "Top": 1022,
+          "Right": 1904,
+          "Bottom": 1064,
+          "TopLeft": {
+            "X": 1818,
+            "Y": 1022
+          },
+          "TopRight": {
+            "X": 1904,
+            "Y": 1022
+          },
+          "BottomLeft": {
+            "X": 1818,
+            "Y": 1064
+          },
+          "BottomRight": {
+            "X": 1904,
+            "Y": 1064
+          }
+        },
+        "WithinScroll": true
+      }
+    ],
+    "Images": [],
+    "Summary": [],
+    "WhiteChoices": [],
+    "Page": "Processing",
+    "CustomInputs": []
+  }
+}

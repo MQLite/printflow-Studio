@@ -942,6 +942,12 @@ public sealed class FinalSaveUiTests
             Size viewport = new(width, height);
             var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = screen }, viewport, tree =>
             {
+                // E4 keeps optional save fields behind an explicit disclosure during review.
+                tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.FinalSave.Options").IsExpanded = true;
+                tree.Root.UpdateLayout();
+                List<DependencyObject> expanded = [];
+                Collect(tree.Root, expanded);
+                tree = new RenderedTree(tree.Root, expanded);
                 Border panel = tree.OfType<Border>().Single(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave");
                 List<DependencyObject> inside = [];
                 Collect(panel, inside);
@@ -1099,7 +1105,9 @@ public sealed class FinalSaveUiTests
         if (state == "saved-tiff") await screen.CheckSavedFileCommand.ExecuteAsync(null);
         await screen.FinalSaveFactsLoaded;
         var baseline = new SessionViewModel(workflow, h.Previews, h.TiffReviews, new RecordingNavigation());
-        baseline.Open(view);
+        // A collision attempt can already approve the result. Compare the same current page,
+        // with and without the coordinator, rather than a saved page against an old review.
+        baseline.Open((await workflow.LoadAsync(view.Id, CancellationToken.None)).Value);
         await baseline.PreviewsLoaded;
         return (screen, baseline);
     }

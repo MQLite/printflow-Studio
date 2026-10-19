@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="30ddf4c3-160c-412d-9185-830b7313345c" name="admin@DESKTOP-0BG8884 2026-10-20 10:00:23" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T10:00:23.9518707+13:00" queuing="2026-10-20T10:00:23.9518710+13:00" start="2026-10-20T10:00:16.1914317+13:00" finish="2026-10-20T10:00:34.5011816+13:00" />
+  <TestSettings name="default" id="09710cce-c86e-4ff3-9df6-7caec6ccce81">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_10_00_23" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="034b933d-61e3-424b-9daa-137992e91c0a" testId="883a29ae-949e-99c4-7583-e51da9391295" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:04.0365148" startTime="2026-10-20T10:00:19.8803650+13:00" endTime="2026-10-20T10:00:23.9230539+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="034b933d-61e3-424b-9daa-137992e91c0a">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.Images.Max(r =&gt; r.Height)&#xD;
+    should be greater than&#xD;
+100d&#xD;
+    but was&#xD;
+85.4733333333333d&#xD;
+&#xD;
+Additional Info:&#xD;
+    dimensions: print preparation keeps a usable image preview</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 169&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 98&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="36e37e0c-dc76-4b6e-a1a6-2db1eed75eb4" testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:04.2287985" startTime="2026-10-20T10:00:23.9387502+13:00" endTime="2026-10-20T10:00:28.1533912+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="36e37e0c-dc76-4b6e-a1a6-2db1eed75eb4" />
+    <UnitTestResult executionId="963f5772-cb77-4f83-9e24-62b4989bc1e8" testId="898dac98-5704-16c9-1595-931a3e2d1ce7" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:06.1886718" startTime="2026-10-20T10:00:28.1551849+13:00" endTime="2026-10-20T10:00:34.3425710+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="963f5772-cb77-4f83-9e24-62b4989bc1e8">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.Images.Max(r =&gt; r.Height)&#xD;
+    should be greater than&#xD;
+100d&#xD;
+    but was&#xD;
+46.99666666666661d&#xD;
+&#xD;
+Additional Info:&#xD;
+    dimensions: print preparation keeps a usable image preview</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 169&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 98&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="883a29ae-949e-99c4-7583-e51da9391295">
+      <Execution id="034b933d-61e3-424b-9daa-137992e91c0a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="898dac98-5704-16c9-1595-931a3e2d1ce7">
+      <Execution id="963f5772-cb77-4f83-9e24-62b4989bc1e8" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="84f0eab8-a201-7cb5-2da4-2245f49cd9d6">
+      <Execution id="36e37e0c-dc76-4b6e-a1a6-2db1eed75eb4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="883a29ae-949e-99c4-7583-e51da9391295" executionId="034b933d-61e3-424b-9daa-137992e91c0a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" executionId="36e37e0c-dc76-4b6e-a1a6-2db1eed75eb4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="898dac98-5704-16c9-1595-931a3e2d1ce7" executionId="963f5772-cb77-4f83-9e24-62b4989bc1e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.23]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.32]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:07.39]       Shouldly.ShouldAssertException : result.Facts.Images.Max(r =&gt; r.Height)&#xD;
+[xUnit.net 00:00:07.39]           should be greater than&#xD;
+[xUnit.net 00:00:07.39]       100d&#xD;
+[xUnit.net 00:00:07.39]           but was&#xD;
+[xUnit.net 00:00:07.39]       85.4733333333333d&#xD;
+[xUnit.net 00:00:07.39]       &#xD;
+[xUnit.net 00:00:07.39]       Additional Info:&#xD;
+[xUnit.net 00:00:07.39]           dimensions: print preparation keeps a usable image preview&#xD;
+[xUnit.net 00:00:07.39]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.39]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(169,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential)&#xD;
+[xUnit.net 00:00:07.39]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(98,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.81]       Shouldly.ShouldAssertException : result.Facts.Images.Max(r =&gt; r.Height)&#xD;
+[xUnit.net 00:00:17.81]           should be greater than&#xD;
+[xUnit.net 00:00:17.81]       100d&#xD;
+[xUnit.net 00:00:17.81]           but was&#xD;
+[xUnit.net 00:00:17.81]       46.99666666666661d&#xD;
+[xUnit.net 00:00:17.81]       &#xD;
+[xUnit.net 00:00:17.81]       Additional Info:&#xD;
+[xUnit.net 00:00:17.81]           dimensions: print preparation keeps a usable image preview&#xD;
+[xUnit.net 00:00:17.81]       Stack Trace:&#xD;
+[xUnit.net 00:00:17.81]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(169,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential)&#xD;
+[xUnit.net 00:00:17.81]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(98,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.81]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.81]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.81]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:00:23.9254748+13:00">
+        <Text>[xUnit.net 00:00:07.39]     PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:00:34.3431637+13:00">
+        <Text>[xUnit.net 00:00:17.81]     PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

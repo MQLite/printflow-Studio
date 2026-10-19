@@ -111,6 +111,7 @@ public sealed class SharedReviewSurface : UserControl
     private void ModelChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(SessionViewModel.ZoomScale) or nameof(SessionViewModel.IsFitToViewport)) UpdateSizes();
+        if (e.PropertyName == nameof(SessionViewModel.ShowsGuidedPreviewTools)) { UpdatePresentation(); UpdateSizes(); }
     }
     private void ViewportChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -198,6 +199,7 @@ public sealed class SharedReviewSurface : UserControl
     {
         if (_model is null) return;
         _updating = true;
+        _toolbar.Visibility = _model.ShowsGuidedPreviewTools ? Visibility.Visible : Visibility.Collapsed;
         foreach (var (button, mode) in _modes)
         {
             button.IsChecked = _model.ReviewViewport.Mode == mode;
@@ -224,15 +226,16 @@ public sealed class SharedReviewSurface : UserControl
         if (_model is null || _images.Count == 0 || _host.ActualWidth <= 0 || _host.ActualHeight <= 0) return;
         double width = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
         double height = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
-        double scale = _model.IsFitToViewport
+        bool fit = _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
+        double scale = fit
             ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - 76) / height))
             : _model.ZoomScale;
         for (int i = 0; i < _images.Count; i++)
         {
             ArtefactPreviewPane pane = _model.PreviewPanes[i];
-            _images[i].LayoutTransform = new ScaleTransform(_model.IsFitToViewport ? 1 : scale, _model.IsFitToViewport ? 1 : scale);
-            _images[i].Width = Math.Max(1, pane.PayloadPixelWidth) * (_model.IsFitToViewport ? scale : 1);
-            _images[i].Height = Math.Max(1, pane.PayloadPixelHeight) * (_model.IsFitToViewport ? scale : 1);
+            _images[i].LayoutTransform = new ScaleTransform(fit ? 1 : scale, fit ? 1 : scale);
+            _images[i].Width = Math.Max(1, pane.PayloadPixelWidth) * (fit ? scale : 1);
+            _images[i].Height = Math.Max(1, pane.PayloadPixelHeight) * (fit ? scale : 1);
             _canvases[i].Width = (IsSlider ? width : Math.Max(1, pane.PayloadPixelWidth)) * scale;
             _canvases[i].Height = (IsSlider ? height : Math.Max(1, pane.PayloadPixelHeight)) * scale;
         }

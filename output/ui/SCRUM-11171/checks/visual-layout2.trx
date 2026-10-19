@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2433970b-ac85-4710-b4b5-ae70a15ad4a5" name="admin@DESKTOP-0BG8884 2026-10-20 09:54:37" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T09:54:37.4830807+13:00" queuing="2026-10-20T09:54:37.4830810+13:00" start="2026-10-20T09:54:26.2738535+13:00" finish="2026-10-20T09:54:55.5277969+13:00" />
+  <TestSettings name="default" id="c9e09ada-3c27-48c2-8896-8aa41419ac0f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_09_54_37" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="4b3cf4b6-5521-4f19-85a1-29c13594d033" testId="bbf3a4f1-cc17-89b2-a5c3-3c022be35131" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" computerName="DESKTOP-0BG8884" duration="00:00:00.4337236" startTime="2026-10-20T09:54:54.9398092+13:00" endTime="2026-10-20T09:54:55.3773924+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4b3cf4b6-5521-4f19-85a1-29c13594d033">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts&#xD;
+    should be within&#xD;
+0.001d&#xD;
+    of&#xD;
+0.4d&#xD;
+    but was&#xD;
+0.2646502835538752d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the E4 review sizing must not shrink unrelated accepted source forms</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 23&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a4f6fd04-c71e-4146-9447-be08c7706856" testId="883a29ae-949e-99c4-7583-e51da9391295" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:07.6704618" startTime="2026-10-20T09:54:29.7833993+13:00" endTime="2026-10-20T09:54:37.4562164+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a4f6fd04-c71e-4146-9447-be08c7706856" />
+    <UnitTestResult executionId="b6f46682-ea5d-498a-992e-0e91eeb4adf2" testId="898dac98-5704-16c9-1595-931a3e2d1ce7" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:10.8912673" startTime="2026-10-20T09:54:44.0459004+13:00" endTime="2026-10-20T09:54:54.9362944+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b6f46682-ea5d-498a-992e-0e91eeb4adf2" />
+    <UnitTestResult executionId="52d158a5-ea4a-4db1-a4b9-2f25acc40223" testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:06.5871712" startTime="2026-10-20T09:54:37.4686201+13:00" endTime="2026-10-20T09:54:44.0447193+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="52d158a5-ea4a-4db1-a4b9-2f25acc40223" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="883a29ae-949e-99c4-7583-e51da9391295">
+      <Execution id="a4f6fd04-c71e-4146-9447-be08c7706856" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="898dac98-5704-16c9-1595-931a3e2d1ce7">
+      <Execution id="b6f46682-ea5d-498a-992e-0e91eeb4adf2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="84f0eab8-a201-7cb5-2da4-2245f49cd9d6">
+      <Execution id="52d158a5-ea4a-4db1-a4b9-2f25acc40223" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="bbf3a4f1-cc17-89b2-a5c3-3c022be35131">
+      <Execution id="4b3cf4b6-5521-4f19-85a1-29c13594d033" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="bbf3a4f1-cc17-89b2-a5c3-3c022be35131" executionId="4b3cf4b6-5521-4f19-85a1-29c13594d033" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="883a29ae-949e-99c4-7583-e51da9391295" executionId="a4f6fd04-c71e-4146-9447-be08c7706856" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="898dac98-5704-16c9-1595-931a3e2d1ce7" executionId="b6f46682-ea5d-498a-992e-0e91eeb4adf2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" executionId="52d158a5-ea4a-4db1-a4b9-2f25acc40223" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="4" executed="4" passed="3" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.05]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.14]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:28.77]       Shouldly.ShouldAssertException : result.Facts&#xD;
+[xUnit.net 00:00:28.77]           should be within&#xD;
+[xUnit.net 00:00:28.77]       0.001d&#xD;
+[xUnit.net 00:00:28.77]           of&#xD;
+[xUnit.net 00:00:28.77]       0.4d&#xD;
+[xUnit.net 00:00:28.77]           but was&#xD;
+[xUnit.net 00:00:28.77]       0.2646502835538752d&#xD;
+[xUnit.net 00:00:28.77]       &#xD;
+[xUnit.net 00:00:28.77]       Additional Info:&#xD;
+[xUnit.net 00:00:28.77]           the E4 review sizing must not shrink unrelated accepted source forms&#xD;
+[xUnit.net 00:00:28.77]       Stack Trace:&#xD;
+[xUnit.net 00:00:28.77]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(23,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry()&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:28.77]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:28.77]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:28.77]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:54:55.3794216+13:00">
+        <Text>[xUnit.net 00:00:28.77]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

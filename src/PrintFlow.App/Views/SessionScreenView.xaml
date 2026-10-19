@@ -497,7 +497,7 @@
                               Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"
                               IsEnabled="{Binding CanInteractWithLivePage}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="{Binding GuidedDetailsWidth}" />
             </Grid.ColumnDefinitions>
 
@@ -584,7 +584,7 @@
                     </Style>
                 </DockPanel.Style>
 
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8" Visibility="{Binding ShowsGuidedPreviewTools, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding PreviewHeading}"
                                FontSize="16"
@@ -1567,38 +1567,42 @@
                             Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
-                            <!-- When each choice fits (SCRUM-11150), beside the choice it explains. -->
-                            <TextBlock Text="{Binding PresetModeHelp}"
-                                       TextWrapping="Wrap"
-                                       Opacity="0.8"
-                                       Margin="0,0,0,6"
-                                       AutomationProperties.AutomationId="Session.PrintDimensions.PresetHelp" />
-                            <ItemsControl ItemsSource="{Binding SizePresets}"
-                                          IsTabStop="False"
-                                          AutomationProperties.AutomationId="Session.SizePresetList">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <local:SessionActionButton CommandParameter="{Binding}"
-                                                Command="{Binding DataContext.UsePresetCommand,
-                                                          RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                Padding="12,7"
-                                                Margin="0,0,6,6">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
-                                                <TextBlock Text="{Binding RecommendationLabel}"
-                                                           FontSize="11"
-                                                           Opacity="0.7" />
-                                            </StackPanel>
-                                        </local:SessionActionButton>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <local:SessionExpander Header="{Binding PresetsLabel}" IsExpanded="{Binding ShowsGuidedCustomSizeEntry, Mode=OneWay}" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintDimensions.Presets">
+                                <StackPanel Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
+                                    <!-- When each choice fits (SCRUM-11150), beside the choice it explains. -->
+                                    <TextBlock Text="{Binding PresetModeHelp}"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               Margin="0,0,0,6"
+                                               AutomationProperties.AutomationId="Session.PrintDimensions.PresetHelp" />
+                                    <ItemsControl ItemsSource="{Binding SizePresets}"
+                                                  IsTabStop="False"
+                                                  AutomationProperties.AutomationId="Session.SizePresetList">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <local:SessionActionButton CommandParameter="{Binding}"
+                                                        Command="{Binding DataContext.UsePresetCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        Padding="12,7"
+                                                        Margin="0,0,6,6">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding RecommendationLabel}"
+                                                                   FontSize="11"
+                                                                   Opacity="0.7" />
+                                                    </StackPanel>
+                                                </local:SessionActionButton>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </local:SessionExpander>
                             <TextBlock Text="{Binding CustomModeHelp}"
                                        TextWrapping="Wrap"
                                        Opacity="0.8"
@@ -1897,6 +1901,9 @@
                                      AutomationProperties.Name="{Binding WhiteUnderbaseHeading}">
                                 <local:SessionListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
+                                        <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+                                        <Setter Property="Padding" Value="10,8" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
                                         <Setter Property="AutomationProperties.Name" Value="{Binding Label}" />
                                     </Style>
                                 </local:SessionListBox.ItemContainerStyle>
@@ -2283,7 +2290,7 @@
                                 Command="{Binding ApplyManualCropCommand}"
                                 IsEnabled="{Binding CanApplyManualCrop}"
                                 Padding="14,6"
-                                Margin="0,0,8,0"  Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}" />
+                                Margin="0,0,8,0"  Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}" />
 <local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
                                         TargetIdentity="{Binding AskIdentity}"
                                         Command="{Binding PrepareCorrectionFilesCommand}"

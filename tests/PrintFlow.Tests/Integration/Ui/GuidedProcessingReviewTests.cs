@@ -10,6 +10,19 @@ namespace PrintFlow.Tests.Integration.Ui;
 [Collection(SqliteCollection.Name)]
 public sealed class GuidedProcessingReviewTests
 {
+    [Fact]
+    public async Task Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry()
+    {
+        using HomeScreenHarness h = new();
+        var model = await GuidedSessionProjectionTests.Open(h, WorkflowType.PrepareAsset);
+        var result = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, new Size(1280, 720), tree =>
+        {
+            var workspace = GuidedSessionShellTests.Find<Grid>(tree, "Session.CurrentWorkspace");
+            return workspace.ColumnDefinitions[1].ActualWidth / workspace.ActualWidth;
+        });
+        result.Facts.ShouldBe(0.4, 0.001, "the E4 review sizing must not shrink unrelated accepted source forms");
+    }
+
     [Theory]
     [InlineData("enhancement")]
     [InlineData("background")]

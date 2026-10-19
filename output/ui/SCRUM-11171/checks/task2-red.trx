@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="8fbe95a4-76e6-4657-afa1-c5442112efdb" name="admin@DESKTOP-0BG8884 2026-10-20 09:42:23" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T09:42:23.9453622+13:00" queuing="2026-10-20T09:42:23.9453624+13:00" start="2026-10-20T09:42:17.5365668+13:00" finish="2026-10-20T09:42:27.4199874+13:00" />
+  <TestSettings name="default" id="6eab291d-1270-40d4-9719-663565e4e662">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_09_42_23" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0aaeb985-fd79-4975-99cd-9fa198e53aa2" testId="c0f9027c-5379-3b9c-8b73-25e43fc01702" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;tiff&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.9061242" startTime="2026-10-20T09:42:23.9326565+13:00" endTime="2026-10-20T09:42:24.8238467+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0aaeb985-fd79-4975-99cd-9fa198e53aa2">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+    should be greater than&#xD;
+0.65d&#xD;
+    but was&#xD;
+0.6d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the exact result must dominate the current workspace</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="153968a6-3d03-42a2-a6cd-3581c7d2715e" testId="b1aed7ec-2f9f-d39e-48e6-3b16872c70ed" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;trim&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.6887856" startTime="2026-10-20T09:42:24.8258387+13:00" endTime="2026-10-20T09:42:25.5131469+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="153968a6-3d03-42a2-a6cd-3581c7d2715e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+    should be greater than&#xD;
+0.65d&#xD;
+    but was&#xD;
+0.6d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the exact result must dominate the current workspace</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="369d8da1-e440-490c-ab6d-86b0a4143e64" testId="d072241a-8162-e8b6-e474-7d681727ea14" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;enhancement&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5766064" startTime="2026-10-20T09:42:25.5147069+13:00" endTime="2026-10-20T09:42:26.0903726+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="369d8da1-e440-490c-ab6d-86b0a4143e64">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+    should be greater than&#xD;
+0.65d&#xD;
+    but was&#xD;
+0.6d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the exact result must dominate the current workspace</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="022458f4-3a27-4dd0-804b-2594857baab2" testId="c528196a-97bb-9488-5bcd-476e0284bcc6" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;background&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:01.7823012" startTime="2026-10-20T09:42:22.1284421+13:00" endTime="2026-10-20T09:42:23.9164226+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="022458f4-3a27-4dd0-804b-2594857baab2">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+    should be greater than&#xD;
+0.65d&#xD;
+    but was&#xD;
+0.6d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the exact result must dominate the current workspace</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7dc35c8b-7925-4ede-a815-8fd39a2d687f" testId="f450e3b9-5f4f-9daf-9767-39b59c67cc63" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6018346" startTime="2026-10-20T09:42:26.0925857+13:00" endTime="2026-10-20T09:42:26.6940507+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7dc35c8b-7925-4ede-a815-8fd39a2d687f">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.Comparison&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    a before/after tool requires two available previews</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 64&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9798a207-7435-4313-9a69-0cdfa12a8b5a" testId="06ff53bb-545f-29f6-c208-5982830511f3" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5695436" startTime="2026-10-20T09:42:26.6952988+13:00" endTime="2026-10-20T09:42:27.2641371+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9798a207-7435-4313-9a69-0cdfa12a8b5a">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.Comparison&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    a before/after tool requires two available previews</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 64&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;trim&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b1aed7ec-2f9f-d39e-48e6-3b16872c70ed">
+      <Execution id="153968a6-3d03-42a2-a6cd-3581c7d2715e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;enhancement&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d072241a-8162-e8b6-e474-7d681727ea14">
+      <Execution id="369d8da1-e440-490c-ab6d-86b0a4143e64" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;tiff&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="c0f9027c-5379-3b9c-8b73-25e43fc01702">
+      <Execution id="0aaeb985-fd79-4975-99cd-9fa198e53aa2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="f450e3b9-5f4f-9daf-9767-39b59c67cc63">
+      <Execution id="7dc35c8b-7925-4ede-a815-8fd39a2d687f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Single_or_missing_preview_does_not_offer_comparison" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="06ff53bb-545f-29f6-c208-5982830511f3">
+      <Execution id="9798a207-7435-4313-9a69-0cdfa12a8b5a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Single_or_missing_preview_does_not_offer_comparison" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: &quot;background&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="c528196a-97bb-9488-5bcd-476e0284bcc6">
+      <Execution id="022458f4-3a27-4dd0-804b-2594857baab2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="c0f9027c-5379-3b9c-8b73-25e43fc01702" executionId="0aaeb985-fd79-4975-99cd-9fa198e53aa2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b1aed7ec-2f9f-d39e-48e6-3b16872c70ed" executionId="153968a6-3d03-42a2-a6cd-3581c7d2715e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d072241a-8162-e8b6-e474-7d681727ea14" executionId="369d8da1-e440-490c-ab6d-86b0a4143e64" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c528196a-97bb-9488-5bcd-476e0284bcc6" executionId="022458f4-3a27-4dd0-804b-2594857baab2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f450e3b9-5f4f-9daf-9767-39b59c67cc63" executionId="7dc35c8b-7925-4ede-a815-8fd39a2d687f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="06ff53bb-545f-29f6-c208-5982830511f3" executionId="9798a207-7435-4313-9a69-0cdfa12a8b5a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="0" failed="6" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.65]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.08]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.20]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:06.02]       Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+[xUnit.net 00:00:06.02]           should be greater than&#xD;
+[xUnit.net 00:00:06.02]       0.65d&#xD;
+[xUnit.net 00:00:06.02]           but was&#xD;
+[xUnit.net 00:00:06.02]       0.6d&#xD;
+[xUnit.net 00:00:06.02]       &#xD;
+[xUnit.net 00:00:06.02]       Additional Info:&#xD;
+[xUnit.net 00:00:06.02]           the exact result must dominate the current workspace&#xD;
+[xUnit.net 00:00:06.02]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.02]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step)&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.02]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.92]       Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+[xUnit.net 00:00:06.92]           should be greater than&#xD;
+[xUnit.net 00:00:06.92]       0.65d&#xD;
+[xUnit.net 00:00:06.92]           but was&#xD;
+[xUnit.net 00:00:06.92]       0.6d&#xD;
+[xUnit.net 00:00:06.92]       &#xD;
+[xUnit.net 00:00:06.92]       Additional Info:&#xD;
+[xUnit.net 00:00:06.92]           the exact result must dominate the current workspace&#xD;
+[xUnit.net 00:00:06.92]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.92]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step)&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.92]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.92]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]       Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+[xUnit.net 00:00:07.61]           should be greater than&#xD;
+[xUnit.net 00:00:07.61]       0.65d&#xD;
+[xUnit.net 00:00:07.61]           but was&#xD;
+[xUnit.net 00:00:07.61]       0.6d&#xD;
+[xUnit.net 00:00:07.61]       &#xD;
+[xUnit.net 00:00:07.61]       Additional Info:&#xD;
+[xUnit.net 00:00:07.61]           the exact result must dominate the current workspace&#xD;
+[xUnit.net 00:00:07.61]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.61]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.19]       Shouldly.ShouldAssertException : result.Facts.ImageShare&#xD;
+[xUnit.net 00:00:08.19]           should be greater than&#xD;
+[xUnit.net 00:00:08.19]       0.65d&#xD;
+[xUnit.net 00:00:08.19]           but was&#xD;
+[xUnit.net 00:00:08.19]       0.6d&#xD;
+[xUnit.net 00:00:08.19]       &#xD;
+[xUnit.net 00:00:08.19]       Additional Info:&#xD;
+[xUnit.net 00:00:08.19]           the exact result must dominate the current workspace&#xD;
+[xUnit.net 00:00:08.19]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.19]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(39,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step)&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.19]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.19]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.79]       Shouldly.ShouldAssertException : result.Facts.Comparison&#xD;
+[xUnit.net 00:00:08.79]           should be&#xD;
+[xUnit.net 00:00:08.79]       False&#xD;
+[xUnit.net 00:00:08.79]           but was&#xD;
+[xUnit.net 00:00:08.79]       True&#xD;
+[xUnit.net 00:00:08.79]       &#xD;
+[xUnit.net 00:00:08.79]       Additional Info:&#xD;
+[xUnit.net 00:00:08.79]           a before/after tool requires two available previews&#xD;
+[xUnit.net 00:00:08.79]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.79]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(64,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing)&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.79]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.79]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.36]       Shouldly.ShouldAssertException : result.Facts.Comparison&#xD;
+[xUnit.net 00:00:09.36]           should be&#xD;
+[xUnit.net 00:00:09.36]       False&#xD;
+[xUnit.net 00:00:09.36]           but was&#xD;
+[xUnit.net 00:00:09.36]       True&#xD;
+[xUnit.net 00:00:09.36]       &#xD;
+[xUnit.net 00:00:09.36]       Additional Info:&#xD;
+[xUnit.net 00:00:09.36]           a before/after tool requires two available previews&#xD;
+[xUnit.net 00:00:09.36]       Stack Trace:&#xD;
+[xUnit.net 00:00:09.36]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(64,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing)&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.36]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:09.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:09.37]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:23.9190122+13:00">
+        <Text>[xUnit.net 00:00:06.01]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "background") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:24.8244131+13:00">
+        <Text>[xUnit.net 00:00:06.92]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "tiff") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:25.5134565+13:00">
+        <Text>[xUnit.net 00:00:07.61]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "trim") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:26.0906195+13:00">
+        <Text>[xUnit.net 00:00:08.19]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "enhancement") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:26.6942843+13:00">
+        <Text>[xUnit.net 00:00:08.79]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:42:27.2643868+13:00">
+        <Text>[xUnit.net 00:00:09.36]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: True) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"automatic\", label: \"Artwork content\", artwork: \"5 × 5 px\", canvas: \"9 × 9 px\")",
+    "Prior": "Failed",
+    "SameMessage": true
+  },
+  {
+    "Name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"manual\", label: \"Selected artwork\", artwork: \"6 × 5 px\", canvas: \"10 × 9 px\")",
+    "Prior": "Failed",
+    "SameMessage": true
+  },
+  {
+    "Name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"en-US\", effectiveLabel: \"Effective source resolution\", normalStatus: \"No enlargement required\", enlargementStatus: \"Enlargement required\")",
+    "Prior": "Failed",
+    "SameMessage": true
+  },
+  {
+    "Name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"zh-CN\", effectiveLabel: \"源图有效分辨率\", normalStatus: \"无需放大\", enlargementStatus: \"需要放大\")",
+    "Prior": "Failed",
+    "SameMessage": true
+  },
+  {
+    "Name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"keep\", label: \"Artwork extent\", artwork: \"Full original canvas\", canvas: \"12 × 10 px\")",
+    "Prior": "Failed",
+    "SameMessage": true
+  }
+]

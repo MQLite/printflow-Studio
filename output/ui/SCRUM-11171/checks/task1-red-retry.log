@@ -1,0 +1,47 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.02]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [1 s]
+  错误消息:
+   System.InvalidOperationException : 调用线程无法访问此对象，因为另一个线程拥有该对象。
+  堆栈跟踪:
+     at System.Windows.Threading.Dispatcher.<VerifyAccess>g__ThrowVerifyAccess|7_0()
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)
+   at System.Windows.Controls.Primitives.ButtonBase.get_Command()
+   at System.Windows.Controls.Primitives.ButtonBase.UpdateCanExecute()
+   at CommunityToolkit.Mvvm.Input.RelayCommand.NotifyCanExecuteChanged() in /_/src/CommunityToolkit.Mvvm/Input/RelayCommand.cs:line 65
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyGuidedPresentation() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.Guided.cs:line 137
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyOperatorStatusChanged() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.OperatorStatus.cs:line 151
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyAutomationRuntimeChanged() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3471
+   at PrintFlow.App.ViewModels.SessionViewModel.<>c__DisplayClass758_0.<OnAutomationRuntimeChanged>g__Apply|0() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3453
+   at PrintFlow.App.ViewModels.SessionViewModel.OnAutomationRuntimeChanged(Object sender, AutomationRuntimeView runtime) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3461
+   at PrintFlow.Workflow.Services.SessionService.<.ctor>b__57_0(Object _, AutomationRuntimeView view) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\Services\SessionService.cs:line 211
+   at PrintFlow.Workflow.Services.AutomationRunRegistry.RequestStop(SessionId session, AutomationStopMode mode) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\Services\AutomationRuntime.cs:line 241
+   at PrintFlow.Workflow.Services.SessionService.RequestStop(SessionId id, AutomationStopMode mode) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\Services\SessionService.cs:line 222
+   at PrintFlow.App.ViewModels.SessionViewModel.ConfirmTakeOver() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 2343
+   at CommunityToolkit.Mvvm.Input.RelayCommand.Execute(Object parameter) in /_/src/CommunityToolkit.Mvvm/Input/RelayCommand.cs:line 77
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 49
+--- End of stack trace from previous location ---
+活动的测试运行已中止。原因: 测试主机进程崩溃 : Unhandled exception. System.InvalidOperationException: �����߳��޷����ʴ˶�����Ϊ��һ���߳�ӵ�иö���
+   at System.Windows.Threading.Dispatcher.<VerifyAccess>g__ThrowVerifyAccess|7_0()
+   at System.Windows.DependencyObject.GetValue(DependencyProperty dp)
+   at System.Windows.Controls.Primitives.ButtonBase.get_Command()
+   at System.Windows.Controls.Primitives.ButtonBase.UpdateCanExecute()
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.<set_ExecutionTask>g__MonitorTask|26_0(AsyncRelayCommand this, Task task) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 243
+   at System.Threading.Tasks.Task.<>c.<ThrowAsync>b__124_1(Object state)
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\output\ui\SCRUM-11171\checks\task1-red-retry.trx
+
+失败!  - 失败:     1，通过:     0，已跳过:     0，总计:     1，持续时间: 1 s - PrintFlow.Tests.dll (net10.0)
+测试运行已中止。

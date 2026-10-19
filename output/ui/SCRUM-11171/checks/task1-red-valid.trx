@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="3dd0a05b-5ac2-4e66-8f02-be159d613ec4" name="admin@DESKTOP-0BG8884 2026-10-20 09:39:06" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T09:39:06.3635479+13:00" queuing="2026-10-20T09:39:06.3635482+13:00" start="2026-10-20T09:39:00.7457373+13:00" finish="2026-10-20T09:39:07.8308781+13:00" />
+  <TestSettings name="default" id="49a0a346-53d4-40a8-98f2-62661478e39f">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_09_39_06" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="b2094a1a-90ab-49f7-9527-3202f7fe30bc" testId="5af0aa22-6d50-9477-b10d-b3cf0b75af46" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Successful_processing_enters_required_review_without_automatic_next_step" computerName="DESKTOP-0BG8884" duration="00:00:00.6594339" startTime="2026-10-20T09:39:07.0211587+13:00" endTime="2026-10-20T09:39:07.6801871+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2094a1a-90ab-49f7-9527-3202f7fe30bc" />
+    <UnitTestResult executionId="19c6873d-589d-4137-9287-228126f92809" testId="35f7be68-bedb-b106-2253-9bff7fad7e00" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True)" computerName="DESKTOP-0BG8884" duration="00:00:01.5704803" startTime="2026-10-20T09:39:04.7512405+13:00" endTime="2026-10-20T09:39:06.3321927+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19c6873d-589d-4137-9287-228126f92809">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3496&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3397&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b8181db8-c630-458c-9df5-23dde2fb42df" testId="292bbd36-63a3-d79a-f6c0-e6e966e51e1c" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6846361" startTime="2026-10-20T09:39:06.3499360+13:00" endTime="2026-10-20T09:39:07.0188530+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8181db8-c630-458c-9df5-23dde2fb42df">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3496&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3397&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="292bbd36-63a3-d79a-f6c0-e6e966e51e1c">
+      <Execution id="b8181db8-c630-458c-9df5-23dde2fb42df" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Successful_processing_enters_required_review_without_automatic_next_step" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="5af0aa22-6d50-9477-b10d-b3cf0b75af46">
+      <Execution id="b2094a1a-90ab-49f7-9527-3202f7fe30bc" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Successful_processing_enters_required_review_without_automatic_next_step" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="35f7be68-bedb-b106-2253-9bff7fad7e00">
+      <Execution id="19c6873d-589d-4137-9287-228126f92809" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="5af0aa22-6d50-9477-b10d-b3cf0b75af46" executionId="b2094a1a-90ab-49f7-9527-3202f7fe30bc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="35f7be68-bedb-b106-2253-9bff7fad7e00" executionId="19c6873d-589d-4137-9287-228126f92809" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="292bbd36-63a3-d79a-f6c0-e6e966e51e1c" executionId="b8181db8-c630-458c-9df5-23dde2fb42df" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.45]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.56]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.17]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:05.17]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.17]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:05.17]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:05.17]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3593,0): at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session)&#xD;
+[xUnit.net 00:00:05.17]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3496,0): at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.17]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3397,0): at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied)&#xD;
+[xUnit.net 00:00:05.17]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:05.17]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.86]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:05.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.86]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:05.86]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:05.86]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3593,0): at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session)&#xD;
+[xUnit.net 00:00:05.86]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3496,0): at PrintFlow.App.ViewModels.SessionViewModel.RefreshAsync(CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:05.86]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3397,0): at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied)&#xD;
+[xUnit.net 00:00:05.86]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:05.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.52]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:39:06.3354142+13:00">
+        <Text>[xUnit.net 00:00:05.17]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:39:07.0193754+13:00">
+        <Text>[xUnit.net 00:00:05.86]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

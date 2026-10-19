@@ -165,6 +165,11 @@ public sealed class PrintSizeGuidanceLayoutTests
 
     private static void Settle(FrameworkElement root, bool expand)
     {
+        // E4 keeps the current custom input above the fold. Preset guidance remains reachable
+        // through its own disclosure; open that choice before asserting all of its help text.
+        foreach (Expander presets in PrintSizeGuidanceUiTests.Descendants<Expander>(root)
+                     .Where(e => AutomationProperties.GetAutomationId(e) == "Session.PrintDimensions.Presets"))
+            presets.IsExpanded = true;
         if (expand)
             foreach (Expander expander in PrintSizeGuidanceUiTests.Descendants<Expander>(root)) expander.IsExpanded = true;
         root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
