@@ -1,6 +1,6 @@
 # SCRUM-11171 visual evidence
 
-Final evidence is **27 PNG/JSON pairs in screens-verified plus the stopping PNG/JSON in screens-runtime**, listed below. All 28 final PNGs were viewed individually. The other image folders, including screens-verified/stopping-1000x700, are retained intermediate evidence and are not the final stopping capture.
+Final evidence is **30 PNG/JSON pairs: 27 in screens-verified, the stopping capture in screens-runtime, and two R1 crop-error captures in screens-r1**, listed below. All 30 final PNGs were viewed individually. The other image folders, including screens-verified/stopping-1000x700, are retained intermediate evidence and are not the final stopping capture.
 
 These are Chinese, synthetic offscreen WPF UserControl renders at 96 DPI. No App/Window.Show, desktop input, actual Photoshop/Meitu or customer data was used. This is not real-keyboard/UIA-device, DPI scaling, newcomer or production acceptance. Synthetic sources deliberately include tiny fixtures and checkerboard payloads; their names and image quality are fixture data.
 
@@ -15,6 +15,9 @@ These are Chinese, synthetic offscreen WPF UserControl renders at 96 DPI. No App
 | Dimensions, white ink, preflight | Three sizes each | Requested versus actual mm/pixels, current input above fold, all three explicit white-ink choices reachable, image preview over 100 DIP high, production contract/risk visible |
 | Stopping / stopped / takeover / handed off | 1000×700 | Distinct transient state, failure retry, explicit takeover confirmation, retained-application warning and recovery action |
 | Invalid size / enlargement | 1000×700 | Invalid raw text and local reason with disabled continue; enlargement warning and independent authorization |
+| R1 crop failure, reload succeeds / fails | 1000×700 each | Real crop command refused at repository commit; preserved draft and result, visible Chinese reason, expanded read-only code and required actions within viewport |
+
+R1 adds [crop failure after successful reload](screens-r1/crop-error-reloaded-1000x700.png) and [crop failure after failed reload](screens-r1/crop-error-reload-failed-1000x700.png). These supplement the original 28 images. Their paired metadata records code/notice/action bounds and the reload branch. Four zh-CN/en regression cases first failed on zero visible notices, then passed after the crop-local placement fix. The original no-error screens have no new visible content.
 
 Initial image inspection found narrow unrelated source forms, a duplicate disabled crop action, custom input below the fold and 30–80 DIP print previews. Meaningful RED tests and follow-up GREEN runs are preserved. The first stopping screenshot had a fixture race: the fake had already changed to Idle during rendering. The corrected screenshot freezes the actual StopRequested event plus the earlier running SessionView; the rendered stopping text is asserted. It is explicitly a runtime snapshot, not a real desktop observation.
 

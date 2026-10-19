@@ -67,3 +67,9 @@ NormalRoute/RequestedRoute/ExecutionTarget gpt-6-astra/high, RouteOffset=0, UNCH
 Ruling: existing approved v2 and explicit continue/Native authorization permit plan then execution without repeated approval — no new product design — cost if wrong: review may require adjustments to presentation; no external publication.
 Ruling: exact approved v2 clarifies P05 as both TIFF routes explicit white ink, overriding older ambiguous PSD-only wording — preserves business rules — cost if wrong: operator sees an extra explicit classification already required by service.
 Self-review: P01-05 each mapped above; no business-layer rewrite is required. Existing authority and persistence tests supplement UI checks; inherited failures remain explicitly unclaimed.
+
+### R1 correction after the one independent review
+- [x] Independently trace hidden coded crop failures and reproduce a real refused crop with preserved draft/result, including reload success/failure in zh-CN/en.
+- [x] Add crop-local existing failure bindings with unique diagnostic IDs; meaningful RED 4/4 then GREEN 4/4.
+- [x] Capture and inspect two Chinese 1000×700 error states; preserve prior evidence.
+- [x] Finish affected crop/failure/guided checks, record scope/limitations, and return a clean correction commit to the parent for final focused verification.

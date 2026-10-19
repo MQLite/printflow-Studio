@@ -306,5 +306,27 @@
     "State": "white-ink",
     "IndividuallyViewed": true,
     "Inspection": "No overlapping current actions or missing required state; details remain scrollable at small viewports"
+  },
+  {
+    "Image": "screens-r1/crop-error-reload-failed-1000x700.png",
+    "Metadata": "screens-r1/crop-error-reload-failed-1000x700.json",
+    "ScreenshotSha256": "44F9D9F85DD04EED6CC379CDEDC566FBA7CBFC9F3D8CBF00C35C4DCB8C3A3E20",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "State": "crop-error-reload-failed",
+    "IndividuallyViewed": true,
+    "Inspection": "Chinese reason and expanded exact code are visible; preserved crop and cancel/use actions fit smallest viewport; no unrelated form"
+  },
+  {
+    "Image": "screens-r1/crop-error-reloaded-1000x700.png",
+    "Metadata": "screens-r1/crop-error-reloaded-1000x700.json",
+    "ScreenshotSha256": "728ABBFFD093B5B3EB9CEEBC2DEDB964FC0A0AF4F83C78C090CA3ACBC9D7F835",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "State": "crop-error-reloaded",
+    "IndividuallyViewed": true,
+    "Inspection": "Chinese reason and expanded exact code are visible; preserved crop and cancel/use actions fit smallest viewport; no unrelated form"
   }
 ]

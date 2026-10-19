@@ -1,0 +1,214 @@
+{
+  "State": "crop-error-reload-failed",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "ReloadFails": true,
+  "CaptureKind": "Synthetic offscreen WPF; real crop command with faulting repository commit; no application launch",
+  "ScreenshotSha256": "44F9D9F85DD04EED6CC379CDEDC566FBA7CBFC9F3D8CBF00C35C4DCB8C3A3E20",
+  "Measurements": {
+    "NoticeCount": 1,
+    "NoticeBounds": {
+      "IsEmpty": false,
+      "Location": {
+        "X": 206,
+        "Y": 193.74666666666667
+      },
+      "Size": {
+        "IsEmpty": false,
+        "Width": 758,
+        "Height": 55.43
+      },
+      "X": 206,
+      "Y": 193.74666666666667,
+      "Width": 758,
+      "Height": 55.43,
+      "Left": 206,
+      "Top": 193.74666666666667,
+      "Right": 964,
+      "Bottom": 249.17666666666668,
+      "TopLeft": {
+        "X": 206,
+        "Y": 193.74666666666667
+      },
+      "TopRight": {
+        "X": 964,
+        "Y": 193.74666666666667
+      },
+      "BottomLeft": {
+        "X": 206,
+        "Y": 249.17666666666668
+      },
+      "BottomRight": {
+        "X": 964,
+        "Y": 249.17666666666668
+      }
+    },
+    "DetailsShown": true,
+    "InitiallyCollapsed": true,
+    "DetailsBounds": {
+      "IsEmpty": false,
+      "Location": {
+        "X": 206,
+        "Y": 255.17666666666668
+      },
+      "Size": {
+        "IsEmpty": false,
+        "Width": 758,
+        "Height": 23
+      },
+      "X": 206,
+      "Y": 255.17666666666668,
+      "Width": 758,
+      "Height": 23,
+      "Left": 206,
+      "Top": 255.17666666666668,
+      "Right": 964,
+      "Bottom": 278.1766666666667,
+      "TopLeft": {
+        "X": 206,
+        "Y": 255.17666666666668
+      },
+      "TopRight": {
+        "X": 964,
+        "Y": 255.17666666666668
+      },
+      "BottomLeft": {
+        "X": 206,
+        "Y": 278.1766666666667
+      },
+      "BottomRight": {
+        "X": 964,
+        "Y": 278.1766666666667
+      }
+    },
+    "CodeShown": true,
+    "Code": "PersistenceError",
+    "CodeReadOnly": true,
+    "CodeBounds": {
+      "IsEmpty": false,
+      "Location": {
+        "X": 271,
+        "Y": 279.1766666666667
+      },
+      "Size": {
+        "IsEmpty": false,
+        "Width": 111.93,
+        "Height": 24.476666666666667
+      },
+      "X": 271,
+      "Y": 279.1766666666667,
+      "Width": 111.93,
+      "Height": 24.476666666666667,
+      "Left": 271,
+      "Top": 279.1766666666667,
+      "Right": 382.93,
+      "Bottom": 303.65333333333336,
+      "TopLeft": {
+        "X": 271,
+        "Y": 279.1766666666667
+      },
+      "TopRight": {
+        "X": 382.93,
+        "Y": 279.1766666666667
+      },
+      "BottomLeft": {
+        "X": 271,
+        "Y": 303.65333333333336
+      },
+      "BottomRight": {
+        "X": 382.93,
+        "Y": 303.65333333333336
+      }
+    },
+    "Actions": [
+      {
+        "Id": "Session.TrimAdjust.Cancel",
+        "Shown": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 328,
+            "Y": 578
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 86,
+            "Height": 42
+          },
+          "X": 328,
+          "Y": 578,
+          "Width": 86,
+          "Height": 42,
+          "Left": 328,
+          "Top": 578,
+          "Right": 414,
+          "Bottom": 620,
+          "TopLeft": {
+            "X": 328,
+            "Y": 578
+          },
+          "TopRight": {
+            "X": 414,
+            "Y": 578
+          },
+          "BottomLeft": {
+            "X": 328,
+            "Y": 620
+          },
+          "BottomRight": {
+            "X": 414,
+            "Y": 620
+          }
+        }
+      },
+      {
+        "Id": "Session.TrimAdjust.Use",
+        "Shown": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 16,
+            "Y": 638
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 102,
+            "Height": 42
+          },
+          "X": 16,
+          "Y": 638,
+          "Width": 102,
+          "Height": 42,
+          "Left": 16,
+          "Top": 638,
+          "Right": 118,
+          "Bottom": 680,
+          "TopLeft": {
+            "X": 16,
+            "Y": 638
+          },
+          "TopRight": {
+            "X": 118,
+            "Y": 638
+          },
+          "BottomLeft": {
+            "X": 16,
+            "Y": 680
+          },
+          "BottomRight": {
+            "X": 118,
+            "Y": 680
+          }
+        }
+      }
+    ],
+    "CropIds": [
+      "Session.Crop.ActionFailure",
+      "Session.Crop.ErrorDetails",
+      "Session.Crop.ErrorCode"
+    ],
+    "UnrelatedForms": false
+  }
+}

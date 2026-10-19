@@ -68,3 +68,13 @@
 `e4-workflow-persistence-final.trx`：277/277通过，0失败、0跳过。覆盖ReturnToStep、RetryAndReview、StopAndTakeOver、StartupRecovery、PDF/PSD preparation、TIFF output/final review、FinalSaveCoordinator、ColleagueCorrection、ManualCrop、TrimAdjustment、AddAnotherSize、FlexibleSize、EnvironmentGate和SessionService；使用E3同一相关集合，保留原11排除并额外排除Smoke。
 
 最终验证边界重新评估：UI呈现、布局与视觉证据仍为Astra/high；纯持久化测试执行的正常/请求路线为Sol/high、RouteOffset=0。当前Native上下文无法原位切换，记录`MODEL_SWITCH_UNAVAILABLE`；该命令实际仍在已验证的`gpt-6-astra/high`执行，不声称降级。控制会话的独立核对使用其实际模型，并另行安排一个新的Astra/high整体UI审查。规则版本2.4，执行主机Windows/local；无发布操作。
+
+## R1 独立审查修正
+
+整体审查在`685b8d5ee59877498bef45a51c6bf6fc91d49f8b`发现1项Important：裁切保持编辑状态的命令失败，其编码提示被隐藏的详情列遮蔽。执行者独立核实后，只在裁切工作区增加21行XAML，绑定现有Notice、NoticeErrorCode与本地化诊断标签；`Session.Crop.*` ID独立，错误详情默认折叠、代码只读可复制。未修改ViewModel、服务、审批、裁切算法或恢复语义。
+
+新`GuidedProcessingCropFailureTests`通过真实UseThisTrim命令和SessionService，在现有FaultingRepository的首次提交处拒绝写入；仅失败重载分支在读取边界注入错误，未直接设置Notice。zh-CN/en × 重载成功/失败四项均保留草稿、结果身份及数据库的步骤/尝试/修订/审批；并验证原因与代码可见、诊断展开不写入、取消/使用动作在1000×700内。`r1-crop-failure-red-behavior`四项因可见提示为0而失败；`r1-crop-failure-green`四项全过。初次编译空值标注错误另存`r1-crop-failure-red.log`，不作为行为RED。
+
+新增两张中文最小窗口截图已逐张检查并写入最终清单，最终证据合计30张。原28张与所有中间证据保留。完整广筛1424/14和持久化277/277是R1之前的检查；此次仅改裁切的条件化消息放置，使用受影响筛选补充验证，不将旧广筛冒充修正后的结果。两个早期键盘激活零次失败仍根因未定，不声称修复或继承；真实键盘/UIA/DPI/新手/生产验收仍NOT RUN。
+
+修正后`r1-crop-failure-affected.trx`：**251/251通过，0失败、0跳过**。覆盖全部GuidedProcessing、FailureGuidance、TrimAdjustment（含持久化）、ManualCropUi/Adjustment、CropHandleGesture、ReturnAndTrimControls及GuidedSessionProjection/Shell；过滤与原排除保存。30张最终图像哈希一致，主检出13个跟踪文件仍与启动快照一致。`r1-validation.json`明确修正后的结果与修正前完整广筛之间的边界。独立审查R1已由原执行者修正，控制会话最终集中验证待完成；本记录不冒充第二次独立审查或用户验收。

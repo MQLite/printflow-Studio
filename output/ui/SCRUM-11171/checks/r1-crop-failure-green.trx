@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2016cd03-36ad-48a2-8bf8-42da73c34652" name="admin@DESKTOP-0BG8884 2026-10-20 10:31:51" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T10:31:51.9761036+13:00" queuing="2026-10-20T10:31:51.9761039+13:00" start="2026-10-20T10:31:46.6333997+13:00" finish="2026-10-20T10:31:54.7436988+13:00" />
+  <TestSettings name="default" id="3502fc4b-7187-4976-b941-b19b57dcc0e1">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_10_31_51" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="9b1a435a-507d-487b-9594-2d1d92a63f6b" testId="35696a29-c286-fec7-6d6b-f3c9c87fd788" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: True)" computerName="DESKTOP-0BG8884" duration="00:00:01.5803730" startTime="2026-10-20T10:31:50.3702066+13:00" endTime="2026-10-20T10:31:51.9521209+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9b1a435a-507d-487b-9594-2d1d92a63f6b" />
+    <UnitTestResult executionId="52e04b53-abce-463a-a3cf-858718653107" testId="d3aaca81-6aa0-b9c9-43d9-bf5546847493" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.9936894" startTime="2026-10-20T10:31:52.6405381+13:00" endTime="2026-10-20T10:31:53.6336937+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="52e04b53-abce-463a-a3cf-858718653107" />
+    <UnitTestResult executionId="4033e62f-e266-4505-8057-3bf9fcd35154" testId="7a8c20c9-da4c-bccc-c38e-329db20bd740" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.9557313" startTime="2026-10-20T10:31:53.6338363+13:00" endTime="2026-10-20T10:31:54.5898806+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4033e62f-e266-4505-8057-3bf9fcd35154" />
+    <UnitTestResult executionId="2b79f902-d289-44e4-bd83-b494a8a7e4de" testId="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6860366" startTime="2026-10-20T10:31:51.9641284+13:00" endTime="2026-10-20T10:31:52.6396305+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2b79f902-d289-44e4-bd83-b494a8a7e4de" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7">
+      <Execution id="2b79f902-d289-44e4-bd83-b494a8a7e4de" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="7a8c20c9-da4c-bccc-c38e-329db20bd740">
+      <Execution id="4033e62f-e266-4505-8057-3bf9fcd35154" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d3aaca81-6aa0-b9c9-43d9-bf5546847493">
+      <Execution id="52e04b53-abce-463a-a3cf-858718653107" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="35696a29-c286-fec7-6d6b-f3c9c87fd788">
+      <Execution id="9b1a435a-507d-487b-9594-2d1d92a63f6b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="35696a29-c286-fec7-6d6b-f3c9c87fd788" executionId="9b1a435a-507d-487b-9594-2d1d92a63f6b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d3aaca81-6aa0-b9c9-43d9-bf5546847493" executionId="52e04b53-abce-463a-a3cf-858718653107" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7a8c20c9-da4c-bccc-c38e-329db20bd740" executionId="4033e62f-e266-4505-8057-3bf9fcd35154" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7" executionId="2b79f902-d289-44e4-bd83-b494a8a7e4de" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="4" executed="4" passed="4" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.38]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.28]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.37]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:07.63]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

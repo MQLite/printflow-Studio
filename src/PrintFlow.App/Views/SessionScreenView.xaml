@@ -709,6 +709,27 @@
             -->
             <DockPanel Grid.Row="1" Margin="0,14,0,0"
                        Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}">
+                <!-- Crop hides the details column, so a refused command needs its own visible
+                     notice. These read-only bindings preserve the same failure and reload wording. -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="Session.Crop.ActionFailure"
+                            Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
+                               AutomationProperties.LiveSetting="Assertive" />
+                    <Expander Header="{Binding NoticeErrorDetailsLabel}" IsExpanded="False"
+                              AutomationProperties.AutomationId="Session.Crop.ErrorDetails"
+                              AutomationProperties.Name="{Binding NoticeErrorDetailsLabel}">
+                        <DockPanel Margin="0,2,0,0">
+                            <TextBlock DockPanel.Dock="Left" Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold" />
+                            <TextBox DockPanel.Dock="Left" Text="{Binding NoticeErrorCode, Mode=OneWay}"
+                                     IsReadOnly="True" IsReadOnlyCaretVisible="True" BorderThickness="0"
+                                     Background="Transparent" Padding="0,3"
+                                     AutomationProperties.AutomationId="Session.Crop.ErrorCode"
+                                     AutomationProperties.Name="{Binding NoticeErrorCodeLabel}" />
+                            <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="16,3,0,0" />
+                        </DockPanel>
+                    </Expander>
+                </StackPanel>
                 <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding ManualCropHeading}"
