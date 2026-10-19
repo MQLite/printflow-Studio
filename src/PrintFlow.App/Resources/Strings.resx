@@ -1327,5 +1327,6 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>Automatic cleanup of diagnostic records did not finish; it will be retried at the next startup. This notice does not mean the workstation passed its checks.</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data></root>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>Technical details</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>Confirm before generation</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>Current step</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>Continue after the current step</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>Change white ink choice</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>History available</value></data></root>
+
 

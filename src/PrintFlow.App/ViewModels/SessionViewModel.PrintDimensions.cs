@@ -122,6 +122,7 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(Preflight));
         OnPropertyChanged(nameof(PreflightRows));
         OnPropertyChanged(nameof(HasPrintDimensionsPreflight));
+        OnPropertyChanged(nameof(ShowsGuidedPreflight));
         OnPropertyChanged(nameof(IsDraftPreflight));
         OnPropertyChanged(nameof(PrintSizeSummary));
         OnPropertyChanged(nameof(PreflightEnlargementNote));

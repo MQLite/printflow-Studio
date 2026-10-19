@@ -1322,7 +1322,7 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanAuthoriseAutomaticSelection, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedBackgroundDecision, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding BackgroundRemovalHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding BackgroundRemovalHint}"
@@ -1341,12 +1341,7 @@
                                            TextWrapping="Wrap"
                                            Opacity="0.8" />
 
-                                <Button Content="{Binding AuthoriseAutomaticSelectionLabel}"
-                                        Command="{Binding BeginAutomaticSelectionCommand}"
-                                        IsEnabled="{Binding CanBeginAutomaticSelection}"
-                                        HorizontalAlignment="Left"
-                                        Padding="14,6"
-                                        Margin="0,10,0,0" />
+                                
 
                                 <!--
                                     The confirmation (§11). It says Meitu decides the subject on
@@ -1365,14 +1360,9 @@
                                                    TextWrapping="Wrap" />
 
                                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                            <Button Content="{Binding ConfirmAutomaticSelectionLabel}"
-                                                    Command="{Binding ConfirmAutomaticSelectionCommand}"
-                                                    Padding="14,6"
-                                                    Margin="0,0,8,0" />
+                                            
 
-                                            <Button Content="{Binding CancelAutomaticSelectionLabel}"
-                                                    Command="{Binding CancelAutomaticSelectionCommand}"
-                                                    Padding="14,6" />
+                                            
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -1412,7 +1402,7 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanSetTrimParameters, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedTrimParameters, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding TrimHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding TrimHint}"
@@ -1507,7 +1497,7 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanChooseFlexibleSize, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
@@ -1612,7 +1602,7 @@
                             Padding="12"
                             Margin="0,12,0,0"
                             AutomationProperties.AutomationId="Session.PrintDimensions.Preflight"
-                            Visibility="{Binding HasPrintDimensionsPreflight, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedPreflight, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding PreflightHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding PreflightDraftHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,6"
@@ -1668,9 +1658,9 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding HasPreparationPlan, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedPreparation, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
-                            <TextBlock Text="{Binding PreparationHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding PreparationHeading}" FontSize="15" FontWeight="SemiBold" /><TextBlock Text="{Binding ConfirmedWhiteUnderbase}" TextWrapping="Wrap" Margin="0,8,0,0" /><Button Content="{Binding ChangeGuidedWhiteInkLabel}" Command="{Binding ChangeGuidedWhiteInkCommand}" Visibility="{Binding CanChangeGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="Session.WhiteUnderbase.Change" HorizontalAlignment="Left" Margin="0,8,0,0" />
                             <TextBlock Text="{Binding CurrentSizeSummary}"
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
@@ -1719,10 +1709,7 @@
                                                 Command="{Binding ChangeSizeCommand}"
                                                 Padding="12,5"
                                                 Margin="0,0,8,0" />
-                                        <Button Content="{Binding ContinueWithSizeLabel}"
-                                                Command="{Binding ContinueWithSizeCommand}"
-                                                IsEnabled="{Binding CanAuthoriseEnlargement}"
-                                                Padding="12,5" />
+                                        
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -1830,7 +1817,7 @@
                             CornerRadius="6"
                             Padding="12"
                             Margin="0,12,0,0"
-                            Visibility="{Binding CanSelectWhiteUnderbase, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
                             <TextBlock Text="{Binding WhiteUnderbaseHeading}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding WhiteUnderbaseHint}"
@@ -2221,7 +2208,7 @@
                                     Command="{Binding ApplyTrimMarginCommand}"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
-                                    Margin="0,10,0,0"  Visibility="{Binding CanSetTrimParameters, Converter={StaticResource BoolToVisibility}}" />
+                                    Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedTrimParameters, Converter={StaticResource BoolToVisibility}}" />
 <Button Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
@@ -2233,7 +2220,7 @@
                                     IsEnabled="{Binding CanConfirmWhiteUnderbase}"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
-                                    Margin="0,10,0,0"  Visibility="{Binding CanSelectWhiteUnderbase, Converter={StaticResource BoolToVisibility}}" />
+                                    Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}" />
 <local:ReviewApprovalButton Content="{Binding UseThisTrimLabel}"
                                     Style="{StaticResource RecommendedAction}"
                                     TargetIdentity="{Binding UseThisTrimIdentity}"
@@ -2286,6 +2273,24 @@
 <Button Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
                                 AutomationProperties.Name="{Binding UseSuggestionLabel}"  Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
+
+<Button Content="{Binding AuthoriseAutomaticSelectionLabel}"
+                                        Command="{Binding BeginAutomaticSelectionCommand}"
+                                        IsEnabled="{Binding CanBeginAutomaticSelection}"
+                                        HorizontalAlignment="Left"
+                                        Padding="14,6"
+                                        Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedAutomaticBegin, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding ConfirmAutomaticSelectionLabel}"
+                                                    Command="{Binding ConfirmAutomaticSelectionCommand}"
+                                                    Padding="14,6"
+                                                    Margin="0,0,8,0"  Visibility="{Binding ShowsGuidedAutomaticConfirmation, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding CancelAutomaticSelectionLabel}"
+                                                    Command="{Binding CancelAutomaticSelectionCommand}"
+                                                    Padding="14,6"  Visibility="{Binding ShowsGuidedAutomaticConfirmation, Converter={StaticResource BoolToVisibility}}" />
+<Button Content="{Binding ContinueWithSizeLabel}"
+                                                Command="{Binding ContinueWithSizeCommand}"
+                                                IsEnabled="{Binding CanAuthoriseEnlargement}"
+                                                Padding="12,5"  Visibility="{Binding ShowsGuidedEnlargement, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{Binding ConfirmOriginalLabel}"
                         Command="{Binding ConfirmOriginalCommand}"
                         AutomationProperties.AutomationId="Session.ConfirmOriginal"
@@ -2296,7 +2301,7 @@
                         Command="{Binding RunStepCommand}"
                         AutomationProperties.AutomationId="Session.RunStep"
                         AutomationProperties.Name="{Binding RunStepLabel}"
-                        Visibility="{Binding CanRunStep, Converter={StaticResource BoolToVisibility}}" />
+                        Visibility="{Binding ShowsGuidedRunStep, Converter={StaticResource BoolToVisibility}}" />
 
                 <local:ReviewApprovalButton Content="{Binding ApproveLabel}"
                         Style="{StaticResource {x:Type Button}}"
@@ -2396,5 +2401,7 @@
                     Padding="14,6" /></Grid>
     </Grid>
 </UserControl>
+
+
 
 

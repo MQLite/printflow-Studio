@@ -1316,5 +1316,6 @@
   <data name="Home_DiagnosticRetentionWarning" xml:space="preserve">
     <value>诊断记录清理未完成，下次启动时会重试。此提示不表示工作站已通过检查。</value>
   </data>
-<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data></root>
+<data name="Session_GuidedTechnicalDetails" xml:space="preserve"><value>技术详情</value></data><data name="Session_GuidedPreflight" xml:space="preserve"><value>生成前确认</value></data><data name="Session_GuidedCurrent" xml:space="preserve"><value>当前步骤</value></data><data name="Session_GuidedFuture" xml:space="preserve"><value>完成当前步骤后继续</value></data><data name="Session_GuidedChangeWhiteInk" xml:space="preserve"><value>修改白墨选择</value></data><data name="Session_GuidedHistoryAvailable" xml:space="preserve"><value>可查看历史</value></data></root>
+
 
