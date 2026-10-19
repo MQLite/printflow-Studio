@@ -15,6 +15,50 @@ namespace PrintFlow.Tests.Integration.Ui;
 public sealed class GuidedImportHomeTests
 {
     [Theory]
+    [InlineData("resume")]
+    [InlineData("open-recovery")]
+    [InlineData("restart-recovery")]
+    public async Task Late_continue_or_recovery_cannot_reopen_a_task_after_leaving_home(string action)
+    {
+        using HomeScreenHarness h = new();
+        if (action == "resume")
+            (await h.Sessions.ImportAsync(PrintFlow.Domain.Sessions.WorkflowType.PrepareAsset,
+                h.WriteSourceFile("late-continue.png"), "late continue", "tester", default)).IsSuccess.ShouldBeTrue();
+        else await RecoverySurfaceTests.Seed(h.Inner, "late recovery");
+        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
+        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
+        var m = new HomeViewModel(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
+        await m.RefreshCommand.ExecuteAsync(null);
+        var gate = proxy.HoldNext(action == "restart-recovery" ? nameof(ISessionService.ResolveRecoveryAsync) : nameof(ISessionService.LoadAsync));
+        Task pending = action switch
+        {
+            "resume" => m.ResumeCommand.ExecuteAsync(m.RecentSessions.Single()),
+            "open-recovery" => m.OpenRecoveryCommand.ExecuteAsync(m.RecoverySessions.Single()),
+            _ => m.RestartRecoveryCommand.ExecuteAsync(m.RecoverySessions.Single()),
+        };
+        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await m.ShowSettingsCommand.ExecuteAsync(null);
+        gate.Release.SetResult(); await pending;
+        h.Navigation.SettingsCount.ShouldBe(1);
+        h.Navigation.SessionFor.ShouldBeNull();
+        m.Notice.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Import_refusal_remains_visible_beside_the_import_action_without_scrolling()
+    {
+        using HomeScreenHarness h = new(); await h.Home.DropFilesCommand.ExecuteAsync(["one", "two"]);
+        WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
+        {
+            var notice = tree.OfType<TextBlock>().Single(t => t.Text == h.Home.Notice);
+            var scroll = GuidedSessionShellTests.Ancestors(notice).OfType<ScrollViewer>().First();
+            var bounds = notice.TransformToAncestor(scroll).TransformBounds(new Rect(notice.RenderSize));
+            bounds.Top.ShouldBeGreaterThanOrEqualTo(0); bounds.Bottom.ShouldBeLessThanOrEqualTo(scroll.ViewportHeight + 0.5);
+            return true;
+        });
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Late_import_after_leaving_or_cancelling_never_navigates_to_route(bool cancel)

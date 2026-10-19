@@ -1,0 +1,217 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:06.00]     PrintFlow.Tests.Integration.Persistence.ImportCancellationShellBoundaryTests.A_cancelled_import_leaves_Home_reporting_a_failure_rather_than_terminating [FAIL]
+  失败 PrintFlow.Tests.Integration.Persistence.ImportCancellationShellBoundaryTests.A_cancelled_import_leaves_Home_reporting_a_failure_rather_than_terminating [403 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : harness.Home.Notice.ShouldNotBeNull()
+    should contain (case insensitive comparison)
+"Cancelled"
+    but was actually
+"已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。"
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Persistence.ImportCancellationShellBoundaryTests.A_cancelled_import_leaves_Home_reporting_a_failure_rather_than_terminating() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Persistence\ImportCancellationShellBoundaryTests.cs:line 88
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:13.32]     PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "en-US", expected: "No preview") [FAIL]
+[xUnit.net 00:00:13.64]     PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "zh-CN", expected: "无预览") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "en-US", expected: "No preview") [292 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(String culture, String expected) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 147
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.<>c.<The_missing_picture_state_is_translated>b__3_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 150
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "zh-CN", expected: "无预览") [321 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(String culture, String expected) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 147
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.<>c.<The_missing_picture_state_is_translated>b__3_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 150
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:14.39]     PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_driver_removes_one_finished_record_and_nothing_else_changes [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_driver_removes_one_finished_record_and_nothing_else_changes [741 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.A_driver_removes_one_finished_record_and_nothing_else_changes() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 298
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.<>c__DisplayClass6_0.<A_driver_removes_one_finished_record_and_nothing_else_changes>b__3() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 306
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:15.81]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:16.20]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:00:16.61]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:17.03]     PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1920, height: 1040) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1000, height: 700) [417 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 539
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform& generalTransform, Matrix& simpleTransform)
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.Bounds(FrameworkElement element, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 789
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.<>c__DisplayClass20_0.<The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 545
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1920, height: 1040) [385 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 539
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform& generalTransform, Matrix& simpleTransform)
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.Bounds(FrameworkElement element, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 789
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.<>c__DisplayClass20_0.<The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 545
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "en", width: 1000, height: 700) [415 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 539
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform& generalTransform, Matrix& simpleTransform)
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.Bounds(FrameworkElement element, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 789
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.<>c__DisplayClass20_0.<The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 545
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(language: "zh-CN", width: 1920, height: 1040) [416 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable(String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 539
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform& generalTransform, Matrix& simpleTransform)
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.Bounds(FrameworkElement element, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 789
+   at PrintFlow.Tests.Integration.Ui.HomeReadinessSummaryTests.<>c__DisplayClass20_0.<The_summary_wraps_its_button_is_keyboard_reachable_and_recovery_stays_reachable>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeReadinessSummaryTests.cs:line 545
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:33.54]     PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Home_keeps_import_warnings_and_recent_actions [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Home_keeps_import_warnings_and_recent_actions [316 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Home_keeps_import_warnings_and_recent_actions() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeAdoptionTests.cs:line 46
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeAdoptionTests.cs:line 174
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.<>c__DisplayClass1_0.<Home_keeps_import_warnings_and_recent_actions>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeAdoptionTests.cs:line 54
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:37.83]     PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(language: "zh-CN") [FAIL]
+[xUnit.net 00:00:38.32]     PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(language: "en") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(language: "zh-CN") [595 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.Facts.Waiting
+    should be
+2
+    but was
+1
+
+Additional Info:
+    the card and the Recent row both say what the job waits for
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(String language) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ColleagueCorrectionUiTests.cs:line 341
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(language: "en") [495 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.Facts.Waiting
+    should be
+2
+    but was
+1
+
+Additional Info:
+    the card and the Recent row both say what the job waits for
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.ColleagueCorrectionUiTests.The_Home_card_and_Recent_row_render_the_correction_wording_with_its_own_identities(String language) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ColleagueCorrectionUiTests.cs:line 341
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\output\ui\SCRUM-11170\checks\e3-home-green.trx
+
+失败!  - 失败:    11，通过:   110，已跳过:     0，总计:   121，持续时间: 34 s - PrintFlow.Tests.dll (net10.0)

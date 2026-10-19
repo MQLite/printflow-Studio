@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2924d898-152b-412f-8e2c-a1a683984eed" name="admin@DESKTOP-0BG8884 2026-10-19 17:51:17" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:51:17.3568624+13:00" queuing="2026-10-19T17:51:17.3568630+13:00" start="2026-10-19T17:51:11.5893082+13:00" finish="2026-10-19T17:51:18.8349766+13:00" />
+  <TestSettings name="default" id="4a800483-25fc-4f3d-aebd-b15fbcb58232">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_51_17" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a2739edf-52a8-4322-bb76-8ac73a0d746b" testId="d6bc650e-c97b-ce83-a3ee-714e281a57ae" testName="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Unavailable_ai_is_information_and_all_local_routes_still_reach_their_original_step" computerName="DESKTOP-0BG8884" duration="00:00:00.3763953" startTime="2026-10-19T17:51:18.2961250+13:00" endTime="2026-10-19T17:51:18.6716886+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a2739edf-52a8-4322-bb76-8ac73a0d746b" />
+    <UnitTestResult executionId="9f94312b-0344-4ad7-83ea-ba604b3ffaec" testId="4701620e-7ef4-d851-bbd7-2f629a8d9d38" testName="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: &quot;pdf&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.9646738" startTime="2026-10-19T17:51:17.3435603+13:00" endTime="2026-10-19T17:51:18.2935447+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9f94312b-0344-4ad7-83ea-ba604b3ffaec">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3404&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 35&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9e437250-c2e4-4ee5-acdc-dee52b3d571e" testId="b5cebe8e-6d58-0e03-f441-d742e312fbd4" testName="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: &quot;psd&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:01.4524637" startTime="2026-10-19T17:51:15.8251129+13:00" endTime="2026-10-19T17:51:17.3273239+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9e437250-c2e4-4ee5-acdc-dee52b3d571e">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3593&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs:line 3404&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 35&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: &quot;pdf&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4701620e-7ef4-d851-bbd7-2f629a8d9d38">
+      <Execution id="9f94312b-0344-4ad7-83ea-ba604b3ffaec" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests" name="Source_information_is_visible_during_preparation_and_review_then_collapses" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: &quot;psd&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b5cebe8e-6d58-0e03-f441-d742e312fbd4">
+      <Execution id="9e437250-c2e4-4ee5-acdc-dee52b3d571e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests" name="Source_information_is_visible_during_preparation_and_review_then_collapses" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Unavailable_ai_is_information_and_all_local_routes_still_reach_their_original_step" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d6bc650e-c97b-ce83-a3ee-714e281a57ae">
+      <Execution id="a2739edf-52a8-4322-bb76-8ac73a0d746b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests" name="Unavailable_ai_is_information_and_all_local_routes_still_reach_their_original_step" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d6bc650e-c97b-ce83-a3ee-714e281a57ae" executionId="a2739edf-52a8-4322-bb76-8ac73a0d746b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4701620e-7ef4-d851-bbd7-2f629a8d9d38" executionId="9f94312b-0344-4ad7-83ea-ba604b3ffaec" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b5cebe8e-6d58-0e03-f441-d742e312fbd4" executionId="9e437250-c2e4-4ee5-acdc-dee52b3d571e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.63]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.75]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.86]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.39]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:05.39]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.39]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:05.39]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:05.39]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3593,0): at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session)&#xD;
+[xUnit.net 00:00:05.39]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3404,0): at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied)&#xD;
+[xUnit.net 00:00:05.39]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(35,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format)&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.35]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:06.35]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.35]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:06.35]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:06.35]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3593,0): at PrintFlow.App.ViewModels.SessionViewModel.Show(SessionView session)&#xD;
+[xUnit.net 00:00:06.35]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.cs(3404,0): at PrintFlow.App.ViewModels.SessionViewModel.RunServiceAsync(Func`2 call, CancellationToken cancellationToken, Action`1 onApplied)&#xD;
+[xUnit.net 00:00:06.35]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(35,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format)&#xD;
+[xUnit.net 00:00:06.35]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.73]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:51:17.3301115+13:00">
+        <Text>[xUnit.net 00:00:05.39]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "psd") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:51:18.2939429+13:00">
+        <Text>[xUnit.net 00:00:06.35]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "pdf") [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

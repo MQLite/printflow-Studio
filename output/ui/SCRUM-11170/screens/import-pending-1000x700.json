@@ -1,0 +1,85 @@
+{
+  "State": "import-pending",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77",
+  "ScreenshotSha256": "28E016D2B9730CF2CA4FDAA25A35326E7B18C80CF4EEC8722C4EBEF5E37F0D04",
+  "EssentialActions": [
+    "Home.CancelImport"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Home.ShowSettings",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 922,
+          "Y": 24,
+          "Width": 54,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ChooseFile",
+        "IsEnabled": false,
+        "CanExecute": false,
+        "Bounds": {
+          "X": 49,
+          "Y": 153.95333333333332,
+          "Width": 95.48,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.CancelImport",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 234.42999999999998,
+          "Width": 138,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ShowEnvironment",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 487.9766666666667,
+          "Width": 124,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.Refresh",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 922,
+          "Y": 448,
+          "Width": 54,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 183.9766666666667,
+        "ViewportHeight": 366
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 155.52333333333334
+      }
+    ],
+    "Previews": 0
+  }
+}

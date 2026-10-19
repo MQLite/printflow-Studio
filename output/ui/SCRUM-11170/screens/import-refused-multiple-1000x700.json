@@ -1,0 +1,74 @@
+{
+  "State": "import-refused-multiple",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": null,
+  "ScreenshotSha256": "E0A6A38954652B09C26F7BBE5DE0B158E383F9F53B4AFA69797DDE2526A67FDD",
+  "EssentialActions": [
+    "Home.ChooseFile"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Home.ShowSettings",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 922,
+          "Y": 24,
+          "Width": 54,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ChooseFile",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 153.95333333333332,
+          "Width": 95.48,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ShowEnvironment",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 407.5,
+          "Width": 124,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.Refresh",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 922,
+          "Y": 448,
+          "Width": 54,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 103.5,
+        "ViewportHeight": 366
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 155.52333333333334
+      }
+    ],
+    "Previews": 0
+  }
+}

@@ -186,6 +186,8 @@
                     <TextBlock Text="{Binding ImportProgress}" TextWrapping="Wrap" AutomationProperties.AutomationId="Home.ImportProgress" />
                     <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding CancelImportLabel}" Command="{Binding CancelImportCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.CancelImport" />
                 </StackPanel>
+                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Margin="0,12,0,0" FontWeight="SemiBold" />
+                <views:NoticeErrorDetails Margin="0,4,0,0" />
                 <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,12,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
             </StackPanel>
         </HeaderedContentControl>
@@ -259,15 +261,6 @@
                                AutomationProperties.AutomationId="Home.StartupDetails.Preset" />
                 </StackPanel>
             </Expander>
-        </StackPanel>
-
-        <StackPanel>
-            <TextBlock Text="{Binding Notice}"
-                       TextWrapping="Wrap"
-                       Margin="0,12,0,0"
-                       FontWeight="SemiBold" />
-            <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
-            <views:NoticeErrorDetails Margin="0,4,0,0" />
         </StackPanel>
 
         </StackPanel>

@@ -1,0 +1,64 @@
+{
+  "State": "psd-pending",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "7EC057BB073977E2A61A4AAAA805B783A454F9CCD9C9FBAB98BFA2195C6E0C8B",
+  "ScreenshotSha256": "2DBACF337D3CBDC108610034F4A30FC746C050E50261E825BB7578CE10509744",
+  "EssentialActions": [
+    "Session.RunStep",
+    "Session.BackToHome"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Session.RunStep",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 16,
+          "Y": 642,
+          "Width": 149.04333333333335,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.ChangeRoute",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 165.04333333333335,
+          "Y": 642,
+          "Width": 194,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 898,
+          "Y": 642,
+          "Width": 86,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 156.35666666666668,
+        "ViewportHeight": 333.87
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 333.87
+      }
+    ],
+    "Previews": 0
+  }
+}

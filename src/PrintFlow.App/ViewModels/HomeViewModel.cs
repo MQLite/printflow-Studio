@@ -547,6 +547,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     {
         if (row is null || ListActionsBlocked) return;
         var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
+        if (!_active) return;
         if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
         else ShowFailureNotice(Format(Strings.Home_ResumeFailed,
             row.HasOpenCorrection ? row.OpenCorrectionLabel : row.OpenLabel), loaded.Failure);
@@ -566,7 +567,9 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
                 if (path is null) return;
             }
             var result = await _sessions.ResolveRecoveryAsync(row.Id, action, path, Environment.UserName, cancellationToken).ConfigureAwait(true);
+            if (!_active) return;
             await RefreshAsync(cancellationToken).ConfigureAwait(true);
+            if (!_active) return;
             if (result.IsFailure) ShowFailureNotice(Strings.Home_RecoveryFailed, result.Failure);
             else if (action != RecoveryAction.Abandon) _navigation.GoToSession(result.Value);
         }
@@ -635,6 +638,7 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
             Notice = null;
             OperationResult<SessionView> loaded =
                 await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
+            if (!_active) return;
 
             if (loaded.IsFailure)
             {

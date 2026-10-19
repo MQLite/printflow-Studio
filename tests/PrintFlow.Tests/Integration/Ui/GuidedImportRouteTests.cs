@@ -45,6 +45,9 @@ public sealed class GuidedImportRouteTests
                 var bounds = button.TransformToAncestor(tree.Root).TransformBounds(new Rect(button.RenderSize));
                 bounds.Bottom.ShouldBeLessThanOrEqualTo(700);
                 bounds.Right.ShouldBeLessThanOrEqualTo(1000);
+                var scroll = GuidedSessionShellTests.Ancestors(button).OfType<ScrollViewer>().First();
+                var clipped = button.TransformToAncestor(scroll).TransformBounds(new Rect(button.RenderSize));
+                clipped.Bottom.ShouldBeLessThanOrEqualTo(scroll.ViewportHeight + 0.5, "the whole action must be visible without scrolling");
                 button.IsEnabled.ShouldBeTrue();
                 tree.OfType<TextBlock>().ShouldContain(x => x.Text == choice.Purpose);
                 tree.OfType<TextBlock>().ShouldContain(x => x.Text == choice.Result);

@@ -50,7 +50,7 @@
             files will be called (SCRUM-11078 §11, §12; SCRUM-11075). The preview is
             informational — it issues no command and creates nothing (§13).
         -->
-        <Border Grid.Row="1" Style="{StaticResource PF.Card}" Margin="0,16,0,16">
+        <Border Grid.Row="1" Style="{StaticResource PF.Card}" Padding="16" Margin="0,12,0,12">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -104,8 +104,8 @@
                            Opacity="0.7"
                            Margin="0,0,0,10" />
 
-                <HeaderedContentControl Style="{StaticResource PF.FormSection}" Header="{Binding OutputNameLabel}">
                 <StackPanel>
+                <TextBlock Text="{Binding OutputNameLabel}" FontWeight="SemiBold" />
                 <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding CanEditOutputName}"
                          AutomationProperties.AutomationId="WorkflowSelection.OutputName"
@@ -121,7 +121,6 @@
                            MaxWidth="480"
                            HorizontalAlignment="Left" />
                 </StackPanel>
-                </HeaderedContentControl>
             </StackPanel>
         </Grid>
         </Border>
