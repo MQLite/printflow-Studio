@@ -1,0 +1,125 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <!-- All styles are opt-in. Keyboard focus is an outline outside the selected surface. -->
+  <Style x:Key="PF.Focus" TargetType="Control">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Control">
+          <Rectangle Margin="-4" Stroke="{DynamicResource PF.Brush.Focus}" StrokeThickness="2"
+                     StrokeDashArray="2,1" RadiusX="8" RadiusY="8" IsHitTestVisible="False" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="PF.Button.Secondary" TargetType="Button">
+    <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+    <Setter Property="Padding" Value="{DynamicResource PF.Padding.Field}" />
+    <Setter Property="FontFamily" Value="{DynamicResource PF.Font.Family}" />
+    <Setter Property="FontSize" Value="{DynamicResource PF.Font.Body}" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Primary}" />
+    <Setter Property="Background" Value="{DynamicResource PF.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <ControlTemplate.Resources>
+            <DataTemplate DataType="{x:Type sys:String}">
+              <AccessText Text="{Binding}" TextWrapping="Wrap" TextAlignment="Center" />
+            </DataTemplate>
+          </ControlTemplate.Resources>
+          <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{DynamicResource PF.Corner.Control}"
+                  Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+            <ContentPresenter ContentSource="Content" RecognizesAccessKey="True"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Surface" Property="BorderThickness" Value="2" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Surface" Property="Background" Value="{DynamicResource PF.Brush.Border}" />
+              <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+              <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Muted}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="PF.Button.Primary" TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
+    <Setter Property="Background" Value="{DynamicResource PF.Brush.Primary}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Surface}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource PF.Brush.PrimaryHover}" /></Trigger>
+      <Trigger Property="IsPressed" Value="True"><Setter Property="Background" Value="{DynamicResource PF.Brush.PrimaryPressed}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="PF.Button.Danger" TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Danger}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Danger}" />
+  </Style>
+
+  <!-- Native edit/selection templates retain keyboard, automation and command semantics. -->
+  <Style x:Key="PF.Input.TextBox" TargetType="TextBox">
+    <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+    <Setter Property="Padding" Value="{DynamicResource PF.Padding.Field}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource PF.Font.Family}" />
+    <Setter Property="FontSize" Value="{DynamicResource PF.Font.Body}" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Background" Value="{DynamicResource PF.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource PF.Brush.Selection}" />
+    <Setter Property="SelectionOpacity" Value="1" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+  </Style>
+  <Style x:Key="PF.Input.ComboBox" TargetType="ComboBox">
+    <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+    <Setter Property="Padding" Value="{DynamicResource PF.Padding.Field}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Background" Value="{DynamicResource PF.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+  </Style>
+  <Style x:Key="PF.Input.CheckBox" TargetType="CheckBox">
+    <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+    <Style.Triggers><Trigger Property="IsChecked" Value="True"><Setter Property="Background" Value="{DynamicResource PF.Brush.Selection}" /></Trigger></Style.Triggers>
+  </Style>
+  <Style x:Key="PF.Input.RadioButton" TargetType="RadioButton">
+    <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+    <Style.Triggers><Trigger Property="IsChecked" Value="True"><Setter Property="Background" Value="{DynamicResource PF.Brush.Selection}" /></Trigger></Style.Triggers>
+  </Style>
+  <Style x:Key="PF.Disclosure" TargetType="Expander">
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Ink}" />
+    <Setter Property="Padding" Value="{DynamicResource PF.Padding.Field}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource PF.Focus}" />
+  </Style>
+  <Style x:Key="PF.Progress" TargetType="ProgressBar">
+    <Setter Property="Height" Value="8" />
+    <Setter Property="Foreground" Value="{DynamicResource PF.Brush.Primary}" />
+    <Setter Property="Background" Value="{DynamicResource PF.Brush.Selection}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+</ResourceDictionary>

@@ -1,0 +1,64 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <Color x:Key="PF.Color.Canvas">#F6F7F4</Color>
+  <Color x:Key="PF.Color.Surface">#FFFFFF</Color>
+  <Color x:Key="PF.Color.Ink">#202E2A</Color>
+  <Color x:Key="PF.Color.Muted">#65706B</Color>
+  <Color x:Key="PF.Color.Primary">#16765D</Color>
+  <Color x:Key="PF.Color.Selection">#E8F4EF</Color>
+  <Color x:Key="PF.Color.Border">#DCE3DE</Color>
+  <Color x:Key="PF.Color.Warning">#FFF1C8</Color>
+  <Color x:Key="PF.Color.PrimaryHover">#10634D</Color>
+  <Color x:Key="PF.Color.PrimaryPressed">#0D503F</Color>
+  <Color x:Key="PF.Color.Focus">#2459AA</Color>
+  <Color x:Key="PF.Color.Danger">#A6382C</Color>
+  <Color x:Key="PF.Color.ErrorSurface">#FFF0EC</Color>
+  <Color x:Key="PF.Color.WarningInk">#715112</Color>
+  <Color x:Key="PF.Color.Checker">#D8D8D8</Color>
+
+  <SolidColorBrush x:Key="PF.Brush.Canvas" Color="{StaticResource PF.Color.Canvas}" />
+  <SolidColorBrush x:Key="PF.Brush.Surface" Color="{StaticResource PF.Color.Surface}" />
+  <SolidColorBrush x:Key="PF.Brush.Ink" Color="{StaticResource PF.Color.Ink}" />
+  <SolidColorBrush x:Key="PF.Brush.Muted" Color="{StaticResource PF.Color.Muted}" />
+  <SolidColorBrush x:Key="PF.Brush.Primary" Color="{StaticResource PF.Color.Primary}" />
+  <SolidColorBrush x:Key="PF.Brush.Selection" Color="{StaticResource PF.Color.Selection}" />
+  <SolidColorBrush x:Key="PF.Brush.Border" Color="{StaticResource PF.Color.Border}" />
+  <SolidColorBrush x:Key="PF.Brush.Warning" Color="{StaticResource PF.Color.Warning}" />
+  <SolidColorBrush x:Key="PF.Brush.PrimaryHover" Color="{StaticResource PF.Color.PrimaryHover}" />
+  <SolidColorBrush x:Key="PF.Brush.PrimaryPressed" Color="{StaticResource PF.Color.PrimaryPressed}" />
+  <SolidColorBrush x:Key="PF.Brush.Focus" Color="{StaticResource PF.Color.Focus}" />
+  <SolidColorBrush x:Key="PF.Brush.Danger" Color="{StaticResource PF.Color.Danger}" />
+  <SolidColorBrush x:Key="PF.Brush.ErrorSurface" Color="{StaticResource PF.Color.ErrorSurface}" />
+  <SolidColorBrush x:Key="PF.Brush.WarningInk" Color="{StaticResource PF.Color.WarningInk}" />
+
+  <FontFamily x:Key="PF.Font.Family">Microsoft YaHei, Noto Sans SC</FontFamily>
+  <sys:Double x:Key="PF.Font.Title">28</sys:Double>
+  <sys:Double x:Key="PF.Font.Body">14</sys:Double>
+  <sys:Double x:Key="PF.Font.Auxiliary">12</sys:Double>
+  <sys:Double x:Key="PF.Control.MinHeight">42</sys:Double>
+  <sys:Double x:Key="PF.Space.4">4</sys:Double>
+  <sys:Double x:Key="PF.Space.8">8</sys:Double>
+  <sys:Double x:Key="PF.Space.12">12</sys:Double>
+  <sys:Double x:Key="PF.Space.16">16</sys:Double>
+  <sys:Double x:Key="PF.Space.24">24</sys:Double>
+  <sys:Double x:Key="PF.Space.32">32</sys:Double>
+  <Thickness x:Key="PF.Padding.Card">24</Thickness>
+  <Thickness x:Key="PF.Padding.Field">12,8,12,8</Thickness>
+  <Thickness x:Key="PF.Margin.Section">0,0,0,16</Thickness>
+  <CornerRadius x:Key="PF.Corner.Card">10</CornerRadius>
+  <CornerRadius x:Key="PF.Corner.Control">6</CornerRadius>
+
+  <!-- A surface behind the image; it never composites or changes source pixels. -->
+  <DrawingBrush x:Key="PF.Image.Checkerboard" TileMode="Tile" Viewport="0,0,16,16"
+                ViewportUnits="Absolute" Stretch="None">
+    <DrawingBrush.Drawing>
+      <DrawingGroup>
+        <GeometryDrawing Brush="{StaticResource PF.Brush.Surface}" Geometry="M0,0 H16 V16 H0 Z" />
+        <GeometryDrawing Geometry="M0,0 H8 V8 H0 Z M8,8 H16 V16 H8 Z">
+          <GeometryDrawing.Brush><SolidColorBrush Color="{StaticResource PF.Color.Checker}" /></GeometryDrawing.Brush>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingBrush.Drawing>
+  </DrawingBrush>
+</ResourceDictionary>
