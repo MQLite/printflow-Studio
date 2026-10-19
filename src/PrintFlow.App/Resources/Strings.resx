@@ -1363,4 +1363,12 @@
   <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>No reliable percentage is available. Please wait; a successful result still needs your review.</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>Stopping this operation</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>Handing control to you</value></data>
+  <data name="Session_GuidedPrintActual" xml:space="preserve"><value>Projected actual image: {0:0.##} × {1:0.##} mm</value></data>
+  <data name="Session_GuidedPrintContract" xml:space="preserve"><value>Production requirement: {0} PPI · CMYK + W1. Validation and review still follow generation.</value></data>
+  <data name="Session_GuidedPrintPixels" xml:space="preserve"><value>Output: {0} × {1} pixels · proportions preserved</value></data>
+  <data name="Session_GuidedPrintRequested" xml:space="preserve"><value>Requested: {0}</value></data>
+  <data name="Session_GuidedPrintRisk" xml:space="preserve"><value>This size requires enlargement. Separate permission is still required after confirming the size; review remains mandatory.</value></data>
+  <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>White ink: {0}</value></data>
+  <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>Your selection also records the stated artwork classification as the reason. Choose it for this finished design.</value></data>
+  <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>Source PSD/PDF spot or white-ink channels are not reused. This choice generates the production W1 channel.</value></data>
 </root>

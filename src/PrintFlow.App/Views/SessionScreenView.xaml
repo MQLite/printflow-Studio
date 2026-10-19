@@ -498,7 +498,7 @@
                               IsEnabled="{Binding CanInteractWithLivePage}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="{Binding GuidedDetailsWidth}" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.ColumnSpan="2" Padding="32" MaxWidth="680" VerticalAlignment="Center"
@@ -531,6 +531,21 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <Border Grid.Row="0" Padding="16" Background="{DynamicResource PF.Brush.Surface}" CornerRadius="10"
+                        BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="1"
+                        AutomationProperties.AutomationId="Session.PrintSummary"
+                        Visibility="{Binding ShowsGuidedPrintSummary, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding GuidedPrintRequested}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Requested" />
+                        <TextBlock Text="{Binding GuidedPrintActual}" TextWrapping="Wrap" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,4" AutomationProperties.AutomationId="Session.PrintSummary.Actual" />
+                        <TextBlock Text="{Binding GuidedPrintPixels}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.PrintSummary.Pixels" />
+                        <TextBlock Text="{Binding GuidedPrintWhiteInk}" TextWrapping="Wrap" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintSummary.WhiteInk" Visibility="{Binding ShowsGuidedPrintWhiteInk, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding GuidedPrintContract}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Contract" />
+                        <Border Background="{DynamicResource PF.Brush.Warning}" Padding="10" CornerRadius="6" Margin="0,10,0,0" Visibility="{Binding ShowsGuidedPrintRisk, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding GuidedPrintRisk}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.PrintSummary.Risk" />
+                        </Border>
+                    </StackPanel>
+                </Border>
 
             <!--
                 Image review (Epic 11200 Part C1 §7–§16). One pane when there is a single
@@ -1870,6 +1885,8 @@
                                        TextWrapping="Wrap"
                                        Opacity="0.7"
                                        Margin="0,6,0,0" />
+                            <TextBlock Text="{Binding GuidedWhiteInkReasonHint}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="{Binding GuidedWhiteInkSourceHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,8,0,0" />
 
                             <local:SessionListBox ItemsSource="{Binding WhiteUnderbaseChoices}"
                                      SelectedItem="{Binding SelectedWhiteUnderbaseChoice}"
@@ -2237,6 +2254,7 @@
                                     Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedTrimParameters, Converter={StaticResource BoolToVisibility}}" />
 <local:SessionActionButton Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
+                                            IsEnabled="{Binding CanConfirmGuidedCustomSize}"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
                                             HorizontalAlignment="Left"
                                             Padding="14,6"

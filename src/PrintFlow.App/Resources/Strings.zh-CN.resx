@@ -1352,4 +1352,12 @@
   <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前没有可靠的百分比，请等待。成功后仍需你检查并审核结果。</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>正在停止本次处理</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>正在交由你接管</value></data>
+  <data name="Session_GuidedPrintActual" xml:space="preserve"><value>预计实际图片：{0:0.##} × {1:0.##} 毫米</value></data>
+  <data name="Session_GuidedPrintContract" xml:space="preserve"><value>生产要求：{0} PPI · CMYK + W1。生成后仍须校验与审核。</value></data>
+  <data name="Session_GuidedPrintPixels" xml:space="preserve"><value>输出：{0} × {1} 像素 · 保持原比例</value></data>
+  <data name="Session_GuidedPrintRequested" xml:space="preserve"><value>当前要求：{0}</value></data>
+  <data name="Session_GuidedPrintRisk" xml:space="preserve"><value>本尺寸需要放大。确认尺寸后仍须单独授权，之后仍需审核结果。</value></data>
+  <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>白墨：{0}</value></data>
+  <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>选择同时记录对应的图案分类理由，请根据本次完整成品设计判断。</value></data>
+  <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>源 PSD/PDF 的专色或白墨通道不会沿用。本次选择用于生成生产 W1 通道。</value></data>
 </root>
