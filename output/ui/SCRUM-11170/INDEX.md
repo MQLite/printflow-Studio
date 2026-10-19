@@ -57,3 +57,11 @@ Pre-review validation: safe UI/Architecture 1375 passed /14 inherited failures /
 The sole independent review is saved in `review/` and SCRUM-11170_REVIEW.md. Controller accepted R1/R3 for one unified fix and deferred R2 Minor. After actual REDs, resume-related48/48, route/draft/output-name26/26 and visual3/3 passed. The first review broad found the same14 inherited failures plus one older missing-thumbnail test expecting direct Session before original confirmation. Its assertions now retain exact task ID and neutral preview behavior while requiring explicit route choice. `review-contract-green.trx` passes94/94; `review-first-broad-comparison.json` preserves the first broad1398/15 result rather than disguising it as baseline. Full AI remains BLOCKED_DEPENDENCY.
 
 Final post-review validation: `checks/review-ui-architecture-final2.trx` —1399 passed/14 failed/0 skipped,1413 total (6m22s). All14 failure names and error messages exactly match E2, with no new failures or missing baseline failures in baseline-comparison.json. Related target94/94 and visual supplement3/3. All25 PNG hashes match their metadata. R1/R3 fixes ready for controller verification; R2 deferred Minor, I03 blocked, real-device/keyboard/DPI/newcomer/production NOT RUN.
+
+## 控制会话最终核验与交付状态
+
+2026-10-19，控制会话在源/测试提交 f60b44c8fbea86b77393d8c5c88b9d6b5b82bcdc 上重新编译并运行安全 GuidedImport 目标，54/54通过，原始 controller-final-guided-import.trx/log/filter 保留。直接解析最终1413项广筛：1399通过、14失败；逐项对照E2名称与错误消息，无新增失败。25张PNG的SHA256均匹配JSON，11项可见/opt-in排除与E2完全相同。审查前277/277持久化证据的时间和范围保持原记录，不声称审查后重跑。
+
+SCRUM-11170、SCRUM-11182、SCRUM-11183已实际转为In Review；SCRUM-11184仍To Do，完整AI接入BLOCKED_DEPENDENCY（11166仍To Do）。这不是用户验收或Jira Done。R1/R3完成一次统一TDD修复；R2 Minor延期，取消已提交导入等待后当前列表可能需手动刷新。真实键盘/设备UIA/DPI/工作站/新手/生产继续NOT RUN，既有异常保持原状态。
+
+机器核验记录：[controller-final-verification.json](../../../output/ui/SCRUM-11170/checks/controller-final-verification.json)；状态原始回执：[jira-final-status.json](../../../output/ui/SCRUM-11170/checks/jira-final-status.json)。执行与唯一独立整体审查均已核实为Astra/high，控制会话实际Sol/xhigh；Windows本地，development-routing v2.4、RouteOffset=0。分支和工作树保留，主检出原有修改保留。未合并、推送、部署、生产操作或进入后续Epic；scratch保留。

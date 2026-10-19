@@ -95,3 +95,11 @@ I01/I02实现及自动化/视觉证据已备齐，交回控制会话进行唯一
 `review-ui-architecture-final2.trx`：1413项，1399通过/14失败/0跳过，测试时长6分22秒；TRX开始2026-10-19 18:47:59 +13:00、结束18:54:26。最终baseline-comparison.json逐项证明14项名称和错误消息与E2完全一致，NewFailureNames与BaselineFailuresNotReproduced均为空。11项排除未改变；没有新增产品失败，也不能称全量通过。run-index.json保留全部运行的计数和时刻。
 
 R1/R3统一修复、94/94关联回归、3/3补充视觉与最终1413广筛证据已完成，交回控制会话作最终针对性核验及其授权范围内的状态处理；本执行者不宣布用户验收或Jira Done。R2仍Deferred Minor，I03完整AI仍BLOCKED_DEPENDENCY，真实设备/键盘/DPI/新手/生产NOT RUN。审查前277/277持久化结果的范围和时间不变。源/测试diff已更新至本修复，所有25截图哈希与JSON一致。scratch保留，不推送或合并。
+
+## 控制会话最终核验与交付状态
+
+2026-10-19，控制会话在源/测试提交 f60b44c8fbea86b77393d8c5c88b9d6b5b82bcdc 上重新编译并运行安全 GuidedImport 目标，54/54通过，原始 controller-final-guided-import.trx/log/filter 保留。直接解析最终1413项广筛：1399通过、14失败；逐项对照E2名称与错误消息，无新增失败。25张PNG的SHA256均匹配JSON，11项可见/opt-in排除与E2完全相同。审查前277/277持久化证据的时间和范围保持原记录，不声称审查后重跑。
+
+SCRUM-11170、SCRUM-11182、SCRUM-11183已实际转为In Review；SCRUM-11184仍To Do，完整AI接入BLOCKED_DEPENDENCY（11166仍To Do）。这不是用户验收或Jira Done。R1/R3完成一次统一TDD修复；R2 Minor延期，取消已提交导入等待后当前列表可能需手动刷新。真实键盘/设备UIA/DPI/工作站/新手/生产继续NOT RUN，既有异常保持原状态。
+
+机器核验记录：[controller-final-verification.json](../../../output/ui/SCRUM-11170/checks/controller-final-verification.json)；状态原始回执：[jira-final-status.json](../../../output/ui/SCRUM-11170/checks/jira-final-status.json)。执行与唯一独立整体审查均已核实为Astra/high，控制会话实际Sol/xhigh；Windows本地，development-routing v2.4、RouteOffset=0。分支和工作树保留，主检出原有修改保留。未合并、推送、部署、生产操作或进入后续Epic；scratch保留。

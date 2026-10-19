@@ -6,7 +6,7 @@
 
 本树 C:/Users/admin/.codex/worktrees/scrum-11170-guided-import/printflow-Studio/；分支 codex/scrum-11170-guided-import，基线 55657e37badb406cbc96a0d8db24abe6386d932d。已用原生 create_worktree 创建并附加。旧树属于另一聊天，只读；主检出 D:/Repositories/printflow-Studio 保留全部未提交文档。禁止合并、推送、部署、生产操作、后续 Epic。
 
-精确 Jira 需求与状态变更在 SCRUM-11170_JIRA_SCOPE.json。11169 与11178～11181已按用户验收转 Done；11170、11182和11183为In Progress；11184保持To Do等待11166依赖。不要发送Jira评论。
+精确 Jira 启动需求与状态变更在 SCRUM-11170_JIRA_SCOPE.json。11169 与11178～11181已按用户验收转 Done。最终11170、11182和11183已转In Review；11184保持To Do等待11166依赖。最终状态原始回执见 output/ui/SCRUM-11170/checks/jira-final-status.json；未发送Jira评论，E3尚待用户验收。
 
 ## 规范和范围
 
@@ -31,4 +31,3 @@ E2基线：安全广筛1344过14继承失败；277持久化过；85引导过；�
 新证据output/ui/SCRUM-11170/：原始TRX、代表性中文离屏页1000x700/1280x720/1920x1080 DIP、逐图view_image、真实命令/几何信息、INDEX.md。真实键盘、多DPI、UIA客户端、新手和生产NOT RUN。E2遗留Tab/Space/推荐字段与旧故障明确保留。
 
 完成前保存RESULTS、AC映射、维护说明、全部Ruling/成本、source diff和测试证据；不要删除scratch，前序清理被策略拒绝。交父HEAD、提交、计数、限制。未获用户验收的E3不得Done。
-

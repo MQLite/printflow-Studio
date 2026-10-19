@@ -1,0 +1,40 @@
+{
+  "VerifiedSourceCommit": "f60b44c8fbea86b77393d8c5c88b9d6b5b82bcdc",
+  "VerifiedAtUtc": "2026-10-19T05:58:00.3357195+00:00",
+  "Host": "Windows/local",
+  "Policy": "development-routing v2.4",
+  "RouteOffset": 0,
+  "FreshControllerTarget": {
+    "Total": 54,
+    "Passed": 54,
+    "Failed": 0
+  },
+  "FinalBroad": {
+    "Total": 1413,
+    "Passed": 1399,
+    "Failed": 14
+  },
+  "NewFailureNames": [],
+  "DifferentMessages": [],
+  "PreReviewPersistence": {
+    "Total": 277,
+    "Passed": 277,
+    "Failed": 0
+  },
+  "PersistenceRerunAfterReview": false,
+  "ScreenshotCount": 25,
+  "HashMismatches": [],
+  "VisibleOrOptInExclusions": 11,
+  "ExclusionsIdentical": true,
+  "IndependentReviewCount": 1,
+  "ImportantFixed": [
+    "R1",
+    "R3"
+  ],
+  "DeferredMinor": [
+    "R2"
+  ],
+  "AiIntegration": "BLOCKED_DEPENDENCY",
+  "RealKeyboardDpiWorkstationNewcomerProduction": "NOT RUN",
+  "MergePushDeploy": false
+}

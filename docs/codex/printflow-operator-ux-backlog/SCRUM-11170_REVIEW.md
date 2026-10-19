@@ -66,3 +66,11 @@ R3现在区分干净名称与真实草稿，采用E2继续编辑/放弃输入样
 四张新增离屏中文PNG已逐张查看（恢复选择1000x700；草稿决策1000x700、1280x720、1920x1080），review-visual3/3。这不是实际设备键盘或DPI验收。R2保持Deferred Minor，当前列表可能需现有Refresh才能看到已提交任务；任务未丢失但提示仍不足。完整AI依赖、14项继承失败和真实设备/生产NOT RUN裁定不变。
 
 最终安全广筛 review-ui-architecture-final2：1399通过/14失败/0跳过（1413），6分22秒。对E2精确比较：14项同名同消息，无新增或缺失继承项。关联回归review-contract-green94/94；原图/草稿补充视觉3/3。最终状态由控制会话核验，本执行记录不构成第二次整体审查、用户验收或Jira Done。
+
+## 控制会话最终核验与交付状态
+
+2026-10-19，控制会话在源/测试提交 f60b44c8fbea86b77393d8c5c88b9d6b5b82bcdc 上重新编译并运行安全 GuidedImport 目标，54/54通过，原始 controller-final-guided-import.trx/log/filter 保留。直接解析最终1413项广筛：1399通过、14失败；逐项对照E2名称与错误消息，无新增失败。25张PNG的SHA256均匹配JSON，11项可见/opt-in排除与E2完全相同。审查前277/277持久化证据的时间和范围保持原记录，不声称审查后重跑。
+
+SCRUM-11170、SCRUM-11182、SCRUM-11183已实际转为In Review；SCRUM-11184仍To Do，完整AI接入BLOCKED_DEPENDENCY（11166仍To Do）。这不是用户验收或Jira Done。R1/R3完成一次统一TDD修复；R2 Minor延期，取消已提交导入等待后当前列表可能需手动刷新。真实键盘/设备UIA/DPI/工作站/新手/生产继续NOT RUN，既有异常保持原状态。
+
+机器核验记录：[controller-final-verification.json](../../../output/ui/SCRUM-11170/checks/controller-final-verification.json)；状态原始回执：[jira-final-status.json](../../../output/ui/SCRUM-11170/checks/jira-final-status.json)。执行与唯一独立整体审查均已核实为Astra/high，控制会话实际Sol/xhigh；Windows本地，development-routing v2.4、RouteOffset=0。分支和工作树保留，主检出原有修改保留。未合并、推送、部署、生产操作或进入后续Epic；scratch保留。
