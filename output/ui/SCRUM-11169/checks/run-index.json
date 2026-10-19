@@ -320,6 +320,14 @@
     "Outcome": "Failed"
   },
   {
+    "File": "g05-task-done.trx",
+    "Passed": 55,
+    "Failed": 0,
+    "Skipped": 0,
+    "Total": 55,
+    "Outcome": "Completed"
+  },
+  {
     "File": "g05-visual-polish-final.trx",
     "Passed": 22,
     "Failed": 0,

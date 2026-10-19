@@ -1,6 +1,6 @@
 # SCRUM-11169 whole-branch review package
 
-Review baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Final review target is the HEAD reported by the controlling chat after Task5 evidence is committed. Implementation commits: `1665381` G01, `a203805` G02, `dd1ee8e` G03, `c49d3a5` G04, then Task5 polish/evidence. Review the entire branch once in a fresh context; this package is not a review verdict.
+Review baseline: `7fd87f6ef7ac349633af19aa04355def00c79b41` (accepted E1). Final review target is the HEAD reported by the controlling chat after Task5 evidence is committed. Implementation commits: `1665381` G01, `a203805` G02, `dd1ee8e` G03, `c49d3a5` G04, `fe19772` Task5 polish/evidence. The final follow-up commit adds only verification records and ignored-by-default PNGs. Review the entire branch once in a fresh context; this package is not a review verdict.
 
 Worktree: `C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-Studio`; branch `codex/scrum-11169-guided-shell`. Main checkout and untracked `output/imagegen` reference gallery are outside this change. No push, merge, deployment, production application, real adapters, uploads or later Epic work is authorized.
 
@@ -25,6 +25,7 @@ Worktree: `C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-St
 
 - Final audited UI/Architecture subset: **1314 PASS / 14 FAIL / 0 SKIP, 1328 total**. All 14 names and error messages match E1 exactly (`checks/baseline-comparison.json`). This excludes 11 visible/opt-in methods; it is not a full-suite PASS.
 - Audited 16-class workflow/persistence subset: **277 PASS / 0 FAIL / 0 SKIP**. Final layout/guidance/save contract subset: **145 PASS / 0 FAIL / 0 SKIP**.
+- After committing `fe19772`, a fresh build and all GuidedSession tests passed **55 / 55**; task-done records `c49d3a5..fe19772`. Only trailing whitespace/EOF cleanup separates the earlier rendered source from this source. The 31 SHA256 hashes and full source.diff were regenerated; GitBlobId also pins committed content. No source/test edits occur in the final evidence commit.
 - The first broad run mistakenly executed three existing unconditional `Window.Show` tests. Their finally blocks closed them and the testhost exited. Preserve raw results and `checks/visible-window-audit.md`; no further visible execution is authorized. Seven opt-in guard-return `Passed` outcomes are not live verification.
 - `PrintDimensionsPreflightUiTests.Keyboard_traverses_the_bound_custom_size_controls_and_panel_does_not_trap_focus` failed in that initial run (`confirm.IsKeyboardFocused`: expected true, actual false). Its source/assertions are unchanged; exclusion leaves it **UNVERIFIED**, not fixed or passed.
 - `GuidedSessionInputTests.Held_key_release_and_double_click_do_not_activate_new_context(key: Space)` once failed only the fresh-activation count (expected 1, actual 0), after stale-key rejection passed. Later passes do not establish a fix. Modifier/focus/scheduling causes remain hypotheses.

@@ -6,5 +6,5 @@
   "OriginalActionContracts": 53,
   "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
   "HashesAndRecordedActionComparison": "PASS",
-  "Note": "Verifies saved evidence integrity; not human, native keyboard or production validation."
+  "Note": "SHA256 hashes describe current worktree bytes (line-ending sensitive); GitBlobId pins committed text. Not human, native keyboard or production validation."
 }

@@ -102,7 +102,7 @@
 - [x] Run the audited `output/ui/SCRUM-11169/checks/run-safe-ui.ps1` UI/Architecture filter; compare every nonpass by exact name/error against E1 baseline. It excludes the eleven visible/opt-in paths listed in safe-ui-exclusions.json; exclusion is NOT RUN, never PASS. Preserve the original broader run and its boundary incident separately.
 - [x] Run relevant workflow/persistence navigation, approval, recovery, source, route and save regression suite; preserve workstation/production excluded tests as NOT RUN.
 - [x] Write AC/code/test map, exhaustive Rulings with cost, baseline comparison, remaining failures and NOT RUN list, usage and evidence index; save source diff and review package. Commit exact paths only, never reference gallery.
-- [ ] Report HEAD/commits/evidence/counts to parent and stop before the single fresh whole-branch review.
+- [x] Report HEAD/commits/evidence/counts to parent and stop before the single fresh whole-branch review.
 
 ## Plan self-review
 

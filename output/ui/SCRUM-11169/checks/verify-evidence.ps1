@@ -5,6 +5,9 @@ foreach ($row in $sourceRows) {
     if ((Get-FileHash -LiteralPath $row.Path -Algorithm SHA256).Hash -ne $row.Sha256) {
         throw ('Source hash mismatch: ' + $row.Path)
     }
+    if ($row.GitBlobId -and (git rev-parse ('HEAD:' + $row.Path)).Trim() -ne $row.GitBlobId) {
+        throw ('Committed source blob mismatch: ' + $row.Path)
+    }
 }
 $images = Get-Content (Join-Path $taskRoot 'evidence-index.json') -Raw | ConvertFrom-Json
 foreach ($row in $images) {
@@ -35,6 +38,6 @@ foreach ($action in $actions) {
     OriginalActionContracts = @($actions).Count
     SourceSha256 = $sourceHash
     HashesAndRecordedActionComparison = 'PASS'
-    Note = 'Verifies saved evidence integrity; not human, native keyboard or production validation.'
+    Note = 'SHA256 hashes describe current worktree bytes (line-ending sensitive); GitBlobId pins committed text. Not human, native keyboard or production validation.'
 } | ConvertTo-Json | Set-Content (Join-Path $PSScriptRoot 'evidence-integrity.json') -Encoding utf8
 Get-Content (Join-Path $PSScriptRoot 'evidence-integrity.json')

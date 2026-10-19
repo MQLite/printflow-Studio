@@ -2,7 +2,7 @@
 
 本轮按用户“SCRUM-11177 通过，请继续推进 SCRUM-11169，沿用已批准视觉和 Native”的授权实施 G01–G04。交付左侧只读步骤、当前步骤专属页面、固定操作栏、只读历史、捕获身份的返回确认、临时草稿离开决策，以及恢复/异步/旧输入保护。业务工作流继续决定合法命令、审核与下游失效。
 
-状态：G01–G04实现、视觉证据与受限回归已完成，Task5提交后验证记录待补；最终全新上下文整体审查由控制会话单独安排。未 push、merge、deploy、启动生产 App 或进入后续 Epic；本记录不等于真人验收、生产验证或 Jira Done。首轮广筛误执行三个无条件 Window.Show 测试，详见下面的边界更正；不再声称整个测试过程离屏。
+状态：G01–G04实现、视觉证据、受限回归及Task5提交后验证已完成，已准备交回控制会话进行最终全新上下文整体审查。未 push、merge、deploy、启动生产 App 或进入后续 Epic；本记录不等于真人验收、生产验证或 Jira Done。首轮广筛误执行三个无条件 Window.Show 测试，详见下面的边界更正；不再声称整个测试过程离屏。
 
 ## 范围与实现
 
@@ -38,7 +38,7 @@
 - 工作区：C:/Users/admin/.codex/worktrees/scrum-11177-guided-theme/printflow-Studio；分支 codex/scrum-11169-guided-shell；基线 7fd87f6ef7ac349633af19aa04355def00c79b41。
 - development-routing v2.4、RouteOffset=0；Normal/Requested/ExecutionTarget 与实际均 Astra/high。控制会话从执行者 turn_context 核对实际值：2026-10-19T01:57:26.572Z、session 01a151e0-b939-7122-9a42-544a9aeabb73。
 - Native 单执行者连续处理，不按阶段重新委派；本轮没有执行者子代理或中途审查代理。计划后及上下文/证据边界复评：UI、交互与 WPF 几何紧密耦合，保持同一实际执行上下文，不声称模型降档。
-- 提交：48798fb 计划/交接；1665381 G01；a203805 G02；dd1ee8e G03；c49d3a5 G04；Task5提交见最终交接 HEAD。
+- 提交：48798fb 计划/交接；1665381 G01；a203805 G02；dd1ee8e G03；c49d3a5 G04；fe19772 Task5实现/证据；最后仅补充验证记录及原本被全局PNG规则忽略的55张页面图与1张合成源图，最终HEAD见交接。
 - Task3 task-done 在提交前执行，125项测试编译的内容与 dd1ee8e 完全一致；当时 ledger 的零长度范围已校正为 a203805..dd1ee8e。Task4先提交再 task-done，范围 dd1ee8e..c49d3a5。
 - 原主检出和约70 MB未跟踪参考 gallery 保持原样。只使用合成源图、临时 SQLite/本地文件、既有 fake adapters；Windows PDF 的本地准备测试使用测试夹具，没有外部应用启动。
 
@@ -63,7 +63,7 @@
 | 首轮 UI + Architecture | 1282 / 56 / 1（1339） | 14个E1同名失败；42个新失败，另误执行3个窗口测试 |
 | 最终安全 UI + Architecture 子集 | 1314 / 14 / 0（1328） | 14个失败与E1同名且错误消息完全一致；明确排除11个可见/opt-in测试，不能称全量通过 |
 | workflow/persistence 回归 | 277 / 0 / 0 | 经审计16类：导航/审批/恢复/源文件/路线/保存；原业务状态与持久事实 |
-| Task5 提交后验证 | 待最终结果 | 最终证据与源码一致性 |
+| Task5 提交后验证 | 55 / 0 / 0 | 重新编译fe19772后的GuidedSession全部用例；task-done范围c49d3a5..fe19772 |
 
 [baseline-comparison.json](../../../output/ui/SCRUM-11169/checks/baseline-comparison.json)保存14个当前/基线错误消息和堆栈，NewFailureNames及BaselineFailuresNotReproduced均为空。它们分布为HomeRecentAccessibility 2项、ManualCropAdjustment 2项、KeepOriginalExtent 3项、PrintDimensionsPreflight 5项、OperatorCultureIsolation 1项、OperatorWave1AHost非可见smoke 1项。测试失败仍保留，E2没有修复或接受这些旧问题。首轮42个新失败中，41个布局/页面合同问题已通过保持原安全断言的修正验证；余下可见键盘失败仅被排除，状态仍未验证。
 
@@ -102,6 +102,8 @@ JSON记录96 DPI、图片SHA256、同一源图SHA256、当前页面、动作矩�
 已查看的最终选集19张：全部13个1000×700状态；1280×720的返回确认、白墨、历史；1920×1080的客户设计源图、必需审核、生成前确认。核对了固定动作、关键警告、当前内容、换行、透明边缘及页面/历史区分。这是执行者图像检查，不是用户或新手验收。
 
 geometry/review-png另含16张中英文审核说明补充PNG；其中最终1000×700中文TIFF审核页已查看。evidence-index.json共55张页面，20张标记执行者已查看；英文自动布局/渲染不等于英文人工走查。source-hashes.json记录当前源码/测试SHA256，action-identity-comparison.json逐一比较基线53个原按钮：Command、CommandParameter、TargetIdentity、IsGestureGuarded、AutomationId、IsDefault、IsCancel均未变，且各保留一个实例。
+
+最终图片捕获/145项布局回归及1328项安全广筛之后，源码只清理尾随空白与EOF空行；没有行为修改，故未仅为格式重渲染。最终31个文件SHA256及source.diff已重新生成，随后重新编译的55项提交后用例通过。SHA256对应当前工作树字节（对换行敏感），每行GitBlobId另锚定已提交内容；后续证据提交没有源码/测试变更。checks/verify-evidence.ps1已核对这些哈希、55图、39主JSON及53动作记录。
 
 初次新捕获测试修改已经在另一个STA渲染的模型，触发 CollectionView 跨线程限制（3 FAIL）；捕获改为对同一真实持久会话新建只读展示快照，驱动模型保持未绑定。该项是测试生命周期修正，不作为产品修复。未设置 PF_11169_CAPTURE_DIR 时仍运行布局断言，截图生成本身为NOT RUN。
 
