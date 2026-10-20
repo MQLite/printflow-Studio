@@ -1,0 +1,46 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.49]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1000, height: 700) [1 s]
+  错误消息:
+   System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Capture(Func`1 create, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 164
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.CaptureSession(SessionViewModel model, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 140
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 39
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:06.28]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1920, height: 1080) [FAIL]
+[xUnit.net 00:00:06.95]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1280, height: 720) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1920, height: 1080) [792 ms]
+  错误消息:
+   System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Capture(Func`1 create, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 164
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.CaptureSession(SessionViewModel model, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 140
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 39
+--- End of stack trace from previous location ---
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1280, height: 720) [669 ms]
+  错误消息:
+   System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Capture(Func`1 create, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 164
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.CaptureSession(SessionViewModel model, Size viewport, String state, String[] essential, String[] fields) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 140
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 39
+--- End of stack trace from previous location ---
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-visual-layout.trx
+
+失败!  - 失败:     3，通过:     0，已跳过:     0，总计:     3，持续时间: 3 s - PrintFlow.Tests.dll (net10.0)

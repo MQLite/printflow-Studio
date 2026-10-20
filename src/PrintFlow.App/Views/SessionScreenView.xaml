@@ -2359,6 +2359,7 @@
                                 Padding="14,6"
                                 Margin="0,0,8,0"  Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}" />
 <local:ReviewApprovalButton Content="{Binding CorrectionPrepareLabel}"
+                                        Style="{StaticResource RecommendedAction}"
                                         TargetIdentity="{Binding AskIdentity}"
                                         Command="{Binding PrepareCorrectionFilesCommand}"
                                         IsEnabled="{Binding CanPrepareCorrection}"
@@ -2366,6 +2367,7 @@
                                         AutomationProperties.Name="{Binding CorrectionPrepareLabel}"
                                         Padding="14,6" Margin="0,0,8,4"  Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}" />
 <local:ReviewApprovalButton x:Name="ImportCorrectedButton"
+                                    Style="{StaticResource RecommendedAction}"
                                     Content="{Binding CorrectionImportLabel}"
                                     TargetIdentity="{Binding ImportIdentity}"
                                     Command="{Binding ImportCorrectedImageCommand}"

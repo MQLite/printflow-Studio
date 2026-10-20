@@ -1,0 +1,30 @@
+{
+  "source": "output/ui/SCRUM-11171/checks/e4-ui-architecture-final2.trx",
+  "run": "e5-ui-architecture-final.trx",
+  "counters": {
+    "total": 1485,
+    "passed": 1471,
+    "failed": 14,
+    "notExecuted": 0
+  },
+  "exactInherited": [
+    "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: \"en-US\", heading: \"Manual crop\", selected: \"Selected bounds\", applied: \"Applied crop bounds\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"en-US\", effectiveLabel: \"Effective source resolution\", normalStatus: \"No enlargement required\", enlargementStatus: \"Enlargement required\")",
+    "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"keep\", label: \"Artwork extent\", artwork: \"Full original canvas\", canvas: \"12 × 10 px\")",
+    "PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test",
+    "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"manual\", label: \"Selected artwork\", artwork: \"6 × 5 px\", canvas: \"10 × 9 px\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"zh-CN\", effectiveLabel: \"源图有效分辨率\", normalStatus: \"无需放大\", enlargementStatus: \"需要放大\")",
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"waiting\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"manual\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+    "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: \"en-US\", tight: \"Tight\", uniform: \"Uniform margin\", edge: \"Per-edge margin\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"automatic\", label: \"Artwork content\", artwork: \"5 × 5 px\", canvas: \"9 × 9 px\")",
+    "PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke",
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"review\", label: \"Keep original extent\", retained: \"Original extent retained\")"
+  ],
+  "changedMessages": [],
+  "newFailures": [],
+  "baselineNotReproduced": [],
+  "interpretation": "Only identical names AND messages are classified exact inherited. Non-reproduction is not a causal fix."
+}
