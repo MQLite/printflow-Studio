@@ -544,6 +544,8 @@
                                    Foreground="{DynamicResource PF.Brush.Muted}" />
                         <StackPanel Margin="0,12,0,0" Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ActionPreservedText}" TextWrapping="Wrap" Margin="0,6,0,6"
+                                       AutomationProperties.AutomationId="Session.ActionPreserved" />
                             <local:NoticeErrorDetails />
                         </StackPanel>
                     </StackPanel>
@@ -1172,6 +1174,8 @@
                                 AutomationProperties.AutomationId="Session.ActionFailure">
                         <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
                                    AutomationProperties.LiveSetting="Assertive" />
+                        <TextBlock Text="{Binding ActionPreservedText}" TextWrapping="Wrap" Margin="0,0,0,6"
+                                   AutomationProperties.AutomationId="Session.ActionPreserved" />
                         <local:NoticeErrorDetails />
                     </StackPanel>
                     <!--

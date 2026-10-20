@@ -3510,10 +3510,12 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         bool sameNavigationContext = NavigationContext(_session) == NavigationContext(session);
         var preservedDraft = sameNavigationContext ? CapturePageDraft() : ((string Signature, Action Restore)?)null;
+        // Reloads retire the previous leave confirmation even when its draft still belongs
+        // to this exact task/result. Keeping that draft is not permission to execute an old leave.
+        KeepDraft();
         if (!sameNavigationContext)
         {
             _isChoosingGuidedWhiteInk = false;
-            KeepDraft();
             CloseHistory();
             ClearPendingDecisions();
         }

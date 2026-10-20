@@ -40,6 +40,9 @@ public partial class SessionViewModel
 
     public bool HasNoticeErrorCode => NoticeErrorCode is not null;
 
+    public string ActionPreservedText => !HasNoticeErrorCode ? string.Empty : Strings.Resolve(
+        _actionFailureScreen == ActionFailureScreen.Current ? "Session_FailurePreservedCurrent" : "Session_FailurePreservedUnknown");
+
     public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
 
     public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
@@ -118,5 +121,6 @@ public partial class SessionViewModel
     {
         OnPropertyChanged(nameof(NoticeErrorCode));
         OnPropertyChanged(nameof(HasNoticeErrorCode));
+        OnPropertyChanged(nameof(ActionPreservedText));
     }
 }

@@ -1422,4 +1422,6 @@
   <data name="Settings_AdvancedHeading" xml:space="preserve"><value>Technical details and local diagnostic locations</value></data>
   <data name="Nav_BackToTask" xml:space="preserve"><value>Return to current task</value></data>
   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>The task could not be reloaded. It has not been resumed; try returning again.</value></data>
+  <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>Originals, input snapshots and existing results remain subject to their retention rules. Availability follows the current task and file checks.</value></data>
+  <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>The last displayed task remains available to inspect; its current records and files have not been rechecked.</value></data>
 </root>

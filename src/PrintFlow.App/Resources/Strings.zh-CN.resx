@@ -1411,4 +1411,6 @@
   <data name="Settings_AdvancedHeading" xml:space="preserve"><value>技术详情与本机诊断位置</value></data>
   <data name="Nav_BackToTask" xml:space="preserve"><value>返回当前任务</value></data>
   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>无法重新读取任务。当前任务尚未恢复；请再次尝试返回。</value></data>
+  <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>原件、输入快照和已有结果仍按既有保留规则管理；可用内容以当前任务和文件核实结果为准。</value></data>
+  <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>上次显示的任务内容仍可查看；当前记录与文件状态尚未重新核实。</value></data>
 </root>
