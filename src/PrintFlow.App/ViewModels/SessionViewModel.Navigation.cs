@@ -39,7 +39,7 @@ public sealed partial class SessionViewModel
     public string KeepDraftLabel => Strings.Session_KeepDraft;
     public string DiscardDraftLabel => Strings.Session_DiscardDraft;
     public bool ShowsLiveWorkspace => !IsViewingHistory;
-    public bool IsLiveInteractionAllowed => !IsViewingHistory && !IsConfirmingDraftLeave;
+    public bool IsLiveInteractionAllowed => !_isSuspendedForUtility && !IsViewingHistory && !IsConfirmingDraftLeave;
     public bool CanInteractWithLivePage => IsLiveInteractionAllowed && !IsConfirmingReturn;
     public string ReturnImpact => _returnIntent is { } intent && _session is { } session
         ? string.Format(Strings.Session_ReturnImpact, DisplayNames.Step(intent.Target.Step),
@@ -104,7 +104,7 @@ public sealed partial class SessionViewModel
 
     private void RequestLeave(Action continuation)
     {
-        if (IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
+        if (_isSuspendedForUtility || IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
         if (HasPageDraft())
         {
             _leaveIntent = new LeaveIntent(NavigationContext(_session), _ => { continuation(); return Task.CompletedTask; });
@@ -172,6 +172,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyNavigation()
     {
+        NotifyUtilities();
         OnPropertyChanged(nameof(ShowsLiveWorkspace));
         OnPropertyChanged(nameof(IsLiveInteractionAllowed));
         OnPropertyChanged(nameof(CanInteractWithLivePage));

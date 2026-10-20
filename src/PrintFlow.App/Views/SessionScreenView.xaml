@@ -2514,6 +2514,12 @@
                         AutomationProperties.AutomationId="Session.ChangeRoute"
                         AutomationProperties.Name="{Binding ChangeRouteLabel}"
                         Visibility="{Binding CanChangeRoute, Converter={StaticResource BoolToVisibility}}" />
+                <local:SessionActionButton Content="{Binding OpenSettingsLabel}" Command="{Binding OpenSettingsCommand}"
+                        AutomationProperties.AutomationId="Session.Settings" AutomationProperties.Name="{Binding OpenSettingsLabel}"
+                        Visibility="{Binding CanOpenUtilities, Converter={StaticResource BoolToVisibility}}" />
+                <local:SessionActionButton Content="{Binding OpenEnvironmentLabel}" Command="{Binding OpenEnvironmentCommand}"
+                        AutomationProperties.AutomationId="Session.Environment" AutomationProperties.Name="{Binding OpenEnvironmentLabel}"
+                        Visibility="{Binding CanOpenUtilities, Converter={StaticResource BoolToVisibility}}" />
             </WrapPanel>
 
 

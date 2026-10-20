@@ -1400,4 +1400,15 @@
   <data name="Home_RecentNextContinue" xml:space="preserve"><value>继续将打开实际当前步骤，不会自动开始处理。</value></data>
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>打开移交详情，查看当前允许的后续操作。</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>查看处理记录。请打开详情核实当前文件；仅有保存历史无法确认。</value></data>
+  <data name="Environment_Unchecked" xml:space="preserve"><value>尚未检查</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未检查。还未读取环境报告，不能确认生产就绪。</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>部分必要检查未运行。请查看下方阻塞原因；历史结果不代表生产许可。</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本次报告描述下方所示检查结果。每次生产请求仍会重新核验。</value></data>
+  <data name="Environment_EvidenceNever" xml:space="preserve"><value>尚无成功的实时检查历史。</value></data>
+  <data name="Environment_EvidenceExpired" xml:space="preserve"><value>历史检查证据已失效。上次成功：{0}。不能据此确认当前就绪。</value></data>
+  <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>当前未重新观察。历史成功时间：{0}；这不是当前生产许可。</value></data>
+  <data name="Environment_EvidenceRecorded" xml:space="preserve"><value>上次实时检查成功：{0}。当前结论请另看本次报告。</value></data>
+  <data name="Settings_AdvancedHeading" xml:space="preserve"><value>技术详情与本机诊断位置</value></data>
+  <data name="Nav_BackToTask" xml:space="preserve"><value>返回当前任务</value></data>
+  <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>无法重新读取任务。当前任务尚未恢复；请再次尝试返回。</value></data>
 </root>

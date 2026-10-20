@@ -519,6 +519,11 @@ public sealed class SettingsAndLocalisationTests
                 WpfRendering.ReviewViewport,
                 tree =>
                 {
+                    Expander advanced = tree.OfType<Expander>().Single(e =>
+                        AutomationProperties.GetAutomationId(e) == "Settings.Advanced");
+                    advanced.IsExpanded.ShouldBeFalse("technical locations are available on demand");
+                    advanced.IsExpanded = true;
+                    tree.Root.UpdateLayout();
                     ScrollViewer scroll = tree.OfType<ScrollViewer>().First();
                     scroll.ScrollToBottom();
                     tree.Root.UpdateLayout();

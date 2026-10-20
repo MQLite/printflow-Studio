@@ -61,6 +61,7 @@ public sealed class EnvironmentCheckRow
             ? Strings.Resolve(Phase == EnvironmentCheckPhase.LiveApplication ? "Environment_LiveCheckNotRun" : "Environment_CheckNotRun")
             : IsFailure || IsAdvisory ? Strings.Resolve(report.MessageKey) : string.Empty;
         Detail = report.Detail;
+        EvidenceSummary = EvidenceText(report.Lifecycle);
         if (report.Lifecycle is { } lifecycle)
         {
             string unknown = Strings.Resolve("Environment_ProbeNotRecorded");
@@ -102,6 +103,19 @@ public sealed class EnvironmentCheckRow
     public string AutomationId { get; }
 
     public string DetailsAutomationId => AutomationId + ".Details";
+    public string EvidenceAutomationId => AutomationId + ".Evidence";
+    public string EvidenceSummary { get; }
+    public bool HasEvidenceSummary => EvidenceSummary.Length > 0;
+
+    internal static string EvidenceText(ReadinessEvidenceLifecycle? lifecycle)
+    {
+        if (lifecycle is null) return string.Empty;
+        string key = lifecycle.LastSuccessfulLiveAt is null ? "Environment_EvidenceNever"
+            : !lifecycle.EvidenceAvailable ? "Environment_EvidenceExpired"
+            : lifecycle.CurrentObservationDeferred ? "Environment_EvidenceDeferred" : "Environment_EvidenceRecorded";
+        return string.Format(CultureInfo.CurrentCulture, Strings.Resolve(key),
+            lifecycle.LastSuccessfulLiveAt?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture));
+    }
 
     public string DetailsLabel => Strings.Resolve("Environment_TechnicalDetails");
 
@@ -262,7 +276,13 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         }
     }
 
-    public string BackLabel => Strings.Nav_BackToHome;
+    public string BackLabel => _navigation is IUtilityTaskNavigation { HasSourceTask: true }
+        ? Strings.Resolve("Nav_BackToTask") : Strings.Nav_BackToHome;
+    [ObservableProperty] private string? _returnNotice;
+    [ObservableProperty] private string? _noticeErrorCode;
+    public string NoticeErrorDetailsLabel => Strings.ErrorDetails_Heading;
+    public string NoticeErrorCodeLabel => Strings.ErrorDetails_Code;
+    public string NoticeErrorCodeHint => Strings.ErrorDetails_CodeHint;
 
     public string PresetLabel => Strings.Environment_Preset;
 
@@ -307,9 +327,15 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     /// Derived from <see cref="EnvironmentReadinessReport.Verified"/> alone. An advisory does not
     /// enter this sentence, because an advisory does not close production work (§5).
     /// </remarks>
-    public string StatusText => IsReady ? Strings.Environment_Verified
+    public string StatusText => !HasReport ? Strings.Resolve("Environment_Unchecked") : IsReady ? Strings.Environment_Verified
         : IsRequiredCheckNotRunOnly ? Strings.Resolve("Environment_NotConfirmedNotRun")
         : Strings.Environment_NotVerified;
+
+    public string ObservationSummary => !HasReport ? Strings.Resolve("Environment_ObservationUnchecked")
+        : _report?.Lifecycle is { LastSuccessfulLiveAt: not null } lifecycle &&
+            (!lifecycle.EvidenceAvailable || lifecycle.CurrentObservationDeferred) ? EnvironmentCheckRow.EvidenceText(lifecycle)
+        : _report!.Checks.Any(c => c.Status == EnvironmentCheckStatus.Blocked) ? Strings.Resolve("Environment_ObservationBlocked")
+        : Strings.Resolve("Environment_ObservationCurrent");
 
     /// <summary>
     /// Not verified because a required check did not run, with no required check failing: the
@@ -337,7 +363,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     /// The inverse, so the view can say "nothing is stopping production work" rather than show
     /// an empty list.
     /// </summary>
-    public bool HasNoBlockingFailures => BlockingFailures.Count == 0;
+    public bool HasNoBlockingFailures => HasReport && BlockingFailures.Count == 0;
 
     /// <summary>Shown in place of the blocking list when there is nothing in it.</summary>
     public string NoBlockingFailuresText => Strings.Environment_NoBlockingFailures;
@@ -383,7 +409,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanRunCheckCommand))]
     private async Task RunLiveChecksAsync(CancellationToken cancellationToken)
     {
-        if (IsBusy) return;
+        if (!CanRunCheckCommand()) return;
 
         _cancellationRequested = false;
         _wasCancelled = false;
@@ -421,7 +447,8 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
 
     private bool CanCancelLiveChecks() => IsBusy && IsRunningLiveChecks && !_cancellationRequested;
 
-    private bool CanRunCheckCommand() => !IsBusy;
+    private bool CanRunCheckCommand() => !IsBusy &&
+        (_navigation is not IUtilityTaskNavigation utility || utility.IsCurrentUtility(this));
 
     partial void OnIsBusyChanged(bool value)
     {
@@ -435,8 +462,22 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanRunCheckCommand))]
     private async Task BackToHomeAsync(CancellationToken cancellationToken)
     {
-        if (IsBusy) return;
-        await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+        if (!CanRunCheckCommand()) return;
+        ReturnNotice = null; NoticeErrorCode = null;
+        IsBusy = true;
+        try
+        {
+            if (_navigation is IUtilityTaskNavigation utility)
+            {
+                if (await utility.ReturnFromUtilityAsync(this, cancellationToken).ConfigureAwait(true) is { } failure)
+                {
+                    ReturnNotice = Strings.Resolve("Nav_TaskReloadFailed");
+                    NoticeErrorCode = failure.Code.ToString();
+                }
+            }
+            else await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+        }
+        finally { IsBusy = false; }
     }
 
     /// <summary>
@@ -513,6 +554,7 @@ public sealed partial class EnvironmentReadinessViewModel : ObservableObject
         OnPropertyChanged(nameof(HasReport));
         OnPropertyChanged(nameof(IsReady));
         OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(ObservationSummary));
         OnPropertyChanged(nameof(HasAdvisories));
         OnPropertyChanged(nameof(AdvisorySummary));
         OnPropertyChanged(nameof(HasBlockingFailures));

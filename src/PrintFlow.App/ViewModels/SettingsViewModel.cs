@@ -146,6 +146,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     public string Heading => Strings.Settings_Heading;
 
     public string GeneralHeading => Strings.Settings_GeneralHeading;
+    public string AdvancedHeading => Strings.Resolve("Settings_AdvancedHeading");
 
     public string ProductionHeading => Strings.Settings_ProductionHeading;
 
@@ -191,7 +192,8 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public string ApplyLabel => Strings.Settings_Apply;
 
-    public string BackLabel => Strings.Nav_BackToHome;
+    public string BackLabel => _navigation is IUtilityTaskNavigation { HasSourceTask: true }
+        ? Strings.Resolve("Nav_BackToTask") : Strings.Nav_BackToHome;
 
     public string OpenEnvironmentLabel => Strings.Environment_Open;
 
@@ -314,7 +316,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanApply))]
     private async Task ApplyAsync(CancellationToken cancellationToken)
     {
-        if (IsBusy)
+        if (!CanApply())
         {
             return;
         }
@@ -377,17 +379,39 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     /// <summary>Opens the screen that owns live workstation verification (Epic 11500 Part C §3).</summary>
-    [RelayCommand]
-    private async Task OpenEnvironmentAsync(CancellationToken cancellationToken) =>
+    [RelayCommand(CanExecute = nameof(CanApply))]
+    private async Task OpenEnvironmentAsync(CancellationToken cancellationToken)
+    {
+        if (IsBusy || _navigation is IUtilityTaskNavigation utility && !utility.IsCurrentUtility(this)) return;
         await _navigation.GoToEnvironmentReadinessAsync(cancellationToken).ConfigureAwait(true);
+    }
 
-    [RelayCommand]
-    private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
-        await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+    [RelayCommand(CanExecute = nameof(CanApply))]
+    private async Task BackToHomeAsync(CancellationToken cancellationToken)
+    {
+        if (!CanApply()) return;
+        IsBusy = true;
+        try
+        {
+            if (_navigation is IUtilityTaskNavigation utility)
+            {
+                if (await utility.ReturnFromUtilityAsync(this, cancellationToken).ConfigureAwait(true) is { } failure)
+                    ShowFailureNotice(Strings.Resolve("Nav_TaskReloadFailed"), failure);
+            }
+            else await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
+        }
+        finally { IsBusy = false; }
+    }
 
-    private bool CanApply() => !IsBusy;
+    private bool CanApply() => !IsBusy &&
+        (_navigation is not IUtilityTaskNavigation utility || utility.IsCurrentUtility(this));
 
-    partial void OnIsBusyChanged(bool value) => ApplyCommand.NotifyCanExecuteChanged();
+    partial void OnIsBusyChanged(bool value)
+    {
+        ApplyCommand.NotifyCanExecuteChanged();
+        OpenEnvironmentCommand.NotifyCanExecuteChanged();
+        BackToHomeCommand.NotifyCanExecuteChanged();
+    }
 
     private void ApplyPersisted(IReadOnlyList<SettingEntry> entries)
     {

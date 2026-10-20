@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f203c76c-9bf1-4c59-aaa4-c9c7c9c4cadf" name="admin@DESKTOP-0BG8884 2026-10-20 19:42:16" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T19:42:16.1556270+13:00" queuing="2026-10-20T19:42:16.1556273+13:00" start="2026-10-20T19:42:10.9783352+13:00" finish="2026-10-20T19:42:17.3703136+13:00" />
+  <TestSettings name="default" id="4d073125-c42a-4c55-aa17-7a54bbf2ef33">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_19_42_16" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a14b19e8-26b4-40e7-987b-54bf68d165d4" testId="a17e6912-70bc-d665-5ebe-32c840d92b22" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.4789009" startTime="2026-10-20T19:42:16.7436634+13:00" endTime="2026-10-20T19:42:17.2182705+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a14b19e8-26b4-40e7-987b-54bf68d165d4">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    task reload owns the utility until it completes</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 62&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4a40cf4c-a63c-4406-96ce-6ae7c97c899b" testId="2e6b6862-48c5-06f7-663d-d8d7609569a2" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.4925382" startTime="2026-10-20T19:42:16.2431242+13:00" endTime="2026-10-20T19:42:16.7389990+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4a40cf4c-a63c-4406-96ce-6ae7c97c899b">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    task reload owns the utility until it completes</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 62&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a4764098-a354-4802-a992-ba0abc4f90b7" testId="e292e41f-8ba0-4051-bc81-f3e6a44627d7" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5594272" startTime="2026-10-20T19:42:15.6870352+13:00" endTime="2026-10-20T19:42:16.2393647+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a4764098-a354-4802-a992-ba0abc4f90b7" />
+    <UnitTestResult executionId="d674809d-508f-4daa-b430-02dde483e761" testId="31d1e34f-e7a2-1fcb-0ddd-823c1291c573" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: False)" computerName="DESKTOP-0BG8884" duration="00:00:01.0456342" startTime="2026-10-20T19:42:14.6284656+13:00" endTime="2026-10-20T19:42:15.6781531+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d674809d-508f-4daa-b430-02dde483e761" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e292e41f-8ba0-4051-bc81-f3e6a44627d7">
+      <Execution id="a4764098-a354-4802-a992-ba0abc4f90b7" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Utilities_reload_the_source_task_and_retain_only_matching_drafts" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="2e6b6862-48c5-06f7-663d-d8d7609569a2">
+      <Execution id="4a40cf4c-a63c-4406-96ce-6ae7c97c899b" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Failed_or_late_reload_cannot_restore_old_task_ownership" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a17e6912-70bc-d665-5ebe-32c840d92b22">
+      <Execution id="a14b19e8-26b4-40e7-987b-54bf68d165d4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Failed_or_late_reload_cannot_restore_old_task_ownership" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="31d1e34f-e7a2-1fcb-0ddd-823c1291c573">
+      <Execution id="d674809d-508f-4daa-b430-02dde483e761" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Utilities_reload_the_source_task_and_retain_only_matching_drafts" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="a17e6912-70bc-d665-5ebe-32c840d92b22" executionId="a14b19e8-26b4-40e7-987b-54bf68d165d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2e6b6862-48c5-06f7-663d-d8d7609569a2" executionId="4a40cf4c-a63c-4406-96ce-6ae7c97c899b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e292e41f-8ba0-4051-bc81-f3e6a44627d7" executionId="a4764098-a354-4802-a992-ba0abc4f90b7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="31d1e34f-e7a2-1fcb-0ddd-823c1291c573" executionId="d674809d-508f-4daa-b430-02dde483e761" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="4" executed="4" passed="2" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.16]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.25]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.39]       Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn&#xD;
+[xUnit.net 00:00:05.39]           should be&#xD;
+[xUnit.net 00:00:05.39]       False&#xD;
+[xUnit.net 00:00:05.39]           but was&#xD;
+[xUnit.net 00:00:05.39]       True&#xD;
+[xUnit.net 00:00:05.39]       &#xD;
+[xUnit.net 00:00:05.39]       Additional Info:&#xD;
+[xUnit.net 00:00:05.39]           task reload owns the utility until it completes&#xD;
+[xUnit.net 00:00:05.39]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.39]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs(62,0): at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway)&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.39]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.39]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.87]       Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn&#xD;
+[xUnit.net 00:00:05.87]           should be&#xD;
+[xUnit.net 00:00:05.87]       False&#xD;
+[xUnit.net 00:00:05.87]           but was&#xD;
+[xUnit.net 00:00:05.87]       True&#xD;
+[xUnit.net 00:00:05.87]       &#xD;
+[xUnit.net 00:00:05.87]       Additional Info:&#xD;
+[xUnit.net 00:00:05.87]           task reload owns the utility until it completes&#xD;
+[xUnit.net 00:00:05.87]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.87]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs(62,0): at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway)&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.87]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.87]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.88]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:42:16.7413042+13:00">
+        <Text>[xUnit.net 00:00:05.39]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:42:17.2188564+13:00">
+        <Text>[xUnit.net 00:00:05.87]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

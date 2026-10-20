@@ -5,12 +5,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
              xmlns:views="clr-namespace:PrintFlow.App.Views"
+             Background="{DynamicResource PF.Brush.Canvas}" Foreground="{DynamicResource PF.Brush.Ink}" FontFamily="{DynamicResource PF.Font.Family}" FontSize="{DynamicResource PF.Font.Body}"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
              AutomationProperties.AutomationId="Screen.Settings"
              AutomationProperties.Name="{Binding Heading}">
 
     <UserControl.Resources>
+      <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" /></ResourceDictionary.MergedDictionaries>
         <Style x:Key="SectionHeading" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -26,7 +28,8 @@
         </Style>
         <!-- A read-only production fact reads as a fact, not as a field somebody forgot to
              enable: selectable text so it can be copied for a support call, and no editor. -->
-        <Style x:Key="ReadOnlyValue" TargetType="TextBox">
+        <Style x:Key="ReadOnlyValue" TargetType="TextBox" BasedOn="{StaticResource PF.Input.TextBox}">
+            <Setter Property="MinHeight" Value="0" />
             <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="IsReadOnlyCaretVisible" Value="True" />
             <Setter Property="BorderThickness" Value="0" />
@@ -34,6 +37,7 @@
             <Setter Property="Padding" Value="0" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
+      </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -49,14 +53,17 @@
                    FontWeight="SemiBold" />
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
-            <StackPanel MaxWidth="640" HorizontalAlignment="Left">
-
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource PF.Card}" Padding="20" VerticalAlignment="Top">
+                    <StackPanel>
                 <!-- General: the operator's own preferences. Everything here is editable and
                      everything here is committed by the one Apply below. -->
                 <TextBlock Text="{Binding GeneralHeading}" Style="{StaticResource SectionHeading}" />
 
                 <TextBlock Text="{Binding LanguageLabel}" Style="{StaticResource RowLabel}" />
-                <ComboBox ItemsSource="{Binding Languages}"
+                <ComboBox Style="{StaticResource PF.Input.ComboBox}" ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
                           DisplayMemberPath="DisplayName"
                           HorizontalAlignment="Left"
@@ -66,7 +73,7 @@
                           AutomationProperties.Name="{Binding LanguageLabel}" />
 
                 <TextBlock Text="{Binding TrimMarginLabel}" Style="{StaticResource RowLabel}" />
-                <TextBox Text="{Binding TrimSafetyMarginPixels, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding TrimSafetyMarginPixels, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          HorizontalAlignment="Left"
                          MinWidth="120"
                          Padding="6,4"
@@ -74,6 +81,22 @@
                          AutomationProperties.Name="{Binding TrimMarginLabel}" />
                 <TextBlock Text="{Binding TrimMarginHint}" Style="{StaticResource RowHint}" />
 
+                <!-- Diagnostics: saved retention applies at the next safe startup. -->
+                <TextBlock Text="{Binding DiagnosticsHeading}" Style="{StaticResource SectionHeading}" />
+
+                <TextBlock Text="{Binding LogRetentionLabel}" Style="{StaticResource RowLabel}" />
+                <TextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding LogRetentionDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalAlignment="Left"
+                         MinWidth="120"
+                         Padding="6,4"
+                         AutomationProperties.AutomationId="Settings.LogRetention"
+                         AutomationProperties.Name="{Binding LogRetentionLabel}" />
+                <TextBlock Text="{Binding LogRetentionHint}" Style="{StaticResource RowHint}" />
+
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource PF.Card}" Padding="20" VerticalAlignment="Top">
+                    <StackPanel>
                 <!-- Production: read-only facts of the verified workstation preset. There is no
                      editor here by design (SCRUM-11118). -->
                 <TextBlock Text="{Binding ProductionHeading}" Style="{StaticResource SectionHeading}" />
@@ -104,7 +127,7 @@
                          AutomationProperties.AutomationId="Settings.PhotoshopColourSettings"
                          AutomationProperties.Name="{Binding ColourSetupLabel}" />
                 <TextBlock Text="{Binding ColourSetupHint}" Style="{StaticResource RowHint}" />
-                <Button Content="{Binding OpenEnvironmentLabel}"
+                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenEnvironmentLabel}"
                         Command="{Binding OpenEnvironmentCommand}"
                         HorizontalAlignment="Left"
                         Padding="10,4"
@@ -112,18 +135,10 @@
                         AutomationProperties.AutomationId="Settings.OpenEnvironment"
                         AutomationProperties.Name="{Binding OpenEnvironmentLabel}" />
 
-                <!-- Diagnostics: saved retention applies at the next safe startup. -->
-                <TextBlock Text="{Binding DiagnosticsHeading}" Style="{StaticResource SectionHeading}" />
-
-                <TextBlock Text="{Binding LogRetentionLabel}" Style="{StaticResource RowLabel}" />
-                <TextBox Text="{Binding LogRetentionDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         HorizontalAlignment="Left"
-                         MinWidth="120"
-                         Padding="6,4"
-                         AutomationProperties.AutomationId="Settings.LogRetention"
-                         AutomationProperties.Name="{Binding LogRetentionLabel}" />
-                <TextBlock Text="{Binding LogRetentionHint}" Style="{StaticResource RowHint}" />
-
+                    </StackPanel>
+                </Border>
+                <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="{Binding AdvancedHeading}" Style="{StaticResource PF.Disclosure}" IsExpanded="False" Margin="0,16,0,0" AutomationProperties.AutomationId="Settings.Advanced">
+                    <StackPanel>
                 <TextBlock Text="{Binding LocalLogLocationLabel}" Style="{StaticResource RowLabel}" />
                 <TextBox Text="{Binding LocalLogLocation, Mode=OneWay}"
                          Style="{StaticResource ReadOnlyValue}"
@@ -137,7 +152,9 @@
                          AutomationProperties.AutomationId="Settings.ScreenshotLocation"
                          AutomationProperties.Name="{Binding ScreenshotLocationLabel}" />
                 <TextBlock Text="{Binding ScreenshotLocationHint}" Style="{StaticResource RowHint}" />
-            </StackPanel>
+                    </StackPanel>
+                </Expander>
+            </Grid>
         </ScrollViewer>
 
         <StackPanel Grid.Row="2" Margin="0,12,0,0">
@@ -149,13 +166,13 @@
             <views:NoticeErrorDetails />
 
             <StackPanel Orientation="Horizontal">
-                <Button Content="{Binding ApplyLabel}"
+                <Button Style="{StaticResource PF.Button.Primary}" Content="{Binding ApplyLabel}"
                         Command="{Binding ApplyCommand}"
                         IsDefault="True"
                         Padding="14,5"
                         AutomationProperties.AutomationId="Settings.Apply"
                         AutomationProperties.Name="{Binding ApplyLabel}" />
-                <Button Content="{Binding BackLabel}"
+                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
                         Command="{Binding BackToHomeCommand}"
                         Margin="10,0,0,0"
                         Padding="14,5"

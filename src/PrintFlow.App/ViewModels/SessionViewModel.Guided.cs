@@ -164,6 +164,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyGuidedPresentation()
     {
+        NotifyUtilities();
         NotifyGuidedCompletion();
         NotifyGuidedRecovery();
         OnPropertyChanged(nameof(ShowsGuidedProcessing));

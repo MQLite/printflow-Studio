@@ -1,0 +1,133 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:04.56]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "stale", expected: "已失效") [FAIL]
+[xUnit.net 00:00:04.59]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "unchecked", expected: "尚未检查") [FAIL]
+[xUnit.net 00:00:04.62]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "blocked", expected: "未运行") [FAIL]
+[xUnit.net 00:00:04.65]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "checked", expected: "本次报告") [FAIL]
+[xUnit.net 00:00:04.68]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "deferred", expected: "未重新观察") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "stale", expected: "已失效") [779 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : shown.GetValueOrDefault("Environment.Observation", string.Empty)
+    should contain (case insensitive comparison)
+"已失效"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(String state, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 31
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "unchecked", expected: "尚未检查") [31 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : shown.GetValueOrDefault("Environment.Observation", string.Empty)
+    should contain (case insensitive comparison)
+"尚未检查"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(String state, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 31
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "blocked", expected: "未运行") [28 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : shown.GetValueOrDefault("Environment.Observation", string.Empty)
+    should contain (case insensitive comparison)
+"未运行"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(String state, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 31
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "checked", expected: "本次报告") [28 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : shown.GetValueOrDefault("Environment.Observation", string.Empty)
+    should contain (case insensitive comparison)
+"本次报告"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(String state, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 31
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: "deferred", expected: "未重新观察") [32 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : shown.GetValueOrDefault("Environment.Observation", string.Empty)
+    should contain (case insensitive comparison)
+"未重新观察"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(String state, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 31
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:05.30]     PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Settings_disclosure_preserves_validation_and_readonly_production [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Settings_disclosure_preserves_validation_and_readonly_production [616 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.AdvancedCollapsed
+    should be
+True
+    but was
+False
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Settings_disclosure_preserves_validation_and_readonly_production() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionUtilityTests.cs:line 90
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f04-red.trx
+
+失败!  - 失败:     6，通过:     1，已跳过:     0，总计:     7，持续时间: 1 s - PrintFlow.Tests.dll (net10.0)

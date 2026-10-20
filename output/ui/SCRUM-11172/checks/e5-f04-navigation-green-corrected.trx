@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="20c54d41-9b30-4c39-8ebe-af3774cbeb8c" name="admin@DESKTOP-0BG8884 2026-10-20 11:19:28" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T11:19:28.2770008+13:00" queuing="2026-10-20T11:19:28.2770011+13:00" start="2026-10-20T11:19:23.0337653+13:00" finish="2026-10-20T11:19:28.4282817+13:00" />
+  <TestSettings name="default" id="c6332239-e57b-45af-9d48-23404f42bcad">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_11_19_28" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="ed373a0f-96da-4c88-b55a-4b05873837f2" testId="31d1e34f-e7a2-1fcb-0ddd-823c1291c573" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: False)" computerName="DESKTOP-0BG8884" duration="00:00:01.0947776" startTime="2026-10-20T11:19:26.7510168+13:00" endTime="2026-10-20T11:19:27.8476059+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ed373a0f-96da-4c88-b55a-4b05873837f2" />
+    <UnitTestResult executionId="623dab1d-e652-451f-b903-25dc64d2acc9" testId="e292e41f-8ba0-4051-bc81-f3e6a44627d7" testName="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.4972718" startTime="2026-10-20T11:19:27.8560481+13:00" endTime="2026-10-20T11:19:28.3501937+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="623dab1d-e652-451f-b903-25dc64d2acc9">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : source.WidthMmText&#xD;
+    should be&#xD;
+"200"&#xD;
+    but was&#xD;
+null</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(Boolean changed) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 57&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e292e41f-8ba0-4051-bc81-f3e6a44627d7">
+      <Execution id="623dab1d-e652-451f-b903-25dc64d2acc9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Utilities_reload_the_source_task_and_retain_only_matching_drafts" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="31d1e34f-e7a2-1fcb-0ddd-823c1291c573">
+      <Execution id="ed373a0f-96da-4c88-b55a-4b05873837f2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests" name="Utilities_reload_the_source_task_and_retain_only_matching_drafts" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="31d1e34f-e7a2-1fcb-0ddd-823c1291c573" executionId="ed373a0f-96da-4c88-b55a-4b05873837f2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e292e41f-8ba0-4051-bc81-f3e6a44627d7" executionId="623dab1d-e652-451f-b903-25dc64d2acc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="2" executed="2" passed="1" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.38]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.26]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.35]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.98]       Shouldly.ShouldAssertException : source.WidthMmText&#xD;
+[xUnit.net 00:00:04.98]           should be&#xD;
+[xUnit.net 00:00:04.98]       "200"&#xD;
+[xUnit.net 00:00:04.98]           but was&#xD;
+[xUnit.net 00:00:04.98]       null&#xD;
+[xUnit.net 00:00:04.98]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.98]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs(57,0): at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(Boolean changed)&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.98]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.98]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.98]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T11:19:28.3524234+13:00">
+        <Text>[xUnit.net 00:00:04.98]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Utilities_reload_the_source_task_and_retain_only_matching_drafts(changed: True) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

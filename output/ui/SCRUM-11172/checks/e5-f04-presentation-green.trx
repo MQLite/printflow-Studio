@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="aef3fca6-4787-42e0-8ce9-f2e1ad153455" name="admin@DESKTOP-0BG8884 2026-10-20 11:15:45" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T11:15:45.2972389+13:00" queuing="2026-10-20T11:15:45.2972392+13:00" start="2026-10-20T11:15:39.6352210+13:00" finish="2026-10-20T11:15:45.3026717+13:00" />
+  <TestSettings name="default" id="d8c0fea9-31b1-4b26-903a-00758c4b3385">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_11_15_45" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="8193044a-eb4d-4801-a1bc-7c7ae11b8c1c" testId="bfbbf719-e0ef-6de1-9a25-e4ca41fbbc19" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;unchecked&quot;, expected: &quot;尚未检查&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.0387562" startTime="2026-10-20T11:15:44.3093936+13:00" endTime="2026-10-20T11:15:44.3396911+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8193044a-eb4d-4801-a1bc-7c7ae11b8c1c" />
+    <UnitTestResult executionId="ee5e49e4-ed99-4d8a-98ae-aa6bd8db7868" testId="bb0fb301-3ab1-95c3-bcef-785ccb8e4d9e" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Opening_and_refreshing_utilities_never_run_live_checks" computerName="DESKTOP-0BG8884" duration="00:00:00.2342234" startTime="2026-10-20T11:15:44.8911270+13:00" endTime="2026-10-20T11:15:45.1255075+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ee5e49e4-ed99-4d8a-98ae-aa6bd8db7868" />
+    <UnitTestResult executionId="c921b06a-d0dc-43de-970d-14789af81927" testId="a60184ac-62b0-e56d-2117-5f541900c501" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;blocked&quot;, expected: &quot;未运行&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.0417477" startTime="2026-10-20T11:15:44.3403934+13:00" endTime="2026-10-20T11:15:44.3855777+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c921b06a-d0dc-43de-970d-14789af81927" />
+    <UnitTestResult executionId="6bc3130d-2ad7-4e58-b84d-14fc94202675" testId="a9bc7036-2d85-04a9-41f7-5a6d3e99ed4c" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;checked&quot;, expected: &quot;本次报告&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.0344055" startTime="2026-10-20T11:15:44.3857400+13:00" endTime="2026-10-20T11:15:44.4203725+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6bc3130d-2ad7-4e58-b84d-14fc94202675" />
+    <UnitTestResult executionId="30a03fa7-a819-4fe2-9bff-e9dcb96592a5" testId="9a8306da-75ad-f447-d89a-3964e95d60a7" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;stale&quot;, expected: &quot;已失效&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.4677436" startTime="2026-10-20T11:15:43.8297907+13:00" endTime="2026-10-20T11:15:44.2996793+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="30a03fa7-a819-4fe2-9bff-e9dcb96592a5" />
+    <UnitTestResult executionId="bc6142ca-38ba-417c-9b8b-53793ff5a8d3" testId="066e03fe-2fc3-7d43-37c5-51dfb81a7846" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;deferred&quot;, expected: &quot;未重新观察&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.0405617" startTime="2026-10-20T11:15:44.4205215+13:00" endTime="2026-10-20T11:15:44.4613027+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc6142ca-38ba-417c-9b8b-53793ff5a8d3" />
+    <UnitTestResult executionId="57233307-7d3b-421a-b8c6-b28a1c2a21da" testId="33b996af-0aa8-4720-5e2f-94fcfad32c59" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Settings_disclosure_preserves_validation_and_readonly_production" computerName="DESKTOP-0BG8884" duration="00:00:00.4282803" startTime="2026-10-20T11:15:44.4628112+13:00" endTime="2026-10-20T11:15:44.8908622+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="57233307-7d3b-421a-b8c6-b28a1c2a21da" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Settings_disclosure_preserves_validation_and_readonly_production" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="33b996af-0aa8-4720-5e2f-94fcfad32c59">
+      <Execution id="57233307-7d3b-421a-b8c6-b28a1c2a21da" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Settings_disclosure_preserves_validation_and_readonly_production" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;deferred&quot;, expected: &quot;未重新观察&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="066e03fe-2fc3-7d43-37c5-51dfb81a7846">
+      <Execution id="bc6142ca-38ba-417c-9b8b-53793ff5a8d3" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Readiness_unchecked_blocked_stale_and_checked_are_distinct" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;blocked&quot;, expected: &quot;未运行&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a60184ac-62b0-e56d-2117-5f541900c501">
+      <Execution id="c921b06a-d0dc-43de-970d-14789af81927" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Readiness_unchecked_blocked_stale_and_checked_are_distinct" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;stale&quot;, expected: &quot;已失效&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9a8306da-75ad-f447-d89a-3964e95d60a7">
+      <Execution id="30a03fa7-a819-4fe2-9bff-e9dcb96592a5" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Readiness_unchecked_blocked_stale_and_checked_are_distinct" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;checked&quot;, expected: &quot;本次报告&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a9bc7036-2d85-04a9-41f7-5a6d3e99ed4c">
+      <Execution id="6bc3130d-2ad7-4e58-b84d-14fc94202675" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Readiness_unchecked_blocked_stale_and_checked_are_distinct" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Readiness_unchecked_blocked_stale_and_checked_are_distinct(state: &quot;unchecked&quot;, expected: &quot;尚未检查&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="bfbbf719-e0ef-6de1-9a25-e4ca41fbbc19">
+      <Execution id="8193044a-eb4d-4801-a1bc-7c7ae11b8c1c" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Readiness_unchecked_blocked_stale_and_checked_are_distinct" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests.Opening_and_refreshing_utilities_never_run_live_checks" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="bb0fb301-3ab1-95c3-bcef-785ccb8e4d9e">
+      <Execution id="ee5e49e4-ed99-4d8a-98ae-aa6bd8db7868" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionUtilityTests" name="Opening_and_refreshing_utilities_never_run_live_checks" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="bfbbf719-e0ef-6de1-9a25-e4ca41fbbc19" executionId="8193044a-eb4d-4801-a1bc-7c7ae11b8c1c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bb0fb301-3ab1-95c3-bcef-785ccb8e4d9e" executionId="ee5e49e4-ed99-4d8a-98ae-aa6bd8db7868" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a60184ac-62b0-e56d-2117-5f541900c501" executionId="c921b06a-d0dc-43de-970d-14789af81927" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a9bc7036-2d85-04a9-41f7-5a6d3e99ed4c" executionId="6bc3130d-2ad7-4e58-b84d-14fc94202675" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9a8306da-75ad-f447-d89a-3964e95d60a7" executionId="30a03fa7-a819-4fe2-9bff-e9dcb96592a5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="066e03fe-2fc3-7d43-37c5-51dfb81a7846" executionId="bc6142ca-38ba-417c-9b8b-53793ff5a8d3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="33b996af-0aa8-4720-5e2f-94fcfad32c59" executionId="57233307-7d3b-421a-b8c6-b28a1c2a21da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="7" executed="7" passed="7" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.46]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.57]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.68]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.01]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

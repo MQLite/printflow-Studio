@@ -27,7 +27,7 @@
 1. A save loses its acknowledgment or conflicts with an existing filename while another fact also fails: preserve uncertainty, history warnings and exact recorded action identity; canceling folder selection changes nothing. Task 1 tests pin these projections alongside existing delivery tests.
 2. A correction or takeover is reopened after interruption, or its callback arrives after another job is opened: expose only lawful current actions, preserve identity, require explicit reimport/re-review and never start external work. Task 2 tests pin this plus inherited async ownership tests.
 3. A historical/unknown/internal status or interrupted job enters Recent: translated truthful text, correct continued page, read-only history, and no inference that a recorded saved file still exists. Task 3 tests pin these mappings and continuation.
-4. Historical readiness evidence remains while current checks are deferred/blocked or not yet read: distinguish historical/stale/unchecked observations and preserve gate authority; settings/diagnostics navigation must preserve supported drafts without running checks. Task 4 tests pin this and collapsed validation visibility.
+4. Historical readiness evidence remains while current checks are deferred/blocked or not yet read: distinguish historical/stale/unchecked observations and preserve gate authority; settings/diagnostics navigation must preserve supported drafts without running checks. Task 4 tests pin this and collapsed validation visibility. Source-task utility navigation did not exist at baseline: the scoped App lease must suspend old actions, preserve only matching drafts after an authoritative reload, retain ownership through Settings → Readiness, reject stale Back/live-check/apply actions and ignore late reloads after navigation elsewhere.
 5. A confirmation is displayed and then the same job is refreshed or its target changes: stale confirmation must be inert, cancel harmless, coexisting blockers durable. Task 5 tests pin abandon/return/draft/feedback behavior and bounded screen geometry.
 
 ## Verification commands
@@ -72,15 +72,15 @@
 
 ### Task 4: F04 readiness and settings hierarchy
 
-**Files:** Modify `src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs`, `SettingsViewModel.cs`, `Views/EnvironmentReadinessView.xaml`, `SettingsView.xaml`, both RESX files; create `tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionUtilityTests.cs`.
+**Files:** Modify `src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs`, `SettingsViewModel.cs`, `Views/EnvironmentReadinessView.xaml`, `SettingsView.xaml`, both RESX files; create `tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionUtilityTests.cs`. AC3 correction also adds `Navigation/IUtilityTaskNavigation.cs`, updates `NavigationService.cs`, adds `SessionViewModel.Utilities.cs`, hooks Session guided/navigation notifications and utility actions, and adds `GuidedUtilityReturnTests.cs`.
 
-**Interfaces:** Consume `EnvironmentReadinessReport`, per-check `Lifecycle`, `Verified`, `Blocked`, existing read/live-check commands, settings validation and navigation leases. Produce read-only `ObservationSummary`, per-row `EvidenceSummary`, settings `AdvancedHeading` and disclosure state as needed. No new age threshold or permission; historic evidence wording derives only from existing lifecycle facts.
+**Interfaces:** Consume `EnvironmentReadinessReport`, per-check `Lifecycle`, `Verified`, `Blocked`, existing read/live-check commands, settings validation; add IUtilityTaskNavigation and a single source-task lease in NavigationService (the assumed existing lease was absent). Produce read-only `ObservationSummary`, per-row `EvidenceSummary`, settings `AdvancedHeading` and disclosure state as needed. No new age threshold or permission; historic evidence wording derives only from existing lifecycle facts.
 
-- [ ] Write tests `Readiness_unchecked_blocked_stale_and_checked_are_distinct`, `Opening_utilities_does_not_run_live_checks_or_lose_source_draft`, `Settings_advanced_disclosure_preserves_validation_and_readonly_production`. Assert old last-success plus deferred observation cannot say currently passed; no-report neutral state; common inputs visible, technical facts collapsed; invalid advanced retention remains visible/reachable and prevents apply.
-- [ ] Run `e5-f04-red` with `FullyQualifiedName~GuidedCompletionUtilityTests`; expected presentation assertion failures.
-- [ ] Organize common settings and advanced technical disclosure, retain visible production boundary/validation and explicit diagnostic controls. Add readiness summary/per-check evidence qualifiers while retaining current gate output, all blockers and explicit check semantics.
-- [ ] Run `e5-f04-green` including `GuidedCompletionUtilityTests|EnvironmentReadinessScreen|ReadinessRowPresentation|SettingsAndLocalisation|HomeReadiness|SettingsAuthority`. Expected GREEN except exact inherited baseline failures if any.
-- [ ] Commit explicit Task 4 files and ledger evidence.
+- [x] Write tests `Readiness_unchecked_blocked_stale_and_checked_are_distinct`, `Opening_utilities_does_not_run_live_checks_or_lose_source_draft`, `Settings_advanced_disclosure_preserves_validation_and_readonly_production`. Assert old last-success plus deferred observation cannot say currently passed; no-report neutral state; common inputs visible, technical facts collapsed; invalid advanced retention remains visible/reachable and prevents apply.
+- [x] Run `e5-f04-red` with `FullyQualifiedName~GuidedCompletionUtilityTests`; expected presentation assertion failures.
+- [x] Organize common settings and advanced technical disclosure, retain visible production boundary/validation and explicit diagnostic controls. Add readiness summary/per-check evidence qualifiers while retaining current gate output, all blockers and explicit check semantics.
+- [x] Run `e5-f04-green` including `GuidedCompletionUtilityTests|EnvironmentReadinessScreen|ReadinessRowPresentation|SettingsAndLocalisation|HomeReadiness|SettingsAuthority`. Expected GREEN except exact inherited baseline failures if any.
+- [x] Commit explicit Task 4 files and ledger evidence.
 
 ### Task 5: F05 feedback, confirmations and final evidence
 

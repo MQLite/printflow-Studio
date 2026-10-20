@@ -2895,7 +2895,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken)
     {
-        if (IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
+        if (_isSuspendedForUtility || IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
         if (HasPageDraft())
         {
             _leaveIntent = new LeaveIntent(NavigationContext(_session), LeaveHomeAsync);

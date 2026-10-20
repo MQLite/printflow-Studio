@@ -1411,4 +1411,15 @@
   <data name="Home_RecentNextContinue" xml:space="preserve"><value>Continue opens the actual current step. Processing will not start automatically.</value></data>
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>Open handoff details to see the currently supported ways to continue.</value></data>
   <data name="Home_RecentNextHistory" xml:space="preserve"><value>View the processing record. Open details to check the current file; saved history alone cannot confirm it.</value></data>
+  <data name="Environment_Unchecked" xml:space="preserve"><value>Not checked yet</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>Not checked yet. No report has been read; this does not confirm production readiness.</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>Some required checks did not run. Read the blockers below; historical results do not grant production permission.</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>This report describes the observation shown below. Every production request is checked again.</value></data>
+  <data name="Environment_EvidenceNever" xml:space="preserve"><value>No successful live-check history is recorded.</value></data>
+  <data name="Environment_EvidenceExpired" xml:space="preserve"><value>Historical check evidence is no longer available. Last success: {0}. It cannot confirm current readiness.</value></data>
+  <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>Current state was not observed again. Historical success: {0}; this is not current production permission.</value></data>
+  <data name="Environment_EvidenceRecorded" xml:space="preserve"><value>Last successful live check: {0}. Read the current report result separately.</value></data>
+  <data name="Settings_AdvancedHeading" xml:space="preserve"><value>Technical details and local diagnostic locations</value></data>
+  <data name="Nav_BackToTask" xml:space="preserve"><value>Return to current task</value></data>
+  <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>The task could not be reloaded. It has not been resumed; try returning again.</value></data>
 </root>
