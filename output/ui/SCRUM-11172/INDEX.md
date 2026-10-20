@@ -44,3 +44,7 @@ Real keyboard, UIA device interaction, DPI scaling, Meitu/Photoshop, workstation
 
 Behavior, AC mapping and test comparison: [RESULTS](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11172_RESULTS.md). Decisions: [RULINGS](RULINGS.md). Review entry: [REVIEW_PACKAGE](REVIEW_PACKAGE.md).
 
+
+## 独立审查与最终控制核对
+
+唯一整体审查：0 Critical、0 Important、1 Minor 暂缓；[审查记录](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11172_REVIEW.md)。暂缓项为环境页返回任务时短暂显示检查工作站文案，实际没有启动诊断。控制复验 48/48，31 张图片与清单/元数据 SHA-256 一致。E5/五个子项 In Review，等待用户验收；离屏截图不代替真实设备或生产验证。

@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-20",
+  "candidate": "41da7d4aeef33957cf5fb23f250526221f6f2822",
+  "sourceAndTestsUnchanged": true,
+  "controllerTests": {
+    "passed": 48,
+    "skipped": 0,
+    "total": 48,
+    "failed": 0
+  },
+  "screenshots": {
+    "count": 31,
+    "allExecutorInspected": true,
+    "manifestAndMetadataMismatches": []
+  },
+  "mainProtection": {
+    "statusChanges": [],
+    "untrackedDocumentMismatches": [],
+    "trackedHashMismatches": [],
+    "trackedFiles": 13,
+    "untrackedDocuments": 5
+  },
+  "exclusionsIdentical": true,
+  "review": {
+    "sessionId": "01a15826-48ae-7e62-8f9a-688ea19677a6",
+    "secondReview": false,
+    "runtimeTimestamp": "2026-10-20T07:11:12.592Z",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "deferredMinor": 1,
+    "important": 0,
+    "critical": 0
+  },
+  "knownFailures": {
+    "broadPassed": 1471,
+    "new": 0,
+    "broadFailed": 14,
+    "notReproduced": 0,
+    "changedMessages": 0
+  },
+  "workflowPersistence": {
+    "passed": 277,
+    "failed": 0
+  },
+  "physicalAcceptance": "NOT RUN"
+}

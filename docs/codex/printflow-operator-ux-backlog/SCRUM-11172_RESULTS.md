@@ -1,6 +1,6 @@
 # SCRUM-11172 E5 实现与验证
 
-本轮在批准的 v2 视觉方案上完成 F01–F05 的 App 层实现，等待控制会话安排唯一一次独立整体审查及用户验收。分支 `codex/scrum-11172-guided-completion`，基点 `209d0b3a6442aac1f901864107b94c5e6a0cb52d`；工作目录为 `C:/Users/admin/.codex/worktrees/scrum-11172-guided-completion/printflow-Studio`。执行为一个 Native 顺序实现者，没有按子项派发审查或第二实现者。
+本轮在批准的 v2 视觉方案上完成 F01–F05 的 App 层实现及唯一一次独立整体审查，等待用户验收。审查为 0 Critical、0 Important、1 Minor 暂缓，详见 [REVIEW](SCRUM-11172_REVIEW.md)。分支 `codex/scrum-11172-guided-completion`，基点 `209d0b3a6442aac1f901864107b94c5e6a0cb52d`，审查源码提交 `41da7d4aeef33957cf5fb23f250526221f6f2822`；工作目录为 `C:/Users/admin/.codex/worktrees/scrum-11172-guided-completion/printflow-Studio`。执行为一个 Native 顺序实现者，没有按子项派发审查或第二实现者。
 
 原始 Epic/子项见 [JIRA_SCOPE](SCRUM-11172_JIRA_SCOPE.json)。历史规划文案的待实施状态由用户后续明确继续执行授权取代；本记录不把实现或离屏测试等同用户验收。
 
@@ -72,3 +72,9 @@
 `e5-workflow-persistence-final.trx`：**277/277 通过，0 失败、0 跳过**。完整筛选文本与 E4 接受选择完全相同；原 11 排除逐字相同，Smoke 命名空间继续排除。[范围核验](../../../output/ui/SCRUM-11172/checks/final-scope-verification.json) 和原 filter/log/TRX 均保留。最终源码 diff 检查通过，测试后未再改产品或测试源码。
 
 技术实现与证据已准备好交由控制会话进行唯一一次独立整体审查。没有将该状态标作用户验收通过或全套测试全绿；14 项继承失败及 NOT RUN 边界仍有效。
+
+## 控制会话收口
+
+SCRUM-11172 与 11190–11194 已转为 **In Review**，等待用户验收；回执为 `output/ui/SCRUM-11172/checks/jira-final-status.json`。唯一独立整体审查为 0 Critical、0 Important、1 Minor 暂缓。轻微项是环境页返回任务时的短暂忙碌文案误称检查工作站；没有实际启动检查，本轮不声称已修复。
+
+控制会话新鲜复验 **48/48 通过**；源码/测试保持审查提交 `41da7d4aeef33957cf5fb23f250526221f6f2822`。31 张图片与清单及各自元数据哈希一致；主检出的 13 个已修改跟踪文件、5 个预存未跟踪文档和 Git 状态均与启动快照一致。原有 14 项广筛失败仍同名、同消息。详细审查、裁决与代价见 `docs/codex/printflow-operator-ux-backlog/SCRUM-11172_REVIEW.md`，最终核对见 `output/ui/SCRUM-11172/checks/controller-final-verification.json`。未合并、推送、部署、关闭旧缺陷或启动后续 Epic。
