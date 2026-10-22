@@ -256,6 +256,93 @@
                 </StackPanel>
             </Border>
         </DataTemplate>
+        <DataTemplate x:Key="OutputHistoryTemplate">
+            <!--
+                Outputs already produced (§15). Present so an operator adding size B can see
+                size A is still there, still approved and still valid. Concise metadata only,
+                with no path and no way in — this is not a history browser.
+            -->
+            <Border
+                    BorderBrush="#22000000"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12"
+                    Margin="0,14,0,0"
+                    Visibility="{Binding HasOutputs, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding OutputsHeading}" FontSize="15" FontWeight="SemiBold" />
+
+                    <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,8,0,0"
+                                  IsTabStop="False"
+                                  AutomationProperties.AutomationId="Session.OutputList"
+                                  AutomationProperties.Name="{Binding OutputsHeading}">
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="AutomationProperties.Name" Value="{Binding FileName}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!--
+                                        The review state is never cut off (SCRUM-11154 F-V5, observed
+                                        at 1000×700): it sits beside the name in the auto-sized column
+                                        with the location and validity, while a long name yields first
+                                        (ellipsis, full name in the tooltip and the row's accessible
+                                        name). Location says where the file actually is (Epic 11400
+                                        Part C2B §24, §25): Working until it is approved, Approved once
+                                        it has been, and the Recycle Bin once a rejection has disposed
+                                        of it — so the list never offers bytes that are not there. The
+                                        row keeps its two-line height, so the picture keeps its area.
+                                    -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding FileName}"
+                                               ToolTip="{Binding FileName}"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               AutomationProperties.AutomationId="Session.OutputFileName" />
+
+                                    <TextBlock Grid.Row="0" Grid.Column="1"
+                                               Margin="12,0,0,0"
+                                               Opacity="0.8"
+                                               AutomationProperties.AutomationId="Session.OutputState">
+                                        <Run Text="{Binding Review, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Location, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Validity, Mode=OneWay}" />
+                                    </TextBlock>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               TextWrapping="Wrap"
+                                               Opacity="0.8"
+                                               AutomationProperties.AutomationId="Session.OutputSummary">
+                                        <Run Text="{Binding Size, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Branch, Mode=OneWay}" />
+                                    </TextBlock>
+
+                                    <!-- An invalidated output is dimmed, and still says so in words. -->
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsValid}" Value="False">
+                                                    <Setter Property="Opacity" Value="0.55" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
     </ResourceDictionary></UserControl.Resources>
 
     <Grid Margin="16" Background="{DynamicResource PF.Brush.Canvas}" TextElement.FontFamily="{DynamicResource PF.Font.Family}" TextElement.FontSize="14"><Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
@@ -1062,91 +1149,26 @@
                 </Grid>
             </DockPanel>
 
-            <!--
-                Outputs already produced (§15). Present so an operator adding size B can see
-                size A is still there, still approved and still valid. Concise metadata only,
-                with no path and no way in — this is not a history browser.
-            -->
-            <Border Grid.Row="2"
-                    BorderBrush="#22000000"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="12"
-                    Margin="0,14,0,0"
-                    Visibility="{Binding HasOutputs, Converter={StaticResource BoolToVisibility}}">
-                <StackPanel>
-                    <TextBlock Text="{Binding OutputsHeading}" FontSize="15" FontWeight="SemiBold" />
-
-                    <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,8,0,0"
-                                  IsTabStop="False"
-                                  AutomationProperties.AutomationId="Session.OutputList"
-                                  AutomationProperties.Name="{Binding OutputsHeading}">
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="AutomationProperties.Name" Value="{Binding FileName}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <!--
-                                        The review state is never cut off (SCRUM-11154 F-V5, observed
-                                        at 1000×700): it sits beside the name in the auto-sized column
-                                        with the location and validity, while a long name yields first
-                                        (ellipsis, full name in the tooltip and the row's accessible
-                                        name). Location says where the file actually is (Epic 11400
-                                        Part C2B §24, §25): Working until it is approved, Approved once
-                                        it has been, and the Recycle Bin once a rejection has disposed
-                                        of it — so the list never offers bytes that are not there. The
-                                        row keeps its two-line height, so the picture keeps its area.
-                                    -->
-                                    <TextBlock Grid.Row="0" Grid.Column="0"
-                                               Text="{Binding FileName}"
-                                               ToolTip="{Binding FileName}"
-                                               FontWeight="SemiBold"
-                                               TextTrimming="CharacterEllipsis"
-                                               AutomationProperties.AutomationId="Session.OutputFileName" />
-
-                                    <TextBlock Grid.Row="0" Grid.Column="1"
-                                               Margin="12,0,0,0"
-                                               Opacity="0.8"
-                                               AutomationProperties.AutomationId="Session.OutputState">
-                                        <Run Text="{Binding Review, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Location, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Validity, Mode=OneWay}" />
-                                    </TextBlock>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                               TextWrapping="Wrap"
-                                               Opacity="0.8"
-                                               AutomationProperties.AutomationId="Session.OutputSummary">
-                                        <Run Text="{Binding Size, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Branch, Mode=OneWay}" />
-                                    </TextBlock>
-
-                                    <!-- An invalidated output is dimmed, and still says so in words. -->
-                                    <Grid.Style>
-                                        <Style TargetType="Grid">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsValid}" Value="False">
-                                                    <Setter Property="Opacity" Value="0.55" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
+            <!-- Save/completed output history belongs to the scrollable details column.
+                 The same template stays below the image on earlier review pages. -->
+            <ContentControl Grid.Row="2" Focusable="False" IsTabStop="False">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="Content" Value="{Binding}" />
+                        <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
             </Grid>
 
             <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto"
@@ -1375,6 +1397,24 @@
                         </ContentControl.Style>
                     </ContentControl>
                     </local:SessionExpander>
+                    <!-- Keep all per-size facts reachable without consuming the image area. -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 <local:SessionExpander Header="{Binding GuidedTechnicalDetailsLabel}" Style="{StaticResource PF.Disclosure}" AutomationProperties.AutomationId="Session.TechnicalDetails" Visibility="{Binding ShowsGuidedTechnicalDetails, Converter={StaticResource BoolToVisibility}}">                    <!-- Current artefact metadata (§3): a file name, never a source path. -->
                     <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>

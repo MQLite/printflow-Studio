@@ -1,0 +1,145 @@
+{
+  "CapturedAt": "2026-10-22",
+  "Kind": "Synthetic offscreen WPF UserControl viewport",
+  "Dpi": 96,
+  "ActualOuterWindowClient": "NOT RUN",
+  "ActualWorkstationDpi": "NOT RUN",
+  "Files": [
+    {
+      "Path": "visuals/correction-waiting-1000x700.png",
+      "Sha256": "F49695D7AB942AF148091927A36DBBE1C4DDC616220FE1E4C1C18AC5EA99A74C"
+    },
+    {
+      "Path": "visuals/correction-waiting-1000x700.json",
+      "Sha256": "7F3BA2F018F574CEFCDBAB565C0274593FBD3F98F9A232899CDFFF2549FBABFB"
+    },
+    {
+      "Path": "visuals/correction-waiting-1280x720.png",
+      "Sha256": "1FA7748F7F85FE8E81C682E73285B289DF2B19B8866C44DDA54FF29B0D46D7A6"
+    },
+    {
+      "Path": "visuals/correction-waiting-1280x720.json",
+      "Sha256": "5F07CBC85FDC877C1FE2BE521A9968359797E9381D57D354D408A3F4A5F78446"
+    },
+    {
+      "Path": "visuals/correction-waiting-1920x1080.png",
+      "Sha256": "4C69DAE2DE889C05270B9BBEC63144800686CD015E7D3755C229E2F292FE517D"
+    },
+    {
+      "Path": "visuals/correction-waiting-1920x1080.json",
+      "Sha256": "65ED65DE9735A1DF70B050DFEA9D74508FF67A1F267F5345131EE6D061159FE8"
+    },
+    {
+      "Path": "visuals/crop-1000x700.png",
+      "Sha256": "ACC26C8245935B56A865A67C9991CF3FB5581E6612C6A261FB6E0769CE5C2AD3"
+    },
+    {
+      "Path": "visuals/crop-1000x700.json",
+      "Sha256": "F8AD7CFD50A10A05528FF4842260D002A5CE28A446DDC617C8BB073FD9F0DAA8"
+    },
+    {
+      "Path": "visuals/crop-1280x720.png",
+      "Sha256": "F77ABBEFB9E8DFF038A51AC296F3A4BA93ECBEA8030EEC994D18C3D6FA38A3C0"
+    },
+    {
+      "Path": "visuals/crop-1280x720.json",
+      "Sha256": "11CED6C7D0CA839FA2459F696156C99348F77B5C5AB4503E7ACD304F1D53E88E"
+    },
+    {
+      "Path": "visuals/crop-1920x1080.png",
+      "Sha256": "40062DFF41BDFF044237569EF15C9798A8C4FABF51BEFACA4372E53C9479C21D"
+    },
+    {
+      "Path": "visuals/crop-1920x1080.json",
+      "Sha256": "FD15C2F7E195C599F232E9737D6EEDA3B91B77CEEC845373F6BA3097B535BB2C"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1000x700.png",
+      "Sha256": "095A315E5F603BCF83BA722545FB362B666300CFEBFED99A38740C639FE96F6D"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1000x700.json",
+      "Sha256": "D49A7FA9446245E6AD71E7EF37DBE95A6063594C163E9265A4B1C1AE3BA1F44C"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1280x720.png",
+      "Sha256": "82D6502179F0ED5C77D8AAFE7BA6992C58904EED87E4FC59CD1201F8A6607B62"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1280x720.json",
+      "Sha256": "577EEA029B6FA2A24FAA99BB0E86316A5609643EB36C35DDA1A38CD14A7C2802"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1920x1080.png",
+      "Sha256": "5BBADDB87655A79EDAF341BCC112AB6804388398233478BFC6030E30A7B3CB97"
+    },
+    {
+      "Path": "visuals/long-chinese-source-1920x1080.json",
+      "Sha256": "A17A3662252ABE5C9CB01D9DAC5292F634F8CB354DC87F7CE2D588DEE722EBF3"
+    },
+    {
+      "Path": "visuals/multisize-completed-1000x700.png",
+      "Sha256": "1F48A5FF07858BF6CCD32AE4AD6BE3696362945C0DA7E6D07C5FB8BD8D68F645"
+    },
+    {
+      "Path": "visuals/multisize-completed-1000x700.json",
+      "Sha256": "D850D0E983677C60997599A3A48752DB1E86EAA363EAF258BC3C4B52DAC7EDD6"
+    },
+    {
+      "Path": "visuals/multisize-completed-1280x720.png",
+      "Sha256": "0411A6E8B15892878AAF0F67D667E33E62FC17A012370A802CBB22D1CF295209"
+    },
+    {
+      "Path": "visuals/multisize-completed-1280x720.json",
+      "Sha256": "AB69632EB5B23ED7608E7344C1F534EFDE9448E2441C56BCA13C99E00CCDC927"
+    },
+    {
+      "Path": "visuals/multisize-completed-1920x1080.png",
+      "Sha256": "4A578664B6287CA8CD167A6B94BA4D2F54FC5F2C2370E0EA1C35FB43D9AC49CE"
+    },
+    {
+      "Path": "visuals/multisize-completed-1920x1080.json",
+      "Sha256": "419790FD34107389BDEBCFD77EA0277AFD4D3EC09CA480C7829E1E5C3505B77D"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1000x700.png",
+      "Sha256": "266AE396F01A4A4C94132022805F07A101E3A5A7903BD4105457094835794B25"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1000x700.json",
+      "Sha256": "0BF2364F237821E929C2568690140248A0D9452846101C4C904B2D3CC7CA93CE"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1280x720.png",
+      "Sha256": "F6B778AF2E209A27D36E488A7C450ADAA299C201936CBB0A332DD33F5237DA68"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1280x720.json",
+      "Sha256": "387DA67CD5D1C7DC5F25F293BEB3C43C5165CEF484CEF89C36E72ACA36F53D37"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1920x1080.png",
+      "Sha256": "7CAC127C7E1B1D718F8D7354885602B8AE543342778CA7555B837CF53C4B3FE4"
+    },
+    {
+      "Path": "visuals/multisize-long-name-1920x1080.json",
+      "Sha256": "5A8EB433AFC4B99FECA73A58D6E21B5D68F0A44D81330EB2FD053EC30CF65A49"
+    },
+    {
+      "Path": "visuals/readiness-blocked-1000x700.png",
+      "Sha256": "456C094AB258E4C8AAACC226350B739B71ECA9F15CE3F8A9B92AEEEC3620FEAB"
+    },
+    {
+      "Path": "visuals/readiness-blocked-1000x700.json",
+      "Sha256": "DB36987CD8C9AE916EBB564A8DBE845B69BA521DB0CE219D28539A9676B06DC3"
+    },
+    {
+      "Path": "visuals/save-uncertain-1000x700.png",
+      "Sha256": "2DF34FC3AADE8E9ED58699C8DF1CE85BAF8366AA4A05DA599F5AB887191A80F2"
+    },
+    {
+      "Path": "visuals/save-uncertain-1000x700.json",
+      "Sha256": "288421DD7C6A4A03F83E38E16096A8280DD1D3D19D49680443593658DF5ACDF2"
+    }
+  ]
+}

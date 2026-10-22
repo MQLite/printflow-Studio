@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="82318bd4-f533-4e5e-b46d-a99d0ba61b0f" name="admin@DESKTOP-0BG8884 2026-10-22 13:47:14" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-22T13:47:14.1345835+13:00" queuing="2026-10-22T13:47:14.1345838+13:00" start="2026-10-22T13:47:08.5125928+13:00" finish="2026-10-22T13:47:15.9445855+13:00" />
+  <TestSettings name="default" id="eea26b8f-76ab-4cda-b5f9-053b8931d7ec">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-22_13_47_14" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="36053eae-4306-4b52-b007-b66a7cf6fbe9" testId="942e3521-21da-2c28-ef77-7f18a36d1d70" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:01.9578651" startTime="2026-10-22T13:47:12.1404875+13:00" endTime="2026-10-22T13:47:14.1045482+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="36053eae-4306-4b52-b007-b66a7cf6fbe9">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : images.Max(i =&gt; i.ActualHeight)&#xD;
+    should be greater than&#xD;
+100d&#xD;
+    but was&#xD;
+1d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 119&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 111&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 139&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="06c96344-324e-4112-8456-44d95231ca80" testId="84cfddc7-fbb8-9c8c-8210-70d448e28069" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.9266461" startTime="2026-10-22T13:47:14.1212577+13:00" endTime="2026-10-22T13:47:15.0328345+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="06c96344-324e-4112-8456-44d95231ca80">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : images.Max(i =&gt; i.ActualHeight)&#xD;
+    should be greater than&#xD;
+100d&#xD;
+    but was&#xD;
+34.00333333333327d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 119&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 111&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs:line 139&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="276084b1-8d54-4f4c-a6ae-680978322bb1" testId="d0a89e96-733a-18b6-539c-cb2718cfdeae" testName="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.7564805" startTime="2026-10-22T13:47:15.0347878+13:00" endTime="2026-10-22T13:47:15.7902019+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="276084b1-8d54-4f4c-a6ae-680978322bb1" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d0a89e96-733a-18b6-539c-cb2718cfdeae">
+      <Execution id="276084b1-8d54-4f4c-a6ae-680978322bb1" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="942e3521-21da-2c28-ef77-7f18a36d1d70">
+      <Execution id="36053eae-4306-4b52-b007-b66a7cf6fbe9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="84cfddc7-fbb8-9c8c-8210-70d448e28069">
+      <Execution id="06c96344-324e-4112-8456-44d95231ca80" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests" name="Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="942e3521-21da-2c28-ef77-7f18a36d1d70" executionId="36053eae-4306-4b52-b007-b66a7cf6fbe9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84cfddc7-fbb8-9c8c-8210-70d448e28069" executionId="06c96344-324e-4112-8456-44d95231ca80" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d0a89e96-733a-18b6-539c-cb2718cfdeae" executionId="276084b1-8d54-4f4c-a6ae-680978322bb1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="1" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.15]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.25]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.24]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.24]       ---- Shouldly.ShouldAssertException : images.Max(i =&gt; i.ActualHeight)&#xD;
+[xUnit.net 00:00:05.24]           should be greater than&#xD;
+[xUnit.net 00:00:05.24]       100d&#xD;
+[xUnit.net 00:00:05.24]           but was&#xD;
+[xUnit.net 00:00:05.24]       1d&#xD;
+[xUnit.net 00:00:05.24]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(119,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage)&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(111,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.24]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.24]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(139,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.24]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.16]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.16]       ---- Shouldly.ShouldAssertException : images.Max(i =&gt; i.ActualHeight)&#xD;
+[xUnit.net 00:00:06.16]           should be greater than&#xD;
+[xUnit.net 00:00:06.16]       100d&#xD;
+[xUnit.net 00:00:06.16]           but was&#xD;
+[xUnit.net 00:00:06.16]       34.00333333333327d&#xD;
+[xUnit.net 00:00:06.16]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(119,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential, Boolean requireImage)&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(111,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.16]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.16]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedAcceptanceTests.cs(139,0): at PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.16]         C:\Users\admin\.codex\worktrees\scrum-11173-guided-acceptance\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:06.93]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T13:47:14.1076757+13:00">
+        <Text>[xUnit.net 00:00:05.24]     PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-22T13:47:15.0332317+13:00">
+        <Text>[xUnit.net 00:00:06.16]     PrintFlow.Tests.Integration.Ui.GuidedAcceptanceTests.Multiple_sizes_and_long_Chinese_filename_keep_current_save_target_reachable(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

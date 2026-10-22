@@ -16,7 +16,7 @@
 - Preserve one image/task, three routes, originals/InputSnapshot, exact approval identity, invalidation, environment/automation gates, explicit W1, 300 PPI/CMYK and privacy.
 - Every test command uses `output/ui/SCRUM-11173/checks/run-safe-ui.ps1`, retaining all 11 exclusions and the entire Smoke namespace.
 - No real App launch, Window.Show/ShowDialog, desktop input, external apps, opt-ins, customer/production data, network/AI/uploads, push/merge/release/deploy.
-- Chinese visual evidence at 1000×700, 1280×720, 1920×1080 DIP is offscreen at 96 DPI; real 100/125/150% DPI, keyboard/mouse/readers and novice acceptance remain NOT RUN.
+- Chinese visual evidence at 1000×700, 1280×720, 1920×1080 DIP is offscreen UserControl viewport at 96 DPI; approved 1000×700 is an outer WPF window baseline, whose actual smaller client area is unmeasured; real 100/125/150% DPI, keyboard/mouse/readers and novice acceptance remain NOT RUN.
 - Legacy F6/N1–N4/PNG/generic recovery and early E4 key instability retain evidence-based status. Existing broad failures may remain only with exact baseline comparison.
 - Retain scratch/ledger; no per-task reviewer. Parent performs the single fresh final review.
 
@@ -33,11 +33,11 @@
 **Files:** create `tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs`, scoped evidence under `output/ui/SCRUM-11173`; modify App only after demonstrated RED.
 **Interfaces:** consumes existing Guided* fixtures, WpfRendering, safe wrapper; produces baseline comparison, targeted TRX and Chinese geometry/screenshots.
 
-- [ ] Run safe broad `-RunName e6-baseline`; expected 1485 total, 1471 pass, 14 inherited failures; compare actual names/messages with E5.
-- [ ] Audit existing identity/gesture/layout coverage. Add smallest missing tests for accessible names, tab eligibility/hidden sections and long Chinese/multisize image/action geometry. Expected: PASS if already correct; evidence-only characterization needs no artificial RED.
-- [ ] For any demonstrated App defect, retain failing test/log, apply minimal fix, rerun targeted safe checks. Expected: actual assertion RED then GREEN.
-- [ ] Reuse existing visual fixtures for selected adverse states; inspect each final PNG and record hashes/geometry, no bitmap scaling masquerading as DPI.
-- [ ] Commit scoped tests/App/evidence.
+- [x] Run safe broad `-RunName e6-baseline`; expected 1485 total, 1471 pass, 14 inherited failures; compare actual names/messages with E5.
+- [x] Audit existing identity/gesture/layout coverage. Add smallest missing tests for accessible names, tab eligibility/hidden sections and long Chinese/multisize image/action geometry. Expected: PASS if already correct; evidence-only characterization needs no artificial RED.
+- [x] For any demonstrated App defect, retain failing test/log, apply minimal fix, rerun targeted safe checks. Expected: actual assertion RED then GREEN.
+- [x] Reuse existing visual fixtures for selected adverse states; inspect each final PNG and record hashes/geometry, no bitmap scaling masquerading as DPI.
+- [x] Commit scoped tests/App/evidence.
 
 ### Task 2: Q02 regression and exact classification
 

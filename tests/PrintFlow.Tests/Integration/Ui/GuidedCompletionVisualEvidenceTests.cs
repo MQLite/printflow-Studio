@@ -193,6 +193,9 @@ public sealed class GuidedCompletionVisualEvidenceTests
         }
         string? directory = Environment.GetEnvironmentVariable("PF_11172_CAPTURE_DIR");
         if (string.IsNullOrWhiteSpace(directory)) return;
+        // Later acceptance passes can reuse this fixture without emitting unrelated screenshots.
+        string? onlyStates = Environment.GetEnvironmentVariable("PF_11172_CAPTURE_STATES");
+        if (!string.IsNullOrWhiteSpace(onlyStates) && !onlyStates.Split(',').Contains(state)) return;
         Directory.CreateDirectory(directory);
         string stem = $"{state}-{viewport.Width:0}x{viewport.Height:0}";
         string path = Path.Combine(directory, stem + ".png");
