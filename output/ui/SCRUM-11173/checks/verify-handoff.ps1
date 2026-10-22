@@ -3,6 +3,7 @@ $repo=(& git rev-parse --show-toplevel).Trim()
 $documents=@(
     'docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md',
     'docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md',
+    'docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md',
     'docs/printflow/guided-acceptance-maintenance.md',
     'docs/printflow/guided-acceptance-walkthrough.md',
     'output/ui/SCRUM-11173/COVERAGE.md',
@@ -31,6 +32,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Source/document diff whitespace check failed.'
 [ordered]@{
     Documents=$documents;LocalLinkCount=$links.Count;Links=$links
     DiffCheck='PASS for product/tests/authored docs; raw logs/TRX deliberately preserved verbatim'
-    HumanStatus='NOT RUN';ParticipantAvailability='UNKNOWN';ActualWorkstation='NOT RUN'
+    HumanStatus='NOT RUN';ParticipantAvailability='NOT_CONFIRMED';HumanScheduling='DEFERRED_BY_USER';ActualWorkstation='NOT RUN'
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'handoff-verification.json') -Encoding utf8
 Write-Output "Verified $($documents.Count) authored documents and $($links.Count) local links; source/document diff check passed."

@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-22",
+  "timezone": "Pacific/Auckland",
+  "status": "PARTIALLY_COMPLETE_EPIC_TECHNICAL_PREPARATION_COMPLETE",
+  "userDecision": "先准备走查材料，真人测试稍后安排",
+  "reviewedHead": "e850e73359ffc0451f69193376b584753bcdf903",
+  "productTestToolFreeze": "24f2b3bb18a6ae96f34fa39a572bd7a9dd9e8ebe",
+  "sourceBuildCommit": "d21c14497697ead627386a5f0ac3f39a7bb4ea60",
+  "verification": {
+    "q01": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "uiArchitecture": {
+      "total": 1494,
+      "passed": 1480,
+      "failed": 14,
+      "exactInheritedFailureNamesAndMessages": true
+    },
+    "persistence": {
+      "total": 277,
+      "passed": 277,
+      "failed": 0,
+      "filterExactToE5": true
+    },
+    "controllerFresh": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    "candidate": {
+      "sourceHashes": 809,
+      "artifactHashes": 54,
+      "allMatch": true,
+      "status": "STATIC_VALIDATED",
+      "graphConstructed": false,
+      "runtimeRootExists": false
+    },
+    "visuals": {
+      "pngs": 17,
+      "geometryFiles": 17,
+      "allHashesMatch": true
+    },
+    "handoff": {
+      "authoredDocuments": 11,
+      "localLinks": 93,
+      "allLinksResolve": true
+    },
+    "protection": {
+      "trackedHashes": 13,
+      "untrackedDocuments": 5,
+      "priorWorktrees": 5,
+      "allUnchanged": true
+    },
+    "sourceTestsToolsUnchangedSinceFreeze": true
+  },
+  "review": {
+    "count": 1,
+    "critical": 0,
+    "important": 0,
+    "minor": 1,
+    "deferred": "E6-M1 candidate evidence overwrite; gate any rebuild until isolation/protection fixed",
+    "actualRoute": {
+      "sessionId": "01a1612b-6019-7a52-92c9-4241dec5d8e3",
+      "agent": "/root/review_e6",
+      "model": "gpt-6-astra",
+      "effort": "high",
+      "timestamp": "2026-10-22T01:13:17.338Z",
+      "file": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T14-13-15-01a1612b-6019-7a52-92c9-4241dec5d8e3.jsonl",
+      "mechanism": "isolated native subagent, fork_turns=none"
+    }
+  },
+  "jira": {
+    "SCRUM_11172": "Done",
+    "SCRUM_11173": "In Progress",
+    "SCRUM_11195": "In Progress",
+    "SCRUM_11196": "In Review",
+    "SCRUM_11197": "In Progress"
+  },
+  "humanTesting": "DEFERRED_BY_USER_NOT_RUN",
+  "actualWindowDpiKeyboardScreenreader": "NOT RUN",
+  "publishPushMergeDeploy": "NOT PERFORMED",
+  "host": "Windows/local",
+  "policyVersion": "2.4",
+  "routeOffset": 0
+}

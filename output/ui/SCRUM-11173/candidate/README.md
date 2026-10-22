@@ -37,7 +37,9 @@ if ($e6Arguments.Mode -cne 'Validate') { throw 'Only static Validate is authoriz
 & ./tools/Start-WorkstationEntry.ps1 @e6Arguments
 ```
 
-这复用本轮实际绝对参数：root为工作树内 `artifacts/pf-opux-scrum11154-workstation-entry/runs/e6-20261022-review`（本轮不存在），manifests位于同级 `manifests/e6-20261022-review`，host为 `build/e6-20261022-review/PrintFlow.WorkstationEntry.dll`。不创建root、不构造WPF图、不设置桌面许可。重建时使用 [build-validate-candidate.ps1](../checks/build-validate-candidate.ps1) 和全新 `-CandidateId e6-...`；它拒绝覆盖已存在的build/manifest/log/run路径。
+这复用本轮实际绝对参数：root为工作树内 `artifacts/pf-opux-scrum11154-workstation-entry/runs/e6-20261022-review`（本轮不存在），manifests位于同级 `manifests/e6-20261022-review`，host为 `build/e6-20261022-review/PrintFlow.WorkstationEntry.dll`。不创建root、不构造WPF图、不设置桌面许可。
+
+独立审查的暂缓Minor E6-M1：[build-validate-candidate.ps1](../checks/build-validate-candidate.ps1) 虽保护build/manifest/log/run路径，却始终覆盖本目录内的证据；失败构建还可能与旧成功summary混在一起。**不要直接复用它重建。** 任何后续重建前先修正为按候选隔离的证据目录并保护已存在路径，验证旧包不变后才构建新候选。本轮保持现有候选、未再次构建；详见[审查记录](../../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md)。这不影响上述针对现有候选的只读静态校验。
 
 ## 负责人现场门槛与场景限制
 

@@ -2,6 +2,7 @@
   "Documents": [
     "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
     "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+    "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
     "docs/printflow/guided-acceptance-maintenance.md",
     "docs/printflow/guided-acceptance-walkthrough.md",
     "output/ui/SCRUM-11173/COVERAGE.md",
@@ -11,11 +12,16 @@
     "output/ui/SCRUM-11173/inherited-failures.md",
     "output/ui/SCRUM-11173/candidate/README.md"
   ],
-  "LocalLinkCount": 82,
+  "LocalLinkCount": 93,
   "Links": [
     {
       "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
       "Target": "../../../output/ui/SCRUM-11173/candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "SCRUM-11173_REVIEW.md",
       "Exists": true
     },
     {
@@ -69,8 +75,23 @@
       "Exists": true
     },
     {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "SCRUM-11173_REVIEW.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/jira-final-status.json",
+      "Exists": true
+    },
+    {
       "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
       "Target": "../../../output/ui/SCRUM-11173/candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "SCRUM-11173_REVIEW.md",
       "Exists": true
     },
     {
@@ -100,17 +121,32 @@
     },
     {
       "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
-      "Target": "../../../output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
-      "Exists": true
-    },
-    {
-      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
       "Target": "../../printflow/guided-acceptance-maintenance.md",
       "Exists": true
     },
     {
       "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
       "Target": "../../../output/ui/SCRUM-11173/RULINGS.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/build-validate-candidate.ps1",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Target": "SCRUM-11173_RESULTS.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Target": "../../printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/controller-review-result.json",
       "Exists": true
     },
     {
@@ -126,6 +162,11 @@
     {
       "Source": "docs/printflow/guided-acceptance-maintenance.md",
       "Target": "guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-maintenance.md",
+      "Target": "../codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
       "Exists": true
     },
     {
@@ -156,6 +197,16 @@
     {
       "Source": "output/ui/SCRUM-11173/RULINGS.md",
       "Target": "execution-ledger.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/RULINGS.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
       "Exists": true
     },
     {
@@ -420,12 +471,18 @@
     },
     {
       "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "../../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
       "Target": "../../../../docs/printflow/guided-acceptance-walkthrough.md",
       "Exists": true
     }
   ],
   "DiffCheck": "PASS for product/tests/authored docs; raw logs/TRX deliberately preserved verbatim",
   "HumanStatus": "NOT RUN",
-  "ParticipantAvailability": "UNKNOWN",
+  "ParticipantAvailability": "NOT_CONFIRMED",
+  "HumanScheduling": "DEFERRED_BY_USER",
   "ActualWorkstation": "NOT RUN"
 }

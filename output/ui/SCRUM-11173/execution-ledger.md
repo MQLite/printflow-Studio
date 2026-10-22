@@ -22,3 +22,12 @@ Task 2: complete (commits 24f2b3b..d21c144, tests: pwsh.exe -NoProfile -File out
 Ruling: preserve raw logs/TRX verbatim despite their emitted whitespace; restrict clean diff check to product/tests/authored documentation — raw assertion tables carry exact evidence and must not be normalized — cost if wrong: unscoped git diff --check reports raw-log whitespace, explicitly documented.
 Task 3: isolated candidate build0 /0 warnings /0 errors; static Validate0, STATIC_VALIDATED, GraphConstructed=false, runtime root absent. SourceHead d21c14497697ead627386a5f0ac3f39a7bb4ea60; 809source/resource +54artifact hashes all match. Final verifier passes;10 authored documents/82 local links verified. Actual participants UNKNOWN, novice/workstation/runtime preparation NOT RUN. Parent separately completed fresh safe GuidedAcceptanceTests9/9 and independently verified candidate files; no product/test changes afterfreeze.
 Task 3: complete (commits d21c144..5cb0b22, tests: pwsh.exe -NoProfile -File output/ui/SCRUM-11173/checks/verify-evidence.ps1 -Phase Final → Final evidence verified; actual workstation/novice/production remain NOT RUN.)
+
+
+## Controller review and user scheduling update
+
+2026-10-22: user explicitly chose “先准备走查材料，真人测试稍后安排”. The current deliverable is technical verification plus walkthrough preparation; real novice observations remain NOT RUN, participant not yet confirmed. This is deferral, not an assertion that no participant is available.
+
+The sole fresh review of BASE through e850e733 is complete: 0 Critical / 0 Important / 1 deferred Minor E6-M1. Parent verified the helper's fixed evidence-directory overwrite by reading lines13–41. No rebuild is needed in this run; retain the reviewed candidate, gate future rebuild until candidate-specific evidence paths/existence protection are fixed and retention verified. Git/artifact copies make existing evidence recoverable; Minor classification is accepted. No product/test fix or second review is warranted for this deferred item. Source/tests/tools remain frozen; only latest user scheduling, review/status records and owner instructions change after review.
+
+Actual review route gpt-6-astra/high, isolated native /root/review_e6, fork_turns=none; runtime turn_context2026-10-22T01:13:17.338Z session01a1612b-6019-7a52-92c9-4241dec5d8e3. Parent focused9/9, 34 visual hashes and863 candidate source/artifact hashes match. Q01/Q03/Epic acceptance remains incomplete; Q02 technical evidence is ready for review.

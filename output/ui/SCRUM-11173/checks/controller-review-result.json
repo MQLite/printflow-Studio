@@ -1,0 +1,40 @@
+{
+  "range": {
+    "base": "65c5853e0e3f4f828b7851479bb418d043b0e44e",
+    "head": "e850e73359ffc0451f69193376b584753bcdf903"
+  },
+  "route": {
+    "sessionId": "01a1612b-6019-7a52-92c9-4241dec5d8e3",
+    "agent": "/root/review_e6",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timestamp": "2026-10-22T01:13:17.338Z",
+    "file": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T14-13-15-01a1612b-6019-7a52-92c9-4241dec5d8e3.jsonl",
+    "mechanism": "isolated native subagent, fork_turns=none"
+  },
+  "findings": {
+    "critical": 0,
+    "important": 0,
+    "minor": 1
+  },
+  "assessment": "ACCEPTABLE_PARTIAL_TECHNICAL_HANDOFF",
+  "minor": {
+    "id": "E6-M1",
+    "status": "DEFERRED",
+    "file": "output/ui/SCRUM-11173/checks/build-validate-candidate.ps1",
+    "line": 13,
+    "impact": "Fresh CandidateId still overwrites fixed reviewed evidence directory; failed build can mix new log and old successful summary.",
+    "requiredBefore": "Any future candidate rebuild; isolate evidence paths and protect existing paths.",
+    "currentDisposition": "No rebuild; preserve reviewed candidate; owner instructions gated."
+  },
+  "userDecision": {
+    "date": "2026-10-22",
+    "quote": "先准备走查材料，真人测试稍后安排",
+    "humanTesting": "DEFERRED_BY_USER",
+    "participant": "NOT_CONFIRMED",
+    "actualNovice": "NOT RUN",
+    "actualWorkstation": "NOT RUN"
+  },
+  "reviewCount": 1,
+  "sourceAndTestsFrozenAt": "24f2b3bb18a6ae96f34fa39a572bd7a9dd9e8ebe"
+}

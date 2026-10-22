@@ -1,6 +1,6 @@
 # SCRUM-11173 whole-branch review package
 
-Review BASE `65c5853e0e3f4f828b7851479bb418d043b0e44e` through the final package commit supplied by the controller. Worktree: `C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio`. Branch: `codex/scrum-11173-guided-acceptance`. The sole fresh independent review is pending; this package contains implementation evidence, not a verdict.
+Review BASE `65c5853e0e3f4f828b7851479bb418d043b0e44e` through `e850e73359ffc0451f69193376b584753bcdf903`. Worktree: `C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio`. Branch: `codex/scrum-11173-guided-acceptance`. The sole fresh independent [review](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md) is complete: 0 Critical, 0 Important, 1 deferred Minor E6-M1. The sections below remain the reviewed implementation evidence; final disposition is in that review record.
 
 ## Spec and scope
 
@@ -16,7 +16,7 @@ Review BASE `65c5853e0e3f4f828b7851479bb418d043b0e44e` through the final package
 3. Keep inherited failures and old defects separate from the App layout fix. Final broad is FAILED with 14 exact inherited names/messages; narrow success is not causal proof that N1–N4/F6/PNG/generic recovery or early E4 key anomalies are fixed.
 4. Check candidate identity and safety: build + metadata + STATIC_VALIDATED/GraphConstructed=false only; no runtime root. PrepareAndSmoke and Interactive are NOT RUN. Full Interactive fake-TIFF path remains subject to N4/F6 qualification; no production-adapter fallback.
 5. Check the Chinese owner material is executable once its explicit gates are met: neutral A01–A12 task cards, source/fixture limits, candidate validation, preparation/stop paths, anonymous independent-completion/help/error/verbatim fields, actual nine-cell outer-window/DPI matrix, owner visual signoff and defect/regression record.
-6. Preserve actual partial status: participant availability UNKNOWN, novice/workstation observations NOT RUN. Q01/Q03 and Epic acceptance are incomplete. Technical readiness is not release, production or old Epic closure.
+6. Preserve actual partial status: user now explicitly deferred human testing (“先准备走查材料，真人测试稍后安排”); participant not confirmed, novice/workstation observations NOT RUN. Q01/Q03 and Epic acceptance are incomplete. Technical readiness is not release, production or old Epic closure.
 
 ## Evidence to inspect
 

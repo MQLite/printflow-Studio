@@ -1,8 +1,8 @@
 # SCRUM-11173 E6 技术验证与真实验收准备
 
-E6 沿用已批准的 v2 风格，补齐可复核的离屏可达性/布局证据，并修复两尺寸保存/完成页的图片挤压。**真实中文新手、实际外部窗口/DPI、物理输入和读屏仍 NOT RUN，E6 整体验收未完成。** 参与者可用性 UNKNOWN；没有把未收到回复写成“新人不可用”。本轮没有发布、部署、推送或生产操作。
+E6 沿用已批准的 v2 风格，补齐可复核的离屏可达性/布局证据，并修复两尺寸保存/完成页的图片挤压。**真实中文新手、实际外部窗口/DPI、物理输入和读屏仍 NOT RUN，E6 整体验收未完成。** 用户于2026-10-22明确选择“先准备走查材料，真人测试稍后安排”；本轮完成技术验证及走查准备，参与者尚未确认。本轮没有发布、部署、推送或生产操作。
 
-工作树 `C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio`，分支 `codex/scrum-11173-guided-acceptance`，BASE `65c5853e0e3f4f828b7851479bb418d043b0e44e`。产品/测试冻结检查点 `24f2b3bb18a6ae96f34fa39a572bd7a9dd9e8ebe`；之后提交仅文档和证据。候选构建时提交及文件身份见 [candidate](../../../output/ui/SCRUM-11173/candidate/README.md)，最终审查由控制会话另行记录，不能把本实现者的检查称作独立审查。
+工作树 `C:/Users/admin/.codex/worktrees/scrum-11173-guided-acceptance/printflow-Studio`，分支 `codex/scrum-11173-guided-acceptance`，BASE `65c5853e0e3f4f828b7851479bb418d043b0e44e`。产品/测试冻结检查点 `24f2b3bb18a6ae96f34fa39a572bd7a9dd9e8ebe`；之后提交仅文档和证据。候选构建时提交及文件身份见 [candidate](../../../output/ui/SCRUM-11173/candidate/README.md)。唯一独立整体[审查](SCRUM-11173_REVIEW.md)为0 Critical、0 Important、1 Minor暂缓，技术交接可作为部分验收包接受。
 
 ## 改动与因果证据
 
@@ -46,4 +46,10 @@ E6 沿用已批准的 v2 风格，补齐可复核的离屏可达性/布局证据
 
 候选构建提交为d21c14497697ead627386a5f0ac3f39a7bb4ea60；Build退出0、0警告/0错误；Validate退出0，STATIC_VALIDATED且GraphConstructed=false，runtime root不存在；809源码/资源与54构建产物的863条哈希已复核。候选仅允许静态Build/manifest/Validate。本轮不执行构造Application/MainWindow的PrepareAndSmoke，也不执行Interactive。负责人另行取得隔离工作站许可、核实prepared record和场景ledger后才可启动；N4假PNG改名TIFF、F6尺寸错配、KeepOriginalExtent→PNG审批、generic recovery及PDF fixture缺口不得用预制结果绕过。未被当前Interactive链证明安全的完整TIFF走查仍BLOCKED。
 
-N1局部Recent投影、N2诊断列表CLR名、N3长小数、N4、F6、PNG、generic recovery、早期E4按键异常及E5 M1误导busy文案的状态逐项保留，没有因为窄测通过关闭旧Epic。建议先审阅技术候选和未解决项，再由负责人完成当前候选准入、真实中文新手及工作站验收；这些动作也不构成发布或生产授权。
+N1局部Recent投影、N2诊断列表CLR名、N3长小数、N4、F6、PNG、generic recovery、早期E4按键异常及E5 M1误导busy文案的状态逐项保留，没有因为窄测通过关闭旧Epic。用户已选择本轮先完成材料、真人测试稍后安排；后续由负责人完成当前候选准入、真实中文新手及工作站验收，这些动作也不构成发布或生产授权。
+
+## 控制会话收口
+
+唯一独立整体审查为0 Critical、0 Important、1 Minor E6-M1暂缓；[详细记录](SCRUM-11173_REVIEW.md)包含真实上下文、直接证据和裁定。M1是候选重建helper覆盖固定证据目录，当前包未被覆盖；下次重建前先修正候选专属证据路径/保护，现有候选保持不变。控制会话新鲜9/9、全部视觉与候选文件哈希已核对；产品/测试/工具与冻结点相同。
+
+Jira回读：SCRUM-11172 **Done**；SCRUM-11196（Q02技术结果）**In Review**；SCRUM-11173、11195、11197 **In Progress**，保留实际工作站和真人验收。回执见[最终状态](../../../output/ui/SCRUM-11173/checks/jira-final-status.json)。未合并、推送或部署；原主检出及此前工作树保留。

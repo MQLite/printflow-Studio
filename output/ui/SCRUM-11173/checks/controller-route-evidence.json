@@ -19,5 +19,20 @@
   "mechanism": "one isolated native sequential implementer, one final isolated whole-branch reviewer",
   "scope": "SCRUM-11173 / 11195-11197",
   "host": "Windows/local",
-  "noInPlaceSwitch": true
+  "noInPlaceSwitch": true,
+  "independentReview": {
+    "sessionId": "01a1612b-6019-7a52-92c9-4241dec5d8e3",
+    "agent": "/root/review_e6",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "timestamp": "2026-10-22T01:13:17.338Z",
+    "file": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T14-13-15-01a1612b-6019-7a52-92c9-4241dec5d8e3.jsonl",
+    "mechanism": "isolated native subagent, fork_turns=none"
+  },
+  "postReviewRemainingRoute": {
+    "normal": "Sol Medium for evidence/status/docs closeout",
+    "actual": "gpt-6.1-sol/high",
+    "limitation": "MODEL_SWITCH_UNAVAILABLE; controller actual route unchanged, no downgrade claimed",
+    "context": "CONTINUE"
+  }
 }

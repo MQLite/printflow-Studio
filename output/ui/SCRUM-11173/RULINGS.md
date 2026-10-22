@@ -23,3 +23,8 @@ These decisions preserve the user's accepted v2 design, continuation authorizati
 Routing v2.4 / RouteOffset=0: Q01 UI/test/visual judgment ran in `gpt-6-astra/high`, verified by the controller at `2026-10-22T00:31:56.297Z` (session `01a16105-7e92-78e2-bf65-4a86e5f132c1`). After planning and the context boundary, separable Q02 strategy/evidence would normally use Sol High and mechanical Q03 documentation Luna Low. `MODEL_SWITCH_UNAVAILABLE`: no actual model switch interface in this continuing Native context; a stronger safe substitute was disclosed. No downgrade is claimed. The controller owns the real independence boundary for the final fresh Astra High review.
 
 The retained detailed ledger is copied to [execution-ledger.md](execution-ledger.md) at handoff. Initial compile error, insufficient initial image assertions, actual product RED/GREEN, fixture correction and all final evidence are separately identified.
+
+
+## Controller closeout rulings
+
+User chose preparation first and real novice testing later on2026-10-22. Record DEFERRED_BY_USER/NOT RUN, not unavailable; participant remains unconfirmed. Sole fresh review:0 Critical/0 Important/1 Minor E6-M1. Keep Minor deferred under Native execution: current candidate is already built, no rebuild required; preserve it and fix candidate-specific evidence isolation/existence protection before future rebuild. Candidate README now gates the unsafe helper. No product/test/source change, broad rerun or second review for documentation-only closeout. [Review and rationale](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md).
