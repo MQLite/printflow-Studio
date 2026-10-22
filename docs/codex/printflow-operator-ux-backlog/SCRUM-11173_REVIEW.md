@@ -24,3 +24,8 @@ M1（Minor）：[build-validate-candidate.ps1:13](../../../output/ui/SCRUM-11173
 控制会话直接核对原始 TRX、同名同消息的 14 项继承失败、17 PNG/17 geometry、809 源码及54构建产物哈希，另运行全部新增9用例且9/9通过。产品/测试冻结点 `24f2b3b` 未改变；后续仅审查、状态、证据和最新用户决定的文档更新，不重复广筛、不重建候选、不另派第二次审查。Q01/11195、Q03/11197 与 Epic 的实际验收仍未完成；Q02 仅提交技术结果待审阅。
 
 [结果](SCRUM-11173_RESULTS.md) · [走查材料](../../printflow/guided-acceptance-walkthrough.md) · [原始审查身份](../../../output/ui/SCRUM-11173/checks/controller-review-result.json)
+
+
+## 后续状态：M1已解决
+
+用户另行授权的M1修复已完成，新的[范围审查](SCRUM-11173_M1_REVIEW.md)无发现。原103证据文件不变，新候选使用独立目录；[修复验证](SCRUM-11173_M1_RESULTS.md)有5场景及真实Build/Validate证据。本文件前述1 Minor暂缓是原e850e733审查快照，不再代表M1当前状态；没有改写原整体审查或补造真人验收。

@@ -28,3 +28,8 @@ The retained detailed ledger is copied to [execution-ledger.md](execution-ledger
 ## Controller closeout rulings
 
 User chose preparation first and real novice testing later on2026-10-22. Record DEFERRED_BY_USER/NOT RUN, not unavailable; participant remains unconfirmed. Sole fresh review:0 Critical/0 Important/1 Minor E6-M1. Keep Minor deferred under Native execution: current candidate is already built, no rebuild required; preserve it and fix candidate-specific evidence isolation/existence protection before future rebuild. Candidate README now gates the unsafe helper. No product/test/source change, broad rerun or second review for documentation-only closeout. [Review and rationale](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md).
+
+
+## User-authorized M1 follow-up
+
+User subsequently requested the deferred rebuild helper fixed, continuing Native and deferring human tests. M1 is now RESOLVED: candidate-specific evidence directories, refusal of existing paths and no Force on evidence leaf. Five controlled filesystem cases and one real isolated Build/Validate prove preservation; original103 files unchanged. The one new scoped independent review has0 Critical/Important/Minor. Original overall review remains historical; no product regression rerun or replacement of reviewed candidate. [M1 results](../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_M1_RESULTS.md).

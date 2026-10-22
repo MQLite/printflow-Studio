@@ -28,7 +28,7 @@
 
 ## 故障处置与维护门槛
 
-独立审查暂缓Minor E6-M1：当前候选重建helper会覆盖固定candidate证据目录。现有候选保持不变；下次重建前先修正候选专属证据路径与存在性保护，验证原包保留，不能仅换CandidateId便重用脚本。[审查和裁定](../codex/printflow-operator-ux-backlog/SCRUM-11173_REVIEW.md)保留具体影响。本轮用户选择先准备材料、真人测试稍后安排。
+原独立审查暂缓的Minor E6-M1现已按用户后续授权修复：helper将新证据放入candidates/<CandidateId>，拒绝已有证据目录，原candidate保持原字节。失败ID不能复用。五场景验证和一次真实隔离Build/Validate通过，[M1范围审查](../codex/printflow-operator-ux-backlog/SCRUM-11173_M1_REVIEW.md)无发现。[新使用说明](../../output/ui/SCRUM-11173/candidates/README.md)区分原验收候选与M1验证候选；旧candidate/README的暂缓警示保留为历史快照。真人测试仍稍后安排。
 
 - 新增可复现 App 缺陷：先运行证明错误的测试，再作最小 App 修复，保留 RED/GREEN 和相关回归；不要修改已有断言以掩盖问题。
 - 发现底层 TIFF、审批谱系、恢复或生产适配器问题：保留精确证据并交关联任务；E6 不越界修业务层。

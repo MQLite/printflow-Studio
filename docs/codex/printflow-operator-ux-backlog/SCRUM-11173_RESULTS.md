@@ -53,3 +53,8 @@ N1局部Recent投影、N2诊断列表CLR名、N3长小数、N4、F6、PNG、gene
 唯一独立整体审查为0 Critical、0 Important、1 Minor E6-M1暂缓；[详细记录](SCRUM-11173_REVIEW.md)包含真实上下文、直接证据和裁定。M1是候选重建helper覆盖固定证据目录，当前包未被覆盖；下次重建前先修正候选专属证据路径/保护，现有候选保持不变。控制会话新鲜9/9、全部视觉与候选文件哈希已核对；产品/测试/工具与冻结点相同。
 
 Jira回读：SCRUM-11172 **Done**；SCRUM-11196（Q02技术结果）**In Review**；SCRUM-11173、11195、11197 **In Progress**，保留实际工作站和真人验收。回执见[最终状态](../../../output/ui/SCRUM-11173/checks/jira-final-status.json)。未合并、推送或部署；原主检出及此前工作树保留。
+
+
+## 用户授权的M1后续修复
+
+用户随后要求先修复候选重建脚本，真人测试仍稍后安排。M1现已解决：每个CandidateId单独存证、已有证据目录拒绝写入；5项定向检查和一次真实隔离Build/Validate通过，原103文件及原候选863清单哈希不变。新鲜范围审查0 Critical/0 Important/0 Minor。[修复结果](SCRUM-11173_M1_RESULTS.md)与[范围审查](SCRUM-11173_M1_REVIEW.md)取代上文M1暂缓状态；原E6整体审查结论和14项旧失败历史保持不变，真人及实机验收仍NOT RUN。

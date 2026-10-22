@@ -1,0 +1,7 @@
+e6-baseline total=1485 passed=1471 failed=14
+e6-q01-final total=45 passed=45 failed=0
+Safety exclusions unchanged; 17 PNG/geometry hashes match at offscreen 96 DPI.
+e6-ui-architecture-final total=1494 passed=1480 failed=14
+e6-workflow-persistence-final total=277 passed=277 failed=0
+Candidate source/binary hashes match (863 files); no runtime root or business implementation changes.
+Final evidence verified; actual workstation/novice/production remain NOT RUN.
