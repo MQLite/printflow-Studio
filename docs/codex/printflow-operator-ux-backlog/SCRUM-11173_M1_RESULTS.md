@@ -17,4 +17,10 @@
 - 原始结果见 `output/ui/SCRUM-11173/checks/m1-fix/`；夹具目录留在本机scratch，不混入真实候选身份。
 - 当前产品/src/tests/tools与24f2b3b冻结点相同；只需PowerShell文件行为验证，不重跑未变化的UI/工作流套件。
 
-真实隔离构建、静态Validate和新鲜独立审查：待本修复提交后执行；当前记录不先行宣称完成。
+## 真实隔离构建与保留验证
+
+修复提交 `73caeb26d5c8611aa5b95e3e879f22a45a28b3da` 后运行 `-CandidateId e6-20261022-m1-fixed`：构建退出0、0警告/0错误，Validate退出0且STATIC_VALIDATED、GraphConstructed=false、runtime root不存在。新证据写入[candidates/e6-20261022-m1-fixed](../../../output/ui/SCRUM-11173/candidates/e6-20261022-m1-fixed/validation-summary.json)，未替换既有验收候选。
+
+重复同ID调用在构建前拒绝，新证据0变化；原103文件0变化。原/新候选清单各863个文件哈希全部匹配。[直接核验](../../../output/ui/SCRUM-11173/checks/m1-fix/real-verification.json)保留结果。只构建与静态校验；没有运行App、PrepareAndSmoke、Interactive、真人或生产。
+
+Native由控制会话顺序实现；实际gpt-6.1-sol/high，turn_context2026-10-22T01:22:50.675Z已核实。规则v2.4，RouteOffset=0；非UI证据保护修复及测试策略采用Sol High能力；无原位切换，未宣称切换至其他模型。仅最后一次新鲜范围审查待执行。无产品/src/tests/tools变更，因此不重跑之前45/1494/277套件。

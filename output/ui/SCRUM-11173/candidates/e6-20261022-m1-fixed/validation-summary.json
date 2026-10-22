@@ -1,0 +1,22 @@
+{
+  "CandidateId": "e6-20261022-m1-fixed",
+  "SourceHead": "73caeb26d5c8611aa5b95e3e879f22a45a28b3da",
+  "BuildExit": 0,
+  "ValidateExit": 0,
+  "RuntimeRootExists": false,
+  "RuntimeGraph": "NOT RUN",
+  "PrepareAndSmoke": "NOT RUN",
+  "Interactive": "NOT RUN",
+  "Novice": "NOT RUN",
+  "Workstation": "NOT RUN",
+  "Arguments": {
+    "Root": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\runs\\e6-20261022-m1-fixed",
+    "CandidateManifest": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\manifests\\e6-20261022-m1-fixed\\candidate-manifest.json",
+    "ScenarioManifest": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\manifests\\e6-20261022-m1-fixed\\scenario-manifest.json",
+    "HostAssembly": "C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\build\\e6-20261022-m1-fixed\\PrintFlow.WorkstationEntry.dll",
+    "Mode": "Validate"
+  },
+  "CandidateManifestSha256": "7A63CAA5651B71BF70A432A7656C3C13172806AE69D3656D80C442CED500C71E",
+  "ScenarioManifestSha256": "2552A47C761E1A709C3A3AD90624485FEF30D64C49E3B886CEFCE2B1D8A33819",
+  "HostSha256": "1BE5C6255B0FCF4F9B463C8E2FCA7D1E47507C8F6AA538A6C4D23BD9C9F45006"
+}
