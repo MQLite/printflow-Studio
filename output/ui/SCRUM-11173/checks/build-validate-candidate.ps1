@@ -10,12 +10,13 @@ $build = Join-Path $artifactRoot ('build\' + $CandidateId)
 $manifest = Join-Path $artifactRoot ('manifests\' + $CandidateId)
 $buildLog = Join-Path $artifactRoot ($CandidateId + '-build.log')
 $run = Join-Path $artifactRoot ('runs\' + $CandidateId)
-$evidence = Join-Path $repo 'output\ui\SCRUM-11173\candidate'
-foreach ($path in @($build, $manifest, $buildLog, $run)) {
+$evidence = Join-Path $repo ('output\ui\SCRUM-11173\candidates\' + $CandidateId)
+foreach ($path in @($build, $manifest, $buildLog, $run, $evidence)) {
     if (Test-Path -LiteralPath $path) { throw "Fresh candidate path required; preserve existing evidence: $path" }
 }
 New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null
-New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+# Do not reuse an evidence directory owned by an earlier attempt.
+New-Item -ItemType Directory -Path $evidence -ErrorAction Stop | Out-Null
 & dotnet build tests/PrintFlow.WorkstationEntry/PrintFlow.WorkstationEntry.csproj --disable-build-servers --configuration Debug --output $build > $buildLog 2>&1
 $buildExit = $LASTEXITCODE
 Copy-Item -LiteralPath $buildLog -Destination (Join-Path $evidence 'build.log')
