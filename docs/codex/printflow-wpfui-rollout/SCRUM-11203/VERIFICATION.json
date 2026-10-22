@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "resources": 1012,
+  "candidateRows": 43,
+  "rewrites": 41,
+  "pages": 140,
+  "conditionalAi": 7,
+  "sourceFiles": 346,
+  "sourceBytesAndAnchors": "PASS",
+  "deterministicRegeneration": "PASS",
+  "reviewRegressions": "PASS",
+  "keyPlaceholderUnitCsvParity": "PASS",
+  "productTests": "NOT RUN",
+  "existingWorkPreservation": {
+    "status": "PASS",
+    "filesChecked": 37,
+    "sourceHead": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3",
+    "check": "pre-existing dirty and untracked docs bytes preserved; pre-existing index unchanged before staging"
+  }
+}

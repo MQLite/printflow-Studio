@@ -1,0 +1,1756 @@
+{
+  "baseCommit": "2561dfd127e3336ec57b37fb3fe47709c1d81fcb",
+  "frozenBaseline": "output/ui/SCRUM-11200/baseline-20261022",
+  "baselineSha256": "94CAF26BB206E3697561EF685F989F1433D8FB7E86570D57600E5299A54E5397",
+  "pageInventorySha256": "7569D73627F3167C003AAE6CBAF3DBA76977D27687717E63E3C57825D076F7E0",
+  "referenceDocuments": [
+    {
+      "path": "docs/codex/printflow-wpfui-rollout/PLAN.md",
+      "sha256": "FD1EA247C69F621FE1F3484802C886EFCA21413FE7EB15E2BCE4190BD08077AE"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/PLAN.md",
+      "sha256": "6E542BF17493E9A89C2B615575D8A0CDC7A1C31D827127C13B66694218A99EAC"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11153_COPY_REVIEW.md",
+      "sha256": "192E9A605888777AC13D4CD93144212BE59040796D678FF8C8F7822F219435A0"
+    },
+    {
+      "path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_COPY_REVIEW.md",
+      "sha256": "943E3BA34FFD7F6BCC7314668D064BC320E6C711661F2C483D571EC2B9D3940C"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/PrintFlow.App/App.xaml",
+      "sha256": "765C3A1EB504F9E3411A4DB2D958EFB15811C978D6897CCDE551CD6952F6AA9B",
+      "lines": 11
+    },
+    {
+      "path": "src/PrintFlow.App/App.xaml.cs",
+      "sha256": "0C8C494B3C1475EE9478652C6B69186F823C338B5699BD1F0DDF7C03AF056550",
+      "lines": 106
+    },
+    {
+      "path": "src/PrintFlow.App/AssemblyInfo.cs",
+      "sha256": "3FAC2AF92385F676E9A941BEFD23FE38F0A5FA6167D4A3A88F07E730C5595CA3",
+      "lines": 10
+    },
+    {
+      "path": "src/PrintFlow.App/Composition/ApplicationStartup.cs",
+      "sha256": "152D0F4D3F92985A5FA8E4D40C02FB2A8253664A9CDB3F1C31AB7BF3B3EF676C",
+      "lines": 283
+    },
+    {
+      "path": "src/PrintFlow.App/Composition/ServiceRegistration.cs",
+      "sha256": "3EC160582D881AB5846552F3535F7656E3E44016D6BF3DD7FCC8190BD7DF4B5C",
+      "lines": 387
+    },
+    {
+      "path": "src/PrintFlow.App/Controls/GuidedStepItem.cs",
+      "sha256": "AEB1544D5FE961549C0E6AA595010AA70CBBF1212D2597F9308B3A1E2394766E",
+      "lines": 17
+    },
+    {
+      "path": "src/PrintFlow.App/Localisation/ILocalisationService.cs",
+      "sha256": "AB19E7174E248FF775A5310FE070D3DA2405A2B4868E48704696E6ED873B5143",
+      "lines": 47
+    },
+    {
+      "path": "src/PrintFlow.App/Localisation/LocalisationService.cs",
+      "sha256": "4B3223E501723E7681657213E3D8061E6E2143B05CCBF70FE925ABECBDA5F7AB",
+      "lines": 94
+    },
+    {
+      "path": "src/PrintFlow.App/Localisation/OperatorLanguage.cs",
+      "sha256": "7F76D11107A7D621C42C162C5B35D810E275C7325BCA5495FB1187A5533FDACA",
+      "lines": 82
+    },
+    {
+      "path": "src/PrintFlow.App/MainWindow.xaml",
+      "sha256": "EF5DC6EE6D560EC4468FA7B1A22D5DBFE242D71FA5AB1844E39A02474688C069",
+      "lines": 55
+    },
+    {
+      "path": "src/PrintFlow.App/MainWindow.xaml.cs",
+      "sha256": "8BAD591DE270CC25A0FDC3902B8BC3395B7517BF86508AADAAB16FEC43886B87",
+      "lines": 11
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/IDeliveryFolderPicker.cs",
+      "sha256": "2408861220EBE9C9E3395647429A92B49A3D650AFCA7EBF0552D37D921EAE1BB",
+      "lines": 14
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/IDiagnosticPackageDestinationPicker.cs",
+      "sha256": "1D45F6A74DBCCF83E7E6B828A5660447CBE55CCE640EECF2D44351DE005A4225",
+      "lines": 8
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/IEntryScreenLifetime.cs",
+      "sha256": "1EE144071847A762163019E09545B90452A8BE1A240C78850CD04544B27AC664",
+      "lines": 7
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/IFilePicker.cs",
+      "sha256": "BFB787AE01683C136D432D81219E393361567D5C0D9F25D7F9A49EB5CA7AED1B",
+      "lines": 34
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/INavigationService.cs",
+      "sha256": "15C92E946233E643A125B1A177C4E4524BA54CF3CE7C7E43368AC23B3B81BD94",
+      "lines": 63
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/IUtilityTaskNavigation.cs",
+      "sha256": "9CC26D35C80FA49D14E57881BBFE711E843DFA4BD7FF0DDD83426A8878189E1F",
+      "lines": 11
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/NavigationService.cs",
+      "sha256": "08F485F675BCE21E51AEED01795691953D516C2A16E5B75C99936535F10047FB",
+      "lines": 131
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/OpenFileDialogPicker.cs",
+      "sha256": "B2F265FBA0D9B000D8EF395DEE448E06F030B0B8381DCA0371F31494B051D4DC",
+      "lines": 35
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/OpenFolderDialogPicker.cs",
+      "sha256": "9F9E57CD7D954E0AA1E09D0E7300D7E9589DD3C416E423D27AC7C97BCBB71FA9",
+      "lines": 28
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/SaveDiagnosticPackageDialog.cs",
+      "sha256": "30139878B813F1A24D057FBFDAC64E1C8EAC7534B41287A3A9B9023AF337D87F",
+      "lines": 30
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/DisplayNames.cs",
+      "sha256": "2BCF4EFBF8A8A9D66D31F4468658EC48C2610C2FF1501C72F716AD1A5C2AFFCF",
+      "lines": 434
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/OperatorCulture.cs",
+      "sha256": "5A3003658E3D234B854EC125D4501C7A01CE5CCF542595AD0954A8EB6C621D3A",
+      "lines": 43
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.cs",
+      "sha256": "18529849C8793AB3A7B0F852ED61A6406D04AD548145800AB09217638538E081",
+      "lines": 1351
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.resx",
+      "sha256": "95D12C62FFF19486898CE6BBB12E097F91E4AFE8E45B158E15E8576882C80DD4",
+      "lines": 1430
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+      "sha256": "DE8F078AE81F35FA7915BD324F45A5EA4C947B61600FB44948B8D8947AF84CC7",
+      "lines": 1419
+    },
+    {
+      "path": "src/PrintFlow.App/Settings/LocalDiagnosticLocations.cs",
+      "sha256": "83BA1592EF419A552F75F0D657488690C21B5AB1B7C6BEFE94028225024B8BEF",
+      "lines": 4
+    },
+    {
+      "path": "src/PrintFlow.App/Settings/SettingsDefaults.cs",
+      "sha256": "507B48A68FD3CA0F29209766C5D187B6BE5B05F618236D3004D008104A3011B0",
+      "lines": 38
+    },
+    {
+      "path": "src/PrintFlow.App/Startup/ReadinessObservationAccessor.cs",
+      "sha256": "B190E7D64060D18FAE1A5032F96065518D03F5048F43CF447ECFFC300DCB00BB",
+      "lines": 126
+    },
+    {
+      "path": "src/PrintFlow.App/Startup/StartupStatus.cs",
+      "sha256": "652BCF8B9E0CAE1D78FA2E9E1566ACE8CFEE4BD9FA476346B6438562A966EC18",
+      "lines": 123
+    },
+    {
+      "path": "src/PrintFlow.App/Startup/StartupStatusAccessor.cs",
+      "sha256": "392C3622D5BEE6D16601F3BE4B6B0C97E4F6D12CE168731D7818A2B8859F8C18",
+      "lines": 29
+    },
+    {
+      "path": "src/PrintFlow.App/Themes/GuidedComponents.xaml",
+      "sha256": "9ED1694D810A5D239AD9092ACCA7AD1A2B6A2F34857B3DC228E1C6BAE12CBD2B",
+      "lines": 202
+    },
+    {
+      "path": "src/PrintFlow.App/Themes/GuidedControls.xaml",
+      "sha256": "7E813928BCB9D6655BFFDA3B12D1206D5BBED63366D10CA2407A3AB819191CAD",
+      "lines": 126
+    },
+    {
+      "path": "src/PrintFlow.App/Themes/GuidedTheme.xaml",
+      "sha256": "73722E9F22D7DFE6E5BEF19CC4324D135D27F22CABF1979B00FB13DF70A15401",
+      "lines": 8
+    },
+    {
+      "path": "src/PrintFlow.App/Themes/GuidedTokens.xaml",
+      "sha256": "115E293487B8D3D898762FB6B106C98B1F00497633C50439B6EBCF0565AB4B93",
+      "lines": 64
+    },
+    {
+      "path": "src/PrintFlow.App/Themes/WpfUiSampleTheme.xaml",
+      "sha256": "A20ECF2FC613C5C7159BCBB8E9A917ED2C268C75FA8A8603D41FE7D34BB21A63",
+      "lines": 46
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/AbandonConfirmation.cs",
+      "sha256": "049710F91FC70DF45D4704E940C441BD41A8B6A2698EDCD85069F17F000BA1C1",
+      "lines": 22
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/ArtefactPreviewPane.cs",
+      "sha256": "28758D7DE889BF9DD34FD4FD5AEAC827AC554115DBC7B4162F6CD6A2F913127C",
+      "lines": 155
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/CropHandleGesture.cs",
+      "sha256": "82E66E52D9D58F5FEBAD787E1759ABF8B6210895FD70B10E0A31701F61F7D7B0",
+      "lines": 224
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/CropSurfaceLayout.cs",
+      "sha256": "5F7304BCE160BE359C1EFE0FBD2C3075DA2A99E1CA573BA0CDEA331E7957A286",
+      "lines": 231
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs",
+      "sha256": "7B54B451556AD1B53425F30AF7E10F664A76B24A10112D19267F31B9B0633E04",
+      "lines": 565
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/ErrorDetailsViewModel.cs",
+      "sha256": "CFE9A010597C83578381CF45F354A3CBCDEAA5AE6B4C3A9D717882579972646B",
+      "lines": 429
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/HomeReadinessSummary.cs",
+      "sha256": "D5B9846BD2BF640200318842C55DB16077B70BFAE0CFE44B23C50317F6CC1C0D",
+      "lines": 129
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/HomeViewModel.cs",
+      "sha256": "966C7C3E60E2205FE73B3EA9576C8FD81CBB7BC88A61163D2E87775B8E12AEC0",
+      "lines": 835
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/NoticeFailure.cs",
+      "sha256": "6A52F8AD06A283B0D4BD55EA79A1547F0F503BE220CED6B993F08B4EEED28AFA",
+      "lines": 42
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/RecentSessionRow.cs",
+      "sha256": "24A04E360DA3FFE6A58BBE4AF76078F13253D2112BB9347C52409EE1B674E114",
+      "lines": 199
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/RecoverySessionRow.cs",
+      "sha256": "E7580A65C5E56C4973801D8132805B7F7701D2926D9870E68971DE72B3A49A17",
+      "lines": 41
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/ReviewViewportState.cs",
+      "sha256": "CF342BD57063CF135CA4FED9E9597BA58E8F8BE9F5D09C0389A3AF51DFA7B7B2",
+      "lines": 22
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Completion.cs",
+      "sha256": "E4F2BE06A74F164FF2AB5214F79550B202B7D59E43599B4BE62D57B39FD6D0A2",
+      "lines": 57
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Correction.cs",
+      "sha256": "DC154C6AD85D7E86A8CF0A8A3206446638A0A39818F45636EA642D8B05E0224A",
+      "lines": 650
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.FailureNotice.cs",
+      "sha256": "8721995CC148E88E2AAED09664843FD7BD690D6698536D936B56A1ED07065F20",
+      "lines": 126
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.FinalSave.cs",
+      "sha256": "3AA19CF5057C8F4C75A5F9D000C85B49F1697DEA0AD1214B3647B9946F4BC865",
+      "lines": 1275
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
+      "sha256": "B11F551BAEAAFC27330BF71A167A505F85123DAC6D6C611D227E4C5351321DCC",
+      "lines": 211
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.ManualCrop.cs",
+      "sha256": "CB3BD374A35A280D6033841214090D94FC653017848006D70272A50CD0383BA5",
+      "lines": 111
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Navigation.cs",
+      "sha256": "A249A1BC0E5453383537C68606569D1BA9FD129186F46B0F7BA6322799C18620",
+      "lines": 193
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.OperatorStatus.cs",
+      "sha256": "432DA213DC6D6E92A66A22974CC4405EBCB15A009A95F9CA124384182EFD7E6B",
+      "lines": 159
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.PrintDimensions.cs",
+      "sha256": "16D6C03EEED0641C343D90A675D650137F9D5BB111C6393D56A3E8AE5F9A92DB",
+      "lines": 321
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.RecoveryGuidance.cs",
+      "sha256": "D886F010177B571303B9A7FB44CE0D5647EFF91569F425EC96BEADFA4CEC23C4",
+      "lines": 51
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.ReviewGuidance.cs",
+      "sha256": "FF44E9C9CC00A85BF8762A628215550739FF68E9046FCB26846727E260F47EA0",
+      "lines": 139
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.TiffReview.cs",
+      "sha256": "F029782ACC0F099560CAC884A7B0236D0AD3EAE4740E646B13C070A273843611",
+      "lines": 375
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.TrimAdjust.cs",
+      "sha256": "8491F322A217269CCD59229122CA3045F52A7EBBBD0EA03A04F1A1B064282799",
+      "lines": 372
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Utilities.cs",
+      "sha256": "38AF8A82CF135AEFACD54EF46DC242AA0E307448776F352F63320F5054B98DBB",
+      "lines": 51
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.cs",
+      "sha256": "5CADDF716BA6FA0A5FFB00D80688A254135C479E48149259FF34C6DB5CF0CB1D",
+      "lines": 3799
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SettingsViewModel.cs",
+      "sha256": "949EFE96E25110AEF89EB92783BB542AF61EB6D405FF9C3CB5CFA58BE225ABD2",
+      "lines": 512
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/ShellViewModel.cs",
+      "sha256": "74F664F79F3D920EC82D46FB4A8FB638275E2816DF5C605610C39E96BA0C51D6",
+      "lines": 54
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/WorkflowSelectionViewModel.cs",
+      "sha256": "69FA8CB81CD42FD0B19C7DB4945E4D572B8191573DB6A251B9906F477C8C33EC",
+      "lines": 587
+    },
+    {
+      "path": "src/PrintFlow.App/Views/EntryActionScope.cs",
+      "sha256": "BE7F67BAF4BB0AC9833BB53DB2FDEE8CF5260D238629E117B2AF093D5403C25F",
+      "lines": 47
+    },
+    {
+      "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+      "sha256": "ABB90C0B9F69507DBAEC4FF3EF047EEAE4E5955F51F9C22A7EF0E2B1BD62EF71",
+      "lines": 238
+    },
+    {
+      "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml.cs",
+      "sha256": "2F62D6F328D935C95B60C77392F80BB11F5D7F34AC4D63844CE3E9672380240E",
+      "lines": 9
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+      "sha256": "DAAFFFCA0620D67A26D43C734A16E7B66B56EF31C51C1AA616838DD5B7DBDDA1",
+      "lines": 225
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml.cs",
+      "sha256": "E159A7CE284533318A0B182D78EE163A4948FBA93E6CD7434DB7BF06D113A90E",
+      "lines": 9
+    },
+    {
+      "path": "src/PrintFlow.App/Views/HomeView.xaml",
+      "sha256": "15B55C39BE604A717A9C1EFD10CD251F38FC7139AF0CAEB8BA9B5F23C44B7325",
+      "lines": 415
+    },
+    {
+      "path": "src/PrintFlow.App/Views/HomeView.xaml.cs",
+      "sha256": "7F9B8EBE385945C1A3B669CAF025B9CCE4C34AB32DD856F11F6D5CED85DFF871",
+      "lines": 127
+    },
+    {
+      "path": "src/PrintFlow.App/Views/NoticeErrorDetails.xaml",
+      "sha256": "C3798159B91ACBD8B3CE9CDA6D2652F81E413A3280690A302AF3B9D61575B29E",
+      "lines": 46
+    },
+    {
+      "path": "src/PrintFlow.App/Views/NoticeErrorDetails.xaml.cs",
+      "sha256": "0CF8B8719D03ADD98B07D11C372D6D46ADE14263EB9B282ADBE2F9D2AEA50A16",
+      "lines": 24
+    },
+    {
+      "path": "src/PrintFlow.App/Views/PreviewPayloadConverter.cs",
+      "sha256": "543C0B6B0AC12122FF5D25F6E47563BF536A795A86ABE3D1254D68E50DBBD196",
+      "lines": 62
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ProposedTrimConverter.cs",
+      "sha256": "6942B69B1FAC4EFF43834AC32D3EB66543480C6E5EF4405124A01483DB9E2DFF",
+      "lines": 51
+    },
+    {
+      "path": "src/PrintFlow.App/Views/RecommendedCommandConverter.cs",
+      "sha256": "5A7B8973D7BBAACBA465834E9724DCC56D233C673E0A99591C3299CF69003584",
+      "lines": 15
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ReviewApprovalButton.cs",
+      "sha256": "CBED56174A2A106F4C342196F36371C9C02137FFB71D94B4F31C2B111EF38F97",
+      "lines": 108
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionActionButton.cs",
+      "sha256": "A198E6964A5781387448FB44BB3AA93646C5BF972773B1C4EC92922A763B2DAF",
+      "lines": 114
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionActionScope.cs",
+      "sha256": "6FA9A27178F338447AABA624B91BB7457125202CF51F4EF314A55ABCA641CB2D",
+      "lines": 36
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionEditorControls.cs",
+      "sha256": "BE99F4FEDD8B0430CFAC3F2D6A026A49265D45E5AB7951103B611016076AB23B",
+      "lines": 168
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+      "sha256": "78BCCBFF3059300EF1D373D15CE4B583D8728A1C099F4E12B2E5E1B4CDA75175",
+      "lines": 2811
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionScreenView.xaml.cs",
+      "sha256": "5971975F05609D86470727352D750B887233A7D7F8329A26D85A28ADB67D05A2",
+      "lines": 596
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+      "sha256": "B5B3CB16377B7D5D8ECF92FD61DFFE066FB66D2E76D59994BC51CC5BA52A3E68",
+      "lines": 184
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SettingsView.xaml.cs",
+      "sha256": "DDB32FAC89EF9C2F61267BFB2224C4DB698BE60094F720018D73A62788E49014",
+      "lines": 9
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SharedReviewSurface.cs",
+      "sha256": "2C16606FEE4A893DABF9310EEEB4850E593E99BDF7C10F4C4BB54318BFAB0273",
+      "lines": 309
+    },
+    {
+      "path": "src/PrintFlow.App/Views/TiffReviewSurface.cs",
+      "sha256": "991D514EBE162D2DFF27CC4C97C7FC3C44694AB31DE6815BE66BC296814DB4B7",
+      "lines": 341
+    },
+    {
+      "path": "src/PrintFlow.App/Views/TrimHandleDrag.cs",
+      "sha256": "D46D45E65D395EEAB709B87B8AF204E53FABB415B3035C90BAC03CDA2635B3FD",
+      "lines": 67
+    },
+    {
+      "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml",
+      "sha256": "34AC93B9D90EF76267EB3A5E1A984303347B0326830769AA66EC86D20ACFD4C9",
+      "lines": 207
+    },
+    {
+      "path": "src/PrintFlow.App/Views/WorkflowSelectionView.xaml.cs",
+      "sha256": "49162C24D5C346C8D71E3758C6577246F9B44FF8418C217D8499DF0F860F3AF9",
+      "lines": 56
+    },
+    {
+      "path": "src/PrintFlow.Domain/Attempts/ProcessingAttempt.cs",
+      "sha256": "37D96C9BC6210BF42B8F051F5D361E50B998763CA0EBAB957CEB06854C971046",
+      "lines": 333
+    },
+    {
+      "path": "src/PrintFlow.Domain/Automation/AutomationLogEntry.cs",
+      "sha256": "C2C78A63475E49CCE77C6F972ED7DF59A5048282691EE694AE69D87DF7DC01FA",
+      "lines": 80
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/ImageFileFacts.cs",
+      "sha256": "3BF21142908E16B41C0FFE3DEADD7751E4F0BE72AB83544CB12079D5B7ACBA2B",
+      "lines": 44
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/NamingPatternRenderer.cs",
+      "sha256": "D8F1113767D47DC3BC5D6087F49FEF0E95797A18DDE32A9A92AA348439690A23",
+      "lines": 185
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/OutputFileNaming.cs",
+      "sha256": "0752C174DA77F4A2F0E01A6FC36DFAAEF67BF79D9DDF134B5CF71F22540BC15C",
+      "lines": 120
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/OutputName.cs",
+      "sha256": "939AFDA09EE7EC3A5A3D4B7759FA00ACED96F5B0B7EF9DCA722798920D1D3142",
+      "lines": 183
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/PdfInspection.cs",
+      "sha256": "8EF25C1A2323BD817F6923DF94D6A45F1A17E7FAC1953BCA48A5B0F3EB8252E7",
+      "lines": 36
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/PsdInspection.cs",
+      "sha256": "2C8BD96D500B3AD9D2DAFB1A296BFE1331929E91B4BF9D840EE9E9C1D43E4410",
+      "lines": 33
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/RetentionFile.cs",
+      "sha256": "AB22A5BAA88E64AE7902D7308E1A10F49EBA993A7347C604D4DFCBB799E33855",
+      "lines": 10
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/Sha256.cs",
+      "sha256": "0B89EDBDC0C403DE73E20ED140972F5026BEE05D9FE199052F52DD68F40CCE40",
+      "lines": 66
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/SupportedInputFormats.cs",
+      "sha256": "F52E1199413B30AEFE416187066B9D302EE60152ADF9FC45AD65EEF203F0D194",
+      "lines": 50
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/WorkingFileEntry.cs",
+      "sha256": "C1B29D90EFA3F9EF464E40003EF22D957EABD45654EB91672A3BDE436A5CD282",
+      "lines": 15
+    },
+    {
+      "path": "src/PrintFlow.Domain/Files/WorkspaceRefs.cs",
+      "sha256": "C0CA0001E431324F24FF7A672F788AD6D9AB96228DF39D9DDC422271752AF663",
+      "lines": 138
+    },
+    {
+      "path": "src/PrintFlow.Domain/Ids/IIdGenerator.cs",
+      "sha256": "44E4C200C6D58AAD2A14FE847F6C438FE672C85F18FED45CF24416DE46FD90C2",
+      "lines": 23
+    },
+    {
+      "path": "src/PrintFlow.Domain/Ids/Identifiers.cs",
+      "sha256": "B18CE8AECEBBB99827D96DD578030BB33C031F2D92814C02CAE752C218B0A8A2",
+      "lines": 70
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/FitWithinBounds.cs",
+      "sha256": "3F170523975A8392DF7E752E024E88E7C28F2C84033C0A519D53388F686D345B",
+      "lines": 370
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/FlexibleSizeSelection.cs",
+      "sha256": "2D952293CFDE84235BFF6BF555193502C614229018908E72812CC02C3D8F00A5",
+      "lines": 205
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/NamingPatternSet.cs",
+      "sha256": "6CFF919FFA0AF4E55FA7191D486A2D514722E07F65B9C296F38D2BB50456B578",
+      "lines": 41
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/PhotoshopPreparation.cs",
+      "sha256": "4FCACA9DAEB94CD44EAFD06DD81421E7221D1C49B8E4CC3CBE1EE35CB959F345",
+      "lines": 229
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/PresetPrintRecommendation.cs",
+      "sha256": "EDCD17260DADB78020CCA65F3C65B16B58C10036C1D38650ABD95AEE91FA7F61",
+      "lines": 347
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/PrintDimensions.cs",
+      "sha256": "CE961140619BCBCB7B87120EB478990A562DEC2000E4542BAC575ECF423C24D3",
+      "lines": 194
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/PrintOutput.cs",
+      "sha256": "596E9B76E25CA44F870F74D84094485CB496AD00539C20290F246DBB5EDE9D1F",
+      "lines": 109
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/PrintPreparationPlan.cs",
+      "sha256": "0EE2FF45A06180F6DB59B640746472AE64032D387EA576834F7524B5C04C59FE",
+      "lines": 358
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/ProductionPresetRef.cs",
+      "sha256": "2CE1BAA018C5F5FDA979BF6AB55C560818615249808401C2B2F4419D4830D2E6",
+      "lines": 17
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/ScaleToTargetEdge.cs",
+      "sha256": "5100F30D8C5797DE63DD1C6CC4E2DE6B627D17DAA7895EFDB38286834216E9A4",
+      "lines": 220
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/TargetEdgePrintPreparationPlan.cs",
+      "sha256": "D2D83D8EB5C7A1E42E5DA0692B12E5E5A063704E087523F3E2B3E344FFB6F246",
+      "lines": 445
+    },
+    {
+      "path": "src/PrintFlow.Domain/Outputs/WhiteUnderbaseBranch.cs",
+      "sha256": "37072B22990EEAC8F28E24E75FC0A8E98FE7B5686A26CB0DBB195CFA4F39E027",
+      "lines": 27
+    },
+    {
+      "path": "src/PrintFlow.Domain/Results/FailureCode.cs",
+      "sha256": "C6B5762EA981C1A2929B56602D0D5994D42426AC7F7C269A06099423CBE4CAA2",
+      "lines": 218
+    },
+    {
+      "path": "src/PrintFlow.Domain/Results/FailureEvidence.cs",
+      "sha256": "09587E06D506EB06A105AE6DF466C65F9DEB5535B454278554F4BC411E0D7474",
+      "lines": 56
+    },
+    {
+      "path": "src/PrintFlow.Domain/Results/OperationFailure.cs",
+      "sha256": "BE7631F9E11F76B30DDFE2BB1656292350E5C37337A6B4758D8ED548ADDEFF40",
+      "lines": 81
+    },
+    {
+      "path": "src/PrintFlow.Domain/Results/OperationResult.cs",
+      "sha256": "61FEE82A9D0D47C6CF3720F52D77A8A08FD61FB7A93AE1A100E5A3D7E60DB84D",
+      "lines": 89
+    },
+    {
+      "path": "src/PrintFlow.Domain/Results/Unit.cs",
+      "sha256": "0D7AA222E9E427D215D519A52892AA216BCB2B487BADEA3A52750A246D51088B",
+      "lines": 12
+    },
+    {
+      "path": "src/PrintFlow.Domain/Reviews/ReviewDecision.cs",
+      "sha256": "2097624A56E90CD5B94C16AC494BBC6B77DF62483415063A46C40B407FA9A121",
+      "lines": 77
+    },
+    {
+      "path": "src/PrintFlow.Domain/Revisions/Revision.cs",
+      "sha256": "E10730C3DAAF96A53B0EB5A58B637C4DEE88DC212395372E77138DC09C601555",
+      "lines": 74
+    },
+    {
+      "path": "src/PrintFlow.Domain/Revisions/RevisionEnums.cs",
+      "sha256": "8104CF8B41F54ED8AAA3AA5C53CEE3A049A82DBB8F9A9F0C70C5E9E4B6D90B70",
+      "lines": 69
+    },
+    {
+      "path": "src/PrintFlow.Domain/Sessions/BackgroundRemovalAuthority.cs",
+      "sha256": "3824B4974F63D10F3E4BE655D88B1BE3CB21B2BB8A0528DF0E6C6DAA774D64CB",
+      "lines": 105
+    },
+    {
+      "path": "src/PrintFlow.Domain/Sessions/InputSnapshot.cs",
+      "sha256": "44FE45655DC9D08995172A7F707FF708F7A37FDC41F4D7B4AF47AFC670A3776E",
+      "lines": 25
+    },
+    {
+      "path": "src/PrintFlow.Domain/Sessions/ProcessingSession.cs",
+      "sha256": "CF13EA06E1CA559DEC3C53A09E784441085414E6898028B64D5931EAF8398515",
+      "lines": 190
+    },
+    {
+      "path": "src/PrintFlow.Domain/Sessions/SessionEnums.cs",
+      "sha256": "BE6052731E851B562E7070F2244CAAF248A50471E06696A1AE580A4FBB8194E7",
+      "lines": 88
+    },
+    {
+      "path": "src/PrintFlow.Domain/Sessions/SessionStep.cs",
+      "sha256": "69E55F536E4E786BFD377A13666603B4842BEC01A1163CA652F39C5EB438CD7A",
+      "lines": 51
+    },
+    {
+      "path": "src/PrintFlow.Domain/Settings/SettingEntry.cs",
+      "sha256": "8CA885522947C366F85EE0273F5DB5D0E3A48230AB9D89D54BB44110F4796ACD",
+      "lines": 50
+    },
+    {
+      "path": "src/PrintFlow.Domain/Settings/SettingKey.cs",
+      "sha256": "3A41AF1E7334B5945F242D70C490591DF348B36135668D25DBF11E6D09DBEBD9",
+      "lines": 65
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/AlphaBounds.cs",
+      "sha256": "896349AB4E0F9FEBF59A290F2B4977BFA8B69087BCF7378CFCCD1CCCD9C624AA",
+      "lines": 100
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/ManualCropGeometry.cs",
+      "sha256": "5C5B156AFA2C8019BAD52698F6BB8B46D9FE5D6F6E227B65B3A90C5F7EF38FD1",
+      "lines": 41
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/ManualCropMargin.cs",
+      "sha256": "9E2CAFA77F6C0745CEC64A4ACA9CC19DF3B251FED8A7985AD981DB6EE2B1AF23",
+      "lines": 26
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/TrimBounds.cs",
+      "sha256": "D8AF51A584C7BBC1FCB580777B12A5442A27A3FFB1349B5390E5827BD5A638F1",
+      "lines": 149
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/TrimEnums.cs",
+      "sha256": "27843FD4556B319EFE6C6294411D761C162F952115BCF4E62BDA9B9F29AE2FD2",
+      "lines": 48
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/TrimGeometry.cs",
+      "sha256": "10C507F42CC1BD97F28F17F321A5641FACE229B8569C955B25C22B91C1645091",
+      "lines": 75
+    },
+    {
+      "path": "src/PrintFlow.Domain/Trimming/TrimMargin.cs",
+      "sha256": "FD2CA0710F79BC666E30BC81D3606DB974DDB31754C1EDE58FA293C7CCD08486",
+      "lines": 82
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakeAdapterExecution.cs",
+      "sha256": "ED1A799A566FBFF4A7EAB26FADBC8818AA80616EA0FE12060673F0BB494C70EF",
+      "lines": 119
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakeAdapterScenario.cs",
+      "sha256": "B4E1AE39913DD7A2FB71EC715FF5BCC070BC54A868F3A626FC1454F6BB181A08",
+      "lines": 87
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakeBackgroundRemovalPng.cs",
+      "sha256": "0B810692AB28C6C1F97F389486F062B9A14BC24A2F1BA3C1294695B9EFDBFFFE",
+      "lines": 116
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakeMeituProcessor.cs",
+      "sha256": "FC515E72DF464822025F3BFCA44D180B829C20656078E0B5BF8CA5160BD83582",
+      "lines": 101
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakePhotoshopOutputProcessor.cs",
+      "sha256": "22B45DE9544370943E4BDF9524983AA9E971381EC8775074E46E362E1775D084",
+      "lines": 289
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakePhotoshopTiffOutput.cs",
+      "sha256": "71692F81D11F454AD545BD7522F04A794E54DCDBC5C9FD123AE324DE7E748DD1",
+      "lines": 117
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Fake/FakeProductionTiff.cs",
+      "sha256": "F9EA822A34BDCC3032F0978CED4A68DC3F93C4C0AC9D2FAB9932924BE07E9284",
+      "lines": 356
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/GuardedMeituUiDriver.cs",
+      "sha256": "50DD1101DDCD7038AA75F7F48F00118150F2B9CA92263081D855D403DFC8905C",
+      "lines": 4920
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/IMeituAutomationFoundation.cs",
+      "sha256": "2B31D7D68E6DBDDDD57543D4D1EB3A055492540392F43D0F44E6FEFD28EEA60D",
+      "lines": 255
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/IMeituUiDriver.cs",
+      "sha256": "FBF69FF9149D6722874BB7280E8F0E3C1910EAC395FEC6452B3B6292553EF184",
+      "lines": 472
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituAutomationComposition.cs",
+      "sha256": "BE490ED9EBE4C570C0F1AAB8BB0926DAFFF9270B9B7C0AF599F9B7AE895C1892",
+      "lines": 106
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituAutomationOptions.cs",
+      "sha256": "4291B8503FC5C1968F9BD023029A51E50C1173E71FEC5856D88694D06E8E4DC7",
+      "lines": 118
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituBackgroundRemovalRule.cs",
+      "sha256": "E389F505AC5FCB2BCBD588CBDAF9B98B1BA0506563867C6897C727EF629DB289",
+      "lines": 50
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituBackgroundRemovalTargetRule.cs",
+      "sha256": "674C30A4671571D0E855F150E1A7E483FA9AC0578E7CCB662968FC6BD861BF99",
+      "lines": 113
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituBaseline.cs",
+      "sha256": "200EF6EFFF382B251C84C275F40B3623935978BEDA7F4F481A56FEBE5B272F73",
+      "lines": 517
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituBusyCancelRule.cs",
+      "sha256": "ED940396B42DED30553B29052D6A3770FBF5DACA86C26FEB7619AC9AFB4D25DB",
+      "lines": 292
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituCardTargetRule.cs",
+      "sha256": "37D778D63F2B3E25FA497E701378A60B318E6AAB5A81F93A5579BC035C0AF6DA",
+      "lines": 363
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituCutoutOutputRule.cs",
+      "sha256": "4560C39CEF4A835C0E7369542643D4043F401DA9A675EA8DC6AF057D2E98D2D7",
+      "lines": 110
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituDocumentIdentityRule.cs",
+      "sha256": "35A7C07698DB45404B45F5EDFDD0E425271E0F0477584EAE431E35C02BC82A09",
+      "lines": 139
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituEnhancementOutputRule.cs",
+      "sha256": "B0AE2DB1398BE0F9ACA707BF6D123B981C9EB6ECD1A8727302D3DFD817A7DAA7",
+      "lines": 137
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituEnhancementRule.cs",
+      "sha256": "7E065D999CDD17267401824FB40B82713AD47807C1F7AEF10B1264EB22695C5F",
+      "lines": 145
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituEnhancementTargetRule.cs",
+      "sha256": "D8F134BF228B06AEE960BFE909993CB6416959E25D07969379080041877E353F",
+      "lines": 232
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituExportRule.cs",
+      "sha256": "5733746F4F6B4D112F9E2673CCEFB681D31127DC4E493150A8CC7F2E752A1F43",
+      "lines": 151
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituMarkerExtraction.cs",
+      "sha256": "05E3D0A77829D88DF402DAD70E37962B5E7AAEEA7541A16F7C5E1E2EB994CE5C",
+      "lines": 71
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituOutputStability.cs",
+      "sha256": "857E1E4499DA3F894F74A6941B59C8157721E837F30308E4E354FA1E62F93514",
+      "lines": 173
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituStartingState.cs",
+      "sha256": "9992146F151A9EE98B4E1B38B1D7AA67E9A31093B129F10EB981BACF9A0E2E6B",
+      "lines": 119
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituStateClassifier.cs",
+      "sha256": "AF13469CDEB7F836275210CC8E4D1BD8AED6F5AC79DFAB481AB0E48C41D747C3",
+      "lines": 229
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/MeituTransparencyRule.cs",
+      "sha256": "EBDA6432488770D99760ED8C45FB4BB5D83C079B24AE5D1C292C044FEDA65639",
+      "lines": 96
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/PresetMeituBaselineProvider.cs",
+      "sha256": "3D91FF111667692EA6F1C7817F58E06E3C559FA1346D0B30FD05C3F53CAE2A5C",
+      "lines": 1340
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Meitu/ProductionMeituProcessor.cs",
+      "sha256": "B53FD2078B93C3C5D1BA28AE25DE5422C0D2EE0E28E8094E5E2CEBB3A62A0A5E",
+      "lines": 1417
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/GuardedPhotoshopDocumentPreparer.cs",
+      "sha256": "8C5B58EEF9E45B2A3E33F4E1BF32180D5882A3B910704D25A679658537011E7E",
+      "lines": 697
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/GuardedPhotoshopTiffSaver.cs",
+      "sha256": "BC281A0CCD69A3C233C885FFD1A16F393D6BB000831143AC93296BC7E12C1F7B",
+      "lines": 514
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/GuardedPhotoshopUiDriver.cs",
+      "sha256": "A9493005C7F65554831BE41B93C36060DD25E110DB1284F5247092EE8BBF5693",
+      "lines": 1440
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/GuardedPhotoshopW1Executor.cs",
+      "sha256": "6E384052AA0C4BAD9962F6967BC4DF9843E9E58760EE9742D322CE4B2DFF5DC1",
+      "lines": 465
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/IPhotoshopAutomationFoundation.cs",
+      "sha256": "D1830421C28B018EA4E59EAB9986275AEC60AAEFABA06800E98F0393CE8237B8",
+      "lines": 126
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/IPhotoshopPreparationAutomation.cs",
+      "sha256": "F9C154B61CE3A18072D8B4E5F6BC39614FF2C3C609184538EF5D04A114F53E5B",
+      "lines": 54
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/IPhotoshopTiffAutomation.cs",
+      "sha256": "1A4D67C7029F43A03881540B439D1C5853BE53CD92EE893075B0B9FB0CC55443",
+      "lines": 103
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/IPhotoshopUiDriver.cs",
+      "sha256": "FF0D52B4130330F450CB3A04F97F7ABE3D6922439353895710387F65BDCD6644",
+      "lines": 128
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/IPhotoshopW1Automation.cs",
+      "sha256": "1BB006FDC663AAA7D11DC038EA62F134D600DEA43BB666891F45C0D8B9B30EF1",
+      "lines": 67
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopAdapterOutputFactory.cs",
+      "sha256": "D9B52F006B925E5944BD280E2CB5F28C20EE64BE38B7A85C2EF521B9AA8B0D6D",
+      "lines": 257
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopAutomationComposition.cs",
+      "sha256": "9C52ED2A1690D41C77B959B63506788E1F7B56B512832AA3998B0A547EB2FCC6",
+      "lines": 204
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopAutomationOptions.cs",
+      "sha256": "E2BE2F0541467BDE884B7926F4B8EE7C0B261FC91CEF24846919DAA5F7F9FC95",
+      "lines": 55
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopBaseline.cs",
+      "sha256": "FF7020F1475F59080D677FABA0635E640BB9D2CD01C21149D445F09262B1A0CE",
+      "lines": 250
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopDocumentIdentityRule.cs",
+      "sha256": "08BC04321BE57E3BAABCBDDE2CE83DE1C8AD84C37B9D1B48E379F07C0E4E5C34",
+      "lines": 224
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopExecutableIdentityRule.cs",
+      "sha256": "78841931B9938C5F55AA4FD6B64C7A415FADA7A093A8A3383905ADC62C67C88D",
+      "lines": 91
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopPreparationNativeBridge.cs",
+      "sha256": "210980EA83DE6D3B30B07E336BF2131930A63BD112A6BF8FCE7D26C97881ABE8",
+      "lines": 421
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopPsdNativeBridge.cs",
+      "sha256": "D62140BFCED5C8CC3E9BE58BFF33BB442BA26ED551EC96304A7EC89E0A2B3EE5",
+      "lines": 171
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopRuntimeFactReader.cs",
+      "sha256": "8FEF83843A4DEECD3EB9EA4FD6A32C6659D213C1F534E09AAFBE2665D67C4822",
+      "lines": 186
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopStartingState.cs",
+      "sha256": "0D23976FF07F3AFF57B9819E450661629258966E3089106AE2AD0E2A50E136D9",
+      "lines": 157
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopStateClassifier.cs",
+      "sha256": "09F9D8D4CFC40D9FF6EAE3E4DA4F4DEC19D988340849DF942B62CB69060C3B36",
+      "lines": 138
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopTiffNativeBridge.cs",
+      "sha256": "39344306B128F308C273F64F5CFFA1BF629601E5078341E639B106F98DECE5B3",
+      "lines": 370
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PhotoshopW1NativeBridge.cs",
+      "sha256": "1CD0360454C47F25F4F825A2DDE572AC2D87AEF9F26053FB1718FE8AE2F78039",
+      "lines": 464
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PresetPhotoshopBaselineProvider.cs",
+      "sha256": "63A3F8AB65E0A9B97F42BF18062D699B7974ADA4AB1E820D2B2AFD43FD4C5E2C",
+      "lines": 541
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/ProductionPhotoshopOutputProcessor.cs",
+      "sha256": "010E33B433667A3D852FA0344C91266628C8FAA8B0266B89AD68BA4C3F2F7789",
+      "lines": 1151
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/ProductionPhotoshopPsdPreparation.cs",
+      "sha256": "22307952935C2C31565E424C8CDEAAE61F3B861B89CD8FCF7541C067FFB6AC11",
+      "lines": 199
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/ProductionTiffInspector.cs",
+      "sha256": "9675A7BCFDCD3D7B47C17AF45D3FF946ADD552202253808ABF9980C36E6D470D",
+      "lines": 727
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/ProductionTiffPreparationMatch.cs",
+      "sha256": "A928666E365DA632F6EF6B2471E769BE9EED16456A7DCA9C2D183BAF38465262",
+      "lines": 113
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/ProductionTiffReviewDecoder.cs",
+      "sha256": "0726C278B484D1C9B57F3F7BDFAC66051EF9EA716385EE391261E49CFC55B399",
+      "lines": 383
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PsdCompositeProbe.cs",
+      "sha256": "F8266B065713636F00B1A5A3C63E269F2D147CD868A728183EF46F368DA49AFE",
+      "lines": 87
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Adapters/Photoshop/PsdOutputSettlePolicy.cs",
+      "sha256": "E26B010B21BB1582D74965110AB43699F9964264C32C6A7AF122C24C31E100B7",
+      "lines": 100
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/GdiWindowEvidenceSink.cs",
+      "sha256": "3F1E9CC27387922969ECB107881DBB21622323EA20002D941C657868542BB42F",
+      "lines": 187
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/IAutomationEvidenceSink.cs",
+      "sha256": "517540638FAD7DE14BDCFE1BBF3D4CD4FBB20DDDD88D15255ED7DC3B55D114A5",
+      "lines": 35
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/IExternalAppWindowLocator.cs",
+      "sha256": "C1843137A414160272680195EE5860862CAB68413C1C623B21108DC78B6E6B9E",
+      "lines": 87
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/IScopedInputSink.cs",
+      "sha256": "2D202E7C6324921819AF286C3ABF512F4A38A7ED44E96D3AFE5F4A3BEEB22A06",
+      "lines": 85
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/IUiElementProvider.cs",
+      "sha256": "C77E8E9470F66A0EFD76F420A41408EC85AF5A48EBA7CF8E6536D6B441CB2CCC",
+      "lines": 232
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/IVerifiedControlSink.cs",
+      "sha256": "8A7E464A7181474826855719C827BA6E6948EF847E2BD4F37F9D8421AFABAB8E",
+      "lines": 134
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/NativeMethods.cs",
+      "sha256": "01054597A51D32210525B3DDEC8496A59A7690380165580870120D61E2912799",
+      "lines": 485
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/SqliteWorkstationAutomationLeaseManager.cs",
+      "sha256": "4366580845E94A50DE137EA3633D5D0475A052A1291D045F5F6CDCFAA173306C",
+      "lines": 510
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/UiReadInterruption.cs",
+      "sha256": "6405C22DF218DCFA4FC76A2A18D7862330EF6F34AB7D1C7C0529C289F4B7D287",
+      "lines": 74
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/UiaElementProvider.cs",
+      "sha256": "3F7B0B853635316DC2B6967B9A3BDDD70C163694CC10FFE71BF7D6E603D6F5CA",
+      "lines": 771
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/Win32ExternalAppWindowLocator.cs",
+      "sha256": "B5F6F6339872571F7F17E5B976CEA496F2C934E43A62C4C90118C101B99F9CCE",
+      "lines": 332
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/Win32ScopedInputSink.cs",
+      "sha256": "7B0B190DC325ACF71CF6F75634122757F0D5E3E0662D5F4C78A9577E00AA36FE",
+      "lines": 135
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/Win32VerifiedControlSink.cs",
+      "sha256": "43A09516A587DEAC068050EC40E5F0CFBDC8E2726A2005154AA97A211B8D20C3",
+      "lines": 312
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Automation/WindowIdentity.cs",
+      "sha256": "9300C85FCB9252460CA43FEFC9A591AB689C6124BC654176E8A71CCE9E6E2736",
+      "lines": 78
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Configuration/PrintFlowConfiguration.cs",
+      "sha256": "F0561929C6CC3F636D2349D408FCD52C009343E98DCCD593114992C2EF3D155A",
+      "lines": 109
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Delivery/WindowsDeliveredFileShell.cs",
+      "sha256": "C4186BA316E24D51EB60E74B31EAE274279C1F3512FC82B870E24CDBA5C8EB2D",
+      "lines": 29
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Delivery/WindowsDeliveryFileSystem.cs",
+      "sha256": "3D63E4FA65ABDD6D4792A7E8CA077B4936E7E63968E7E301E8DC8E695837ED53",
+      "lines": 461
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Delivery/WindowsDeliveryNative.cs",
+      "sha256": "3A41EC3B7EA1939B8A4E525D6929D3C6323E65647B575B4EB55A1D0067497E45",
+      "lines": 192
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Diagnostics/DiagnosticPackageArchiveWriter.cs",
+      "sha256": "11620882E5189DB7CB8EBAC6AE1B13B617556EDAB5868ABECCC4D9C47820ECDC",
+      "lines": 269
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Diagnostics/DiagnosticPackageManifestRenderer.cs",
+      "sha256": "D727BCA7AFCE538559E51AE6F69FC6FA019F4855FF4021B1991E2DBBF4C8779C",
+      "lines": 98
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Diagnostics/LocalDiagnosticFileStore.cs",
+      "sha256": "F3B0DCE6A7985FE1EB67418E1538B09696635C94F4FC9B9041FF8BAC31BE939D",
+      "lines": 53
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Diagnostics/LocalDiagnosticPackageEvidence.cs",
+      "sha256": "5997B2661EDC76ADA7BE2DDAC348707E88EE33896FA70F277AF64E66B5783C3D",
+      "lines": 118
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Diagnostics/SystemProcessLiveness.cs",
+      "sha256": "B3479BFB07F717157B3080650D7C2585CC7D739ED1AEECF296450933684D0EC3",
+      "lines": 92
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Gate/VerifiedEnvironmentGate.cs",
+      "sha256": "E52587B338894EFEC251F6407B728395DB5351C3EB7A2C637C2DC613E19F2209",
+      "lines": 342
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/DeterministicAlphaTrimProcessor.cs",
+      "sha256": "B5598A84A64EC9E18216C3DF961126DB9C32DD8C1184BEBD09F1E89E541F00B4",
+      "lines": 302
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/FormatSniffer.cs",
+      "sha256": "0E1C58451059C9C80592CEE6F71AC8D88CD6F2A7297C719F235F229BD423E77C",
+      "lines": 52
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicFileInspector.cs",
+      "sha256": "52F0FA807465DA8923FA177B295A3174ECE18C5C0F422429818D44A4E448096D",
+      "lines": 163
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicImagePreviewDecoder.cs",
+      "sha256": "95C2F5C00E46B277527A8ECF5429BD57393D131F88017415513C4DDE1ECA95D6",
+      "lines": 306
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicManualCropProcessor.cs",
+      "sha256": "EBC3CE80A29055B9D37C496DE2E921D84E9662056B7043DA737185549D56A91A",
+      "lines": 218
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicManualResultImporter.cs",
+      "sha256": "227325A41B6DC07E96D2CE487567A8139307E2F5C5754AA9142575CCB0F8E337",
+      "lines": 255
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicMeituTransparencyInspector.cs",
+      "sha256": "E219B02E50E1DD6BA2E1DADAC74FE0C30087FD549EE526D7E94C99B9FC2562F6",
+      "lines": 124
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WicPixelFormats.cs",
+      "sha256": "E5E31855090E3290479CE50EF1051092E06AA22676DB637BD90DF0F5592AE35D",
+      "lines": 131
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WindowsPdfDocument.cs",
+      "sha256": "26C3F0070C6D7F48E2F2DA953D1AD0BE815B50AD4B94F73D7461D8D092A3C108",
+      "lines": 106
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Imaging/WindowsPdfPreparationProcessor.cs",
+      "sha256": "CAE163B3A2A64641A0CC5D22652439A42903BFC4CEFC4D5220E76B4556A097AF",
+      "lines": 126
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Preset/ConfiguredPresetProvider.cs",
+      "sha256": "4D81DE7C1D1410F7FDCB2EEC2CDA3E8910B64B26C11FFFB313E45AC2D2BFB372",
+      "lines": 91
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Preset/VerifiedJsonFile.cs",
+      "sha256": "625E20729745E72C03A4181E809FA4AD973F3DB122DADF14C6DA6A8E0E3AFD59",
+      "lines": 71
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Preset/WorkstationPresetProvider.cs",
+      "sha256": "9550DC7B0CE5A5AAD9DB65D525CFFD490FC799700C0EBB1904FC197CFE941624",
+      "lines": 264
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Properties/AssemblyInfo.cs",
+      "sha256": "D1468693584CC3D1077DC372B6679850AFD81D5922D3BB7BD56038E73B17E066",
+      "lines": 3
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/Mappers.cs",
+      "sha256": "9306565322426CBC47AC816893912909FEC1C91AC7E9D4827F7FF21BA94E54CF",
+      "lines": 1771
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/MigrationRunner.cs",
+      "sha256": "AAAB5AECC7FFCD5A7D2E0529C2BD700622375F3E1A00DE702822D52D02F70443",
+      "lines": 200
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/PdfInspectionStorage.cs",
+      "sha256": "4AB1B498477EDEBD76306D188A86811EFE618DFE58BD9986AC516A050806407E",
+      "lines": 65
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/PsdInspectionStorage.cs",
+      "sha256": "D7AB2873588886DCE7CC9F19BF46D048170D4371884DAF6F32A03FFED2CA7B18",
+      "lines": 72
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SessionRows.cs",
+      "sha256": "08E079E00C4A3A8A30975E3FDC9E785305C35B7B947756650D200FF932113D83",
+      "lines": 434
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SqliteConnectionFactory.cs",
+      "sha256": "4947D55F26F1701FD54D798550AD37C0038597B43448515E53CCCF5E0870DD0C",
+      "lines": 50
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SqliteDeliveryRepository.cs",
+      "sha256": "388DB771EA07CE429134DED56B0C9919B1C9DB7EF97E18A1BEAC91503E0EEE15",
+      "lines": 520
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SqliteDiagnosticRetentionRepository.cs",
+      "sha256": "DBB66478762AF65F26DA07F0587070C16FAF6222C006E3C2EF661050ECFC98EA",
+      "lines": 285
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SqliteSessionRepository.cs",
+      "sha256": "46F223FDF7562BAF01C0933CFEAF6978325F4074C6A793BF970E5A4DA1365CDA",
+      "lines": 1219
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Sqlite/SqliteSettingsRepository.cs",
+      "sha256": "89846A0FD3224F8713DBD71B9E40E194261E4B04145FED0491EDA2CB3CF85F20",
+      "lines": 129
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Startup/ISingleInstanceGuard.cs",
+      "sha256": "0BEBF75C411B57DBB0B0149799294F748A2D496EC7BB2BE45CB301A4EDD6B319",
+      "lines": 47
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Startup/SingleInstanceGuard.cs",
+      "sha256": "55D6D74D2D65A1ECDB0BF077644A2C7FCF5F4E5930A3175FFB841B40C10BFCA6",
+      "lines": 132
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/EnvironmentAutomationLock.cs",
+      "sha256": "2D055C0BF99E4A87CEFE16B66E309CC51EEEB1651DD3B229BB0F5F59496AA9A4",
+      "lines": 139
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/FileSystemArtifactReader.cs",
+      "sha256": "8C6B97769AEAA49147BD5DB6240E7A24F5739DE254870B30E57E7386DAAFA2B3",
+      "lines": 135
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/PresetWorkstationRequirements.cs",
+      "sha256": "F62B64199765CD7D43AB9F6DB0B6FADD7BD006D019A5C30AACDB162FEC4E7474",
+      "lines": 363
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/ProductBuildIdentity.cs",
+      "sha256": "C66AA9B4EB1A05814989823BB6DDC2350292EFEC26A1D9BF3DE9998855B73436",
+      "lines": 241
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/ProductionLiveWorkstationVerifier.cs",
+      "sha256": "0B8EC02CB3112B1E5952A7FB9B7962C9FDC5CC66625365870FB7D1763936F9C9",
+      "lines": 1127
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/ProductionRevalidation.cs",
+      "sha256": "041FA546D9E52CEDE60523110E525F2C08E0BA7CDEDC1E5DA2D567D1FA037145",
+      "lines": 507
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/ProductionWorkstationVerifier.cs",
+      "sha256": "22709890BA238462D781D75445AEC3E1C1A92576EA6BD1A3EB393D0FE8843AAB",
+      "lines": 1083
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/ReadinessProbeProgress.cs",
+      "sha256": "CC140818B57BDBA3C095FA12627B7D6FC357A181177C90928FA463F0AE8ABC9B",
+      "lines": 63
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/Win32WorkstationFactReader.cs",
+      "sha256": "8880206698EC2B05CFFF546B6E65AF936DE41C1F37854BCDBF8EDF8919E54BC0",
+      "lines": 213
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/WorkstationFacts.cs",
+      "sha256": "256C49C781B2E1415838AC98C9380082D2797802E74D110AF29FEFAAEBDBFAA4",
+      "lines": 148
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/WorkstationRequirements.cs",
+      "sha256": "52E7069C9A4A056C07F756CDAB3AA002435A70CE129D669008BF0049CD574689",
+      "lines": 86
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/WorkstationVerificationResult.cs",
+      "sha256": "3908770CEE9027B7A79E408F3FB4E91DB99C008E4A53DF1599B5CD9AD28F5477",
+      "lines": 176
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Verification/WorkstationVerificationVocabulary.cs",
+      "sha256": "53AF674E79A22B26722A82961AEF5136B8E2C5907C1059EC45F0DF50DFB0431A",
+      "lines": 148
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/FileCorrectionPackageStore.cs",
+      "sha256": "8447832E4C7223D12EEC7E71E1AF10E617273F6E1F07EE974D07A0C77D4878BD",
+      "lines": 219
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/FileWorkspace.cs",
+      "sha256": "993C4C2C68E24600C5B8F03CF0EEF177A0586EDCDCA981B2C51D704334F077DB",
+      "lines": 719
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/PathGuard.cs",
+      "sha256": "069299A7C7A30BC96B09B4BBCB79254BD963BC1438B888FE8821792DC99A9607",
+      "lines": 64
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/RecycleBin.cs",
+      "sha256": "C35570F04EB0C6D47536ED866768506374C41630E70BFC483751E8827FA05954",
+      "lines": 46
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/ReparsePointGuard.cs",
+      "sha256": "BFB4DAA3A721F0EF8369C660CCB6FB20425E2DC0C59565090C25F84B5B976D03",
+      "lines": 21
+    },
+    {
+      "path": "src/PrintFlow.Infrastructure/Workspace/WindowsCorrectionFolderShell.cs",
+      "sha256": "FD7E17FD162D662185940E9260CF1A057E6FF7AB5CCAD76D98F29A724DB663CB",
+      "lines": 63
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Commands/CommandContext.cs",
+      "sha256": "EE249B8A427F9DF50AD07C1A475D5BB1DC3AD98DB5C844E6F7029FA68593E83E",
+      "lines": 63
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Commands/CommandRejection.cs",
+      "sha256": "1B52262420652E063F6CC9F25CFF1B28479F2C5C8F382DEBC5DA244858BA5B1D",
+      "lines": 51
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Commands/WorkflowCommand.cs",
+      "sha256": "FC35319B05616EA74EFDFD73169A5AA9A61C7B7E651AF20865EE2F38C25FB5EE",
+      "lines": 463
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Definitions/StepDefinition.cs",
+      "sha256": "F2A45EF7CB0090D1BDF17D17AD26F96D884C8FB8A62FBF830F1778D4D49844CB",
+      "lines": 53
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Definitions/WorkflowCatalog.cs",
+      "sha256": "F457EA050AB8ECC5392B2105B96E665589A1671B23C25FB0335FBBF7B5474DA5",
+      "lines": 161
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Definitions/WorkflowDefinition.cs",
+      "sha256": "03F1AA88434611788AB157238FBA744B0350CA5B32EF8A846D194BAA8788B141",
+      "lines": 49
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/ApprovedArtifactDeliveryService.cs",
+      "sha256": "299E86C286D3C5426D51790ED6E932C51630710D685D11F38164A23AEA07F36B",
+      "lines": 667
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/ApprovedArtifactResolver.cs",
+      "sha256": "DE892A3BD5CD339C6736AF9A69F27A6431F6B15BF2810EF92213027F5D1B8D3A",
+      "lines": 170
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/DeliveryContracts.cs",
+      "sha256": "8EF5C4FEAF7AAD3AD54196DBEA8E22A75FCBF70FC75D7011A3678D6AFCF027D5",
+      "lines": 120
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/DeliveryDraftText.cs",
+      "sha256": "D03ABB036BF94A2B4C24FA4E9691F489CD1B156AE3F7823BBCCC4BC010697E41",
+      "lines": 43
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/FinalSaveCoordinator.cs",
+      "sha256": "92209348FB63FE87F57CD1B2875BEB3088A1141BF6D4AC7CCC0D605678515703",
+      "lines": 308
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/IDeliveredFileShell.cs",
+      "sha256": "98FEC5543AD80165C8E19DDC9D8A96E960C32E88E24A965BB1B92DC25BABE52A",
+      "lines": 14
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/IDeliveryFileSystem.cs",
+      "sha256": "E4019D020EC5FF26CFCF1A5D2E9C1C4D0D9AC9135CFF67F86C1D8C4E9FE00D4E",
+      "lines": 56
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Delivery/IDeliveryRepository.cs",
+      "sha256": "0D17B8D7F34EEACCB13B5E1AF2021081206A6E9A7CB3552C718B3230C03BAF2C",
+      "lines": 35
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Effects/WorkflowEffect.cs",
+      "sha256": "92CA19F92BD96CB39B88A489C4B63F7488E4BF0D25D3BB58F5E808A9AD412D6C",
+      "lines": 228
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Effects/WorkflowTransition.cs",
+      "sha256": "CEA8E2D9E9079A32D26BD5A6121A489266FD7A09DC2B99FE3E414136EB38BC7F",
+      "lines": 57
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Engine/IWorkflowEngine.cs",
+      "sha256": "E4D6D01611CDEBDE7CB7F7850FB982EAC1FCEEE3E16111692626F7A6E74E2048",
+      "lines": 66
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Engine/SessionStateRules.cs",
+      "sha256": "E2682910B92C253E119F485ADDF1B5700D7B8A472C6DE5DCA2A6F393EA0C1B82",
+      "lines": 59
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Engine/TransitionTable.cs",
+      "sha256": "4AB06B214188944D9A256A48404B095A74FACA48A176F772D99CF557B6F586DB",
+      "lines": 309
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Engine/WorkflowEngine.cs",
+      "sha256": "2C4745D7A3426F282864B1221C914F7FA655F61BCF90028A7B47F5BAC2967B54",
+      "lines": 2177
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Engine/WorkflowSnapshot.cs",
+      "sha256": "9707CD7186EFDC36BF2165849613CA2C5113DC870FC8939EE903581E4631C4AF",
+      "lines": 631
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/AdapterPorts.cs",
+      "sha256": "09485D2EB58D8BFB49E70D9BC3772B6A3480307F2428C1C6C6F5AE51DB8C7836",
+      "lines": 141
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/AutomationControl.cs",
+      "sha256": "80648EB7ECE66C07CC29343F38E405458EFED1C8849F2F23C80DCDCE5791C3FC",
+      "lines": 455
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ICorrectionFolderShell.cs",
+      "sha256": "56363295BCC316C69554A7B7D9E66C57AE5F969379AC7CC79E4D25CD25D346A0",
+      "lines": 22
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ICorrectionPackageStore.cs",
+      "sha256": "2CFB32DDD3CACD103E9BA1143DBB4B26DCBEFE776720944BD9E6BCE19D6E04A3",
+      "lines": 55
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IDiagnosticImagePreviewDecoder.cs",
+      "sha256": "75786D94E2F60E233ADB35050B5B7E18DBB23EDED38BE9A0522038C31058882B",
+      "lines": 18
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IDiagnosticPackage.cs",
+      "sha256": "0AA4BC617C31D39843C88425ADB7E7E99DEB581571FA4FACD2DBFE578AA6954B",
+      "lines": 30
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IDiagnosticRetention.cs",
+      "sha256": "C7AC012EF0F4DB269926A7B8074C9554BB67C8382C5D1B1F2ADD92180591A430",
+      "lines": 70
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IEnvironmentDiagnostics.cs",
+      "sha256": "5B8D7C4F50B50AAD492FCED2DD5D81CC64119B66648B1D9409340DAFCE788255",
+      "lines": 144
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IEnvironmentGate.cs",
+      "sha256": "F95B33A4E7CC4C675CD3D1A0D668391AD369D01C273F6E4AACEF6B24EFFD9561",
+      "lines": 63
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IEnvironmentReadinessObservations.cs",
+      "sha256": "899D53E720E51392AC864FD039DEF86C8D1EBA015570861DA88F902C8006ED9F",
+      "lines": 12
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IFileInspector.cs",
+      "sha256": "B47F69FEAC9AD86D0B676D43DEB26891C6A40C28E845CAF4FE196546158D3662",
+      "lines": 26
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IImagePreviewDecoder.cs",
+      "sha256": "CBC55AF49719A1606D429A0476D50BDF823B3F357EF31A4B4572902D27EDA063",
+      "lines": 96
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IManualCropProcessor.cs",
+      "sha256": "CFA50403752546000F247C08EF8853FBE70B04275C9BC5A0E2135C30DAEF868B",
+      "lines": 84
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IManualResultImporter.cs",
+      "sha256": "1F16BB23CA9A1C530311BA12C32342C5671A60DCC621B6DE86178039DE090D60",
+      "lines": 65
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IPdfPreparationProcessor.cs",
+      "sha256": "ECB8B595F556CD0B743F16EA10657E1350FA907FA3A43D6EAB268A9F3A52F13B",
+      "lines": 27
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IProcessLiveness.cs",
+      "sha256": "42E5BDE96A9EB99075E044F161EA15AC5795FECBBD71DE705C6CF9F54982056C",
+      "lines": 36
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ISessionRepository.cs",
+      "sha256": "25483B1C2CF3AB0574971A172E53AEBCECAD363BE53C52C1C4FFFB515B4C931E",
+      "lines": 102
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ISettingsRepository.cs",
+      "sha256": "B1976CBA077C7FB2DCB8817F12886D2A88F4F5C684BF69BA68F4CE1690156761",
+      "lines": 42
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ITiffReviewDecoder.cs",
+      "sha256": "C3D2032202C3F9C5619C5AD1A10F948F393AB4F6EB92CF9AA1EAE2EDFEC6BB84",
+      "lines": 120
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ITrimProcessor.cs",
+      "sha256": "B4F6BE4DB178B4592844B7720E5940D8AB36E1E02A0C571C5A61D88B149A8A88",
+      "lines": 158
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IWorkspace.cs",
+      "sha256": "7743614D38033E904C44A2F44EDCFA973BE1784A80BBFEAA99A8D404637C4272",
+      "lines": 137
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IWorkstationAutomationLease.cs",
+      "sha256": "4A333EC690A3FF4188A600A9FF185A7CCAA04AA2133B762F869B925BB4BF9F4B",
+      "lines": 58
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/IWorkstationPresetProvider.cs",
+      "sha256": "0AF852A6D41E6A6A024C501AEA5DDA5B292BFF96D0C6E92359012C47512F78B8",
+      "lines": 60
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Ports/ReadinessDiagnostics.cs",
+      "sha256": "7305F573B6F3C90FF7113778B103311BD617091396A15399BF6C7D7E7AB4594B",
+      "lines": 74
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ArtefactPreviewService.cs",
+      "sha256": "9934BC9CE219FA371D380CEA6F4AE6663314BC28DC8366DAF201F6E52CDE254B",
+      "lines": 172
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/AutomationRuntime.cs",
+      "sha256": "15D1A251BCC341C13FA8279B2B8EDFA684E873A418F560DD6CE23E094BFEA65C",
+      "lines": 369
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/CorrectionClosing.cs",
+      "sha256": "3C57D539DE9309F410FD6963CBC666A5D085357D325521F742EFBD8737C667D8",
+      "lines": 87
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/CorrectionRequest.cs",
+      "sha256": "69E930AB6E108396F92348E2AE73DF203BCA85DB3B4F54CB04A846E6596AF60F",
+      "lines": 172
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/CorrectionRequestEligibility.cs",
+      "sha256": "8F264F5EDF6B41B009B30D774E33C851E15AC61F86C56B1786F0445E53139B83",
+      "lines": 228
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/DiagnosticPackage.cs",
+      "sha256": "CE383BCE7ADF8BD47FD295BF3A19E3164504B832CA244B201215204A09E3BAB5",
+      "lines": 242
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/DiagnosticPackageService.cs",
+      "sha256": "4526A3718155CE5DB21ACCAFED876520D0DF11169DB5FD6190D7F2A3069B47F5",
+      "lines": 167
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/DiagnosticRetentionPlan.cs",
+      "sha256": "0E5658A882C0E9F1D479EDE756DBC899733F0970CA5A1A141C2E4FE753290E87",
+      "lines": 250
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/DiagnosticRetentionService.cs",
+      "sha256": "24FBCA46B4D8DF5A84F6D67624316598CBB71BE90DAB698C100C1CBF76457E3F",
+      "lines": 219
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ErrorDetailsView.cs",
+      "sha256": "FFED28BD5787C43E56EC5FD3E4067B835E77447073FF21297A5E6E49529E97D5",
+      "lines": 91
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/IArtefactPreviewService.cs",
+      "sha256": "8CA1207934596226E0BA6CE5611B634B746A5CA5327CB3C89489EC84BA4FCDF2",
+      "lines": 83
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/IProductionTiffReviewService.cs",
+      "sha256": "1CCFC585286CE06E6DBE8F9B6A5BA78D818EBDB50C398B412E18098C259C626C",
+      "lines": 180
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ISessionService.cs",
+      "sha256": "2F7879EE6F7AB64731C2DA6EED1C817B1E5280495D9B2A6DC5FEA60F2AB9B053",
+      "lines": 242
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/IStartupRecoveryService.cs",
+      "sha256": "432D0076C3B6AD7D42B716C0BCEDB6442CA531AEB050CB8B46941AC256100DC9",
+      "lines": 107
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ManualCropEligibility.cs",
+      "sha256": "7762639D8A71521E77E9E653AD013393C46CBE4AAAFA7B42E7DDFDB78457D857",
+      "lines": 147
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ManualResultEligibility.cs",
+      "sha256": "E5880EFB518E9A7FDC9A2B6797711C45AF8C05AFDAE3DF10A2AFBBF2E05A56B7",
+      "lines": 16
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/PrintDimensionsPreflight.cs",
+      "sha256": "E87FEC84756A56B8834BB5E3A45AEA6CDC4CDC0FA7CC89725E1EEAC3CC111FB2",
+      "lines": 101
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/ProductionTiffReviewService.cs",
+      "sha256": "85FC42812702C8D9A3A5956D8B5B95802FB446869147132189F4CF2BB4E7DEF5",
+      "lines": 236
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/RevisionIntegrityGuard.cs",
+      "sha256": "5CB1840A8F8D7D1EF424859675DBB66C9D676CFD7C2DE9580C6DA2F9DE72A4F7",
+      "lines": 71
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionAggregate.cs",
+      "sha256": "C8DB7A012C9514D696D8B08FC5FBE560648A0AA35B02612ADE2493FD0E83AADE",
+      "lines": 209
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionCompletionGate.cs",
+      "sha256": "9A67E525F5571737E42F4C8FBE93613C7463561DF28ACB9665341B8C393BB6BA",
+      "lines": 26
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionHistoryView.cs",
+      "sha256": "C625A129E2F82A3FAD5AE596426DC821BFDFE4D2708B4B376C71661152DF9742",
+      "lines": 12
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionMutation.cs",
+      "sha256": "485DEFA84846CF731A5A3FD3BDEEDBA469895B33954357F16ABE4AC5454CAF97",
+      "lines": 123
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionRetentionPlan.cs",
+      "sha256": "B41C49CC972BB07DAB6AFED48643F8177A53C32764B3A63E3A8E75341C38CD1A",
+      "lines": 166
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionRetentionService.cs",
+      "sha256": "AAB1AFD9ABD61B1C3B8181FB30A1C18BA936D61AB6E465A1A51D301EADB9BC18",
+      "lines": 99
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionService.Correction.cs",
+      "sha256": "8D47906057B0E8E8F627B98FAF4E2E0571AE484F437C38EBA5A730BE8F0ACF68",
+      "lines": 555
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionService.ErrorDetails.cs",
+      "sha256": "8F6C6787CC87B65A1414E6FA21EBC76C54C0C152A86DCA0FC0E403EF25A8B3E4",
+      "lines": 221
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionService.Recovery.cs",
+      "sha256": "3F9ECDDAE8452EFD0A42E19EF8C3DDF96E93E90DE4C7934E4CE2803010781EB4",
+      "lines": 134
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionService.cs",
+      "sha256": "1C8D39AB0EF64A897D1F6C16E14A35646D93225F2F79C464C4159E6A5C40C618",
+      "lines": 3595
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/SessionView.cs",
+      "sha256": "AC394BA1EDCD102B081A92E4AA2490BE015C2227068CBDFB47CA1848BEDFE1D6",
+      "lines": 1240
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/StartupRecoveryService.cs",
+      "sha256": "37D91E244968635C5B5559538A823DC8F5DC935562CC7CB1BF0F555D47EA5563",
+      "lines": 480
+    },
+    {
+      "path": "src/PrintFlow.Workflow/Services/TrimAdjustmentEligibility.cs",
+      "sha256": "6D9E1CBF206EC3BE0B4DB2503B71D9043F19E01AC8E9E76AC1D37B03F7FB9608",
+      "lines": 161
+    }
+  ]
+}
