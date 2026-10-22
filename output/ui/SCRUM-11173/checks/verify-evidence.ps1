@@ -1,4 +1,4 @@
-param([ValidateSet('Q01','Final')][string]$Phase='Final')
+param([ValidateSet('Q01','Q02','Final')][string]$Phase='Final')
 $ErrorActionPreference='Stop'
 $checks=$PSScriptRoot
 function Assert-Counters([string]$Name,[int]$Total,[int]$Passed,[int]$Failed) {
@@ -25,16 +25,32 @@ foreach ($png in $pngs) {
     if ((Get-FileHash -LiteralPath $png.FullName).Hash -ne $geometry.ScreenshotSha256 -or $geometry.Dpi -ne 96) { throw "Image/geometry mismatch: $($png.Name)" }
 }
 Write-Output 'Safety exclusions unchanged; 17 PNG/geometry hashes match at offscreen 96 DPI.'
-if ($Phase -eq 'Final') {
+foreach ($reference in (Get-Content -LiteralPath (Join-Path $checks 'readonly-reference-hashes.json') -Raw | ConvertFrom-Json)) {
+    if ((Get-FileHash -LiteralPath $reference.Path).Hash -ne $reference.Hash) { throw "Readonly reference changed: $($reference.Path)" }
+}
+if ($Phase -ne 'Q01') {
     Assert-Counters 'e6-ui-architecture-final' 1494 1480 14
     Assert-Counters 'e6-workflow-persistence-final' 277 277 0
     foreach ($name in 'e6-final-vs-e5.json','e6-final-vs-baseline.json') {
         if (-not (Get-Content -LiteralPath (Join-Path $checks $name) -Raw | ConvertFrom-Json).ExactMatch) { throw "$name differs" }
     }
+    $oldFilter=(Get-Content -LiteralPath (Join-Path $checks '..\..\SCRUM-11172\checks\e5-workflow-persistence-final-filter.txt') -Raw).Trim()
+    $currentFilter=(Get-Content -LiteralPath (Join-Path $checks 'e6-workflow-persistence-final-filter.txt') -Raw).Trim()
+    if ($oldFilter -cne $currentFilter) { throw 'Persistence selection differs from E5.' }
+    $coverage=Get-Content -LiteralPath (Join-Path $checks 'coverage-map.json') -Raw | ConvertFrom-Json
+    foreach ($source in $coverage.Sources) {
+        if ((Get-FileHash -LiteralPath (Join-Path $checks $source.Path)).Hash -ne $source.Sha256) { throw "Coverage source changed: $($source.Path)" }
+    }
+    if (@($coverage.Groups).Count -ne 15) { throw 'Coverage group missing.' }
+}
+if ($Phase -eq 'Final') {
     $candidateRoot=Join-Path $checks '..\candidate'
     $summary=Get-Content -LiteralPath (Join-Path $candidateRoot 'validation-summary.json') -Raw | ConvertFrom-Json
     if ($summary.BuildExit -ne 0 -or $summary.ValidateExit -ne 0 -or $summary.RuntimeRootExists) { throw 'Candidate static boundary failed.' }
+    $validation=Get-Content -LiteralPath (Join-Path $candidateRoot 'validate.log') -Raw | ConvertFrom-Json
+    if ($validation.Status -cne 'STATIC_VALIDATED' -or $validation.GraphConstructed -ne $false) { throw 'Candidate graph boundary not confirmed.' }
     $manifest=Get-Content -LiteralPath (Join-Path $candidateRoot 'candidate-manifest.json') -Raw | ConvertFrom-Json
+    if ($manifest.SourceHead -cne $summary.SourceHead) { throw 'Candidate source identity mismatch.' }
     foreach ($file in $manifest.Files) {
         if ((Get-FileHash -LiteralPath $file.Path).Hash -ne $file.Sha256) { throw "Candidate changed: $($file.Path)" }
     }

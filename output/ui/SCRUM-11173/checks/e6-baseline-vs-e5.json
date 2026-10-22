@@ -2,7 +2,12 @@
   "Reference": {
     "Path": "output/ui/SCRUM-11172/checks/e5-ui-architecture-final.trx",
     "Sha256": "62DDE1AA69CCA9A7F4E24C4B91BEAC9E0CC02E005E40172BB428B45F4875BF91",
-    "Counters": [],
+    "Counters": {
+      "Total": 1485,
+      "Passed": 1471,
+      "Failed": 14,
+      "NotExecuted": 0
+    },
     "Failures": [
       {
         "Name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
@@ -65,7 +70,12 @@
   "Current": {
     "Path": "output/ui/SCRUM-11173/checks/e6-baseline.trx",
     "Sha256": "40F00DFE0F8C7D958D8CDA033D5E0E3CE8BA017867D0A233B06C832CEA5E844D",
-    "Counters": [],
+    "Counters": {
+      "Total": 1485,
+      "Passed": 1471,
+      "Failed": 14,
+      "NotExecuted": 0
+    },
     "Failures": [
       {
         "Name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",

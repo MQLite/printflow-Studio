@@ -9,7 +9,9 @@ function Read-Run([string]$Path) {
     $failures = @($xml.TestRun.Results.UnitTestResult | Where-Object outcome -eq 'Failed' | ForEach-Object {
         [ordered]@{ Name = $_.testName; Message = [string]$_.Output.ErrorInfo.Message }
     } | Sort-Object { $_.Name })
-    return [pscustomobject]@{ Path=$Path; Sha256=(Get-FileHash -LiteralPath $Path).Hash; Counters=$xml.TestRun.ResultSummary.Counters; Failures=$failures }
+    $c=$xml.TestRun.ResultSummary.Counters
+    $counts=[ordered]@{Total=[int]$c.total;Passed=[int]$c.passed;Failed=[int]$c.failed;NotExecuted=[int]$c.notExecuted}
+    return [pscustomobject]@{ Path=$Path; Sha256=(Get-FileHash -LiteralPath $Path).Hash; Counters=$counts; Failures=$failures }
 }
 $before = Read-Run $Reference
 $after = Read-Run $Current

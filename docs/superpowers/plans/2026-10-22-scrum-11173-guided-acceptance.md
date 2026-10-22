@@ -44,11 +44,11 @@
 **Files:** create `output/ui/SCRUM-11173/COVERAGE.md`, comparisons and checks.
 **Interfaces:** consumes Task 1 frozen source plus inherited persistence filter; produces final raw logs/TRX and AC-to-test map.
 
-- [ ] Run final broad safe UI/Architecture once after source freeze; expected inherited 14 only plus newly added passing cases.
-- [ ] Run same E5 persistence selection through safe wrapper once; expected 277/277.
-- [ ] Compare exact baseline/E5/final failure names and raw messages. Document every unchanged/new/disappearing failure and legacy classification separately.
-- [ ] Map three routes, skip/reject/retry/return/correction/restart/multisize/save conflicts and invariants to exact executed tests; retain uncovered device/production boundaries.
-- [ ] Commit evidence and coverage.
+- [x] Run final broad safe UI/Architecture once after source freeze; expected inherited 14 only plus newly added passing cases.
+- [x] Run same E5 persistence selection through safe wrapper once; expected 277/277.
+- [x] Compare exact baseline/E5/final failure names and raw messages. Document every unchanged/new/disappearing failure and legacy classification separately.
+- [x] Map three routes, skip/reject/retry/return/correction/restart/multisize/save conflicts and invariants to exact executed tests; retain uncovered device/production boundaries.
+- [x] Commit evidence and coverage.
 
 ### Task 3: Q03 owner candidate and acceptance handoff
 
@@ -59,4 +59,5 @@
 - [ ] Prepare Chinese participant confirmation, no-coaching prompts, independent completion/help/errors/verbatim response forms, actual nine-cell DPI matrix, defect severity/owner/regression register, 11155 scenario map and safe start/stop instructions.
 - [ ] Verify links, hashes and candidate identity; record incomplete actual novice/workstation status and remaining conditions without fabricated timings/KPIs.
 - [ ] Commit scoped deliverables; preserve scratch and send exact HEAD, package, raw results and rulings to parent for one fresh final review.
+
 
