@@ -1,0 +1,23 @@
+{
+  "coordinator": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "verifiedAt": "2026-10-22T00:29:00.753Z",
+    "evidence": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T13-28-58-01a16102-d4e9-7412-b40d-70576b54e28a.jsonl:turn_context"
+  },
+  "requestedExecutor": {
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "task": "/root/native_e6",
+    "actual": "gpt-6-astra/high",
+    "verifiedAt": "2026-10-22T00:31:56.297Z",
+    "sessionId": "01a16105-7e92-78e2-bf65-4a86e5f132c1",
+    "evidence": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T13-31-52-01a16105-7e92-78e2-bf65-4a86e5f132c1.jsonl:session_meta+turn_context"
+  },
+  "ruleVersion": "2.4",
+  "routeOffset": 0,
+  "mechanism": "one isolated native sequential implementer, one final isolated whole-branch reviewer",
+  "scope": "SCRUM-11173 / 11195-11197",
+  "host": "Windows/local",
+  "noInPlaceSwitch": true
+}

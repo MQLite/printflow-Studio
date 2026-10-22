@@ -1,0 +1,431 @@
+{
+  "Documents": [
+    "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+    "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+    "docs/printflow/guided-acceptance-maintenance.md",
+    "docs/printflow/guided-acceptance-walkthrough.md",
+    "output/ui/SCRUM-11173/COVERAGE.md",
+    "output/ui/SCRUM-11173/RULINGS.md",
+    "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+    "output/ui/SCRUM-11173/visual-inspection.md",
+    "output/ui/SCRUM-11173/inherited-failures.md",
+    "output/ui/SCRUM-11173/candidate/README.md"
+  ],
+  "LocalLinkCount": 82,
+  "Links": [
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/run-safe-ui.ps1",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/inherited-failures.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/e6-final-vs-e5.json",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/checks/e6-final-vs-baseline.json",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/COVERAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/index.html",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/visual-manifest.json",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../printflow/guided-acceptance-maintenance.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Target": "../../../output/ui/SCRUM-11173/RULINGS.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "SCRUM-11173_RESULTS.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/COVERAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/index.html",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../printflow/guided-acceptance-maintenance.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/codex/printflow-operator-ux-backlog/SCRUM-11173_HANDOFF.md",
+      "Target": "../../../output/ui/SCRUM-11173/RULINGS.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-maintenance.md",
+      "Target": "../../output/ui/SCRUM-11173/checks/run-safe-ui.ps1",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-maintenance.md",
+      "Target": "../../output/ui/SCRUM-11173/checks/compare-failures.ps1",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-maintenance.md",
+      "Target": "guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-walkthrough.md",
+      "Target": "../../output/ui/SCRUM-11173/candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "docs/printflow/guided-acceptance-walkthrough.md",
+      "Target": "../../output/ui/SCRUM-11173/COVERAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/COVERAGE.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_JIRA_SCOPE.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/COVERAGE.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/COVERAGE.md",
+      "Target": "../../../docs/printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/RULINGS.md",
+      "Target": "execution-ledger.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_JIRA_SCOPE.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/superpowers/plans/2026-10-22-scrum-11173-guided-acceptance.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/codex/printflow-operator-ux-backlog/SCRUM-11173_RESULTS.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/controller-source-freeze.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-multisize-red.trx",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-multisize-green.trx",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-q01-final.trx",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-ui-architecture-final.trx",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-final-vs-e5.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-final-vs-baseline.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/e6-workflow-persistence-final.trx",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "COVERAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "checks/coverage-map.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "inherited-failures.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "index.html",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "visual-inspection.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "visual-manifest.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "visuals-before-fix/multisize-long-name-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "candidate/README.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "../../../docs/printflow/guided-acceptance-maintenance.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "RULINGS.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/REVIEW_PACKAGE.md",
+      "Target": "execution-ledger.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/correction-waiting-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/correction-waiting-1280x720.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/correction-waiting-1920x1080.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/crop-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/crop-1280x720.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/crop-1920x1080.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/long-chinese-source-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/long-chinese-source-1280x720.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/long-chinese-source-1920x1080.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-completed-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-completed-1280x720.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-completed-1920x1080.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-long-name-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-long-name-1280x720.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/multisize-long-name-1920x1080.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/readiness-blocked-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/visual-inspection.md",
+      "Target": "visuals/save-uncertain-1000x700.png",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/inherited-failures.md",
+      "Target": "checks/e6-baseline-vs-e5.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/inherited-failures.md",
+      "Target": "checks/e6-final-vs-e5.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/inherited-failures.md",
+      "Target": "checks/e6-final-vs-baseline.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/inherited-failures.md",
+      "Target": "COVERAGE.md",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "candidate-manifest.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "candidate-provenance.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "scenario-manifest.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "build.log",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "generate.log",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "validate.log",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "validation-summary.json",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "../checks/build-validate-candidate.ps1",
+      "Exists": true
+    },
+    {
+      "Source": "output/ui/SCRUM-11173/candidate/README.md",
+      "Target": "../../../../docs/printflow/guided-acceptance-walkthrough.md",
+      "Exists": true
+    }
+  ],
+  "DiffCheck": "PASS for product/tests/authored docs; raw logs/TRX deliberately preserved verbatim",
+  "HumanStatus": "NOT RUN",
+  "ParticipantAvailability": "UNKNOWN",
+  "ActualWorkstation": "NOT RUN"
+}

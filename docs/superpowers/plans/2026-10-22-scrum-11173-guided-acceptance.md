@@ -55,9 +55,7 @@
 **Files:** create `docs/printflow/guided-acceptance-maintenance.md`, `docs/printflow/guided-acceptance-walkthrough.md`, E6 RESULTS/HANDOFF, RULINGS and REVIEW_PACKAGE.
 **Interfaces:** consumes frozen source, supported WorkstationEntry, Q01/Q02 evidence, readonly SCRUM-11155 sources; produces reviewable technical conclusion and explicitly incomplete human record.
 
-- [ ] Inspect launcher/host safety and fixture support. Build isolated candidate without launch; prepare metadata and Validate only when confirmed headless. Expected: build/validation success, no run root/window/external adapter activation; document exact limitation if unavailable.
-- [ ] Prepare Chinese participant confirmation, no-coaching prompts, independent completion/help/errors/verbatim response forms, actual nine-cell DPI matrix, defect severity/owner/regression register, 11155 scenario map and safe start/stop instructions.
-- [ ] Verify links, hashes and candidate identity; record incomplete actual novice/workstation status and remaining conditions without fabricated timings/KPIs.
-- [ ] Commit scoped deliverables; preserve scratch and send exact HEAD, package, raw results and rulings to parent for one fresh final review.
-
-
+- [x] Inspect launcher/host safety and fixture support. Build isolated candidate without launch; prepare metadata and Validate only when confirmed headless. Expected: build/validation success, no run root/window/external adapter activation; document exact limitation if unavailable.
+- [x] Prepare Chinese participant confirmation, no-coaching prompts, independent completion/help/errors/verbatim response forms, actual nine-cell DPI matrix, defect severity/owner/regression register, 11155 scenario map and safe start/stop instructions.
+- [x] Verify links, hashes and candidate identity; record incomplete actual novice/workstation status and remaining conditions without fabricated timings/KPIs.
+- [x] Commit scoped deliverables; preserve scratch and send exact HEAD, package, raw results and rulings to parent for one fresh final review.

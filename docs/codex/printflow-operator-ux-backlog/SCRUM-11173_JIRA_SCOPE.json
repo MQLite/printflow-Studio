@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-22",
+  "timezone": "Pacific/Auckland",
+  "authorization": "SCRUM-11172 通过。请继续推进 SCRUM-11173，沿用已批准的视觉风格和 Native 执行方式。",
+  "issues": [
+    {
+      "key": "SCRUM-11173",
+      "raw": {
+        "data": {
+          "appliedContentFormat": "markdown",
+          "id": "10933",
+          "key": "SCRUM-11173",
+          "fields": {
+            "summary": "引导式界面改版：无障碍、回归与新手验收",
+            "description": "Planning-ID：PF-GUX-v2-E6\n\n## 目标\n\n以可复核证据确认新界面完整、美观、可操作，且三条既有路线与状态安全行为没有回退。\n\n## 范围\n\n布局缩放、键盘及辅助技术、自动化行为回归、中文视觉检查与真实新手走查；问题记录和上线建议。\n\n## Epic 验收条件\n\n1. 实际支持的窗口与缩放矩阵中图片、提示和主操作可达，无裁切遮挡、焦点丢失或隐藏控件误操作。\n2. 三条路线以及拒绝/重试/返回/恢复/多尺寸/保存失败的行为回归通过，已知缺陷与新回归分列。\n3. 真实中文新手走查记录独立完成情况、求助点、误操作和反馈；模拟及开发者演示不能替代新手证据。\n4. 子项完成或明确记录范围调整，未处理阻塞和残余风险可审阅；本 Epic 不包含发布、部署或真实生产操作。\n\n## 子项范围\n\n* Q01：验收窗口缩放、中文布局、键盘和辅助技术可操作性\n* Q02：完成三条路线与关键异常的集成回归和证据核对\n* Q03：运行中文真实新手走查、视觉验收并形成改版结论\n\n## 共同范围与约束\n\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）。用户要求：全面美化使用界面，改为一步一步指导操作、单步尽量仅显示相关内容的引导式应用。本轮授权为生成 Scrum 待办与 Epics；所有条目是待规划/待开发，不代表已完成或自动进入实施。\n\n推荐体验：步骤导航＋当前任务工作区＋固定操作栏；一个推荐主操作，低频/技术内容按需展开，相关辅助动作与关键阻塞仍可见。最终样式及详细交互需经过设计评审。\n\n保持一任务一图片、三条既有路线、原件和 InputSnapshot、合法命令、必要人工审核、精确结果身份、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁、原有回收/保留和本地隐私合同。AI 相关外部传输沿用 SCRUM-11156 已有明确选取/上传范围，本次不扩大。保留现有 zh-CN/en 资源，中文为人工验收主语言，不增加英文人工测试。\n\n不包含新增图片编辑器、批量处理、订单/账号系统、自动打印、自动通过审核、新云服务、收费服务、发布或生产变更。保留工作区已有修改；本次不改产品代码。\n\n## 与既有工作衔接\n\n复用 [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139) 的术语、状态、审核、裁切、保存、修正和最近任务能力；它及 SCRUM-11154/11155 的未完成验收和已知缺陷保持原状态。本轮是信息架构和视觉重组，不重建底层能力，不把旧功能验收转写为通过。\n\n[SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156) / [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166) 的 AI 业务功能继续由原 Epic 负责，新界面仅有条件接入；不作为三条核心路线交付的阻塞。\n\n## 计划依据与证据状态\n\n基于本地 master de7bca6e0a8462584b4d6bf4d16307d1335e2fb3 的 WPF XAML、ViewModels、WorkflowCatalog/TransitionTable、MVP 设计、术语及历史交接材料，并于本轮读取既有 Jira 状态。未运行应用、未采集新界面截图、未执行真人走查；规划判断不构成产品验证。\n\n## Scrum 组织\n\n建议 Sprint 0：体验蓝图与原型评审；Sprint 1：共享组件与引导框架；Sprint 2：导入/导航/恢复；Sprint 3：处理审核/保存辅助页/条件 AI 接入；Sprint 4：集成、布局键盘和真实新手验收。仅为分组与顺序建议，待容量评估和估点后拆分，不承诺每组能在一个 Sprint 完成；本次不创建/启动实际 Sprint，不指派人员、工期或故事点。按依赖顺序取入待办。\n\nReady：当前范围、旧能力复用边界、依赖及验收条件明确；涉及交互/状态变更的实现先有经评审设计。Done：实现和适当行为/视觉检查有证据、关键缺陷处置明确、人工验收单独记录；模拟不代替真人或生产证据。",
+            "status": {
+              "name": "To Do"
+            },
+            "assignee": null,
+            "priority": {
+              "name": "High"
+            },
+            "updated": "2026-10-19T11:07:41.770+1300"
+          }
+        }
+      }
+    },
+    {
+      "key": "SCRUM-11195",
+      "raw": {
+        "data": {
+          "appliedContentFormat": "markdown",
+          "id": "10955",
+          "key": "SCRUM-11195",
+          "fields": {
+            "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+            "description": "Planning-ID：PF-GUX-v2-Q01  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n确保新界面在真实工作站上完整可见且所有关键动作可达。\n\n## 验收条件\n\n1. 按 D03 批准矩阵检查现有 1000×700 窗口基线及代表性大屏/100%、125%、150% 缩放场景；若不支持须明确限制和后续处置。\n2. 检查图片、主操作、长中文、错误和多尺寸列表无遮挡，滚动与固定栏不挤掉工作区。\n3. 覆盖 Tab 顺序、焦点可见、Enter/Space 余波、鼠标双击、对话框取消、读屏名称和隐藏控件不可达。\n4. 保留中文截图和实测记录；英文仅资源/绑定结构检查，沿用既有无需英文人工测试的决定。\n\n## 前置依赖\n\n* [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)：在 WPF 落地共享主题资源与引导界面组件\n* [SCRUM-11180](https://yituoxx.atlassian.net/browse/SCRUM-11180)：提供安全的上一步、查看历史与修改后续影响提示\n* [SCRUM-11190](https://yituoxx.atlassian.net/browse/SCRUM-11190)：把最终审核、保存和完成整理成可理解的收尾步骤\n* [SCRUM-11191](https://yituoxx.atlassian.net/browse/SCRUM-11191)：将同事修正、人工接管和恢复显示为独立引导分支\n* [SCRUM-11192](https://yituoxx.atlassian.net/browse/SCRUM-11192)：重做最近任务和待处理入口并准确定位继续步骤\n* [SCRUM-11193](https://yituoxx.atlassian.net/browse/SCRUM-11193)：统一环境检查、设置和技术详情的页面层级\n* [SCRUM-11194](https://yituoxx.atlassian.net/browse/SCRUM-11194)：统一错误、空状态、确认对话框与就地反馈\n* [SCRUM-11187](https://yituoxx.atlassian.net/browse/SCRUM-11187)：将裁切调整做成单独工作区并清楚返回审核\n* [SCRUM-11183](https://yituoxx.atlassian.net/browse/SCRUM-11183)：把路线选择和原图确认拆成清晰的引导步骤\n\n## Scrum 分组\n\n建议 Sprint 4（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11173](https://yituoxx.atlassian.net/browse/SCRUM-11173)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+            "status": {
+              "name": "To Do"
+            },
+            "assignee": null,
+            "priority": {
+              "name": "High"
+            },
+            "updated": "2026-10-19T11:09:41.130+1300"
+          }
+        }
+      }
+    },
+    {
+      "key": "SCRUM-11196",
+      "raw": {
+        "data": {
+          "appliedContentFormat": "markdown",
+          "id": "10956",
+          "key": "SCRUM-11196",
+          "fields": {
+            "summary": "完成三条路线与关键异常的集成回归和证据核对",
+            "description": "Planning-ID：PF-GUX-v2-Q02  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n确认界面重构没有破坏现有审批、状态和文件安全契约。\n\n## 验收条件\n\n1. 在隔离测试环境验证三条路线及可选跳过、驳回重试、返回失效、修正回导、重启恢复、多尺寸和保存冲突/失败。\n2. 校验当前结果精确审批、原件/快照保护、环境门禁、自动化锁和生产 TIFF 合同未回退。\n3. 将旧 N1–N4、F6、PNG 审批/绑定、generic recovery 等缺口逐项分类为已确认解决、旧缺陷或新回归；未解决项不得标为通过。\n4. 记录具体构建、执行范围和结果；模拟处理器、屏幕渲染、真实桌面及真实生产验证分别报告，不互相替代。\n\n## 前置依赖\n\n* [SCRUM-11195](https://yituoxx.atlassian.net/browse/SCRUM-11195)：验收窗口缩放、中文布局、键盘和辅助技术可操作性\n\n## Scrum 分组\n\n建议 Sprint 4（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11173](https://yituoxx.atlassian.net/browse/SCRUM-11173)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+            "status": {
+              "name": "To Do"
+            },
+            "assignee": null,
+            "priority": {
+              "name": "High"
+            },
+            "updated": "2026-10-19T11:09:42.176+1300"
+          }
+        }
+      }
+    },
+    {
+      "key": "SCRUM-11197",
+      "raw": {
+        "data": {
+          "appliedContentFormat": "markdown",
+          "id": "10957",
+          "key": "SCRUM-11197",
+          "fields": {
+            "summary": "运行中文真实新手走查、视觉验收并形成改版结论",
+            "description": "Planning-ID：PF-GUX-v2-Q03  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n验证新手能按步骤理解并完成操作，收集实际使用问题。\n\n## 验收条件\n\n1. 使用经确认的隔离构建和合成资料，由真实新手完成路线选择、审核、裁切、尺寸、保存、继续/恢复；记录未执行场景。\n2. 记录独立完成、求助、误解、走错步骤和用户原话，不新增工时、百分比改善或耗时 KPI。\n3. 由负责人检查视觉一致性和关键页面，问题有严重程度、负责人和回归结果；缺少真人证据不能声称新手验证完成。\n4. 与 SCRUM-11155 采用可共享场景和证据映射，旧 Epic 不被自动关闭；完成改版结论不包含发布、部署或生产变更。\n\n## 前置依赖\n\n* [SCRUM-11196](https://yituoxx.atlassian.net/browse/SCRUM-11196)：完成三条路线与关键异常的集成回归和证据核对\n\n## Scrum 分组\n\n建议 Sprint 4（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11173](https://yituoxx.atlassian.net/browse/SCRUM-11173)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+            "status": {
+              "name": "To Do"
+            },
+            "assignee": null,
+            "priority": {
+              "name": "High"
+            },
+            "updated": "2026-10-19T11:09:42.206+1300"
+          }
+        }
+      }
+    }
+  ]
+}

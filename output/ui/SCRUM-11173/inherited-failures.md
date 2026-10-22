@@ -22,4 +22,3 @@ The E6 pre-change broad baseline has the same 14 fully-qualified parameterized f
 Raw messages (including language and binding details) are preserved without rewriting in the comparison JSON and source TRX. Classifications name the observed assertion area, not an established root cause. The 14 suite failures are separate from N1–N4/F6/PNG/generic-recovery and E4 input risks described in [COVERAGE](COVERAGE.md); numerical similarity does not identify them as the same defect.
 
 No new safety exclusions were introduced. Excluded real-device tests and the entire PrintFlow.Tests.Smoke namespace remain NOT RUN. The permitted Integration.Ui.SessionSmokeTests are separate synthetic tests. Tests named Production_smoke use fake/controlled harnesses and do not certify production.
-

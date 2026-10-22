@@ -47,8 +47,13 @@ if ($Phase -eq 'Final') {
     $candidateRoot=Join-Path $checks '..\candidate'
     $summary=Get-Content -LiteralPath (Join-Path $candidateRoot 'validation-summary.json') -Raw | ConvertFrom-Json
     if ($summary.BuildExit -ne 0 -or $summary.ValidateExit -ne 0 -or $summary.RuntimeRootExists) { throw 'Candidate static boundary failed.' }
+    if (Test-Path -LiteralPath $summary.Arguments.Root) { throw 'Candidate runtime root now exists.' }
+    foreach ($entry in @(@('candidate-manifest.json',$summary.CandidateManifestSha256),@('scenario-manifest.json',$summary.ScenarioManifestSha256))) {
+        if ((Get-FileHash -LiteralPath (Join-Path $candidateRoot $entry[0])).Hash -ne $entry[1]) { throw "Copied candidate evidence changed: $($entry[0])" }
+    }
     $validation=Get-Content -LiteralPath (Join-Path $candidateRoot 'validate.log') -Raw | ConvertFrom-Json
     if ($validation.Status -cne 'STATIC_VALIDATED' -or $validation.GraphConstructed -ne $false) { throw 'Candidate graph boundary not confirmed.' }
+    if ($validation.CandidateHash -cne $summary.CandidateManifestSha256 -or $validation.ScenarioHash -cne $summary.ScenarioManifestSha256) { throw 'Static validation hashes differ.' }
     $manifest=Get-Content -LiteralPath (Join-Path $candidateRoot 'candidate-manifest.json') -Raw | ConvertFrom-Json
     if ($manifest.SourceHead -cne $summary.SourceHead) { throw 'Candidate source identity mismatch.' }
     foreach ($file in $manifest.Files) {
