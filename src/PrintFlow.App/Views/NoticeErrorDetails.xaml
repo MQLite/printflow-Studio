@@ -11,7 +11,7 @@
         Opening it is view state only: it sends nothing, retries nothing and changes no record.
     -->
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries><BooleanToVisibilityConverter x:Key="BoolToVisibility" /></ResourceDictionary>
     </UserControl.Resources>
     <Expander Header="{Binding NoticeErrorDetailsLabel}"
               Margin="0,0,0,6"
@@ -19,7 +19,7 @@
               AutomationProperties.AutomationId="NoticeErrorDetails"
               AutomationProperties.Name="{Binding NoticeErrorDetailsLabel}">
         <Expander.Style>
-            <Style TargetType="Expander">
+            <Style TargetType="Expander" BasedOn="{StaticResource PF.Disclosure}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Code, ElementName=DetailsControl}" Value="{x:Null}">
                         <Setter Property="Visibility" Value="Collapsed" />
@@ -27,20 +27,20 @@
                 </Style.Triggers>
             </Style>
         </Expander.Style>
-        <!-- One line where it fits: the code first, then how to use it. -->
-        <DockPanel Margin="0,2,0,0">
-            <TextBlock DockPanel.Dock="Left" Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold" />
-            <TextBox DockPanel.Dock="Left"
+        <!-- Code and hint wrap independently so a long code stays selectable at narrow widths. -->
+        <StackPanel Margin="0,8,0,0">
+            <TextBlock Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold" />
+            <TextBox
                      Text="{Binding Code, ElementName=DetailsControl, Mode=OneWay}"
                      IsReadOnly="True"
                      IsReadOnlyCaretVisible="True"
                      BorderThickness="0"
                      Background="Transparent"
-                     Padding="0,3"
+                     Padding="0,3" TextWrapping="Wrap"
                      AutomationProperties.AutomationId="NoticeErrorDetails.Code"
                      AutomationProperties.Name="{Binding NoticeErrorCodeLabel}" />
-            <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="16,3,0,0"
+            <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="0,6,0,0"
                        AutomationProperties.AutomationId="NoticeErrorDetails.Hint" />
-        </DockPanel>
+        </StackPanel>
     </Expander>
 </UserControl>

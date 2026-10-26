@@ -14,4 +14,8 @@ public enum GuidedStepState
 /// Caller-owned, localized step presentation. Ordering and business authority stay with the caller.
 /// </summary>
 public sealed record GuidedStepItem(
-    string Id, string Title, string Detail, string StatusText, GuidedStepState State);
+    string Id, string Title, string Detail, string StatusText, GuidedStepState State)
+{
+    public int Number { get; init; }
+    public bool IsCurrent { get; init; }
+}

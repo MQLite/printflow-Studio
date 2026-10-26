@@ -4,7 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
-             xmlns:views="clr-namespace:PrintFlow.App.Views"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:views="clr-namespace:PrintFlow.App.Views"
              mc:Ignorable="d"
              Background="{DynamicResource PF.Brush.Canvas}"
              Foreground="{DynamicResource PF.Brush.Ink}"
@@ -20,7 +20,7 @@
     <UserControl.Resources>
       <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-          <ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" />
+          <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
         </ResourceDictionary.MergedDictionaries>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <!--
@@ -34,7 +34,7 @@
                             <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
                         </Style>
 <DataTemplate x:Key="HomeTaskRow">
-                            <Border Style="{StaticResource PF.Card}" Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,8">
+                            <ui:Card Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,8" Style="{DynamicResource PF.Card.Fluent}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -147,93 +147,92 @@
                                                 Visibility="{Binding CanRemoveRecord, Converter={StaticResource BoolToVisibility}}" />
                                     </StackPanel>
                                 </Grid>
-                            </Border>
+                            </ui:Card>
                         </DataTemplate>
           </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{DynamicResource PF.Brush.Canvas}">
-    <Grid x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="3*" />
-            <RowDefinition Height="2*" />
-        </Grid.RowDefinitions>
-
-        <DockPanel Grid.Row="0" LastChildFill="True">
-            <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
+    <Grid Background="{DynamicResource PF.Brush.Canvas}">    <Grid.ColumnDefinitions><ColumnDefinition Width="184" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+    <Border Background="White" BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="0,0,1,0" Padding="16,24">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+          <StackPanel Orientation="Horizontal" Margin="6,0,0,32">
+            <ui:SymbolIcon Symbol="Print24" FontSize="28" Foreground="{DynamicResource PF.Brush.Primary}" VerticalAlignment="Center" Margin="0,0,10,0" />
+            <TextBlock Text="PrintFlow&#10;Studio" FontSize="18" FontWeight="SemiBold" />
+          </StackPanel>
+          <Border Background="{DynamicResource PF.Brush.Selection}" CornerRadius="8" Padding="12,14">
+            <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="Home24" FontSize="20" Foreground="{DynamicResource PF.Brush.Primary}" Margin="0,0,10,0" /><TextBlock Text="{Binding ImportHeading}" Foreground="{DynamicResource PF.Brush.Primary}" FontWeight="SemiBold" VerticalAlignment="Center" FontSize="13" /></StackPanel>
+          </Border>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+<views:SessionActionButton Style="{StaticResource PF.Button.Secondary}"
                     VerticalAlignment="Center"
                     Content="{Binding SettingsLabel}"
                     Command="{Binding ShowSettingsCommand}"
                     AutomationProperties.AutomationId="Home.ShowSettings"
                     AutomationProperties.Name="{Binding SettingsLabel}" />
-            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding Title}" />
+        </StackPanel>
+        <Border />
+      </DockPanel>
+    </Border>
+    <Grid Grid.Column="1" x:Name="LayoutRoot" Margin="{DynamicResource PF.Padding.Card}" SizeChanged="OnLayoutSizeChanged">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition>
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Setter Property="Height" Value="3*" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Readiness.HasReason}" Value="True"><Setter Property="Height" Value="*" /></DataTrigger>
+                            <DataTrigger Binding="{Binding IsConfirmingAbandon}" Value="True"><Setter Property="Height" Value="0" /></DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" LastChildFill="True">
+
+            <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding SampleTitle}" Margin="0,0,0,16">
+              <TextBlock Text="{Binding SampleSubtitle}" TextWrapping="Wrap" />
+            </HeaderedContentControl>
         </DockPanel>
 
         <!-- SCRUM-11152: what Production Readiness last observed in this run, in words, with its
              one way to that screen. The button only navigates; nothing here starts a check. -->
-        <!-- Reserve both scroll areas after the title. The 3:2 allocation leaves room for the
-             42-DIP actions in Recovery/Recent even with every upper disclosure expanded.
-             The existing code-behind maximum remains an additional upper bound. -->
+        <!-- The upper section takes its content height up to the code-behind cap.
+             The remaining space belongs to Recovery/Recent, including when disclosures expand. -->
         <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
                       AutomationProperties.AutomationId="Home.Upper">
         <StackPanel>
         <!-- The one way in. Dropping is handled on the whole screen, so the operator can
              drop anywhere rather than hunt for a target. -->
-        <HeaderedContentControl Style="{StaticResource PF.TaskCard}" Header="{Binding ImportHeading}">
+        <ui:Card Style="{StaticResource PF.Card.Fluent}" Padding="16" Background="{DynamicResource PF.Brush.ImportSurface}" BorderBrush="{DynamicResource PF.Brush.ImportBorder}">
             <StackPanel>
-                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
-                <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" Content="{Binding ChooseFileLabel}"
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                    <ui:SymbolIcon Symbol="Image24" FontSize="24" Foreground="{DynamicResource PF.Brush.ImportIcon}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <TextBlock Text="{Binding SampleDropLabel}" FontSize="22" FontWeight="SemiBold" />
+                </StackPanel>
+                <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" MinWidth="180" Content="{Binding ChooseFileLabel}"
                         Command="{Binding ChooseFileCommand}" IsEnabled="{Binding CanStartImport}"
                         AutomationProperties.AutomationId="Home.ChooseFile"
-                        AutomationProperties.Name="{Binding ChooseFileLabel}"
-                        HorizontalAlignment="Left" />
+                        AutomationProperties.Name="{Binding ChooseFileLabel}" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="{DynamicResource PF.Font.Body}" Margin="8,8,8,8" />
                 <StackPanel Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" Margin="0,12,0,0">
                     <TextBlock Text="{Binding ImportProgress}" TextWrapping="Wrap" AutomationProperties.AutomationId="Home.ImportProgress" />
                     <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding CancelImportLabel}" Command="{Binding CancelImportCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.CancelImport" />
                 </StackPanel>
                 <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Margin="0,12,0,0" FontWeight="SemiBold" />
                 <views:NoticeErrorDetails Margin="0,4,0,0" />
-                <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,12,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
+                <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="{DynamicResource PF.Font.Body}" TextAlignment="Center" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
             </StackPanel>
-        </HeaderedContentControl>
+        </ui:Card>
 
 
         <StackPanel Margin="0,8,0,14">
-            <Border Style="{StaticResource PF.Card}">
-                <StackPanel>
-                    <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
-                               AutomationProperties.AutomationId="Home.Readiness.Heading" />
-                    <TextBlock Text="{Binding Readiness.StatusText}" FontSize="16" FontWeight="SemiBold"
-                               TextWrapping="Wrap" Margin="0,2,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Status" />
-                    <TextBlock Text="{Binding Readiness.ReasonText}" TextWrapping="Wrap" Margin="0,4,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Reason"
-                               Visibility="{Binding Readiness.HasReason, Converter={StaticResource BoolToVisibility}}" />
-                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding EnvironmentDetailsLabel}"><StackPanel>
-                    <TextBlock Text="{Binding Readiness.CheckedAtText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,2,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.CheckedAt"
-                               Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock Text="{Binding Readiness.HintText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0"
-                               AutomationProperties.AutomationId="Home.Readiness.Hint" />
-                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
-                              AutomationProperties.AutomationId="Home.Readiness.Details"
-                              AutomationProperties.Name="{Binding Readiness.DetailsLabel}"
-                              Visibility="{Binding Readiness.HasTechnicalDetail, Converter={StaticResource BoolToVisibility}}">
-                        <TextBox Text="{Binding Readiness.TechnicalDetailText, Mode=OneWay}" IsReadOnly="True"
-                                 TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
-                                 AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
-                    </Expander>
 
-                    </StackPanel></Expander>
-                    <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
-                            Command="{Binding ShowEnvironmentCommand}"
-                            AutomationProperties.AutomationId="Home.ShowEnvironment"
-                            AutomationProperties.Name="{Binding EnvironmentLabel}"
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Left" />
-                </StackPanel>
-            </Border>
 
             <!-- Startup warnings stay visible; only the counts that need no action fold away. -->
             <HeaderedContentControl Style="{StaticResource PF.Notice.Warning}" Margin="0,8,0,0"
@@ -272,13 +271,49 @@
         </StackPanel>
         </ScrollViewer>
 
-        <DockPanel Grid.Row="2" Margin="0,16,0,0">
-            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <ui:Card Style="{StaticResource PF.Card.Fluent}" Padding="14"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{Binding Readiness.Heading}" Opacity="0.75" TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="Home.Readiness.Heading" />
+                    <TextBlock Text="{Binding Readiness.StatusText}" FontSize="16" FontWeight="SemiBold"
+                               TextWrapping="Wrap" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Status" />
+                    <TextBlock Text="{Binding Readiness.ReasonText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Reason"
+                               Visibility="{Binding Readiness.HasReason, Converter={StaticResource BoolToVisibility}}" />
+                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding EnvironmentDetailsLabel}"><ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto" IsTabStop="False"><StackPanel>
+                    <TextBlock Text="{Binding Readiness.CheckedAtText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,2,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.CheckedAt"
+                               Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding Readiness.HintText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Home.Readiness.Hint" />
+                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding Readiness.DetailsLabel}" Margin="0,4,0,0"
+                              AutomationProperties.AutomationId="Home.Readiness.Details"
+                              AutomationProperties.Name="{Binding Readiness.DetailsLabel}"
+                              Visibility="{Binding Readiness.HasTechnicalDetail, Converter={StaticResource BoolToVisibility}}">
+                        <TextBox Text="{Binding Readiness.TechnicalDetailText, Mode=OneWay}" IsReadOnly="True"
+                                 TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
+                                 AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
+                    </Expander>
+
+                    </StackPanel></ScrollViewer></Expander>
+
+                </StackPanel><views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
+                            Command="{Binding ShowEnvironmentCommand}"
+                            AutomationProperties.AutomationId="Home.ShowEnvironment"
+                            AutomationProperties.Name="{Binding EnvironmentLabel}"
+                            Margin="16,0,0,0"
+                            Grid.Column="1" VerticalAlignment="Center" /></Grid></ui:Card>
+        </Grid>
+
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True" Margin="0,0,0,8">
                 <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
                         Content="{Binding RefreshLabel}"
                         Command="{Binding RefreshCommand}"
                         AutomationProperties.AutomationId="Home.Refresh"
-                        AutomationProperties.Name="{Binding RefreshLabel}" />
+                        AutomationProperties.Name="{Binding RefreshLabel}" /><TextBlock Text="{Binding ContinueHeading}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
             </DockPanel>
 
             <!--
@@ -288,13 +323,11 @@
                 fresh gesture aimed at this confirmation, so the initiating double-click or a held key
                 cannot complete it.
             -->
-            <Border x:Name="AbandonConfirmationPanel"
+            <ui:Card x:Name="AbandonConfirmationPanel" Background="{DynamicResource PF.Brush.Warning}" BorderBrush="{DynamicResource PF.Brush.WarningInk}"
                     DockPanel.Dock="Top"
-                    Style="{StaticResource PF.Card}"
-                    Background="{DynamicResource PF.Brush.Warning}" BorderBrush="{DynamicResource PF.Brush.WarningInk}"
                     Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,12"
                     AutomationProperties.AutomationId="Home.AbandonConfirmation"
-                    Visibility="{Binding IsConfirmingAbandon, Converter={StaticResource BoolToVisibility}}">
+                    Visibility="{Binding IsConfirmingAbandon, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
                 <StackPanel>
                     <TextBlock Text="{Binding PendingAbandon.Question}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
                                AutomationProperties.AutomationId="Home.AbandonConfirmation.Question" />
@@ -313,10 +346,10 @@
                                 AutomationProperties.Name="{Binding AbandonConfirmLabel}" />
                     </WrapPanel>
                 </StackPanel>
-            </Border>
+            </ui:Card>
 
             <TextBlock DockPanel.Dock="Top"
-                       Text="{Binding EmptyRecentText}"
+                       AutomationProperties.AutomationId="Home.EmptyRecent" Text="{Binding EmptyRecentText}"
                        Opacity="0.7"
                        Margin="0,4,0,0"
                        Visibility="{Binding HasNoRecentSessions, Converter={StaticResource BoolToVisibility}}" />
@@ -324,7 +357,22 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" AutomationProperties.AutomationId="Home.Lists">
                 <!-- Inert while an Abandon confirmation is open (SCRUM-11154 F-V4); scrolling still works. -->
                 <StackPanel IsEnabled="{Binding AreListsInteractive}">
-                    <StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
+
+                <StackPanel Visibility="{Binding HasContinueSessions, Converter={StaticResource BoolToVisibility}}">
+
+                <ItemsControl ItemsSource="{Binding ContinueSessions}"
+                              IsTabStop="False"
+                              AutomationProperties.AutomationId="Home.ContinueList"
+                              AutomationProperties.Name="{Binding ContinueHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
+                </StackPanel>
+                <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding RecentHeading}" IsExpanded="{Binding HasNoContinueSessions, Mode=OneWay}" x:Name="HistoryDisclosure" AutomationProperties.AutomationId="Home.HistoryDetails">
+                <ItemsControl ItemsSource="{Binding HistorySessions}"
+                              IsTabStop="False"
+                              AutomationProperties.AutomationId="Home.RecentSessionList"
+                              AutomationProperties.Name="{Binding RecentHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
+                </Expander>
+<!-- Keep recovery actions at the end of this scroll region, so Scroll to end reaches the final recovery action. -->
+<StackPanel Visibility="{Binding HasRecoverySessions, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,18">
                         <TextBlock Text="{Binding RecoveryHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
                         <ItemsControl ItemsSource="{Binding RecoverySessions}" IsTabStop="False"
                                       AutomationProperties.AutomationId="Home.RecoveryList"
@@ -337,10 +385,11 @@
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource PF.Card}" Background="{DynamicResource PF.Brush.Warning}"
-                                            BorderBrush="{DynamicResource PF.Brush.WarningInk}" Margin="0,0,0,8">
+                                    <ui:Card Margin="0,0,0,8" Style="{DynamicResource PF.Card.Fluent}"
+                                             AutomationProperties.AutomationId="Home.RecoveryCard"
+                                             Background="{DynamicResource PF.Brush.Warning}" BorderBrush="{DynamicResource PF.Brush.WarningInk}">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="{DynamicResource PF.Font.Body}" TextWrapping="Wrap" />
                                             <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,10" />
                                             <TextBlock Text="{Binding UnfinishedImportHint}" TextWrapping="Wrap" Margin="0,0,0,10"
                                                        Visibility="{Binding HasUnfinishedManualImport, Converter={StaticResource BoolToVisibility}}" />
@@ -367,24 +416,11 @@
                                             </WrapPanel>
                                             <TextBlock Text="{Binding NoActions}" Visibility="{Binding HasNoActions, Converter={StaticResource BoolToVisibility}}" TextWrapping="Wrap" />
                                         </StackPanel>
-                                    </Border>
+                                    </ui:Card>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                <StackPanel Visibility="{Binding HasContinueSessions, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding ContinueHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
-                <ItemsControl ItemsSource="{Binding ContinueSessions}"
-                              IsTabStop="False"
-                              AutomationProperties.AutomationId="Home.ContinueList"
-                              AutomationProperties.Name="{Binding ContinueHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
-                </StackPanel>
-                <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding RecentHeading}" IsExpanded="{Binding HasNoContinueSessions, Mode=OneWay}" x:Name="HistoryDisclosure" AutomationProperties.AutomationId="Home.HistoryDetails">
-                <ItemsControl ItemsSource="{Binding HistorySessions}"
-                              IsTabStop="False"
-                              AutomationProperties.AutomationId="Home.RecentSessionList"
-                              AutomationProperties.Name="{Binding RecentHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
-                </Expander>
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>

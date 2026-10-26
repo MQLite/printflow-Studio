@@ -1424,4 +1424,16 @@
   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>The task could not be reloaded. It has not been resumed; try returning again.</value></data>
   <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>Originals, input snapshots and existing results remain subject to their retention rules. Availability follows the current task and file checks.</value></data>
   <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>The last displayed task remains available to inspect; its current records and files have not been rechecked.</value></data>
+  <data name="Home_SampleTitle" xml:space="preserve"><value>Start with one image</value></data>
+  <data name="Home_SampleSubtitle" xml:space="preserve"><value>Import an image. PrintFlow will guide you through each step.</value></data>
+  <data name="Home_SampleDropLabel" xml:space="preserve"><value>Drop your image here</value></data>
+  <data name="Session_GuidedOriginalChecksHeading" xml:space="preserve"><value>Check this original first</value></data>
+  <data name="Session_GuidedOriginalChecks" xml:space="preserve"><value>Check that the content and orientation are correct and nothing you want to keep is missing. Then use the confirmation action below.</value></data>
+  <data name="Session_CropDetailsLabel" xml:space="preserve"><value>Coordinates and keys</value></data>
+  <data name="Session_ReviewToolsLabel" xml:space="preserve"><value>Image inspection tools</value></data>
+  <data name="Session_CompletionSavedCount" xml:space="preserve"><value>This result has {0} saved-copy records. Records do not verify the current files.</value></data>
+  <data name="Session_CompletionRecordsUnknown" xml:space="preserve"><value>Save records are loading or unavailable; the count is not confirmed.</value></data>
+  <data name="Session_SaveReviewResult" xml:space="preserve"><value>View reviewed comparison</value></data>
+  <data name="Session_SaveHideReview" xml:space="preserve"><value>Return to result preview</value></data>
+  <data name="Session_SaveCurrentResult" xml:space="preserve"><value>Current result preview</value></data>
 </root>

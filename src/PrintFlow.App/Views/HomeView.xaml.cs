@@ -28,7 +28,9 @@ public partial class HomeView : UserControl
     /// squeezed to nothing. Capping the upper part keeps both halves reachable by scrolling.
     /// Layout only: it decides nothing and binds nothing.
     /// </remarks>
-    private const double UpperShare = 0.65;
+    // The sample's two-line page heading also needs room; reserve enough height for
+    // recovery rows even when every upper disclosure is expanded.
+    private const double UpperShare = 0.39;
 
     private HomeViewModel? _subscribedHome;
     private EventHandler? _observationChanged;

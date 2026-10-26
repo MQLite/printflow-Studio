@@ -89,6 +89,8 @@ public sealed class ManualCropAdjustmentUiTests(ITestOutputHelper output)
             model.CropAppliedBounds.ShouldBe(TrimBounds.FromEdges(1, 2, 12, 8));
             model.DraftManualCropGeometry!.Margin.ShouldBe(ManualCropMargin.PerEdge(0, 4, 1, 2));
             AssertOutlines(tree.Root, model);
+            Control<Expander>(tree.Root, "Crop.CoordinatesAndKeyboard").IsExpanded = true;
+            ProcessingWorkspaceRolloutTests.Settle(tree.Root);
             Control<TextBlock>(tree.Root, "ManualCropAppliedBounds").Text.ShouldContain("[1, 2 → 12, 8)");
             model.TrySetCropSelection(new CropSurfaceLayout(12, 10, 12, 10, 12, 10, true, 1), -1, 2, 9, 7).ShouldBeFalse();
             model.CanApplyManualCrop.ShouldBeFalse();

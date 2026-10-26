@@ -523,6 +523,8 @@ public sealed class SettingsAndLocalisationTests
                         AutomationProperties.GetAutomationId(e) == "Settings.Advanced");
                     advanced.IsExpanded.ShouldBeFalse("technical locations are available on demand");
                     advanced.IsExpanded = true;
+                    // WPF UI realizes its expanded presenter through the dispatcher.
+                    tree.Root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
                     tree.Root.UpdateLayout();
                     ScrollViewer scroll = tree.OfType<ScrollViewer>().First();
                     scroll.ScrollToBottom();

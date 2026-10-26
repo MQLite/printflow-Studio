@@ -27,7 +27,8 @@ public sealed class GuidedThemeAdoptionTests
                 Application.Current.ShouldBeNull();
                 tree.Root.TryFindResource("PF.Button.Primary").ShouldBeOfType<Style>();
                 tree.Root.FontFamily.Source.ShouldBe("Microsoft YaHei, Noto Sans SC");
-                tree.Root.FontSize.ShouldBe(14);
+                // U04 also opts route selection into the shared 16-DIP body.
+                tree.Root.FontSize.ShouldBe(16);
                 tree.OfType<HeaderedContentControl>().ShouldContain(c => ReferenceEquals(c.Style, tree.Root.FindResource("PF.PageHeader")));
                 return 0;
             });

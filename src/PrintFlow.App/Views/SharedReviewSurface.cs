@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Media;
 using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
@@ -14,11 +15,40 @@ namespace PrintFlow.App.Views;
 /// <summary>One display-only comparison surface for all general review workflows.</summary>
 public sealed class SharedReviewSurface : UserControl
 {
+    /// <summary>Save-page presentation only; never changes the review viewport or its approval.</summary>
+    public static readonly DependencyProperty ResultOnlyProperty = DependencyProperty.Register(
+        nameof(ResultOnly), typeof(bool), typeof(SharedReviewSurface),
+        new PropertyMetadata(false, (d, _) => ((SharedReviewSurface)d).ReloadImages()));
+
+    public bool ResultOnly
+    {
+        get => (bool)GetValue(ResultOnlyProperty);
+        set => SetValue(ResultOnlyProperty, value);
+    }
+
+    /// <summary>Original inspection shows the actual current pane, retaining zoom and backgrounds.</summary>
+    public static readonly DependencyProperty CurrentOnlyProperty = DependencyProperty.Register(
+        nameof(CurrentOnly), typeof(bool), typeof(SharedReviewSurface),
+        new PropertyMetadata(false, (d, _) => ((SharedReviewSurface)d).ReloadImages()));
+
+    public bool CurrentOnly
+    {
+        get => (bool)GetValue(CurrentOnlyProperty);
+        set => SetValue(CurrentOnlyProperty, value);
+    }
+
+    private IReadOnlyList<ArtefactPreviewPane> _panes = [];
     private readonly DockPanel _root = new();
-    private readonly WrapPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
+    private readonly Button _reviewToggle = new SessionActionButton { HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 8) };
+    private bool _reviewComparisonExpanded;
+    private bool ShowsResultOnly => ResultOnly && !_reviewComparisonExpanded;
+    private readonly StackPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
+    private readonly WrapPanel _zoomTools = new();
+    private readonly WrapPanel _inspectionTools = new();
     private readonly Grid _host = new();
-    private readonly Slider _slider = new() { Minimum = 0, Maximum = 100, SmallChange = 1, LargeChange = 10, Width = 160 };
-    private readonly Button _actualSize = new() { Content = "100%", Padding = new Thickness(10, 4, 10, 4) };
+    private readonly Slider _slider = new() { Minimum = 0, Maximum = 100, SmallChange = 1, LargeChange = 10, Width = 120, MinHeight = 42 };
+    private readonly Button _actualSize = new SessionActionButton { Content = "100%", Margin = new Thickness(0, 0, 6, 4) };
+    private readonly Button _inspectionToggle = new SessionActionButton { Content = "⋯", MinWidth = 42, Margin = new Thickness(0, 0, 6, 4), Visibility = Visibility.Collapsed };
     private readonly List<(RadioButton Button, ReviewComparisonMode Mode)> _modes = [];
     private readonly List<(RadioButton Button, ReviewInspectionBackground Background)> _backgrounds = [];
     private readonly List<Image> _images = [];
@@ -30,18 +60,44 @@ public sealed class SharedReviewSurface : UserControl
     private Grid? _overlay;
     private Border? _divider;
     private bool _updating;
+    private bool _compactToolsMode;
+    private bool _inspectionExpanded;
 
     public SharedReviewSurface()
     {
+        Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("/PrintFlow.App;component/Themes/WpfUiTheme.xaml", UriKind.Relative)
+        });
+        FontSize = 16;
         Focusable = false;
         AutomationProperties.SetAutomationId(this, "Session.PreviewPanes");
         AutomationProperties.SetName(this, Strings.Session_PreviewHeading);
+        _reviewToggle.SetResourceReference(StyleProperty, "PF.Button.Secondary");
+        AutomationProperties.SetAutomationId(_reviewToggle, "Session.Save.ReviewResult");
+        _reviewToggle.Click += (_, _) =>
+        {
+            _reviewComparisonExpanded = !_reviewComparisonExpanded;
+            ReloadImages();
+        };
+        DockPanel.SetDock(_reviewToggle, Dock.Top);
+        _root.Children.Add(_reviewToggle);
         DrawingGroup drawing = new();
         drawing.Children.Add(new GeometryDrawing(Brushes.White, null, new RectangleGeometry(new Rect(0, 0, 16, 16))));
         drawing.Children.Add(new GeometryDrawing(Brushes.LightGray, null, new RectangleGeometry(new Rect(0, 0, 8, 8))));
         drawing.Children.Add(new GeometryDrawing(Brushes.LightGray, null, new RectangleGeometry(new Rect(8, 8, 8, 8))));
         _checkerboard = new DrawingBrush(drawing) { TileMode = TileMode.Tile, ViewportUnits = BrushMappingMode.Absolute, Viewport = new Rect(0, 0, 16, 16), Stretch = Stretch.None };
         _checkerboard.Freeze();
+        AutomationProperties.SetAutomationId(_toolbar, "Session.ReviewTools");
+        _toolbar.Children.Add(_zoomTools);
+        _toolbar.Children.Add(_inspectionTools);
+        TextBlock zoomStatus = new() { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 4) };
+        zoomStatus.SetBinding(TextBlock.TextProperty, new Binding(nameof(SessionViewModel.ZoomLabel)));
+        AutomationProperties.SetAutomationId(zoomStatus, "Session.ReviewZoomStatus");
+        _zoomTools.Children.Add(zoomStatus);
+        AddZoom("ReviewZoomOut", "ZoomOutLabel", "ZoomOutCommand", "CanZoomOut");
+        AddZoom("ReviewZoomIn", "ZoomInLabel", "ZoomInCommand", "CanZoomIn");
+        AddZoom("ReviewResetZoom", "ResetZoomLabel", "ResetZoomCommand", null);
         AddMode(ReviewComparisonMode.SideBySide, "ReviewModeSideBySide", Strings.Session_ReviewModeSideBySide);
         AddMode(ReviewComparisonMode.Slider, "ReviewModeSlider", Strings.Session_ReviewModeSlider);
         AddBackground(ReviewInspectionBackground.Checkerboard, "ReviewBackgroundCheckerboard", Strings.Session_ReviewBackgroundCheckerboard);
@@ -50,11 +106,23 @@ public sealed class SharedReviewSurface : UserControl
         AutomationProperties.SetAutomationId(_slider, "Session.ReviewComparisonSlider");
         AutomationProperties.SetName(_slider, Strings.Session_ReviewComparisonSlider);
         _slider.ValueChanged += (_, _) => { if (!_updating && _model is not null) _model.ReviewViewport.SliderPosition = _slider.Value; };
-        _toolbar.Children.Add(_slider); Button actual = _actualSize;
+        _inspectionTools.Children.Add(_slider); Button actual = _actualSize;
+        actual.SetResourceReference(StyleProperty, "PF.Button.Secondary");
         AutomationProperties.SetAutomationId(actual, "Session.ReviewActualSize");
         AutomationProperties.SetName(actual, "100%");
         actual.Click += (_, _) => { if (_model is not null) { _model.IsFitToViewport = false; _model.ZoomScale = 1; } };
-        _toolbar.Children.Add(actual);
+        _zoomTools.Children.Add(actual);
+        _inspectionToggle.SetResourceReference(StyleProperty, "PF.Button.Secondary");
+        AutomationProperties.SetAutomationId(_inspectionToggle, "Session.ReviewToolsToggle");
+        AutomationProperties.SetName(_inspectionToggle, Strings.Resolve("Session_ReviewToolsLabel"));
+        _inspectionToggle.ToolTip = Strings.Resolve("Session_ReviewToolsLabel");
+        _inspectionToggle.Click += (_, _) =>
+        {
+            _inspectionExpanded = !_inspectionExpanded;
+            UpdatePresentation();
+            UpdateSizes();
+        };
+        _zoomTools.Children.Add(_inspectionToggle);
         DockPanel.SetDock(_toolbar, Dock.Top);
         _root.Children.Add(_toolbar);
         _root.Children.Add(_host);
@@ -65,12 +133,25 @@ public sealed class SharedReviewSurface : UserControl
         Loaded += (_, _) => Attach(DataContext as SessionViewModel);
     }
 
+    private void AddZoom(string id, string label, string command, string? enabled)
+    {
+        SessionActionButton button = new() { Margin = new Thickness(0, 0, 6, 4) };
+        button.SetResourceReference(StyleProperty, "PF.Button.Secondary");
+        button.SetBinding(ContentControl.ContentProperty, new Binding(label));
+        button.SetBinding(AutomationProperties.NameProperty, new Binding(label));
+        button.SetBinding(Button.CommandProperty, new Binding(command));
+        if (enabled is not null) button.SetBinding(IsEnabledProperty, new Binding(enabled));
+        AutomationProperties.SetAutomationId(button, "Session." + id);
+        _zoomTools.Children.Add(button);
+    }
+
     private RadioButton Choice(string id, string label, string group)
     {
-        RadioButton button = new() { Content = label, GroupName = group, Margin = new Thickness(0, 2, 12, 2), VerticalAlignment = VerticalAlignment.Center };
+        RadioButton button = new SessionRadioButton { Content = label, GroupName = group, Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+        button.SetResourceReference(StyleProperty, "PF.Input.RadioButton");
         AutomationProperties.SetAutomationId(button, "Session." + id);
         AutomationProperties.SetName(button, label);
-        _toolbar.Children.Add(button);
+        _inspectionTools.Children.Add(button);
         return button;
     }
 
@@ -98,6 +179,7 @@ public sealed class SharedReviewSurface : UserControl
             _model.PreviewPanes.CollectionChanged -= PanesChanged;
         }
         _model = model;
+        _reviewComparisonExpanded = false;
         if (model is not null)
         {
             model.PropertyChanged += ModelChanged;
@@ -110,6 +192,12 @@ public sealed class SharedReviewSurface : UserControl
     private void PanesChanged(object? sender, NotifyCollectionChangedEventArgs e) => ReloadImages();
     private void ModelChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(SessionViewModel.SaveReviewPanes) && ResultOnly) ReloadImages();
+        if (e.PropertyName == nameof(SessionViewModel.GuidedPage))
+        {
+            _reviewComparisonExpanded = false;
+            ReloadImages();
+        }
         if (e.PropertyName is nameof(SessionViewModel.ZoomScale) or nameof(SessionViewModel.IsFitToViewport)) UpdateSizes();
         if (e.PropertyName == nameof(SessionViewModel.ShowsGuidedPreviewTools)) { UpdatePresentation(); UpdateSizes(); }
     }
@@ -123,10 +211,13 @@ public sealed class SharedReviewSurface : UserControl
     private void ReloadImages()
     {
         _images.Clear();
+        _panes = _model is null ? [] : ShowsResultOnly || CurrentOnly
+            ? _model.PreviewPanes.TakeLast(1).ToArray()
+            : ResultOnly ? _model.SaveReviewPanes : _model.PreviewPanes.ToArray();
         if (_model is not null)
         {
             PreviewPayloadConverter converter = new();
-            foreach (ArtefactPreviewPane pane in _model.PreviewPanes)
+            foreach (ArtefactPreviewPane pane in _panes)
             {
                 Image image = new()
                 {
@@ -143,7 +234,7 @@ public sealed class SharedReviewSurface : UserControl
         Rebuild();
     }
 
-    private bool IsSlider => _model?.ReviewViewport.Mode == ReviewComparisonMode.Slider && _images.Count == 2 && _model.PreviewPanes.All(p => p.HasImage);
+    private bool IsSlider => !ShowsResultOnly && _model?.ReviewViewport.Mode == ReviewComparisonMode.Slider && _images.Count == 2 && _panes.All(p => p.HasImage);
 
     private void Rebuild()
     {
@@ -160,7 +251,7 @@ public sealed class SharedReviewSurface : UserControl
         if (_model is null) return;
         for (int i = 0; i < _images.Count; i++)
         {
-            ArtefactPreviewPane pane = _model.PreviewPanes[i];
+            ArtefactPreviewPane pane = _panes[i];
             Grid canvas = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             canvas.Children.Add(_images[i]);
             _canvases.Add(canvas);
@@ -177,13 +268,22 @@ public sealed class SharedReviewSurface : UserControl
             DockPanel panel = new() { Margin = new Thickness(0, 0, 10, 0) };
             Grid.SetColumn(panel, i);
             StackPanel heading = new();
-            heading.Children.Add(new TextBlock { Text = IsSlider ? _model.BeforeLabel + " / " + _model.AfterLabel : pane.Heading, FontWeight = FontWeights.SemiBold });
-            heading.Children.Add(new TextBlock { Text = pane.FileName, TextTrimming = TextTrimming.CharacterEllipsis });
-            heading.Children.Add(new TextBlock { Text = pane.Detail, Opacity = 0.6 });
+            if (CurrentOnly)
+            {
+                string detail = pane.FileName + " · " + pane.Detail;
+                heading.Children.Add(new TextBlock { Text = detail, ToolTip = detail,
+                    TextTrimming = TextTrimming.CharacterEllipsis });
+            }
+            else
+            {
+                heading.Children.Add(new TextBlock { Text = ShowsResultOnly ? Strings.Resolve("Session_SaveCurrentResult") : IsSlider ? _model.BeforeLabel + " / " + _model.AfterLabel : pane.Heading, FontWeight = FontWeights.SemiBold });
+                string detail = pane.FileName + " · " + pane.Detail;
+                heading.Children.Add(new TextBlock { Text = detail, ToolTip = detail, TextTrimming = TextTrimming.CharacterEllipsis });
+            }
             DockPanel.SetDock(heading, Dock.Top);
             panel.Children.Add(heading);
             ScrollViewer scroll = new() { HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = canvas };
-            AutomationProperties.SetAutomationId(scroll, IsSlider ? "Session.ReviewOverlay" : i == 0 ? "Session.ReviewBefore" : "Session.ReviewAfter");
+            AutomationProperties.SetAutomationId(scroll, IsSlider ? "Session.ReviewOverlay" : ShowsResultOnly || CurrentOnly && _model.PreviewPanes.Count > 1 ? "Session.ReviewAfter" : i == 0 ? "Session.ReviewBefore" : "Session.ReviewAfter");
             AutomationProperties.SetName(scroll, pane.Heading);
             scroll.ScrollChanged += Scrolled;
             _scrolls.Add(scroll);
@@ -199,20 +299,32 @@ public sealed class SharedReviewSurface : UserControl
     {
         if (_model is null) return;
         _updating = true;
-        _toolbar.Visibility = _model.ShowsGuidedPreviewTools ? Visibility.Visible : Visibility.Collapsed;
+        _reviewToggle.Visibility = ResultOnly && _model.SaveReviewPanes.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        _reviewToggle.Content = Strings.Resolve(_reviewComparisonExpanded ? "Session_SaveHideReview" : "Session_SaveReviewResult");
+        AutomationProperties.SetName(_reviewToggle, (string)_reviewToggle.Content);
+        _toolbar.Visibility = !ShowsResultOnly && _model.ShowsGuidedPreviewTools ? Visibility.Visible : Visibility.Collapsed;
         foreach (var (button, mode) in _modes)
         {
             button.IsChecked = _model.ReviewViewport.Mode == mode;
-            button.IsEnabled = mode == ReviewComparisonMode.SideBySide || (_images.Count == 2 && _model.PreviewPanes.All(p => p.HasImage));
+            button.IsEnabled = mode == ReviewComparisonMode.SideBySide || (_images.Count == 2 && _panes.All(p => p.HasImage));
             button.Visibility = _images.Count == 2 && _images.All(i => i.Source is not null) ? Visibility.Visible : Visibility.Collapsed;
         }
         bool hasImage = _images.Any(i => i.Source is not null);
+        // Optional save comparison and completed inspection keep the image usable first.
+        bool compact = ResultOnly || _model.GuidedPage == GuidedSessionPage.Completed;
+        if (compact != _compactToolsMode)
+        {
+            _compactToolsMode = compact;
+            _inspectionExpanded = false;
+        }
+        _inspectionTools.Visibility = compact && !_inspectionExpanded ? Visibility.Collapsed : Visibility.Visible;
+        _inspectionToggle.Visibility = compact && hasImage ? Visibility.Visible : Visibility.Collapsed;
         foreach (var (button, background) in _backgrounds)
         {
             button.IsChecked = _model.ReviewViewport.Background == background;
             button.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
         }
-        _actualSize.Visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
+        _actualSize.Visibility = hasImage && (!compact || _inspectionExpanded) ? Visibility.Visible : Visibility.Collapsed;
         _slider.Visibility = IsSlider ? Visibility.Visible : Visibility.Collapsed;
         _slider.Value = _model.ReviewViewport.SliderPosition;
         Brush brush = _model.ReviewViewport.Background switch { ReviewInspectionBackground.White => Brushes.White, ReviewInspectionBackground.Black => Brushes.Black, _ => TryFindResource("TransparencyCheckerboard") as Brush ?? _checkerboard };
@@ -224,15 +336,15 @@ public sealed class SharedReviewSurface : UserControl
     private void UpdateSizes()
     {
         if (_model is null || _images.Count == 0 || _host.ActualWidth <= 0 || _host.ActualHeight <= 0) return;
-        double width = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
-        double height = _model.PreviewPanes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
-        bool fit = _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
+        double width = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
+        double height = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));
+        bool fit = ShowsResultOnly || _model.IsFitToViewport || !_model.ShowsGuidedPreviewTools;
         double scale = fit
-            ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - 76) / height))
+            ? Math.Max(0.001, Math.Min(Math.Max(1, _host.ActualWidth / (IsSlider ? 1 : _images.Count) - 28) / width, Math.Max(1, _host.ActualHeight - (CurrentOnly ? 28 : 76)) / height))
             : _model.ZoomScale;
         for (int i = 0; i < _images.Count; i++)
         {
-            ArtefactPreviewPane pane = _model.PreviewPanes[i];
+            ArtefactPreviewPane pane = _panes[i];
             _images[i].LayoutTransform = new ScaleTransform(fit ? 1 : scale, fit ? 1 : scale);
             _images[i].Width = Math.Max(1, pane.PayloadPixelWidth) * (fit ? scale : 1);
             _images[i].Height = Math.Max(1, pane.PayloadPixelHeight) * (fit ? scale : 1);

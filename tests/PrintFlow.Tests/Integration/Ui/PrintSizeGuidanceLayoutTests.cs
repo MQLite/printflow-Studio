@@ -90,7 +90,8 @@ public sealed class PrintSizeGuidanceLayoutTests
             // Scoped to the three print-size sections (size choice, preflight, preparation); the
             // desired height excludes the margin, which DesiredSize includes.
             Rect contentBounds = ReviewGuidanceLayoutTests.Bounds(content, tree.Root);
-            List<Border> sections = [.. PrintSizeGuidanceUiTests.Descendants<Border>(content)
+            List<FrameworkElement> sections = [.. PrintSizeGuidanceUiTests.Descendants<FrameworkElement>(content)
+                .Where(b => b is Border or Wpf.Ui.Controls.Card)
                 .Where(b => ReferenceEquals(VisualTreeHelper.GetParent(b), content) && ReviewGuidanceLayoutTests.Shown(b) &&
                     PrintSizeGuidanceUiTests.Descendants<FrameworkElement>(b).Any(e => GuidanceIds.Contains(AutomationProperties.GetAutomationId(e))))];
             List<string> clipped = [.. sections.SelectMany(PrintSizeGuidanceUiTests.Descendants<TextBlock>)
@@ -102,10 +103,10 @@ public sealed class PrintSizeGuidanceLayoutTests
                 .Count(t => ReviewGuidanceLayoutTests.Shown(t) &&
                     AutomationProperties.GetAutomationId(t).StartsWith("Session.PrintDimensions.", StringComparison.Ordinal) &&
                     screen.PreflightRows.Any(r => r.AutomationId == AutomationProperties.GetAutomationId(t)));
-            foreach (Border section in sections) section.Visibility = Visibility.Collapsed;
+            foreach (FrameworkElement section in sections) section.Visibility = Visibility.Collapsed;
             tree.Root.UpdateLayout();
             Rect withoutGuidance = ReviewGuidanceLayoutTests.Bounds(tree.OfType<SharedReviewSurface>().Single(), tree.Root);
-            foreach (Border section in sections) section.Visibility = Visibility.Visible;
+            foreach (FrameworkElement section in sections) section.Visibility = Visibility.Visible;
             tree.Root.UpdateLayout();
             return (Image: image, Column: column, Shown: shown, Clipped: clipped, Sections: sections.Count, Rows: rows,
                 ExtentHeight: details.ExtentHeight, ViewportHeight: details.ViewportHeight, WithoutGuidance: withoutGuidance);
@@ -172,8 +173,7 @@ public sealed class PrintSizeGuidanceLayoutTests
             presets.IsExpanded = true;
         if (expand)
             foreach (Expander expander in PrintSizeGuidanceUiTests.Descendants<Expander>(root)) expander.IsExpanded = true;
-        root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
-        root.UpdateLayout();
+        ProcessingWorkspaceRolloutTests.Settle(root);
     }
 
     private static bool InsideExpander(DependencyObject element)

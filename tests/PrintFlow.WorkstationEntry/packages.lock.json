@@ -42,6 +42,11 @@
           "SQLitePCLRaw.core": "2.1.12"
         }
       },
+      "WPF-UI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
+      },
       "printflow.app": {
         "type": "Project",
         "dependencies": {
@@ -50,7 +55,8 @@
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.11, )",
           "PrintFlow.Domain": "[0.1.0, )",
           "PrintFlow.Infrastructure": "[0.1.0, )",
-          "PrintFlow.Workflow": "[0.1.0, )"
+          "PrintFlow.Workflow": "[0.1.0, )",
+          "WPF-UI": "[4.3.0, )"
         }
       },
       "printflow.domain": {
@@ -110,6 +116,15 @@
         "contentHash": "Ljd0Uxoq5XpScD2Bg0nM/r3mwx7Ao5Uq24eo2ARxbGvqJ7Zht6rt2cJtwVRH4Cv+1ZVMdXz6TB43KbpmsxRrvQ==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.11"
+        }
+      },
+      "WPF-UI": {
+        "type": "CentralTransitive",
+        "requested": "[4.3.0, )",
+        "resolved": "4.3.0",
+        "contentHash": "SIHhc8lIrhEQ/1cLFZN6Dtf8cqsLm4myBULj9obnacd9TyDs2vizhKYzRzTlcPEcnzb3L4EstvPN3M6kcXbJCA==",
+        "dependencies": {
+          "WPF-UI.Abstractions": "4.3.0"
         }
       }
     }

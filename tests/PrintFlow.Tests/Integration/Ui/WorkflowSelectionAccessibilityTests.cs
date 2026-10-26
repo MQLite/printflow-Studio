@@ -114,7 +114,7 @@ public sealed class WorkflowSelectionAccessibilityTests
     /// <summary>The new labels are real sentences in both languages, not resource keys (§25).</summary>
     [Theory]
     [InlineData("en-US", "Source file", "Output name")]
-    [InlineData("zh-CN", "源文件", "输出名称")]
+    [InlineData("zh-CN", "源文件", "输出文件基础名称")]
     public async Task The_source_and_output_name_labels_are_translated(
         string culture, string sourceLabel, string outputLabel)
     {

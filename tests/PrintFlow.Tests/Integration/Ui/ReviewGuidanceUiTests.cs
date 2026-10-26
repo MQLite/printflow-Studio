@@ -295,7 +295,7 @@ public sealed class ReviewGuidanceUiTests
 
     [Theory]
     [InlineData("en", "Trim")]
-    [InlineData("zh-CN", "裁边")]
+    [InlineData("zh-CN", "裁去多余边缘")]
     public async Task The_returned_correction_review_keeps_the_11148_next_step_line_and_the_guidance_does_not_repeat_it(
         string language, string trim)
     {

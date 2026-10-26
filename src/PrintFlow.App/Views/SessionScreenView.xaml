@@ -4,7 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
-             xmlns:local="clr-namespace:PrintFlow.App.Views"
+             xmlns:controls="clr-namespace:PrintFlow.App.Controls"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:local="clr-namespace:PrintFlow.App.Views"
              xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:SessionViewModel}"
@@ -256,7 +257,222 @@
                 </StackPanel>
             </Border>
         </DataTemplate>
-        <DataTemplate x:Key="OutputHistoryTemplate">
+        <Style x:Key="SaveDeliveryHighlight" TargetType="Border">
+            <Setter Property="Background" Value="Transparent" />
+            <Style.Triggers><DataTrigger Binding="{Binding CanCheckSaveAgain}" Value="True">
+                <Setter Property="Background" Value="#FFF4E5" /><Setter Property="BorderBrush" Value="#B66A11" />
+                <Setter Property="BorderThickness" Value="1" /><Setter Property="Padding" Value="8" /><Setter Property="CornerRadius" Value="6" />
+                <Setter Property="TextElement.Foreground" Value="#8A1F11" />
+                <Setter Property="AutomationProperties.LiveSetting" Value="Polite" />
+            </DataTrigger></Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="CompletedSummaryTemplate"><Border AutomationProperties.AutomationId="Session.Completion.Summary" Background="{DynamicResource PF.Brush.Selection}" CornerRadius="6" Padding="12" Margin="0,0,0,14" TextElement.FontSize="16">
+    <StackPanel>
+        <TextBlock Text="{Binding GuidedCompletionState}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.Completion.Workflow" />
+        <TextBlock Text="{Binding GuidedApprovalState}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.Completion.Approval" />
+        <Border Style="{StaticResource SaveDeliveryHighlight}" AutomationProperties.AutomationId="Session.Save.DeliveryHighlight"><TextBlock Text="{Binding GuidedDeliveryState}" Margin="0,4,0,0" FontWeight="SemiBold" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.Completion.Delivery" /></Border>
+        <TextBlock Text="{Binding GuidedSavedCount}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.Completion.SavedCount" />
+    </StackPanel>
+</Border></DataTemplate>
+        <DataTemplate x:Key="SaveSelectionTemplate"><StackPanel>
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasMultipleFinalSaveTargets, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FinalSaveTargetLabel}" Style="{StaticResource MetadataLabel}" />
+                        <local:SessionComboBox ItemsSource="{Binding FinalSaveTargets}"
+                                  SelectedItem="{Binding SelectedFinalSaveTarget, Mode=TwoWay}"
+                                  TextSearch.TextPath="Label" HorizontalContentAlignment="Stretch"
+                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  AutomationProperties.AutomationId="Session.FinalSave.Target"
+                                  AutomationProperties.Name="{Binding FinalSaveTargetLabel}">
+                            <local:SessionComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Label}" />
+                                        <TextBlock Text="{Binding DeliveryStatus}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </local:SessionComboBox.ItemTemplate>
+                        </local:SessionComboBox>
+                    </StackPanel>
+
+                    <Border Background="#FFF4E5" BorderBrush="#B66A11" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,8,0,0"
+                            Visibility="{Binding HasFinalSaveAlert, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FinalSaveAlert}" TextWrapping="Wrap" Foreground="#8A1F11"
+                                   AutomationProperties.AutomationId="Session.FinalSave.Alert" AutomationProperties.LiveSetting="Polite" />
+                    </Border>
+                    <ProgressBar Height="6" Margin="0,6,0,0" Minimum="0" Maximum="1" Value="{Binding FinalSaveProgress, Mode=OneWay}"
+                                 AutomationProperties.Name="{Binding FinalSaveStatus}"
+                                 Visibility="{Binding HasFinalSaveProgress, Converter={StaticResource BoolToVisibility}}" />
+
+                    <!-- Older and unresolved saves stay reachable with their own destination. -->
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasFinalSaveRecords, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding FinalSaveRecordsLabel}" Style="{StaticResource MetadataLabel}" />
+                        <!-- Labels carry full folders, so they wrap rather than clip. -->
+                        <local:SessionComboBox ItemsSource="{Binding FinalSaveRecords}"
+                                  SelectedItem="{Binding SelectedFinalSaveRecord, Mode=TwoWay}"
+                                  HorizontalContentAlignment="Stretch"
+                                  TextSearch.TextPath="Label"
+                                  IsEnabled="{Binding IsSaveDraftEditable}"
+                                  AutomationProperties.AutomationId="Session.FinalSave.Record"
+                                  AutomationProperties.Name="{Binding FinalSaveRecordsLabel}">
+                            <local:SessionComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </local:SessionComboBox.ItemTemplate>
+                        </local:SessionComboBox>
+                    </StackPanel>
+
+
+</StackPanel></DataTemplate>
+        <DataTemplate x:Key="SaveDraftTemplate"><StackPanel>
+                    <!-- The draft is shown only while a save of this result is possible. -->
+                    <StackPanel Visibility="{Binding ShowsSaveDraft, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding SaveFileNameLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,4" />
+                        <local:SessionTextBox Text="{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding IsSaveDraftEditable}"
+                                 AutomationProperties.AutomationId="Session.FinalSave.FileName"
+                                 AutomationProperties.Name="{Binding SaveFileNameLabel}" />
+
+                        <TextBlock Text="{Binding SaveFolderLabel}" Style="{StaticResource MetadataLabel}" Margin="0,8,8,4" />
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><local:SessionTextBox Text="{Binding SaveFolderText, Mode=OneWay}" IsReadOnly="True" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Hidden" ToolTip="{Binding SaveFolderText}"
+                                 AutomationProperties.AutomationId="Session.FinalSave.Folder"
+                                 AutomationProperties.Name="{Binding SaveFolderLabel}" />
+                        <local:SessionActionButton Grid.Column="1" Content="{Binding ChangeLocationLabel}" Command="{Binding ChangeLocationCommand}"
+                                VerticalAlignment="Center" Padding="12,8" Margin="8,0,0,0"
+                                AutomationProperties.AutomationId="Session.FinalSave.ChangeLocation"
+                                AutomationProperties.Name="{Binding ChangeLocationLabel}"
+                                Visibility="{Binding CanChangeLocation, Converter={StaticResource BoolToVisibility}}" /></Grid>
+
+                        <TextBlock Text="{Binding SaveDraftNotice}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
+                                   AutomationProperties.AutomationId="Session.FinalSave.DraftNotice"
+                                   Visibility="{Binding HasSaveDraftNotice, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding SaveSummary}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   AutomationProperties.AutomationId="Session.FinalSave.Summary" />
+                    </StackPanel>
+
+</StackPanel></DataTemplate>
+        <DataTemplate x:Key="SaveOutcomeTemplate"><StackPanel>
+                    <TextBlock Text="{Binding FinalSaveStatus}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
+                               AutomationProperties.AutomationId="Session.FinalSave.Status" />
+                    <TextBlock Text="{Binding GuidedCompletionNotice}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}"
+                               AutomationProperties.AutomationId="Session.Completion.Notice"
+                               Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Text="{Binding FinalSaveSecondary}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.85"
+                               AutomationProperties.AutomationId="Session.FinalSave.Secondary"
+                               Visibility="{Binding HasFinalSaveSecondary, Converter={StaticResource BoolToVisibility}}" />
+
+                    <StackPanel Margin="0,8,0,0"
+                                Visibility="{Binding HasFinalSaveSavedPath, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding SavedPathLabel}" Style="{StaticResource MetadataLabel}" />
+                        <local:SessionTextBox Text="{Binding FinalSaveSavedPath, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 AutomationProperties.AutomationId="Session.FinalSave.SavedPath"
+                                 AutomationProperties.Name="{Binding SavedPathLabel}" />
+                    </StackPanel>
+
+                    <WrapPanel Margin="0,10,0,0">
+                        <WrapPanel.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
+                                <Setter Property="Padding" Value="12,5" />
+                                <Setter Property="Margin" Value="0,0,8,6" />
+                            </Style>
+                        </WrapPanel.Resources>
+
+
+
+
+                        <local:SessionActionButton Content="{Binding OpenFolderLabel}" Command="{Binding OpenContainingFolderCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.OpenFolder"
+                                AutomationProperties.Name="{Binding OpenFolderLabel}"
+                                Visibility="{Binding CanOpenContainingFolder, Converter={StaticResource BoolToVisibility}}" />
+                        <local:SessionActionButton Content="{Binding CheckSavedLabel}" Command="{Binding CheckSavedFileCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.CheckSaved"
+                                AutomationProperties.Name="{Binding CheckSavedLabel}"
+                                Visibility="{Binding CanCheckSavedFile, Converter={StaticResource BoolToVisibility}}" />
+                        <local:ReviewApprovalButton Content="{Binding SaveAnotherCopyLabel}" Command="{Binding SaveAnotherCopyCommand}"
+                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.SaveAnotherCopy"
+                                AutomationProperties.Name="{Binding SaveAnotherCopyLabel}"
+                                Visibility="{Binding CanSaveAnotherCopy, Converter={StaticResource BoolToVisibility}}" />
+
+                        <local:SessionActionButton Content="{Binding CancelSaveLabel}" Command="{Binding CancelSaveCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.Cancel"
+                                AutomationProperties.Name="{Binding CancelSaveLabel}"
+                                Visibility="{Binding CanCancelSave, Converter={StaticResource BoolToVisibility}}" />
+                    </WrapPanel>
+
+                    <TextBlock Text="{Binding FinalSaveOpenNotice}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               AutomationProperties.AutomationId="Session.FinalSave.OpenNotice"
+                               Visibility="{Binding HasFinalSaveOpenNotice, Converter={StaticResource BoolToVisibility}}" />
+
+                    <local:SessionExpander Header="{Binding FinalSaveDetailsLabel}" Margin="0,6,0,0"
+                              AutomationProperties.AutomationId="Session.FinalSave.Details"
+                              AutomationProperties.Name="{Binding FinalSaveDetailsLabel}"
+                              Visibility="{Binding HasFinalSaveDetails, Converter={StaticResource BoolToVisibility}}">
+                        <local:SessionTextBox Text="{Binding FinalSaveDetails, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 AutomationProperties.Name="{Binding FinalSaveDetailsLabel}" />
+                    </local:SessionExpander>
+
+</StackPanel></DataTemplate>
+        <DataTemplate x:Key="WpfUiSaveTemplate">
+            <Border AutomationProperties.AutomationId="Session.FinalSave" AutomationProperties.Name="{Binding FinalSaveHeading}">
+                <ui:Card Style="{DynamicResource PF.Card.Fluent}" FontSize="16" Margin="0,0,0,14">
+                <ui:Card.Resources>
+                    <ResourceDictionary>
+                        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="{x:Type local:SessionTextBox}" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="{x:Type local:SessionActionButton}" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="{x:Type local:SessionComboBox}" BasedOn="{StaticResource PF.Input.ComboBox}" />
+                        <Style TargetType="{x:Type local:SessionExpander}" BasedOn="{StaticResource PF.Disclosure}" />
+                    </ResourceDictionary>
+                </ui:Card.Resources>
+<StackPanel>
+<StackPanel Margin="0,0,0,8" Visibility="{Binding ShowsGuidedCompletion, Converter={StaticResource BoolToVisibility}}">
+    <TextBlock Text="{Binding GuidedApprovalState}" FontWeight="SemiBold" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.Completion.Approval" />
+    <Border Style="{StaticResource SaveDeliveryHighlight}" AutomationProperties.AutomationId="Session.Save.DeliveryHighlight"><TextBlock Text="{Binding GuidedDeliveryState}" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.AutomationId="Session.Completion.Delivery" /></Border>
+    <TextBlock Text="{Binding GuidedCompletionState}" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.Completion.Workflow" />
+</StackPanel>
+<ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveSelectionTemplate}" Focusable="False" IsTabStop="False" />
+<ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveDraftTemplate}" Focusable="False" IsTabStop="False" />
+<ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveOutcomeTemplate}" Focusable="False" IsTabStop="False" />
+</StackPanel></ui:Card>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="WpfUiCompletedTemplate">
+            <Border AutomationProperties.AutomationId="Session.FinalSave" AutomationProperties.Name="{Binding FinalSaveHeading}">
+                <ui:Card Style="{DynamicResource PF.Card.Fluent}" FontSize="16" Margin="0,0,0,14">
+                <ui:Card.Resources>
+                    <ResourceDictionary>
+                        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="{x:Type local:SessionTextBox}" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="{x:Type local:SessionActionButton}" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="{x:Type local:SessionComboBox}" BasedOn="{StaticResource PF.Input.ComboBox}" />
+                        <Style TargetType="{x:Type local:SessionExpander}" BasedOn="{StaticResource PF.Disclosure}" />
+                    </ResourceDictionary>
+                </ui:Card.Resources>
+<StackPanel>
+
+<ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveSelectionTemplate}" Focusable="False" IsTabStop="False" />
+<ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveOutcomeTemplate}" Focusable="False" IsTabStop="False" />
+<local:SessionExpander Header="{Binding FinalSaveHeading}" Margin="0,12,0,0" AutomationProperties.AutomationId="Session.Completion.SaveOptions"
+        Visibility="{Binding ShowsSaveDraft, Converter={StaticResource BoolToVisibility}}"><ContentControl Content="{Binding}" ContentTemplate="{StaticResource SaveDraftTemplate}" Focusable="False" IsTabStop="False" /></local:SessionExpander>
+</StackPanel></ui:Card>
+            </Border>
+        </DataTemplate>                <Style x:Key="PF.Sample.Steps" TargetType="ItemsControl" BasedOn="{StaticResource PF.StepNavigation}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
+              <Setter Property="ItemTemplate">
+                <Setter.Value><DataTemplate>
+                  <Border x:Name="Step" Padding="12,14" Margin="0,0,0,6" CornerRadius="8" Background="White">
+                    <DockPanel><TextBlock Text="{Binding StatusText}" DockPanel.Dock="Right" FontSize="11" Foreground="{DynamicResource PF.Brush.Muted}" Margin="8,0,0,0" VerticalAlignment="Center" /><TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" /></DockPanel>
+                  </Border>
+                  <DataTemplate.Triggers><DataTrigger Binding="{Binding State}" Value="Current"><Setter TargetName="Step" Property="Background" Value="{DynamicResource PF.Brush.Selection}" /></DataTrigger></DataTemplate.Triggers>
+                </DataTemplate></Setter.Value>
+              </Setter>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style><DataTemplate x:Key="OutputHistoryTemplate">
             <!--
                 Outputs already produced (§15). Present so an operator adding size B can see
                 size A is still there, still approved and still valid. Concise metadata only,
@@ -343,6 +559,41 @@
                 </StackPanel>
             </Border>
         </DataTemplate>
+        <!-- TIFF inspection uses a narrow, scrollable facts column. Give every status
+             its full width instead of reserving an unbounded auto column beside the name. -->
+        <DataTemplate x:Key="TiffOutputHistoryTemplate">
+            <ui:Card Padding="12" Margin="0,12,0,0" Visibility="{Binding HasOutputs, Converter={StaticResource BoolToVisibility}}">
+                <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+                <StackPanel>
+                    <TextBlock Text="{Binding OutputsHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,8,0,0" IsTabStop="False" FontSize="16"
+                                  AutomationProperties.AutomationId="Session.OutputList" AutomationProperties.Name="{Binding OutputsHeading}">
+                        <ItemsControl.ItemContainerStyle><Style TargetType="ContentPresenter">
+                            <Setter Property="AutomationProperties.Name" Value="{Binding FileName}" />
+                        </Style></ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                            <StackPanel Margin="0,4">
+                                <StackPanel.Style><Style TargetType="StackPanel"><Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsValid}" Value="False"><Setter Property="Opacity" Value="0.55" /></DataTrigger>
+                                </Style.Triggers></Style></StackPanel.Style>
+                                <TextBlock Text="{Binding FileName}" ToolTip="{Binding FileName}" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" AutomationProperties.AutomationId="Session.OutputFileName" />
+                                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.AutomationId="Session.OutputState">
+                                    <Run Text="{Binding Review, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Location, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Validity, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource PF.Brush.Muted}"
+                                           AutomationProperties.AutomationId="Session.OutputSummary">
+                                    <Run Text="{Binding Size, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Branch, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ui:Card>
+        </DataTemplate>
     </ResourceDictionary></UserControl.Resources>
 
     <Grid Margin="16" Background="{DynamicResource PF.Brush.Canvas}" TextElement.FontFamily="{DynamicResource PF.Font.Family}" TextElement.FontSize="14"><Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
@@ -356,13 +607,25 @@
         </Grid.RowDefinitions>
 
         <!-- Session identity (§3). -->
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
-            <TextBlock DockPanel.Dock="Right" Text="{Binding Workflow}" VerticalAlignment="Center"
-                       Margin="12,0,0,0" Opacity="0.85" />
-            <TextBlock Text="{Binding SessionName}" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-        </DockPanel>
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+          <Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+          </ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+          <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+          <HeaderedContentControl Style="{StaticResource PF.PageHeader}" Header="{Binding GuidedCurrentTitle}"
+              AutomationProperties.AutomationId="Session.CurrentStepTitle" AutomationProperties.Name="{Binding GuidedCurrentTitle}" />
+          <StackPanel Grid.Column="1" MaxWidth="360" Margin="12,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding SessionName}" FontSize="12" Foreground="{DynamicResource PF.Brush.Muted}"
+                TextTrimming="CharacterEllipsis" ToolTip="{Binding SessionName}" TextAlignment="Right"
+                AutomationProperties.AutomationId="Session.TaskSummary" AutomationProperties.Name="{Binding SessionName}" />
+            <TextBlock Text="{Binding Workflow}" FontSize="12" TextAlignment="Right" Foreground="{DynamicResource PF.Brush.Muted}" />
+          </StackPanel>
+          <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding NextStepText}" FontSize="{DynamicResource PF.Font.Body}"
+              TextWrapping="Wrap" Margin="0,2,0,0" AutomationProperties.AutomationId="Session.CurrentStepInstruction" />
+        </Grid>
 
-        <Border Grid.Row="1" Grid.ColumnSpan="2" x:Name="OperatorStatusPanel" Margin="0,6,0,0" Padding="10,4"
+        <Border Grid.Row="1" Grid.ColumnSpan="2" x:Name="OperatorStatusPanel" Margin="0,4,0,0" Padding="10,4"
                 Background="#F3F7FA"
                 Focusable="True" KeyboardNavigation.IsTabStop="True"
                 AutomationProperties.AutomationId="Session.OperatorStatus"
@@ -380,8 +643,7 @@
                 </Style>
             </Border.Style>
             <TextBlock TextWrapping="Wrap">
-                <Run Text="{Binding GuidedCurrentTitle, Mode=OneWay}" FontWeight="SemiBold" FontSize="16" /><Run Text=" · " /><Run Text="{Binding GuidedCurrentStatus, Mode=OneWay}" /><Run Text=" — " />
-                <Run Text="{Binding NextStepText, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding StatusReason, Mode=OneWay}" />
+                <Run Text="{Binding GuidedCurrentStatus, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=" " /><Run Text="{Binding StatusReason, Mode=OneWay}" />
             </TextBlock>
         </Border>
 
@@ -395,7 +657,7 @@
                 BorderThickness="1"
                 CornerRadius="4"
                 Padding="10,6"
-                Margin="0,12,0,0"
+                Margin="0,8,0,0"
                 Visibility="{Binding IsFakeProcessing, Converter={StaticResource BoolToVisibility}}">
             <StackPanel>
                 <TextBlock Text="{Binding FakeModeNotice}"
@@ -415,8 +677,8 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
-            <TextBlock Text="{Binding OriginalSourceSummary}" TextWrapping="Wrap"
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,8,0,0">
+            <TextBlock Text="{Binding OriginalSourceSummary}" TextTrimming="CharacterEllipsis" ToolTip="{Binding OriginalSourceSummary}"
                        AutomationProperties.AutomationId="Session.OriginalSourceSummary"
                        Visibility="{Binding ShowsGuidedSourceDetails, Converter={StaticResource BoolToVisibility}}" />
             <!-- Automation has ended for this session; nothing here restarts it (§14). -->
@@ -499,16 +761,22 @@
                 produces no Revision, and coming back needs an explicit return. It deliberately
                 does not claim Meitu is safe or finished.
             -->
-            <Border BorderThickness="1"
-                    BorderBrush="#B0B0B0"
+            <ui:Card
                     Padding="12"
                     Margin="0,0,0,8"
-                    Visibility="{Binding IsConfirmingTakeOver, Converter={StaticResource BoolToVisibility}}">
+                    Visibility="{Binding IsConfirmingTakeOver, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
                 <StackPanel>
                     <TextBlock Text="{Binding TakeOverConfirmQuestion}"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10" />
-                    <StackPanel Orientation="Horizontal">
+                    <WrapPanel>
                         <local:SessionActionButton Content="{Binding TakeOverConfirmLabel}"
                                 Command="{Binding ConfirmTakeOverCommand}"
                                 AutomationProperties.AutomationId="Session.TakeOverConfirm"
@@ -520,9 +788,9 @@
                                 AutomationProperties.AutomationId="Session.TakeOverCancel"
                                 AutomationProperties.Name="{Binding TakeOverCancelLabel}"
                                 Padding="14,6" />
-                    </StackPanel>
+                    </WrapPanel>
                 </StackPanel>
-            </Border>
+            </ui:Card>
 
             <!--
                 What Meitu may still be holding after a stop (§21, §29). Read from the closed
@@ -564,7 +832,7 @@
             <TextBlock Text="{Binding ManualCropNotice}"
                        TextWrapping="Wrap"
                        Margin="0,0,0,6"
-                       Visibility="{Binding IsManualCropRequired, Converter={StaticResource BoolToVisibility}}" />
+                       Visibility="{Binding ShowsManualCropEntryNotice, Converter={StaticResource BoolToVisibility}}" />
 
             <!--
                 Manual Crop (Part C2 §3). Its visibility is CanManualCrop, which the workflow
@@ -582,14 +850,19 @@
                     HorizontalAlignment="Left"
                     Padding="14,6"
                     Margin="0,0,0,8"
-                    Visibility="{Binding CanManualCrop, Converter={StaticResource BoolToVisibility}}" />
+                    Visibility="{Binding ShowsManualCropEntry, Converter={StaticResource BoolToVisibility}}" />
 
         </StackPanel>
 
-                <ScrollViewer Grid.Row="4" Grid.Column="0" Margin="0,14,16,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid Grid.Row="4" Grid.Column="0" Margin="0,8,16,0">
+          <Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+          </ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources>
+          <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+<ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
                 <TextBlock Text="{Binding StepsHeading}" FontWeight="SemiBold" Margin="0,0,0,12" />
-                <ItemsControl ItemsSource="{Binding GuidedSteps}" Style="{StaticResource PF.StepNavigation}"
+                <controls:GuidedStepList ItemsSource="{Binding GuidedSteps}" Style="{DynamicResource PF.StepNavigation.Compact}"
                               AutomationProperties.AutomationId="Session.StepList" AutomationProperties.Name="{Binding StepsHeading}" />
                 <local:SessionExpander Header="{Binding HistoryHeading}" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.HistorySelector">
                     <local:SessionExpander.Style><Style TargetType="Expander"><Style.Triggers>
@@ -604,7 +877,12 @@
                     </StackPanel>
                 </local:SessionExpander>
             </StackPanel>
-        </ScrollViewer><Grid Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace"
+        </ScrollViewer><StackPanel Grid.Row="1"><local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Margin="0,6,0,0" Content="{Binding OpenSettingsLabel}" Command="{Binding OpenSettingsCommand}"
+                        AutomationProperties.AutomationId="Session.Settings" AutomationProperties.Name="{Binding OpenSettingsLabel}"
+                        IsEnabled="{Binding CanOpenUtilities}" /><local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Margin="0,6,0,0" Content="{Binding OpenEnvironmentLabel}" Command="{Binding OpenEnvironmentCommand}"
+                        AutomationProperties.AutomationId="Session.Environment" AutomationProperties.Name="{Binding OpenEnvironmentLabel}"
+                        IsEnabled="{Binding CanOpenUtilities}" /></StackPanel>
+        </Grid><Grid Grid.Row="4" Grid.Column="1" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.CurrentWorkspace"
                               Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"
                               IsEnabled="{Binding CanInteractWithLivePage}">
             <Grid.ColumnDefinitions>
@@ -612,16 +890,20 @@
                 <ColumnDefinition Width="{Binding GuidedDetailsWidth}" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.ColumnSpan="2" Padding="32" MaxWidth="680" VerticalAlignment="Center"
-                    Background="{DynamicResource PF.Brush.Surface}" CornerRadius="10"
+            <ui:Card Grid.ColumnSpan="2" Padding="32" MaxWidth="680" VerticalAlignment="Center"
+                    FontSize="16"
                     AutomationProperties.AutomationId="Session.Processing"
                     Visibility="{Binding ShowsGuidedProcessing, Converter={StaticResource BoolToVisibility}}">
+                <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="{Binding GuidedProcessingApplication}" FontSize="16" Foreground="{DynamicResource PF.Brush.Muted}"
+                        <TextBlock Text="{Binding GuidedProcessingApplication}" TextWrapping="Wrap" FontSize="16" Foreground="{DynamicResource PF.Brush.Muted}"
                                    AutomationProperties.AutomationId="Session.Processing.Application" />
                         <TextBlock Text="{Binding CurrentStep}" FontSize="26" FontWeight="SemiBold" Margin="0,8,0,16" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding GuidedProcessingState}" FontSize="18" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding GuidedProcessingState}" TextWrapping="Wrap" FontSize="18" FontWeight="SemiBold"
                                    AutomationProperties.AutomationId="Session.Processing.State" />
                         <ProgressBar IsIndeterminate="True" Height="6" Margin="0,16,0,16"
                                      AutomationProperties.AutomationId="Session.Processing.Progress"
@@ -637,23 +919,20 @@
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-            </Border>
+            </ui:Card>
             <Grid Grid.Column="0" Grid.ColumnSpan="{Binding GuidedImageColumnSpan}" Margin="0,0,20,0" Visibility="{Binding ShowsGuidedImageWorkspace, Converter={StaticResource BoolToVisibility}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Border Grid.Row="0" Padding="16" Background="{DynamicResource PF.Brush.Surface}" CornerRadius="10"
+                <Border Grid.Row="0" Padding="12" Background="{DynamicResource PF.Brush.Surface}" CornerRadius="10"
                         BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="1"
                         AutomationProperties.AutomationId="Session.PrintSummary"
                         Visibility="{Binding ShowsGuidedPrintSummary, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
-                        <TextBlock Text="{Binding GuidedPrintRequested}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Requested" />
                         <TextBlock Text="{Binding GuidedPrintActual}" TextWrapping="Wrap" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,4" AutomationProperties.AutomationId="Session.PrintSummary.Actual" />
                         <TextBlock Text="{Binding GuidedPrintPixels}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.PrintSummary.Pixels" />
-                        <TextBlock Text="{Binding GuidedPrintWhiteInk}" TextWrapping="Wrap" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintSummary.WhiteInk" Visibility="{Binding ShowsGuidedPrintWhiteInk, Converter={StaticResource BoolToVisibility}}" />
-                        <TextBlock Text="{Binding GuidedPrintContract}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Contract" />
                         <Border Background="{DynamicResource PF.Brush.Warning}" Padding="10" CornerRadius="6" Margin="0,10,0,0" Visibility="{Binding ShowsGuidedPrintRisk, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{Binding GuidedPrintRisk}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.PrintSummary.Risk" />
                         </Border>
@@ -697,44 +976,7 @@
                     </Style>
                 </DockPanel.Style>
 
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8" Visibility="{Binding ShowsGuidedPreviewTools, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock DockPanel.Dock="Left"
-                               Text="{Binding PreviewHeading}"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
-
-                    <!-- Zoom (§12) and, through the panes' scrollbars, pan (§13). -->
-                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <TextBlock Text="{Binding ZoomLabel}"
-                                   VerticalAlignment="Center"
-                                   Opacity="0.75"
-                                   MinWidth="52"
-                                   TextAlignment="Right"
-                                   Margin="0,0,10,0" />
-                        <local:SessionActionButton Content="{Binding ZoomOutLabel}"
-                                AutomationProperties.AutomationId="Session.ReviewZoomOut"
-                                AutomationProperties.Name="{Binding ZoomOutLabel}"
-                                Command="{Binding ZoomOutCommand}"
-                                IsEnabled="{Binding CanZoomOut}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ZoomInLabel}"
-                                AutomationProperties.AutomationId="Session.ReviewZoomIn"
-                                AutomationProperties.Name="{Binding ZoomInLabel}"
-                                Command="{Binding ZoomInCommand}"
-                                IsEnabled="{Binding CanZoomIn}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ResetZoomLabel}"
-                                AutomationProperties.AutomationId="Session.ReviewResetZoom"
-                                AutomationProperties.Name="{Binding ResetZoomLabel}"
-                                Command="{Binding ResetZoomCommand}"
-                                Padding="10,4" />
-                    </WrapPanel>
-                </StackPanel>
-
-                <local:SharedReviewSurface />
+                                <local:SharedReviewSurface CurrentOnly="{Binding ShowsGuidedSourceDetails}"><local:SharedReviewSurface.Style><Style TargetType="local:SharedReviewSurface"><Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Save"><Setter Property="ResultOnly" Value="True" /><Setter Property="Background" Value="White" /><Setter Property="Padding" Value="12" /><Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" /><Setter Property="BorderThickness" Value="1" /></DataTrigger><DataTrigger Binding="{Binding GuidedPage}" Value="Completed"><Setter Property="ResultOnly" Value="True" /><Setter Property="Background" Value="White" /><Setter Property="Padding" Value="12" /><Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Border}" /><Setter Property="BorderThickness" Value="1" /></DataTrigger></Style.Triggers></Style></local:SharedReviewSurface.Style></local:SharedReviewSurface>
             </DockPanel>
 
             <!--
@@ -761,42 +1003,6 @@
                     </Style>
                 </DockPanel.Style>
 
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                    <TextBlock DockPanel.Dock="Left"
-                               Text="{Binding TiffReviewModeHeading}"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center" />
-
-                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <TextBlock Text="{Binding ZoomLabel}"
-                                   VerticalAlignment="Center"
-                                   Opacity="0.75"
-                                   MinWidth="52"
-                                   TextAlignment="Right"
-                                   Margin="0,0,10,0" />
-                        <local:SessionActionButton Content="{Binding ZoomOutLabel}"
-                                AutomationProperties.AutomationId="Session.TiffReviewZoomOut"
-                                AutomationProperties.Name="{Binding ZoomOutLabel}"
-                                Command="{Binding ZoomOutCommand}"
-                                IsEnabled="{Binding CanZoomOut}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ZoomInLabel}"
-                                AutomationProperties.AutomationId="Session.TiffReviewZoomIn"
-                                AutomationProperties.Name="{Binding ZoomInLabel}"
-                                Command="{Binding ZoomInCommand}"
-                                IsEnabled="{Binding CanZoomIn}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ResetZoomLabel}"
-                                AutomationProperties.AutomationId="Session.TiffReviewResetZoom"
-                                AutomationProperties.Name="{Binding ResetZoomLabel}"
-                                Command="{Binding ResetZoomCommand}"
-                                Padding="10,4" />
-                    </WrapPanel>
-                </StackPanel>
-
                 <local:TiffReviewSurface />
             </DockPanel>
 
@@ -820,297 +1026,110 @@
                 the coordinate mapping entirely: a mouse position on this canvas is already a
                 position in the scrolled content (see CropSurfaceLayout).
             -->
-            <DockPanel Grid.Row="1" Margin="0,14,0,0"
-                       Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}">
-                <!-- Crop hides the details column, so a refused command needs its own visible
-                     notice. These read-only bindings preserve the same failure and reload wording. -->
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
-                            AutomationProperties.AutomationId="Session.Crop.ActionFailure"
-                            Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6"
-                               AutomationProperties.LiveSetting="Assertive" />
-                    <Expander Header="{Binding NoticeErrorDetailsLabel}" IsExpanded="False"
-                              AutomationProperties.AutomationId="Session.Crop.ErrorDetails"
-                              AutomationProperties.Name="{Binding NoticeErrorDetailsLabel}">
-                        <DockPanel Margin="0,2,0,0">
-                            <TextBlock DockPanel.Dock="Left" Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold" />
-                            <TextBox DockPanel.Dock="Left" Text="{Binding NoticeErrorCode, Mode=OneWay}"
-                                     IsReadOnly="True" IsReadOnlyCaretVisible="True" BorderThickness="0"
-                                     Background="Transparent" Padding="0,3"
-                                     AutomationProperties.AutomationId="Session.Crop.ErrorCode"
-                                     AutomationProperties.Name="{Binding NoticeErrorCodeLabel}" />
-                            <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="16,3,0,0" />
-                        </DockPanel>
-                    </Expander>
-                </StackPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                    <TextBlock DockPanel.Dock="Left"
-                               Text="{Binding ManualCropHeading}"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock x:Name="TrimAdjustHeadingText"
-                               DockPanel.Dock="Left"
-                               Text="{Binding TrimAdjustHeading}"
-                               AutomationProperties.AutomationId="Session.TrimAdjust.Heading"
-                               Focusable="True"
-                               FocusVisualStyle="{x:Null}"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}" />
+            <Grid Grid.Row="1" Margin="0,8,0,0" Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="Session.Crop.Workspace">
+                <Grid.Resources>
+                    <ResourceDictionary>
+                        <ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml"/>
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="{x:Type local:SessionRadioButton}" BasedOn="{StaticResource PF.Input.RadioButton}"/>
+                        <Style TargetType="{x:Type local:SessionTextBox}" BasedOn="{StaticResource PF.Input.TextBox}"/>
+                        <Style TargetType="{x:Type local:SessionExpander}" BasedOn="{StaticResource PF.Disclosure}"/>
+                    </ResourceDictionary>
+                </Grid.Resources>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="260"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Zoom acts on the adjust surface; Compare shows both pictures fitted, so it is hidden there. -->
-                    <WrapPanel Orientation="Horizontal" Margin="0,6,0,0"
-                                Visibility="{Binding ShowsCropSurface, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Text="{Binding ZoomLabel}"
-                                   VerticalAlignment="Center"
-                                   Opacity="0.75"
-                                   MinWidth="52"
-                                   TextAlignment="Right"
-                                   Margin="0,0,10,0" />
-                        <local:SessionActionButton Content="{Binding ZoomOutLabel}"
-                                Command="{Binding ZoomOutCommand}"
-                                IsEnabled="{Binding CanZoomOut}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ZoomInLabel}"
-                                Command="{Binding ZoomInCommand}"
-                                IsEnabled="{Binding CanZoomIn}"
-                                Padding="10,4"
-                                Margin="0,0,6,0" />
-                        <local:SessionActionButton Content="{Binding ResetZoomLabel}"
-                                Command="{Binding ResetZoomCommand}"
-                                Padding="10,4" />
-                    </WrapPanel>
-                </StackPanel>
-
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
-                    <!--
-                        Adjusting a trim review (SCRUM-11147). Use this trim is the only control
-                        here that reaches the service; it is guarded like Approve so a key or click
-                        begun elsewhere never submits. Nothing here approves or saves.
-                    -->
-                    <StackPanel AutomationProperties.AutomationId="Session.TrimAdjust.Panel"
-                                Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,4"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.Instructions">
-                            <Run Text="{Binding TrimAdjustInstructions, Mode=OneWay}" />
-                            <Run Text="{Binding TrimAdjustKeyboardHint, Mode=OneWay}" Foreground="#FF5A5A5A" />
-                        </TextBlock>
-                        <WrapPanel Margin="0,0,0,4">
-                            <TextBlock Text="{Binding TrimAdjustKeptSummary}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,16,0"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Kept" />
-                            <TextBlock Text="{Binding TrimAdjustSuggestionSummary}" TextWrapping="Wrap"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Suggestion" />
-                        </WrapPanel>
-                        <TextBlock Text="{Binding TrimAdjustUnchangedNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.Unchanged"
-                                   Visibility="{Binding IsTrimDraftUnchanged, Converter={StaticResource BoolToVisibility}}" />
-                        <TextBlock Text="{Binding TrimAdjustInvalidNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.Invalid"
-                                   Visibility="{Binding IsTrimAdjustInvalid, Converter={StaticResource BoolToVisibility}}" />
-                        <TextBlock Text="{Binding TrimAdjustSourceUnavailableNotice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.SourceUnavailable"
-                                   Visibility="{Binding IsTrimSourceUnavailable, Converter={StaticResource BoolToVisibility}}" />
-                        <WrapPanel>
-
-                            <local:SessionActionButton Content="{Binding RestoreSuggestionLabel}"
-                                    Command="{Binding RestoreAutomaticSuggestionCommand}"
-                                    IsEnabled="{Binding CanRestoreAutomaticSuggestion}"
-                                    AutomationProperties.AutomationId="Session.TrimAdjust.Restore"
-                                    AutomationProperties.Name="{Binding RestoreSuggestionLabel}"
-                                    Padding="14,6" Margin="0,0,8,4" />
-                            <local:SessionActionButton Content="{Binding CancelTrimAdjustLabel}"
-                                    Command="{Binding CancelTrimAdjustCommand}"
-                                    AutomationProperties.AutomationId="Session.TrimAdjust.Cancel"
-                                    AutomationProperties.Name="{Binding CancelTrimAdjustLabel}"
-                                    Padding="14,6" Margin="0,0,16,4" />
-                            <!-- Compare / Adjust: which picture the surface shows; nothing is written. -->
-                            <local:SessionActionButton Content="{Binding TrimCompareToggleLabel}"
-                                    Command="{Binding ToggleTrimCompareCommand}"
-                                    AutomationProperties.AutomationId="Session.TrimAdjust.CompareToggle"
-                                    AutomationProperties.Name="{Binding TrimCompareToggleLabel}"
-                                    Padding="10,6" Margin="0,0,0,4" />
+                <DockPanel Grid.Row="1" Margin="0,0,12,0">
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding ManualCropHeading}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}"/>
+                        <TextBlock x:Name="TrimAdjustHeadingText" DockPanel.Dock="Left" Text="{Binding TrimAdjustHeading}" AutomationProperties.AutomationId="Session.TrimAdjust.Heading" Focusable="True" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}"/>
+                        <!-- Zoom acts on the adjust surface; Compare shows both pictures fitted, so it is hidden there. -->
+                        <WrapPanel Orientation="Horizontal" Margin="0,6,0,0" Visibility="{Binding ShowsCropSurface, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding ZoomLabel}" VerticalAlignment="Center" Opacity="0.75" MinWidth="52" TextAlignment="Right" Margin="0,0,10,0"/>
+                            <local:SessionActionButton Content="{Binding ZoomOutLabel}" Command="{Binding ZoomOutCommand}" IsEnabled="{Binding CanZoomOut}" Padding="10,4" Margin="0,0,6,0" AutomationProperties.Name="{Binding ZoomOutLabel}"/>
+                            <local:SessionActionButton Content="{Binding ZoomInLabel}" Command="{Binding ZoomInCommand}" IsEnabled="{Binding CanZoomIn}" Padding="10,4" Margin="0,0,6,0" AutomationProperties.Name="{Binding ZoomInLabel}"/>
+                            <local:SessionActionButton Content="{Binding ResetZoomLabel}" Command="{Binding ResetZoomCommand}" Padding="10,4" AutomationProperties.Name="{Binding ResetZoomLabel}"/>
                         </WrapPanel>
                     </StackPanel>
-
-                    <StackPanel Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding ManualCropAdjustmentLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <local:SessionRadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0"
-                                     AutomationProperties.AutomationId="Session.ManualCropModeTight" AutomationProperties.Name="{Binding ManualCropTightLabel}" />
-                        <local:SessionRadioButton Content="{Binding ManualCropUniformLabel}" IsChecked="{Binding IsManualCropUniform}" GroupName="ManualCropMode" Margin="0,0,14,0"
-                                     AutomationProperties.AutomationId="Session.ManualCropModeUniform" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
-                        <local:SessionRadioButton Content="{Binding ManualCropPerEdgeLabel}" IsChecked="{Binding IsManualCropPerEdge}" GroupName="ManualCropMode"
-                                     AutomationProperties.AutomationId="Session.ManualCropModePerEdge" AutomationProperties.Name="{Binding ManualCropPerEdgeLabel}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{Binding IsManualCropUniform, Converter={StaticResource BoolToVisibility}}">
-                        <local:SessionTextBox Text="{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}" Width="64" Padding="5,3"
-                                 AutomationProperties.AutomationId="Session.ManualCropUniformMargin" AutomationProperties.Name="{Binding ManualCropUniformLabel}" />
-                        <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
-                    </StackPanel>
-                    <WrapPanel Margin="0,0,0,6" Visibility="{Binding IsManualCropPerEdge, Converter={StaticResource BoolToVisibility}}">
-                        <TextBlock Text="{Binding TrimLeftLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <local:SessionTextBox Text="{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
-                                 AutomationProperties.AutomationId="Session.ManualCropMarginLeft" AutomationProperties.Name="{Binding TrimLeftLabel}" />
-                        <TextBlock Text="{Binding TrimTopLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <local:SessionTextBox Text="{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
-                                 AutomationProperties.AutomationId="Session.ManualCropMarginTop" AutomationProperties.Name="{Binding TrimTopLabel}" />
-                        <TextBlock Text="{Binding TrimRightLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <local:SessionTextBox Text="{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3" Margin="0,0,10,0"
-                                 AutomationProperties.AutomationId="Session.ManualCropMarginRight" AutomationProperties.Name="{Binding TrimRightLabel}" />
-                        <TextBlock Text="{Binding TrimBottomLabel}" VerticalAlignment="Center" Margin="0,0,6,0" />
-                        <local:SessionTextBox Text="{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}" Width="52" Padding="5,3"
-                                 AutomationProperties.AutomationId="Session.ManualCropMarginBottom" AutomationProperties.Name="{Binding TrimBottomLabel}" />
-                        <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0" />
-                    </WrapPanel>
-                    <TextBlock Text="{Binding ManualCropInstructions}"
-                               TextWrapping="Wrap"
-                               Opacity="0.75"
-                               Margin="0,0,0,4" />
-
-                    <TextBlock Text="{Binding CropSelectionSummary}"
-                               AutomationProperties.AutomationId="Session.ManualCropSelectedBounds"
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,4" />
-
-                    <TextBlock Text="{Binding CropAppliedSummary}" AutomationProperties.AutomationId="Session.ManualCropAppliedBounds" FontWeight="SemiBold" Margin="0,0,0,4" />
-                    <TextBlock Text="{Binding ManualCropMarginInvalidNotice}" TextWrapping="Wrap" Margin="0,0,0,6"
-                               Visibility="{Binding IsManualCropMarginInvalid, Converter={StaticResource BoolToVisibility}}" />
-
-                    <!-- A refused selection says so and stops there; nothing else changes (§23). -->
-                    <TextBlock Text="{Binding ManualCropInvalidNotice}"
-                               TextWrapping="Wrap"
-                               FontStyle="Italic"
-                               Margin="0,0,0,6"
-                               Visibility="{Binding IsCropSelectionInvalid,
-                                            Converter={StaticResource BoolToVisibility}}" />
-
-                    <StackPanel Orientation="Horizontal">
+                    <Grid>
                         <!--
-                            Apply is the only control on this surface that reaches the service.
-                            Cancel calls a command that touches nothing at all (§22).
-                        -->
-
-                        <local:SessionActionButton Content="{Binding CancelManualCropLabel}"
-                                AutomationProperties.AutomationId="Session.CancelManualCrop" AutomationProperties.Name="{Binding CancelManualCropLabel}"
-                                Command="{Binding CancelManualCropCommand}"
-                                Padding="14,6" />
-                    </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-
-                <Grid>
-                <!--
                     Compare (SCRUM-11147): the result under review beside the proposed trim, both
                     fitted. The proposed image is the pre-trim source's preview cut in memory; the
                     two payloads can differ in display reduction, so they are shown fitted rather
                     than at one shared numeric zoom that would draw them at different scales.
                 -->
-                <Grid AutomationProperties.AutomationId="Session.TrimAdjust.Compare"
-                      Visibility="{Binding ShowsTrimCompare, Converter={StaticResource BoolToVisibility}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <DockPanel Grid.Column="0" Margin="0,0,6,0">
-                        <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustCurrentLabel}" TextWrapping="Wrap"
-                                   FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
-                                Background="{StaticResource TransparencyCheckerboard}">
-                            <Image Source="{Binding TrimAdjustCurrentPane.Payload, Converter={StaticResource PreviewPayload}}"
-                                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.CurrentImage" />
-                        </Border>
-                    </DockPanel>
-                    <DockPanel Grid.Column="1" Margin="6,0,0,0">
-                        <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustProposedLabel}" TextWrapping="Wrap"
-                                   FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
-                                Background="{StaticResource TransparencyCheckerboard}">
-                            <Image Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
-                                   AutomationProperties.AutomationId="Session.TrimAdjust.ProposedImage">
-                                <Image.Source>
-                                    <MultiBinding Converter="{StaticResource ProposedTrim}">
-                                        <Binding Path="TrimAdjustSourcePane.Payload" />
-                                        <Binding Path="TrimProposedPayloadRect" />
-                                    </MultiBinding>
-                                </Image.Source>
-                            </Image>
-                        </Border>
-                    </DockPanel>
-                </Grid>
-
-                <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6"
-                        Visibility="{Binding DataContext.ShowsCropSurface, RelativeSource={RelativeSource AncestorType=UserControl},
-                                     Converter={StaticResource BoolToVisibility}}"
-                        DataContext="{Binding CropPane}">
-                    <ScrollViewer>
-                        <ScrollViewer.Style>
-                            <Style TargetType="ScrollViewer">
-                                <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
-                                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
-                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                 Value="True">
-                                        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
-                                        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ScrollViewer.Style>
-
-                        <Grid Background="{StaticResource TransparencyCheckerboard}">
-                            <Image Source="{Binding Payload, Converter={StaticResource PreviewPayload}}"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center">
-                                <Image.LayoutTransform>
-                                    <ScaleTransform
-                                        ScaleX="{Binding DataContext.ZoomScale,
-                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        ScaleY="{Binding DataContext.ZoomScale,
-                                                 RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                                </Image.LayoutTransform>
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Stretch" Value="None" />
+                        <Grid AutomationProperties.AutomationId="Session.TrimAdjust.Compare" Visibility="{Binding ShowsTrimCompare, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <DockPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustCurrentLabel}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Background="{StaticResource TransparencyCheckerboard}">
+                                    <Image Source="{Binding TrimAdjustCurrentPane.Payload, Converter={StaticResource PreviewPayload}}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.AutomationId="Session.TrimAdjust.CurrentImage"/>
+                                </Border>
+                            </DockPanel>
+                            <DockPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock DockPanel.Dock="Top" Text="{Binding TrimAdjustProposedLabel}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Background="{StaticResource TransparencyCheckerboard}">
+                                    <Image Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.AutomationId="Session.TrimAdjust.ProposedImage">
+                                        <Image.Source>
+                                            <MultiBinding Converter="{StaticResource ProposedTrim}">
+                                                <Binding Path="TrimAdjustSourcePane.Payload"/>
+                                                <Binding Path="TrimProposedPayloadRect"/>
+                                            </MultiBinding>
+                                        </Image.Source>
+                                    </Image>
+                                </Border>
+                            </DockPanel>
+                        </Grid>
+                        <Border BorderBrush="#22000000" BorderThickness="1" CornerRadius="6" Visibility="{Binding DataContext.ShowsCropSurface, RelativeSource={RelativeSource AncestorType=UserControl},                                      Converter={StaticResource BoolToVisibility}}" DataContext="{Binding CropPane}">
+                            <ScrollViewer>
+                                <ScrollViewer.Style>
+                                    <Style TargetType="ScrollViewer">
+                                        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+                                        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DataContext.IsFitToViewport,
-                                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                         Value="True">
-                                                <Setter Property="Stretch" Value="Uniform" />
+                                            <DataTrigger Binding="{Binding DataContext.IsFitToViewport,                                                            RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+                                                <Setter Property="VerticalScrollBarVisibility" Value="Disabled"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </Image.Style>
-                            </Image>
-
-                            <!--
+                                </ScrollViewer.Style>
+                                <Grid Background="{StaticResource TransparencyCheckerboard}">
+                                    <Image Source="{Binding Payload, Converter={StaticResource PreviewPayload}}" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image.LayoutTransform>
+                                            <ScaleTransform ScaleX="{Binding DataContext.ZoomScale,                                                  RelativeSource={RelativeSource AncestorType=UserControl}}" ScaleY="{Binding DataContext.ZoomScale,                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </Image.LayoutTransform>
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Stretch" Value="None"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.IsFitToViewport,                                                                    RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                        <Setter Property="Stretch" Value="Uniform"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                    <!--
                                 Transparent so it is hit-testable across the whole surface,
                                 including the letterboxed margins. A drag that extends outside
                                 the image is refused; only expansion of valid bounds may clamp.
                             -->
-                            <Canvas x:Name="CropOverlay"
-                                    AutomationProperties.AutomationId="Session.ManualCropSurface"
-                                    Background="Transparent"
-                                    ClipToBounds="True"
-                                    Cursor="Cross">
-                                <Rectangle x:Name="CropAppliedOutline" Visibility="Collapsed" Stroke="#FF257749" StrokeThickness="2"
-                                           AutomationProperties.AutomationId="Session.ManualCropAppliedOutline" IsHitTestVisible="False" />
-                                <Rectangle x:Name="CropSelectionOutline"
-                                           AutomationProperties.AutomationId="Session.ManualCropSelectedOutline"
-                                           Visibility="Collapsed"
-                                           Stroke="#FF1E88E5"
-                                           StrokeThickness="1.5"
-                                           StrokeDashArray="4 3"
-                                           Fill="#221E88E5"
-                                           IsHitTestVisible="False" />
-
-                                <!--
+                                    <Canvas x:Name="CropOverlay" AutomationProperties.AutomationId="Session.ManualCropSurface" Background="Transparent" ClipToBounds="True" Cursor="Cross">
+                                        <Rectangle x:Name="CropAppliedOutline" Visibility="Collapsed" Stroke="#FF257749" StrokeThickness="2" AutomationProperties.AutomationId="Session.ManualCropAppliedOutline" IsHitTestVisible="False"/>
+                                        <Rectangle x:Name="CropSelectionOutline" AutomationProperties.AutomationId="Session.ManualCropSelectedOutline" Visibility="Collapsed" Stroke="#FF1E88E5" StrokeThickness="1.5" StrokeDashArray="4 3" Fill="#221E88E5" IsHitTestVisible="False"/>
+                                        <!--
                                     Trim adjustment (SCRUM-11147): the picture outside the kept
                                     area is dimmed, the boundary is a light solid line under a
                                     dark dashed one drawn just inside the kept area, and eight
@@ -1118,45 +1137,132 @@
                                     when the boundary lies on the picture border. Positioned by
                                     the code-behind from the source-pixel draft.
                                 -->
-                                <Rectangle x:Name="TrimDimLeft" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
-                                <Rectangle x:Name="TrimDimTop" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
-                                <Rectangle x:Name="TrimDimRight" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
-                                <Rectangle x:Name="TrimDimBottom" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False" />
-                                <Rectangle x:Name="TrimOutlineLight" Visibility="Collapsed" Stroke="White" StrokeThickness="2"
-                                           IsHitTestVisible="False" AutomationProperties.AutomationId="Session.TrimAdjust.Outline" />
-                                <Rectangle x:Name="TrimOutlineDark" Visibility="Collapsed" Stroke="#FF1A1A1A" StrokeThickness="1"
-                                           StrokeDashArray="4 3" IsHitTestVisible="False" />
-                                <Thumb x:Name="TrimHandleLeft" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Left"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Left" />
-                                <Thumb x:Name="TrimHandleTop" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Top"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Top" />
-                                <Thumb x:Name="TrimHandleRight" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Right"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Right" />
-                                <Thumb x:Name="TrimHandleBottom" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Bottom"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Bottom" />
-                                <Thumb x:Name="TrimHandleTopLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="TopLeft"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopLeft" />
-                                <Thumb x:Name="TrimHandleTopRight" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="TopRight"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopRight" />
-                                <Thumb x:Name="TrimHandleBottomLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="BottomLeft"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomLeft" />
-                                <Thumb x:Name="TrimHandleBottomRight" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="BottomRight"
-                                       AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomRight" />
-                            </Canvas>
-                        </Grid>
-                    </ScrollViewer>
+                                        <Rectangle x:Name="TrimDimLeft" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False"/>
+                                        <Rectangle x:Name="TrimDimTop" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False"/>
+                                        <Rectangle x:Name="TrimDimRight" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False"/>
+                                        <Rectangle x:Name="TrimDimBottom" Visibility="Collapsed" Fill="#8C000000" IsHitTestVisible="False"/>
+                                        <Rectangle x:Name="TrimOutlineLight" Visibility="Collapsed" Stroke="White" StrokeThickness="2" IsHitTestVisible="False" AutomationProperties.AutomationId="Session.TrimAdjust.Outline"/>
+                                        <Rectangle x:Name="TrimOutlineDark" Visibility="Collapsed" Stroke="#FF1A1A1A" StrokeThickness="1" StrokeDashArray="4 3" IsHitTestVisible="False"/>
+                                        <Thumb x:Name="TrimHandleLeft" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Left" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Left"/>
+                                        <Thumb x:Name="TrimHandleTop" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Top" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Top"/>
+                                        <Thumb x:Name="TrimHandleRight" Style="{StaticResource TrimHandle}" Cursor="SizeWE" Tag="Right" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Right"/>
+                                        <Thumb x:Name="TrimHandleBottom" Style="{StaticResource TrimHandle}" Cursor="SizeNS" Tag="Bottom" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.Bottom"/>
+                                        <Thumb x:Name="TrimHandleTopLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="TopLeft" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopLeft"/>
+                                        <Thumb x:Name="TrimHandleTopRight" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="TopRight" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.TopRight"/>
+                                        <Thumb x:Name="TrimHandleBottomLeft" Style="{StaticResource TrimHandle}" Cursor="SizeNESW" Tag="BottomLeft" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomLeft"/>
+                                        <Thumb x:Name="TrimHandleBottomRight" Style="{StaticResource TrimHandle}" Cursor="SizeNWSE" Tag="BottomRight" AutomationProperties.AutomationId="Session.TrimAdjust.Handle.BottomRight"/>
+                                    </Canvas>
+                                </Grid>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+                <Border Grid.Row="1" Grid.Column="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" AutomationProperties.AutomationId="Session.Crop.Options">
+                    <StackPanel TextElement.FontSize="16">
+                <ScrollViewer MaxHeight="96" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,0,0,8" AutomationProperties.AutomationId="Session.Crop.ActionFailure" Visibility="{Binding HasNoticeErrorCode, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,6" AutomationProperties.LiveSetting="Assertive"/>
+                        <Expander Header="{Binding NoticeErrorDetailsLabel}" IsExpanded="False" AutomationProperties.AutomationId="Session.Crop.ErrorDetails" AutomationProperties.Name="{Binding NoticeErrorDetailsLabel}">
+                            <DockPanel Margin="0,2,0,0">
+                                <TextBlock DockPanel.Dock="Left" Text="{Binding NoticeErrorCodeLabel}" Margin="0,3,8,0" FontWeight="SemiBold"/>
+                                <TextBox DockPanel.Dock="Left" Text="{Binding NoticeErrorCode, Mode=OneWay}" IsReadOnly="True" IsReadOnlyCaretVisible="True" BorderThickness="0" Background="Transparent" Padding="0,3" AutomationProperties.AutomationId="Session.Crop.ErrorCode" AutomationProperties.Name="{Binding NoticeErrorCodeLabel}"/>
+                                <TextBlock Text="{Binding NoticeErrorCodeHint}" TextWrapping="Wrap" Opacity="0.85" Margin="16,3,0,0"/>
+                            </DockPanel>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+                        <StackPanel AutomationProperties.AutomationId="Session.TrimAdjust.Panel" Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding TrimAdjustInstructions}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding TrimAdjustUnchangedNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4" AutomationProperties.AutomationId="Session.TrimAdjust.Unchanged" Visibility="{Binding IsTrimDraftUnchanged, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="{Binding TrimAdjustInvalidNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,4" AutomationProperties.AutomationId="Session.TrimAdjust.Invalid" Visibility="{Binding IsTrimAdjustInvalid, Converter={StaticResource BoolToVisibility}}"/>
+                            <TextBlock Text="{Binding TrimAdjustSourceUnavailableNotice}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,4" AutomationProperties.AutomationId="Session.TrimAdjust.SourceUnavailable" Visibility="{Binding IsTrimSourceUnavailable, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                        <StackPanel Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{Binding ManualCropAdjustmentLabel}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <local:SessionRadioButton Content="{Binding ManualCropTightLabel}" IsChecked="{Binding IsManualCropTight}" GroupName="ManualCropMode" Margin="0,0,14,0" AutomationProperties.AutomationId="Session.ManualCropModeTight" AutomationProperties.Name="{Binding ManualCropTightLabel}"/>
+                                <local:SessionRadioButton Content="{Binding ManualCropUniformLabel}" IsChecked="{Binding IsManualCropUniform}" GroupName="ManualCropMode" Margin="0,0,14,0" AutomationProperties.AutomationId="Session.ManualCropModeUniform" AutomationProperties.Name="{Binding ManualCropUniformLabel}"/>
+                                <local:SessionRadioButton Content="{Binding ManualCropPerEdgeLabel}" IsChecked="{Binding IsManualCropPerEdge}" GroupName="ManualCropMode" AutomationProperties.AutomationId="Session.ManualCropModePerEdge" AutomationProperties.Name="{Binding ManualCropPerEdgeLabel}"/>
+                            </WrapPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6" Visibility="{Binding IsManualCropUniform, Converter={StaticResource BoolToVisibility}}">
+                                <local:SessionTextBox Text="{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}" Width="64" Padding="5,3" AutomationProperties.AutomationId="Session.ManualCropUniformMargin" AutomationProperties.Name="{Binding ManualCropUniformLabel}"/>
+                                <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                            </StackPanel>
+                            <WrapPanel Margin="0,0,0,6" Visibility="{Binding IsManualCropPerEdge, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,8,4">
+                                <TextBlock Text="{Binding TrimLeftLabel}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <local:SessionTextBox Text="{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}" Width="72" Padding="5,3" AutomationProperties.AutomationId="Session.ManualCropMarginLeft" AutomationProperties.Name="{Binding TrimLeftLabel}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,8,4">
+                                <TextBlock Text="{Binding TrimTopLabel}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <local:SessionTextBox Text="{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}" Width="72" Padding="5,3" AutomationProperties.AutomationId="Session.ManualCropMarginTop" AutomationProperties.Name="{Binding TrimTopLabel}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,8,4">
+                                <TextBlock Text="{Binding TrimRightLabel}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <local:SessionTextBox Text="{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}" Width="72" Padding="5,3" AutomationProperties.AutomationId="Session.ManualCropMarginRight" AutomationProperties.Name="{Binding TrimRightLabel}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,8,4">
+                                <TextBlock Text="{Binding TrimBottomLabel}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <local:SessionTextBox Text="{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}" Width="72" Padding="5,3" AutomationProperties.AutomationId="Session.ManualCropMarginBottom" AutomationProperties.Name="{Binding TrimBottomLabel}"/>
+                                </StackPanel>
+                                <TextBlock Text="px" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                            </WrapPanel>
+                            <TextBlock Text="{Binding ManualCropMarginInvalidNotice}" TextWrapping="Wrap" Margin="0,0,0,6" Visibility="{Binding IsManualCropMarginInvalid, Converter={StaticResource BoolToVisibility}}"/>
+                            <!-- A refused selection says so and stops there; nothing else changes (§23). -->
+                            <TextBlock Text="{Binding ManualCropInvalidNotice}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,0,0,6" Visibility="{Binding IsCropSelectionInvalid,                                             Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                        <local:SessionExpander Header="{Binding CropDetailsLabel}" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.Crop.CoordinatesAndKeyboard" AutomationProperties.Name="{Binding CropDetailsLabel}">
+                            <StackPanel>
+                                <StackPanel Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,4" AutomationProperties.AutomationId="Session.TrimAdjust.Instructions">
+                                        <Run Text="{Binding TrimAdjustInstructions, Mode=OneWay}"/>
+                                        <Run Text="{Binding TrimAdjustKeyboardHint, Mode=OneWay}" Foreground="#FF5A5A5A"/>
+                                    </TextBlock>
+                                    <WrapPanel Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding TrimAdjustKeptSummary}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,16,0" AutomationProperties.AutomationId="Session.TrimAdjust.Kept"/>
+                                        <TextBlock Text="{Binding TrimAdjustSuggestionSummary}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.TrimAdjust.Suggestion"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
+                                    <TextBlock Text="{Binding ManualCropInstructions}" TextWrapping="Wrap" Opacity="0.75" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding CropSelectionSummary}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.ManualCropSelectedBounds" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding CropAppliedSummary}" TextWrapping="Wrap" AutomationProperties.AutomationId="Session.ManualCropAppliedBounds" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </local:SessionExpander>
+                    </StackPanel>
+                </ScrollViewer>
                 </Border>
-                </Grid>
-            </DockPanel>
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,0">
+                    <WrapPanel Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}">
+                        <local:SessionActionButton Content="{Binding RestoreSuggestionLabel}" Command="{Binding RestoreAutomaticSuggestionCommand}" IsEnabled="{Binding CanRestoreAutomaticSuggestion}" AutomationProperties.AutomationId="Session.TrimAdjust.Restore" AutomationProperties.Name="{Binding RestoreSuggestionLabel}" Padding="14,6" Margin="0,0,8,4"/>
+                        <local:SessionActionButton Content="{Binding CancelTrimAdjustLabel}" Command="{Binding CancelTrimAdjustCommand}" AutomationProperties.AutomationId="Session.TrimAdjust.Cancel" AutomationProperties.Name="{Binding CancelTrimAdjustLabel}" Padding="14,6" Margin="0,0,16,4"/>
+                        <!-- Compare / Adjust: which picture the surface shows; nothing is written. -->
+                        <local:SessionActionButton Content="{Binding TrimCompareToggleLabel}" Command="{Binding ToggleTrimCompareCommand}" AutomationProperties.AutomationId="Session.TrimAdjust.CompareToggle" AutomationProperties.Name="{Binding TrimCompareToggleLabel}" Padding="10,6" Margin="0,0,0,4"/>
+                    </WrapPanel>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding ShowsManualCropControls, Converter={StaticResource BoolToVisibility}}">
+                        <!--
+                            Apply is the only control on this surface that reaches the service.
+                            Cancel calls a command that touches nothing at all (§22).
+                        -->
+                        <local:SessionActionButton Content="{Binding CancelManualCropLabel}" AutomationProperties.AutomationId="Session.CancelManualCrop" AutomationProperties.Name="{Binding CancelManualCropLabel}" Command="{Binding CancelManualCropCommand}" Padding="14,6"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
 
-            <!-- Save/completed output history belongs to the scrollable details column.
-                 The same template stays below the image on earlier review pages. -->
+            <!-- Save/completed and production TIFF review history belongs to the scrollable
+                 details column so output records cannot squeeze the inspection canvas. -->
             <ContentControl Grid.Row="2" Focusable="False" IsTabStop="False">
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
                         <Setter Property="Content" Value="{Binding}" />
                         <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsProductionTiffReview}" Value="True">
+                                <Setter Property="Content" Value="{x:Null}" />
+                                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
                                 <Setter Property="Content" Value="{x:Null}" />
                                 <Setter Property="ContentTemplate" Value="{x:Null}" />
@@ -1174,9 +1280,28 @@
             <ScrollViewer x:Name="SessionDetailsScroll" Grid.Column="1" VerticalScrollBarVisibility="Auto"
                           Visibility="{Binding ShowsGuidedDetailsColumn, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
-                    <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}"
-                            BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12"
-                            Visibility="{Binding ShowsGuidedRecovery, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Card Padding="14" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.OriginalChecks"
+                             Visibility="{Binding ShowsGuidedOriginalChecks, Converter={StaticResource BoolToVisibility}}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+                        <StackPanel>
+                            <TextBlock Text="{Binding GuidedOriginalChecksHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding GuidedOriginalChecks}" FontSize="16" TextWrapping="Wrap" Margin="0,10,0,0"
+                                       AutomationProperties.AutomationId="Session.OriginalChecks.Text" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <ui:Card Padding="16" Margin="0,0,0,12"
+                            AutomationProperties.AutomationId="Session.RecoveryGuidance" Visibility="{Binding ShowsGuidedRecovery, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
                         <StackPanel>
                             <TextBlock Text="{Binding GuidedRecoveryHeading}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Heading" />
@@ -1188,7 +1313,7 @@
                             <TextBlock Text="{Binding GuidedRecoveryNext}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
                                        AutomationProperties.AutomationId="Session.RecoveryGuidance.Next" />
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
                     <TextBlock Text="{Binding GuidedCorrectionReview}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,12"
                                Visibility="{Binding ShowsGuidedCorrectionReview, Converter={StaticResource BoolToVisibility}}"
                                AutomationProperties.AutomationId="Session.Correction.ReturnReview" />
@@ -1207,16 +1332,23 @@
                         is stated in words; no button here is a default button, and the two
                         consequential ones use the fresh-gesture guard bound to their exact target.
                     -->
-                    <Border BorderBrush="{DynamicResource PF.Brush.Border}" Background="{DynamicResource PF.Brush.Surface}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12"
+                    <ui:Card Padding="16" Margin="0,0,0,12"
                             AutomationProperties.AutomationId="Session.Correction.AskPanel"
-                            Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding IsAskingColleague, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
                         <StackPanel>
-                            <TextBlock Text="{Binding AskColleagueLabel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding AskColleagueLabel}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding AskColleagueHint}" TextWrapping="Wrap" Opacity="0.8" Margin="0,4,0,8" />
                             <Label Content="{Binding CorrectionNoteLabel}" Target="{Binding ElementName=CorrectionNoteBox}" Padding="0,0,0,2" />
                             <local:SessionTextBox x:Name="CorrectionNoteBox"
                                      Text="{Binding CorrectionNote, UpdateSourceTrigger=PropertyChanged}"
-                                     AcceptsReturn="False" TextWrapping="Wrap" MaxLength="1000" MinHeight="26"
+                                     AcceptsReturn="False" TextWrapping="Wrap" MaxLength="1000" MinHeight="42"
                                      AutomationProperties.AutomationId="Session.Correction.Note"
                                      AutomationProperties.Name="{Binding CorrectionNoteLabel}" />
                             <TextBlock Text="{Binding CorrectionActivityText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"
@@ -1237,16 +1369,23 @@
                                         Padding="14,6" Margin="0,0,8,4" />
                             </WrapPanel>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
-                    <Border BorderBrush="#9BAFC0" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,10"
+                    <ui:Card Padding="12" Margin="0,0,0,10"
                             AutomationProperties.AutomationId="Session.Correction.Panel"
-                            Visibility="{Binding ShowsCorrectionPanel, Converter={StaticResource BoolToVisibility}}">
+                            Visibility="{Binding ShowsCorrectionPanel, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
                         <StackPanel>
                             <TextBlock x:Name="CorrectionHeadingText"
                                        Text="{Binding CorrectionStatusText}"
                                        Focusable="True" FocusVisualStyle="{x:Null}"
-                                       FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"
                                        AutomationProperties.AutomationId="Session.Correction.Heading"
                                        AutomationProperties.Name="{Binding CorrectionStatusText}" />
                             <TextBlock Text="{Binding CorrectionLastImportText}" TextWrapping="Wrap" Margin="0,6,0,0"
@@ -1304,7 +1443,7 @@
                                 </StackPanel>
                             </local:SessionExpander>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
                     <TextBlock Text="{Binding CorrectionObsoleteText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,10"
                                AutomationProperties.AutomationId="Session.Correction.Obsolete"
@@ -1379,10 +1518,26 @@
                         No button here is a default button, and approving or saving buttons use
                         the fresh-gesture input guard bound to the exact target and draft.
                     -->
-                    <local:SessionExpander Header="{Binding FinalSaveHeading}" Style="{StaticResource PF.Disclosure}"
+                    <!-- Read-only completion facts do not depend on save eligibility. -->
+                    <ContentControl Focusable="False" IsTabStop="False">
+                        <ContentControl.Style><Style TargetType="ContentControl">
+                            <Setter Property="Content" Value="{x:Null}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Content" Value="{Binding}" />
+                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedSummaryTemplate}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></ContentControl.Style>
+                    </ContentControl>
+                    <local:SessionExpander
                                            IsExpanded="{Binding ExpandsGuidedFinalSave, Mode=OneWay}"
                                            Visibility="{Binding HasFinalSave, Converter={StaticResource BoolToVisibility}}"
                                            AutomationProperties.AutomationId="Session.FinalSave.Options">
+                        <local:SessionExpander.Style><Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}">
+                            <Setter Property="Header" Value="{Binding FinalSaveHeading}" />
+                            <Style.Triggers><DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
+                                <Setter Property="Header" Value="{Binding GuidedCompletionHeading}" />
+                            </DataTrigger></Style.Triggers>
+                        </Style></local:SessionExpander.Style>
                     <ContentControl Focusable="False" IsTabStop="False">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
@@ -1392,6 +1547,8 @@
                                         <Setter Property="Content" Value="{Binding}" />
                                         <Setter Property="ContentTemplate" Value="{StaticResource FinalSaveTemplate}" />
                                     </DataTrigger>
+                                    <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Save" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiSaveTemplate}" /></MultiDataTrigger>
+<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding HasFinalSave}" Value="True" /><Condition Binding="{Binding GuidedPage}" Value="Completed" /></MultiDataTrigger.Conditions><Setter Property="ContentTemplate" Value="{StaticResource WpfUiCompletedTemplate}" /></MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </ContentControl.Style>
@@ -1405,11 +1562,15 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding GuidedPage}" Value="Save">
                                         <Setter Property="Content" Value="{Binding}" />
-                                        <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource TiffOutputHistoryTemplate}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding GuidedPage}" Value="Completed">
                                         <Setter Property="Content" Value="{Binding}" />
-                                        <Setter Property="ContentTemplate" Value="{StaticResource OutputHistoryTemplate}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource TiffOutputHistoryTemplate}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsProductionTiffReview}" Value="True">
+                                        <Setter Property="Content" Value="{Binding}" />
+                                        <Setter Property="ContentTemplate" Value="{StaticResource TiffOutputHistoryTemplate}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -1666,14 +1827,14 @@
                         </StackPanel>
                     </Border>
 
-                    <Border BorderBrush="#22000000"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="12"
-                            Margin="0,12,0,0"
-                            Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Card Padding="16" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.PrintDimensions.Entry" Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
+<ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+
                         <StackPanel>
-                            <TextBlock Text="{Binding SizeHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding SizeHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <local:SessionExpander Header="{Binding PresetsLabel}" IsExpanded="{Binding ShowsGuidedCustomSizeEntry, Mode=OneWay}" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintDimensions.Presets">
                                 <StackPanel Visibility="{Binding ShowsGuidedDimensions, Converter={StaticResource BoolToVisibility}}">
                                     <TextBlock Text="{Binding UsePresetLabel}" Opacity="0.6" Margin="0,8,0,4" />
@@ -1730,31 +1891,19 @@
                                                Opacity="0.7"
                                                Margin="0,3,0,0"
                                                Visibility="{Binding HasCustomPresetContext, Converter={StaticResource BoolToVisibility}}" />
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="12" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Grid.Row="0" Grid.Column="0"
-                                                   Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                        <local:SessionComboBox Grid.Row="1" Grid.Column="0"
-                                                  ItemsSource="{Binding TargetEdgeChoices}"
+                                    <StackPanel Margin="0,8,0,0">
+
+                                        <TextBlock Text="{Binding TargetEdgeLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <local:SessionComboBox Style="{StaticResource PF.Input.ComboBox}" ItemsSource="{Binding TargetEdgeChoices}"
                                                   SelectedItem="{Binding SelectedTargetEdgeChoice}"
                                                   AutomationProperties.AutomationId="Session.PrintDimensions.TargetEdge"
                                                   AutomationProperties.Name="{Binding TargetEdgeLabel}"
                                                   DisplayMemberPath="Label" />
-                                        <TextBlock Grid.Row="0" Grid.Column="2"
-                                                   Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
-                                        <local:SessionTextBox Grid.Row="1" Grid.Column="2"
-                                                 AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
+                                        <TextBlock Text="{Binding TargetSizeMmLabel}" Opacity="0.6" Margin="0,0,0,4" />
+                                        <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" AutomationProperties.AutomationId="Session.PrintDimensions.TargetMillimetres"
                                                  AutomationProperties.Name="{Binding TargetSizeMmLabel}"
                                                  Text="{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}" />
-                                    </Grid>
+                                    </StackPanel>
                                     <!-- The existing custom-size validation, beside the input it is about. -->
                                     <TextBlock Text="{Binding CustomSizeInputHint}"
                                                TextWrapping="Wrap"
@@ -1766,17 +1915,16 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
-                    <Border BorderBrush="#22000000"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="12"
-                            Margin="0,12,0,0"
-                            AutomationProperties.AutomationId="Session.PrintDimensions.Preflight"
-                            Visibility="{Binding ShowsGuidedPreflight, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Card Padding="16" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.PrintDimensions.Preflight" Visibility="{Binding ShowsGuidedPreflight, Converter={StaticResource BoolToVisibility}}">
+<ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+
                         <StackPanel>
-                            <TextBlock Text="{Binding PreflightHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding PreflightHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding PreflightDraftHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,6"
                                        Visibility="{Binding IsDraftPreflight, Converter={StaticResource BoolToVisibility}}" />
                             <!--
@@ -1818,21 +1966,21 @@
                             </ItemsControl>
                             </local:SessionExpander>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
                     <!--
                         The projected preparation plan (Part B1A.2B §8). Read-only, and shown only
                         while a plan is actually in force — SessionView reports the *usable* plan,
                         so a stale one simply never appears here (§16).
                     -->
-                    <Border BorderBrush="#22000000"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="12"
-                            Margin="0,12,0,0"
-                            Visibility="{Binding ShowsGuidedPreparation, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Card Padding="16" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.Preparation" Visibility="{Binding ShowsGuidedPreparation, Converter={StaticResource BoolToVisibility}}">
+<ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+
                         <StackPanel>
-                            <TextBlock Text="{Binding PreparationHeading}" FontSize="15" FontWeight="SemiBold" /><TextBlock Text="{Binding ConfirmedWhiteUnderbase}" TextWrapping="Wrap" Margin="0,8,0,0" /><local:SessionActionButton Content="{Binding ChangeGuidedWhiteInkLabel}" Command="{Binding ChangeGuidedWhiteInkCommand}" Visibility="{Binding CanChangeGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="Session.WhiteUnderbase.Change" HorizontalAlignment="Left" Margin="0,8,0,0" />
+                            <TextBlock Text="{Binding PreparationHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" /><TextBlock Text="{Binding ConfirmedWhiteUnderbase}" TextWrapping="Wrap" Margin="0,8,0,0" /><local:SessionActionButton Content="{Binding ChangeGuidedWhiteInkLabel}" Command="{Binding ChangeGuidedWhiteInkCommand}" Visibility="{Binding CanChangeGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="Session.WhiteUnderbase.Change" HorizontalAlignment="Left" Margin="0,8,0,0" />
                             <TextBlock Text="{Binding CurrentSizeSummary}"
                                        TextWrapping="Wrap"
                                        Margin="0,6,0,0" />
@@ -1929,7 +2077,7 @@
                                 </StackPanel>
                             </local:SessionExpander>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
                     <!--
                         Dimensions that cannot be executed (Part B1A.2B §11–§15). A size decision
@@ -1984,30 +2132,34 @@
                         recommended: the operator classifies the design and PrintFlow records
                         what they chose.
                     -->
-                    <Border BorderBrush="#22000000"
-                            BorderThickness="1"
-                            CornerRadius="6"
-                            Padding="12"
-                            Margin="0,12,0,0"
-                            Visibility="{Binding ShowsGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}">
+                    <ui:Card Padding="16" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.WhiteUnderbase" Visibility="{Binding ShowsGuidedWhiteInk, Converter={StaticResource BoolToVisibility}}">
+<ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+
                         <StackPanel>
-                            <TextBlock Text="{Binding WhiteUnderbaseHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding WhiteUnderbaseHeading}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding WhiteUnderbaseHint}"
                                        TextWrapping="Wrap"
                                        Opacity="0.7"
                                        Margin="0,6,0,0" />
-                            <TextBlock Text="{Binding GuidedWhiteInkReasonHint}" TextWrapping="Wrap" Margin="0,8,0,0" />
-                            <TextBlock Text="{Binding GuidedWhiteInkSourceHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,8,0,0" />
+
 
                             <local:SessionListBox ItemsSource="{Binding WhiteUnderbaseChoices}"
                                      SelectedItem="{Binding SelectedWhiteUnderbaseChoice}"
-                                     DisplayMemberPath="Label"
+                                     HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                      BorderThickness="0"
                                      Margin="0,8,0,0"
                                      AutomationProperties.AutomationId="Session.WhiteUnderbaseChoices"
                                      AutomationProperties.Name="{Binding WhiteUnderbaseHeading}">
+                                <local:SessionListBox.ItemTemplate><DataTemplate>
+                                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+                                </DataTemplate></local:SessionListBox.ItemTemplate>
                                 <local:SessionListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                         <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
                                         <Setter Property="Padding" Value="10,8" />
                                         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -2015,21 +2167,33 @@
                                     </Style>
                                 </local:SessionListBox.ItemContainerStyle>
                             </local:SessionListBox>
+                            <TextBlock Text="{Binding GuidedWhiteInkReasonHint}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="{Binding GuidedWhiteInkSourceHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,8,0,0" />
 
 
 
-                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Opacity="0.8">
+                            <StackPanel Margin="0,10,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding BranchLabel}" Opacity="0.75" Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding ConfirmedWhiteUnderbase}" TextWrapping="Wrap" />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Opacity="0.8">
+                            <StackPanel Margin="0,4,0,0" Opacity="0.8">
                                 <TextBlock Text="{Binding MaximumBoundsHeading}" Opacity="0.75" Margin="0,0,8,0" />
                                 <TextBlock Text="{Binding ConfirmedMaximumBounds}" TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </ui:Card>
 
+<ui:Card Padding="16" Margin="0,0,0,12" AutomationProperties.AutomationId="Session.PrintDecisions" Visibility="{Binding ShowsGuidedPrintSummary, Converter={StaticResource BoolToVisibility}}">
+<ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries></ResourceDictionary></ui:Card.Resources>
+                        <ui:Card.Style><Style TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}" /></ui:Card.Style>
+<StackPanel>
+                        <TextBlock Text="{Binding GuidedPrintRequested}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Requested" />
+                        <TextBlock Text="{Binding GuidedPrintWhiteInk}" TextWrapping="Wrap" Margin="0,8,0,0" AutomationProperties.AutomationId="Session.PrintSummary.WhiteInk" Visibility="{Binding ShowsGuidedPrintWhiteInk, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Text="{Binding GuidedPrintContract}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource PF.Brush.Muted}" AutomationProperties.AutomationId="Session.PrintSummary.Contract" />
+</StackPanel></ui:Card>
                     <!--
                         Review panel (§9). Metadata and a decision, nothing else: preview,
                         comparison, zoom and crop are Epic 11200.
@@ -2040,8 +2204,18 @@
                             Padding="12"
                             Margin="0,12,0,0"
                             Visibility="{Binding IsReviewRequired, Converter={StaticResource BoolToVisibility}}">
+                        <Border.Style><Style TargetType="Border"><Style.Triggers>
+                            <DataTrigger Binding="{Binding IsProductionTiffReview}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource PF.Brush.Surface}" />
+                                <Setter Property="TextElement.FontSize" Value="16" />
+                            </DataTrigger>
+                        </Style.Triggers></Style></Border.Style>
                         <StackPanel>
-                            <TextBlock Text="{Binding ReviewHeading}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ReviewHeading}" FontWeight="SemiBold" TextWrapping="Wrap">
+                                <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="FontSize" Value="15" />
+                                    <Style.Triggers><DataTrigger Binding="{Binding IsProductionTiffReview}" Value="True"><Setter Property="FontSize" Value="24" /></DataTrigger></Style.Triggers>
+                                </Style></TextBlock.Style>
+                            </TextBlock>
 
                             <!--
                                 What was established about the production TIFF, and the limit of
@@ -2072,6 +2246,7 @@
                                 identity while the operator reads localised wording (§29, §32).
                             -->
                             <ItemsControl ItemsSource="{Binding TiffMetadata}"
+                                          FontSize="16"
                                           Margin="0,10,0,0"
                                           IsTabStop="False"
                                           AutomationProperties.AutomationId="Session.TiffProductionMetadata"
@@ -2085,23 +2260,19 @@
                                 </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,2">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="190" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
+                                        <StackPanel Margin="0,6">
 
-                                            <TextBlock Grid.Column="0"
+                                            <TextBlock
                                                        Text="{Binding Label}"
                                                        Opacity="0.7"
                                                        TextWrapping="Wrap" />
-                                            <TextBlock Grid.Column="1"
+                                            <TextBlock
                                                        Text="{Binding Value}"
                                                        TextWrapping="Wrap"
                                                        AutomationProperties.AutomationId="{Binding Key,
                                                            StringFormat=Session.TiffMetadata.{0}}"
                                                        AutomationProperties.Name="{Binding Label}" />
-                                        </Grid>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -2116,6 +2287,7 @@
                                         Visibility="{Binding HasTiffReview, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding TiffOutputPathLabel}" Opacity="0.7" />
                                 <local:SessionTextBox Text="{Binding TiffOutputPath, Mode=OneWay}"
+                                         FontSize="16" MinHeight="42"
                                          IsReadOnly="True"
                                          IsReadOnlyCaretVisible="True"
                                          BorderThickness="0"
@@ -2349,36 +2521,58 @@
             Actions (§4). Every button's visibility comes from AvailableCommands, which is the
             engine's own answer — the screen states no workflow rule of its own.
         -->
-        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,14,0,0" AutomationProperties.AutomationId="Session.ActionBar"
-              IsEnabled="{Binding CanInteractWithLivePage}" Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <controls:GuidedActionPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,8,0,0"
+              Background="{DynamicResource PF.Brush.Surface}" AutomationProperties.AutomationId="Session.ActionBar"
+              PrimaryCommand="{Binding RecommendedCommand}" IsEnabled="{Binding CanInteractWithLivePage}"
+              Visibility="{Binding ShowsLiveWorkspace, Converter={StaticResource BoolToVisibility}}">
+          <controls:GuidedActionPanel.Resources>
+            <ResourceDictionary>
+              <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+              <local:RecommendedCommandConverter x:Key="RecommendedCommand" />
+<Style x:Key="RecommendedAction" TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource RecommendedCommand}">
+                            <Binding Path="Command" RelativeSource="{RelativeSource Self}" />
+                            <Binding Path="DataContext.RecommendedCommand" RelativeSource="{RelativeSource AncestorType={x:Type local:SessionScreenView}}" />
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource PF.Brush.Primary}" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="Background" Value="{DynamicResource PF.Brush.Primary}" /><Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+              <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}"><Setter Property="Margin" Value="0,3,8,3" /></Style>
+            </ResourceDictionary>
+          </controls:GuidedActionPanel.Resources>
+<local:SessionActionButton Style="{StaticResource PF.Button.Secondary}"
+                    Content="{Binding BackLabel}" Command="{Binding BackToHomeCommand}" AutomationProperties.AutomationId="Session.BackToHome" AutomationProperties.Name="{Binding BackLabel}">
 
-            <WrapPanel Orientation="Horizontal">
-                <WrapPanel.Resources>
-                    <Style TargetType="Button" BasedOn="{StaticResource RecommendedAction}">
-                        <Setter Property="Padding" Value="14,6" />
-                        <Setter Property="Margin" Value="0,0,8,0" />
-                    </Style>
-                </WrapPanel.Resources>
-
-
-<local:SessionActionButton Content="{Binding ApplyTrimMarginLabel}"
+                </local:SessionActionButton>
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding CancelAutomaticSelectionLabel}"
+                                                    Command="{Binding CancelAutomaticSelectionCommand}"
+                                                    Padding="14,6"  Visibility="{Binding ShowsGuidedAutomaticConfirmation, Converter={StaticResource BoolToVisibility}}" />
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ApplyTrimMarginLabel}"
                                     Command="{Binding ApplyTrimMarginCommand}"
                                     HorizontalAlignment="Left"
                                     Padding="14,6"
                                     Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedTrimParameters, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding ConfirmCustomSizeLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmCustomSizeLabel}"
                                             Command="{Binding ConfirmCustomSizeCommand}"
                                             IsEnabled="{Binding CanConfirmGuidedCustomSize}"
                                             AutomationProperties.AutomationId="Session.PrintDimensions.ConfirmSize"
                                             HorizontalAlignment="Left"
                                             Padding="14,6"
                                             Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedCustomSizeAction, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding CustomSizeLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding CustomSizeLabel}"
                           Command="{Binding ChooseCustomSizeCommand}"
                           AutomationProperties.AutomationId="Session.PrintDimensions.CustomSize"
                           Padding="14,6" Margin="0,10,0,0"
                           Visibility="{Binding ShowsGuidedCustomSizeEntry, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding ConfirmWhiteUnderbaseLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmWhiteUnderbaseLabel}"
                                     Command="{Binding SelectWhiteUnderbaseCommand}"
                                     IsEnabled="{Binding CanConfirmWhiteUnderbase}"
                                     HorizontalAlignment="Left"
@@ -2392,7 +2586,7 @@
                                     AutomationProperties.AutomationId="Session.TrimAdjust.Use"
                                     AutomationProperties.Name="{Binding UseThisTrimLabel}"
                                     Padding="14,6" Margin="0,0,8,4"  Visibility="{Binding IsAdjustingTrim, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding ApplyManualCropLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ApplyManualCropLabel}"
                                 AutomationProperties.AutomationId="Session.ApplyManualCrop" AutomationProperties.Name="{Binding ApplyManualCropLabel}"
                                 Command="{Binding ApplyManualCropCommand}"
                                 IsEnabled="{Binding CanApplyManualCrop}"
@@ -2416,72 +2610,46 @@
                                     AutomationProperties.Name="{Binding CorrectionImportLabel}"
                                     HorizontalAlignment="Left" Padding="14,6" FontWeight="SemiBold"  Visibility="{Binding CanImportCorrectedImage, Converter={StaticResource BoolToVisibility}}" />
 <local:ReviewApprovalButton Content="{Binding ConfirmAndSaveLabel}"
-                                Style="{StaticResource {x:Type Button}}"
+                                Style="{StaticResource RecommendedAction}"
                                 TargetIdentity="{Binding ConfirmAndSaveIdentity}"
                                 Command="{Binding ConfirmAndSaveCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.ConfirmAndSave"
                                 AutomationProperties.Name="{Binding ConfirmAndSaveLabel}"  Visibility="{Binding CanConfirmAndSave, Converter={StaticResource BoolToVisibility}}" />
-<local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
-                                Style="{StaticResource {x:Type Button}}"
-                                TargetIdentity="{Binding SaveApprovedIdentity}"
-                                Command="{Binding SaveApprovedCommand}"
-                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
-                                AutomationProperties.Name="{Binding SaveApprovedLabel}"  Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
-<local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
-                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
-                                AutomationProperties.Name="{Binding RetryRecordedLabel}"  Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
-<local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
-                                Style="{StaticResource {x:Type Button}}" TargetIdentity="{Binding RecordedActionIdentity}"
-                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
-                                AutomationProperties.Name="{Binding CheckAgainLabel}"  Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding UseSuggestionLabel}" Command="{Binding UseSuggestedNameCommand}"
                                 AutomationProperties.AutomationId="Session.FinalSave.UseSuggestion"
                                 AutomationProperties.Name="{Binding UseSuggestionLabel}"  Visibility="{Binding CanUseSuggestedName, Converter={StaticResource BoolToVisibility}}" />
-
-<local:SessionActionButton Content="{Binding AuthoriseAutomaticSelectionLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding AuthoriseAutomaticSelectionLabel}"
                                         Command="{Binding BeginAutomaticSelectionCommand}"
                                         IsEnabled="{Binding CanBeginAutomaticSelection}"
                                         HorizontalAlignment="Left"
                                         Padding="14,6"
                                         Margin="0,10,0,0"  Visibility="{Binding ShowsGuidedAutomaticBegin, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding ConfirmAutomaticSelectionLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmAutomaticSelectionLabel}"
                                                     Command="{Binding ConfirmAutomaticSelectionCommand}"
                                                     Padding="14,6"
                                                     Margin="0,0,8,0"  Visibility="{Binding ShowsGuidedAutomaticConfirmation, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding CancelAutomaticSelectionLabel}"
-                                                    Command="{Binding CancelAutomaticSelectionCommand}"
-                                                    Padding="14,6"  Visibility="{Binding ShowsGuidedAutomaticConfirmation, Converter={StaticResource BoolToVisibility}}" />
-<local:SessionActionButton Content="{Binding ContinueWithSizeLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ContinueWithSizeLabel}"
                                                 Command="{Binding ContinueWithSizeCommand}"
                                                 IsEnabled="{Binding CanAuthoriseEnlargement}"
                                                 Padding="12,5"  Visibility="{Binding ShowsGuidedEnlargement, Converter={StaticResource BoolToVisibility}}" />
-                <local:SessionActionButton Content="{Binding ConfirmOriginalLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ConfirmOriginalLabel}"
                         Command="{Binding ConfirmOriginalCommand}"
                         AutomationProperties.AutomationId="Session.ConfirmOriginal"
                         AutomationProperties.Name="{Binding ConfirmOriginalLabel}"
                         Visibility="{Binding CanConfirmOriginal, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding RunStepLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding RunStepLabel}"
                         Command="{Binding RunStepCommand}"
                         AutomationProperties.AutomationId="Session.RunStep"
                         AutomationProperties.Name="{Binding RunStepLabel}"
                         Visibility="{Binding ShowsGuidedRunStep, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:ReviewApprovalButton Content="{Binding ApproveLabel}"
+<local:ReviewApprovalButton Content="{Binding ApproveLabel}"
                         Style="{StaticResource {x:Type Button}}"
                         TargetIdentity="{Binding ReviewTargetIdentity}"
                         Command="{Binding ApproveCommand}"
                         AutomationProperties.AutomationId="Session.Approve"
                         AutomationProperties.Name="{Binding ApproveLabel}"
                         Visibility="{Binding CanApprove, Converter={StaticResource BoolToVisibility}}" />
-
-                <!--
-                    The same Session.Reject everywhere. On background-removal review it is bound to
-                    the exact result and guarded against a gesture begun elsewhere (SCRUM-11148);
-                    every other step keeps a plain button.
-                -->
-                <local:ReviewApprovalButton Content="{Binding RejectLabel}"
+<local:ReviewApprovalButton Content="{Binding RejectLabel}"
                         Style="{StaticResource {x:Type Button}}"
                         IsGestureGuarded="{Binding IsRejectGestureGuarded}"
                         TargetIdentity="{Binding RejectTargetIdentity}"
@@ -2489,9 +2657,7 @@
                         AutomationProperties.AutomationId="Session.Reject"
                         AutomationProperties.Name="{Binding RejectLabel}"
                         Visibility="{Binding CanReject, Converter={StaticResource BoolToVisibility}}" />
-
-                <!-- Opens the Ask panel beside the review; writes nothing (SCRUM-11148, D4). -->
-                <local:SessionActionButton x:Name="AskColleagueButton"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" x:Name="AskColleagueButton"
                         Content="{Binding AskColleagueLabel}"
                         ToolTip="{Binding AskColleagueHint}"
                         Command="{Binding BeginAskColleagueCommand}"
@@ -2499,82 +2665,73 @@
                         AutomationProperties.Name="{Binding AskColleagueLabel}"
                         AutomationProperties.HelpText="{Binding AskColleagueHint}"
                         Visibility="{Binding CanAskColleague, Converter={StaticResource BoolToVisibility}}" />
-
-                <!-- Opens the trim editor over the pre-trim source; sends nothing (SCRUM-11147). -->
-                <local:SessionActionButton x:Name="BeginTrimAdjustButton"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" x:Name="BeginTrimAdjustButton"
                         Content="{Binding TrimAdjustBeginLabel}"
                         Command="{Binding BeginTrimAdjustCommand}"
                         AutomationProperties.AutomationId="Session.TrimAdjust.Begin"
                         AutomationProperties.Name="{Binding TrimAdjustBeginLabel}"
                         Visibility="{Binding CanAdjustTrim, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding RetryLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding RetryLabel}"
                         Command="{Binding RetryCommand}"
                         AutomationProperties.AutomationId="Session.Retry"
                         AutomationProperties.Name="{Binding RetryLabel}"
                         Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding ErrorDetailsLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ErrorDetailsLabel}"
                         Command="{Binding OpenErrorDetailsCommand}"
                         AutomationProperties.AutomationId="Session.ErrorDetails"
                         AutomationProperties.Name="{Binding ErrorDetailsLabel}"
                         Visibility="{Binding CanOpenErrorDetails, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding SkipLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding SkipLabel}"
                         Command="{Binding SkipCommand}"
                         AutomationProperties.AutomationId="Session.Skip"
                         AutomationProperties.Name="{Binding SkipLabel}"
                         Visibility="{Binding CanSkip, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding KeepOriginalExtentLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding KeepOriginalExtentLabel}"
                         ToolTip="{Binding KeepOriginalExtentHint}"
                         Command="{Binding KeepOriginalExtentCommand}"
                         AutomationProperties.AutomationId="Session.KeepOriginalExtent"
                         AutomationProperties.Name="{Binding KeepOriginalExtentLabel}"
                         Visibility="{Binding CanKeepOriginalExtent, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding SubmitManualResultLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding SubmitManualResultLabel}"
                         Command="{Binding SubmitManualResultCommand}"
                         AutomationProperties.AutomationId="Session.SubmitManualResult"
                         AutomationProperties.Name="{Binding SubmitManualResultLabel}"
                         Visibility="{Binding CanSubmitManualResult, Converter={StaticResource BoolToVisibility}}" />
-                <local:SessionActionButton Content="{Binding HandOffLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding HandOffLabel}"
                         Command="{Binding HandOffCommand}"
                         AutomationProperties.AutomationId="Session.HandOff"
                         AutomationProperties.Name="{Binding HandOffLabel}"
                         Visibility="{Binding CanHandOff, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding CompleteLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding CompleteLabel}"
                         Command="{Binding CompleteCommand}"
                         AutomationProperties.AutomationId="Session.Complete"
                         AutomationProperties.Name="{Binding CompleteLabel}"
                         Visibility="{Binding CanComplete, Converter={StaticResource BoolToVisibility}}" />
-
-                <local:SessionActionButton Content="{Binding AddAnotherSizeLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding AddAnotherSizeLabel}"
                         Command="{Binding AddAnotherSizeCommand}"
                         AutomationProperties.AutomationId="Session.AddAnotherSize"
                         AutomationProperties.Name="{Binding AddAnotherSizeLabel}"
                         Visibility="{Binding CanAddAnotherSize, Converter={StaticResource BoolToVisibility}}" />
-                <local:SessionActionButton Content="{Binding ChangeRouteLabel}"
+<local:SessionActionButton Style="{StaticResource RecommendedAction}" Content="{Binding ChangeRouteLabel}"
                         Command="{Binding ChangeRouteCommand}"
                         AutomationProperties.AutomationId="Session.ChangeRoute"
                         AutomationProperties.Name="{Binding ChangeRouteLabel}"
                         Visibility="{Binding CanChangeRoute, Converter={StaticResource BoolToVisibility}}" />
-                <local:SessionActionButton Content="{Binding OpenSettingsLabel}" Command="{Binding OpenSettingsCommand}"
-                        AutomationProperties.AutomationId="Session.Settings" AutomationProperties.Name="{Binding OpenSettingsLabel}"
-                        Visibility="{Binding CanOpenUtilities, Converter={StaticResource BoolToVisibility}}" />
-                <local:SessionActionButton Content="{Binding OpenEnvironmentLabel}" Command="{Binding OpenEnvironmentCommand}"
-                        AutomationProperties.AutomationId="Session.Environment" AutomationProperties.Name="{Binding OpenEnvironmentLabel}"
-                        Visibility="{Binding CanOpenUtilities, Converter={StaticResource BoolToVisibility}}" />
-            </WrapPanel>
-
-
-                    <local:SessionActionButton Grid.Column="1"
-                    Content="{Binding BackLabel}"
-                    Command="{Binding BackToHomeCommand}"
-                    AutomationProperties.AutomationId="Session.BackToHome"
-                    AutomationProperties.Name="{Binding BackLabel}"
-                    Padding="14,6" /></Grid>
+<local:ReviewApprovalButton Content="{Binding SaveApprovedLabel}"
+                                Style="{StaticResource RecommendedAction}"
+                                TargetIdentity="{Binding SaveApprovedIdentity}"
+                                Command="{Binding SaveApprovedCommand}"
+                                AutomationProperties.AutomationId="Session.FinalSave.SaveApproved"
+                                AutomationProperties.Name="{Binding SaveApprovedLabel}"  Visibility="{Binding CanSaveApproved, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding RetryRecordedLabel}" Command="{Binding RetryRecordedSaveCommand}"
+                                Style="{StaticResource RecommendedAction}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.RetryRecorded"
+                                AutomationProperties.Name="{Binding RetryRecordedLabel}"  Visibility="{Binding CanRetryRecordedSave, Converter={StaticResource BoolToVisibility}}" />
+<local:ReviewApprovalButton Content="{Binding CheckAgainLabel}" Command="{Binding CheckSaveAgainCommand}"
+                                Style="{StaticResource RecommendedAction}" TargetIdentity="{Binding RecordedActionIdentity}"
+                                AutomationProperties.AutomationId="Session.FinalSave.CheckAgain"
+                                AutomationProperties.Name="{Binding CheckAgainLabel}"  Visibility="{Binding CanCheckSaveAgain, Converter={StaticResource BoolToVisibility}}" />
+        </controls:GuidedActionPanel>
         <Border Grid.Row="4" Grid.Column="1" Margin="0,14,0,0" Padding="20" Background="{DynamicResource PF.Brush.Surface}"
                 AutomationProperties.AutomationId="Session.HistoryWorkspace"
                 Visibility="{Binding IsViewingHistory, Converter={StaticResource BoolToVisibility}}">
@@ -2599,11 +2756,17 @@
                         HorizontalAlignment="Left" Margin="0,16,0,0" AutomationProperties.AutomationId="Session.CloseHistory" />
             </Grid>
         </Border>
-        <Border Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Background="{DynamicResource PF.Brush.Surface}"
-                BorderBrush="{DynamicResource PF.Brush.Primary}" BorderThickness="2" Padding="24" Margin="20"
+        <ui:Card Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Padding="24" Margin="20"
                 MaxWidth="600" VerticalAlignment="Center" Panel.ZIndex="10"
                 AutomationProperties.AutomationId="Session.DraftLeave"
-                Visibility="{Binding IsConfirmingDraftLeave, Converter={StaticResource BoolToVisibility}}">
+                Visibility="{Binding IsConfirmingDraftLeave, Converter={StaticResource BoolToVisibility}}" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
             <StackPanel>
                 <TextBlock x:Name="DraftLeaveHeadingText" Focusable="True" Text="{Binding DraftLeaveHeading}" FontSize="20" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding DraftLeaveNotice}" TextWrapping="Wrap" Margin="0,12,0,18" />
@@ -2614,12 +2777,18 @@
                             AutomationProperties.AutomationId="Session.DiscardDraft" />
                 </WrapPanel>
             </StackPanel>
-        </Border>
-        <Border Grid.Row="4" Grid.RowSpan="2" Grid.ColumnSpan="2" Padding="24" Margin="20" MaxWidth="650"
-                VerticalAlignment="Center" Background="{DynamicResource PF.Brush.Surface}"
-                BorderBrush="{DynamicResource PF.Brush.Primary}" BorderThickness="2" Panel.ZIndex="9"
+        </ui:Card>
+        <ui:Card Grid.Row="4" Grid.RowSpan="2" Grid.ColumnSpan="2" Padding="24" Margin="20" MaxWidth="650"
+                VerticalAlignment="Center" Panel.ZIndex="9"
                 Visibility="{Binding IsConfirmingReturn, Converter={StaticResource BoolToVisibility}}"
-                AutomationProperties.AutomationId="Session.ReturnConfirmation">
+                AutomationProperties.AutomationId="Session.ReturnConfirmation" Style="{DynamicResource PF.Card.Fluent}">
+                        <ui:Card.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+                            <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
+                        </ResourceDictionary.MergedDictionaries>
+                        <Style TargetType="local:SessionTextBox" BasedOn="{StaticResource PF.Input.TextBox}" />
+                        <Style TargetType="local:SessionActionButton" BasedOn="{StaticResource PF.Button.Secondary}" />
+                        <Style TargetType="local:SessionExpander" BasedOn="{StaticResource PF.Disclosure}" />
+                        </ResourceDictionary></ui:Card.Resources>
             <StackPanel>
                 <TextBlock x:Name="ReturnHeadingText" Focusable="True" Text="{Binding ReturnHeading}" FontSize="20" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding ReturnImpact}" TextWrapping="Wrap" Margin="0,12,0,18" />
@@ -2630,6 +2799,6 @@
                             AutomationProperties.AutomationId="Session.CancelReturn" Margin="0,0,0,8" />
                 </WrapPanel>
             </StackPanel>
-        </Border>
+        </ui:Card>
     </Grid>
 </UserControl>

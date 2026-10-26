@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using PrintFlow.App.Resources;
 using PrintFlow.App.ViewModels;
@@ -42,7 +43,9 @@ namespace PrintFlow.App.Views;
 public sealed class TiffReviewSurface : UserControl
 {
     private readonly DockPanel _root = new();
-    private readonly WrapPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
+    private readonly StackPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 8) };
+    private readonly WrapPanel _zoomTools = new();
+    private readonly WrapPanel _modeTools = new();
     private readonly List<(RadioButton Button, TiffReviewMode Mode)> _modes = [];
     private readonly Image _image = new()
     {
@@ -77,7 +80,7 @@ public sealed class TiffReviewSurface : UserControl
     };
 
     private readonly TextBlock _legend = new() { TextWrapping = TextWrapping.Wrap, Opacity = 0.7 };
-    private readonly TextBlock _detail = new() { Opacity = 0.6 };
+    private readonly TextBlock _detail = new() { Opacity = 0.6, TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock _unavailable = new() { TextWrapping = TextWrapping.Wrap, Visibility = Visibility.Collapsed };
 
     private ImageSource? _colour;
@@ -88,13 +91,30 @@ public sealed class TiffReviewSurface : UserControl
 
     public TiffReviewSurface()
     {
+        Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("/PrintFlow.App;component/Themes/WpfUiTheme.xaml", UriKind.Relative)
+        });
+        FontSize = 16;
         Focusable = false;
         AutomationProperties.SetAutomationId(this, "Session.TiffReviewSurface");
         AutomationProperties.SetName(this, Strings.Session_TiffModeHeading);
 
+        AutomationProperties.SetAutomationId(_toolbar, "Session.TiffReviewTools");
+        TextBlock status = new() { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 4) };
+        status.SetBinding(TextBlock.TextProperty, new Binding(nameof(SessionViewModel.ZoomLabel)));
+        AutomationProperties.SetAutomationId(status, "Session.TiffReviewZoomStatus");
+        _zoomTools.Children.Add(status);
+        AddZoom("TiffReviewZoomOut", "ZoomOutLabel", "ZoomOutCommand", "CanZoomOut");
+        AddZoom("TiffReviewZoomIn", "ZoomInLabel", "ZoomInCommand", "CanZoomIn");
+        AddZoom("TiffReviewResetZoom", "ResetZoomLabel", "ResetZoomCommand", null);
+        _toolbar.Children.Add(_zoomTools);
+        _toolbar.Children.Add(_modeTools);
         AddMode(TiffReviewMode.Colour, "TiffReviewColour", Strings.Session_TiffModeColour);
         AddMode(TiffReviewMode.WhiteInk, "TiffReviewWhiteInk", Strings.Session_TiffModeWhiteInk);
         AddMode(TiffReviewMode.Overlay, "TiffReviewOverlay", Strings.Session_TiffModeOverlay);
+        _detail.Margin = new Thickness(0, 2, 8, 2);
+        _zoomTools.Children.Add(_detail);
 
         _canvas.Children.Add(_image);
         _scroll.Content = _canvas;
@@ -106,20 +126,35 @@ public sealed class TiffReviewSurface : UserControl
 
         DockPanel.SetDock(_toolbar, Dock.Top);
         DockPanel.SetDock(_legend, Dock.Bottom);
-        DockPanel.SetDock(_detail, Dock.Bottom);
         DockPanel.SetDock(_unavailable, Dock.Top);
         _root.Children.Add(_toolbar);
         _root.Children.Add(_unavailable);
         _root.Children.Add(_legend);
-        _root.Children.Add(_detail);
         _root.Children.Add(_scroll);
         Content = _root;
 
         _scroll.ScrollChanged += Scrolled;
-        SizeChanged += (_, _) => UpdateSize();
+        _scroll.SizeChanged += (_, _) => UpdateSize();
         DataContextChanged += (_, _) => Attach(DataContext as SessionViewModel);
         Unloaded += (_, _) => Attach(null);
         Loaded += (_, _) => Attach(DataContext as SessionViewModel);
+    }
+
+    private void AddZoom(string id, string label, string command, string? enabled)
+    {
+        Button button = new SessionActionButton { Margin = new Thickness(0, 0, 6, 4) };
+        button.SetResourceReference(StyleProperty, "PF.Button.Secondary");
+        // Short visible zoom symbols leave room for the channel names on small windows.
+        // The full localized action remains the accessible name and tooltip.
+        if (id == "TiffReviewZoomOut") button.Content = "−";
+        else if (id == "TiffReviewZoomIn") button.Content = "+";
+        else button.SetBinding(ContentControl.ContentProperty, new Binding(label));
+        button.SetBinding(ToolTipProperty, new Binding(label));
+        button.SetBinding(AutomationProperties.NameProperty, new Binding(label));
+        button.SetBinding(Button.CommandProperty, new Binding(command));
+        if (enabled is not null) button.SetBinding(IsEnabledProperty, new Binding(enabled));
+        AutomationProperties.SetAutomationId(button, "Session." + id);
+        _zoomTools.Children.Add(button);
     }
 
     /// <summary>
@@ -135,11 +170,13 @@ public sealed class TiffReviewSurface : UserControl
     {
         RadioButton button = new()
         {
-            Content = label,
+            Content = new TextBlock { Text = label, TextWrapping = TextWrapping.Wrap, MaxWidth = 140 },
             GroupName = "TiffReviewMode" + GetHashCode().ToString(CultureInfo.InvariantCulture),
-            Margin = new Thickness(0, 2, 12, 2),
+            Margin = new Thickness(0, 2, 6, 2),
+            MinHeight = 42,
             VerticalAlignment = VerticalAlignment.Center,
         };
+        button.SetResourceReference(StyleProperty, "PF.Input.RadioButton");
 
         AutomationProperties.SetAutomationId(button, "Session." + id);
         AutomationProperties.SetName(button, label);
@@ -151,7 +188,7 @@ public sealed class TiffReviewSurface : UserControl
             }
         };
 
-        _toolbar.Children.Add(button);
+        _modeTools.Children.Add(button);
         _modes.Add((button, mode));
     }
 
@@ -201,6 +238,9 @@ public sealed class TiffReviewSurface : UserControl
 
     private void ViewportChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // A pan updates both axes from one ScrollChanged event. Do not reapply the
+        // still-old other axis while recording the first property notification.
+        if (_updating) return;
         if (e.PropertyName is nameof(ReviewViewportState.HorizontalPosition)
             or nameof(ReviewViewportState.VerticalPosition))
         {
@@ -271,8 +311,10 @@ public sealed class TiffReviewSurface : UserControl
 
         double width = Math.Max(1, _model.TiffPreviewPixelWidth);
         double height = Math.Max(1, _model.TiffPreviewPixelHeight);
-        double available = Math.Max(1, ActualWidth - 28);
-        double vertical = Math.Max(1, ActualHeight - 96);
+        // The actual viewport already excludes the wrapping tool rows and legends.
+        // Reserving a fixed header height can crop the fitted image on narrow layouts.
+        double available = Math.Max(1, _scroll.ViewportWidth > 0 ? _scroll.ViewportWidth : _scroll.ActualWidth);
+        double vertical = Math.Max(1, _scroll.ViewportHeight > 0 ? _scroll.ViewportHeight : _scroll.ActualHeight);
 
         double scale = _model.IsFitToViewport
             ? Math.Max(0.001, Math.Min(available / width, vertical / height))
@@ -300,6 +342,7 @@ public sealed class TiffReviewSurface : UserControl
         if (e.ExtentWidthChange != 0 || e.ExtentHeightChange != 0 ||
             e.ViewportWidthChange != 0 || e.ViewportHeightChange != 0)
         {
+            if (e.ViewportWidthChange != 0 || e.ViewportHeightChange != 0) UpdateSize();
             ApplyPosition();
             return;
         }

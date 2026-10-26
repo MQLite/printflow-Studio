@@ -131,6 +131,17 @@ public sealed class GuidedSessionEditorInputTests
             if (input is ComboBox combo)
             {
                 // Materialize the native item containers without opening its Popup/HWND.
+                // This artificial ItemsPresenter replaces the theme's popup hierarchy, so
+                // provide alignment locally instead of retaining its ancestor bindings.
+                // The guarded container/provider and every selection assertion stay real.
+                combo.ItemContainerStyle = new Style(typeof(ComboBoxItem))
+                {
+                    Setters =
+                    {
+                        new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Left),
+                        new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center),
+                    },
+                };
                 combo.Template = new ControlTemplate(typeof(ComboBox)) { VisualTree = new FrameworkElementFactory(typeof(ItemsPresenter)) };
                 combo.ApplyTemplate(); combo.UpdateLayout();
             }

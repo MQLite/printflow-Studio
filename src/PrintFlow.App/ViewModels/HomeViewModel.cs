@@ -31,6 +31,9 @@ public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifeti
     public bool IsImporting => _import is not null;
     public bool CanStartImport => _active && !IsBusy && !IsConfirmingAbandon;
     public string ImportProgress => Strings.Resolve("Home_GuidedImporting");
+    public string SampleTitle => Strings.Resolve("Home_SampleTitle");
+    public string SampleSubtitle => Strings.Resolve("Home_SampleSubtitle");
+    public string SampleDropLabel => Strings.Resolve("Home_SampleDropLabel");
     public string CancelImportLabel => Strings.Resolve("Home_GuidedCancelImport");
     public string AiUnavailable => Strings.Resolve("Home_GuidedAiUnavailable");
     public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");

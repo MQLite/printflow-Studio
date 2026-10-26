@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:local="clr-namespace:PrintFlow.App.Views"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
              mc:Ignorable="d"
@@ -17,7 +18,7 @@
     <UserControl.Resources>
       <ResourceDictionary>
         <ResourceDictionary.MergedDictionaries>
-          <ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" />
+          <ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" />
         </ResourceDictionary.MergedDictionaries>
         <local:PreviewPayloadConverter x:Key="PreviewPayload" />
 
@@ -50,20 +51,21 @@
             files will be called (SCRUM-11078 §11, §12; SCRUM-11075). The preview is
             informational — it issues no command and creates nothing (§13).
         -->
-        <Border Grid.Row="1" Style="{StaticResource PF.Card}" Padding="16" Margin="0,12,0,12">
+        <ui:Card Grid.Row="1" Style="{StaticResource PF.Card.Fluent}" Padding="12" Margin="0,8,0,12">
         <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
+            <Border Grid.Column="0" Grid.RowSpan="2"
                     BorderBrush="{DynamicResource PF.Brush.Border}"
                     BorderThickness="1"
                     CornerRadius="{DynamicResource PF.Corner.Control}"
-                    Width="180"
-                    Height="140"
-                    Margin="0,0,16,0"
+                    Width="100"
+                    Height="100"
+                    Margin="0,0,12,0"
                     AutomationProperties.AutomationId="WorkflowSelection.Preview"
                     AutomationProperties.Name="{Binding PreviewHeading}">
                 <Grid>
@@ -77,24 +79,17 @@
                                AutomationProperties.Name="{Binding PreviewHeading}" />
                     </Grid>
 
-                    <TextBlock Text="{Binding Preview.Unavailable}"
-                               Visibility="{Binding Preview.IsUnavailable, Converter={StaticResource BoolToVisibility},
-                                                    FallbackValue=Collapsed}"
-                               TextWrapping="Wrap"
-                               Margin="10"
-                               Opacity="0.75"
-                               VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Column="1">
+            <StackPanel Grid.Column="1" Margin="0,0,12,0">
                 <TextBlock Text="{Binding SourceFileLabel}" Foreground="{DynamicResource PF.Brush.Muted}" />
                 <TextBlock Text="{Binding SourceFileName}"
                            AutomationProperties.AutomationId="WorkflowSelection.SourceFile"
                            AutomationProperties.Name="{Binding SourceFileName}"
                            FontSize="{DynamicResource PF.Font.Body}"
                            FontWeight="SemiBold"
-                           TextWrapping="Wrap"
+                           TextWrapping="Wrap" ToolTip="{Binding SourceFileName}"
                            Margin="0,2,0,2" />
 
                 <!-- The pixel figures the preview seam reported, reduced-for-display note included. -->
@@ -104,7 +99,12 @@
                            Opacity="0.7"
                            Margin="0,0,0,10" />
 
-                <StackPanel>
+                <TextBlock Text="{Binding Preview.Unavailable}"
+                           Visibility="{Binding Preview.IsUnavailable, Converter={StaticResource BoolToVisibility}, FallbackValue=Collapsed}"
+                           TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,4,0,0" />
+
+            </StackPanel>
+                <StackPanel Grid.Column="2">
                 <TextBlock Text="{Binding OutputNameLabel}" FontWeight="SemiBold" />
                 <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding CanEditOutputName}"
@@ -115,41 +115,42 @@
                          HorizontalAlignment="Left"
                          Margin="0,2,0,4" />
 
-                <TextBlock Text="{Binding OutputNameHint}"
-                           TextWrapping="Wrap"
-                           Opacity="0.7"
-                           MaxWidth="480"
-                           HorizontalAlignment="Left" />
                 </StackPanel>
-            </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding OutputNameHint}"
+                           TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" FontSize="14" Margin="0,4,0,0" />
         </Grid>
-        </Border>
+        </ui:Card>
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsTabStop="False">
-            <StackPanel>
-                <TextBlock Text="{Binding Hint}" TextWrapping="Wrap" Margin="0,0,0,10" Opacity="0.7" />
+            <StackPanel Grid.IsSharedSizeScope="True">
 
                 <ItemsControl ItemsSource="{Binding Workflows}" HorizontalContentAlignment="Stretch">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource PF.Card}" Margin="0,0,12,0" Padding="16">
+                            <ui:Card Style="{StaticResource PF.Card.Fluent}" Margin="0,0,8,0" Padding="12">
                                 <Grid>
-                                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>                                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                                        <TextBlock Text="{Binding Title}" TextWrapping="Wrap" FontSize="{DynamicResource PF.Font.Body}" FontWeight="SemiBold" Margin="0,0,0,8" />
-                                        <TextBlock Text="{Binding Purpose}" TextWrapping="Wrap" Margin="0,0,0,4" />
-                                        <TextBlock Text="{Binding Result}" TextWrapping="Wrap" Margin="0,0,0,4" />
-                                        <TextBlock Text="{Binding Dimensions}" TextWrapping="Wrap" Margin="0,0,0,8" />
-
-                                    </StackPanel>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" SharedSizeGroup="RouteTitle" />
+                                        <RowDefinition Height="Auto" SharedSizeGroup="RoutePurpose" />
+                                        <RowDefinition Height="Auto" SharedSizeGroup="RouteResult" />
+                                        <RowDefinition Height="Auto" SharedSizeGroup="RouteSize" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="{Binding Title}" TextWrapping="Wrap" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" />
+                                    <TextBlock Grid.Row="1" Text="{Binding Purpose}" TextWrapping="Wrap" Margin="0,0,0,12" />
+                                    <Border Grid.Row="2" BorderBrush="{DynamicResource PF.Brush.Border}" BorderThickness="0,1,0,0" Padding="0,8,0,0">
+                                        <TextBlock Text="{Binding Result}" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock Grid.Row="3" Text="{Binding Dimensions}" TextWrapping="Wrap" Margin="0,6,0,12" Foreground="{DynamicResource PF.Brush.Muted}" />
 
                                     <!-- Enabled by the engine's own AvailableCommands, so the button
                                          is offered on exactly the rule that would accept it (§7).
                                          The identity comes from the catalogue entry's workflow type
                                          and never from its translated title (§22). -->
-                                    <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Grid.Row="1"
-                                            Content="{Binding DataContext.SelectLabel,
-                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Grid.Row="5"
+                                            Content="{Binding Title}"
                                             Command="{Binding DataContext.SelectCommand,
                                                               RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
@@ -159,15 +160,17 @@
                                             AutomationProperties.Name="{Binding Title}"
                                             VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
                                 </Grid>
-                            </Border>
+                            </ui:Card>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
 
-        <ContentControl Grid.Row="3" Style="{StaticResource PF.ActionBar}" Margin="0,16,0,0">
-        <StackPanel>
+        <ContentControl Grid.Row="3" Style="{StaticResource PF.ActionBar}" Margin="0,12,0,0">
+        <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,0">
             <TextBlock Text="{Binding RouteChangeHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,0,0,8" AutomationProperties.AutomationId="WorkflowSelection.ChangeHint" />
             <TextBlock Text="{Binding ProgressLabel}" TextWrapping="Wrap" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="WorkflowSelection.Progress" />
             <TextBlock Text="{Binding Notice}"
@@ -177,13 +180,14 @@
                        Margin="0,0,0,8" />
             <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
             <local:NoticeErrorDetails />
-            <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
+        </StackPanel>
+            <local:SessionActionButton Grid.Column="1" Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
                     Command="{Binding BackToHomeCommand}"
                     IsEnabled="{Binding CanGoHome}"
                     AutomationProperties.AutomationId="WorkflowSelection.Back"
                     AutomationProperties.Name="{Binding BackLabel}"
                     HorizontalAlignment="Left" />
-        </StackPanel>
+        </Grid>
         </ContentControl>
     </Grid>
     <Border Background="{DynamicResource PF.Brush.Surface}" BorderBrush="{DynamicResource PF.Brush.Primary}"

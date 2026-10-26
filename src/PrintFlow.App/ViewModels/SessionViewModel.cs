@@ -3044,6 +3044,8 @@ public sealed partial class SessionViewModel : ObservableObject
             current,
             cancellationToken).ConfigureAwait(true));
 
+        var saveReviewPanes = await BuildSaveReviewPanesAsync(session, loaded, cancellationToken).ConfigureAwait(true);
+
         // Decoding is slow enough that a second command can land while the first load is still
         // in flight. Publishing only for the generation that is still current is what stops the
         // older load's images from reappearing beside the newer state's metadata — the exact
@@ -3057,6 +3059,9 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             PreviewPanes.Add(pane);
         }
+
+        SaveReviewPanes = saveReviewPanes;
+        OnPropertyChanged(nameof(SaveReviewPanes));
 
         _publishedPreviewGeneration = generation;
         OnPropertyChanged(nameof(HasPreview));
@@ -3097,6 +3102,8 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         _previewGeneration++;
         ClearTiffReview();
+        SaveReviewPanes = [];
+        OnPropertyChanged(nameof(SaveReviewPanes));
 
         if (PreviewPanes.Count == 0)
         {

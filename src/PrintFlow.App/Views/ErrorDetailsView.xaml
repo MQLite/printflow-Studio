@@ -1,6 +1,7 @@
 <UserControl x:Class="PrintFlow.App.Views.ErrorDetailsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:views="clr-namespace:PrintFlow.App.Views"
              Background="{DynamicResource PF.Brush.Canvas}" Foreground="{DynamicResource PF.Brush.Ink}"
              FontFamily="{DynamicResource PF.Font.Family}" FontSize="{DynamicResource PF.Font.Body}"
@@ -8,7 +9,7 @@
              AutomationProperties.Name="{Binding Heading}">
     <UserControl.Resources>
       <ResourceDictionary>
-        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <views:PreviewPayloadConverter x:Key="PreviewPayload" />
         <Style x:Key="SectionHeading" TargetType="TextBlock">
@@ -16,7 +17,8 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,18,0,6" />
         </Style>
-        <Style x:Key="ReadOnlyValue" TargetType="TextBox">
+        <Style x:Key="ReadOnlyValue" TargetType="TextBox" BasedOn="{StaticResource PF.Input.TextBox}">
+            <Setter Property="MinHeight" Value="0" />
             <Setter Property="IsReadOnly" Value="True" />
             <Setter Property="IsReadOnlyCaretVisible" Value="True" />
             <Setter Property="BorderThickness" Value="0" />
@@ -27,7 +29,7 @@
         <Style TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
             <Setter Property="Padding" Value="16,8" />
             <Setter Property="Margin" Value="0,0,8,0" />
-            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="MinHeight" Value="{DynamicResource PF.Control.MinHeight}" />
         </Style>
       </ResourceDictionary>
     </UserControl.Resources>
@@ -38,11 +40,14 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="{Binding Heading}" FontSize="26" FontWeight="SemiBold" />
+        <DockPanel>
+            <ui:SymbolIcon Symbol="Info24" Style="{StaticResource PF.Icon}" Margin="0,0,12,0" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Heading}" FontSize="{DynamicResource PF.Font.Section}" FontWeight="SemiBold" TextWrapping="Wrap" />
+        </DockPanel>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,16"
                       HorizontalScrollBarVisibility="Disabled" Focusable="False">
-            <StackPanel>
-                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="#A12822"
+            <ui:Card Style="{StaticResource PF.Card.Fluent}"><StackPanel>
+                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Danger}"
                            AutomationProperties.AutomationId="ErrorDetails.Notice" />
                 <!-- The notice's own code; the Code row below belongs to the opened attempt (SCRUM-11151). -->
                 <views:NoticeErrorDetails Margin="0,4,0,0" />
@@ -92,9 +97,10 @@
                              AutomationProperties.AutomationId="ErrorDetails.TechnicalDetail" AutomationProperties.Name="{Binding TechnicalHeading}" />
                     </Expander>
                 </StackPanel>
-            </StackPanel>
+            </StackPanel></ui:Card>
         </ScrollViewer>
-        <WrapPanel Grid.Row="2">
+        <DockPanel Grid.Row="2" LastChildFill="True"><Button DockPanel.Dock="Left" Content="{Binding BackLabel}" Command="{Binding BackCommand}"
+                    AutomationProperties.AutomationId="ErrorDetails.Back" AutomationProperties.Name="{Binding BackLabel}" /><WrapPanel HorizontalAlignment="Right">
             <Button Content="{Binding RetryLabel}" Command="{Binding RetryCommand}"
                     Visibility="{Binding CanRetry, Converter={StaticResource BoolToVisibility}}"
                     AutomationProperties.AutomationId="ErrorDetails.Retry" AutomationProperties.Name="{Binding RetryLabel}" />
@@ -108,9 +114,8 @@
                     Visibility="{Binding CanExportDiagnosticPackage, Converter={StaticResource BoolToVisibility}}"
                     AutomationProperties.AutomationId="ErrorDetails.ExportDiagnosticPackage"
                     AutomationProperties.Name="{Binding ExportDiagnosticPackageLabel}" />
-            <Button Content="{Binding BackLabel}" Command="{Binding BackCommand}"
-                    AutomationProperties.AutomationId="ErrorDetails.Back" AutomationProperties.Name="{Binding BackLabel}" />
-        </WrapPanel>
+
+        </WrapPanel></DockPanel>
       </Grid>
 
       <Grid Visibility="{Binding IsPackagePreview, Converter={StaticResource BoolToVisibility}}"
@@ -123,7 +128,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel>
-          <TextBlock Text="{Binding PackageHeading}" FontSize="26" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding PackageHeading}" FontSize="{DynamicResource PF.Font.Section}" FontWeight="SemiBold" />
           <TextBlock Text="{Binding PackageLocalOnlyNotice}" Margin="0,8,0,0" TextWrapping="Wrap"
                      FontWeight="SemiBold" AutomationProperties.AutomationId="DiagnosticPackage.LocalOnlyNotice" />
         </StackPanel>
@@ -131,8 +136,8 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,16"
                       HorizontalScrollBarVisibility="Disabled" Focusable="False"
                       AutomationProperties.AutomationId="DiagnosticPackage.Contents">
-          <StackPanel>
-            <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="#A12822"
+          <ui:Card Style="{StaticResource PF.Card.Fluent}"><StackPanel>
+            <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Danger}"
                        AutomationProperties.AutomationId="DiagnosticPackage.Notice" />
 
             <TextBlock Text="{Binding PackageSubjectHeading}" Style="{StaticResource SectionHeading}" />
@@ -209,17 +214,17 @@
             <TextBlock Text="{Binding PackageDestinationHint}" TextWrapping="Wrap"
                        AutomationProperties.AutomationId="DiagnosticPackage.Destination" />
             <TextBlock Text="{Binding PackageNoOverwriteNotice}" Margin="0,4,0,0" TextWrapping="Wrap" />
-          </StackPanel>
+          </StackPanel></ui:Card>
         </ScrollViewer>
 
-        <WrapPanel Grid.Row="2">
+        <DockPanel Grid.Row="2" LastChildFill="True"><Button DockPanel.Dock="Left" Content="{Binding BackToDetailsLabel}" Command="{Binding BackFromPackageCommand}"
+                  AutomationProperties.AutomationId="DiagnosticPackage.Back"
+                  AutomationProperties.Name="{Binding BackToDetailsLabel}" /><WrapPanel HorizontalAlignment="Right">
           <Button Content="{Binding SavePackageLabel}" Command="{Binding SavePackageCommand}"
                   AutomationProperties.AutomationId="DiagnosticPackage.Save"
                   AutomationProperties.Name="{Binding SavePackageLabel}" />
-          <Button Content="{Binding BackToDetailsLabel}" Command="{Binding BackFromPackageCommand}"
-                  AutomationProperties.AutomationId="DiagnosticPackage.Back"
-                  AutomationProperties.Name="{Binding BackToDetailsLabel}" />
-        </WrapPanel>
+
+        </WrapPanel></DockPanel>
       </Grid>
     </Grid>
 </UserControl>

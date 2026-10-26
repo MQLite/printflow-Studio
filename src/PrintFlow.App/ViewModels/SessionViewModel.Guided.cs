@@ -57,6 +57,9 @@ public sealed partial class SessionViewModel
     });
     public string GuidedProcessingWait => Strings.Resolve("Session_GuidedProcessingWait");
     public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
+    public bool ShowsGuidedOriginalChecks => ShowsGuidedSourceDetails && (CanConfirmOriginal || IsReviewRequired);
+    public string GuidedOriginalChecksHeading => Strings.Resolve("Session_GuidedOriginalChecksHeading");
+    public string GuidedOriginalChecks => Strings.Resolve("Session_GuidedOriginalChecks");
     public bool ShowsGuidedPdfSource => ShowsGuidedSourceDetails && HasPdfSource;
     public bool ShowsGuidedPsdSource => ShowsGuidedSourceDetails && HasPsdSource;
     public string OriginalSourceSummary => string.Format(System.Globalization.CultureInfo.CurrentCulture,
@@ -99,11 +102,15 @@ public sealed partial class SessionViewModel
         GuidedSessionPage.WhiteInk => WhiteUnderbaseHeading,
         GuidedSessionPage.SourcePreparation => RunStepLabel,
         GuidedSessionPage.Preflight => Strings.Session_GuidedPreflight,
+        GuidedSessionPage.Completed when !HasFinalSave => GuidedCompletionState,
         GuidedSessionPage.Save or GuidedSessionPage.Completed when HasFinalSave => GuidedCompletionHeading,
         _ => CurrentStep.Length > 0 ? CurrentStep : StatusHeading,
     };
     public string GuidedCurrentStatus => StatusHeading;
     public string GuidedInteractionIdentity => $"{NavigationContext(_session)}|{GuidedPage}|{IsViewingHistory}|{SelectedHistory?.Step}|{IsConfirmingDraftLeave}|{IsConfirmingReturn}|{IsConfirmingAutomaticSelection}|{IsChoosingCustomSize}|{IsComparingTrim}|{SelectedSave?.Key}";
+    public string CropDetailsLabel => Strings.Resolve("Session_CropDetailsLabel");
+    public bool ShowsManualCropEntry => CanManualCrop && !IsCropping;
+    public bool ShowsManualCropEntryNotice => IsManualCropRequired && !IsCropping;
     public string GuidedTechnicalDetailsLabel => Strings.Session_GuidedTechnicalDetails;
     public bool ShowsGuidedDimensions => GuidedPage == GuidedSessionPage.Dimensions && CanChooseFlexibleSize;
     public bool ShowsGuidedCustomSizeAction => ShowsGuidedDimensions && IsChoosingCustomSize;
@@ -156,7 +163,11 @@ public sealed partial class SessionViewModel
                     step.Step == _session.CurrentStep?.Step ? Strings.Session_GuidedCurrent
                         : step.IsFinished ? Strings.Session_GuidedHistoryAvailable : Strings.Session_GuidedFuture,
                     step.Step == StepKind.Trim && step.State == StepState.Skipped ? Strings.Session_OriginalExtentRetained
-                        : DisplayNames.StepState(step.State), state));
+                        : DisplayNames.StepState(step.State), state)
+                {
+                    Number = GuidedSteps.Count + 1,
+                    IsCurrent = step.Step == _session.CurrentStep?.Step,
+                });
             }
         }
         NotifyGuidedPresentation();
@@ -168,6 +179,8 @@ public sealed partial class SessionViewModel
         NotifyGuidedCompletion();
         NotifyGuidedRecovery();
         OnPropertyChanged(nameof(ShowsGuidedProcessing));
+        OnPropertyChanged(nameof(ShowsManualCropEntry));
+        OnPropertyChanged(nameof(ShowsManualCropEntryNotice));
         OnPropertyChanged(nameof(ShowsGuidedImageWorkspace));
         OnPropertyChanged(nameof(ShowsGuidedPreviewTools));
         OnPropertyChanged(nameof(ShowsGuidedDetailsColumn));
@@ -185,6 +198,9 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(GuidedCurrentStatus));
         OnPropertyChanged(nameof(GuidedInteractionIdentity));
         OnPropertyChanged(nameof(ShowsGuidedSourceDetails));
+        OnPropertyChanged(nameof(ShowsGuidedOriginalChecks));
+        OnPropertyChanged(nameof(GuidedOriginalChecksHeading));
+        OnPropertyChanged(nameof(GuidedOriginalChecks));
         OnPropertyChanged(nameof(ShowsGuidedPdfSource));
         OnPropertyChanged(nameof(ShowsGuidedPsdSource));
         OnPropertyChanged(nameof(OriginalSourceSummary));

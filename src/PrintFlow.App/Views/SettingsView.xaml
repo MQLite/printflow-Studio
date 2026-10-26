@@ -1,6 +1,7 @@
 <UserControl x:Class="PrintFlow.App.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PrintFlow.App.ViewModels"
@@ -12,11 +13,11 @@
              AutomationProperties.Name="{Binding Heading}">
 
     <UserControl.Resources>
-      <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/GuidedTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+      <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="/PrintFlow.App;component/Themes/WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
         <Style x:Key="SectionHeading" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontSize" Value="20" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,18,0,6" />
+            <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
         <Style x:Key="RowLabel" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,8,0,2" />
@@ -47,16 +48,19 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
+        <DockPanel Grid.Row="0">
+        <ui:SymbolIcon Symbol="Settings24" Style="{StaticResource PF.Icon}" Margin="0,0,12,0" VerticalAlignment="Center" />
+        <TextBlock
                    Text="{Binding Heading}"
-                   FontSize="26"
-                   FontWeight="SemiBold" />
+                   FontSize="{DynamicResource PF.Font.Section}"
+                   FontWeight="SemiBold" TextWrapping="Wrap" />
+        </DockPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                <Border Grid.Column="0" Style="{StaticResource PF.Card}" Padding="20" VerticalAlignment="Top">
+                <ui:Card Grid.Column="0" Padding="20" VerticalAlignment="Top" Style="{DynamicResource PF.Card.Fluent}">
                     <StackPanel>
                 <!-- General: the operator's own preferences. Everything here is editable and
                      everything here is committed by the one Apply below. -->
@@ -94,8 +98,8 @@
                 <TextBlock Text="{Binding LogRetentionHint}" Style="{StaticResource RowHint}" />
 
                     </StackPanel>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource PF.Card}" Padding="20" VerticalAlignment="Top">
+                </ui:Card>
+                <ui:Card Grid.Column="2" Padding="20" VerticalAlignment="Top" Style="{DynamicResource PF.Card.Fluent}">
                     <StackPanel>
                 <!-- Production: read-only facts of the verified workstation preset. There is no
                      editor here by design (SCRUM-11118). -->
@@ -136,7 +140,7 @@
                         AutomationProperties.Name="{Binding OpenEnvironmentLabel}" />
 
                     </StackPanel>
-                </Border>
+                </ui:Card>
                 <Expander Grid.Row="1" Grid.ColumnSpan="3" Header="{Binding AdvancedHeading}" Style="{StaticResource PF.Disclosure}" IsExpanded="False" Margin="0,16,0,0" AutomationProperties.AutomationId="Settings.Advanced">
                     <StackPanel>
                 <TextBlock Text="{Binding LocalLogLocationLabel}" Style="{StaticResource RowLabel}" />
@@ -165,20 +169,20 @@
             <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
             <views:NoticeErrorDetails />
 
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource PF.Button.Primary}" Content="{Binding ApplyLabel}"
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <Button Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource PF.Button.Primary}" Content="{Binding ApplyLabel}"
                         Command="{Binding ApplyCommand}"
                         IsDefault="True"
                         Padding="14,5"
                         AutomationProperties.AutomationId="Settings.Apply"
                         AutomationProperties.Name="{Binding ApplyLabel}" />
-                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
+                <Button Grid.Column="0" HorizontalAlignment="Left" Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
                         Command="{Binding BackToHomeCommand}"
-                        Margin="10,0,0,0"
+                        Margin="0,0,12,0"
                         Padding="14,5"
                         AutomationProperties.AutomationId="Settings.Back"
                         AutomationProperties.Name="{Binding BackLabel}" />
-            </StackPanel>
+            </Grid>
         </StackPanel>
     </Grid>
 </UserControl>

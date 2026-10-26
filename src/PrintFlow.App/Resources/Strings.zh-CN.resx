@@ -64,10 +64,10 @@
     <value>生成打印 TIFF</value>
   </data>
   <data name="Step_Import" xml:space="preserve"><value>导入</value></data>
-  <data name="Step_OriginalConfirmation" xml:space="preserve"><value>原图确认</value></data>
-  <data name="Step_Enhancement" xml:space="preserve"><value>高清化</value></data>
+  <data name="Step_OriginalConfirmation" xml:space="preserve"><value>检查原图</value></data>
+  <data name="Step_Enhancement" xml:space="preserve"><value>增强清晰度</value></data>
   <data name="Step_BackgroundRemoval" xml:space="preserve"><value>去背景</value></data>
-  <data name="Step_Trim" xml:space="preserve"><value>裁边</value></data>
+  <data name="Step_Trim" xml:space="preserve"><value>裁去多余边缘</value></data>
   <data name="Step_ApprovedPngExport" xml:space="preserve"><value>导出已审核 PNG</value></data>
   <data name="Step_PrintDimensions" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Step_PhotoshopOutput" xml:space="preserve"><value>Photoshop 输出</value></data>
@@ -98,10 +98,10 @@
     <value>返回主页</value>
   </data>
   <data name="Home_ImportHeading" xml:space="preserve">
-    <value>开始新的处理</value>
+    <value>开始新任务</value>
   </data>
   <data name="Home_ImportHint" xml:space="preserve">
-    <value>选择一个文件，或将一个文件拖入本窗口。每个处理只接受一个文件，不支持批量导入。</value>
+    <value>选择一个文件，或把它拖到此处；一次只能处理一个文件。</value>
   </data>
   <data name="Home_ChooseFile" xml:space="preserve">
     <value>选择文件…</value>
@@ -110,13 +110,13 @@
     <value>图片|*.png;*.jpg;*.jpeg;*.psd;*.pdf|所有文件|*.*</value>
   </data>
   <data name="Home_RecentHeading" xml:space="preserve">
-    <value>最近处理</value>
+    <value>最近任务</value>
   </data>
   <data name="Home_Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
   <data name="Home_Resume" xml:space="preserve">
-    <value>继续</value>
+    <value>继续此任务</value>
   </data>
   <data name="Home_Details" xml:space="preserve">
     <value>查看</value>
@@ -137,42 +137,42 @@
     <value>无法打开该处理任务。打开处理任务只会读取它，因此没有做任何更改。你可以再次选择“{0}”；如果仍无法打开，请展开下方的“错误详情”，并请同事或主管帮忙。</value>
   </data>
   <data name="Home_AbandonFailed" xml:space="preserve">
-    <value>无法放弃该处理任务。放弃操作从不删除文件，因此它的导入文件、已审核的输出和历史记录均予保留。请在列表中查看该任务的状态；如果不确定，请展开下方的“错误详情”，并请同事或主管帮忙。</value>
+    <value>未能放弃此任务。导入的文件、已审核结果和历史记录都会保留，不会删除文件。请查看列表中的当前状态；仍不确定时，展开“错误详情”并请同事帮忙。</value>
   </data>
   <data name="Home_AbandonDone" xml:space="preserve">
     <value>“{0}”已放弃。导入的文件、已审核的输出和历史记录均予保留。</value>
   </data>
-  <data name="Home_AbandonConfirmQuestion" xml:space="preserve"><value>放弃“{0}”？放弃后此任务不能再继续处理。已导入的文件、已审核的输出和历史记录会保留，不会删除任何文件。</value></data>
+  <data name="Home_AbandonConfirmQuestion" xml:space="preserve"><value>放弃“{0}”？此任务将不能继续处理。导入的文件、已审核结果和历史记录都会保留，不会删除任何文件。</value></data>
   <data name="Home_AbandonKeep" xml:space="preserve"><value>保留任务</value></data>
   <data name="Home_AbandonConfirm" xml:space="preserve"><value>确认放弃</value></data>
-  <data name="Home_AbandonStale" xml:space="preserve"><value>“{0}”的状态已变化，未放弃。请在列表中查看它的当前状态。</value></data>
+  <data name="Home_AbandonStale" xml:space="preserve"><value>“{0}”的状态已变化，本次未放弃。请查看列表中的当前状态，再决定下一步。</value></data>
   <data name="Home_RecentStepComplete" xml:space="preserve"><value>完成任务</value></data>
   <data name="Home_RecentUnavailable" xml:space="preserve">
     <value>无法读取最近处理（{0}）。</value>
   </data>
   <data name="WorkflowSelection_Heading" xml:space="preserve">
-    <value>选择流程</value>
+    <value>选择处理路线</value>
   </data>
   <data name="WorkflowSelection_Hint" xml:space="preserve">
-    <value>在本次处理产生第一个处理结果之前，仍可更改流程。</value>
+    <value>生成第一个处理结果前，可以更换路线。</value>
   </data>
   <data name="WorkflowSelection_Select" xml:space="preserve">
-    <value>选择</value>
+    <value>选择此路线</value>
   </data>
   <data name="WorkflowSelection_Locked" xml:space="preserve">
-    <value>本次处理已产生结果，流程已锁定。如需更换流程，请结束本次处理并重新导入文件。</value>
+    <value>已有处理结果，路线已锁定。如需更换路线，请结束本次处理，再重新导入文件。</value>
   </data>
   <data name="WorkflowSelection_Refused" xml:space="preserve">
-    <value>无法选择该流程。没有开始任何处理，显示的输出名称已保留。你可以再次选择流程；如果仍被拒绝，请展开下方的“错误详情”，并请同事或主管帮忙。</value>
+    <value>无法选择此路线。未开始处理，输出名称已保留。请重新选择；若仍无法继续，请同事或主管帮忙，下方可查看错误详情。</value>
   </data>
   <data name="WorkflowSelection_SourceFileLabel" xml:space="preserve">
     <value>源文件</value>
   </data>
   <data name="WorkflowSelection_OutputNameLabel" xml:space="preserve">
-    <value>输出名称</value>
+    <value>输出文件基础名称</value>
   </data>
   <data name="WorkflowSelection_OutputNameHint" xml:space="preserve">
-    <value>PrintFlow 生成文件时所用的基础名称。源文件不会被重命名。尺寸与油墨后缀，以及同名文件已存在时的编号后缀，都会自动添加。</value>
+    <value>此名称用于生成输出文件，不会改动源文件名。尺寸、油墨和同名编号后缀会自动添加。</value>
   </data>
   <data name="WorkflowSelection_OutputNameRejected" xml:space="preserve">
     <value>无法使用该输出名称。请输入 1 至 {1} 个字符，不能包含控制字符，也不能包含以下任一字符：{0}</value>
@@ -184,7 +184,7 @@
     <value>已导入的文件</value>
   </data>
   <data name="WorkflowSelection_PreviewNeedsPreparation" xml:space="preserve">
-    <value>此文件将在处理页面中准备后才能显示。请选择流程以继续。</value>
+    <value>文件准备好后才能显示预览。请选择处理路线，继续准备文件。</value>
   </data>
   <data name="Session_StepsHeading" xml:space="preserve">
     <value>步骤</value>
@@ -207,12 +207,12 @@
   <data name="StepState_Skipped" xml:space="preserve"><value>已跳过</value></data>
   <data name="StepState_Failed" xml:space="preserve"><value>失败</value></data>
   <data name="StepState_Interrupted" xml:space="preserve"><value>已中断</value></data>
-  <data name="Session_ConfirmOriginal" xml:space="preserve"><value>确认原图</value></data>
+  <data name="Session_ConfirmOriginal" xml:space="preserve"><value>确认使用这张原图</value></data>
   <data name="Session_RunStep" xml:space="preserve"><value>执行步骤</value></data>
-  <data name="Session_Approve" xml:space="preserve"><value>通过</value></data>
+  <data name="Session_Approve" xml:space="preserve"><value>确认这张图通过检查</value></data>
   <data name="Session_Reject" xml:space="preserve"><value>驳回</value></data>
   <data name="Session_Retry" xml:space="preserve"><value>重试</value></data>
-  <data name="Session_Skip" xml:space="preserve"><value>跳过</value></data>
+  <data name="Session_Skip" xml:space="preserve"><value>跳过此项处理</value></data>
   <data name="Session_HandOff" xml:space="preserve"><value>转为人工处理</value></data>
   <data name="Session_FakeModeNotice" xml:space="preserve">
     <value>模拟处理模式 —— 生成的是测试文件，不是正式产出。</value>
@@ -221,10 +221,10 @@
     <value>自动处理已结束，请手动继续。</value>
   </data>
   <data name="Session_ReviewHeading" xml:space="preserve"><value>待审核</value></data>
-  <data name="Session_TiffReviewHeading" xml:space="preserve"><value>生产 TIFF</value></data>
-  <data name="Session_TiffReviewSummary" xml:space="preserve"><value>已验证 CMYK + W1 · {0}</value></data>
-  <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>系统验证的是文件结构，而非画面或印刷质量。</value></data>
-  <data name="Session_ApproveTiff" xml:space="preserve"><value>批准此 TIFF</value></data>
+  <data name="Session_TiffReviewHeading" xml:space="preserve"><value>检查打印 TIFF</value></data>
+  <data name="Session_TiffReviewSummary" xml:space="preserve"><value>TIFF 文件结构已校验：CMYK + W1 · {0}</value></data>
+  <data name="Session_TiffReviewCaveat" xml:space="preserve"><value>文件结构校验不代表画面或印刷质量合格。请检查图片与白墨，再决定是否通过审核。单独审核不会保存文件。</value></data>
+  <data name="Session_ApproveTiff" xml:space="preserve"><value>确认此 TIFF 通过检查</value></data>
   <data name="Session_RejectTiff" xml:space="preserve"><value>驳回此 TIFF</value></data>
   <data name="OutputLocation_Working" xml:space="preserve"><value>待审核（Working）</value></data>
   <data name="OutputLocation_Approved" xml:space="preserve"><value>已在 Approved</value></data>
@@ -357,14 +357,14 @@
     <value>最大印刷尺寸</value>
   </data>
   <data name="Session_MaxBoundsHint" xml:space="preserve">
-    <value>请输入打印成品允许达到的最大宽度和最大高度，单位为毫米。图像会按原图比例适应最大尺寸，既不会被拉伸，也不会被放大。固定输出分辨率：300 PPI。</value>
+    <value>请输入成品允许的最大宽度和最大高度，单位为毫米。图片保持原比例，不拉伸，也不为填满上限而放大。像素是图片的细小方格；输出固定为 300 PPI（每英寸像素数）。</value>
   </data>
   <data name="Session_LabelMaxWidthMm" xml:space="preserve"><value>最大宽度（mm）</value></data>
   <data name="Session_LabelMaxHeightMm" xml:space="preserve"><value>最大高度（mm）</value></data>
   <data name="Session_LabelMaxLongEdgeMm" xml:space="preserve"><value>最大长边（mm）</value></data>
   <data name="Session_MaxBoundsConfirm" xml:space="preserve"><value>确认最大印刷尺寸</value></data>
   <data name="Session_MaxBoundsInvalid" xml:space="preserve">
-    <value>最大宽度和最大高度都必须是大于零的毫米数值。</value>
+    <value>最大宽度和最大高度都要填写大于零的数值，单位为毫米。</value>
   </data>
   <data name="Session_MaxBoundsSummary" xml:space="preserve">
     <value>最大 {0} × {1} mm</value>
@@ -381,19 +381,19 @@
   <data name="Session_DimensionsNotSet" xml:space="preserve"><value>尚未设置</value></data>
   <data name="Session_PresetsLabel" xml:space="preserve"><value>预设尺寸</value></data>
   <data name="Session_PresetHint" xml:space="preserve">
-    <value>预设只是填入其最大尺寸范围，确认之前仍可自行修改毫米数值；具体由哪条边起限制作用，由 PrintFlow 根据图像本身判断。</value>
+    <value>预设填入的是最大尺寸，确认前可以修改。图片保持原比例，由宽度或高度的上限决定是否缩小。</value>
   </data>
-  <data name="Session_SizeHeading" xml:space="preserve"><value>尺寸</value></data>
+  <data name="Session_SizeHeading" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_UsePreset" xml:space="preserve"><value>使用预设</value></data>
   <data name="Session_CustomSize" xml:space="preserve"><value>自定义尺寸</value></data>
   <data name="Session_AdjustSize" xml:space="preserve"><value>调整尺寸</value></data>
   <data name="Session_RecommendedMaximum" xml:space="preserve"><value>推荐最大尺寸：{0} × {1} mm</value></data>
   <data name="Session_RecommendedLongEdge" xml:space="preserve"><value>推荐长边：{0} mm</value></data>
   <data name="Session_RecommendedShortEdge" xml:space="preserve"><value>推荐短边：{0} mm</value></data>
-  <data name="Session_TargetEdge" xml:space="preserve"><value>目标边</value></data>
-  <data name="Session_TargetSizeMm" xml:space="preserve"><value>目标尺寸（mm）</value></data>
-  <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，并输入大于零的毫米数值。</value></data>
-  <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>无法预览此尺寸。请核对输入和任务详情，然后重试。</value></data>
+  <data name="Session_TargetEdge" xml:space="preserve"><value>要设置的边</value></data>
+  <data name="Session_TargetSizeMm" xml:space="preserve"><value>尺寸（毫米）</value></data>
+  <data name="Session_TargetSizeInvalid" xml:space="preserve"><value>请选择宽度、高度或长边，再输入大于零的数值，单位为毫米。</value></data>
+  <data name="Session_TargetSizeUnavailable" xml:space="preserve"><value>暂时无法预览此尺寸。请核对尺寸输入和任务详情，再重试。</value></data>
   <data name="Session_ConfirmCustomSize" xml:space="preserve"><value>确认自定义尺寸</value></data>
   <data name="TargetEdge_Width" xml:space="preserve"><value>宽度</value></data>
   <data name="TargetEdge_Height" xml:space="preserve"><value>高度</value></data>
@@ -402,29 +402,30 @@
   <data name="Session_PresetExceeded" xml:space="preserve"><value>此尺寸超过 {0} 推荐尺寸。</value></data>
   <data name="Session_CustomResolutionOnly" xml:space="preserve"><value>无需改变像素尺寸。</value></data>
   <data name="Session_CustomShrink" xml:space="preserve"><value>图片将按比例缩小。</value></data>
-  <data name="Session_EnlargementWarning" xml:space="preserve"><value>此尺寸需要在 300 PPI 下将图片放大至约 {0}%。&#10;放大可能降低图片清晰度。</value></data>
+  <data name="Session_EnlargementWarning" xml:space="preserve"><value>按此尺寸输出 300 PPI 图片，需要放大到原来的约 {0}%。
+放大可能让图片变模糊。</value></data>
   <data name="Session_ChangeSize" xml:space="preserve"><value>修改尺寸</value></data>
-  <data name="Session_ContinueWithSize" xml:space="preserve"><value>仍按此尺寸处理</value></data>
-  <data name="Session_EnlargementConfirmed" xml:space="preserve"><value>已确认按此图片和尺寸进行放大。</value></data>
+  <data name="Session_ContinueWithSize" xml:space="preserve"><value>接受风险并授权放大</value></data>
+  <data name="Session_EnlargementConfirmed" xml:space="preserve"><value>你已授权按当前图片和尺寸放大，处理后仍须审核结果。</value></data>
   <data name="Session_CurrentPreset" xml:space="preserve"><value>预设：{0}</value></data>
-  <data name="Session_CurrentCustomTarget" xml:space="preserve"><value>自定义{0}：{1} mm</value></data>
+  <data name="Session_CurrentCustomTarget" xml:space="preserve"><value>自定义{0}：{1} 毫米</value></data>
   <data name="Session_PresetOverrideYes" xml:space="preserve"><value>预设尺寸调整：是</value></data>
   <data name="Session_ProjectedResize" xml:space="preserve"><value>预计处理：{0}</value></data>
   <data name="ResizeDirection_ResolutionOnly" xml:space="preserve"><value>无需改变像素尺寸</value></data>
   <data name="ResizeDirection_Shrink" xml:space="preserve"><value>按比例缩小</value></data>
   <data name="ResizeDirection_Enlarge" xml:space="preserve"><value>放大</value></data>
   <data name="Session_ProportionalFit" xml:space="preserve"><value>按比例适应</value></data>
-  <data name="Session_EnlargementExplicitlyConfirmed" xml:space="preserve"><value>已明确确认放大</value></data>
+  <data name="Session_EnlargementExplicitlyConfirmed" xml:space="preserve"><value>你已明确授权放大</value></data>
   <data name="Session_ProjectedPlan" xml:space="preserve"><value>预计处理方案</value></data>
   <data name="Session_PhotoshopNotRun" xml:space="preserve"><value>未运行 Photoshop。</value></data>
   <data name="Session_PreparationHeading" xml:space="preserve"><value>打印准备</value></data>
   <data name="Session_PreparationResolutionOnly" xml:space="preserve">
-    <value>图像已在最大尺寸范围之内，像素尺寸保持不变。</value>
+    <value>图片已在最大尺寸以内，不改变像素尺寸。</value>
   </data>
   <data name="Session_PreparationProportionalShrink" xml:space="preserve">
-    <value>图像将按原图比例缩小，以适应最大尺寸。</value>
+    <value>图片保持原比例，缩小到最大尺寸以内。</value>
   </data>
-  <data name="Session_PreparationLimitingEdge" xml:space="preserve"><value>起限制作用的边：{0}</value></data>
+  <data name="Session_PreparationLimitingEdge" xml:space="preserve"><value>决定尺寸的边：{0}</value></data>
   <data name="Session_PreparationProjectedSize" xml:space="preserve">
     <value>预计尺寸：{0} × {1} 像素</value>
   </data>
@@ -439,20 +440,20 @@
     <value>预计 {0} × {1} 像素，{2} PPI</value>
   </data>
   <data name="Session_PreparationAttemptProjectionNotice" xml:space="preserve">
-    <value>此为计划值 — 并未运行 Photoshop。</value>
+    <value>这里是预计结果，尚未运行 Photoshop。</value>
   </data>
   <data name="Session_RunReady" xml:space="preserve">
-    <value>可以运行此步骤：本图片的印刷尺寸已确认。</value>
+    <value>本图片的印刷尺寸已确认，可以运行此步骤。</value>
   </data>
   <data name="Session_RunNotReady" xml:space="preserve">
-    <value>在确认本图片的印刷尺寸及所需放大之前，无法运行此步骤。</value>
+    <value>请先确认本图片的印刷尺寸；如需放大，还须单独授权。</value>
   </data>
   <data name="Session_DimensionReviewRequired" xml:space="preserve">
-    <value>此尺寸按旧版精确尺寸规则保存，或其所依据的图片已发生变化。继续前请重新确认最大印刷尺寸。</value>
+    <value>此尺寸来自旧版精确尺寸规则，或所依据的图片已变化。继续前，请重新确认最大印刷尺寸。</value>
   </data>
   <data name="Session_ReviewMaximumBounds" xml:space="preserve"><value>重新确认最大尺寸</value></data>
   <data name="Session_HistoricalBoundsLabel" xml:space="preserve">
-    <value>此前保存，尚未确认为最大尺寸范围</value>
+    <value>此前记录的尺寸，尚未确认为最大尺寸范围</value>
   </data>
   <data name="PreparationMode_ResolutionOnly" xml:space="preserve"><value>仅设置分辨率</value></data>
   <data name="PreparationMode_ProportionalShrink" xml:space="preserve"><value>按比例缩小</value></data>
@@ -464,19 +465,19 @@
   <data name="Preset_A4" xml:space="preserve"><value>A4</value></data>
   <data name="Preset_A5" xml:space="preserve"><value>A5</value></data>
   <data name="Preset_Custom" xml:space="preserve"><value>自定义</value></data>
-  <data name="Session_W1Heading" xml:space="preserve"><value>白墨打底（W1）</value></data>
+  <data name="Session_W1Heading" xml:space="preserve"><value>选择白墨方案（W1）</value></data>
   <data name="Session_W1Hint" xml:space="preserve">
-    <value>请对完整的成品设计进行判断并自行选择收缩量。系统没有默认值，也绝不会通过分析图像替你决定。</value>
+    <value>白墨是打印时垫在彩色图案下面的白色墨层。内缩是把白墨边缘向内缩小，单位是像素（图片的细小方格）。请根据完整成品设计自行选择；没有默认选项，系统不会替你决定。</value>
   </data>
-  <data name="Session_W1Confirm" xml:space="preserve"><value>确认 W1 分支</value></data>
-  <data name="Session_W1NotChosen" xml:space="preserve"><value>尚未选择</value></data>
-  <data name="W1_0px" xml:space="preserve"><value>0 像素 — 精细细节</value></data>
-  <data name="W1_1px" xml:space="preserve"><value>1 像素 — 普通图案</value></data>
-  <data name="W1_2px" xml:space="preserve"><value>2 像素 — 实色／整块矩形图案</value></data>
+  <data name="Session_W1Confirm" xml:space="preserve"><value>确认白墨方案</value></data>
+  <data name="Session_W1NotChosen" xml:space="preserve"><value>等待你选择</value></data>
+  <data name="W1_0px" xml:space="preserve"><value>0 像素（不内缩）— 精细细节</value></data>
+  <data name="W1_1px" xml:space="preserve"><value>内缩 1 像素 — 普通图案</value></data>
+  <data name="W1_2px" xml:space="preserve"><value>内缩 2 像素 — 实色／整块矩形图案</value></data>
   <data name="Session_FakeTiffNotice" xml:space="preserve">
     <value>此处生成的 TIFF 属于合成的基础输出，不可用于生产。未进行 CMYK 转换、未生成 W1 专色通道、未执行 Photoshop 动作，也未做任何 Maintop 相关准备。请勿据此打印。</value>
   </data>
-  <data name="Session_Complete" xml:space="preserve"><value>完成</value></data>
+  <data name="Session_Complete" xml:space="preserve"><value>完成任务</value></data>
   <data name="Session_AddAnotherSize" xml:space="preserve"><value>增加另一个尺寸</value></data>
   <data name="Session_OutputsHeading" xml:space="preserve"><value>已生成的输出</value></data>
   <data name="Session_LabelBranch" xml:space="preserve"><value>W1</value></data>
@@ -504,14 +505,14 @@
   <data name="Session_ZoomFit" xml:space="preserve"><value>适应窗口</value></data>
   <data name="Session_ZoomPercent" xml:space="preserve"><value>{0}%</value></data>
   <data name="Session_ManualCropRequiredNotice" xml:space="preserve">
-    <value>自动裁切无法确定裁切范围。请使用"手动裁切"自行框选。</value>
+    <value>未找到裁切范围。请点“手动裁切”，框出要保留的部分。</value>
   </data>
   <data name="Session_ManualCropHeading" xml:space="preserve"><value>手动裁切</value></data>
   <data name="Session_ManualCropBegin" xml:space="preserve"><value>手动裁切</value></data>
   <data name="Session_ManualCropInstructions" xml:space="preserve">
     <value>在图像内拖动，选择要保留的范围。蓝色虚线表示选区，绿色实线表示加上边距后的实际裁切范围。再次拖动可重新框选，放大后可使用滚动条。</value>
   </data>
-  <data name="Session_ManualCropApply" xml:space="preserve"><value>应用裁切</value></data>
+  <data name="Session_ManualCropApply" xml:space="preserve"><value>使用此裁切</value></data>
   <data name="Session_ManualCropCancel" xml:space="preserve"><value>取消裁切</value></data>
   <data name="Session_ManualCropInvalid" xml:space="preserve">
     <value>裁切区域无效。请至少选择一个像素，并将整个选区保持在图像范围内。</value>
@@ -522,12 +523,12 @@
   <!-- Return to an earlier step (Epic 11200 Part C3 §3, §5). -->
   <data name="Session_ReturnHeading" xml:space="preserve"><value>返回上一步骤</value></data>
   <data name="Session_ReturnHint" xml:space="preserve">
-    <value>选择要返回的较早步骤。此处仅列出当前允许返回的步骤。</value>
+    <value>请选择要返回的步骤。这里只显示当前允许返回的较早步骤。</value>
   </data>
   <data name="Session_ReturnTargetLabel" xml:space="preserve"><value>返回至</value></data>
   <data name="Session_ReturnBegin" xml:space="preserve"><value>返回步骤</value></data>
   <data name="Session_ReturnConfirmQuestion" xml:space="preserve">
-    <value>返回该步骤会使其后生成的结果失效。已有的审核记录将予以保留。</value>
+    <value>返回后，后续生成的结果会失效，需要重做；已有审核记录会保留。</value>
   </data>
   <data name="Session_ReturnConfirm" xml:space="preserve"><value>确认返回</value></data>
   <data name="Session_ReturnCancel" xml:space="preserve"><value>取消</value></data>
@@ -573,8 +574,8 @@
   <data name="Session_BackgroundRemovalConfirmQuestion" xml:space="preserve">
     <value>美图将自行判定此图片的前景主体。请在审核通过前检查结果。此授权仅适用于上方显示的图片，不适用于其后续版本。</value>
   </data>
-  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认</value></data>
-  <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Session_BackgroundRemovalConfirm" xml:space="preserve"><value>确认使用自动选择</value></data>
+  <data name="Session_BackgroundRemovalCancel" xml:space="preserve"><value>取消本次确认</value></data>
   <data name="Session_BackgroundRemovalAuthorised" xml:space="preserve">
     <value>已对此图片授权自动选择 · 版本 {0}</value>
   </data>
@@ -587,20 +588,20 @@
   </data>
   <data name="Session_Stop" xml:space="preserve"><value>停止</value></data>
   <data name="Session_StopHint" xml:space="preserve">
-    <value>安全停止本次自动操作，不会关闭美图秀秀。</value>
+    <value>请求停止本次自动操作，不会强制关闭美图秀秀。</value>
   </data>
   <data name="Session_StoppingNotice" xml:space="preserve">
-    <value>正在停止 —— PrintFlow 正在请求美图秀秀取消本次操作，请稍候。</value>
+    <value>正在停止：已请求美图秀秀取消本次操作，尚未确认停止。请等待。</value>
   </data>
   <data name="Session_TakeOver" xml:space="preserve"><value>在美图秀秀中手动接管</value></data>
   <data name="Session_TakeOverHint" xml:space="preserve">
-    <value>停止 PrintFlow 自动化，美图秀秀保持原样交给你手动操作。PrintFlow 不会强制关闭美图秀秀。如果接管后美图秀秀无响应，请通过美图秀秀或 Windows 手动关闭后再恢复自动处理。</value>
+    <value>接管后，PrintFlow 会停止控制美图秀秀，但不会强制关闭它。美图可能仍在运行；请先处理其当前状态，再恢复自动处理。</value>
   </data>
   <data name="Session_TakingOverNotice" xml:space="preserve">
     <value>正在移交 —— PrintFlow 已停止控制美图秀秀，不会再发送任何操作。</value>
   </data>
   <data name="Session_TakeOverConfirmQuestion" xml:space="preserve">
-    <value>确定要在美图秀秀中手动接管吗？PrintFlow 将停止控制本次操作的美图秀秀，并且不再向它发送任何指令。美图秀秀会保持原样 —— 既不取消也不关闭，因此它可能仍在运行，你可能需要自行完成或关闭它。本次尝试不会生成版本记录；要恢复自动化，需要明确执行「恢复自动处理」。</value>
+    <value>要在美图秀秀中接管吗？PrintFlow 将停止发送指令，既不取消也不关闭美图，因此它可能仍在运行。请自行完成或关闭它。本次尝试不会生成版本记录；之后须明确选择“恢复自动处理”。</value>
   </data>
   <data name="Session_TakeOverConfirm" xml:space="preserve"><value>手动接管</value></data>
   <data name="Session_TakeOverCancel" xml:space="preserve"><value>继续自动处理</value></data>
@@ -615,7 +616,7 @@
   </data>
   <data name="Session_ReenterAutomation" xml:space="preserve"><value>恢复自动处理</value></data>
   <data name="Session_ReenterAutomationHint" xml:space="preserve">
-    <value>本会话已移交给你手动处理。恢复自动处理会以全新的工作副本开始一次新的尝试；已移交的那次尝试仍保留在历史记录中。</value>
+    <value>此任务已转为手动处理。恢复自动处理将使用新的工作副本和新的尝试；已移交的那次尝试仍保留在历史记录中。</value>
   </data>
   <data name="Failure_AutomationStopped" xml:space="preserve">
     <value>你停止了本次操作。未产生任何结果，也未创建版本记录。</value>
@@ -731,7 +732,7 @@
     <value>生产就绪状态</value>
   </data>
   <data name="Environment_Hint" xml:space="preserve">
-    <value>检查本工作站是否可以开始生产。安全恢复只处理 PrintFlow 测试图像，不会更改您的工作文件或应用设置。</value>
+    <value>检查这台工作站能否开始生产。安全恢复只处理 PrintFlow 测试图像，不会更改你的工作文件或应用设置。</value>
   </data>
   <data name="Environment_Open" xml:space="preserve">
     <value>生产就绪状态</value>
@@ -740,19 +741,19 @@
     <value>刷新状态</value>
   </data>
   <data name="Environment_RunLiveChecks" xml:space="preserve"><value>安全恢复并重新检查</value></data>
-  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>选择“安全恢复并重新检查”后，会检查美图秀秀和 Photoshop，安全处理已确认归属的 PrintFlow 测试图像，再进行一次新检查。</value></data>
+  <data name="Environment_RunLiveChecksHint" xml:space="preserve"><value>点“安全恢复并重新检查”，会先确认美图秀秀和 Photoshop 的状态，只处理已确认属于 PrintFlow 的测试图像，再进行新检查。</value></data>
   <data name="Environment_Checking" xml:space="preserve"><value>正在检查工作站，请稍候。</value></data>
   <data name="Environment_CheckingPhotoshop" xml:space="preserve"><value>正在检查 Photoshop 和应用当前状态，请稍候。</value></data>
   <data name="Environment_CancelLiveChecks" xml:space="preserve"><value>取消检查</value></data>
-  <data name="Environment_Cancelling" xml:space="preserve"><value>正在安全取消，请等待当前操作结束。</value></data>
-  <data name="Environment_Cancelled" xml:space="preserve"><value>检查已取消。上次结果已保留，准备好后请点“安全恢复并重新检查”。</value></data>
+  <data name="Environment_Cancelling" xml:space="preserve"><value>正在取消检查，请等待当前操作安全结束。</value></data>
+  <data name="Environment_Cancelled" xml:space="preserve"><value>检查已取消，之前的结果会保留。准备好后，请点“安全恢复并重新检查”。</value></data>
   <data name="Environment_RecheckingAfterFailure" xml:space="preserve"><value>上一次检查未完成，正在确认应用当前状态，请稍候。</value></data>
-  <data name="Environment_PreviousCheckIncomplete" xml:space="preserve"><value>上一次 Photoshop 检查未完成。请点“安全恢复并重新检查”确认当前状态。</value></data>
+  <data name="Environment_PreviousCheckIncomplete" xml:space="preserve"><value>上次 Photoshop 检查未完成。请点“安全恢复并重新检查”，先确认当前状态。</value></data>
   <data name="Environment_RecoveryEvidenceDetail" xml:space="preserve"><value>恢复结果：{0}。{1} 上次操作：{2}；上次失败：{3}。</value></data>
   <data name="ReadinessRecovery_AlreadyAbsentRecheck" xml:space="preserve"><value>检查时，上一次 PrintFlow 测试图像已不在打开的文件中。本次检查结果见下方。</value></data>
   <data name="ReadinessRecovery_ClosedExactProbeRecheck" xml:space="preserve"><value>上一次 PrintFlow 测试图像已安全关闭。本次检查结果见下方。</value></data>
-  <data name="ReadinessRecovery_BlockedUserWork" xml:space="preserve"><value>Photoshop 中还有其他工作文件。请先保存并关闭您的文件，再点“安全恢复并重新检查”。</value></data>
-  <data name="ReadinessRecovery_BlockedUnknownState" xml:space="preserve"><value>暂时无法安全确认 Photoshop 的当前状态。请查看 Photoshop 是否有需要您处理的对话框，再点“安全恢复并重新检查”。</value></data>
+  <data name="ReadinessRecovery_BlockedUserWork" xml:space="preserve"><value>Photoshop 中还有你的工作文件。请自行保存并关闭，再点“安全恢复并重新检查”。</value></data>
+  <data name="ReadinessRecovery_BlockedUnknownState" xml:space="preserve"><value>暂时无法确认 Photoshop 的安全状态。请查看是否有待处理的弹窗，处理后再点“安全恢复并重新检查”。</value></data>
   <data name="Environment_TechnicalDetails" xml:space="preserve"><value>技术详情</value></data>
   <data name="Environment_RestartHelp" xml:space="preserve"><value>何时需要重启 PrintFlow</value></data>
   <data name="Environment_AutomaticChecksHeading" xml:space="preserve"><value>自动检查</value></data>
@@ -804,7 +805,7 @@
     <value>如果已认可的 PrintFlow 工作站记录、Photoshop 安装、美图秀秀安装或已校验的动作文件被替换或更新，请先重启 PrintFlow，然后再使用生产模式。</value>
   </data>
   <data name="Environment_RefreshScope" xml:space="preserve">
-    <value>“刷新状态”只读取当前状态，不会恢复测试图像或执行新的应用检查。已认可的安装文件在重启 PrintFlow 前不会重新读取。</value>
+    <value>“刷新状态”只读取状态，不会恢复测试图像，也不会重新检查应用。已认可的安装文件要重启 PrintFlow 才会重新读取。</value>
   </data>
   <data name="Failure_PsdCompositeMissing" xml:space="preserve"><value>无法验证此 PSD 的兼容合成图。请在 Photoshop 中启用“最大兼容性”另存副本，再导入该副本。</value></data>
   <data name="Failure_PsdPreparationFailed" xml:space="preserve"><value>Photoshop 未能从此 PSD 生成通过验证的栅格图。原始文件已保留，请检查失败原因后重试。</value></data>
@@ -854,17 +855,17 @@
   <data name="Session_TiffColourPreviewName" xml:space="preserve"><value>彩色预览</value></data>
   <data name="Session_TiffWhiteInkPreviewName" xml:space="preserve"><value>白墨预览</value></data>
   <data name="Session_TiffOverlayPreviewName" xml:space="preserve"><value>彩色与白墨叠加预览</value></data>
-  <data name="Session_TiffColourLegend" xml:space="preserve"><value>这是 CMYK 内容未经色彩校准的屏幕近似显示，不能作为印刷颜色的依据。</value></data>
-  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>亮部 = 有白墨 · 黑色 = 无白墨。</value></data>
-  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>白色叠加 = 白墨覆盖范围，并非最终印刷效果。</value></data>
+  <data name="Session_TiffColourLegend" xml:space="preserve"><value>CMYK 印刷色彩在屏幕上只是近似显示，未经色彩校准，不能据此判断实际打印颜色。</value></data>
+  <data name="Session_TiffWhiteInkLegend" xml:space="preserve"><value>亮部表示有白墨，黑色表示无白墨。请检查白墨覆盖是否正确。</value></data>
+  <data name="Session_TiffOverlayLegend" xml:space="preserve"><value>白色叠加标出白墨覆盖范围，不是最终印刷效果。</value></data>
   <data name="Session_TiffProductionHeading" xml:space="preserve"><value>生产信息</value></data>
   <data name="Session_TiffLabelOutputFile" xml:space="preserve"><value>输出文件</value></data>
   <data name="Session_TiffLabelOutputPath" xml:space="preserve"><value>输出路径</value></data>
   <data name="Session_TiffLabelPixelDimensions" xml:space="preserve"><value>像素尺寸</value></data>
-  <data name="Session_TiffLabelPhysicalSize" xml:space="preserve"><value>物理尺寸</value></data>
+  <data name="Session_TiffLabelPhysicalSize" xml:space="preserve"><value>印刷尺寸</value></data>
   <data name="Session_TiffLabelResolution" xml:space="preserve"><value>TIFF 分辨率</value></data>
   <data name="Session_TiffLabelEffectiveDpi" xml:space="preserve"><value>源图有效分辨率</value></data>
-  <data name="Session_TiffLabelColourMode" xml:space="preserve"><value>色彩</value></data>
+  <data name="Session_TiffLabelColourMode" xml:space="preserve"><value>印刷色彩模式</value></data>
   <data name="Session_TiffLabelWhiteInk" xml:space="preserve"><value>白墨</value></data>
   <data name="Session_TiffLabelEnlargement" xml:space="preserve"><value>放大</value></data>
   <data name="Session_TiffLabelHash" xml:space="preserve"><value>SHA-256</value></data>
@@ -874,13 +875,13 @@
   <data name="Session_TiffValueEffectiveDpi" xml:space="preserve"><value>{0:0} × {1:0} PPI，来自 {2} × {3} 源图像素</value></data>
   <data name="Session_TiffValueBelowProduction" xml:space="preserve"><value> · 低于 {0} PPI 生产分辨率</value></data>
   <data name="Session_TiffValueColourMode" xml:space="preserve"><value>{0} · {1} 位 · {2} 个墨通道</value></data>
-  <data name="Session_TiffValueWhiteInk" xml:space="preserve"><value>{0} 已验证 · {1} · {2:N0} 像素有墨</value></data>
-  <data name="Session_TiffValueEnlargementAuthorised" xml:space="preserve"><value>需要放大，操作员已授权</value></data>
-  <data name="Session_TiffValueEnlargementUnauthorised" xml:space="preserve"><value>需要放大，但未记录操作员授权</value></data>
+  <data name="Session_TiffValueWhiteInk" xml:space="preserve"><value>{0} 通道已校验 · {1} · {2:N0} 像素有白墨</value></data>
+  <data name="Session_TiffValueEnlargementAuthorised" xml:space="preserve"><value>需要放大，你已授权；仍须检查结果</value></data>
+  <data name="Session_TiffValueEnlargementUnauthorised" xml:space="preserve"><value>需要放大，尚未记录你的授权</value></data>
   <data name="Session_TiffPreviewUnavailable" xml:space="preserve"><value>无法生成该文件的彩色、白墨和彩色 + 白墨预览。TIFF 文件本身未受影响，下方的审核决定不变。</value></data>
   <data name="Session_TiffLabelPreset" xml:space="preserve"><value>生产预设</value></data>
   <data name="Session_TiffValuePreset" xml:space="preserve"><value>{0}（{1}）</value></data>
-  <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>处理已完成。文件清理尚未完成，PrintFlow 下次启动时将重试。已批准的输出文件会保留。</value></data>
+  <data name="Session_CompletionCleanupPending" xml:space="preserve"><value>处理已完成，但文件清理还没完成。PrintFlow 下次启动时会重试清理，已审核的输出文件会保留。</value></data>
   <data name="Home_RecoveryDescription" xml:space="preserve"><value>{0} · 中断于{1} · {2} · 最后活动：{3}</value></data>
   <data name="Home_RecoveryFailed" xml:space="preserve"><value>恢复操作未能完成。其中一部分可能已被记录（例如，该任务可能已被移交），因此请不要立即重复该操作。请从列表中打开该任务，查看其当前状态；如果不确定，请展开下方的“错误详情”，并请同事或主管帮忙。</value></data>
   <data name="Home_RecoveryHeading" xml:space="preserve"><value>需要恢复</value></data>
@@ -894,35 +895,35 @@
   <data name="Settings_Heading" xml:space="preserve"><value>设置</value></data>
   <data name="Settings_GeneralHeading" xml:space="preserve"><value>常规</value></data>
   <data name="Settings_ProductionHeading" xml:space="preserve"><value>生产</value></data>
-  <data name="Settings_ProductionHint" xml:space="preserve"><value>以下内容来自本机已认可的生产配置，仅供查看核对，不能在此修改。</value></data>
+  <data name="Settings_ProductionHint" xml:space="preserve"><value>这些是本机已认可的生产配置，只能查看核对，不能在这里修改。</value></data>
   <data name="Settings_DiagnosticsHeading" xml:space="preserve"><value>本机记录</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>界面语言</value></data>
   <data name="Settings_OutputRoot" xml:space="preserve"><value>输出位置</value></data>
-  <data name="Settings_OutputRootHint" xml:space="preserve"><value>成品文件的存放位置，由已认可的生产配置固定，不会移动任何已有任务的文件。</value></data>
+  <data name="Settings_OutputRootHint" xml:space="preserve"><value>成品存放位置由已认可的生产配置固定。这里不会移动已有任务的文件。</value></data>
   <data name="Settings_OutputRootUnavailable" xml:space="preserve"><value>已认可的生产配置尚未通过校验，因此未给出输出位置。</value></data>
   <data name="Settings_TrimMargin" xml:space="preserve"><value>默认安全边（像素）</value></data>
-  <data name="Settings_TrimMarginHint" xml:space="preserve"><value>裁切时在图案四周保留的额外空间。仅对此后新建的任务生效；已经打开的任务保持原有取值。填 0 表示紧贴图案裁切。</value></data>
+  <data name="Settings_TrimMarginHint" xml:space="preserve"><value>裁切时在图案四周多留的空间，单位为像素。只影响以后新建的任务；已打开的任务不变。填 0 表示紧贴图案裁切。</value></data>
   <data name="Settings_TrimMarginInvalid" xml:space="preserve"><value>请将默认安全边填写为 0 或更大的整数像素值。本次未保存任何内容。</value></data>
   <data name="Settings_ProductionDpi" xml:space="preserve"><value>打印分辨率</value></data>
   <data name="Settings_ProductionDpiValue" xml:space="preserve"><value>{0} PPI（固定）</value></data>
   <data name="Settings_Preset" xml:space="preserve"><value>已认可的生产配置</value></data>
   <data name="Settings_ColourSetup" xml:space="preserve"><value>Photoshop 颜色设置</value></data>
-  <data name="Settings_ColourSetupHint" xml:space="preserve"><value>在生产就绪状态页面进行检查。PrintFlow 不会替您修改 Photoshop 的颜色设置。</value></data>
+  <data name="Settings_ColourSetupHint" xml:space="preserve"><value>请在生产就绪状态页面检查。PrintFlow 不会替你修改 Photoshop 的颜色设置。</value></data>
   <data name="Settings_ColourConfirmed" xml:space="preserve"><value>已确认</value></data>
   <data name="Settings_ColourMismatch" xml:space="preserve"><value>与认可的颜色设置不一致</value></data>
   <data name="Settings_ColourNotVerified" xml:space="preserve"><value>尚未检查——请在生产就绪状态页面运行检查</value></data>
   <data name="Settings_LogRetention" xml:space="preserve"><value>本机记录保留天数</value></data>
-  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>诊断记录和故障截图仅保存在本机，不会上传。应用安全启动并完成恢复后，会按设置的天数限量清理符合条件的过期记录和截图。当前工作仍需使用的诊断资料会保留。更改将在下次启动时生效。</value></data>
+  <data name="Settings_LogRetentionHint" xml:space="preserve"><value>诊断记录和故障截图只保存在本机，不会上传。应用安全启动并完成恢复后，会按保留天数限量清理符合条件的过期内容；当前工作仍需使用的资料会保留。修改从下次启动生效。</value></data>
   <data name="Settings_LocalLogLocation" xml:space="preserve"><value>本机诊断记录位置</value></data>
   <data name="Settings_LocalLogLocationHint" xml:space="preserve"><value>保存诊断记录的本机数据库。选中路径即可复制。</value></data>
   <data name="Settings_ScreenshotLocation" xml:space="preserve"><value>故障截图位置</value></data>
   <data name="Settings_ScreenshotLocationHint" xml:space="preserve"><value>保存故障截图的本机文件夹。选中路径即可复制。</value></data>
   <data name="Startup_DiagnosticRetentionWarning" xml:space="preserve"><value>本机诊断记录和截图的自动清理未能安全完成。您可以继续工作；下次启动时将重试清理。</value></data>
   <data name="Settings_LogRetentionInvalid" xml:space="preserve"><value>请填写 1 到 {0} 之间的本机记录保留天数。本次未保存任何内容。</value></data>
-  <data name="Settings_Apply" xml:space="preserve"><value>应用</value></data>
+  <data name="Settings_Apply" xml:space="preserve"><value>保存设置</value></data>
   <data name="Settings_Saved" xml:space="preserve"><value>设置已保存。</value></data>
-  <data name="Settings_SaveFailed" xml:space="preserve"><value>无法保存设置。没有做任何更改：之前的设置仍然有效，你输入的内容仍保留在屏幕上。你可以再次选择“{0}”；如果再次失败，请展开下方的“错误详情”，并请同事或主管帮忙。</value></data>
-  <data name="Settings_LoadFailed" xml:space="preserve"><value>无法读取已保存的设置（{0}）。当前显示的是默认值。</value></data>
+  <data name="Settings_SaveFailed" xml:space="preserve"><value>设置未能保存，之前的设置仍有效；你输入的内容也还在。可再次点“{0}”。仍失败时，请展开“错误详情”并请同事帮忙。</value></data>
+  <data name="Settings_LoadFailed" xml:space="preserve"><value>暂时读不到已保存的设置（{0}），现在显示的是默认值，请先核对。</value></data>
   <data name="ErrorDetails_Heading" xml:space="preserve"><value>错误详情</value></data>
   <data name="ErrorDetails_WhatHappened" xml:space="preserve"><value>发生了什么</value></data>
   <data name="ErrorDetails_Processing" xml:space="preserve"><value>处理信息</value></data>
@@ -941,9 +942,9 @@
   <data name="ErrorDetails_PathUnavailable" xml:space="preserve"><value>路径不可用</value></data>
   <data name="ErrorDetails_NotCaptured" xml:space="preserve"><value>未捕获截图</value></data>
   <data name="ErrorDetails_ImageUnavailable" xml:space="preserve"><value>诊断截图不可用</value></data>
-  <data name="ErrorDetails_Historical" xml:space="preserve"><value>这是以前的故障。本次尝试的恢复操作已不可用。</value></data>
-  <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>处理在结果确认之前中断。请查看可用的恢复操作。</value></data>
-  <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>处理在结果确认之前取消。请查看可用的恢复操作。</value></data>
+  <data name="ErrorDetails_Historical" xml:space="preserve"><value>这是以前的故障记录，不能再使用本次尝试的恢复操作。请返回任务查看当前状态。</value></data>
+  <data name="ErrorDetails_Interrupted" xml:space="preserve"><value>处理在确认结果前中断，结果尚未确认。请查看当前可用的恢复操作。</value></data>
+  <data name="ErrorDetails_Cancelled" xml:space="preserve"><value>处理在确认结果前取消，结果尚未确认。请查看当前可用的恢复操作。</value></data>
   <data name="ErrorDetails_ManualProcessing" xml:space="preserve"><value>手动处理</value></data>
   <data name="Home_ImportRefused" xml:space="preserve"><value>{0}（{1}）</value></data>
   <data name="Home_ImportFormatSeparator" xml:space="preserve"><value>、</value></data>
@@ -1026,7 +1027,7 @@
   <data name="Environment_ProbeProgressDetail" xml:space="preserve"><value>最近的诊断尝试：{0}；探测编号：{1}。已记录的阶段（未列出的阶段未经确认）：{2}。最后尝试：{3}；最后确认：{4}；清理结果：{5}。主要失败：{6}；次要失败：{7}。</value></data>
   <data name="Session_PhotoshopTakeOver" xml:space="preserve"><value>在 Photoshop 中接管</value></data>
   <data name="Session_PhotoshopStopHint" xml:space="preserve"><value>停止当前自动操作。接管会停止 PrintFlow 的控制，并保持 Photoshop 现状；它可能仍在运行。PrintFlow 不会强制关闭 Photoshop。返回自动处理前，请先检查 Photoshop。</value></data>
-  <data name="Session_PhotoshopTakeOverConfirmQuestion" xml:space="preserve"><value>要在 Photoshop 中接管吗？PrintFlow 将停止控制 Photoshop，并保持其现状。它可能仍在运行；返回自动处理前，请自行检查。此步骤不支持导回手工制作的结果，包括 TIFF。</value></data>
+  <data name="Session_PhotoshopTakeOverConfirmQuestion" xml:space="preserve"><value>要在 Photoshop 中接管吗？PrintFlow 将停止控制它，但不会关闭或取消它。Photoshop 可能仍在运行，请先检查当前状态。此步骤不能导回手工结果，包括 TIFF；恢复自动处理须另行选择。</value></data>
   <data name="Session_PhotoshopStoppingNotice" xml:space="preserve"><value>正在停止 — PrintFlow 已请求停止 Photoshop 操作，请稍候。</value></data>
   <data name="Session_PhotoshopTakingOverNotice" xml:space="preserve"><value>正在移交 — PrintFlow 正在结束对 Photoshop 的控制。</value></data>
   <data name="Session_PhotoshopHandedOffNotice" xml:space="preserve"><value>PrintFlow 已停止控制 Photoshop。此步骤不支持导入手工结果，包括手工制作的 TIFF。</value></data>
@@ -1039,9 +1040,9 @@
   <data name="Session_StatusReview" xml:space="preserve"><value>等待你检查</value></data>
   <data name="Session_StatusInput" xml:space="preserve"><value>需要你操作</value></data>
   <data name="Home_RecentStatusUnknown" xml:space="preserve"><value>状态暂不可用</value></data>
-  <data name="Home_RecentSaveHistoryUnavailable" xml:space="preserve"><value>保存记录暂不可用；请在任务详情中检查</value></data>
-  <data name="Home_RecentPngSavedPreviously" xml:space="preserve"><value>已批准的 PNG 曾保存过；请在任务详情中检查</value></data>
-  <data name="Home_RecentTiffSavedPreviously" xml:space="preserve"><value>{0} 个已批准的 TIFF 尺寸曾保存过；请在任务详情中检查</value></data>
+  <data name="Home_RecentSaveHistoryUnavailable" xml:space="preserve"><value>暂时读不到保存记录，请打开任务详情核对</value></data>
+  <data name="Home_RecentPngSavedPreviously" xml:space="preserve"><value>有已审核 PNG 的保存记录，当前文件待核实；请打开任务详情</value></data>
+  <data name="Home_RecentTiffSavedPreviously" xml:space="preserve"><value>有 {0} 个已审核 TIFF 尺寸的保存记录，当前文件待核实；请打开任务详情</value></data>
   <data name="Session_NextCompleted" xml:space="preserve"><value>此流程已完成。</value></data>
   <data name="Session_NextAbandoned" xml:space="preserve"><value>此任务已放弃；请返回主页选择其他任务。</value></data>
   <data name="Session_NextProcessing" xml:space="preserve"><value>PrintFlow 正在处理：{0}，请稍候。</value></data>
@@ -1069,11 +1070,11 @@
   <data name="FinalSave_FileNameLabel" xml:space="preserve"><value>文件名</value></data>
   <data name="FinalSave_FolderLabel" xml:space="preserve"><value>文件夹</value></data>
   <data name="FinalSave_NoFolderValue" xml:space="preserve"><value>尚未选择文件夹</value></data>
-  <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>更改位置</value></data>
+  <data name="FinalSave_ChangeLocation" xml:space="preserve"><value>选择保存文件夹</value></data>
   <data name="FinalSave_PickerTitle" xml:space="preserve"><value>选择保存最终结果的文件夹</value></data>
   <data name="FinalSave_NoFolder" xml:space="preserve"><value>保存前请选择文件夹。</value></data>
-  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>这是上次成功保存使用的文件夹。如果此任务应保存到别处，请更改位置。</value></data>
-  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>无法读取上次使用的文件夹。保存前请选择文件夹。</value></data>
+  <data name="FinalSave_RememberedFolder" xml:space="preserve"><value>这是上次成功保存使用的文件夹。要换位置，请点“选择保存文件夹”。</value></data>
+  <data name="FinalSave_PreferenceUnavailable" xml:space="preserve"><value>暂时读不到上次使用的文件夹。请重新选择保存文件夹。</value></data>
   <data name="FinalSave_SaveAs" xml:space="preserve"><value>另存为：{0}</value></data>
   <data name="FinalSave_TypePng" xml:space="preserve"><value>PNG</value></data>
   <data name="FinalSave_TypeTiff" xml:space="preserve"><value>打印 TIFF · {0:0.#} × {1:0.#} 毫米</value></data>
@@ -1085,36 +1086,36 @@
   <data name="FinalSave_ConfirmAndSave" xml:space="preserve"><value>确认结果并保存</value></data>
   <data name="FinalSave_SaveApproved" xml:space="preserve"><value>保存已审核结果</value></data>
   <data name="FinalSave_RetrySave" xml:space="preserve"><value>重试保存</value></data>
-  <data name="FinalSave_CheckAgain" xml:space="preserve"><value>再次核实此次保存</value></data>
+  <data name="FinalSave_CheckAgain" xml:space="preserve"><value>核实这次保存</value></data>
   <data name="FinalSave_CheckSaved" xml:space="preserve"><value>检查已保存的文件</value></data>
   <data name="FinalSave_OpenFolder" xml:space="preserve"><value>打开所在文件夹</value></data>
   <data name="FinalSave_SaveAnotherCopy" xml:space="preserve"><value>另存一份</value></data>
   <data name="FinalSave_UseSuggestion" xml:space="preserve"><value>使用 {0}</value></data>
   <data name="FinalSave_CancelSave" xml:space="preserve"><value>取消保存</value></data>
-  <data name="FinalSave_AwaitingConfirmation" xml:space="preserve"><value>等待你检查。请检查结果、文件名和文件夹，然后选择“{0}”。</value></data>
-  <data name="FinalSave_ApproveOnlyHint" xml:space="preserve"><value>“{0}”只记录审核结果，不会保存文件。</value></data>
+  <data name="FinalSave_AwaitingConfirmation" xml:space="preserve"><value>请先检查图片，再核对文件名和文件夹。点“{0}”会同时确认审核并保存。</value></data>
+  <data name="FinalSave_ApproveOnlyHint" xml:space="preserve"><value>单独点“{0}”只记录审核结果，不会保存文件。</value></data>
   <data name="FinalSave_StageChecking" xml:space="preserve"><value>正在检查文件名和文件夹…</value></data>
-  <data name="FinalSave_StageApproving" xml:space="preserve"><value>正在确认此结果…</value></data>
+  <data name="FinalSave_StageApproving" xml:space="preserve"><value>正在记录本次审核决定，尚未开始保存…</value></data>
   <data name="FinalSave_StagePreparingPng" xml:space="preserve"><value>已通过审核。正在准备审核通过的 PNG…</value></data>
   <data name="FinalSave_StageSaving" xml:space="preserve"><value>已通过审核。正在保存到 {0}…</value></data>
   <data name="FinalSave_StageFinishing" xml:space="preserve"><value>已通过审核。正在完成保存…此时已无法取消。</value></data>
-  <data name="FinalSave_ApprovedNotSaved" xml:space="preserve"><value>已通过审核，尚未保存到你选择的文件夹。</value></data>
-  <data name="FinalSave_ApprovedNotSavedReason" xml:space="preserve"><value>已通过审核，但尚未保存：{0}无需重新处理图片。</value></data>
+  <data name="FinalSave_ApprovedNotSaved" xml:space="preserve"><value>这份结果已通过审核，尚未保存到你选择的文件夹。</value></data>
+  <data name="FinalSave_ApprovedNotSavedReason" xml:space="preserve"><value>结果已通过审核，但尚未保存。{0}图片无需重新处理；请按提示处理后重试保存。</value></data>
   <data name="FinalSave_Saved" xml:space="preserve"><value>已保存：{0}，位置：{1}。</value></data>
-  <data name="FinalSave_SavedPreviously" xml:space="preserve"><value>此前已保存：{0}，位置：{1}。尚未检查该位置。</value></data>
-  <data name="FinalSave_Uncertain" xml:space="preserve"><value>文件可能已保存到 {0}，但尚未核实完成。请再次核实此次保存。</value></data>
+  <data name="FinalSave_SavedPreviously" xml:space="preserve"><value>有保存记录：{0}，位置：{1}。当前文件是否仍在，尚未核实。</value></data>
+  <data name="FinalSave_Uncertain" xml:space="preserve"><value>文件可能已保存到 {0}，但结果尚未核实。请核实同一次保存，这不会重新保存或另存文件。</value></data>
   <data name="FinalSave_Collision" xml:space="preserve"><value>此文件夹中已存在 {0}，不会覆盖它。可使用 {1}，或选择其他文件夹。</value></data>
   <data name="FinalSave_CollisionNoSuggestion" xml:space="preserve"><value>此文件夹中已存在 {0}，不会覆盖它。请输入其他名称或选择其他文件夹。</value></data>
-  <data name="FinalSave_Missing" xml:space="preserve"><value>此前已保存，但文件现在找不到：{0}</value></data>
-  <data name="FinalSave_Changed" xml:space="preserve"><value>此前已保存，但 {0} 处的文件已被更改。不会覆盖它；如需再次保存，请选择其他名称或文件夹。</value></data>
-  <data name="FinalSave_Unavailable" xml:space="preserve"><value>此前已保存，但现在无法访问 {0}。请重新连接驱动器后再次检查。</value></data>
-  <data name="FinalSave_HistoryUnavailable" xml:space="preserve"><value>无法读取保存记录，可能存在更早的保存。</value></data>
-  <data name="FinalSave_PngPreparationPending" xml:space="preserve"><value>已通过审核；审核通过的 PNG 尚未准备好。请使用下方的步骤操作完成准备，然后再保存。图片无需重新处理。</value></data>
-  <data name="FinalSave_ApprovalRefused" xml:space="preserve"><value>结果尚未通过审核：屏幕上的结果已变化或无法审核。未保存任何文件。</value></data>
-  <data name="FinalSave_ApprovalUnknown" xml:space="preserve"><value>PrintFlow 无法确认审核是否已记录。未保存任何文件。请返回主页并重新打开此任务查看当前状态。</value></data>
+  <data name="FinalSave_Missing" xml:space="preserve"><value>有保存记录，但现在找不到文件：{0}</value></data>
+  <data name="FinalSave_Changed" xml:space="preserve"><value>有保存记录，但 {0} 处的文件已变化，不会覆盖。如需再次保存，请换一个名称或文件夹。</value></data>
+  <data name="FinalSave_Unavailable" xml:space="preserve"><value>有保存记录，但现在无法访问 {0}。请连接好驱动器，再检查文件。</value></data>
+  <data name="FinalSave_HistoryUnavailable" xml:space="preserve"><value>暂时读不到保存记录，无法判断以前是否保存过。请稍后查看，或请同事帮忙。</value></data>
+  <data name="FinalSave_PngPreparationPending" xml:space="preserve"><value>结果已通过审核，但最终 PNG 还没准备好。请用下方的步骤操作完成准备，再保存；无需重新处理图片。</value></data>
+  <data name="FinalSave_ApprovalRefused" xml:space="preserve"><value>未通过审核，也未保存文件：当前结果已变化或无法审核。请重新检查当前结果。</value></data>
+  <data name="FinalSave_ApprovalUnknown" xml:space="preserve"><value>暂时无法确认审核是否已记录，未保存任何文件。请返回首页，重新打开此任务查看当前状态。</value></data>
   <data name="FinalSave_DraftRefused" xml:space="preserve"><value>未审核，也未保存：{0}</value></data>
   <data name="FinalSave_Ineligible" xml:space="preserve"><value>此结果不能保存：{0}</value></data>
-  <data name="FinalSave_UncertainElsewhere" xml:space="preserve"><value>此前保存到 {0} 的操作尚未核实。使用其他名称或文件夹保存将另存一份。</value></data>
+  <data name="FinalSave_UncertainElsewhere" xml:space="preserve"><value>此前保存到 {0} 的结果仍待核实。换名称或文件夹是另存一份，不会核实之前那次保存。</value></data>
   <data name="FinalSave_ReasonApprovalEvidenceMissing" xml:space="preserve"><value>此图片没有人工审核记录，因此不能视为已通过审核。</value></data>
   <data name="FinalSave_ReasonPending" xml:space="preserve"><value>它仍在等待检查。</value></data>
   <data name="FinalSave_ReasonRejected" xml:space="preserve"><value>它已被驳回。</value></data>
@@ -1125,22 +1126,22 @@
   <data name="FinalSave_ReasonMissing" xml:space="preserve"><value>找不到它。</value></data>
   <data name="FinalSave_ReasonSourceChanged" xml:space="preserve"><value>PrintFlow 存储中的已审核文件已更改或丢失。</value></data>
   <data name="FinalSave_FailCancelled" xml:space="preserve"><value>保存已取消。</value></data>
-  <data name="FinalSave_FailNotWritable" xml:space="preserve"><value>无法写入该文件夹。</value></data>
-  <data name="FinalSave_FailUnavailable" xml:space="preserve"><value>该文件夹当前不可用（驱动器可能已断开）。</value></data>
-  <data name="FinalSave_FailUnsupported" xml:space="preserve"><value>不支持此位置。请选择本机本地 NTFS 驱动器上的文件夹（U 盘须为 NTFS 格式）；不支持网络、云盘及其他类型的驱动器。</value></data>
-  <data name="FinalSave_FailProtected" xml:space="preserve"><value>该文件夹属于 PrintFlow 自身存储，或该名称是导入的原始文件。请选择其他文件夹或名称。</value></data>
-  <data name="FinalSave_FailCopy" xml:space="preserve"><value>复制未能完成。</value></data>
-  <data name="FinalSave_FailVerify" xml:space="preserve"><value>无法核实复制的文件。</value></data>
-  <data name="FinalSave_FailPersistence" xml:space="preserve"><value>无法写入保存记录。</value></data>
+  <data name="FinalSave_FailNotWritable" xml:space="preserve"><value>无法写入所选文件夹。请检查写入权限，或选择其他文件夹。</value></data>
+  <data name="FinalSave_FailUnavailable" xml:space="preserve"><value>保存文件夹当前不可用，驱动器可能已断开。请检查连接，或选择其他文件夹。</value></data>
+  <data name="FinalSave_FailUnsupported" xml:space="preserve"><value>不能保存到此位置。请选择本机的 NTFS 文件夹；U 盘也须使用 NTFS 格式。不支持网络、云盘或其他类型的驱动器。</value></data>
+  <data name="FinalSave_FailProtected" xml:space="preserve"><value>不能使用 PrintFlow 自身存储文件夹，也不能覆盖导入的原始文件。请换一个文件夹或名称。</value></data>
+  <data name="FinalSave_FailCopy" xml:space="preserve"><value>文件复制未完成。请查看当前保存状态，再按提示处理。</value></data>
+  <data name="FinalSave_FailVerify" xml:space="preserve"><value>文件复制后的校验未通过，本次尚未保存。请重试保存。</value></data>
+  <data name="FinalSave_FailPersistence" xml:space="preserve"><value>保存记录未能写入，保存结果以当前核实状态为准。请查看当前提示。</value></data>
   <data name="FinalSave_FailInvalidName" xml:space="preserve"><value>文件名无效。</value></data>
   <data name="FinalSave_FailConflict" xml:space="preserve"><value>所选内容已变化。请检查结果后重试。</value></data>
   <data name="FinalSave_FailOther" xml:space="preserve"><value>保存未完成。</value></data>
   <data name="FinalSave_OpenDispatched" xml:space="preserve"><value>已请求 Windows 在文件夹中显示 {0}。</value></data>
-  <data name="FinalSave_OpenMissing" xml:space="preserve"><value>未打开文件夹：已保存的文件找不到了。</value></data>
-  <data name="FinalSave_OpenChanged" xml:space="preserve"><value>未打开文件夹：已保存的文件已被更改。</value></data>
-  <data name="FinalSave_OpenUnavailable" xml:space="preserve"><value>未打开文件夹：该位置当前无法访问。</value></data>
+  <data name="FinalSave_OpenMissing" xml:space="preserve"><value>未打开文件夹：有保存记录，但现在找不到文件。</value></data>
+  <data name="FinalSave_OpenChanged" xml:space="preserve"><value>未打开文件夹：有保存记录，但文件已变化。</value></data>
+  <data name="FinalSave_OpenUnavailable" xml:space="preserve"><value>未打开文件夹：目前无法访问保存位置，请检查驱动器连接。</value></data>
   <data name="FinalSave_OpenIneligible" xml:space="preserve"><value>未打开文件夹：此结果已不能再保存或打开。</value></data>
-  <data name="FinalSave_OpenUncertain" xml:space="preserve"><value>未打开文件夹：此次保存尚未核实。</value></data>
+  <data name="FinalSave_OpenUncertain" xml:space="preserve"><value>未打开文件夹：这次保存还没核实，请先核实保存结果。</value></data>
   <data name="FinalSave_OpenShellFailed" xml:space="preserve"><value>Windows 未能打开文件夹。文件仍保存在 {0}。</value></data>
   <data name="FinalSave_FullPathLabel" xml:space="preserve"><value>完整路径（可选中复制）</value></data>
   <data name="FinalSave_DetailsLabel" xml:space="preserve"><value>技术详情</value></data>
@@ -1148,12 +1149,12 @@
   <data name="Session_NextCompletedNotSaved" xml:space="preserve"><value>此流程已完成，但审核通过的结果尚未保存到你选择的文件夹。</value></data>
   <data name="FinalSave_StageVerifyingSaved" xml:space="preserve"><value>正在检查已保存的文件…</value></data>
   <data name="FinalSave_StageApproved" xml:space="preserve"><value>已通过审核。正在准备保存…</value></data>
-  <data name="FinalSave_ActionIncomplete" xml:space="preserve"><value>此操作未完成，因此暂时无法确认此次保存的更多情况。请重试。</value></data>
+  <data name="FinalSave_ActionIncomplete" xml:space="preserve"><value>本次操作未完成，暂时无法核实更多保存信息。请查看当前状态提示；仍不确定时，请同事帮忙。</value></data>
   <data name="FinalSave_HistoryLoading" xml:space="preserve"><value>正在读取以前的保存记录…</value></data>
-  <data name="FinalSave_HistoryNotRefreshed" xml:space="preserve"><value>无法刷新保存记录。此处显示的是之前读取的内容，可能已过时。</value></data>
+  <data name="FinalSave_HistoryNotRefreshed" xml:space="preserve"><value>保存记录未能更新。这里是上次读取的记录，可能已过时，不代表文件现在仍在。</value></data>
   <data name="FinalSave_RecordsLabel" xml:space="preserve"><value>此结果的保存记录</value></data>
   <data name="FinalSave_RecordSaved" xml:space="preserve"><value>{2} 已保存：{0}，位置：{1}</value></data>
-  <data name="FinalSave_RecordUnverified" xml:space="preserve"><value>尚未核实：{0}，位置：{1}</value></data>
+  <data name="FinalSave_RecordUnverified" xml:space="preserve"><value>尚未核实：{0}，保存位置：{1}</value></data>
   <data name="FinalSave_RecordNotSaved" xml:space="preserve"><value>未保存：{0}，位置：{1}</value></data>
   <data name="Session_NextFinalReviewNeedsDraft" xml:space="preserve"><value>请检查此结果，然后选择文件夹并检查文件名以便保存。“{0}”只记录审核结果。</value></data>
   <data name="Session_TrimAdjustBegin" xml:space="preserve"><value>调整裁切边缘</value></data>
@@ -1174,10 +1175,10 @@
   <data name="Session_TrimAdjustInvalid" xml:space="preserve"><value>无法使用该边界：边界必须在图片范围内，且至少保留一个像素。已保留之前的边界。如需让边线正好落在图片边界上，请放大图片，或选中控制点后按 Ctrl+方向键。</value></data>
   <data name="Session_TrimAdjustUnchanged" xml:space="preserve"><value>边界没有变化。使用后仍会生成一个需要审核的新结果。</value></data>
   <data name="Session_TrimAdjustBusy" xml:space="preserve"><value>正在生成新的裁切…</value></data>
-  <data name="Session_TrimAdjustReady" xml:space="preserve"><value>新的裁切已生成。请检查后再通过。</value></data>
+  <data name="Session_TrimAdjustReady" xml:space="preserve"><value>新的裁切已生成。请检查后，再确认这张图通过检查。</value></data>
   <data name="Session_TrimAdjustSourceUnavailable" xml:space="preserve"><value>无法打开生成此裁切的原图，因此无法在这里调整边缘。当前结果没有变化。</value></data>
   <data name="Session_NextTrimAdjust" xml:space="preserve"><value>拖动边线或角点，然后选择“{0}”。</value></data>
-  <data name="FinalSave_TrimAdjustOpen" xml:space="preserve"><value>请先完成或取消裁切调整，再通过或保存。</value></data>
+  <data name="FinalSave_TrimAdjustOpen" xml:space="preserve"><value>请先使用裁切结果，或取消本次调整，再审核或保存。</value></data>
   <data name="Session_TrimHandleLeft" xml:space="preserve"><value>左边线</value></data>
   <data name="Session_TrimHandleTop" xml:space="preserve"><value>上边线</value></data>
   <data name="Session_TrimHandleRight" xml:space="preserve"><value>右边线</value></data>
@@ -1190,13 +1191,13 @@
   <data name="Session_AskColleague" xml:space="preserve"><value>请同事修正此图片</value></data>
   <data name="Session_AskColleagueHint" xml:space="preserve"><value>不确定效果是否正确？可以请同事修正。</value></data>
   <data name="Session_CorrectionNoteLabel" xml:space="preserve"><value>需要修正的地方（可选）</value></data>
-  <data name="Session_CorrectionPrepare" xml:space="preserve"><value>为同事准备文件</value></data>
-  <data name="Session_CorrectionTryAgain" xml:space="preserve"><value>重试</value></data>
-  <data name="Session_CorrectionCancel" xml:space="preserve"><value>取消</value></data>
-  <data name="Session_CorrectionPreparing" xml:space="preserve"><value>正在准备文件…</value></data>
-  <data name="Session_CorrectionPrepareFailed" xml:space="preserve"><value>无法为同事准备文件，未移交任何内容。{0}</value></data>
-  <data name="Session_CorrectionStatus" xml:space="preserve"><value>已移交 — 等待同事修正后的图片</value></data>
-  <data name="Session_CorrectionStep1" xml:space="preserve"><value>1. 把这两个文件交给同事：</value></data>
+  <data name="Session_CorrectionPrepare" xml:space="preserve"><value>准备修正副本</value></data>
+  <data name="Session_CorrectionTryAgain" xml:space="preserve"><value>重试准备副本</value></data>
+  <data name="Session_CorrectionCancel" xml:space="preserve"><value>取消本次准备</value></data>
+  <data name="Session_CorrectionPreparing" xml:space="preserve"><value>正在准备修正副本，不会自动发送…</value></data>
+  <data name="Session_CorrectionPrepareFailed" xml:space="preserve"><value>修正副本未能准备好，本次未移交任何内容。{0}</value></data>
+  <data name="Session_CorrectionStatus" xml:space="preserve"><value>任务已转为同事修正，文件须自行交接；等待导入修正图片。</value></data>
+  <data name="Session_CorrectionStep1" xml:space="preserve"><value>1. 请自行把这两个文件交给同事：</value></data>
   <data name="Session_CorrectionReference" xml:space="preserve"><value>参考（请勿修改）：{0}</value></data>
   <data name="Session_CorrectionWorking" xml:space="preserve"><value>请修改此文件：{0}</value></data>
   <data name="Session_CorrectionFolder" xml:space="preserve"><value>文件夹：{0}</value></data>
@@ -1204,26 +1205,26 @@
   <data name="Session_CorrectionStep2" xml:space="preserve"><value>2. 需要修正：{0}</value></data>
   <data name="Session_CorrectionNoNote" xml:space="preserve"><value>无备注 — 请检查头发、边缘和残留背景。</value></data>
   <data name="Session_CorrectionStep3" xml:space="preserve"><value>3. 将修正后的图片另存为透明背景的 PNG，尺寸 {0} × {1} 像素，保存在同一文件夹（例如“{2}”）。</value></data>
-  <data name="Session_CorrectionStep4" xml:space="preserve"><value>4. 回到 PrintFlow，打开此任务并选择“导入修正后的图片”。PrintFlow 不会对导入的图片重新去除背景。</value></data>
+  <data name="Session_CorrectionStep4" xml:space="preserve"><value>4. 回到 PrintFlow，打开此任务并选择“导入修正后的图片”。导入后仍须审核，不会重新去除背景。</value></data>
   <data name="Session_CorrectionImport" xml:space="preserve"><value>导入修正后的图片</value></data>
   <data name="Session_CorrectionPickerTitle" xml:space="preserve"><value>选择修正后的图片</value></data>
   <data name="Session_CorrectionChecking" xml:space="preserve"><value>正在检查图片…</value></data>
   <data name="Session_CorrectionRefused" xml:space="preserve"><value>已拒绝导入：{0} 此任务仍为已移交状态。</value></data>
   <data name="Session_CorrectionIsReference" xml:space="preserve"><value>这是参考副本。请选择修正后的图片。</value></data>
   <data name="Session_CorrectionChanged" xml:space="preserve"><value>检查期间图片发生了变化。请重新保存后再选择“导入修正后的图片”。</value></data>
-  <data name="Session_CorrectionMissingFiles" xml:space="preserve"><value>部分给同事的文件已丢失。</value></data>
+  <data name="Session_CorrectionMissingFiles" xml:space="preserve"><value>给同事的文件有缺失。请重新准备文件，再自行交接。</value></data>
   <data name="Session_CorrectionRepair" xml:space="preserve"><value>重新准备文件</value></data>
   <data name="Session_CorrectionLastImportFailed" xml:space="preserve"><value>上次导入未完成。请再次选择“导入修正后的图片”。</value></data>
-  <data name="Session_CorrectionReview" xml:space="preserve"><value>请检查修正后的图片，然后选择“通过”或“驳回”。通过后，PrintFlow 将继续进行“{0}”。不会重新去除背景。</value></data>
-  <data name="Session_CorrectionIdentical" xml:space="preserve"><value>此图片与发出的图片完全相同。</value></data>
-  <data name="Session_CorrectionOtherComputer" xml:space="preserve"><value>如果同事使用另一台电脑，请自行将这些文件复制给对方。</value></data>
+  <data name="Session_CorrectionReview" xml:space="preserve"><value>请检查修正后的图片，再选择“确认这张图通过检查”或“驳回”。确认通过后，将继续进行“{0}”，不会重新去除背景。</value></data>
+  <data name="Session_CorrectionIdentical" xml:space="preserve"><value>这张图与交给同事的图片完全相同，请核对是否选中了修正后的文件。</value></data>
+  <data name="Session_CorrectionOtherComputer" xml:space="preserve"><value>请自行交接文件。同事在另一台电脑时，请把这两个文件复制给对方；PrintFlow 不会自动发送。</value></data>
   <data name="Session_CorrectionObsolete" xml:space="preserve"><value>此修正请求已不再有效，其文件仍在 {0}。</value></data>
   <data name="Session_CorrectionUseImport" xml:space="preserve"><value>此任务正在等待同事修正后的图片。请在此任务中使用“导入修正后的图片”。</value></data>
   <data name="Session_CorrectionNotAvailable" xml:space="preserve"><value>此修正请求已不可用，未作任何更改。</value></data>
   <data name="Session_CorrectionResultChanged" xml:space="preserve"><value>此结果已不再是待检查的结果，未作任何更改。</value></data>
   <data name="Session_CorrectionAlreadyImported" xml:space="preserve"><value>此修正已导入。</value></data>
   <data name="Session_CorrectionNameTaken" xml:space="preserve"><value>修正文件夹中已有一个同名的不同文件，未对其作任何改动。请将其移走后重试。</value></data>
-  <data name="Session_CorrectionOpenFolderFailed" xml:space="preserve"><value>无法打开文件夹，其路径已显示在面板中。</value></data>
+  <data name="Session_CorrectionOpenFolderFailed" xml:space="preserve"><value>未能打开文件夹。请复制面板中的路径，自行打开。</value></data>
   <data name="Session_CorrectionOtherOptions" xml:space="preserve"><value>其他选项</value></data>
   <data name="Session_CorrectionFileReference" xml:space="preserve"><value>{0} - 参考（请勿修改）</value></data>
   <data name="Session_CorrectionFileWorking" xml:space="preserve"><value>{0} - 请修改此文件</value></data>
@@ -1246,19 +1247,19 @@
   <data name="Session_GuidanceTiffOverlay" xml:space="preserve"><value>在“{0}”中放大，对照白墨与设计边缘。</value></data>
   <data name="Session_GuidanceTiffColour" xml:space="preserve"><value>在“{0}”中检查设计完整、没有被裁掉。屏幕颜色仅为近似效果。</value></data>
   <data name="Session_GuidanceTiffSize" xml:space="preserve"><value>在“{0}”下核对“{1}”是否为所需的印刷尺寸。</value></data>
-  <data name="Session_GuidanceApprove" xml:space="preserve"><value>“{0}”会接受当前这个结果并结束本次审核。它不会把文件保存到你的文件夹。</value></data>
-  <data name="Session_GuidanceApproveTiff" xml:space="preserve"><value>“{0}”只记录此 TIFF 已通过你的检查。它不检查打印质量，也不会把文件保存到你的文件夹。</value></data>
+  <data name="Session_GuidanceApprove" xml:space="preserve"><value>点击“{0}”，确认当前这张图通过检查；此操作不会把文件保存到你的文件夹。</value></data>
+  <data name="Session_GuidanceApproveTiff" xml:space="preserve"><value>点击“{0}”，只记录你已检查这份 TIFF；这不代表已检查打印质量，也不会把文件保存到你的文件夹。</value></data>
   <data name="Session_GuidanceReject" xml:space="preserve"><value>“{0}”会记录你在下方选择的原因，并搁置此结果。不会自动重新处理；之后由你选择如何重试。</value></data>
   <data name="Session_GuidanceRejectTiff" xml:space="preserve"><value>“{0}”不会立即生成新的 TIFF：它先将此 TIFF 移入回收站，再记录你在下方选择的原因。只有选择“{2}”后才会生成新的 TIFF；仅选择“{1}”不会生成。如果无法移入回收站，则不会拒绝，TIFF 保持原位。</value></data>
   <data name="Session_GuidanceHelpEnhancement" xml:space="preserve"><value>不确定？请先请有经验的同事和你一起查看，再做决定。</value></data>
-  <data name="Session_GuidanceHelpAskColleague" xml:space="preserve"><value>有问题或不确定？用下方按钮请同事修正此图片。发送前可以先写备注。</value></data>
+  <data name="Session_GuidanceHelpAskColleague" xml:space="preserve"><value>有问题或不确定？用下方按钮准备交给同事修正的副本，准备前可以先写备注。</value></data>
   <data name="Session_GuidanceHelpNoColleague" xml:space="preserve"><value>此结果无法请同事修正。如有问题，请选择“{0}”。</value></data>
-  <data name="Session_GuidanceHelpAdjustTrim" xml:space="preserve"><value>边缘不对？用下方“{0}”在裁切前的图片上移动边缘。新的裁切结果仍需你审核。</value></data>
+  <data name="Session_GuidanceHelpAdjustTrim" xml:space="preserve"><value>边缘不合适？点击下方“{0}”，在裁切前的图片上调整边缘；新结果仍须审核。</value></data>
   <data name="Session_GuidanceHelpNoAdjustTrim" xml:space="preserve"><value>此结果无法调整裁切边缘。如有内容被裁掉，请选择“{0}”，之后可以重新尝试。</value></data>
   <data name="Session_GuidanceHelpTiff" xml:space="preserve"><value>不确定？请先请有经验的同事查看再决定。在 PrintFlow 之外修改的 TIFF 无法导入。</value></data>
   <data name="Session_GuidanceHelpTiffReturn" xml:space="preserve"><value>如需先修改印刷尺寸，请使用下方“{0}”。</value></data>
-  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>需要标准尺寸时选择预设。预设是上限，不是准确的印刷尺寸：较大的图片会缩小到上限以内，较小的图片不会被放大，图片比例保持不变。</value></data>
-  <data name="Session_SizeHelpCustom" xml:space="preserve"><value>某一边必须是准确尺寸时，选择“{0}”。选择要固定的边（“{1}”、“{2}”，或表示此图片较长一边的“{3}”），并输入毫米数，另一边按图片比例得出。如需放大图片，会先征求你的确认。</value></data>
+  <data name="Session_SizeHelpPreset" xml:space="preserve"><value>需要标准尺寸时，选择预设。预设是尺寸上限，不是最终印刷尺寸。大图片会缩小到上限以内，小图片不会被放大；图片保持原比例。</value></data>
+  <data name="Session_SizeHelpCustom" xml:space="preserve"><value>某一边需要准确尺寸时，选择“{0}”。请选择“{1}”、“{2}”或“{3}”（图片较长的一边），再输入毫米数。另一边按原比例计算；需要放大时，仍须你单独授权。</value></data>
   <data name="Session_SizeSummaryDraft" xml:space="preserve"><value>按当前设置，整张图片（含透明边缘）的印刷尺寸预计约为 {0:0.0} × {1:0.0} 毫米。</value></data>
   <data name="Session_SizeSummaryCurrent" xml:space="preserve"><value>按已选尺寸，整张图片（含透明边缘）的印刷尺寸约为 {0:0.0} × {1:0.0} 毫米。</value></data>
   <data name="Session_SizeGovernorWithinLimits" xml:space="preserve"><value>图片已在上限以内，因此不会缩小，也不会为填满上限而放大。</value></data>
@@ -1269,13 +1270,13 @@
   <data name="Session_SizeGovernorLongEdgeWidth" xml:space="preserve"><value>你输入的长边就是此图片的宽度，因此由宽度决定尺寸。</value></data>
   <data name="Session_SizeGovernorLongEdgeHeight" xml:space="preserve"><value>你输入的长边就是此图片的高度，因此由高度决定尺寸。</value></data>
   <data name="Session_SizeSummaryProportions" xml:space="preserve"><value>图片保持原有比例。</value></data>
-  <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>按此尺寸需要放大图片，印刷效果可能发虚或模糊。确认此尺寸后，会请你决定是否接受。</value></data>
-  <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>按此尺寸需要放大图片，印刷效果可能发虚或模糊。可选择“{0}”改用较小的尺寸（需要的放大更少），或选择“{1}”接受这一点。此尺寸需要放大时，在你接受之前“{2}”不可用。</value></data>
-  <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>技术细节（像素与 PPI）</value></data>
+  <data name="Session_SizeDraftEnlargement" xml:space="preserve"><value>此尺寸需要放大图片，印刷效果可能发虚或模糊。确认尺寸后，仍须你单独授权放大。</value></data>
+  <data name="Session_SizeEnlargementPlain" xml:space="preserve"><value>此尺寸需要放大，印刷效果可能发虚或模糊。可点“{0}”改小尺寸，减少放大；或点“{1}”。授权前，“{2}”不可用；处理后仍须审核结果。</value></data>
+  <data name="Session_SizeTechnicalDetails" xml:space="preserve"><value>技术细节（像素与每英寸像素数 PPI）</value></data>
   <data name="Session_ActionUnconfirmed" xml:space="preserve"><value>PrintFlow 无法确认该操作是否已完成。{0}</value></data>
   <data name="Session_ActionFailedNext" xml:space="preserve"><value>屏幕顶部的状态会显示你现在可以做什么。如果不确定，请展开下方的“错误详情”，并请同事或主管帮忙。</value></data>
   <data name="Session_ActionFailedNextStale" xml:space="preserve"><value>之后屏幕未能更新。在进行任何其他操作之前，请展开下方的“错误详情”，并请同事或主管帮忙。</value></data>
-  <data name="ErrorDetails_CodeHint" xml:space="preserve"><value>寻求帮助时，请提供此代码。</value></data>
+  <data name="ErrorDetails_CodeHint" xml:space="preserve"><value>需要同事帮忙时，请提供这个错误代码。</value></data>
   <data name="FailureNotice_RevisionIntegrityMismatch" xml:space="preserve"><value>PrintFlow 无法确认文件是否仍与记录的结果一致，因此该决定未生效。</value></data>
   <data name="FailureNotice_OperationFaulted" xml:space="preserve"><value>操作意外结束，未记录通过验证的结果。操作停止时，PrintFlow 未再更改外部应用程序；其当前状态未知。</value></data>
   <data name="FailureNotice_MeituLaunchFailed" xml:space="preserve"><value>美图未能启动或尚未就绪。</value></data>
@@ -1296,11 +1297,11 @@
   <data name="Home_ReadinessChecking" xml:space="preserve"><value>正在检查工作站……</value></data>
   <data name="Home_ReadinessCheckingHint" xml:space="preserve"><value>请选择“查看工作站检查”查看该检查。</value></data>
   <data name="Home_ReadinessReady" xml:space="preserve"><value>上次检查通过。</value></data>
-  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是已记录的检查结果。每个自动步骤仍会执行自己的工作站检查。</value></data>
+  <data name="Home_ReadinessReadyHint" xml:space="preserve"><value>这是上次记录的检查结果。每个自动步骤仍会重新检查工作站。</value></data>
   <data name="Home_ReadinessBlocked" xml:space="preserve"><value>暂时不能自动处理。</value></data>
   <data name="Home_ReadinessFirstReason" xml:space="preserve"><value>原因：{0}。{1}</value></data>
   <data name="Home_ReadinessLiveCheckPending" xml:space="preserve"><value>原因：美图秀秀和 Photoshop 的检查目前没有有效结果。请选择“查看工作站检查”，然后选择“{0}”。</value></data>
-  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>请选择“查看工作站检查”查看全部检查项。请熟练同事或主管帮忙。</value></data>
+  <data name="Home_ReadinessBlockedHint" xml:space="preserve"><value>请点“查看工作站检查”，查看全部阻塞原因；需要时请熟练同事或主管帮忙。</value></data>
   <data name="Home_ReadinessNotConfirmed" xml:space="preserve"><value>需要重新检查工作站。</value></data>
   <data name="Home_ReadinessUnfinishedReason" xml:space="preserve"><value>上一次检查未完成，因此不会把更早的结果显示为当前结果。</value></data>
   <data name="Home_ReadinessNoReason" xml:space="preserve"><value>上一次检查未给出原因。请选择“查看工作站检查”查看详情。</value></data>
@@ -1323,11 +1324,11 @@
   <data name="Session_HistoryValid" xml:space="preserve"><value>记录有效</value></data>
   <data name="Session_HistoryInvalid" xml:space="preserve"><value>已失效的记录</value></data>
   <data name="Session_HistoryBytesReleased" xml:space="preserve"><value>预览文件已按保留规则释放</value></data>
-  <data name="Session_DraftLeaveHeading" xml:space="preserve"><value>保留尚未提交的输入？</value></data>
-  <data name="Session_DraftLeaveNotice" xml:space="preserve"><value>当前页面有尚未提交的输入。可继续编辑，或放弃本页输入后离开；这些输入尚未确认或保存。</value></data>
+  <data name="Session_DraftLeaveHeading" xml:space="preserve"><value>要保留本页输入吗？</value></data>
+  <data name="Session_DraftLeaveNotice" xml:space="preserve"><value>本页还有未确认或保存的输入。你可以继续编辑，或只放弃本页输入后离开；这不会放弃整个任务。</value></data>
   <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
-  <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”。需要重新处理：{1}。依赖这些步骤的尺寸、输出结果及审核需要重新完成；已有历史记录保留。</value></data>
+  <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”后，须重新处理：{1}。相关尺寸、输出结果和审核都须重做；已有历史记录会保留。</value></data>
   <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI 设计暂不可用。选择本地图片后，可使用三条现有路线。</value></data>
   <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
   <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
@@ -1335,7 +1336,7 @@
   <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
   <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
   <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>已取消选择等待。重新打开任务可查看当前已保存的状态。</value></data>
-  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。</value></data>
+  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>生成第一个处理结果前，可以更换路线；返回首页会保留此任务。</value></data>
   <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>已有处理结果，当前路线已锁定。返回首页会保留任务和结果。</value></data>
   <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>正在保存您的选择…</value></data>
   <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>本次原始文件：{0}（原件保持不变）</value></data>
@@ -1349,20 +1350,20 @@
   <data name="Session_GuidedPhaseUnknown" xml:space="preserve"><value>应用状态未知或受到阻塞，PrintFlow 正在等待安全结果。</value></data>
   <data name="Session_GuidedPhaseValidated" xml:space="preserve"><value>输出校验已完成，正在准备结果供你审核。</value></data>
   <data name="Session_GuidedPhaseWriting" xml:space="preserve"><value>已确认导出，输出文件可能仍在写入。</value></data>
-  <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前没有可靠的百分比，请等待。成功后仍需你检查并审核结果。</value></data>
+  <data name="Session_GuidedProcessingWait" xml:space="preserve"><value>当前无法提供可靠的百分比，请等待；处理成功后，仍须你检查并审核结果。</value></data>
   <data name="Session_GuidedStopping" xml:space="preserve"><value>正在停止本次处理</value></data>
   <data name="Session_GuidedTakingOver" xml:space="preserve"><value>正在交由你接管</value></data>
-  <data name="Session_GuidedPrintActual" xml:space="preserve"><value>预计实际图片：{0:0.##} × {1:0.##} 毫米</value></data>
-  <data name="Session_GuidedPrintContract" xml:space="preserve"><value>生产要求：{0} PPI · CMYK + W1。生成后仍须校验与审核。</value></data>
-  <data name="Session_GuidedPrintPixels" xml:space="preserve"><value>输出：{0} × {1} 像素 · 保持原比例</value></data>
-  <data name="Session_GuidedPrintRequested" xml:space="preserve"><value>当前要求：{0}</value></data>
-  <data name="Session_GuidedPrintRisk" xml:space="preserve"><value>本尺寸需要放大。确认尺寸后仍须单独授权，之后仍需审核结果。</value></data>
-  <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>白墨：{0}</value></data>
-  <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>选择同时记录对应的图案分类理由，请根据本次完整成品设计判断。</value></data>
-  <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>源 PSD/PDF 的专色或白墨通道不会沿用。本次选择用于生成生产 W1 通道。</value></data>
-  <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>保存已批准的结果</value></data>
+  <data name="Session_GuidedPrintActual" xml:space="preserve"><value>预计印刷尺寸：{0:0.##} × {1:0.##} 毫米</value></data>
+  <data name="Session_GuidedPrintContract" xml:space="preserve"><value>TIFF 打印文件：{0} PPI（每英寸像素数）· CMYK 印刷色彩 · W1 白墨通道。生成后须校验、人工审核，再保存。</value></data>
+  <data name="Session_GuidedPrintPixels" xml:space="preserve"><value>预计输出：{0} × {1} 像素（图片的细小方格）· 保持原比例</value></data>
+  <data name="Session_GuidedPrintRequested" xml:space="preserve"><value>本次尺寸设置：{0}</value></data>
+  <data name="Session_GuidedPrintRisk" xml:space="preserve"><value>此尺寸需要放大，图片可能变模糊。确认尺寸后，仍须单独授权放大，并在处理后审核结果。</value></data>
+  <data name="Session_GuidedPrintWhiteInk" xml:space="preserve"><value>白墨方案：{0}</value></data>
+  <data name="Session_GuidedWhiteInkReasonHint" xml:space="preserve"><value>请按完整成品设计选择图案类别：精细细节对应 0 像素，普通图案对应 1 像素，实色或整块矩形对应 2 像素。选择时会记录对应的分类理由；0 像素仍有白墨，只是不内缩。</value></data>
+  <data name="Session_GuidedWhiteInkSourceHint" xml:space="preserve"><value>不会沿用原 PSD/PDF 文件里的专色或白墨通道。本次选择用于生成打印所需的 W1 白墨通道。</value></data>
+  <data name="Session_CompletionSaveHeading" xml:space="preserve"><value>保存已审核的结果</value></data>
   <data name="Session_CompletionFinishedHeading" xml:space="preserve"><value>任务完成 · 保存记录</value></data>
-  <data name="Session_CompletionNotice" xml:space="preserve"><value>审核通过、保存到所选文件夹和完成任务是独立状态。内部批准文件不代表已交付。</value></data>
+  <data name="Session_CompletionNotice" xml:space="preserve"><value>通过审核、保存文件、完成任务是三件事。PrintFlow 内部的已审核文件，不代表已保存到你选的文件夹。</value></data>
   <data name="Session_CompletionApproved" xml:space="preserve"><value>结果已批准</value></data>
   <data name="Session_CompletionNotApproved" xml:space="preserve"><value>尚未批准</value></data>
   <data name="Session_CompletionPngPreparing" xml:space="preserve"><value>已批准 · 等待准备 PNG</value></data>
@@ -1395,22 +1396,34 @@
   <data name="Session_RecoveryNext" xml:space="preserve"><value>当前可选操作：{0}。不会自动开始。</value></data>
   <data name="Home_RecentUnknownWorkflow" xml:space="preserve"><value>未识别的流程</value></data>
   <data name="Home_RecentUnknownStep" xml:space="preserve"><value>未识别的步骤</value></data>
-  <data name="Home_RecentNextCorrection" xml:space="preserve"><value>打开详情导入修正图片，之后仍需重新审核。</value></data>
-  <data name="Home_RecentNextSaved" xml:space="preserve"><value>继续查看实际步骤并核实当前文件。保存历史不代表文件仍存在。</value></data>
-  <data name="Home_RecentNextContinue" xml:space="preserve"><value>继续将打开实际当前步骤，不会自动开始处理。</value></data>
+  <data name="Home_RecentNextCorrection" xml:space="preserve"><value>请打开详情，导入同事修正后的图片；导入后仍须审核。</value></data>
+  <data name="Home_RecentNextSaved" xml:space="preserve"><value>请打开当前步骤，核实当前文件是否仍在。有保存记录不代表文件现在存在。</value></data>
+  <data name="Home_RecentNextContinue" xml:space="preserve"><value>继续任务只会打开当前步骤，不会自动开始处理。</value></data>
   <data name="Home_RecentNextHandedOff" xml:space="preserve"><value>打开移交详情，查看当前允许的后续操作。</value></data>
-  <data name="Home_RecentNextHistory" xml:space="preserve"><value>查看处理记录。请打开详情核实当前文件；仅有保存历史无法确认。</value></data>
+  <data name="Home_RecentNextHistory" xml:space="preserve"><value>请打开处理详情，核实当前文件。仅有保存记录，不能确认文件现在仍在。</value></data>
   <data name="Environment_Unchecked" xml:space="preserve"><value>尚未检查</value></data>
-  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未检查。还未读取环境报告，不能确认生产就绪。</value></data>
-  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>部分必要检查未运行。请查看下方阻塞原因；历史结果不代表生产许可。</value></data>
-  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本次报告描述下方所示检查结果。每次生产请求仍会重新核验。</value></data>
+  <data name="Environment_ObservationUnchecked" xml:space="preserve"><value>尚未检查，不能确认可以生产。请先查看环境报告。</value></data>
+  <data name="Environment_ObservationBlocked" xml:space="preserve"><value>有必要检查未运行。请处理下方阻塞原因；历史结果不能作为当前生产许可。</value></data>
+  <data name="Environment_ObservationCurrent" xml:space="preserve"><value>本次报告对应下方检查结果。每次生产请求仍会重新核验，不代表以后一直就绪。</value></data>
   <data name="Environment_EvidenceNever" xml:space="preserve"><value>尚无成功的实时检查历史。</value></data>
   <data name="Environment_EvidenceExpired" xml:space="preserve"><value>历史检查证据已失效。上次成功：{0}。不能据此确认当前就绪。</value></data>
-  <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>当前未重新观察。历史成功时间：{0}；这不是当前生产许可。</value></data>
+  <data name="Environment_EvidenceDeferred" xml:space="preserve"><value>当前未重新观察应用状态。历史成功时间：{0}；不能据此开始生产。</value></data>
   <data name="Environment_EvidenceRecorded" xml:space="preserve"><value>上次实时检查成功：{0}。当前结论请另看本次报告。</value></data>
   <data name="Settings_AdvancedHeading" xml:space="preserve"><value>技术详情与本机诊断位置</value></data>
   <data name="Nav_BackToTask" xml:space="preserve"><value>返回当前任务</value></data>
   <data name="Nav_TaskReloadFailed" xml:space="preserve"><value>无法重新读取任务。当前任务尚未恢复；请再次尝试返回。</value></data>
   <data name="Session_FailurePreservedCurrent" xml:space="preserve"><value>原件、输入快照和已有结果仍按既有保留规则管理；可用内容以当前任务和文件核实结果为准。</value></data>
   <data name="Session_FailurePreservedUnknown" xml:space="preserve"><value>上次显示的任务内容仍可查看；当前记录与文件状态尚未重新核实。</value></data>
+  <data name="Home_SampleTitle" xml:space="preserve"><value>从一张图片开始</value></data>
+  <data name="Home_SampleSubtitle" xml:space="preserve"><value>导入图片，PrintFlow 会一步一步引导你完成。</value></data>
+  <data name="Home_SampleDropLabel" xml:space="preserve"><value>将图片拖到这里</value></data>
+  <data name="Session_GuidedOriginalChecksHeading" xml:space="preserve"><value>先检查这张原图</value></data>
+  <data name="Session_GuidedOriginalChecks" xml:space="preserve"><value>确认图片内容和方向正确，没有缺少要保留的部分。检查后，再选择下方的确认操作。</value></data>
+  <data name="Session_CropDetailsLabel" xml:space="preserve"><value>坐标和键盘操作</value></data>
+  <data name="Session_ReviewToolsLabel" xml:space="preserve"><value>图片查看工具</value></data>
+  <data name="Session_CompletionSavedCount" xml:space="preserve"><value>此结果有 {0} 份保存记录。记录不代表当前文件已核实。</value></data>
+  <data name="Session_CompletionRecordsUnknown" xml:space="preserve"><value>保存记录正在读取或暂不可用，份数尚未核实。</value></data>
+  <data name="Session_SaveReviewResult" xml:space="preserve"><value>查看审核结果</value></data>
+  <data name="Session_SaveHideReview" xml:space="preserve"><value>返回结果预览</value></data>
+  <data name="Session_SaveCurrentResult" xml:space="preserve"><value>当前结果预览</value></data>
 </root>
