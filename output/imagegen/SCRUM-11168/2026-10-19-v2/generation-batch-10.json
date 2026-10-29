@@ -1,0 +1,24 @@
+[
+  {
+    "id": "png-save",
+    "group": "主流程",
+    "title": "保存已批准PNG",
+    "file": "44-png-save.png",
+    "intent": "PNG专属保存状态，无印刷尺寸、白墨或TIFF。",
+    "primary": "保存到所选文件夹",
+    "sourceRef": "D:/Repositories/printflow-Studio/output/imagegen/SCRUM-11168/2026-10-19-v1/06-save.png",
+    "prompt": "Edit this save screen into the PNG route variant. Exact route header 准备设计素材. Sidebar exactly six stages: 导入与路线,确认原图,图片增强,去除背景,裁切画布 all completed; 保存 PNG sixth active. Keep transparent fox, approval and 未保存 facts. Change filename to 山野狐狸_素材.png; replace TIFF / physical size / 300PPI metadata with PNG · 透明素材 ONLY. There must be NO TIFF, 印刷设置, 生成与审核, white ink, physical size, PPI anywhere. Keep folder D:\\示例输出. Primary 保存到所选文件夹, open folder disabled until saved. Small titlebar 视觉原型 v2. Preserve style, all other safe wording.",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-78e3ca49-468d-4a2b-ad49-dbd9d3fe06c9.png"
+  },
+  {
+    "id": "png-saved",
+    "group": "主流程",
+    "title": "PNG保存成功",
+    "file": "45-png-saved.png",
+    "intent": "素材已保存，但任务仍待完成；可核实文件位置。",
+    "primary": "完成任务",
+    "sourceRef": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-90a606ad-e946-4aac-b51c-165dc3821a9d.png",
+    "prompt": "Edit this success screen into PNG route variant ONLY. Exact route header 准备设计素材. Sidebar exactly six stages: 导入与路线,确认原图,图片增强,去除背景,裁切画布 all completed; 保存 PNG sixth active. Filename 山野狐狸_素材.png. Keep transparent fox, 文件保存：已核实 and 处理任务：待完成 as distinct facts; folder D:\\示例输出. Remove 添加另一尺寸 button because this material route has no print-size branch. Footer only 打开所在文件夹 secondary and 完成任务 primary. Absolutely NO TIFF, 印刷设置,生成与审核, physical dimensions, PPI or white ink anywhere. Preserve all rest and 视觉原型v2.",
+    "source": "C:\\Users\\admin\\.codex\\generated_images\\01a1510a-9045-7432-83d1-7b7fe52e0a35\\exec-5f46d0ac-0369-4d20-a2c0-7597cc921c58.png"
+  }
+]

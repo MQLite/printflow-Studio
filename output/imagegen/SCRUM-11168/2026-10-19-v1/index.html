@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>PrintFlow Studio · SCRUM-11168 视觉评审 v1</title>
+<style>
+:root{--bg:#f6f7f4;--surface:#fff;--ink:#202e2a;--muted:#65706b;--accent:#16765d;--line:#dce3de;--mint:#e8f4ef}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+a{color:var(--accent);text-underline-offset:4px}button{font:inherit;cursor:pointer}button,a{touch-action:manipulation}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:20px 4vw;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{font-size:19px;font-weight:700;letter-spacing:-.4px}.brand span{font-size:14px;font-weight:400;color:var(--muted);margin-left:12px}.badge{background:var(--mint);color:var(--accent);padding:5px 12px;border-radius:6px;font-size:13px}
+main{max-width:1700px;margin:0 auto;padding:30px 4vw 48px}.intro{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:24px}
+h1{font-size:29px;line-height:1.35;letter-spacing:-1px;margin:5px 0 10px}p{margin:6px 0;color:var(--muted)}.eyebrow{font-size:12px;letter-spacing:1.4px;color:var(--accent);font-weight:700}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 16px}nav button,.tools button{border:1px solid var(--line);border-radius:7px;color:var(--muted);background:var(--surface);padding:9px 15px;min-height:44px}
+nav button[aria-current="page"]{border-color:var(--accent);color:var(--accent);background:var(--mint);font-weight:700}nav button small{margin-right:8px;opacity:.65}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}figure img{display:block;width:100%;height:auto}figcaption{padding:15px 20px;border-top:1px solid var(--line)}
+figcaption strong{font-size:17px}figcaption p{margin-top:5px}.tools{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px;font-size:13px}.tools div{display:flex;gap:8px}.tools button{padding:5px 13px;min-height:36px}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}details{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:16px 20px}summary{cursor:pointer;font-weight:700}details>div{padding-top:15px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;vertical-align:top;padding:9px 7px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:500}.table-wrap{overflow:auto}
+.swatches{display:flex;gap:14px;flex-wrap:wrap}.swatch i{display:block;width:48px;height:32px;border:1px solid var(--line);border-radius:5px;margin-bottom:5px}.swatch{font-size:12px}
+h2{font-size:17px;margin:17px 0 6px}h3{font-size:14px;margin:14px 0 5px}ul{padding-left:20px;margin:7px 0;color:var(--muted)}code{font-size:12px;background:var(--bg);padding:2px 5px;border-radius:3px}
+.note{font-size:13px;margin-top:24px;line-height:1.8}.links{display:flex;gap:20px;flex-wrap:wrap}
+@media(max-width:850px){main{padding:24px 14px}.intro{display:block}.details-grid{grid-template-columns:1fr}header{padding:14px}.brand span{display:none}.tools{align-items:flex-start;flex-wrap:wrap}h1{font-size:25px}nav button{padding:8px 10px}}
+@media(prefers-reduced-motion:no-preference){nav button{transition:background .15s,color .15s}}
+@media print{header,nav,.tools{display:none}main{padding:0}details{break-inside:avoid}.details-grid{display:block}details{margin-top:15px}}
+</style>
+</head>
+<body><div style="padding:14px 4vw;background:#e8f4ef;color:#16765d;font:14px Microsoft YaHei,sans-serif">已补齐为扩展版：45 个页面状态、18 组流程。<a style="color:#16765d;font-weight:700" href="../2026-10-19-v2/index.html#home">打开完整原型图库 →</a>　<a href="index-v1.html">查看保留的首版</a></div>
+<header><div class="brand">PrintFlow Studio<span>SCRUM-11168 / 体验蓝图与统一视觉体系</span></div><span class="badge">视觉草案 · 待评审</span></header>
+<main>
+<div class="intro"><div><div class="eyebrow">GUIDED WORKSPACE · V1</div><h1>让每一步，只关注当前要做的事。</h1><p>六张 Imagegen 视觉原型，覆盖开始、选择、检查、调整、尺寸和保存。</p></div><div><p>2026-10-19 · 中文优先</p><a href="https://yituoxx.atlassian.net/browse/SCRUM-11168" target="_blank" rel="noopener">查看 Epic ↗</a></div></div>
+<nav aria-label="原型页面" id="screen-nav"><button type="button" data-index="0" aria-current="page"><small>01</small>开始任务</button><button type="button" data-index="1" aria-current="false"><small>02</small>选择路线</button><button type="button" data-index="2" aria-current="false"><small>03</small>审核图片</button><button type="button" data-index="3" aria-current="false"><small>04</small>调整裁切</button><button type="button" data-index="4" aria-current="false"><small>05</small>印刷尺寸</button><button type="button" data-index="5" aria-current="false"><small>06</small>保存结果</button></nav>
+<figure><a id="image-link" href="01-home.png" target="_blank" rel="noopener" aria-label="查看当前原型原图"><img id="screen-image" src="01-home.png" alt="开始任务视觉原型"></a><figcaption aria-live="polite"><strong id="screen-title">01 / 开始任务</strong><p id="screen-intent">突出单张图片导入；环境未检查时明确告知；继续任务为次级入口。</p><p><span id="screen-action">主操作：选择图片</span><br><span id="screen-hidden">本步收起：路线参数、图片审核、印刷尺寸、保存表单。</span></p></figcaption></figure>
+<div class="tools"><span>图内按钮为静态示意；点击图片可查看原尺寸。左右方向键可切换当前评审图。</span><div><button type="button" id="previous" aria-label="上一张原型">← 上一张</button><button type="button" id="next" aria-label="下一张原型">下一张 →</button></div></div>
+<div class="details-grid">
+<details><summary>视觉规范与组件方向</summary><div>
+<div class="swatches"><div class="swatch"><i style="background:#f6f7f4"></i>画布<br>#F6F7F4</div><div class="swatch"><i style="background:#fff"></i>工作区<br>#FFFFFF</div><div class="swatch"><i style="background:#202e2a"></i>主文字<br>#202E2A</div><div class="swatch"><i style="background:#16765d"></i>主操作<br>#16765D</div><div class="swatch"><i style="background:#e8f4ef"></i>当前步骤<br>#E8F4EF</div></div>
+<h2>层级与布局</h2><ul><li>顶栏：当前任务与路线；左侧：阶段进度；中央：当前任务；底部：固定操作栏。</li><li>正文优先使用微软雅黑 / Noto Sans SC；标题 24–30，正文 14–16，辅助文字 12–14（DIP 建议值，待真实窗口验证）。</li><li>间距使用 4 / 8 / 12 / 16 / 24 / 32；圆角约 10；主要操作高度至少 42。</li><li>每步一个推荐主操作；驳回、求助、停止和接管根据当前资格仍可达。</li></ul>
+<h2>控件状态草案</h2><div class="table-wrap"><table><thead><tr><th>状态</th><th>表现与约束</th></tr></thead><tbody><tr><td>正常 / 悬停</td><td>主按钮实色、悬停轻微加深；次级按钮描边；危险操作用明确动词。</td></tr><tr><td>键盘焦点</td><td>可见外轮廓，与选中状态区分；新审核不自动聚焦批准。</td></tr><tr><td>禁用</td><td>降低强调并解释原因；隐藏控件不得留在 Tab 或辅助技术操作面。</td></tr><tr><td>执行中</td><td>显示真实阶段；无可靠比例时不定进度，不显示虚构百分比。</td></tr><tr><td>错误 / 警告</td><td>图标与文字并用，就地说明；技术细节按需展开。</td></tr></tbody></table></div>
+<p>这些是待评审设计变量；生成图的细微像素或纹理并非组件实现规范。</p>
+</div></details>
+<details><summary>三条路线如何逐步展开</summary><div class="table-wrap"><table><thead><tr><th>路线</th><th>显示的阶段</th></tr></thead><tbody><tr><td>准备设计素材</td><td>导入/选路线 → 确认原图 → 增强/审核（可跳过处理）→ 去背景/审核（可跳过处理）→ 裁切/审核 → 批准 PNG 准备 → 保存 → 按原规则完成。没有印刷尺寸或 TIFF。</td></tr><tr><td>处理客户设计</td><td>导入/选路线 → 原图确认 → 增强/审核 → 去背景/审核 → 裁切/审核 → 尺寸 → 适用白墨分支 → Photoshop 生成/校验 → 最终审核 → 保存 → 按原规则完成。</td></tr><tr><td>生成打印 TIFF</td><td>导入/选路线 → 设计确认/必要源准备 → 尺寸 → 适用白墨分支 → Photoshop 生成/校验 → 最终审核 → 保存/另一尺寸 → 按原规则完成。没有美图或默认裁切。</td></tr><tr><td>PDF / PSD</td><td>仅在相应输入与合法时机显示页面/栅格准备或已有白墨选择；不在无关步骤铺开。</td></tr><tr><td>AI 设计</td><td>本版未绘制，不呈现未具备能力的可用承诺；由 SCRUM-11156/11166 的业务功能与独立适配项负责。</td></tr></tbody></table><p>侧栏表示用户阶段，不新增持久化业务步骤；“生成与审核”内部仍区分准备、处理、校验和人工审核。查看历史、修改重做与通过审批必须区分。</p></div></details>
+<details><summary>当前状态与信息显隐草案</summary><div class="table-wrap"><table><thead><tr><th>状态</th><th>当前应显示</th><th>收起 / 禁止</th></tr></thead><tbody><tr><td>导入前</td><td>单文件入口、环境摘要、继续任务。</td><td>所有任务参数与审批。</td></tr><tr><td>待输入</td><td>当前必填输入、即时反馈和确认。</td><td>未来步骤的可执行表单。</td></tr><tr><td>自动处理</td><td>当前阶段、真实状态、合法停止/接管。</td><td>审批、返回重做与未来步骤执行。</td></tr><tr><td>待审核</td><td>当前结果、对比与检查要点、合法通过/驳回/求助。</td><td>与审核无关的尺寸和保存表单。</td></tr><tr><td>失败 / 停止</td><td>原因、保留内容、错误码、当前可用下一步。</td><td>虚构重试资格和自动修复。</td></tr><tr><td>已移交</td><td>交接说明、保留状态、支持的显式回导或重入。</td><td>Photoshop 不支持的人工 TIFF 回导。</td></tr><tr><td>保存失败 / 不确定</td><td>批准和交付的分别状态、核实或合法重试。</td><td>交付成功、无证据的文件夹入口。</td></tr><tr><td>已完成</td><td>业务完成事实、独立保存记录、核实后的文件入口。</td><td>把完成直接等同已保存。</td></tr></tbody></table><p>该表是设计草案，未绘制的异常界面不能视为完成原型或验收。</p></div></details>
+<details><summary>设计取舍、复用与待评审范围</summary><div>
+<h2>交互结构取舍</h2><ul><li>纯线性向导：步骤简单，但多次审核、返回和多尺寸容易失去上下文。</li><li>保留集中工作区并美化：迁移较小，当前信息过多的问题仍然存在。</li><li>推荐步骤导航＋当前工作区＋固定操作栏：保持进度感，同时让每步聚焦；真实状态映射和安全返回需要后续设计验证。</li></ul>
+<h2>复用映射</h2><ul><li>SCRUM-11140：中文/英文术语；11143：当前状态和推荐动作；11146：路线说明。</li><li>11147：裁切调整；11148：同事修正；11149：审核检查要点；11150：尺寸解释。</li><li>11144/11145：精确批准结果导出与保存；11151：错误说明；11152/11153：环境及最近任务。</li><li>11154/11155：历史集成与新手验证缺口保留；旧 N1–N4、F6、审批/绑定/恢复缺口并未由这些图解决。</li><li>新层只改变视觉、布局和按状态展示；不重建审批、处理、交接、导出或业务状态机。</li></ul>
+<h2>本轮待评审</h2><ul><li>整体色彩和层级；左侧导航宽度；图片与检查提示比例；底部操作位置。</li><li>审核与保存、裁切与审批、查看与修改的表达是否清楚。</li><li>尚缺独立原图/运行/白墨/最终 TIFF、多尺寸、失败恢复、同事回导及辅助页面。</li><li>窗口 1000×700 和代表性 100%/125%/150% 缩放仍待工作站验证；当前图片不能证明响应式或键盘合格。</li></ul>
+<p>本版不是完整 Epic 验收，也不是可交互产品原型；产品实现与真人评审均未进行。</p>
+</div></details>
+</div>
+<p class="note">全部画面由内置 Imagegen 生成，狐狸为合成示例素材，示例尺寸/文件名/文件夹/状态不代表实际处理结果。图片中的检查圆圈是视觉提示；实施时应使用非交互要点图标，除非另有清单设计。</p>
+<div class="links"><a href="prototype-manifest.json">完整提示词、来源与设计清单</a><a href="verification.json">文件校验记录</a></div>
+</main>
+<script>
+"use strict";
+const screens=[{"id":"home","title":"开始任务","file":"01-home.png","intent":"突出单张图片导入；环境未检查时明确告知；继续任务为次级入口。","primary":"选择图片","hidden":"路线参数、图片审核、印刷尺寸、保存表单。"},{"id":"route","title":"选择路线","file":"02-route.png","intent":"原图导入后，按用途选择三条固定路线；当前选择尚未启动处理。","primary":"确认路线","hidden":"后续增强、裁切、白墨和保存表单。"},{"id":"review","title":"审核图片","file":"03-review.png","intent":"去背景审核示例：处理前在左，处理后在右；大图、检查要点和当前决策聚焦。","primary":"通过此结果","hidden":"尺寸输入与导出表单；通过不表示保存。"},{"id":"crop","title":"调整裁切","file":"04-crop.png","intent":"独立调整模式，突出边界、手柄、恢复自动建议和取消；使用新裁切后仍需审核。","primary":"使用此裁切","hidden":"通过审批、印刷参数与保存操作。"},{"id":"dimensions","title":"印刷尺寸","file":"05-print-size.png","intent":"指定高度、按比例计算宽度；区分实际输出尺寸和技术详情。透明背景修订版。","primary":"确认尺寸","hidden":"审批、文件保存与无关白墨选项。"},{"id":"save","title":"保存结果","file":"06-save.png","intent":"已批准与尚未保存分别显示；保存位置和文件名清晰；打开文件夹在保存后可用。","primary":"保存到所选文件夹","hidden":"新的审核命令与无关图像参数；保存不自动等于任务完成。"}];
+let current=0;
+const nav=document.getElementById("screen-nav");
+function show(index,updateHash=true){
+ current=(index+screens.length)%screens.length;
+ const s=screens[current];
+ document.getElementById("screen-image").src=s.file;
+ document.getElementById("screen-image").alt=s.title+"视觉原型："+s.intent;
+ document.getElementById("image-link").href=s.file;
+ document.getElementById("screen-title").textContent=String(current+1).padStart(2,"0")+" / "+s.title;
+ document.getElementById("screen-intent").textContent=s.intent;
+ document.getElementById("screen-action").textContent="主操作："+s.primary;
+ document.getElementById("screen-hidden").textContent="本步收起："+s.hidden;
+ nav.querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-current",i===current?"page":"false"));
+ if(updateHash)history.replaceState(null,"","#"+s.id);
+}
+nav.addEventListener("click",e=>{const b=e.target.closest("button[data-index]");if(b)show(Number(b.dataset.index));});
+document.getElementById("previous").addEventListener("click",()=>show(current-1));
+document.getElementById("next").addEventListener("click",()=>show(current+1));
+document.addEventListener("keydown",e=>{if(e.target.closest("input,textarea,select,summary,details"))return;if(e.key==="ArrowRight"){e.preventDefault();show(current+1);}if(e.key==="ArrowLeft"){e.preventDefault();show(current-1);}});
+const initial=screens.findIndex(s=>s.id===location.hash.slice(1));
+show(initial>=0?initial:0,false);
+</script>
+</body>
+</html>
+

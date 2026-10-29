@@ -1,0 +1,755 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {
+      "id": "customer",
+      "name": "客户设计 · 完整路线",
+      "route": "customer",
+      "nodes": [
+        "home",
+        "route",
+        "original",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review",
+        "background-ready",
+        "background-running",
+        "review",
+        "crop-review",
+        "dimensions",
+        "white-ink",
+        "preflight",
+        "tiff-running",
+        "tiff-review",
+        "save",
+        "saved",
+        "completed"
+      ]
+    },
+    {
+      "id": "asset",
+      "name": "设计素材 · PNG 路线",
+      "route": "asset",
+      "nodes": [
+        "home",
+        "route",
+        "original",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review",
+        "background-ready",
+        "background-running",
+        "review",
+        "crop-review",
+        "png-final",
+        "png-save",
+        "png-saved",
+        "home"
+      ],
+      "note": "增强/去背景/裁切为共享组件，侧栏按素材路线投影；PNG收尾、独立保存和成功页已单独绘制，素材路线没有印刷尺寸/白墨/TIFF。"
+    },
+    {
+      "id": "tiff",
+      "name": "完成设计 · 直接 TIFF",
+      "route": "tiff",
+      "nodes": [
+        "home",
+        "route",
+        "pdf-psd",
+        "original",
+        "dimensions",
+        "white-ink",
+        "preflight",
+        "tiff-running",
+        "tiff-review",
+        "save",
+        "saved",
+        "completed"
+      ],
+      "note": "PDF准备后需检查受管栅格图再确认尺寸；PNG等已完成设计不需要源文件准备。通用版式按直接TIFF五阶段投影，无美图或默认裁切。"
+    },
+    {
+      "id": "rejection",
+      "name": "审核驳回 → 新尝试",
+      "nodes": [
+        "enhance-review",
+        "enhance-ready",
+        "enhance-running",
+        "enhance-review"
+      ],
+      "note": "驳回不会自动生成新结果，进入可重试状态，用户显式开始新尝试。"
+    },
+    {
+      "id": "correction",
+      "name": "同事修正 → 显式回导",
+      "nodes": [
+        "review",
+        "correction-prepare",
+        "correction-wait",
+        "review",
+        "crop-review"
+      ],
+      "note": "回导必须对应当前有效请求与结果身份；回到背景审核并不自动通过。"
+    },
+    {
+      "id": "takeover",
+      "name": "Photoshop 接管与重入",
+      "nodes": [
+        "tiff-running",
+        "takeover",
+        "handed-off",
+        "preflight",
+        "tiff-running",
+        "tiff-review"
+      ]
+    },
+    {
+      "id": "stop",
+      "name": "请求停止 → 确认中断",
+      "nodes": [
+        "enhance-running",
+        "stopping",
+        "failure",
+        "enhance-ready"
+      ]
+    },
+    {
+      "id": "recovery",
+      "name": "重启后恢复任务",
+      "nodes": [
+        "home",
+        "recovery",
+        "failure",
+        "enhance-ready",
+        "enhance-running"
+      ]
+    },
+    {
+      "id": "save-failure",
+      "name": "保存失败 → 修正与重试",
+      "nodes": [
+        "save",
+        "save-failed",
+        "save",
+        "saved"
+      ]
+    },
+    {
+      "id": "uncertain",
+      "name": "保存待核实 → 核实结果",
+      "nodes": [
+        "save",
+        "save-uncertain",
+        "saved"
+      ],
+      "note": "核实失败可停留当前待核实状态；另存一份是独立分支，不能把核实按钮变为重新写文件。"
+    },
+    {
+      "id": "collision",
+      "name": "同名冲突 → 明确新名称",
+      "nodes": [
+        "save",
+        "collision",
+        "save",
+        "saved"
+      ]
+    },
+    {
+      "id": "return",
+      "name": "返回重做 → 重新审核",
+      "nodes": [
+        "dimensions",
+        "return-confirm",
+        "crop",
+        "crop-review",
+        "dimensions"
+      ]
+    },
+    {
+      "id": "draft",
+      "name": "离开未提交表单",
+      "nodes": [
+        "dimensions",
+        "draft-leave",
+        "dimensions"
+      ],
+      "note": "继续编辑保留本页输入；确认离开则丢弃本页草稿并返回来源，原业务任务不放弃。"
+    },
+    {
+      "id": "abandon",
+      "name": "放弃当前处理任务",
+      "nodes": [
+        "review",
+        "abandon",
+        "home"
+      ]
+    },
+    {
+      "id": "enlargement",
+      "name": "放大风险与本次授权",
+      "nodes": [
+        "dimensions",
+        "enlargement",
+        "dimensions",
+        "white-ink",
+        "preflight"
+      ],
+      "note": "授权针对当前具体尺寸；返回并修改尺寸使旧授权不可复用，确认尺寸仍是独立动作。"
+    },
+    {
+      "id": "import",
+      "name": "导入拒绝 → 重新选择",
+      "nodes": [
+        "home",
+        "input-error",
+        "home"
+      ]
+    },
+    {
+      "id": "utilities",
+      "name": "环境、设置和最近任务",
+      "nodes": [
+        "home",
+        "readiness",
+        "settings",
+        "recent",
+        "error-details"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "AI 条件接入与手动交接",
+      "nodes": [
+        "ai-planned"
+      ],
+      "note": "规划预览；开始生成禁用。仅设计模板、Prompt/附件、阶段和手动交接布局，不证明自动上传/生图/回收已实现。"
+    }
+  ],
+  "edges": {
+    "home": [
+      [
+        "演示导入一张图片",
+        "route"
+      ],
+      [
+        "导入校验失败",
+        "input-error"
+      ],
+      [
+        "查看需要恢复",
+        "recovery"
+      ],
+      [
+        "检查环境",
+        "readiness"
+      ],
+      [
+        "查看最近任务",
+        "recent"
+      ]
+    ],
+    "route": [
+      [
+        "客户设计：检查原图",
+        "original"
+      ],
+      [
+        "素材路线：查看PNG收尾",
+        "png-final"
+      ],
+      [
+        "直接TIFF：源文件准备",
+        "pdf-psd"
+      ]
+    ],
+    "original": [
+      [
+        "确认原图后选择增强",
+        "enhance-ready"
+      ],
+      [
+        "查看直接TIFF尺寸步骤",
+        "dimensions"
+      ],
+      [
+        "重新选择图片",
+        "home"
+      ]
+    ],
+    "enhance-ready": [
+      [
+        "开始增强（演示）",
+        "enhance-running"
+      ],
+      [
+        "跳过增强",
+        "background-ready"
+      ]
+    ],
+    "enhance-running": [
+      [
+        "模拟增强成功",
+        "enhance-review"
+      ],
+      [
+        "模拟增强失败",
+        "failure"
+      ],
+      [
+        "请求停止",
+        "stopping"
+      ]
+    ],
+    "enhance-review": [
+      [
+        "通过增强结果",
+        "background-ready"
+      ],
+      [
+        "驳回，准备新尝试",
+        "enhance-ready"
+      ]
+    ],
+    "background-ready": [
+      [
+        "开始去背景（演示）",
+        "background-running"
+      ],
+      [
+        "跳过处理：查看后续裁切",
+        "crop-review"
+      ]
+    ],
+    "background-running": [
+      [
+        "模拟处理成功",
+        "review"
+      ],
+      [
+        "模拟失败：查看错误模板",
+        "failure"
+      ],
+      [
+        "请求停止",
+        "stopping"
+      ]
+    ],
+    "review": [
+      [
+        "通过后查看裁切审核",
+        "crop-review"
+      ],
+      [
+        "请同事修正",
+        "correction-prepare"
+      ],
+      [
+        "驳回，重新选择去背景",
+        "background-ready"
+      ],
+      [
+        "放弃当前任务",
+        "abandon"
+      ]
+    ],
+    "crop-review": [
+      [
+        "通过裁切结果",
+        "dimensions"
+      ],
+      [
+        "调整裁切边界",
+        "crop"
+      ],
+      [
+        "素材路线：最终检查与保存",
+        "png-final"
+      ]
+    ],
+    "crop": [
+      [
+        "使用此裁切，回到待审核",
+        "crop-review"
+      ],
+      [
+        "取消调整，保留原结果",
+        "crop-review"
+      ]
+    ],
+    "dimensions": [
+      [
+        "确认尺寸后选择白墨",
+        "white-ink"
+      ],
+      [
+        "查看需要放大场景",
+        "enlargement"
+      ],
+      [
+        "返回重做确认",
+        "return-confirm"
+      ],
+      [
+        "离开未提交输入",
+        "draft-leave"
+      ]
+    ],
+    "white-ink": [
+      [
+        "确认白墨选择",
+        "preflight",
+        "white-input"
+      ]
+    ],
+    "preflight": [
+      [
+        "开始生成TIFF（演示）",
+        "tiff-running"
+      ],
+      [
+        "修改设置",
+        "dimensions"
+      ]
+    ],
+    "tiff-running": [
+      [
+        "模拟生成及校验成功",
+        "tiff-review"
+      ],
+      [
+        "在Photoshop中接管",
+        "takeover"
+      ],
+      [
+        "模拟失败",
+        "failure"
+      ],
+      [
+        "请求停止：查看状态模板",
+        "stopping"
+      ]
+    ],
+    "tiff-review": [
+      [
+        "批准此TIFF",
+        "save"
+      ],
+      [
+        "查看白墨覆盖",
+        "white-preview"
+      ],
+      [
+        "驳回：准备重新生成",
+        "preflight"
+      ]
+    ],
+    "white-preview": [
+      [
+        "批准完整TIFF",
+        "save"
+      ],
+      [
+        "返回颜色预览",
+        "tiff-review"
+      ],
+      [
+        "驳回：准备新尝试",
+        "preflight"
+      ]
+    ],
+    "png-final": [
+      [
+        "模拟确认与保存成功",
+        "png-saved"
+      ],
+      [
+        "仅通过，进入PNG保存",
+        "png-save"
+      ],
+      [
+        "调整裁切",
+        "crop"
+      ]
+    ],
+    "save": [
+      [
+        "模拟保存成功",
+        "saved"
+      ],
+      [
+        "模拟保存失败",
+        "save-failed"
+      ],
+      [
+        "模拟保存结果待核实",
+        "save-uncertain"
+      ],
+      [
+        "模拟同名冲突",
+        "collision"
+      ]
+    ],
+    "saved": [
+      [
+        "完成处理任务",
+        "completed"
+      ],
+      [
+        "添加另一尺寸",
+        "multi-size"
+      ]
+    ],
+    "completed": [
+      [
+        "开始新任务",
+        "home"
+      ],
+      [
+        "查看记录",
+        "recent"
+      ]
+    ],
+    "multi-size": [
+      [
+        "添加另一尺寸：设置尺寸",
+        "dimensions"
+      ],
+      [
+        "审核待处理尺寸",
+        "tiff-review"
+      ]
+    ],
+    "correction-prepare": [
+      [
+        "准备修正文件",
+        "correction-wait"
+      ],
+      [
+        "取消，返回审核",
+        "review"
+      ]
+    ],
+    "correction-wait": [
+      [
+        "模拟有效修正图片回导",
+        "review"
+      ],
+      [
+        "恢复自动处理前查看当前资格",
+        "background-ready"
+      ]
+    ],
+    "failure": [
+      [
+        "准备重试增强",
+        "enhance-ready"
+      ],
+      [
+        "查看错误详情",
+        "error-details"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "takeover": [
+      [
+        "继续自动处理（取消）",
+        "tiff-running"
+      ],
+      [
+        "确认接管",
+        "handed-off"
+      ]
+    ],
+    "handed-off": [
+      [
+        "恢复自动处理：准备新尝试",
+        "preflight"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "recovery": [
+      [
+        "打开增强中断任务",
+        "failure"
+      ],
+      [
+        "打开未完成修正导入",
+        "correction-wait"
+      ]
+    ],
+    "save-failed": [
+      [
+        "修正保存位置后重试",
+        "save"
+      ],
+      [
+        "查看错误详情",
+        "error-details"
+      ]
+    ],
+    "save-uncertain": [
+      [
+        "模拟再次核实成功",
+        "saved"
+      ],
+      [
+        "模拟仍未核实",
+        "save-uncertain"
+      ],
+      [
+        "明确另存一份",
+        "save"
+      ]
+    ],
+    "collision": [
+      [
+        "使用建议名称后确认保存",
+        "save"
+      ],
+      [
+        "返回修改名称",
+        "save"
+      ]
+    ],
+    "return-confirm": [
+      [
+        "取消，保留原状态",
+        "dimensions"
+      ],
+      [
+        "确认返回并重新裁切",
+        "crop"
+      ]
+    ],
+    "draft-leave": [
+      [
+        "继续编辑",
+        "dimensions"
+      ],
+      [
+        "放弃本页输入并离开",
+        "home"
+      ]
+    ],
+    "abandon": [
+      [
+        "继续当前任务",
+        "review"
+      ],
+      [
+        "确认放弃当前任务",
+        "home"
+      ]
+    ],
+    "enlargement": [
+      [
+        "返回调整尺寸",
+        "dimensions"
+      ],
+      [
+        "允许此次放大，回到尺寸确认",
+        "dimensions",
+        "enlargement"
+      ]
+    ],
+    "readiness": [
+      [
+        "查看设置",
+        "settings"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "settings": [
+      [
+        "返回来源任务（示例）",
+        "dimensions"
+      ],
+      [
+        "返回主页",
+        "home"
+      ]
+    ],
+    "recent": [
+      [
+        "继续审核",
+        "review"
+      ],
+      [
+        "查看修正任务",
+        "correction-wait"
+      ],
+      [
+        "查看恢复",
+        "recovery"
+      ],
+      [
+        "查看完成记录",
+        "completed"
+      ]
+    ],
+    "error-details": [
+      [
+        "返回增强失败示例",
+        "failure"
+      ]
+    ],
+    "input-error": [
+      [
+        "重新选择文件",
+        "home"
+      ]
+    ],
+    "pdf-psd": [
+      [
+        "模拟准备完成，检查栅格副本",
+        "original"
+      ],
+      [
+        "重新选择文件",
+        "home"
+      ]
+    ],
+    "ai-planned": [
+      [
+        "查看手动回收后的素材路线",
+        "png-final"
+      ]
+    ],
+    "stopping": [
+      [
+        "模拟确认停止，查看可用操作",
+        "failure"
+      ]
+    ],
+    "png-save": [
+      [
+        "模拟保存成功",
+        "png-saved"
+      ],
+      [
+        "返回素材最终检查",
+        "png-final"
+      ]
+    ],
+    "png-saved": [
+      [
+        "模拟完成任务，返回主页",
+        "home"
+      ]
+    ]
+  },
+  "notes": [
+    "本包为视觉和流程评审材料，事件按钮只切换情景，不执行处理、审批、写文件、打印或外部控制。",
+    "共享版式使用客户路线示例图，三路线差异以路线图/信息矩阵为准；素材PNG和直接TIFF源准备另有专属画面。",
+    "源准备完成后的栅格检查复用原图页布局，实施时必须显示真实页/尺寸；未准备前只显示文件占位。"
+  ]
+}

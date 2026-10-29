@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-19",
+  "scope": "Visual and flow prototypes only; none marked Done",
+  "records": [
+    {
+      "issueIdOrKey": "SCRUM-11174",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11174 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "issueIdOrKey": "SCRUM-11175",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11175 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "issueIdOrKey": "SCRUM-11176",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11176 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ],
+  "epicExpected": "In Progress",
+  "implementationTask": "SCRUM-11177 To Do"
+}

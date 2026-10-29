@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "epic": "SCRUM-11168",
+  "epicUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11168",
+  "date": "2026-10-19",
+  "timezone": "Pacific/Auckland",
+  "status": "VISUAL_DRAFT_AWAITING_REVIEW",
+  "generator": "built-in image_gen.imagegen",
+  "purpose": "现代化、中文优先、逐步引导的视觉方向评审；非可执行产品界面。",
+  "sourceCommit": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3",
+  "screens": [
+    {
+      "id": "home",
+      "title": "开始任务",
+      "file": "01-home.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-04ef02da-4d99-4ca8-a874-02839ca12a22.png",
+      "prompt": "Use case: ui-mockup\nAsset type: PrintFlow Studio / SCRUM-11168 / home-screen high-fidelity raster prototype.\nReference image role: the attached existing review-screen prototype is a DESIGN SYSTEM reference only. Create a NEW different screen in precisely the same visual system, not a collage or picture of that screen.\nPrimary request: ONE complete, front-on, edge-to-edge Windows desktop app screenshot, wide landscape 16:10. A calm premium modern professional creative tool for an inexperienced print-shop operator. Accurate, crisp Simplified Chinese, meticulous alignment, generous efficient spacing, CJK sans serif, matte off-white canvas, white surfaces, graphite text, forest-teal primary, thin dividers, 10-12px corners, very restrained shadows. The reference titlebar and \"PrintFlow Studio\" wordmark remain consistent, small \"视觉原型 v1\" label, neutral window controls. No browser, no physical device, no perspective, no outer presentation frame.\nScreen: clean task-focused home. A slim left navigation rail labeled simply with \"开始任务\" selected, \"最近任务\", \"环境检查\"; bottom links \"设置\" and \"帮助\". Main content starts with a small overline \"开始任务\", large heading \"从一张图片开始\", subtitle \"导入图片，PrintFlow 会一步一步引导你完成。\". Main central import area is a large beautifully restrained dashed-outline drop zone, small elegant file/image outline icon, exact headline \"将图片拖到这里\", short \"一次处理一张图片\", ONE solid teal main button \"选择图片\". Make this hero surface central and inviting with negative space, no giant decorative abstract artwork, no chart or promotional content.\nBelow or beside the main drop zone, a low-emphasis neutral environment summary strip with a hollow circle icon, exact title \"环境尚未检查\", short text \"开始自动处理前，需要检查工作站。\", outlined secondary action \"检查环境\". Do not show false green-ready status or pretend anything has been checked.\nLower main section is \"继续处理\", two compact cards each showing the same synthetic botanical orange fox artwork from the reference as a small thumbnail. Card one \"山野狐狸.png\", small amber badge \"待审核\", secondary \"继续审核\". Card two \"徽章设计.png\", neutral label \"有保存记录\", secondary \"查看记录\". These are understated recent-job entries, not a dashboard. Footer hint \"原图保留在本地。\".\nConstraints: show only home-relevant information. No route buttons before file import, no print-size fields, no TIFF form, no reviews or approvals on Home, no live production controls, no account/avatar, no business metrics, no orders, no batch features, no cloud promises. Do not add an enabled AI-generation action because that integration is conditional and unavailable in this core prototype. Output ONLY this polished practical UI screenshot.",
+      "intent": "突出单张图片导入；环境未检查时明确告知；继续任务为次级入口。",
+      "primary": "选择图片",
+      "hidden": "路线参数、图片审核、印刷尺寸、保存表单。"
+    },
+    {
+      "id": "route",
+      "title": "选择路线",
+      "file": "02-route.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-b85c5b20-0862-4d8c-8f95-d579dc779a8d.png",
+      "prompt": "Use case: ui-mockup\nAsset type: PrintFlow Studio / SCRUM-11168 / choose-route high-fidelity raster prototype.\nReference image role: the attached review-screen prototype is a DESIGN SYSTEM and synthetic artwork reference only. Create a NEW different screen consistent with it.\nPrimary request: ONE front-facing flat edge-to-edge complete Windows desktop app UI screenshot, wide landscape about 16:10. Same white and warm off-white surfaces, graphite text, forest-teal accent, restrained mint selection, CJK sans serif, thin borders, crisp accurate Simplified Chinese, sensible 10-12px corners. Same titlebar with original geometric mark and exact \"PrintFlow Studio\", small \"视觉原型 v1\", neutral window controls. No device frame, no browser or presentation backdrop.\nPage state: one image has ALREADY been imported and the operator is now explicitly choosing one of three existing workflows. Header task context exact \"山野狐狸.png\" and small \"本地任务\". A slim left step rail with heading \"开始新任务\", three stages: \"导入图片\" completed, \"选择路线\" CURRENT highlighted, \"确认原图\" upcoming; below subtle note \"后续步骤按路线展开\". Bottom rail links \"返回主页\" and \"帮助\".\nMain heading \"你希望得到什么结果？\"; supporting line \"根据这张图片的用途，选择一条处理路线。\". Under the heading a narrow source summary row showing a small thumbnail of the same orange fox and flowers on cream from the reference, filename \"山野狐狸.png\", quiet text \"已导入 · 原图未修改\". Keep source metadata lightweight and do not show technical hashes.\nThe central content is THREE visually elegant comparable vertical selection cards in one row, generous spacing, modest line icons, no giant illustrations. Card 1 exact title \"准备设计素材\", description \"照片或标志，处理成设计用 PNG。\", small lines \"输出 PNG\" and \"无需印刷尺寸\". Card 2 SELECTED with thin teal border, pale mint tint and top-right selected radio: title \"处理客户设计\", description \"已有排版，继续检查并制作打印文件。\", small lines \"输出 TIFF\" and \"需要印刷尺寸\". Card 3 title \"生成打印 TIFF\", description \"已完成设计，直接制作打印文件。\", small lines \"输出 TIFF\" and \"不经过美图处理\". These are choices with radio semantics, not three simultaneous command buttons. No imaginary speed scores or recommendations.\nBelow cards a subtle contextual sentence for selected card \"可逐步检查增强、去背景和裁切结果。\". Bottom fixed main footer: secondary back action \"重新选择图片\"; informational text \"确认路线后检查原图，尚未开始处理。\"; ONE solid teal primary \"确认路线\" with right arrow.\nConstraints: keep exactly the three named workflows. Choosing route must not start processing, approve an image, bypass original confirmation or promise a save. No print-size settings, no white-ink configuration, no export form on this step. No AI route, no batch/order/account functionality. Accurate Chinese labels; no filler text. Output ONLY this complete practical polished route-choice screenshot.",
+      "intent": "原图导入后，按用途选择三条固定路线；当前选择尚未启动处理。",
+      "primary": "确认路线",
+      "hidden": "后续增强、裁切、白墨和保存表单。"
+    },
+    {
+      "id": "review",
+      "title": "审核图片",
+      "file": "03-review.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-b6213bb4-53c1-4f78-ac3b-83af6f48693b.png",
+      "prompt": "Use case: ui-mockup\nAsset type: High-fidelity raster visual prototype for SCRUM-11168, PrintFlow Studio Windows desktop app, Simplified Chinese, design candidate v1.\nPrimary request: Create ONE exceptionally polished, practical modern desktop application screen for a step-by-step print-production assistant. This is a flat, front-on, edge-to-edge UI screenshot, wide landscape about 16:10. The entire image is the actual app window. No device, no browser, no desk, no perspective, no surrounding presentation board. It should look like a beautifully designed shippable professional creative desktop product, calm, humane, readable, meticulously aligned, with excellent typography and restrained visual density.\nDesign language: matte near-white #F6F7F4 canvas, white working surfaces, deep graphite #202E2A text, restrained forest-teal #16765D main accent, pale mint selected states, thin neutral dividers, 10-12px corner radii, discreet shadow only where needed. CJK sans-serif like Microsoft YaHei / Noto Sans SC. Generous but efficient spacing. Avoid purple gradients, glass, neon, enormous pills, excessive nested cards, marketing graphics or decorative charts.\nLayout: narrow top titlebar with a simple original geometric page mark plus exact wordmark \"PrintFlow Studio\" at left, quiet window controls at right. Below it a slim header showing task \"山野狐狸.png\", route \"处理客户设计\", and small \"本地任务\" indicator. Left 210px navigation column with exact heading \"处理步骤\" and vertical numbered progression: \"导入与路线\" completed, \"确认原图\" completed, \"图片增强\" completed, \"去除背景\" ACTIVE with small badge \"待审核\", \"裁切画布\" upcoming, \"印刷设置\" upcoming, \"生成与审核\" upcoming, \"保存结果\" upcoming. Completed stages have small checkmarks, active stage highlighted in pale mint, future stages muted and visibly not clickable. Bottom of left rail has subdued \"返回主页\" and \"帮助\".\nCurrent task in main content: large exact heading \"检查去背景结果\"; short sentence \"请确认主体完整，边缘没有残留。\"; small step overline \"当前步骤 · 去除背景\". Main workspace has a very large image comparison region, with two equal previews side by side, exact labels \"处理前\" on LEFT and \"处理后\" on RIGHT. Both previews contain the exact same synthetic print-ready decorative illustration: a bold vivid burnt-orange red fox surrounded by sage foliage and small cream wildflowers, outlined ink details, isolated emblem composition, high visual quality. Before preview has a neutral cream rectangular source background; after preview shows subtle light transparency checkerboard around the identical fox and foliage. The art is large, attractive, centered and unclipped. This synthetic image is sample print artwork, not customer data. A compact toolbar above the previews has \"并排对比\", zoom minus and plus, \"100%\", and \"适合窗口\". No general drawing or eraser tools.\nTo the right of comparison, a narrow unobtrusive contextual guidance column, exact title \"检查要点\" with three concise lines \"主体是否完整\" / \"边缘是否干净\" / \"透明区域是否正确\"; use small neutral outlined circles, not fake prechecked quality assurances. Underneath a lightweight hint \"不确定时，可请同事修正。\" The preview receives most of the screen's area.\nFixed footer across main content, separated by a hairline: quiet left action \"查看上一步\"; small informative sentence \"通过后进入裁切，当前结果尚未保存。\"; on right a subtle text action \"请同事修正\", an outlined secondary \"驳回此结果\", and ONE solid forest-teal primary button \"通过此结果\" with modest right arrow. Buttons around 42px high. Approve does NOT imply save. Critical distinction: the displayed step is BACKGROUND REMOVAL REVIEW, not completion and not final output.\nConstraints: render all quoted Simplified Chinese text accurately and sharply, no random extra copy, no nonsensical metrics, no charts, no order management, no avatars, no account features, no AI automatic approvals, no print/printer buttons, no filename paths or hashes in primary UI, no print dimensions form or export form on this review step, no fake completion percentage. Preserve safe visual separation between navigation, viewing, and approving. Use plenty of breathing room while remaining realistic for a 1000x700-or-larger desktop window. A small unobtrusive top label \"视觉原型 v1\" may distinguish the concept. Output only this one complete UI screenshot.",
+      "intent": "去背景审核示例：处理前在左，处理后在右；大图、检查要点和当前决策聚焦。",
+      "primary": "通过此结果",
+      "hidden": "尺寸输入与导出表单；通过不表示保存。"
+    },
+    {
+      "id": "crop",
+      "title": "调整裁切",
+      "file": "04-crop.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-9ee77970-7a41-4163-b04c-a45358770031.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 5 \"裁切画布\" active with small badge \"调整中\", previous stages completed, future stages muted. Main overline \"当前步骤 · 裁切画布\"; title \"调整图片边缘\"; subtitle \"拖动边框，保留你需要的完整图案。\".\nThe central and dominant region is ONE large checkerboard image canvas with the orange fox and flowers, generous surrounding transparent margins. A teal rectangular crop outline snugly but safely surrounds all subject and foliage; visible eight square edge/corner handles, subtle dimming outside crop. Show no dimensions/print parameters, no unrelated TIFF/export forms. A compact toolbar above has minus/plus, \"100%\", \"适合窗口\".\nNarrow right contextual column: exact heading \"裁切建议\"; short text \"自动建议已载入\"; simple explanatory line \"请勿切掉尾巴、花朵或细小边缘。\"; outlined secondary action \"恢复自动建议\"; quiet toggle/link \"比较裁切前后\". No fake prechecked inspection criteria and no numeric margin units.\nFixed footer: left secondary action \"取消调整\"; quiet sentence \"使用后仍需审核裁切结果。\"; ONE solid teal primary button \"使用此裁切\". Applying the crop is NOT approval and NOT saving. There is no \"通过\" or \"保存\" button in crop-edit mode. Keep the whole artwork clearly within the chosen crop boundary, not clipped. Exact Chinese copy and clean realistic control sizes.",
+      "intent": "独立调整模式，突出边界、手柄、恢复自动建议和取消；使用新裁切后仍需审核。",
+      "primary": "使用此裁切",
+      "hidden": "通过审批、印刷参数与保存操作。"
+    },
+    {
+      "id": "dimensions",
+      "title": "印刷尺寸",
+      "file": "05-print-size.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-002e5846-f1c4-49e8-8cb6-f4b999342fe7.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 6 \"印刷设置\" active, stages 1-5 completed, 7-8 future. Main overline \"当前步骤 · 印刷设置\"; title \"设置印刷尺寸\"; subtitle \"保持图片比例，选择你需要的实际大小。\".\nTwo balanced columns: left roughly 38% width has a clean focused form, right 62% is a large print preview. Form tabs \"预设尺寸\" and SELECTED \"自定义尺寸\". Radio selection \"指定高度\" selected; exact input \"200\" with suffix \"mm\". Read-only calculated row \"实际宽度\" value \"150 mm\". Subtle locked ratio indicator \"锁定比例 3:4\". Explain \"宽度会按原图比例计算。\". A simple result summary below has \"实际输出\" with \"150 × 200 mm\", \"输出像素\" with \"1772 × 2362 px\", \"生产分辨率\" with \"300 PPI\", and calm neutral positive label \"无需放大\". All values are coherent illustrative sample values, not measurements of actual files. A collapsed disclosure \"查看技术详情\" keeps further technical facts out of the main form. No unnecessary W1/CMYK form at this stage.\nPreview on right: fox artwork on a subtle light checkerboard within portrait white paper-like bounds at 3:4 aspect ratio, spacious background, thin measurement lines showing \"150 mm\" horizontal and \"200 mm\" vertical. Small label \"尺寸预览\" and modest zoom/fit controls. Image stays large and fully visible. Do not show completed TIFF or printing operation.\nFixed footer across main content: back action \"查看上一步\", quiet note \"确认尺寸后进入生成前检查，不会立即生成文件。\", ONE solid teal primary \"确认尺寸\". No approve or save buttons on this size-input step. No enlargement consent checkbox in a no-enlargement example. No arbitrary percentage or fake measured DPI. Render Chinese and all values accurately.",
+      "editPrompt": "Use case: precise-object-edit / ui-mockup\nEdit target: attached PrintFlow Studio size-settings UI prototype.\nMake ONE targeted correction ONLY: inside the portrait image's 150 mm by 200 mm print-preview rectangle, replace the cream/beige paper background behind the fox and foliage with the same subtle light-gray transparency checkerboard already visible around the rectangle. The fox and foliage have already had background removal; the preview must show them over checkerboard right up to all illustration edges, with no cream rectangular fill, no white/brown matte, and no flattening. Keep a very thin neutral rectangle border and all measurement lines.\nPreserve everything else EXACTLY: all window framing, titlebar, side navigation and checkmarks, active step, all Simplified Chinese text, input values 200/150, radio controls, 3:4 ratio, \"150 × 200 mm\", \"1772 × 2362 px\", \"300 PPI\", status, toolbar, footer, colors and spacings. Do not move, resize, redraw or alter the fox/flowers. Do not change any text. No additional elements. Output the corrected complete screenshot in the same dimensions.",
+      "intent": "指定高度、按比例计算宽度；区分实际输出尺寸和技术详情。透明背景修订版。",
+      "primary": "确认尺寸",
+      "hidden": "审批、文件保存与无关白墨选项。"
+    },
+    {
+      "id": "save",
+      "title": "保存结果",
+      "file": "06-save.png",
+      "source": "C:/Users/admin/.codex/generated_images/01a1510a-9045-7432-83d1-7b7fe52e0a35/exec-841af174-9198-4c80-9a9c-b387070284b3.png",
+      "prompt": "Use case: ui-mockup\nAsset type: SCRUM-11168 PrintFlow Studio high-fidelity raster design prototype v1.\nReference role: attached review-screen image is a visual-system and sample-artwork reference only. Generate ONE NEW different screen, NOT a collage or picture inside a picture.\nCanvas: one complete front-facing flat edge-to-edge Windows desktop app screenshot, landscape approximately 16:10. Exactly match reference's titlebar with simple original teal geometric mark, \"PrintFlow Studio\", small \"视觉原型 v1\", and window controls. Match off-white and white surfaces, graphite CJK sans serif, forest-teal accent, pale mint selections, discreet neutral dividers, restrained 10px corners. Crisp correct Simplified Chinese, meticulous alignment, practical professional creative product design. No device frame, browser, perspective, gradients, marketing graphics, charts, avatars or irrelevant forms.\nHeader context: exact filename \"山野狐狸.png\", route \"处理客户设计\", small \"本地任务\".\nLeft rail: heading \"处理步骤\", same eight macro stages \"导入与路线\", \"确认原图\", \"图片增强\", \"去除背景\", \"裁切画布\", \"印刷设置\", \"生成与审核\", \"保存结果\"; use small numbered circles, previous completed with checks, current highlighted mint, future muted. Bottom links \"返回主页\" and \"帮助\".\nArtwork: use the SAME synthetic vivid orange seated fox, sage foliage and cream wildflowers with fine ink lines from reference. This is fictional sample artwork. Preserve subject, style and proportions, never show erasing or painting tools. Only relevant step controls are visible. Output ONLY one complete polished UI screenshot.\n\nCurrent screen: stage 8 \"保存结果\" active, previous stages completed. Main overline \"当前步骤 · 保存结果\"; title \"保存已批准的结果\"; subtitle \"确认文件名和文件夹，再保存这份结果。\".\nMain layout: a large pleasant fox-result preview on subtle transparency checkerboard at left (about 52% width), to its right a clean precise save form (48%). Above form show two clearly separated status facts: a small approval check with exact \"此结果已批准\", and a neutral pill \"尚未保存\". These are mockup state labels, not a fabricated file-write receipt.\nForm fields: label \"文件名\", input exact \"山野狐狸_200mm.tif\"; label \"保存到\", folder field exact \"D:\\示例输出\" with outlined \"更改文件夹\". Small metadata line \"TIFF · 150 × 200 mm · 300 PPI\". A quiet note \"保存的是当前已批准的文件。\". A subdued disabled action \"打开所在文件夹\" with helper \"保存成功后可用\". No existing delivery receipt, no fake success check, no completed state and no re-approval checkbox. Filename and folder are synthetic visual examples only.\nBottom fixed main footer: left back action \"查看审核结果\"; quiet note \"批准与保存是两个独立状态。\"; ONE solid teal primary \"保存到所选文件夹\". Do NOT label this action complete or auto-complete the processing job. No print button, no second approve command, no cloud upload, no overcomplicated versions table or unrelated settings. Ensure accurate Chinese and legible full folder/filename text.",
+      "intent": "已批准与尚未保存分别显示；保存位置和文件名清晰；打开文件夹在保存后可用。",
+      "primary": "保存到所选文件夹",
+      "hidden": "新的审核命令与无关图像参数；保存不自动等于任务完成。"
+    }
+  ],
+  "design": {
+    "canvas": "#F6F7F4",
+    "surface": "#FFFFFF",
+    "ink": "#202E2A",
+    "muted": "#65706B",
+    "primary": "#16765D",
+    "selection": "#E8F4EF",
+    "border": "#DCE3DE",
+    "warning": "#FFF1C8",
+    "font": "Microsoft YaHei / Noto Sans SC",
+    "spacing": [
+      4,
+      8,
+      12,
+      16,
+      24,
+      32
+    ],
+    "cornerRadius": 10,
+    "controlMinHeight": 42,
+    "principles": [
+      "当前内容优先",
+      "一个推荐主操作",
+      "辅助操作按需可见",
+      "真实状态优先于装饰反馈",
+      "图片与决策突出"
+    ]
+  },
+  "coverage": {
+    "visualScreens": [
+      "Home",
+      "WorkflowSelection",
+      "BackgroundRemovalReview",
+      "TrimAdjustment",
+      "PrintDimensions",
+      "ApprovedResultSave"
+    ],
+    "notYetDrawn": [
+      "原图确认",
+      "运行/停止/接管",
+      "独立增强审核",
+      "白墨分支",
+      "最终TIFF审核",
+      "多尺寸列表",
+      "同事修正/回导",
+      "错误/恢复",
+      "保存失败/不确定",
+      "完成/最近任务",
+      "环境/设置/错误详情",
+      "AI条件接入"
+    ],
+    "interactionPrototype": false,
+    "completeEpicAcceptance": false,
+    "humanReview": false,
+    "physicalWindowDpiVerification": false,
+    "productImplementation": false
+  },
+  "reviewNotes": [
+    "图片是合成素材，文件名、输出路径、尺寸与状态是视觉示例，不是生产执行记录。",
+    "侧栏为用户阶段投影，不新增业务StepKind；处理和待审子状态仍分别受原工作流约束。",
+    "本轮未提交Git、未改产品源码，也未将Epic或子项标记Done。",
+    "路线选择图中顶部路线名代表当前草稿选择，不代表业务处理已开始。",
+    "审核图的圆形检查提示采用生成器的表现；实施时应使用非交互要点图标，除非另有清单设计。",
+    "图片示例外观仅用于布局评审，不能作为TIFF通道、CMYK或输出尺寸验证。"
+  ]
+}

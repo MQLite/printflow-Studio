@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-19",
+  "scope": "Visual prototypes and draft design only; no issue marked Done. SCRUM-11177 remains To Do.",
+  "records": [
+    {
+      "issueIdOrKey": "SCRUM-11168",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11168 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "issueIdOrKey": "SCRUM-11174",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11174 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "issueIdOrKey": "SCRUM-11175",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11175 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "issueIdOrKey": "SCRUM-11176",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11176 transitioned successfully\",\"transitionId\":21,\"statusName\":\"In Progress\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ]
+}

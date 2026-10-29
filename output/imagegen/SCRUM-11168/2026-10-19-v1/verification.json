@@ -1,0 +1,62 @@
+{
+  "status": "ASSET_CHECKS_PASSED_VISUAL_DRAFT",
+  "date": "2026-10-19",
+  "imageCount": 6,
+  "pngAndCopyHashes": "PASS",
+  "galleryJavaScriptSyntax": "PASS",
+  "imageGeneration": "built-in image_gen",
+  "visualInspection": "six images inspected in conversation; print-size transparency corrected",
+  "productTests": "NOT RUN - no product source changes",
+  "interactionAcceptance": "NOT RUN",
+  "actualWindowDpi": "NOT RUN",
+  "files": [
+    {
+      "file": "01-home.png",
+      "width": 1586,
+      "height": 992,
+      "bytes": 1341593,
+      "sha256": "3D3A3F8BC620ABB66E0573FBC2B00B74A4C393083248ADC879FAB74F96F687B4",
+      "sourceCopyVerified": true
+    },
+    {
+      "file": "02-route.png",
+      "width": 1585,
+      "height": 992,
+      "bytes": 1400033,
+      "sha256": "856C37E2BAC10C94A69A28D0551C12D021FDC72435BA0DC6D6EB3695E8D6447A",
+      "sourceCopyVerified": true
+    },
+    {
+      "file": "03-review.png",
+      "width": 1586,
+      "height": 992,
+      "bytes": 1887477,
+      "sha256": "92AFB4226841FC18EFD1928F6B41C56A8A1D003877C67002FC95E2C956BF9A92",
+      "sourceCopyVerified": true
+    },
+    {
+      "file": "04-crop.png",
+      "width": 1586,
+      "height": 992,
+      "bytes": 1673010,
+      "sha256": "BC130B0D71B36F5B8AFCD6A895B3AD4B40E578D53250873E2BEB451397E54EA3",
+      "sourceCopyVerified": true
+    },
+    {
+      "file": "05-print-size.png",
+      "width": 1584,
+      "height": 993,
+      "bytes": 1666656,
+      "sha256": "85B766358A32A74D7FDEB0F2C3623D55C49A7B076DCF233E15C5BE09D5F210ED",
+      "sourceCopyVerified": true
+    },
+    {
+      "file": "06-save.png",
+      "width": 1584,
+      "height": 993,
+      "bytes": 1635046,
+      "sha256": "75E6D22130B4D2825BA846CCA9FAE7AE97E1B545DD600A253AE824A1C26A334D",
+      "sourceCopyVerified": true
+    }
+  ]
+}
