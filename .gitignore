@@ -64,6 +64,14 @@ displays.json
 # and the three snapshots committed before this rule (no author data) stay tracked.
 /docs/codex/printflow-operator-ux-backlog/*_JIRA_READBACK.json
 
+# --- Jira status snapshots in UI evidence folders ---------------------------
+# Same hazard as the readbacks above: the SCRUM-11173 start/final snapshots carry
+# the reporter's name and email and Atlassian accountIds, and the U01 frozen
+# baseline (SCRUM-11200 checkout-bytes) copies them byte for byte. They stay on
+# this workstation only. Snapshots committed before this rule without author
+# data stay tracked; new ones are local by default.
+/output/**/jira-*-status.json
+
 # --- Owner-review packets (SCRUM-11152) -------------------------------------
 # Per-issue/per-run packet folders, their ZIPs and the LATEST.md pointer are local
 # deliverables. Only the convention README is tracked.
