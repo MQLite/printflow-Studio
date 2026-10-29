@@ -206,9 +206,9 @@ public sealed class SessionAccessibilityTests
     /// traversal, so the absence of <c>TabIndex</c> and of any non-default
     /// <c>KeyboardNavigation</c> mode is asserted here as well rather than assumed.
     /// <para>
-    /// The traversal itself is proven against the running application, by UI Automation, in the
-    /// live desktop record for this slice. This test is what keeps the screen from drifting
-    /// away from that proof between live runs.
+    /// Earlier slices have their own live desktop record. This migrated candidate still needs
+    /// fresh physical traversal and screen-reader acceptance; these structural properties do
+    /// not establish how a real window will move focus.
     /// </para>
     /// </remarks>
     [Fact]
@@ -226,9 +226,11 @@ public sealed class SessionAccessibilityTests
         order.Stops.ShouldContain("Session.SubmitManualResult");
         order.Stops.ShouldContain("Session.BackToHome");
 
-        // Submit Manual Result is reachable before the operator has to leave the screen.
+        // The approved fixed footer places Back on the left and the current action on the
+        // right. Default traversal follows that visual order; tabbing past Back does not
+        // invoke it. Both actions remain reachable without a confined focus scope.
         List<string> stops = [.. order.Stops];
-        stops.IndexOf("Session.SubmitManualResult").ShouldBeLessThan(stops.IndexOf("Session.BackToHome"));
+        stops.IndexOf("Session.BackToHome").ShouldBeLessThan(stops.IndexOf("Session.SubmitManualResult"));
 
         // A list of steps and a pair of preview images are there to be read, not operated.
         order.Stops.ShouldNotContain("Session.StepList");

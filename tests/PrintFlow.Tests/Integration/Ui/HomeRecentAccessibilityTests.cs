@@ -62,7 +62,7 @@ public sealed class HomeRecentAccessibilityTests
         using HomeScreenHarness harness = new();
         HomeViewModel home = await RemovableListAsync(harness, "a11y-row.png");
 
-        RenderResult<Rendered> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+        RenderResult<Rendered> rendered = RenderHistory(
             () => new HomeView { DataContext = home },
             WpfRendering.ReviewViewport,
             tree => new Rendered(
@@ -130,6 +130,7 @@ public sealed class HomeRecentAccessibilityTests
     [InlineData("zh-CN", "无预览")]
     public async Task The_missing_picture_state_is_translated(string culture, string expected)
     {
+        using OperatorCultureScope operatorCulture = new(culture);
         CultureInfo previous = CultureInfo.CurrentUICulture;
         try
         {
@@ -144,7 +145,7 @@ public sealed class HomeRecentAccessibilityTests
 
             harness.Home.RecentSessions.Single().HasThumbnail.ShouldBeFalse();
 
-            RenderResult<string> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+            RenderResult<string> rendered = RenderHistory(
                 () => new HomeView { DataContext = harness.Home },
                 WpfRendering.ReviewViewport,
                 tree => tree.OfType<TextBlock>()
@@ -178,7 +179,7 @@ public sealed class HomeRecentAccessibilityTests
         using HomeScreenHarness harness = new();
         HomeViewModel home = await RemovableListAsync(harness, "a11y-keyboard.png");
 
-        RenderResult<Traversal> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+        RenderResult<Traversal> rendered = RenderHistory(
             () => new HomeView { DataContext = home },
             WpfRendering.ReviewViewport,
             tree =>
@@ -210,7 +211,7 @@ public sealed class HomeRecentAccessibilityTests
         using HomeScreenHarness harness = new();
         HomeViewModel home = await RemovableListAsync(harness, "a11y-patterns.png");
 
-        RenderResult<IReadOnlyList<bool>> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+        RenderResult<IReadOnlyList<bool>> rendered = RenderHistory(
             () => new HomeView { DataContext = home },
             WpfRendering.ReviewViewport,
             tree => (IReadOnlyList<bool>)
@@ -302,6 +303,7 @@ public sealed class HomeRecentAccessibilityTests
             view.Measure(WpfRendering.ReviewViewport);
             view.Arrange(new Rect(0, 0, WpfRendering.ReviewViewport.Width, WpfRendering.ReviewViewport.Height));
             view.UpdateLayout();
+            ProcessingWorkspaceRolloutTests.Settle(view);
 
             // The row is found the way a driver finds it: by the name the operator gave the job.
             FrameworkElement row = Flatten(view).OfType<FrameworkElement>().Single(element =>
@@ -375,6 +377,18 @@ public sealed class HomeRecentAccessibilityTests
     // Helpers
     // -----------------------------------------------------------------------------------
 
+    internal static RenderResult<T> RenderHistory<T>(Func<UserControl> create, Size viewport, Func<RenderedTree, T> inspect) =>
+        WpfRendering.RenderExpectingNoBindingErrors(create, viewport, tree =>
+        {
+            Expander history = tree.OfType<Expander>().Single(element =>
+                AutomationProperties.GetAutomationId(element) == "Home.HistoryDetails");
+            IsOnScreen(history).ShouldBeTrue("history must be reachable through its visible disclosure");
+            ((IExpandCollapseProvider)new ExpanderAutomationPeer(history).GetPattern(PatternInterface.ExpandCollapse)!).Expand();
+            ProcessingWorkspaceRolloutTests.Settle(tree.Root);
+            history.IsExpanded.ShouldBeTrue();
+            return inspect(Flatten(tree.Root));
+        });
+
     private sealed record Rendered(
         IReadOnlyList<string> Ids, int ImagesWithSource, string Screen, IReadOnlyList<string> RowNames);
 
@@ -405,6 +419,7 @@ public sealed class HomeRecentAccessibilityTests
 
     private static async Task<IReadOnlyList<Labelled>> InCultureAsync(string fileName, string culture)
     {
+        using OperatorCultureScope operatorCulture = new(culture);
         CultureInfo previous = CultureInfo.CurrentUICulture;
         using HomeScreenHarness harness = new();
         try
@@ -412,7 +427,7 @@ public sealed class HomeRecentAccessibilityTests
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
             HomeViewModel home = await RemovableListAsync(harness, fileName);
 
-            return WpfRendering.RenderExpectingNoBindingErrors(
+            return RenderHistory(
                 () => new HomeView { DataContext = home },
                 WpfRendering.ReviewViewport,
                 tree => (IReadOnlyList<Labelled>)

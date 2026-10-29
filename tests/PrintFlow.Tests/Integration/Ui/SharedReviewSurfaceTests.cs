@@ -25,7 +25,7 @@ public sealed class SharedReviewSurfaceTests
     {
         WithSurface((model, view) =>
         {
-            ScrollViewer[] panes = Descendants<ScrollViewer>(view).ToArray();
+            ScrollViewer[] panes = PictureScrolls(view).ToArray();
             panes.Length.ShouldBe(2);
             panes[0].ScrollableWidth.ShouldNotBe(panes[1].ScrollableWidth);
             int events = 0;
@@ -60,7 +60,7 @@ public sealed class SharedReviewSurfaceTests
             AssertPositions(view, 0.8, 0.2);
             model.IsFitToViewport = true;
             Settle(view);
-            Descendants<ScrollViewer>(view).ShouldAllBe(s => s.ScrollableWidth == 0 && s.ScrollableHeight == 0);
+            PictureScrolls(view).ShouldAllBe(s => s.ScrollableWidth == 0 && s.ScrollableHeight == 0);
             model.ReviewViewport.HorizontalPosition.ShouldBe(0.8);
             model.IsFitToViewport = false;
             Settle(view);
@@ -82,7 +82,7 @@ public sealed class SharedReviewSurfaceTests
         {
             model.ZoomScale = 0.2;
             Settle(view);
-            ScrollViewer[] panes = Descendants<ScrollViewer>(view).ToArray();
+            ScrollViewer[] panes = PictureScrolls(view).ToArray();
             panes[1].ScrollableWidth.ShouldBe(0);
             panes[0].ScrollToHorizontalOffset(panes[0].ScrollableWidth * 0.75);
             Settle(view);
@@ -213,7 +213,7 @@ public sealed class SharedReviewSurfaceTests
             model.ReviewViewport.Mode = ReviewComparisonMode.Slider;
             model.ReviewViewport.SliderPosition = position;
             Settle(view);
-            Grid canvas = (Grid)Descendants<ScrollViewer>(view).Single().Content;
+            Grid canvas = (Grid)PictureScrolls(view).Single().Content;
             Pixel(canvas, 10, 10).ShouldBe(afterLeft ? Colors.Lime : Colors.Red);
             Pixel(canvas, 1500, 10).ShouldBe(afterRight ? Colors.Lime : Colors.Red);
         });
@@ -274,8 +274,8 @@ public sealed class SharedReviewSurfaceTests
 
             model.ReviewViewport.Mode = ReviewComparisonMode.SideBySide;
             Settle(view);
-            ScrollViewer before = Descendants<ScrollViewer>(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewBefore");
-            ScrollViewer after = Descendants<ScrollViewer>(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewAfter");
+            ScrollViewer before = PictureScrolls(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewBefore");
+            ScrollViewer after = PictureScrolls(view).Single(s => AutomationProperties.GetAutomationId(s) == "Session.ReviewAfter");
             before.TranslatePoint(new Point(), view).X.ShouldBeLessThan(after.TranslatePoint(new Point(), view).X);
 
             model.ReviewViewport.Mode = ReviewComparisonMode.Slider;
@@ -317,7 +317,7 @@ public sealed class SharedReviewSurfaceTests
     /// <summary>Samples the composed overlay canvas at fixed fractions of the picture width.</summary>
     private static void AssertSides(SharedReviewSurface view, int position)
     {
-        Grid canvas = (Grid)Descendants<ScrollViewer>(view).Single().Content;
+        Grid canvas = (Grid)PictureScrolls(view).Single().Content;
         double width = canvas.Width;
         double divider = width * position / 100;
         foreach (double fraction in new[] { 0.05, 0.375, 0.625, 0.95 })
@@ -435,9 +435,13 @@ public sealed class SharedReviewSurfaceTests
         Settle(view);
     }
 
+    private static IEnumerable<ScrollViewer> PictureScrolls(DependencyObject view) =>
+        Descendants<ScrollViewer>(view).Where(scroll => AutomationProperties.GetAutomationId(scroll) is
+            "Session.ReviewBefore" or "Session.ReviewAfter" or "Session.ReviewOverlay");
+
     private static void AssertPositions(DependencyObject view, double x, double y)
     {
-        foreach (ScrollViewer pane in Descendants<ScrollViewer>(view))
+        foreach (ScrollViewer pane in PictureScrolls(view))
         {
             if (pane.ScrollableWidth > 0) (pane.HorizontalOffset / pane.ScrollableWidth).ShouldBe(x, 0.005);
             if (pane.ScrollableHeight > 0) (pane.VerticalOffset / pane.ScrollableHeight).ShouldBe(y, 0.005);

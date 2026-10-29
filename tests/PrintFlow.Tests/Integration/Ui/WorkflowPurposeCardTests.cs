@@ -59,7 +59,7 @@ public sealed class WorkflowPurposeCardTests
                         choose.Focusable.ShouldBeTrue();
                         choose.IsDefault.ShouldBeFalse();
                         choose.Command.ShouldBeSameAs(model.SelectCommand);
-                        choose.Content.ShouldBe(model.SelectLabel);
+                        choose.Content.ShouldBe(((WorkflowChoice)choose.CommandParameter).Title);
                         Grid card = (Grid)choose.Parent;
                         TextBlock[] lines = [.. tree.OfType<TextBlock>()
                             .Where(t => ReferenceEquals(t.DataContext, choose.CommandParameter) && expected[i].Contains(t.Text))];
@@ -141,7 +141,7 @@ public sealed class WorkflowPurposeCardTests
                         model.Workflows[i].ShouldBeSameAs(original[i]);
                         buttons[i].CommandParameter.ShouldBeSameAs(original[i]);
                         AutomationProperties.GetName(buttons[i]).ShouldBe(original[i].Title);
-                        buttons[i].Content.ShouldBe(model.SelectLabel);
+                        buttons[i].Content.ShouldBe(original[i].Title);
                         string[] displayed = [.. tree.OfType<TextBlock>().Where(t => ReferenceEquals(t.DataContext, original[i])).Select(t => t.Text)];
                         foreach (string line in Expected(culture)[i]) displayed.ShouldContain(line);
                     }

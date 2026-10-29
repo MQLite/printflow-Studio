@@ -274,14 +274,13 @@ public sealed class FailureGuidanceLayoutTests
     private static double PictureRowHeight(RenderedTree tree)
     {
         if (tree.Root is not SessionScreenView) return 0;
-        Grid root = tree.OfType<Grid>().First(g => g.RowDefinitions.Count == 6);
-        return root.Children.OfType<Grid>().Single(g => Grid.GetRow(g) == 4).ActualHeight;
+        return tree.OfType<Grid>().Single(g =>
+            AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace").ActualHeight;
     }
 
     private static void Settle(RenderedTree tree)
     {
-        tree.Root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
-        tree.Root.UpdateLayout();
+        ProcessingWorkspaceRolloutTests.Settle(tree.Root);
     }
 
     private static Rect Bounds(FrameworkElement element, Visual root) =>

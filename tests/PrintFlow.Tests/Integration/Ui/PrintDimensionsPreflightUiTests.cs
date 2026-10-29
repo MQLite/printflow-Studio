@@ -50,6 +50,7 @@ public sealed class PrintDimensionsPreflightUiTests
                 PumpUntil(() => model.PreflightLoaded.IsCompleted);
                 model.PreflightLoaded.GetAwaiter().GetResult();
                 tree.Root.UpdateLayout();
+                ExpandTechnicalDetails(tree.Root);
                 AssertRow(tree.Root, "SourcePixels", $"600 × 300 {px}");
                 AssertRow(tree.Root, "PrintSize", $"25.4 × 12.7 {mm}");
                 AssertRow(tree.Root, "OutputPixels", $"300 × 150 {px}");
@@ -111,12 +112,17 @@ public sealed class PrintDimensionsPreflightUiTests
             state = await Execute(h.Sessions, id, new WorkflowCommand.Approve(StepKind.Trim, state.CurrentArtefact!.Sha256));
         }
         state = await Execute(h.Sessions, id, new WorkflowCommand.SetCustomTargetEdgeSize(TargetEdge.Width, 25.4m));
+        // The committed size leads to the white-ink page. Make the required explicit
+        // choice before checking the persisted facts on the generation/preflight page.
+        state = await Execute(h.Sessions, id,
+            new WorkflowCommand.SelectWhiteUnderbaseBranch(WhiteUnderbaseBranch.W1_1px, "ordinary design"));
         // New service and view model: no editor or process-local geometry can supply these values.
         RestartedSession restarted = h.RestartSession(new RecordingNavigation());
         state = (await restarted.Sessions.LoadAsync(id, CancellationToken.None)).Value;
         WpfRendering.RenderExpectingNoBindingErrors(() => CreateView(h, state, "en-US"),
             WpfRendering.ReviewViewport, tree =>
             {
+                ExpandTechnicalDetails(tree.Root);
                 AssertRow(tree.Root, "GraphicBounds", artwork, label);
                 AssertRow(tree.Root, "FinalCanvas", canvas);
                 AssertRow(tree.Root, "SourcePixels", canvas);
@@ -234,11 +240,20 @@ public sealed class PrintDimensionsPreflightUiTests
     private static void AssertRow(DependencyObject root, string key, string value, string? label = null)
     {
         TextBlock block = Control<TextBlock>(root, key);
+        block.BringIntoView();
+        ProcessingWorkspaceRolloutTests.Settle((FrameworkElement)root);
+        GuidedSessionProjectionTests.Shown(block).ShouldBeTrue();
         block.Text.ShouldBe(value);
         TextBlockAutomationPeer peer = new(block);
         peer.GetAutomationId().ShouldBe("Session.PrintDimensions." + key);
         peer.GetName().ShouldEndWith(": " + value);
         if (label is not null) peer.GetName().ShouldBe(label + ": " + value);
+    }
+
+    private static void ExpandTechnicalDetails(UserControl root)
+    {
+        Control<Expander>(root, "TechnicalDetails").IsExpanded = true;
+        ProcessingWorkspaceRolloutTests.Settle(root);
     }
 
     private static T Control<T>(DependencyObject root, string key) where T : DependencyObject =>

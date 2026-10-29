@@ -28,6 +28,7 @@ public sealed class OperatorWave1AHostTests
     [Fact]
     public async Task Nonvisible_seed_and_real_command_persistence_smoke()
     {
+        using OperatorCultureScope culture = new();
         using SyntheticHostData data = new();
         await data.NewReview();
         string first = data.Screen.ReviewTargetIdentity!;
@@ -54,7 +55,9 @@ public sealed class OperatorWave1AHostTests
             WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = data.Screen },
                 WpfRendering.ReviewViewport, tree =>
                 {
-                    ReviewApprovalButton approve = tree.OfType<ReviewApprovalButton>().Single();
+                    ReviewApprovalButton approve = tree.OfType<ReviewApprovalButton>()
+                        .Single(button => AutomationProperties.GetAutomationId(button) == "Session.Approve");
+                    GuidedSessionProjectionTests.Shown(approve).ShouldBeTrue();
                     approve.Command.ShouldBeSameAs(data.Screen.ApproveCommand);
                     approve.TargetIdentity.ShouldBe(data.Screen.ReviewTargetIdentity);
                     approve.IsDefault.ShouldBeFalse();

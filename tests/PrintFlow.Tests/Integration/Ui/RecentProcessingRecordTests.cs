@@ -310,11 +310,17 @@ public sealed class RecentProcessingRecordTests
             await harness.Home.RefreshCommand.ExecuteAsync(null);
             RecentSessionRow row = harness.Home.RecentSessions.Single(candidate => candidate.Id == review.Id);
             row.State.ShouldBe(Strings.Session_StatusCompleted);
-            RenderResult<bool> rendered = WpfRendering.RenderExpectingNoBindingErrors(
+            RenderResult<bool> rendered = HomeRecentAccessibilityTests.RenderHistory(
                 () => new HomeView { DataContext = harness.Home }, WpfRendering.ReviewViewport,
-                tree => tree.OfType<TextBlock>().Any(text =>
-                    text.Text.Contains("Saved previously", StringComparison.Ordinal) ||
-                    text.Text.Contains("曾保存过", StringComparison.Ordinal)));
+                tree =>
+                {
+                    var history = tree.OfType<TextBlock>().Single(text =>
+                        AutomationProperties.GetAutomationId(text) == "Home.RecentSaveHistory");
+                    GuidedSessionProjectionTests.Shown(history).ShouldBeTrue();
+                    history.Text.ShouldBe(row.SaveHistoryText);
+                    return history.Text.Contains("Saved previously", StringComparison.Ordinal) ||
+                        history.Text.Contains("保存记录", StringComparison.Ordinal);
+                });
             rendered.Facts.ShouldBeTrue();
         }
         finally { FinalSaveFixtures.Remove(folder); }

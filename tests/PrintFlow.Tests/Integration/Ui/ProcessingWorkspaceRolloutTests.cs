@@ -298,10 +298,15 @@ public sealed class ProcessingWorkspaceRolloutTests
             Size size = new(width, height);
             WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = model }, size, tree =>
             {
-                var toggle = Find<Button>(tree, "Session.ReviewToolsToggle");
-                Inside(toggle, tree.Root);
                 tree.OfType<Image>().Where(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i))
                     .Max(i => i.ActualHeight).ShouldBeGreaterThan(100);
+                var comparison = Find<Button>(tree, "Session.Save.ReviewResult");
+                Inside(comparison, tree.Root);
+                comparison.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Settle(tree.Root);
+                var toggle = Find<Button>(tree, "Session.ReviewToolsToggle");
+                toggle.BringIntoView(); Settle(tree.Root);
+                Inside(toggle, tree.Root);
                 var viewport = model.ReviewViewport;
                 var mode = viewport.Mode;
                 var background = viewport.Background;
@@ -310,11 +315,33 @@ public sealed class ProcessingWorkspaceRolloutTests
                 GuidedSessionProjectionTests.Shown(Find<Button>(tree, "Session.ReviewActualSize")).ShouldBeTrue();
                 All(tree.Root).OfType<RadioButton>().Where(b => AutomationProperties.GetAutomationId(b).StartsWith("Session.ReviewBackground"))
                     .ShouldAllBe(b => GuidedSessionProjectionTests.Shown(b));
+                // ReloadImages replaces the original visual nodes. Inspect the current tree,
+                // and prove the expanded toolbar leaves a real, unclipped comparison picture.
+                var images = All(tree.Root).OfType<Image>()
+                    .Where(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i)).ToArray();
+                images.ShouldNotBeEmpty();
+                images.Max(i => i.ActualWidth * i.ActualHeight).ShouldBeGreaterThanOrEqualTo(10_000,
+                    "expanding inspection tools must preserve a usable comparison picture");
+                foreach (var image in images) Inside(image, tree.Root);
+                foreach (var tool in All(tree.Root).OfType<FrameworkElement>().Where(element =>
+                    AutomationProperties.GetAutomationId(element) == "Session.ReviewActualSize" ||
+                    AutomationProperties.GetAutomationId(element).StartsWith("Session.ReviewBackground")))
+                {
+                    tool.BringIntoView(); Settle(tree.Root); Inside(tool, tree.Root);
+                }
                 viewport.Mode.ShouldBe(mode); viewport.Background.ShouldBe(background);
                 model.CanApprove.ShouldBeFalse();
                 return true;
             });
-            Capture(model, size, "completed-" + language);
+            Capture(model, size, "completed-" + language, tree =>
+            {
+                Find<Button>(tree, "Session.Save.ReviewResult").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Settle(tree.Root);
+                var tools = Find<Button>(tree, "Session.ReviewToolsToggle");
+                tools.BringIntoView(); Settle(tree.Root);
+                tools.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Settle(tree.Root);
+            });
             var after = (await h.Repository.LoadAsync(model.Id, default)).Value!;
             after.Reviews.ShouldBe(before.Reviews); after.Revisions.ShouldBe(before.Revisions); after.Session.ShouldBe(before.Session);
         }

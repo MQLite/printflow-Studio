@@ -125,7 +125,7 @@ public sealed class ColleagueCorrectionUiTests
 
     [Theory]
     [InlineData("en", "Trim")]
-    [InlineData("zh-CN", "裁边")]
+    [InlineData("zh-CN", "裁去多余边缘")]
     public async Task A_successful_import_shows_R2_for_review_naming_the_next_step_and_exact_approval_continues(string language, string trim)
     {
         using OperatorCultureScope culture = new(language);

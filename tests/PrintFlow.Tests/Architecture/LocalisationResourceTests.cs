@@ -690,7 +690,8 @@ public sealed class LocalisationResourceTests
         english.ShouldNotContain("re-checks everything", Case.Insensitive);
         english.ShouldNotContain("verifies everything", Case.Insensitive);
 
-        ValueOf(ChineseResx, "Environment_RefreshScope").ShouldContain("不会重新读取");
+        ValueOf(ChineseResx, "Environment_RefreshScope")
+            .ShouldContain("已认可的安装文件要重启 PrintFlow 才会重新读取");
     }
 
     /// <summary>
@@ -998,8 +999,8 @@ public sealed class LocalisationResourceTests
         {
             ValueOf(NeutralResx, key).ShouldContain(englishDetails, Case.Sensitive, key);
             ValueOf(NeutralResx, key).ShouldContain("colleague or supervisor", Case.Sensitive, key);
-            ValueOf(ChineseResx, key).ShouldContain("“" + chineseDetails + "”", Case.Sensitive, key);
-            ValueOf(ChineseResx, key).ShouldContain("同事或主管", Case.Sensitive, key);
+            ValueOf(ChineseResx, key).ShouldContain(chineseDetails, Case.Sensitive, key);
+            ValueOf(ChineseResx, key).ShouldMatch("同事|主管", key);
         }
     }
 

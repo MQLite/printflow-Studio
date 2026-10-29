@@ -631,6 +631,24 @@ public sealed record SessionView(
 {
     public IReadOnlyList<SessionHistoryView> History { get; init; } = [];
 
+    /// <summary>The actual pre-trim input of the approved trim promoted to the current PNG.</summary>
+    public ArtefactView? ApprovedPngReviewInput
+    {
+        get
+        {
+            if (WorkflowType != WorkflowType.PrepareAsset || CurrentArtefact?.Facts.Format != ImageFormat.Png ||
+                UpstreamArtefact is not { } reviewed ||
+                !History.Any(step => step.Step == StepKind.ApprovedPngExport &&
+                    step.Revisions.Any(revision => revision.Id == CurrentArtefact.RevisionId)) ||
+                !History.Any(step => step.Step == StepKind.Trim && step.Revisions.Any(revision =>
+                    revision.Id == reviewed.RevisionId && revision.ReviewState == ReviewState.Approved && revision.IsValid)) ||
+                History.SelectMany(step => step.Revisions).FirstOrDefault(revision => revision.Id == reviewed.SourceRevisionId) is not { } source)
+                return null;
+
+            return new ArtefactView(source.Id, source.FileName, source.Facts, false, source.SourceId);
+        }
+    }
+
     /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
     public SessionCleanupResult? CompletionCleanup { get; init; }
 

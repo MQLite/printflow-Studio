@@ -43,6 +43,13 @@ public sealed class SharedReviewSurface : UserControl
     private bool _reviewComparisonExpanded;
     private bool ShowsResultOnly => ResultOnly && !_reviewComparisonExpanded;
     private readonly StackPanel _toolbar = new() { Margin = new Thickness(0, 0, 0, 6) };
+    private readonly ScrollViewer _toolbarScroll = new()
+    {
+        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+        HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+        Focusable = false,
+        IsTabStop = false,
+    };
     private readonly WrapPanel _zoomTools = new();
     private readonly WrapPanel _inspectionTools = new();
     private readonly Grid _host = new();
@@ -123,11 +130,14 @@ public sealed class SharedReviewSurface : UserControl
             UpdateSizes();
         };
         _zoomTools.Children.Add(_inspectionToggle);
-        DockPanel.SetDock(_toolbar, Dock.Top);
-        _root.Children.Add(_toolbar);
+        AutomationProperties.SetAutomationId(_toolbarScroll, "Session.ReviewToolsScroll");
+        _toolbarScroll.Content = _toolbar;
+        DockPanel.SetDock(_toolbarScroll, Dock.Top);
+        _root.Children.Add(_toolbarScroll);
         _root.Children.Add(_host);
         Content = _root;
         _host.SizeChanged += (_, _) => UpdateSizes();
+        SizeChanged += (_, _) => UpdateSizes();
         DataContextChanged += (_, _) => Attach(DataContext as SessionViewModel);
         Unloaded += (_, _) => Attach(null);
         Loaded += (_, _) => Attach(DataContext as SessionViewModel);
@@ -335,6 +345,11 @@ public sealed class SharedReviewSurface : UserControl
 
     private void UpdateSizes()
     {
+        // A wrapped optional toolbar must leave room for the comparison it operates on.
+        // The remaining tools stay reachable through their own scroll region at small sizes.
+        _toolbarScroll.MaxHeight = _compactToolsMode && _root.ActualHeight > 0
+            ? Math.Max(48, _root.ActualHeight - _reviewToggle.DesiredSize.Height - 196)
+            : double.PositiveInfinity;
         if (_model is null || _images.Count == 0 || _host.ActualWidth <= 0 || _host.ActualHeight <= 0) return;
         double width = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelWidth));
         double height = _panes.Max(p => (double)Math.Max(1, p.PayloadPixelHeight));

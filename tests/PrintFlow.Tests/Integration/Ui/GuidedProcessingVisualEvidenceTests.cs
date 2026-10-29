@@ -152,18 +152,35 @@ public sealed class GuidedProcessingVisualEvidenceTests
                     }).ToArray(),
                 Images = tree.OfType<Image>().Where(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i))
                     .Select(i => Bounds(i, tree.Root)).ToArray(),
-                Summary = tree.OfType<TextBlock>().Where(t => AutomationProperties.GetAutomationId(t).StartsWith("Session.PrintSummary.") && GuidedSessionProjectionTests.Shown(t))
-                    .Select(t => new { Id = AutomationProperties.GetAutomationId(t), t.Text, Bounds = Bounds(t, tree.Root) }).ToArray(),
                 WhiteChoices = tree.OfType<ListBox>().Where(b => AutomationProperties.GetAutomationId(b) == "Session.WhiteUnderbaseChoices" && GuidedSessionProjectionTests.Shown(b))
                     .Select(b => Bounds(b, tree.Root)).ToArray(),
                 Page = model.GuidedPage.ToString(),
                 ProcessingState = tree.OfType<TextBlock>().FirstOrDefault(t => AutomationProperties.GetAutomationId(t) == "Session.Processing.State")?.Text,
                 CustomInputs = tree.OfType<TextBox>().Where(t => AutomationProperties.GetAutomationId(t) == "Session.PrintDimensions.TargetMillimetres" && GuidedSessionProjectionTests.Shown(t))
                     .Select(t => new { Bounds = Bounds(t, tree.Root), InScroll = tree.OfType<ScrollViewer>().Where(s => s.IsAncestorOf(t)).All(s => Bounds(t, s).Bottom <= s.ViewportHeight + 0.5) }).ToArray(),
+                // U06 puts these facts in a scrollable details column. Verify every full
+                // sentence through that path, retaining both root and scroll clipping bounds.
+                Summary = tree.OfType<TextBlock>().Where(t => AutomationProperties.GetAutomationId(t).StartsWith("Session.PrintSummary.") && GuidedSessionProjectionTests.Shown(t))
+                    .Select(t =>
+                    {
+                        t.BringIntoView();
+                        ProcessingWorkspaceRolloutTests.Settle(tree.Root);
+                        return new
+                        {
+                            Id = AutomationProperties.GetAutomationId(t), t.Text, Bounds = Bounds(t, tree.Root),
+                            WithinScroll = tree.OfType<ScrollViewer>().Where(s => s.IsAncestorOf(t)).All(s =>
+                            {
+                                Rect inside = Bounds(t, s);
+                                return inside.Top >= -0.5 && inside.Bottom <= s.ViewportHeight + 0.5
+                                    && inside.Left >= -0.5 && inside.Right <= s.ViewportWidth + 0.5;
+                            }),
+                        };
+                    }).ToArray(),
             };
             }
             finally { tree.Root.DataContext = null; tree.Root.UpdateLayout(); }
         });
+        WriteEvidence();
         foreach (string id in essential)
         {
             var action = result.Facts.Actions.Single(a => a.Id == id);
@@ -173,7 +190,11 @@ public sealed class GuidedProcessingVisualEvidenceTests
         }
         foreach (var choice in result.Facts.WhiteChoices) Inside(choice, viewport, state + ": explicit white-ink choices");
         if (state == "stopping") result.Facts.ProcessingState.ShouldBe(PrintFlow.App.Resources.Strings.Resolve("Session_GuidedStopping"));
-        foreach (var text in result.Facts.Summary) Inside(text.Bounds, viewport, state + ": " + text.Id);
+        foreach (var text in result.Facts.Summary)
+        {
+            Inside(text.Bounds, viewport, state + ": " + text.Id);
+            text.WithinScroll.ShouldBeTrue(state + ": " + text.Id + " must be reachable without clipping");
+        }
         if (state is "dimensions" or "white-ink" or "preflight")
             result.Facts.Images.Max(r => r.Height).ShouldBeGreaterThan(100, state + ": print preparation keeps a usable image preview");
         foreach (var input in result.Facts.CustomInputs)
@@ -181,21 +202,25 @@ public sealed class GuidedProcessingVisualEvidenceTests
             Inside(input.Bounds, viewport, state + ": custom-size input");
             input.InScroll.ShouldBeTrue(state + ": current input must be above the fold");
         }
-        string? directory = Environment.GetEnvironmentVariable("PF_11171_CAPTURE_DIR");
-        if (string.IsNullOrWhiteSpace(directory)) return;
-        string? onlyState = Environment.GetEnvironmentVariable("PF_11171_CAPTURE_STATE");
-        if (!string.IsNullOrWhiteSpace(onlyState) && onlyState != state) return;
-        Directory.CreateDirectory(directory);
-        string stem = $"{state}-{viewport.Width:0}x{viewport.Height:0}";
-        string path = Path.Combine(directory, stem + ".png");
-        WpfRendering.CapturePng(create, viewport, path, tree => Settle(tree.Root));
-        File.WriteAllText(Path.Combine(directory, stem + ".json"), JsonSerializer.Serialize(new
+        void WriteEvidence()
         {
-            State = state, Language = "zh-CN", WidthDip = viewport.Width, HeightDip = viewport.Height, Dpi = 96,
-            CaptureKind = "Synthetic offscreen WPF RenderTargetBitmap; no App/Window.Show, desktop input or real external application",
-            ScreenshotSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))), EssentialActions = essential,
-            Measurements = result.Facts,
-        }, new JsonSerializerOptions { WriteIndented = true }));
+            string? directory = Environment.GetEnvironmentVariable("PF_11171_CAPTURE_DIR");
+            if (string.IsNullOrWhiteSpace(directory)) return;
+            string? onlyState = Environment.GetEnvironmentVariable("PF_11171_CAPTURE_STATE");
+            if (!string.IsNullOrWhiteSpace(onlyState) && onlyState != state) return;
+            Directory.CreateDirectory(directory);
+            string stem = $"{state}-{viewport.Width:0}x{viewport.Height:0}";
+            string path = Path.Combine(directory, stem + ".png");
+            WpfRendering.CapturePng(create, viewport, path, tree => Settle(tree.Root));
+            File.WriteAllText(Path.Combine(directory, stem + ".json"), JsonSerializer.Serialize(new
+            {
+                State = state, Language = "zh-CN", WidthDip = viewport.Width, HeightDip = viewport.Height, Dpi = 96,
+                CaptureKind = "Synthetic offscreen WPF RenderTargetBitmap; no App/Window.Show, desktop input or real external application",
+                SummaryGeometry = "Each summary measured after BringIntoView; screenshot uses the initial scroll position. Assertions may fail after capture; consult TRX.",
+                ScreenshotSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))), EssentialActions = essential,
+                Measurements = result.Facts,
+            }, new JsonSerializerOptions { WriteIndented = true }));
+        }
     }
 
     private static Rect Bounds(FrameworkElement item, Visual root) => item.TransformToAncestor(root).TransformBounds(new Rect(item.RenderSize));

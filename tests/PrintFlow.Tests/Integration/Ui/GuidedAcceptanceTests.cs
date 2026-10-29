@@ -139,7 +139,9 @@ public sealed class GuidedAcceptanceTests
                 {
                     var item = facts.Single(f => f.Id == id);
                     item.IsEnabled.ShouldBeTrue(state + ": " + id);
-                    Inside(item.Bounds, viewport); item.WithinScroll.ShouldBeTrue(state + ": " + id);
+                    Inside(item.Bounds, viewport); item.WithinScroll.ShouldBeTrue(state + ": " + id + " " +
+                        string.Join("; ", all.OfType<ScrollViewer>().Where(s => s.IsAncestorOf(all.Single(e => AutomationProperties.GetAutomationId(e) == id)))
+                            .Select(s => $"{s.Name}: viewport={s.ViewportHeight:0.##}, field={Bounds(all.Single(e => AutomationProperties.GetAutomationId(e) == id), s)}")));
                 }
                 var images = all.OfType<Image>().Where(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i)).ToArray();
                 if (requireImage)
