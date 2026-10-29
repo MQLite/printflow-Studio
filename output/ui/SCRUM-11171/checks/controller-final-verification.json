@@ -1,0 +1,110 @@
+{
+  "task": "SCRUM-11171",
+  "verifiedAtUtc": "2026-10-19T21:36:37Z",
+  "userDate": "2026-10-20",
+  "timezone": "Pacific/Auckland",
+  "host": "Windows/local",
+  "policy": "development-routing v2.4",
+  "routeOffset": 0,
+  "verifiedSourceCommit": "62afc10f5ddd32d0f37812179735e96cd52d3f1a",
+  "reviewedPreFixCommit": "685b8d5ee59877498bef45a51c6bf6fc91d49f8b",
+  "status": "READY_FOR_USER_REVIEW",
+  "freshControllerTarget": {
+    "total": 34,
+    "passed": 34,
+    "failed": 0,
+    "notExecuted": 0,
+    "evidence": "controller-final-e4.trx",
+    "exitCode": 0
+  },
+  "postReviewAffected": {
+    "total": 251,
+    "passed": 251,
+    "failed": 0,
+    "evidence": "r1-crop-failure-affected.trx"
+  },
+  "r1Red": {
+    "total": 4,
+    "failed": 4,
+    "expectedFailure": "coded crop reason not visible"
+  },
+  "r1Green": {
+    "total": 4,
+    "passed": 4
+  },
+  "preCorrectionBroad": {
+    "total": 1438,
+    "passed": 1424,
+    "failed": 14,
+    "inheritedExact": 14,
+    "newFailureNames": [],
+    "changedMessages": [],
+    "evidence": "e4-ui-architecture-final2.trx"
+  },
+  "preCorrectionPersistence": {
+    "total": 277,
+    "passed": 277,
+    "failed": 0,
+    "evidence": "e4-workflow-persistence-final.trx"
+  },
+  "fullBroadAndPersistenceRerunAfterR1": false,
+  "independentReview": {
+    "count": 1,
+    "freshContext": true,
+    "actualModel": "gpt-6-astra",
+    "effort": "high",
+    "session": "01a1560c-5fc3-76a1-a054-691bd554f25e",
+    "critical": 0,
+    "important": [
+      "R1"
+    ],
+    "minor": 0,
+    "importantDisposition": "R1 reproduced, corrected by original executor and verified by controller; no second whole-diff review claimed"
+  },
+  "actualRoutes": {
+    "nativeUi": {
+      "model": "gpt-6-astra",
+      "effort": "high",
+      "session": "01a155df-3280-7bb1-aecc-56adaf01199a"
+    },
+    "controller": {
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "session": "01a155dd-4ce0-71c1-a86d-de895a6f8563",
+      "inPlaceSwitchAvailable": false
+    },
+    "persistence": {
+      "normalRequested": "Sol/high",
+      "actual": "gpt-6-astra/high",
+      "marker": "MODEL_SWITCH_UNAVAILABLE",
+      "downgradeClaimed": false
+    }
+  },
+  "XamlSha256": "B52C6EE3B09653BC77A356A1B89831CCB7ECE54911872888462DA7FE90A8B83B",
+  "VisibleOptInExclusions": 11,
+  "ExclusionsIdentical": true,
+  "HashMismatches": [],
+  "FinalScreenshotCount": 30,
+  "mainCheckoutPreservation": {
+    "StatusChanges": [],
+    "TrackedHashMismatches": []
+  },
+  "uncertainties": [
+    "Two initial broad synthetic fresh-activation assertions received zero; unchanged tests passed targeted, final broad and controller; root cause unresolved, not fixed or proven inherited.",
+    "14 exact inherited failures and existing F6/N1-N4 remain.",
+    "Real keyboard/device UIA/DPI/workstation/novice/production acceptance NOT RUN."
+  ],
+  "jiraFinalStatus": "In Review",
+  "jiraKeys": [
+    "SCRUM-11171",
+    "SCRUM-11185",
+    "SCRUM-11186",
+    "SCRUM-11187",
+    "SCRUM-11188",
+    "SCRUM-11189"
+  ],
+  "jiraCommentsSent": false,
+  "mergePushDeploy": false,
+  "scratchPreserved": true,
+  "nextEpicStarted": false
+}

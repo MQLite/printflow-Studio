@@ -1,0 +1,97 @@
+{
+  "State": "review-draft-leave",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "E7BD7A218831F7938878EA812D442B8BC6B96E892603B4AD24378157D139A1B5",
+  "EssentialActions": [
+    "WorkflowSelection.KeepDraft",
+    "WorkflowSelection.DiscardDraft"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "WorkflowSelection.PrepareDesignAsset",
+        "IsEnabled": false,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 41,
+          "Y": 484.1533333333333,
+          "Width": 271.3333333333333,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.PrepareCustomerDesign",
+        "IsEnabled": false,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 358.3333333333333,
+          "Y": 484.1533333333333,
+          "Width": 271.3333333333333,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.GeneratePrintTiff",
+        "IsEnabled": false,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 675.6666666666666,
+          "Y": 484.1533333333333,
+          "Width": 271.3333333333333,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.Back",
+        "IsEnabled": false,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 36,
+          "Y": 626,
+          "Width": 82,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.KeepDraft",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 226,
+          "Y": 371.67499999999995,
+          "Width": 82,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.DiscardDraft",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 320,
+          "Y": 371.67499999999995,
+          "Width": 124,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 24
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 256.23
+      }
+    ],
+    "Previews": 1
+  }
+}

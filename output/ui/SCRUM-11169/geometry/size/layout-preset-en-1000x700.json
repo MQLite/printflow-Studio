@@ -1,0 +1,72 @@
+{
+  "state": "preset",
+  "language": "en",
+  "width": 1000,
+  "height": 700,
+  "facts": {
+    "Image": {
+      "X": 206,
+      "Y": 313.8166666666667,
+      "Width": 446.79999999999995,
+      "Height": 314.1833333333333
+    },
+    "Column": {
+      "X": 672.8,
+      "Y": 222.70000000000002,
+      "Width": 311.20000000000005,
+      "Height": 405.29999999999995
+    },
+    "ExtentHeight": 668.22,
+    "ViewportHeight": 405.29999999999995,
+    "PreviousLayout": {
+      "X": 24,
+      "Y": 374.28,
+      "Width": 572,
+      "Height": 258.48
+    },
+    "WithoutGuidance": {
+      "X": 206,
+      "Y": 313.8166666666667,
+      "Width": 446.79999999999995,
+      "Height": 314.1833333333333
+    },
+    "Sections": 2,
+    "Rows": 0,
+    "Clipped": [],
+    "Shown": [
+      {
+        "Id": "Session.PrintDimensions.Summary",
+        "InContent": {
+          "X": 13,
+          "Y": 87.79666666666667,
+          "Width": 268.20000000000005,
+          "Height": 129.33666666666664
+        },
+        "InColumn": true,
+        "InExpander": false
+      },
+      {
+        "Id": "Session.PrintDimensions.TechnicalDetails",
+        "InContent": {
+          "X": 13,
+          "Y": 225.13333333333333,
+          "Width": 268.20000000000005,
+          "Height": 23
+        },
+        "InColumn": true,
+        "InExpander": false
+      },
+      {
+        "Id": "Session.Preparation.TechnicalDetails",
+        "InContent": {
+          "X": 13,
+          "Y": 609.22,
+          "Width": 268.20000000000005,
+          "Height": 23
+        },
+        "InColumn": true,
+        "InExpander": false
+      }
+    ]
+  }
+}

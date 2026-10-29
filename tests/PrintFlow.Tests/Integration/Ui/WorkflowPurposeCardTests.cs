@@ -73,7 +73,9 @@ public sealed class WorkflowPurposeCardTests
                             line.ActualHeight.ShouldBeGreaterThanOrEqualTo(
                                 line.DesiredSize.Height - line.Margin.Top - line.Margin.Bottom - 0.5);
                             Rect bounds = line.TransformToAncestor(card).TransformBounds(new Rect(line.RenderSize));
-                            bounds.Right.ShouldBeLessThanOrEqualTo(choose.TranslatePoint(new Point(), card).X + 0.5);
+                            // The guided three-column cards place their action below the copy.
+                            bounds.Bottom.ShouldBeLessThanOrEqualTo(choose.TranslatePoint(new Point(), card).Y + 0.5);
+                            bounds.Right.ShouldBeLessThanOrEqualTo(card.ActualWidth + 0.5);
                             line.ActualWidth.ShouldBeGreaterThan(100);
                         }
                     }

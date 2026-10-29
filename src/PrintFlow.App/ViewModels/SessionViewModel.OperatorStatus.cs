@@ -34,6 +34,9 @@ public partial class SessionViewModel
     {
         get
         {
+            if (IsConfirmingDraftLeave) return DraftLeaveNotice;
+            if (IsConfirmingReturn) return ReturnImpact;
+            if (IsViewingHistory) return HistoryNotice;
             // A job waiting for a colleague says so, and names the one way back (SCRUM-11148).
             if (IsHandedOff && ShowsCorrectionPanel)
                 return CorrectionActivity == CorrectionActivity.Checking ? CorrectionActivityText
@@ -60,6 +63,9 @@ public partial class SessionViewModel
             if (CanManualCrop) return FormatNext(Strings.Session_NextAction, BeginManualCropLabel);
             if (IsStoppedStep) return Strings.Session_NextStopped;
             if (CanConfirmOriginal) return FormatNext(Strings.Session_NextOriginal, ConfirmOriginalLabel);
+            if (ShowsGuidedDimensions) return Strings.Session_NextDimensions;
+            if (ShowsGuidedWhiteInk) return Strings.Session_NextWhiteInk;
+            if (ShowsGuidedEnlargement) return FormatNext(Strings.Session_NextAction, ContinueWithSizeLabel);
             if (CanRunStep) return FormatNext(Strings.Session_NextAction, RunStepLabel);
             // The status panel repeats what the save section says, so the two never disagree.
             if (FinalSaveNextText is { } saveText) return saveText;
@@ -77,6 +83,9 @@ public partial class SessionViewModel
         get
         {
             if (IsBusy) return null;
+            if (IsConfirmingDraftLeave) return KeepDraftCommand;
+            if (IsConfirmingReturn) return ConfirmReturnCommand;
+            if (IsViewingHistory) return CloseHistoryCommand;
             if (IsHandedOff && ShowsCorrectionPanel) return CanImportCorrectedImage ? ImportCorrectedImageCommand : null;
             if (IsHandedOff) return CanReenterAutomation ? ReenterAutomationCommand : null;
             if (_session?.State == SessionState.Completed) return FinalSaveRecommendation;
@@ -89,6 +98,12 @@ public partial class SessionViewModel
             if (CanRetry) return RetryCommand;
             if (CanManualCrop) return BeginManualCropCommand;
             if (IsStoppedStep) return null;
+            if (ShowsGuidedCustomSizeAction) return ConfirmCustomSizeCommand;
+            if (ShowsGuidedDimensions) return ChooseCustomSizeCommand;
+            if (ShowsGuidedWhiteInk) return SelectWhiteUnderbaseCommand;
+            if (ShowsGuidedEnlargement) return ContinueWithSizeCommand;
+            if (ShowsGuidedAutomaticConfirmation) return ConfirmAutomaticSelectionCommand;
+            if (ShowsGuidedAutomaticBegin) return BeginAutomaticSelectionCommand;
             if (CanConfirmOriginal) return ConfirmOriginalCommand;
             if (CanRunStep) return RunStepCommand;
             if (_session?.CurrentStep is null && FinalSaveRecommendation is { } save) return save;
@@ -133,6 +148,7 @@ public partial class SessionViewModel
 
     private void NotifyOperatorStatusChanged()
     {
+        NotifyGuidedPresentation();
         OnPropertyChanged(nameof(StatusHeading));
         OnPropertyChanged(nameof(NextStepText));
         OnPropertyChanged(nameof(StatusReason));

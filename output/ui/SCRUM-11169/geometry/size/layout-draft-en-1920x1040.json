@@ -1,0 +1,83 @@
+{
+  "state": "draft",
+  "language": "en",
+  "width": 1920,
+  "height": 1040,
+  "facts": {
+    "Image": {
+      "X": 206,
+      "Y": 295.34000000000003,
+      "Width": 998.8,
+      "Height": 662.66
+    },
+    "Column": {
+      "X": 1224.8,
+      "Y": 204.22333333333333,
+      "Width": 679.2,
+      "Height": 753.7766666666666
+    },
+    "ExtentHeight": 632.3,
+    "ViewportHeight": 753.7766666666666,
+    "PreviousLayout": {
+      "X": 24,
+      "Y": 359.04,
+      "Width": 1492,
+      "Height": 613.72
+    },
+    "WithoutGuidance": {
+      "X": 206,
+      "Y": 295.34000000000003,
+      "Width": 998.8,
+      "Height": 662.66
+    },
+    "Sections": 2,
+    "Rows": 0,
+    "Clipped": [],
+    "Shown": [
+      {
+        "Id": "Session.PrintDimensions.PresetHelp",
+        "InContent": {
+          "X": 13,
+          "Y": 114.27333333333334,
+          "Width": 653.2,
+          "Height": 55.43
+        },
+        "InColumn": true,
+        "InExpander": false
+      },
+      {
+        "Id": "Session.PrintDimensions.CustomHelp",
+        "InContent": {
+          "X": 13,
+          "Y": 289.69,
+          "Width": 653.2,
+          "Height": 55.43000000000001
+        },
+        "InColumn": true,
+        "InExpander": false
+      },
+      {
+        "Id": "Session.PrintDimensions.Summary",
+        "InContent": {
+          "X": 13,
+          "Y": 528.3466666666667,
+          "Width": 653.2,
+          "Height": 36.95333333333333
+        },
+        "InColumn": true,
+        "InExpander": false
+      },
+      {
+        "Id": "Session.PrintDimensions.TechnicalDetails",
+        "InContent": {
+          "X": 13,
+          "Y": 573.3,
+          "Width": 653.2,
+          "Height": 23
+        },
+        "InColumn": true,
+        "InExpander": false
+      }
+    ]
+  }
+}

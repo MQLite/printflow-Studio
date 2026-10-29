@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="0bc651f6-006f-4c7c-9495-ff6f0fb610d9" name="admin@DESKTOP-0BG8884 2026-10-20 19:55:29" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T19:55:29.3946126+13:00" queuing="2026-10-20T19:55:29.3946129+13:00" start="2026-10-20T19:55:23.3965041+13:00" finish="2026-10-20T19:55:31.9095857+13:00" />
+  <TestSettings name="default" id="a09edf4e-bd6f-49f5-9dac-f87f05784192">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_19_55_29" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="48d46984-0c90-4ec0-8667-9916ec92c963" testId="f816ffb7-1cc6-77fa-3604-e7c2ad412d4c" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:01.2209702" startTime="2026-10-20T19:55:29.3812019+13:00" endTime="2026-10-20T19:55:30.5880553+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="48d46984-0c90-4ec0-8667-9916ec92c963">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1254&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1267&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 564&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 44&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="bc470cc6-7eb4-4d68-becb-e6c1fd8ba4ca" testId="1d64aafe-48d8-7c8c-525e-cf5dcefdc27c" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:02.2756309" startTime="2026-10-20T19:55:27.0279911+13:00" endTime="2026-10-20T19:55:29.3653356+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc470cc6-7eb4-4d68-becb-e6c1fd8ba4ca">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1254&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1267&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 564&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 44&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="791d0576-eb86-4edf-963c-0b5dbf9c0e13" testId="b8929e40-105d-ae0c-c847-f1fa527de0cb" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:01.1594856" startTime="2026-10-20T19:55:30.5897307+13:00" endTime="2026-10-20T19:55:31.7484385+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="791d0576-eb86-4edf-963c-0b5dbf9c0e13">
+      <Output>
+        <ErrorInfo>
+          <Message>System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。</Message>
+          <StackTrace>   at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+   at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1254&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 1267&#xD;
+   at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs:line 564&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs:line 44&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b8929e40-105d-ae0c-c847-f1fa527de0cb">
+      <Execution id="791d0576-eb86-4edf-963c-0b5dbf9c0e13" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests" name="Chinese_completion_recovery_and_utilities_keep_actions_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="f816ffb7-1cc6-77fa-3604-e7c2ad412d4c">
+      <Execution id="48d46984-0c90-4ec0-8667-9916ec92c963" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests" name="Chinese_completion_recovery_and_utilities_keep_actions_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1d64aafe-48d8-7c8c-525e-cf5dcefdc27c">
+      <Execution id="bc470cc6-7eb4-4d68-becb-e6c1fd8ba4ca" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests" name="Chinese_completion_recovery_and_utilities_keep_actions_reachable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="f816ffb7-1cc6-77fa-3604-e7c2ad412d4c" executionId="48d46984-0c90-4ec0-8667-9916ec92c963" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d64aafe-48d8-7c8c-525e-cf5dcefdc27c" executionId="bc470cc6-7eb4-4d68-becb-e6c1fd8ba4ca" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b8929e40-105d-ae0c-c847-f1fa527de0cb" executionId="791d0576-eb86-4edf-963c-0b5dbf9c0e13" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="3" passed="0" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.16]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.25]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.62]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:05.62]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.62]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:05.62]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1254,0): at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords()&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1267,0): at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged()&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(564,0): at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation)&#xD;
+[xUnit.net 00:00:05.62]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs(44,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:05.62]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.84]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:06.84]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.84]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:06.84]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:06.84]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1254,0): at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords()&#xD;
+[xUnit.net 00:00:06.84]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1267,0): at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged()&#xD;
+[xUnit.net 00:00:06.84]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(564,0): at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation)&#xD;
+[xUnit.net 00:00:06.84]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs(44,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:06.84]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.00]       System.NotSupportedException : 该类型的 CollectionView 不支持从调度程序线程以外的线程对其 SourceCollection 进行的更改。&#xD;
+[xUnit.net 00:00:08.00]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.00]            at System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)&#xD;
+[xUnit.net 00:00:08.00]            at System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)&#xD;
+[xUnit.net 00:00:08.00]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1254,0): at PrintFlow.App.ViewModels.SessionViewModel.SyncFinalSaveRecords()&#xD;
+[xUnit.net 00:00:08.00]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(1267,0): at PrintFlow.App.ViewModels.SessionViewModel.NotifyFinalSaveChanged()&#xD;
+[xUnit.net 00:00:08.00]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\ViewModels\SessionViewModel.FinalSave.cs(564,0): at PrintFlow.App.ViewModels.SessionViewModel.LoadFinalSaveFactsAsync(SessionView session, Int32 generation)&#xD;
+[xUnit.net 00:00:08.00]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionVisualEvidenceTests.cs(44,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:08.00]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.01]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:55:29.3680675+13:00">
+        <Text>[xUnit.net 00:00:05.62]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:55:30.5885286+13:00">
+        <Text>[xUnit.net 00:00:06.84]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:55:31.7488057+13:00">
+        <Text>[xUnit.net 00:00:08.00]     PrintFlow.Tests.Integration.Ui.GuidedCompletionVisualEvidenceTests.Chinese_completion_recovery_and_utilities_keep_actions_reachable(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,339 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.48]     PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.The_tab_stops_reach_submit_manual_result_and_skip_the_display_only_lists [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.The_tab_stops_reach_submit_manual_result_and_skip_the_display_only_lists [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : stops.IndexOf("Session.SubmitManualResult")
+    should be less than
+10
+    but was
+12
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.SessionAccessibilityTests.The_tab_stops_reach_submit_manual_result_and_skip_the_display_only_lists() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\SessionAccessibilityTests.cs:line 231
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:24.31]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:24.87]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1920, height: 1040) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "zh-CN", width: 1000, height: 700) [703 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1920, height: 1040) [563 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:25.42]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:25.88]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "en", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:00:26.40]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "en", width: 1920, height: 1040) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "zh-CN", width: 1000, height: 700) [544 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "en", width: 1920, height: 1040) [465 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "en", width: 1920, height: 1040) [518 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:26.89]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:27.32]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-no-folder", language: "en", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:27.83]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-remembered", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "history", language: "zh-CN", width: 1000, height: 700) [485 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-no-folder", language: "en", width: 1000, height: 700) [431 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-remembered", language: "en", width: 1000, height: 700) [512 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:28.33]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:00:28.75]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-no-folder", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:29.26]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:29.75]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1920, height: 1040) [496 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-no-folder", language: "zh-CN", width: 1000, height: 700) [416 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "saved-tiff", language: "zh-CN", width: 1000, height: 700) [509 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "records", language: "en", width: 1000, height: 700) [494 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:30.19]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "en", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:30.68]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-remembered", language: "zh-CN", width: 1920, height: 1040) [FAIL]
+[xUnit.net 00:00:31.29]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "en", width: 1000, height: 700) [431 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "pending-remembered", language: "zh-CN", width: 1920, height: 1040) [492 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "collision", language: "en", width: 1000, height: 700) [604 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:31.70]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:32.17]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "zh-CN", width: 1000, height: 700) [FAIL]
+[xUnit.net 00:00:32.60]     PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "en", width: 1000, height: 700) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "zh-CN", width: 1000, height: 700) [419 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "save-failed", language: "zh-CN", width: 1000, height: 700) [464 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(state: "blocked", language: "en", width: 1000, height: 700) [430 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout(String state, String language, Double width, Double height) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 943
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.<>c.<Rendered_final_save_section_binds_wraps_and_keeps_the_review_layout>b__23_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\FinalSaveUiTests.cs:line 952
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\g01-regression.trx
+
+失败!  - 失败:    19，通过:    56，已跳过:     0，总计:    75，持续时间: 37 s - PrintFlow.Tests.dll (net10.0)

@@ -1,0 +1,147 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.85]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 0) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 0) [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.58]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 2) [FAIL]
+[xUnit.net 00:00:07.34]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 2) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 2) [731 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 2) [755 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:08.04]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 0) [FAIL]
+[xUnit.net 00:00:08.66]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 1) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 0) [699 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: PrepareCustomerDesign, branch: 1) [619 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:09.27]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 1) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(route: GeneratePrintTiff, branch: 1) [610 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.GetValueOrDefault("Session.PrintSummary.Requested") (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Both_Tiff_routes_require_explicit_white_ink_and_show_current_preflight_summary(WorkflowType route, Int32 branch) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 45
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:10.54]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Readable_size_summary_preserves_raw_custom_input_and_does_not_authorise_enlargement [FAIL]
+[xUnit.net 00:00:11.73]     PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Invalid_input_has_no_stale_print_summary_and_cannot_continue [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Readable_size_summary_preserves_raw_custom_input_and_does_not_authorise_enlargement [614 ms]
+  错误消息:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  堆栈跟踪:
+     at Shouldly.StringHelpers.Clip(String stringToClip, Int32 maximumStringLength, String ellipsis) in /_/src/Shouldly/Internals/StringHelpers.cs:line 127
+   at Shouldly.ShouldBeStringTestExtensions.ShouldContain(String actual, String expected, Case caseSensitivity, String customMessage) in /_/src/Shouldly/ShouldlyExtensionMethods/ShouldBe/StringContainsTestExtensions.cs:line 22
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Readable_size_summary_preserves_raw_custom_input_and_does_not_authorise_enlargement() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 67
+--- End of stack trace from previous location ---
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Invalid_input_has_no_stale_print_summary_and_cannot_continue [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : enabled.Facts
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an invalid size must not offer a continue action
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingPrintTests.Invalid_input_has_no_stale_print_summary_and_cannot_continue() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingPrintTests.cs:line 87
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\output\ui\SCRUM-11171\checks\task4-red-behavior.trx
+
+失败!  - 失败:     8，通过:     1，已跳过:     0，总计:     9，持续时间: 7 s - PrintFlow.Tests.dll (net10.0)

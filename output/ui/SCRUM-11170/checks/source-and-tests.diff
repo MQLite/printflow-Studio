@@ -1,0 +1,2351 @@
+diff --git a/src/PrintFlow.App/Navigation/IEntryScreenLifetime.cs b/src/PrintFlow.App/Navigation/IEntryScreenLifetime.cs
+new file mode 100644
+index 0000000..87b52fb
+--- /dev/null
++++ b/src/PrintFlow.App/Navigation/IEntryScreenLifetime.cs
+@@ -0,0 +1,7 @@
++namespace PrintFlow.App.Navigation;
++
++/// <summary>Retires transient entry-screen input and asynchronous presentation ownership.</summary>
++public interface IEntryScreenLifetime
++{
++    void Deactivate();
++}
+diff --git a/src/PrintFlow.App/Navigation/NavigationService.cs b/src/PrintFlow.App/Navigation/NavigationService.cs
+index 3e68725..9fc864a 100644
+--- a/src/PrintFlow.App/Navigation/NavigationService.cs
++++ b/src/PrintFlow.App/Navigation/NavigationService.cs
+@@ -87,6 +87,7 @@ public async Task GoToErrorDetailsAsync(
+ 
+     private void Show(object viewModel)
+     {
++        if (Current is IEntryScreenLifetime entry) entry.Deactivate();
+         Current = viewModel;
+         CurrentChanged?.Invoke(this, EventArgs.Empty);
+     }
+diff --git a/src/PrintFlow.App/Resources/Strings.resx b/src/PrintFlow.App/Resources/Strings.resx
+index 5a65c77..77bea7a 100644
+--- a/src/PrintFlow.App/Resources/Strings.resx
++++ b/src/PrintFlow.App/Resources/Strings.resx
+@@ -822,8 +822,8 @@
+   <data name="Failure_PsdUnreadable" xml:space="preserve"><value>The PSD is corrupt or unreadable. No prepared image was created.</value></data>
+   <data name="Failure_PsdUnsupported" xml:space="preserve"><value>This PSD cannot be prepared automatically. Use an RGB 8-bit PSD with a Photoshop-compatible composite.</value></data>
+   <data name="Session_PreparePsd" xml:space="preserve"><value>Prepare PSD for review</value></data>
+-  <data name="Session_PsdPending" xml:space="preserve"><value>Original source: PSD (preserved unchanged). Prepare its raster preview before review. Supported: RGB, 8-bit, with a Photoshop-compatible composite. PSD files are treated as visual artwork inputs: existing spot-colour or white-ink channels in the source are not preserved as production channels. PrintFlow generates production white ink when creating the final TIFF.</value></data>
+-  <data name="Session_PsdPrepared" xml:space="preserve"><value>Original source: PSD (preserved unchanged). The displayed PNG is the managed raster representation prepared by Photoshop. Review this representation before continuing.</value></data>
++  <data name="Session_PsdPending" xml:space="preserve"><value>Original source: PSD (preserved unchanged). Prepare its raster preview before review. Supported: RGB, 8-bit, with a Photoshop-compatible composite. PSD files are treated as visual artwork inputs: existing spot-colour or white-ink channels in the source are not preserved as production channels.</value></data>
++  <data name="Session_PsdPrepared" xml:space="preserve"><value>Original source: PSD (preserved unchanged). The displayed PNG is the managed raster representation prepared by Photoshop. Source spot-colour or white-ink channels are not carried forward as production channels. Review this representation before continuing.</value></data>
+   <data name="Failure_PdfUnreadable" xml:space="preserve"><value>This PDF is damaged or unreadable. No prepared image was created. Import a readable single-page PDF.</value></data>
+   <data name="Failure_PdfEncrypted" xml:space="preserve"><value>Password-protected or encrypted PDFs are unsupported. No prepared image was created.</value></data>
+   <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>This PDF contains multiple pages. PrintFlow only accepts a single-page PDF for this workflow.</value></data>
+@@ -831,8 +831,8 @@
+   <data name="Failure_SourceImageUnreadable" xml:space="preserve"><value>No image could be read from this file — it is incomplete or damaged. Nothing was processed and your file was not changed.</value></data>
+   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF preparation failed. No validated raster is available. Check the failure before retrying.</value></data>
+   <data name="Session_PreparePdf" xml:space="preserve"><value>Prepare PDF for review</value></data>
+-  <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels. PrintFlow generates production white ink when creating the final TIFF.</value></data>
+-  <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels). Print sizing follows review.</value></data>
++  <data name="Session_PdfPending" xml:space="preserve"><value>Source: PDF (unchanged). Prepare its single page at 300 PPI, then review the page and physical dimensions before continuing. Multi-page and encrypted PDFs are unsupported. PDF files are treated as visual artwork inputs: existing spot-colour or white-ink separations in the source are not preserved as production channels.</value></data>
++  <data name="Session_PdfPrepared" xml:space="preserve"><value>Single-page PDF prepared for review. Source: PDF (unchanged). The displayed PNG is the managed full-page raster at 300 PPI. Confirm page 1 and its dimensions: {0:0.##} × {1:0.##} mm ({2} × {3} pixels).</value></data>
+   <data name="Session_SubmitManualResult" xml:space="preserve"><value>Submit Manual Result</value></data>
+   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>Manual processing result</value></data>
+   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>Transparent PNG (*.png)|*.png</value></data>
+@@ -1339,4 +1339,16 @@
+   <data name="Session_KeepDraft" xml:space="preserve"><value>Keep editing</value></data>
+   <data name="Session_DiscardDraft" xml:space="preserve"><value>Discard input and leave</value></data>
+   <data name="Session_ReturnImpact" xml:space="preserve"><value>Return to {0}. Steps to redo: {1}. Dependent dimensions, output results and approvals must be redone. Existing history is retained.</value></data>
++  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI design is not available yet. Choose a local image to use any of the three routes.</value></data>
++  <data name="Home_GuidedCancelImport" xml:space="preserve"><value>Stop waiting for import</value></data>
++  <data name="Home_GuidedContinue" xml:space="preserve"><value>Continue a task</value></data>
++  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>Workstation details and checks</value></data>
++  <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>Import waiting cancelled. If a task was already created, find it in recent tasks; your original file is unchanged.</value></data>
++  <data name="Home_GuidedImporting" xml:space="preserve"><value>Importing one image. Your original file is kept unchanged.</value></data>
++  <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>Selection waiting cancelled. Reopen the task to read its current saved state.</value></data>
++  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>No processing has started. You can change route until the first processed result exists. Back keeps this task in recent tasks.</value></data>
++  <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>A processed result already exists, so this route is locked. Back keeps the task and its results.</value></data>
++  <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>Saving your choice…</value></data>
++  <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>Original file for this task: {0} (kept unchanged)</value></data>
++  <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>Change route (no processed result yet)</value></data>
+ </root>
+diff --git a/src/PrintFlow.App/Resources/Strings.zh-CN.resx b/src/PrintFlow.App/Resources/Strings.zh-CN.resx
+index bdc6a9f..7dd6d6d 100644
+--- a/src/PrintFlow.App/Resources/Strings.zh-CN.resx
++++ b/src/PrintFlow.App/Resources/Strings.zh-CN.resx
+@@ -811,8 +811,8 @@
+   <data name="Failure_PsdUnreadable" xml:space="preserve"><value>PSD 已损坏或无法读取。未生成准备图像。</value></data>
+   <data name="Failure_PsdUnsupported" xml:space="preserve"><value>无法自动准备此 PSD。需使用包含 Photoshop 兼容合成图的 RGB 8 位 PSD。</value></data>
+   <data name="Session_PreparePsd" xml:space="preserve"><value>准备 PSD 以供检查</value></data>
+-  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
+-  <data name="Session_PsdPrepared" xml:space="preserve"><value>原始文件：PSD（保持不变）。显示的 PNG 是 Photoshop 生成的受管栅格副本。请检查此副本后继续。</value></data>
++  <data name="Session_PsdPending" xml:space="preserve"><value>原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通道保留。</value></data>
++  <data name="Session_PsdPrepared" xml:space="preserve"><value>原始文件：PSD（保持不变）。显示的 PNG 是 Photoshop 生成的受管栅格副本。源文件中已有的专色或白墨通道不会作为生产通道沿用。请检查此副本后继续。</value></data>
+   <data name="Failure_PdfUnreadable" xml:space="preserve"><value>PDF 已损坏或无法读取，未生成准备图像。请导入可读取的单页 PDF。</value></data>
+   <data name="Failure_PdfEncrypted" xml:space="preserve"><value>不支持受密码保护或加密的 PDF，未生成准备图像。</value></data>
+   <data name="Failure_PdfMultiplePages" xml:space="preserve"><value>此 PDF 包含多页。此工作流程仅接受单页 PDF。</value></data>
+@@ -820,8 +820,8 @@
+   <data name="Failure_SourceImageUnreadable" xml:space="preserve"><value>无法从该文件读取图像——文件不完整或已损坏。未开始任何处理，您的文件未被更改。</value></data>
+   <data name="Failure_PdfPreparationFailed" xml:space="preserve"><value>PDF 准备失败，未生成通过验证的栅格图。请检查失败原因后重试。</value></data>
+   <data name="Session_PreparePdf" xml:space="preserve"><value>准备 PDF 以供检查</value></data>
+-  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。PrintFlow 会在生成最终 TIFF 时统一创建生产白墨通道。</value></data>
+-  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。检查后再设置印刷尺寸。</value></data>
++  <data name="Session_PdfPending" xml:space="preserve"><value>原始文件：PDF（保持不变）。请先以 300 PPI 准备单页图像，再检查页面及实际尺寸。暂不支持多页或加密 PDF。PDF 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨分色不会作为生产通道保留。</value></data>
++  <data name="Session_PdfPrepared" xml:space="preserve"><value>单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：{0:0.##} × {1:0.##} 毫米（{2} × {3} 像素）。</value></data>
+   <data name="Session_SubmitManualResult" xml:space="preserve"><value>提交手动处理结果</value></data>
+   <data name="Session_ManualProcessingResult" xml:space="preserve"><value>手动处理结果</value></data>
+   <data name="Session_ManualCutoutFilter" xml:space="preserve"><value>透明 PNG (*.png)|*.png</value></data>
+@@ -1328,4 +1328,16 @@
+   <data name="Session_KeepDraft" xml:space="preserve"><value>继续编辑</value></data>
+   <data name="Session_DiscardDraft" xml:space="preserve"><value>放弃输入并离开</value></data>
+   <data name="Session_ReturnImpact" xml:space="preserve"><value>返回“{0}”。需要重新处理：{1}。依赖这些步骤的尺寸、输出结果及审核需要重新完成；已有历史记录保留。</value></data>
++  <data name="Home_GuidedAiUnavailable" xml:space="preserve"><value>AI 设计暂不可用。选择本地图片后，可使用三条现有路线。</value></data>
++  <data name="Home_GuidedCancelImport" xml:space="preserve"><value>取消本次导入等待</value></data>
++  <data name="Home_GuidedContinue" xml:space="preserve"><value>继续待处理任务</value></data>
++  <data name="Home_GuidedEnvironmentDetails" xml:space="preserve"><value>环境详情与检查</value></data>
++  <data name="Home_GuidedImportCancelled" xml:space="preserve"><value>已取消导入等待。若任务已创建，可在最近任务中找到；原文件保持不变。</value></data>
++  <data name="Home_GuidedImporting" xml:space="preserve"><value>正在导入一张图片，原文件保持不变。</value></data>
++  <data name="WorkflowSelection_GuidedCancelled" xml:space="preserve"><value>已取消选择等待。重新打开任务可查看当前已保存的状态。</value></data>
++  <data name="WorkflowSelection_GuidedChangeAllowed" xml:space="preserve"><value>尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。</value></data>
++  <data name="WorkflowSelection_GuidedChangeLocked" xml:space="preserve"><value>已有处理结果，当前路线已锁定。返回首页会保留任务和结果。</value></data>
++  <data name="WorkflowSelection_GuidedProgress" xml:space="preserve"><value>正在保存您的选择…</value></data>
++  <data name="Session_GuidedOriginalFile" xml:space="preserve"><value>本次原始文件：{0}（原件保持不变）</value></data>
++  <data name="Session_GuidedChangeRoute" xml:space="preserve"><value>更换路线（尚无处理结果）</value></data>
+ </root>
+diff --git a/src/PrintFlow.App/ViewModels/HomeViewModel.cs b/src/PrintFlow.App/ViewModels/HomeViewModel.cs
+index 880e1ca..5f09b5b 100644
+--- a/src/PrintFlow.App/ViewModels/HomeViewModel.cs
++++ b/src/PrintFlow.App/ViewModels/HomeViewModel.cs
+@@ -9,6 +9,7 @@
+ using PrintFlow.Domain.Results;
+ using PrintFlow.Domain.Sessions;
+ using PrintFlow.Workflow.Commands;
++using PrintFlow.Workflow.Engine;
+ using PrintFlow.Workflow.Services;
+ 
+ namespace PrintFlow.App.ViewModels;
+@@ -23,8 +24,36 @@ namespace PrintFlow.App.ViewModels;
+ /// record — the closest it comes to the file system is passing the path a dialog or a drop
+ /// handed it straight to <see cref="ISessionService.ImportAsync"/> (plan §17.4, Part 3C2 §5).
+ /// </remarks>
+-public sealed partial class HomeViewModel : ObservableObject
++public sealed partial class HomeViewModel : ObservableObject, IEntryScreenLifetime
+ {
++    private bool _active = true;
++    private CancellationTokenSource? _import;
++    public bool IsImporting => _import is not null;
++    public bool CanStartImport => _active && !IsBusy && !IsConfirmingAbandon;
++    public string ImportProgress => Strings.Resolve("Home_GuidedImporting");
++    public string CancelImportLabel => Strings.Resolve("Home_GuidedCancelImport");
++    public string AiUnavailable => Strings.Resolve("Home_GuidedAiUnavailable");
++    public string ContinueHeading => Strings.Resolve("Home_GuidedContinue");
++    public string EnvironmentDetailsLabel => Strings.Resolve("Home_GuidedEnvironmentDetails");
++    public IEnumerable<RecentSessionRow> ContinueSessions => RecentSessions.Where(x => x.CanContinueProcessing || x.HasOpenCorrection);
++    public IEnumerable<RecentSessionRow> HistorySessions => RecentSessions.Where(x => !x.CanContinueProcessing && !x.HasOpenCorrection);
++    public bool HasContinueSessions => ContinueSessions.Any();
++    public bool HasNoContinueSessions => !HasContinueSessions;
++    public bool HasHistorySessions => HistorySessions.Any();
++
++    public void Deactivate()
++    {
++        _active = false;
++        ++_refreshGeneration;
++        _import?.Cancel();
++        _thumbnails?.Cancel();
++        OnPropertyChanged(nameof(CanStartImport));
++    }
++
++    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanStartImport));
++
++    [RelayCommand]
++    private void CancelImport() => _import?.Cancel();
+     private readonly ISessionService _sessions;
+     private readonly IArtefactPreviewService _previews;
+     private readonly INavigationService _navigation;
+@@ -262,8 +291,12 @@ private string RecoverySummary
+     /// starts no live check (SCRUM-11152).
+     /// </remarks>
+     [RelayCommand]
+-    private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
++    private async Task ShowEnvironmentAsync(CancellationToken cancellationToken)
++    {
++        if (!_active) return;
++        Deactivate();
+         await _navigation.GoToEnvironmentReadinessAsync(cancellationToken).ConfigureAwait(true);
++    }
+ 
+     /// <summary>
+     /// Opens Settings (SCRUM-11118).
+@@ -274,13 +307,18 @@ private async Task ShowEnvironmentAsync(CancellationToken cancellationToken) =>
+     /// or written.
+     /// </remarks>
+     [RelayCommand]
+-    private async Task ShowSettingsAsync(CancellationToken cancellationToken) =>
++    private async Task ShowSettingsAsync(CancellationToken cancellationToken)
++    {
++        if (!_active) return;
++        Deactivate();
+         await _navigation.GoToSettingsAsync(cancellationToken).ConfigureAwait(true);
++    }
+ 
+     /// <summary>Reloads Recent Processing from persistence.</summary>
+     [RelayCommand]
+     private async Task RefreshAsync(CancellationToken cancellationToken)
+     {
++        if (!_active) return;
+         int generation = ++_refreshGeneration;
+         // The list is about to be rebuilt from current facts: a confirmation opened against the
+         // old rows no longer describes them (SCRUM-11154 F-V4).
+@@ -320,6 +358,11 @@ private async Task RefreshAsync(CancellationToken cancellationToken)
+ 
+         OnPropertyChanged(nameof(HasNoRecentSessions));
+ 
++        OnPropertyChanged(nameof(ContinueSessions));
++        OnPropertyChanged(nameof(HistorySessions));
++        OnPropertyChanged(nameof(HasContinueSessions));
++        OnPropertyChanged(nameof(HasNoContinueSessions));
++        OnPropertyChanged(nameof(HasHistorySessions));
+         ThumbnailsLoaded = StartThumbnailLoad([.. RecentSessions]);
+     }
+ 
+@@ -424,6 +467,7 @@ private Task AbandonRecoveryAsync(RecoverySessionRow? row, CancellationToken can
+     /// </remarks>
+     [ObservableProperty]
+     [NotifyPropertyChangedFor(nameof(IsConfirmingAbandon))]
++    [NotifyPropertyChangedFor(nameof(CanStartImport))]
+     [NotifyPropertyChangedFor(nameof(AreListsInteractive))]
+     private AbandonConfirmation? _pendingAbandon;
+ 
+@@ -437,7 +481,7 @@ private Task AbandonRecoveryAsync(RecoverySessionRow? row, CancellationToken can
+     public bool AreListsInteractive => PendingAbandon is null;
+ 
+     /// <summary>Busy, or waiting for the operator's answer to an open Abandon confirmation.</summary>
+-    private bool ListActionsBlocked => IsBusy || PendingAbandon is not null;
++    private bool ListActionsBlocked => !_active || IsBusy || PendingAbandon is not null;
+ 
+     public string AbandonKeepLabel => Strings.Resolve("Home_AbandonKeep");
+ 
+@@ -504,7 +548,8 @@ private async Task OpenRecoveryAsync(RecoverySessionRow? row, CancellationToken
+     {
+         if (row is null || ListActionsBlocked) return;
+         var loaded = await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
+-        if (loaded.IsSuccess) _navigation.GoToSession(loaded.Value);
++        if (!_active) return;
++        if (loaded.IsSuccess) OpenContinuedSession(loaded.Value);
+         else ShowFailureNotice(Format(Strings.Home_ResumeFailed,
+             row.HasOpenCorrection ? row.OpenCorrectionLabel : row.OpenLabel), loaded.Failure);
+     }
+@@ -523,9 +568,11 @@ private async Task RecoverAsync(RecoverySessionRow? row, RecoveryAction action,
+                 if (path is null) return;
+             }
+             var result = await _sessions.ResolveRecoveryAsync(row.Id, action, path, Environment.UserName, cancellationToken).ConfigureAwait(true);
++            if (!_active) return;
+             await RefreshAsync(cancellationToken).ConfigureAwait(true);
++            if (!_active) return;
+             if (result.IsFailure) ShowFailureNotice(Strings.Home_RecoveryFailed, result.Failure);
+-            else if (action != RecoveryAction.Abandon) _navigation.GoToSession(result.Value);
++            else if (action != RecoveryAction.Abandon) OpenContinuedSession(result.Value);
+         }
+         finally { IsBusy = false; }
+     }
+@@ -534,6 +581,7 @@ private async Task RecoverAsync(RecoverySessionRow? row, RecoveryAction action,
+     [RelayCommand]
+     private async Task ChooseFileAsync(CancellationToken cancellationToken)
+     {
++        if (!CanStartImport) return;
+         string? chosen = _filePicker.PickSingleFile(Strings.Home_ChooseFile, Strings.Home_ImportFilter);
+         if (chosen is null)
+         {
+@@ -555,6 +603,7 @@ private async Task ChooseFileAsync(CancellationToken cancellationToken)
+     [RelayCommand]
+     private async Task DropFilesAsync(IReadOnlyList<string>? paths, CancellationToken cancellationToken)
+     {
++        if (!CanStartImport) return;
+         if (paths is null || paths.Count == 0)
+         {
+             Notice = Strings.Home_DropNothing;
+@@ -590,6 +639,7 @@ private async Task ResumeAsync(RecentSessionRow? row, CancellationToken cancella
+             Notice = null;
+             OperationResult<SessionView> loaded =
+                 await _sessions.LoadAsync(row.Id, cancellationToken).ConfigureAwait(true);
++            if (!_active) return;
+ 
+             if (loaded.IsFailure)
+             {
+@@ -597,7 +647,7 @@ private async Task ResumeAsync(RecentSessionRow? row, CancellationToken cancella
+                 return;
+             }
+ 
+-            _navigation.GoToSession(loaded.Value);
++            OpenContinuedSession(loaded.Value);
+         }
+         finally
+         {
+@@ -605,6 +655,18 @@ private async Task ResumeAsync(RecentSessionRow? row, CancellationToken cancella
+         }
+     }
+ 
++    private void OpenContinuedSession(SessionView session)
++    {
++        // Import's temporary route is not recorded user intent (choosing that same route
++        // has no persistent effect). Ask again only before the original is confirmed.
++        // Processing, interrupted and review states retain their existing recovery location.
++        if (session.CurrentStep is { Step: StepKind.OriginalConfirmation, State: StepState.Waiting } &&
++            session.AvailableCommands.Contains(CommandKind.SelectWorkflow))
++            _navigation.GoToWorkflowSelection(session);
++        else
++            _navigation.GoToSession(session);
++    }
++
+     /// <summary>
+     /// Opens the Abandon confirmation for a listed session; <see cref="ConfirmAbandonAsync"/> then
+     /// abandons it through the ordinary command path (SCRUM-11154 F-V4).
+@@ -670,12 +732,15 @@ private async Task RemoveRecordAsync(RecentSessionRow? row, CancellationToken ca
+ 
+     private async Task ImportAsync(string sourceAbsolutePath, CancellationToken cancellationToken)
+     {
+-        if (IsBusy)
++        if (!CanStartImport)
+         {
+             return;
+         }
+ 
+         IsBusy = true;
++        using var import = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
++        _import = import;
++        OnPropertyChanged(nameof(IsImporting));
+         try
+         {
+             Notice = null;
+@@ -684,7 +749,9 @@ private async Task ImportAsync(string sourceAbsolutePath, CancellationToken canc
+                 sourceAbsolutePath,
+                 outputName: null,
+                 operatorName: Environment.UserName,
+-                cancellationToken).ConfigureAwait(true);
++                import.Token).ConfigureAwait(true);
++
++            if (!_active) return;
+ 
+             if (imported.IsFailure)
+             {
+@@ -697,10 +764,21 @@ private async Task ImportAsync(string sourceAbsolutePath, CancellationToken canc
+                 return;
+             }
+ 
++            if (import.IsCancellationRequested)
++            {
++                Notice = Strings.Resolve("Home_GuidedImportCancelled");
++                return;
++            }
+             _navigation.GoToWorkflowSelection(imported.Value);
+         }
++        catch (OperationCanceledException) when (import.IsCancellationRequested)
++        {
++            if (_active) Notice = Strings.Resolve("Home_GuidedImportCancelled");
++        }
+         finally
+         {
++            _import = null;
++            OnPropertyChanged(nameof(IsImporting));
+             IsBusy = false;
+         }
+     }
+diff --git a/src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs b/src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs
+index 05d1f56..5c6c6c1 100644
+--- a/src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs
++++ b/src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs
+@@ -5,6 +5,7 @@
+ using PrintFlow.Domain.Files;
+ using PrintFlow.Domain.Sessions;
+ using PrintFlow.Workflow.Definitions;
++using PrintFlow.Workflow.Engine;
+ 
+ namespace PrintFlow.App.ViewModels;
+ 
+@@ -17,6 +18,20 @@ public enum GuidedSessionPage
+ 
+ public sealed partial class SessionViewModel
+ {
++    public bool ShowsGuidedSourceDetails => !IsViewingHistory && _session?.CurrentStep?.Step == StepKind.OriginalConfirmation;
++    public bool ShowsGuidedPdfSource => ShowsGuidedSourceDetails && HasPdfSource;
++    public bool ShowsGuidedPsdSource => ShowsGuidedSourceDetails && HasPsdSource;
++    public string OriginalSourceSummary => string.Format(System.Globalization.CultureInfo.CurrentCulture,
++        Strings.Resolve("Session_GuidedOriginalFile"), _session?.SourceFileName ?? string.Empty);
++    public bool CanChangeRoute => !IsBusy && Allows(CommandKind.SelectWorkflow);
++    public string ChangeRouteLabel => Strings.Resolve("Session_GuidedChangeRoute");
++
++    [RelayCommand(CanExecute = nameof(CanChangeRoute))]
++    private void ChangeRoute()
++    {
++        if (!CanChangeRoute || _session is not { } session) return;
++        RequestLeave(() => { ClearPreviews(); _navigation.GoToWorkflowSelection(session); });
++    }
+     private bool _isChoosingGuidedWhiteInk;
+     public ObservableCollection<GuidedStepItem> GuidedSteps { get; } = [];
+     public GuidedSessionPage GuidedPage => _session switch
+@@ -114,6 +129,12 @@ private void NotifyGuidedPresentation()
+         OnPropertyChanged(nameof(GuidedCurrentTitle));
+         OnPropertyChanged(nameof(GuidedCurrentStatus));
+         OnPropertyChanged(nameof(GuidedInteractionIdentity));
++        OnPropertyChanged(nameof(ShowsGuidedSourceDetails));
++        OnPropertyChanged(nameof(ShowsGuidedPdfSource));
++        OnPropertyChanged(nameof(ShowsGuidedPsdSource));
++        OnPropertyChanged(nameof(OriginalSourceSummary));
++        OnPropertyChanged(nameof(CanChangeRoute));
++        ChangeRouteCommand.NotifyCanExecuteChanged();
+         OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
+         OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
+         OnPropertyChanged(nameof(ShowsGuidedDimensions));
+diff --git a/src/PrintFlow.App/ViewModels/WorkflowSelectionViewModel.cs b/src/PrintFlow.App/ViewModels/WorkflowSelectionViewModel.cs
+index dd098e3..f9429be 100644
+--- a/src/PrintFlow.App/ViewModels/WorkflowSelectionViewModel.cs
++++ b/src/PrintFlow.App/ViewModels/WorkflowSelectionViewModel.cs
+@@ -122,8 +122,55 @@ private static string Describe(StepDefinition step)
+ /// <see cref="IArtefactPreviewService"/>, which cannot write a file or advance a session.
+ /// </para>
+ /// </remarks>
+-public sealed partial class WorkflowSelectionViewModel : ObservableObject
++public sealed partial class WorkflowSelectionViewModel : ObservableObject, IEntryScreenLifetime
+ {
++    public sealed record DraftLeaveRequest(long Generation);
++    private bool _active = true;
++    private long _generation;
++    public string InteractionIdentity => $"{_generation}|{_session?.Id}|{IsConfirmingDraftLeave}";
++    public string RouteChangeHint => Strings.Resolve(_session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true
++        ? "WorkflowSelection_GuidedChangeAllowed" : "WorkflowSelection_GuidedChangeLocked");
++    public string ProgressLabel => Strings.Resolve("WorkflowSelection_GuidedProgress");
++    private DraftLeaveRequest? _pendingLeave;
++    public DraftLeaveRequest? PendingLeave
++    {
++        get => _pendingLeave;
++        private set
++        {
++            if (!SetProperty(ref _pendingLeave, value)) return;
++            OnPropertyChanged(nameof(IsConfirmingDraftLeave));
++            NotifyEligibility();
++            OnPropertyChanged(nameof(InteractionIdentity));
++        }
++    }
++    public bool IsConfirmingDraftLeave => PendingLeave is not null;
++    public bool CanInteractWithPage => _active && !IsConfirmingDraftLeave;
++    public bool CanGoHome => CanInteractWithPage && !IsBusy;
++    public string DraftLeaveHeading => Strings.Session_DraftLeaveHeading;
++    public string DraftLeaveNotice => Strings.Session_DraftLeaveNotice;
++    public string KeepDraftLabel => Strings.Session_KeepDraft;
++    public string DiscardDraftLabel => Strings.Session_DiscardDraft;
++
++    public void Deactivate()
++    {
++        _active = false;
++        ++_generation;
++        PendingLeave = null;
++        IsBusy = false;
++        NotifyEligibility();
++        OnPropertyChanged(nameof(InteractionIdentity));
++    }
++
++    private bool Owns(long generation) => _active && generation == _generation;
++    partial void OnIsBusyChanged(bool value) => NotifyEligibility();
++    private void NotifyEligibility()
++    {
++        OnPropertyChanged(nameof(CanSelect));
++        OnPropertyChanged(nameof(CanEditOutputName));
++        OnPropertyChanged(nameof(RouteChangeHint));
++        OnPropertyChanged(nameof(CanInteractWithPage));
++        OnPropertyChanged(nameof(CanGoHome));
++    }
+     private readonly ISessionService _sessions;
+     private readonly IArtefactPreviewService _previews;
+     private readonly INavigationService _navigation;
+@@ -243,7 +290,7 @@ private void OnLanguageChanged(object? sender, EventArgs e)
+     /// lives in the engine; this is a reading of its answer, not a second copy of it.
+     /// </remarks>
+     public bool CanSelect =>
+-        _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
++        CanInteractWithPage && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SelectWorkflow) == true;
+ 
+     /// <summary>
+     /// Whether the Output Name may still be edited, as the engine reports it.
+@@ -254,7 +301,7 @@ private void OnLanguageChanged(object? sender, EventArgs e)
+     /// box and an accepted command must not be able to disagree.
+     /// </remarks>
+     public bool CanEditOutputName =>
+-        _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
++        CanInteractWithPage && !IsBusy && _session?.AvailableCommands.Contains(CommandKind.SetOutputName) == true;
+ 
+     /// <summary>Points the screen at the session it is choosing a workflow for.</summary>
+     /// <remarks>
+@@ -265,6 +312,10 @@ public void Open(SessionView session)
+     {
+         ArgumentNullException.ThrowIfNull(session);
+ 
++        ++_generation;
++        _active = true;
++        PendingLeave = null;
++        IsBusy = false;
+         _session = session;
+         Notice = CanSelect ? null : Strings.WorkflowSelection_Locked;
+ 
+@@ -276,8 +327,8 @@ public void Open(SessionView session)
+         OnPropertyChanged(nameof(SessionName));
+         OnPropertyChanged(nameof(SourceFileName));
+         OnPropertyChanged(nameof(HasSourceFileName));
+-        OnPropertyChanged(nameof(CanSelect));
+-        OnPropertyChanged(nameof(CanEditOutputName));
++        NotifyEligibility();
++        OnPropertyChanged(nameof(InteractionIdentity));
+ 
+         Preview = null;
+         OnPropertyChanged(nameof(HasPreview));
+@@ -322,7 +373,7 @@ void Publish(ArtefactPreviewPane pane)
+         {
+             // Only for the session still on screen. A load that started before the operator went
+             // back and imported something else publishes nothing.
+-            if (!ReferenceEquals(_session, session))
++            if (!_active || !ReferenceEquals(_session, session))
+             {
+                 return;
+             }
+@@ -335,11 +386,14 @@ void Publish(ArtefactPreviewPane pane)
+     [RelayCommand]
+     private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancellationToken)
+     {
+-        if (choice is null || _session is null || IsBusy)
++        if (choice is null || _session is null || IsBusy || !CanInteractWithPage)
+         {
+             return;
+         }
+ 
++        long generation = _generation;
++        SessionView session = _session;
++        string typed = OutputName ?? string.Empty;
+         IsBusy = true;
+         try
+         {
+@@ -349,8 +403,9 @@ private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancell
+             // the race §19 describes: a workflow started against the session's old name while the
+             // box on screen showed a new one. If the name cannot be accepted, nothing starts
+             // (§20) — the operator stays here with a sentence explaining why.
+-            OperationResult<SessionView> named = await CommitOutputNameAsync(cancellationToken)
++            OperationResult<SessionView> named = await CommitOutputNameAsync(session, typed, generation, cancellationToken)
+                 .ConfigureAwait(true);
++            if (!Owns(generation) || cancellationToken.IsCancellationRequested) return;
+             if (named.IsFailure)
+             {
+                 return;
+@@ -362,6 +417,8 @@ private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancell
+                 Environment.UserName,
+                 cancellationToken).ConfigureAwait(true);
+ 
++            if (!Owns(generation) || cancellationToken.IsCancellationRequested) return;
++
+             if (selected.IsFailure)
+             {
+                 // Includes the workflow lock: the engine refuses SelectWorkflow once a derived
+@@ -376,9 +433,13 @@ private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancell
+ 
+             _navigation.GoToSession(selected.Value);
+         }
++        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
++        {
++            if (Owns(generation)) Notice = Strings.Resolve("WorkflowSelection_GuidedCancelled");
++        }
+         finally
+         {
+-            IsBusy = false;
++            if (Owns(generation)) IsBusy = false;
+         }
+     }
+ 
+@@ -397,11 +458,9 @@ private async Task SelectAsync(WorkflowChoice? choice, CancellationToken cancell
+     /// unchanged value would write a metadata transaction for a decision nobody made.
+     /// </para>
+     /// </remarks>
+-    private async Task<OperationResult<SessionView>> CommitOutputNameAsync(CancellationToken cancellationToken)
++    private async Task<OperationResult<SessionView>> CommitOutputNameAsync(
++        SessionView session, string typed, long generation, CancellationToken cancellationToken)
+     {
+-        SessionView session = _session!;
+-
+-        string typed = OutputName ?? string.Empty;
+         if (string.Equals(typed, session.OutputName.Value, StringComparison.Ordinal))
+         {
+             return OperationResult.Ok(session);
+@@ -426,6 +485,8 @@ private async Task<OperationResult<SessionView>> CommitOutputNameAsync(Cancellat
+             Environment.UserName,
+             cancellationToken).ConfigureAwait(true);
+ 
++        if (!Owns(generation) || cancellationToken.IsCancellationRequested) return renamed;
++
+         if (renamed.IsFailure)
+         {
+             Notice = string.Format(
+@@ -459,8 +520,40 @@ private void Show(SessionView session, string? notice)
+     }
+ 
+     [RelayCommand]
+-    private async Task BackToHomeAsync(CancellationToken cancellationToken) =>
++    private async Task BackToHomeAsync(CancellationToken cancellationToken)
++    {
++        if (!CanGoHome) return;
++        if (_session is not null && !string.Equals(OutputName, SessionName, StringComparison.Ordinal))
++        {
++            PendingLeave = new DraftLeaveRequest(_generation);
++            return;
++        }
++        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
++    }
++
++    [RelayCommand]
++    private void KeepDraft(DraftLeaveRequest? request)
++    {
++        if (!OwnsLeave(request)) return;
++        PendingLeave = null;
++    }
++
++    [RelayCommand]
++    private async Task DiscardDraftAndLeaveAsync(DraftLeaveRequest? request, CancellationToken cancellationToken)
++    {
++        if (!OwnsLeave(request)) return;
++        OutputName = SessionName;
++        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
++    }
++
++    private bool OwnsLeave(DraftLeaveRequest? request) => request is not null &&
++        ReferenceEquals(request, PendingLeave) && Owns(request.Generation) && !IsBusy;
++
++    private async Task LeaveHomeAsync(CancellationToken cancellationToken)
++    {
++        Deactivate();
+         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
++    }
+ 
+     // --- SCRUM-11151: failure notices whose code sits under Error details ------------------
+ 
+diff --git a/src/PrintFlow.App/Views/EntryActionScope.cs b/src/PrintFlow.App/Views/EntryActionScope.cs
+new file mode 100644
+index 0000000..e40ae2a
+--- /dev/null
++++ b/src/PrintFlow.App/Views/EntryActionScope.cs
+@@ -0,0 +1,47 @@
++using System.ComponentModel;
++using System.Windows;
++using System.Windows.Controls;
++
++namespace PrintFlow.App.Views;
++
++/// <summary>Reuses the session gesture boundary for Home and route selection.</summary>
++internal sealed class EntryActionScope
++{
++    private readonly UserControl _view;
++    private INotifyPropertyChanged? _model;
++    private bool _active = true;
++
++    internal EntryActionScope(UserControl view)
++    {
++        _view = view;
++        SessionActionScope.SetActive(view, true);
++        view.DataContextChanged += (_, _) => Observe();
++        view.Loaded += (_, _) => { _active = true; Observe(); };
++        view.Unloaded += (_, _) => { _active = false; Unsubscribe(); Invalidate(); };
++        Observe();
++    }
++
++    private void Observe()
++    {
++        Unsubscribe();
++        if (_active && _view.DataContext is INotifyPropertyChanged model)
++        {
++            _model = model;
++            model.PropertyChanged += Changed;
++        }
++        Invalidate();
++    }
++
++    private void Changed(object? sender, PropertyChangedEventArgs e)
++    {
++        if (e.PropertyName is "IsBusy" or "IsConfirmingAbandon" or "InteractionIdentity" or "CanStartImport")
++            Invalidate();
++    }
++
++    private void Invalidate() => SessionActionScope.SetActive(_view, _active);
++    private void Unsubscribe()
++    {
++        if (_model is not null) _model.PropertyChanged -= Changed;
++        _model = null;
++    }
++}
+diff --git a/src/PrintFlow.App/Views/HomeView.xaml b/src/PrintFlow.App/Views/HomeView.xaml
+index e2d0ff7..29a849f 100644
+--- a/src/PrintFlow.App/Views/HomeView.xaml
++++ b/src/PrintFlow.App/Views/HomeView.xaml
+@@ -29,6 +29,120 @@
+             (Epic 11200 Part C1 §29).
+         -->
+         <views:PreviewPayloadConverter x:Key="PreviewPayload" />
++<Style x:Key="HomeTaskContainer" TargetType="ContentPresenter">
++                            <Setter Property="AutomationProperties.AutomationId" Value="Home.RecentSession" />
++                            <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
++                        </Style>
++<DataTemplate x:Key="HomeTaskRow">
++                            <Border Style="{StaticResource PF.Card}" Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,8">
++                                <Grid>
++                                    <Grid.ColumnDefinitions>
++                                        <ColumnDefinition Width="Auto" />
++                                        <ColumnDefinition Width="*" />
++                                        <ColumnDefinition Width="Auto" />
++                                    </Grid.ColumnDefinitions>
++
++                                    <!--
++                                        The picture, or the space where one would be. Fixed extent
++                                        either way, so a row that has no preview — or has not been
++                                        given one yet — does not make the list jump as thumbnails
++                                        arrive (Jira 11602).
++                                    -->
++                                    <Border Grid.Column="0"
++                                            Width="64" Height="64"
++                                            Margin="0,0,12,0"
++                                            VerticalAlignment="Center"
++                                            Background="{DynamicResource PF.Image.Checkerboard}"
++                                            BorderBrush="{DynamicResource PF.Brush.Border}"
++                                            BorderThickness="1"
++                                            CornerRadius="{DynamicResource PF.Corner.Control}">
++                                        <Grid>
++                                            <!--
++                                                The identity sits on the Image and on the neutral
++                                                line beside it rather than on the Border: a Border
++                                                creates no automation peer, so an id put there is
++                                                invisible to a real UI Automation client. Each of
++                                                these does create one, and exactly one of them is
++                                                on screen at a time.
++                                            -->
++                                            <Image Source="{Binding Thumbnail, Converter={StaticResource PreviewPayload}}"
++                                                   Stretch="Uniform"
++                                                   Margin="2"
++                                                   AutomationProperties.AutomationId="Home.RecentSessionThumbnail"
++                                                   AutomationProperties.Name="{Binding ThumbnailName}"
++                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVisibility}}" />
++                                            <TextBlock Text="{Binding ThumbnailState}"
++                                                       FontSize="{DynamicResource PF.Font.Auxiliary}"
++                                                       Opacity="0.6"
++                                                       TextWrapping="Wrap"
++                                                       TextAlignment="Center"
++                                                       HorizontalAlignment="Center"
++                                                       VerticalAlignment="Center"
++                                                       AutomationProperties.AutomationId="Home.RecentSessionNoThumbnail"
++                                                       AutomationProperties.Name="{Binding ThumbnailName}" />
++                                        </Grid>
++                                    </Border>
++
++                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
++                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="{DynamicResource PF.Font.Body}" />
++                                        <TextBlock Text="{Binding MetadataText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.75" />
++                                        <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
++                                                   AutomationProperties.AutomationId="Home.RecentStatus"
++                                                   AutomationProperties.Name="{Binding State}" />
++                                        <TextBlock Text="{Binding SaveHistoryText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.8"
++                                                   AutomationProperties.AutomationId="Home.RecentSaveHistory"
++                                                   AutomationProperties.Name="{Binding SaveHistoryText}"
++                                                   Visibility="{Binding HasSaveHistoryText, Converter={StaticResource BoolToVisibility}}" />
++                                        <!-- SCRUM-11148: what "Details" alone cannot say for a handed-off correction job. -->
++                                        <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
++                                                   AutomationProperties.AutomationId="Home.RecentWaitingForCorrection"
++                                                   Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
++                                    </StackPanel>
++
++                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
++                                        <!--
++                                            The row actions repeat once per session, so their
++                                            AutomationIds are unique within a row rather than within
++                                            the screen: a driver picks the row by its accessible name
++                                            — the operator's own output name — and then the action.
++                                        -->
++                                        <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenActionLabel}"
++                                                Command="{Binding DataContext.ResumeCommand,
++                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                CommandParameter="{Binding}"
++                                                AutomationProperties.AutomationId="Home.ResumeSession"
++                                                AutomationProperties.Name="{Binding OpenActionLabel}"
++                                                Margin="0,0,8,0" />
++                                        <!-- Offered only where the workflow layer says Abandon is legal (§10). -->
++                                        <views:SessionActionButton Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.AbandonLabel,
++                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                Command="{Binding DataContext.AbandonCommand,
++                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                CommandParameter="{Binding}"
++                                                AutomationProperties.AutomationId="Home.AbandonSession"
++                                                AutomationProperties.Name="{Binding DataContext.AbandonLabel,
++                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                Margin="0,0,8,0"
++                                                Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
++                                        <!--
++                                            Offered only where the workflow layer says the record may
++                                            be taken off the list — a finished job, never one still
++                                            being worked on or waiting for a recovery decision
++                                            (Jira 11602). Abandon and this are never both offered.
++                                        -->
++                                        <views:SessionActionButton Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.RemoveLabel,
++                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                Command="{Binding DataContext.RemoveRecordCommand,
++                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                CommandParameter="{Binding}"
++                                                AutomationProperties.AutomationId="Home.RemoveSessionRecord"
++                                                AutomationProperties.Name="{Binding DataContext.RemoveLabel,
++                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
++                                                Visibility="{Binding CanRemoveRecord, Converter={StaticResource BoolToVisibility}}" />
++                                    </StackPanel>
++                                </Grid>
++                            </Border>
++                        </DataTemplate>
+           </ResourceDictionary>
+     </UserControl.Resources>
+ 
+@@ -41,7 +155,7 @@
+         </Grid.RowDefinitions>
+ 
+         <DockPanel Grid.Row="0" LastChildFill="True">
+-            <Button Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
++            <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
+                     VerticalAlignment="Center"
+                     Content="{Binding SettingsLabel}"
+                     Command="{Binding ShowSettingsCommand}"
+@@ -58,6 +172,27 @@
+         <ScrollViewer x:Name="Upper" Grid.Row="1" VerticalScrollBarVisibility="Auto" IsTabStop="False"
+                       AutomationProperties.AutomationId="Home.Upper">
+         <StackPanel>
++        <!-- The one way in. Dropping is handled on the whole screen, so the operator can
++             drop anywhere rather than hunt for a target. -->
++        <HeaderedContentControl Style="{StaticResource PF.TaskCard}" Header="{Binding ImportHeading}">
++            <StackPanel>
++                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
++                <views:SessionActionButton Style="{StaticResource PF.Button.Primary}" Content="{Binding ChooseFileLabel}"
++                        Command="{Binding ChooseFileCommand}" IsEnabled="{Binding CanStartImport}"
++                        AutomationProperties.AutomationId="Home.ChooseFile"
++                        AutomationProperties.Name="{Binding ChooseFileLabel}"
++                        HorizontalAlignment="Left" />
++                <StackPanel Visibility="{Binding IsImporting, Converter={StaticResource BoolToVisibility}}" Margin="0,12,0,0">
++                    <TextBlock Text="{Binding ImportProgress}" TextWrapping="Wrap" AutomationProperties.AutomationId="Home.ImportProgress" />
++                    <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding CancelImportLabel}" Command="{Binding CancelImportCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" AutomationProperties.AutomationId="Home.CancelImport" />
++                </StackPanel>
++                <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" Margin="0,12,0,0" FontWeight="SemiBold" />
++                <views:NoticeErrorDetails Margin="0,4,0,0" />
++                <TextBlock Text="{Binding AiUnavailable}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,12,0,0" AutomationProperties.AutomationId="Home.AiUnavailable" />
++            </StackPanel>
++        </HeaderedContentControl>
++
++
+         <StackPanel Margin="0,8,0,14">
+             <Border Style="{StaticResource PF.Card}">
+                 <StackPanel>
+@@ -69,6 +204,7 @@
+                     <TextBlock Text="{Binding Readiness.ReasonText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                AutomationProperties.AutomationId="Home.Readiness.Reason"
+                                Visibility="{Binding Readiness.HasReason, Converter={StaticResource BoolToVisibility}}" />
++                    <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding EnvironmentDetailsLabel}"><StackPanel>
+                     <TextBlock Text="{Binding Readiness.CheckedAtText}" TextWrapping="Wrap" Opacity="0.8" Margin="0,2,0,0"
+                                AutomationProperties.AutomationId="Home.Readiness.CheckedAt"
+                                Visibility="{Binding Readiness.HasCheckedAt, Converter={StaticResource BoolToVisibility}}" />
+@@ -82,7 +218,9 @@
+                                  TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Margin="0,2,0,0"
+                                  AutomationProperties.AutomationId="Home.Readiness.TechnicalDetail" />
+                     </Expander>
+-                    <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
++
++                    </StackPanel></Expander>
++                    <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding EnvironmentLabel}"
+                             Command="{Binding ShowEnvironmentCommand}"
+                             AutomationProperties.AutomationId="Home.ShowEnvironment"
+                             AutomationProperties.Name="{Binding EnvironmentLabel}"
+@@ -125,34 +263,12 @@
+             </Expander>
+         </StackPanel>
+ 
+-        <!-- The one way in. Dropping is handled on the whole screen, so the operator can
+-             drop anywhere rather than hunt for a target. -->
+-        <HeaderedContentControl Style="{StaticResource PF.TaskCard}" Header="{Binding ImportHeading}">
+-            <StackPanel>
+-                <TextBlock Text="{Binding ImportHint}" TextWrapping="Wrap" Opacity="0.7" Margin="0,4,0,10" />
+-                <Button Style="{StaticResource PF.Button.Primary}" Content="{Binding ChooseFileLabel}"
+-                        Command="{Binding ChooseFileCommand}"
+-                        AutomationProperties.AutomationId="Home.ChooseFile"
+-                        AutomationProperties.Name="{Binding ChooseFileLabel}"
+-                        HorizontalAlignment="Left" />
+-            </StackPanel>
+-        </HeaderedContentControl>
+-
+-        <StackPanel>
+-            <TextBlock Text="{Binding Notice}"
+-                       TextWrapping="Wrap"
+-                       Margin="0,12,0,0"
+-                       FontWeight="SemiBold" />
+-            <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
+-            <views:NoticeErrorDetails Margin="0,4,0,0" />
+-        </StackPanel>
+-
+         </StackPanel>
+         </ScrollViewer>
+ 
+         <DockPanel Grid.Row="2" Margin="0,16,0,0">
+             <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
+-                <Button Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
++                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" DockPanel.Dock="Right"
+                         Content="{Binding RefreshLabel}"
+                         Command="{Binding RefreshCommand}"
+                         AutomationProperties.AutomationId="Home.Refresh"
+@@ -177,7 +293,7 @@
+                     <TextBlock Text="{Binding PendingAbandon.Question}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"
+                                AutomationProperties.AutomationId="Home.AbandonConfirmation.Question" />
+                     <WrapPanel>
+-                        <Button Style="{StaticResource PF.Button.Secondary}" x:Name="AbandonKeepButton"
++                        <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" x:Name="AbandonKeepButton"
+                                 Content="{Binding AbandonKeepLabel}"
+                                 Command="{Binding KeepJobCommand}"
+                                 IsCancel="True"
+@@ -227,19 +343,19 @@
+                                                        AutomationProperties.AutomationId="Home.Recovery.WaitingForCorrection"
+                                                        Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
+                                             <WrapPanel>
+-                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenCorrectionLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
++                                                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenCorrectionLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                         AutomationProperties.AutomationId="Home.Recovery.OpenCorrection" AutomationProperties.Name="{Binding OpenCorrectionLabel}"
+                                                         Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+-                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding RestartLabel}" Command="{Binding DataContext.RestartRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
++                                                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding RestartLabel}" Command="{Binding DataContext.RestartRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                         AutomationProperties.AutomationId="Home.Recovery.Restart" AutomationProperties.Name="{Binding RestartLabel}"
+                                                         Visibility="{Binding CanRestart, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+-                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding ManualResultLabel}" Command="{Binding DataContext.ImportRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
++                                                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding ManualResultLabel}" Command="{Binding DataContext.ImportRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                         AutomationProperties.AutomationId="Home.Recovery.ManualResult" AutomationProperties.Name="{Binding ManualResultLabel}"
+                                                         Visibility="{Binding CanImport, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+-                                                <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
++                                                <views:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenLabel}" Command="{Binding DataContext.OpenRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                         AutomationProperties.AutomationId="Home.Recovery.Open" AutomationProperties.Name="{Binding OpenLabel}"
+                                                         Visibility="{Binding ShowsPlainOpen, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+-                                                <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding AbandonLabel}" Command="{Binding DataContext.AbandonRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
++                                                <views:SessionActionButton Style="{StaticResource PF.Button.Danger}" Content="{Binding AbandonLabel}" Command="{Binding DataContext.AbandonRecoveryCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"
+                                                         AutomationProperties.AutomationId="Home.Recovery.Abandon" AutomationProperties.Name="{Binding AbandonLabel}"
+                                                         Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" Margin="0,0,8,4" />
+                                             </WrapPanel>
+@@ -250,136 +366,19 @@
+                             </ItemsControl.ItemTemplate>
+                         </ItemsControl>
+                     </StackPanel>
+-                <TextBlock Text="{Binding RecentHeading}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
+-                <ItemsControl ItemsSource="{Binding RecentSessions}"
++                <StackPanel Visibility="{Binding HasContinueSessions, Converter={StaticResource BoolToVisibility}}">
++                    <TextBlock Text="{Binding ContinueHeading}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
++                <ItemsControl ItemsSource="{Binding ContinueSessions}"
++                              IsTabStop="False"
++                              AutomationProperties.AutomationId="Home.ContinueList"
++                              AutomationProperties.Name="{Binding ContinueHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
++                </StackPanel>
++                <Expander Style="{StaticResource PF.Disclosure}" Header="{Binding RecentHeading}" IsExpanded="{Binding HasNoContinueSessions, Mode=OneWay}" x:Name="HistoryDisclosure" AutomationProperties.AutomationId="Home.HistoryDetails">
++                <ItemsControl ItemsSource="{Binding HistorySessions}"
+                               IsTabStop="False"
+                               AutomationProperties.AutomationId="Home.RecentSessionList"
+-                              AutomationProperties.Name="{Binding RecentHeading}">
+-                    <!--
+-                        A row announces the operator's own name for the work, not the class that
+-                        produced it, and carries the identity a driver selects it by. Both belong
+-                        on the generated container: that is what item automation reads.
+-                    -->
+-                    <ItemsControl.ItemContainerStyle>
+-                        <Style TargetType="ContentPresenter">
+-                            <Setter Property="AutomationProperties.AutomationId" Value="Home.RecentSession" />
+-                            <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
+-                        </Style>
+-                    </ItemsControl.ItemContainerStyle>
+-
+-                    <ItemsControl.ItemTemplate>
+-                        <DataTemplate>
+-                            <Border Style="{StaticResource PF.Card}" Padding="{DynamicResource PF.Padding.Field}" Margin="0,0,0,8">
+-                                <Grid>
+-                                    <Grid.ColumnDefinitions>
+-                                        <ColumnDefinition Width="Auto" />
+-                                        <ColumnDefinition Width="*" />
+-                                        <ColumnDefinition Width="Auto" />
+-                                    </Grid.ColumnDefinitions>
+-
+-                                    <!--
+-                                        The picture, or the space where one would be. Fixed extent
+-                                        either way, so a row that has no preview — or has not been
+-                                        given one yet — does not make the list jump as thumbnails
+-                                        arrive (Jira 11602).
+-                                    -->
+-                                    <Border Grid.Column="0"
+-                                            Width="64" Height="64"
+-                                            Margin="0,0,12,0"
+-                                            VerticalAlignment="Center"
+-                                            Background="{DynamicResource PF.Image.Checkerboard}"
+-                                            BorderBrush="{DynamicResource PF.Brush.Border}"
+-                                            BorderThickness="1"
+-                                            CornerRadius="{DynamicResource PF.Corner.Control}">
+-                                        <Grid>
+-                                            <!--
+-                                                The identity sits on the Image and on the neutral
+-                                                line beside it rather than on the Border: a Border
+-                                                creates no automation peer, so an id put there is
+-                                                invisible to a real UI Automation client. Each of
+-                                                these does create one, and exactly one of them is
+-                                                on screen at a time.
+-                                            -->
+-                                            <Image Source="{Binding Thumbnail, Converter={StaticResource PreviewPayload}}"
+-                                                   Stretch="Uniform"
+-                                                   Margin="2"
+-                                                   AutomationProperties.AutomationId="Home.RecentSessionThumbnail"
+-                                                   AutomationProperties.Name="{Binding ThumbnailName}"
+-                                                   Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVisibility}}" />
+-                                            <TextBlock Text="{Binding ThumbnailState}"
+-                                                       FontSize="{DynamicResource PF.Font.Auxiliary}"
+-                                                       Opacity="0.6"
+-                                                       TextWrapping="Wrap"
+-                                                       TextAlignment="Center"
+-                                                       HorizontalAlignment="Center"
+-                                                       VerticalAlignment="Center"
+-                                                       AutomationProperties.AutomationId="Home.RecentSessionNoThumbnail"
+-                                                       AutomationProperties.Name="{Binding ThumbnailName}" />
+-                                        </Grid>
+-                                    </Border>
+-
+-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+-                                        <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="{DynamicResource PF.Font.Body}" />
+-                                        <TextBlock Text="{Binding MetadataText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.75" />
+-                                        <TextBlock Text="{Binding State}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+-                                                   AutomationProperties.AutomationId="Home.RecentStatus"
+-                                                   AutomationProperties.Name="{Binding State}" />
+-                                        <TextBlock Text="{Binding SaveHistoryText}" TextWrapping="Wrap" Margin="0,2,0,0" Opacity="0.8"
+-                                                   AutomationProperties.AutomationId="Home.RecentSaveHistory"
+-                                                   AutomationProperties.Name="{Binding SaveHistoryText}"
+-                                                   Visibility="{Binding HasSaveHistoryText, Converter={StaticResource BoolToVisibility}}" />
+-                                        <!-- SCRUM-11148: what "Details" alone cannot say for a handed-off correction job. -->
+-                                        <TextBlock Text="{Binding WaitingForCorrectionText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+-                                                   AutomationProperties.AutomationId="Home.RecentWaitingForCorrection"
+-                                                   Visibility="{Binding HasOpenCorrection, Converter={StaticResource BoolToVisibility}}" />
+-                                    </StackPanel>
+-
+-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+-                                        <!--
+-                                            The row actions repeat once per session, so their
+-                                            AutomationIds are unique within a row rather than within
+-                                            the screen: a driver picks the row by its accessible name
+-                                            — the operator's own output name — and then the action.
+-                                        -->
+-                                        <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding OpenActionLabel}"
+-                                                Command="{Binding DataContext.ResumeCommand,
+-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                CommandParameter="{Binding}"
+-                                                AutomationProperties.AutomationId="Home.ResumeSession"
+-                                                AutomationProperties.Name="{Binding OpenActionLabel}"
+-                                                Margin="0,0,8,0" />
+-                                        <!-- Offered only where the workflow layer says Abandon is legal (§10). -->
+-                                        <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.AbandonLabel,
+-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                Command="{Binding DataContext.AbandonCommand,
+-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                CommandParameter="{Binding}"
+-                                                AutomationProperties.AutomationId="Home.AbandonSession"
+-                                                AutomationProperties.Name="{Binding DataContext.AbandonLabel,
+-                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                Margin="0,0,8,0"
+-                                                Visibility="{Binding CanAbandon, Converter={StaticResource BoolToVisibility}}" />
+-                                        <!--
+-                                            Offered only where the workflow layer says the record may
+-                                            be taken off the list — a finished job, never one still
+-                                            being worked on or waiting for a recovery decision
+-                                            (Jira 11602). Abandon and this are never both offered.
+-                                        -->
+-                                        <Button Style="{StaticResource PF.Button.Danger}" Content="{Binding DataContext.RemoveLabel,
+-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                Command="{Binding DataContext.RemoveRecordCommand,
+-                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                CommandParameter="{Binding}"
+-                                                AutomationProperties.AutomationId="Home.RemoveSessionRecord"
+-                                                AutomationProperties.Name="{Binding DataContext.RemoveLabel,
+-                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+-                                                Visibility="{Binding CanRemoveRecord, Converter={StaticResource BoolToVisibility}}" />
+-                                    </StackPanel>
+-                                </Grid>
+-                            </Border>
+-                        </DataTemplate>
+-                    </ItemsControl.ItemTemplate>
+-                </ItemsControl>
++                              AutomationProperties.Name="{Binding RecentHeading}" ItemContainerStyle="{StaticResource HomeTaskContainer}" ItemTemplate="{StaticResource HomeTaskRow}" />
++                </Expander>
+                 </StackPanel>
+             </ScrollViewer>
+         </DockPanel>
+diff --git a/src/PrintFlow.App/Views/HomeView.xaml.cs b/src/PrintFlow.App/Views/HomeView.xaml.cs
+index 862c93c..a24d0b6 100644
+--- a/src/PrintFlow.App/Views/HomeView.xaml.cs
++++ b/src/PrintFlow.App/Views/HomeView.xaml.cs
+@@ -39,6 +39,7 @@ public partial class HomeView : UserControl
+     public HomeView()
+     {
+         InitializeComponent();
++        _ = new EntryActionScope(this);
+         Loaded += (_, _) => { _observing = true; Subscribe(); };
+         Unloaded += (_, _) => { _observing = false; Unsubscribe(); };
+         DataContextChanged += (_, _) => { Unsubscribe(); if (_observing) Subscribe(); };
+diff --git a/src/PrintFlow.App/Views/SessionScreenView.xaml b/src/PrintFlow.App/Views/SessionScreenView.xaml
+index 8040633..4ab88ff 100644
+--- a/src/PrintFlow.App/Views/SessionScreenView.xaml
++++ b/src/PrintFlow.App/Views/SessionScreenView.xaml
+@@ -305,6 +305,9 @@
+         </Border>
+ 
+         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10,0,0">
++            <TextBlock Text="{Binding OriginalSourceSummary}" TextWrapping="Wrap"
++                       AutomationProperties.AutomationId="Session.OriginalSourceSummary"
++                       Visibility="{Binding ShowsGuidedSourceDetails, Converter={StaticResource BoolToVisibility}}" />
+             <!-- Automation has ended for this session; nothing here restarts it (§14). -->
+             <TextBlock Text="{Binding HandedOffNotice}"
+                        TextWrapping="Wrap"
+@@ -314,9 +317,11 @@
+ 
+             <!-- The error surface: a localised sentence and a stable code, never a trace (§15). -->
+             <TextBlock Text="{Binding PdfSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
+-                       Visibility="{Binding HasPdfSource, Converter={StaticResource BoolToVisibility}}" />
++                       AutomationProperties.AutomationId="Session.PdfSourceNotice"
++                       Visibility="{Binding ShowsGuidedPdfSource, Converter={StaticResource BoolToVisibility}}" />
+             <TextBlock Text="{Binding PsdSourceNotice}" TextWrapping="Wrap" Margin="0,8,0,8"
+-                       Visibility="{Binding HasPsdSource, Converter={StaticResource BoolToVisibility}}" />
++                       AutomationProperties.AutomationId="Session.PsdSourceNotice"
++                       Visibility="{Binding ShowsGuidedPsdSource, Converter={StaticResource BoolToVisibility}}" />
+ 
+             <TextBlock TextWrapping="Wrap"
+                        FontWeight="SemiBold"
+@@ -2386,6 +2391,11 @@
+                         AutomationProperties.AutomationId="Session.AddAnotherSize"
+                         AutomationProperties.Name="{Binding AddAnotherSizeLabel}"
+                         Visibility="{Binding CanAddAnotherSize, Converter={StaticResource BoolToVisibility}}" />
++                <local:SessionActionButton Content="{Binding ChangeRouteLabel}"
++                        Command="{Binding ChangeRouteCommand}"
++                        AutomationProperties.AutomationId="Session.ChangeRoute"
++                        AutomationProperties.Name="{Binding ChangeRouteLabel}"
++                        Visibility="{Binding CanChangeRoute, Converter={StaticResource BoolToVisibility}}" />
+             </WrapPanel>
+ 
+ 
+diff --git a/src/PrintFlow.App/Views/WorkflowSelectionView.xaml b/src/PrintFlow.App/Views/WorkflowSelectionView.xaml
+index dd78488..e9de24f 100644
+--- a/src/PrintFlow.App/Views/WorkflowSelectionView.xaml
++++ b/src/PrintFlow.App/Views/WorkflowSelectionView.xaml
+@@ -35,7 +35,7 @@
+     </UserControl.Resources>
+ 
+     <Grid Background="{DynamicResource PF.Brush.Canvas}">
+-    <Grid Margin="{DynamicResource PF.Padding.Card}">
++    <Grid Margin="{DynamicResource PF.Padding.Card}" IsEnabled="{Binding CanInteractWithPage}">
+         <Grid.RowDefinitions>
+             <RowDefinition Height="Auto" />
+             <RowDefinition Height="Auto" />
+@@ -43,14 +43,14 @@
+             <RowDefinition Height="Auto" />
+         </Grid.RowDefinitions>
+ 
+-        <HeaderedContentControl Grid.Row="0" Style="{StaticResource PF.PageHeader}" Header="{Binding Heading}" />
++        <HeaderedContentControl x:Name="RouteHeading" Focusable="True" Grid.Row="0" Style="{StaticResource PF.PageHeader}" Header="{Binding Heading}" />
+ 
+         <!--
+             The source context: what was imported, what it looks like, and what the produced
+             files will be called (SCRUM-11078 §11, §12; SCRUM-11075). The preview is
+             informational — it issues no command and creates nothing (§13).
+         -->
+-        <Border Grid.Row="1" Style="{StaticResource PF.Card}" Margin="0,16,0,16">
++        <Border Grid.Row="1" Style="{StaticResource PF.Card}" Padding="16" Margin="0,12,0,12">
+         <Grid>
+             <Grid.ColumnDefinitions>
+                 <ColumnDefinition Width="Auto" />
+@@ -83,7 +83,7 @@
+                                TextWrapping="Wrap"
+                                Margin="10"
+                                Opacity="0.75"
+-                               VerticalAlignment="Center" />
++                               VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
+                 </Grid>
+             </Border>
+ 
+@@ -104,9 +104,9 @@
+                            Opacity="0.7"
+                            Margin="0,0,0,10" />
+ 
+-                <HeaderedContentControl Style="{StaticResource PF.FormSection}" Header="{Binding OutputNameLabel}">
+                 <StackPanel>
+-                <TextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
++                <TextBlock Text="{Binding OutputNameLabel}" FontWeight="SemiBold" />
++                <local:SessionTextBox Style="{StaticResource PF.Input.TextBox}" Text="{Binding OutputName, UpdateSourceTrigger=PropertyChanged}"
+                          IsEnabled="{Binding CanEditOutputName}"
+                          AutomationProperties.AutomationId="WorkflowSelection.OutputName"
+                          AutomationProperties.Name="{Binding OutputNameLabel}"
+@@ -121,7 +121,6 @@
+                            MaxWidth="480"
+                            HorizontalAlignment="Left" />
+                 </StackPanel>
+-                </HeaderedContentControl>
+             </StackPanel>
+         </Grid>
+         </Border>
+@@ -130,35 +129,25 @@
+             <StackPanel>
+                 <TextBlock Text="{Binding Hint}" TextWrapping="Wrap" Margin="0,0,0,10" Opacity="0.7" />
+ 
+-                <ItemsControl ItemsSource="{Binding Workflows}">
++                <ItemsControl ItemsSource="{Binding Workflows}" HorizontalContentAlignment="Stretch">
++                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                     <ItemsControl.ItemTemplate>
+                         <DataTemplate>
+-                            <Border Style="{StaticResource PF.Card}" Margin="{DynamicResource PF.Margin.Section}">
++                            <Border Style="{StaticResource PF.Card}" Margin="0,0,12,0" Padding="16">
+                                 <Grid>
+-                                    <Grid.ColumnDefinitions>
+-                                        <ColumnDefinition Width="*" />
+-                                        <ColumnDefinition Width="Auto" />
+-                                    </Grid.ColumnDefinitions>
+-
+-                                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
++                                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>                                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                                         <TextBlock Text="{Binding Title}" TextWrapping="Wrap" FontSize="{DynamicResource PF.Font.Body}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                         <TextBlock Text="{Binding Purpose}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                         <TextBlock Text="{Binding Result}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                         <TextBlock Text="{Binding Dimensions}" TextWrapping="Wrap" Margin="0,0,0,8" />
+-                                        <ItemsControl ItemsSource="{Binding Steps}">
+-                                            <ItemsControl.ItemTemplate>
+-                                                <DataTemplate>
+-                                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="8,1,0,1" Opacity="0.8" />
+-                                                </DataTemplate>
+-                                            </ItemsControl.ItemTemplate>
+-                                        </ItemsControl>
++
+                                     </StackPanel>
+ 
+                                     <!-- Enabled by the engine's own AvailableCommands, so the button
+                                          is offered on exactly the rule that would accept it (§7).
+                                          The identity comes from the catalogue entry's workflow type
+                                          and never from its translated title (§22). -->
+-                                    <Button Style="{StaticResource PF.Button.Secondary}" Grid.Column="1"
++                                    <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Grid.Row="1"
+                                             Content="{Binding DataContext.SelectLabel,
+                                                               RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                             Command="{Binding DataContext.SelectCommand,
+@@ -168,7 +157,7 @@
+                                                                 RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                             AutomationProperties.AutomationId="{Binding AutomationId}"
+                                             AutomationProperties.Name="{Binding Title}"
+-                                            VerticalAlignment="Center" />
++                                            VerticalAlignment="Bottom" HorizontalAlignment="Stretch" />
+                                 </Grid>
+                             </Border>
+                         </DataTemplate>
+@@ -179,6 +168,8 @@
+ 
+         <ContentControl Grid.Row="3" Style="{StaticResource PF.ActionBar}" Margin="0,16,0,0">
+         <StackPanel>
++            <TextBlock Text="{Binding RouteChangeHint}" TextWrapping="Wrap" Foreground="{DynamicResource PF.Brush.Muted}" Margin="0,0,0,8" AutomationProperties.AutomationId="WorkflowSelection.ChangeHint" />
++            <TextBlock Text="{Binding ProgressLabel}" TextWrapping="Wrap" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" AutomationProperties.AutomationId="WorkflowSelection.Progress" />
+             <TextBlock Text="{Binding Notice}"
+                        AutomationProperties.AutomationId="WorkflowSelection.Notice"
+                        TextWrapping="Wrap"
+@@ -186,13 +177,31 @@
+                        Margin="0,0,0,8" />
+             <!-- The exact code of the failure this notice describes, collapsed (SCRUM-11151). -->
+             <local:NoticeErrorDetails />
+-            <Button Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
++            <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding BackLabel}"
+                     Command="{Binding BackToHomeCommand}"
++                    IsEnabled="{Binding CanGoHome}"
+                     AutomationProperties.AutomationId="WorkflowSelection.Back"
+                     AutomationProperties.Name="{Binding BackLabel}"
+                     HorizontalAlignment="Left" />
+         </StackPanel>
+         </ContentControl>
+     </Grid>
++    <Border Background="{DynamicResource PF.Brush.Surface}" BorderBrush="{DynamicResource PF.Brush.Primary}"
++            BorderThickness="2" Padding="24" Margin="20" MaxWidth="600" VerticalAlignment="Center" Panel.ZIndex="10"
++            AutomationProperties.AutomationId="WorkflowSelection.DraftLeave"
++            Visibility="{Binding IsConfirmingDraftLeave, Converter={StaticResource BoolToVisibility}}">
++        <StackPanel>
++            <TextBlock x:Name="DraftLeaveHeadingText" Focusable="True" Text="{Binding DraftLeaveHeading}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
++            <TextBlock Text="{Binding DraftLeaveNotice}" TextWrapping="Wrap" Margin="0,12,0,18" />
++            <WrapPanel>
++                <local:SessionActionButton Style="{StaticResource PF.Button.Primary}" Content="{Binding KeepDraftLabel}"
++                        Command="{Binding KeepDraftCommand}" CommandParameter="{Binding PendingLeave}" Margin="0,0,12,8"
++                        AutomationProperties.AutomationId="WorkflowSelection.KeepDraft" />
++                <local:SessionActionButton Style="{StaticResource PF.Button.Secondary}" Content="{Binding DiscardDraftLabel}"
++                        Command="{Binding DiscardDraftAndLeaveCommand}" CommandParameter="{Binding PendingLeave}" Margin="0,0,0,8"
++                        AutomationProperties.AutomationId="WorkflowSelection.DiscardDraft" />
++            </WrapPanel>
++        </StackPanel>
++    </Border>
+     </Grid>
+ </UserControl>
+diff --git a/src/PrintFlow.App/Views/WorkflowSelectionView.xaml.cs b/src/PrintFlow.App/Views/WorkflowSelectionView.xaml.cs
+index cfef89b..fa98b15 100644
+--- a/src/PrintFlow.App/Views/WorkflowSelectionView.xaml.cs
++++ b/src/PrintFlow.App/Views/WorkflowSelectionView.xaml.cs
+@@ -1,9 +1,56 @@
++using System.ComponentModel;
++using System.Windows;
+ using System.Windows.Controls;
++using System.Windows.Input;
++using PrintFlow.App.ViewModels;
+ 
+ namespace PrintFlow.App.Views;
+ 
+-/// <summary>Workflow Selection. No code-behind logic: every action is a bound command.</summary>
++/// <summary>Bound commands own decisions; context changes focus a non-activating heading.</summary>
+ public partial class WorkflowSelectionView : UserControl
+ {
+-    public WorkflowSelectionView() => InitializeComponent();
++    private WorkflowSelectionViewModel? _observed;
++    private bool _active = true;
++
++    public WorkflowSelectionView()
++    {
++        InitializeComponent();
++        _ = new EntryActionScope(this);
++        DataContextChanged += (_, _) => Observe();
++        Loaded += (_, _) => { _active = true; Observe(); };
++        Unloaded += (_, _) => { _active = false; Unsubscribe(); };
++    }
++
++    private void Observe()
++    {
++        Unsubscribe();
++        if (!_active || DataContext is not WorkflowSelectionViewModel model) return;
++        _observed = model;
++        model.PropertyChanged += OnModelChanged;
++        FocusHeading();
++    }
++
++    private void Unsubscribe()
++    {
++        if (_observed is not null) _observed.PropertyChanged -= OnModelChanged;
++        _observed = null;
++    }
++
++    private void OnModelChanged(object? sender, PropertyChangedEventArgs args)
++    {
++        if (args.PropertyName == nameof(WorkflowSelectionViewModel.InteractionIdentity)) FocusHeading();
++    }
++
++    private void FocusHeading()
++    {
++        if (!_active || _observed is null) return;
++        FrameworkElement target = _observed.IsConfirmingDraftLeave ? DraftLeaveHeadingText : RouteHeading;
++        FocusManager.SetFocusedElement(FocusManager.GetFocusScope(this), target);
++        if (!IsLoaded) return;
++        var context = SessionActionScope.State(this);
++        Dispatcher.BeginInvoke(() =>
++        {
++            if (_active && ReferenceEquals(context, SessionActionScope.State(this)) && SessionActionScope.CanInteract(target)) target.Focus();
++        }, System.Windows.Threading.DispatcherPriority.Loaded);
++    }
+ }
+diff --git a/tests/PrintFlow.Tests/Architecture/LocalisationResourceTests.cs b/tests/PrintFlow.Tests/Architecture/LocalisationResourceTests.cs
+index ba355b9..4f48065 100644
+--- a/tests/PrintFlow.Tests/Architecture/LocalisationResourceTests.cs
++++ b/tests/PrintFlow.Tests/Architecture/LocalisationResourceTests.cs
+@@ -37,7 +37,6 @@ public void The_current_print_size_step_and_guidance_use_one_Chinese_term()
+             "Session_RunReady",
+             "Session_RunNotReady",
+             "Session_DimensionReviewRequired",
+-            "Session_PdfPrepared",
+             "Session_NextDimensions",
+             "Session_PreflightHeading",
+             "Session_PreflightPrintSize",
+@@ -52,6 +51,22 @@ public void The_current_print_size_step_and_guidance_use_one_Chinese_term()
+         }
+     }
+ 
++    [Fact]
++    public void Shared_source_preparation_copy_does_not_promise_a_print_route()
++    {
++        // Source preparation also belongs to the PNG-only asset route. Its page must
++        // describe the input/raster copy; print-size terminology belongs to the later step.
++        foreach (string resource in new[] { NeutralResx, ChineseResx })
++        foreach (string key in new[] { "Session_PdfPrepared", "Session_PsdPrepared" })
++        {
++            string value = ValueOf(resource, key);
++            value.ShouldContain("PNG");
++            value.ShouldNotContain("TIFF");
++            value.ShouldNotContain("印刷尺寸");
++            value.ShouldNotContain("print size", Case.Insensitive);
++        }
++    }
++
+     [Fact]
+     public void Every_English_string_has_a_zh_CN_translation()
+     {
+diff --git a/tests/PrintFlow.Tests/Integration/Persistence/PsdPreparationWorkflowTests.cs b/tests/PrintFlow.Tests/Integration/Persistence/PsdPreparationWorkflowTests.cs
+index 5950c2b..47239fb 100644
+--- a/tests/PrintFlow.Tests/Integration/Persistence/PsdPreparationWorkflowTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Persistence/PsdPreparationWorkflowTests.cs
+@@ -209,7 +209,7 @@ public async Task Invalid_adapter_output_never_creates_a_revision(string fault)
+         stored.Attempts.Single(a => a.Operation == OperationKind.PreparePsd).PsdInspection.ShouldNotBeNull();
+     }
+ 
+-    private sealed class PsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
++    internal sealed class PsdProcessor(IWorkspace workspace) : IPhotoshopOutputProcessor
+     {
+         public string AdapterId => "test-psd-boundary-v1";
+         public AdapterExecutionMode Mode { get; init; } = AdapterExecutionMode.Fake;
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportDraftTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportDraftTests.cs
+new file mode 100644
+index 0000000..f93e0d7
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportDraftTests.cs
+@@ -0,0 +1,165 @@
++using System.Reflection;
++using System.Text.Json;
++using System.Windows;
++using System.Windows.Automation.Peers;
++using System.Windows.Automation.Provider;
++using System.Windows.Controls;
++using System.Windows.Input;
++using PrintFlow.App.ViewModels;
++using PrintFlow.App.Views;
++using PrintFlow.Domain.Sessions;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Workflow.Commands;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportDraftTests
++{
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task Untouched_or_reverted_names_leave_without_a_draft_decision(bool editThenRevert)
++    {
++        using HomeScreenHarness h = new();
++        var m = h.WorkflowSelection(h.Navigation); m.Open(await GuidedImportRouteTests.Import(h, "clean-name.png"));
++        if (editThenRevert) { m.OutputName = "temporary draft"; m.OutputName = m.SessionName; }
++        await m.BackToHomeCommand.ExecuteAsync(null);
++        m.PendingLeave.ShouldBeNull(); h.Navigation.GoHomeCount.ShouldBe(1);
++    }
++
++    [Fact]
++    public async Task Keep_preserves_the_draft_and_only_the_current_discard_request_may_leave_without_writing()
++    {
++        using HomeScreenHarness h = new();
++        var imported = await GuidedImportRouteTests.Import(h, "kept-name.png");
++        var before = JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(imported.Id, default)).Value);
++        var m = h.WorkflowSelection(h.Navigation); m.Open(imported); m.OutputName = "kept draft";
++        await m.BackToHomeCommand.ExecuteAsync(null); var old = m.PendingLeave.ShouldNotBeNull();
++        m.KeepDraftCommand.Execute(old);
++        m.OutputName.ShouldBe("kept draft"); m.IsConfirmingDraftLeave.ShouldBeFalse(); h.Navigation.GoHomeCount.ShouldBe(0);
++        await m.BackToHomeCommand.ExecuteAsync(null); var current = m.PendingLeave.ShouldNotBeNull();
++        await m.DiscardDraftAndLeaveCommand.ExecuteAsync(old);
++        h.Navigation.GoHomeCount.ShouldBe(0); ReferenceEquals(m.PendingLeave, current).ShouldBeTrue();
++        await m.DiscardDraftAndLeaveCommand.ExecuteAsync(current);
++        h.Navigation.GoHomeCount.ShouldBe(1); m.OutputName.ShouldBe(imported.OutputName.Value);
++        JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(imported.Id, default)).Value).ShouldBe(before);
++    }
++
++    [Fact]
++    public async Task Old_leave_request_and_retained_provider_cannot_discard_the_reopened_tasks_name()
++    {
++        using HomeScreenHarness h = new();
++        var a = await GuidedImportRouteTests.Import(h, "draft-a.png"); var b = await GuidedImportRouteTests.Import(h, "draft-b.png");
++        var m = h.WorkflowSelection(h.Navigation); m.Open(a); m.OutputName = "A draft"; await m.BackToHomeCommand.ExecuteAsync(null);
++        var old = m.PendingLeave.ShouldNotBeNull();
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            var discard = GuidedImportHomeTests.Find<Button>(tree, "WorkflowSelection.DiscardDraft");
++            var provider = GuidedSessionInputTests.Provider(discard);
++            m.Deactivate(); m.Open(b); m.OutputName = "B draft"; m.BackToHomeCommand.Execute(null); tree.Root.UpdateLayout();
++            var current = m.PendingLeave.ShouldNotBeNull();
++            m.KeepDraftCommand.Execute(old); m.DiscardDraftAndLeaveCommand.Execute(old);
++            provider.Invoke(); GuidedImportHomeTests.Drain();
++            h.Navigation.GoHomeCount.ShouldBe(0); m.OutputName.ShouldBe("B draft"); ReferenceEquals(current, m.PendingLeave).ShouldBeTrue();
++            m.KeepDraftCommand.Execute(current); tree.Root.UpdateLayout();
++            GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName").IsEnabled.ShouldBeTrue();
++            return true;
++        });
++        (await h.Sessions.LoadAsync(a.Id, default)).Value.OutputName.Value.ShouldBe(a.OutputName.Value);
++        (await h.Sessions.LoadAsync(b.Id, default)).Value.OutputName.Value.ShouldBe(b.OutputName.Value);
++    }
++
++    [Fact]
++    public async Task Draft_decision_blocks_ordinary_input_and_moves_focus_to_a_non_action_heading()
++    {
++        using HomeScreenHarness h = new();
++        var m = h.WorkflowSelection(h.Navigation); m.Open(await GuidedImportRouteTests.Import(h, "modal-input.png"));
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            var route = GuidedImportHomeTests.Find<Button>(tree, m.Workflows.Last().AutomationId);
++            var ordinary = GuidedSessionInputTests.Provider(route);
++            var editor = GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName");
++            var value = (IValueProvider)UIElementAutomationPeer.CreatePeerForElement(editor)!.GetPattern(PatternInterface.Value)!;
++            FocusManager.SetFocusedElement(FocusManager.GetFocusScope(tree.Root), route);
++            m.OutputName = "still editing"; m.BackToHomeCommand.Execute(null); tree.Root.UpdateLayout();
++            ordinary.Invoke(); value.SetValue("stale edit"); m.SelectCommand.Execute(m.Workflows.Last()); m.BackToHomeCommand.Execute(null);
++            GuidedImportHomeTests.Drain();
++            m.OutputName.ShouldBe("still editing"); h.Navigation.GoHomeCount.ShouldBe(0); h.Navigation.SessionFor.ShouldBeNull();
++            FocusManager.GetFocusedElement(FocusManager.GetFocusScope(tree.Root)).ShouldBe(tree.Root.FindName("DraftLeaveHeadingText"));
++            m.KeepDraftCommand.Execute(m.PendingLeave); tree.Root.UpdateLayout();
++            FocusManager.GetFocusedElement(FocusManager.GetFocusScope(tree.Root)).ShouldBe(tree.Root.FindName("RouteHeading"));
++            return true;
++        });
++    }
++
++    [Fact]
++    public async Task A_successfully_committed_name_is_clean_even_if_the_subsequent_route_choice_is_refused()
++    {
++        using HomeScreenHarness h = new(); var imported = await GuidedImportRouteTests.Import(h, "saved-name.png");
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new WorkflowSelectionViewModel(service, h.Previews, h.Navigation); m.Open(imported); m.OutputName = "committed-name";
++        var gate = proxy.HoldNext(); var pending = m.SelectCommand.ExecuteAsync(m.Workflows.Last());
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        try
++        {
++            (await h.Sessions.ExecuteAsync(imported.Id, new WorkflowCommand.ConfirmOriginal(), "tester", default)).IsSuccess.ShouldBeTrue();
++            (await h.Sessions.ExecuteAsync(imported.Id, new WorkflowCommand.StartStep(StepKind.Enhancement), "tester", default)).IsSuccess.ShouldBeTrue();
++        }
++        finally { gate.Release.SetResult(); await pending; }
++        h.Navigation.SessionFor.ShouldBeNull(); m.Notice.ShouldNotBeNullOrWhiteSpace(); m.SessionName.ShouldBe("committed-name");
++        await m.BackToHomeCommand.ExecuteAsync(null);
++        m.PendingLeave.ShouldBeNull(); h.Navigation.GoHomeCount.ShouldBe(1);
++        (await h.Sessions.LoadAsync(imported.Id, default)).Value.OutputName.Value.ShouldBe("committed-name");
++    }
++
++    [Fact]
++    public async Task Leaving_an_edited_route_name_waits_for_a_draft_decision_without_saving()
++    {
++        using HomeScreenHarness h = new();
++        var imported = await GuidedImportRouteTests.Import(h, "unsaved-route-name.png");
++        var m = h.WorkflowSelection(h.Navigation); m.Open(imported); await m.PreviewLoaded;
++        string before = JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(imported.Id, default)).Value);
++        m.OutputName = "operator-new-output-name";
++        await m.BackToHomeCommand.ExecuteAsync(null);
++        h.Navigation.GoHomeCount.ShouldBe(0);
++        m.OutputName.ShouldBe("operator-new-output-name");
++        JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(imported.Id, default)).Value).ShouldBe(before);
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            GuidedSessionProjectionTests.Shown(GuidedImportHomeTests.Find<Border>(tree, "WorkflowSelection.DraftLeave")).ShouldBeTrue();
++            GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName").IsEnabled.ShouldBeFalse();
++            foreach (var choice in m.Workflows) GuidedImportHomeTests.Find<Button>(tree, choice.AutomationId).IsEnabled.ShouldBeFalse();
++            return true;
++        });
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task A_busy_route_submission_cannot_open_a_leave_decision_or_navigate_away(bool rename)
++    {
++        using HomeScreenHarness h = new();
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new WorkflowSelectionViewModel(service, h.Previews, h.Navigation);
++        m.Open(await GuidedImportRouteTests.Import(h, "pending-route-name.png"));
++        if (rename) m.OutputName = "submitted-name";
++        var gate = proxy.HoldNext(); var pending = m.SelectCommand.ExecuteAsync(m.Workflows.Last());
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        try
++        {
++            await m.BackToHomeCommand.ExecuteAsync(null);
++            h.Navigation.GoHomeCount.ShouldBe(0); m.IsBusy.ShouldBeTrue();
++            WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++            {
++                GuidedImportHomeTests.Find<Button>(tree, "WorkflowSelection.Back").IsEnabled.ShouldBeFalse();
++                return true;
++            });
++        }
++        finally { gate.Release.SetResult(); await pending; }
++        h.Navigation.SessionFor.ShouldNotBeNull();
++    }
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportHomeTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportHomeTests.cs
+new file mode 100644
+index 0000000..e596c74
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportHomeTests.cs
+@@ -0,0 +1,123 @@
++using System.Reflection;
++using System.Windows;
++using System.Windows.Automation;
++using System.Windows.Controls;
++using System.Windows.Threading;
++using CommunityToolkit.Mvvm.Input;
++using PrintFlow.App.ViewModels;
++using PrintFlow.App.Views;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportHomeTests
++{
++    [Theory]
++    [InlineData("resume")]
++    [InlineData("open-recovery")]
++    [InlineData("restart-recovery")]
++    public async Task Late_continue_or_recovery_cannot_reopen_a_task_after_leaving_home(string action)
++    {
++        using HomeScreenHarness h = new();
++        if (action == "resume")
++            (await h.Sessions.ImportAsync(PrintFlow.Domain.Sessions.WorkflowType.PrepareAsset,
++                h.WriteSourceFile("late-continue.png"), "late continue", "tester", default)).IsSuccess.ShouldBeTrue();
++        else await RecoverySurfaceTests.Seed(h.Inner, "late recovery");
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new HomeViewModel(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
++        await m.RefreshCommand.ExecuteAsync(null);
++        var gate = proxy.HoldNext(action == "restart-recovery" ? nameof(ISessionService.ResolveRecoveryAsync) : nameof(ISessionService.LoadAsync));
++        Task pending = action switch
++        {
++            "resume" => m.ResumeCommand.ExecuteAsync(m.RecentSessions.Single()),
++            "open-recovery" => m.OpenRecoveryCommand.ExecuteAsync(m.RecoverySessions.Single()),
++            _ => m.RestartRecoveryCommand.ExecuteAsync(m.RecoverySessions.Single()),
++        };
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        await m.ShowSettingsCommand.ExecuteAsync(null);
++        gate.Release.SetResult(); await pending;
++        h.Navigation.SettingsCount.ShouldBe(1);
++        h.Navigation.SessionFor.ShouldBeNull();
++        m.Notice.ShouldBeNull();
++    }
++
++    [Fact]
++    public async Task Import_refusal_remains_visible_beside_the_import_action_without_scrolling()
++    {
++        using HomeScreenHarness h = new(); await h.Home.DropFilesCommand.ExecuteAsync(["one", "two"]);
++        WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
++        {
++            var notice = tree.OfType<TextBlock>().Single(t => t.Text == h.Home.Notice);
++            var scroll = GuidedSessionShellTests.Ancestors(notice).OfType<ScrollViewer>().First();
++            var bounds = notice.TransformToAncestor(scroll).TransformBounds(new Rect(notice.RenderSize));
++            bounds.Top.ShouldBeGreaterThanOrEqualTo(0); bounds.Bottom.ShouldBeLessThanOrEqualTo(scroll.ViewportHeight + 0.5);
++            return true;
++        });
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task Late_import_after_leaving_or_cancelling_never_navigates_to_route(bool cancel)
++    {
++        using HomeScreenHarness h = new();
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new HomeViewModel(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
++        h.FilePicker.Path = h.WriteSourceFile("late-home.png");
++        var gate = proxy.HoldNext(nameof(ISessionService.ImportAsync));
++        var pending = m.ChooseFileCommand.ExecuteAsync(null);
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        m.IsBusy.ShouldBeTrue();
++        if (cancel) m.ChooseFileCommand.Cancel();
++        else await m.ShowSettingsCommand.ExecuteAsync(null);
++        gate.Release.SetResult(); await pending;
++        h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++        m.IsBusy.ShouldBeFalse();
++        if (cancel) m.Notice.ShouldNotBeNullOrWhiteSpace();
++        // The committed import is still recoverable; cancellation never deletes the snapshot.
++        (await h.Sessions.ListRecentAsync(default)).Value.Count.ShouldBe(1);
++    }
++
++    [Fact]
++    public async Task Import_is_primary_and_above_workstation_information()
++    {
++        using HomeScreenHarness h = new();
++        await h.Home.RefreshCommand.ExecuteAsync(null);
++        WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
++        {
++            var choose = Find<Button>(tree, "Home.ChooseFile");
++            var readiness = Find<TextBlock>(tree, "Home.Readiness.Status");
++            choose.TransformToAncestor(tree.Root).Transform(new Point()).Y
++                .ShouldBeLessThan(readiness.TransformToAncestor(tree.Root).Transform(new Point()).Y);
++            choose.IsEnabled.ShouldBeTrue();
++            return true;
++        });
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public void Retained_home_invoke_cannot_cross_rebinding_or_unload(bool unload)
++    {
++        using HomeScreenHarness a = new(); using HomeScreenHarness b = new();
++        WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = a.Home }, new Size(1000, 700), tree =>
++        {
++            var choose = Find<Button>(tree, "Home.ChooseFile");
++            int calls = 0; choose.Command = new RelayCommand(() => calls++);
++            var provider = GuidedSessionInputTests.Provider(choose);
++            if (unload) tree.Root.RaiseEvent(new RoutedEventArgs(FrameworkElement.UnloadedEvent));
++            else tree.Root.DataContext = b.Home;
++            tree.Root.UpdateLayout();
++            provider.Invoke(); Drain(); calls.ShouldBe(0);
++            return true;
++        });
++    }
++
++    internal static T Find<T>(RenderedTree tree, string id) where T : FrameworkElement =>
++        tree.OfType<T>().Single(x => AutomationProperties.GetAutomationId(x) == id);
++    internal static void Drain() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportResumeTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportResumeTests.cs
+new file mode 100644
+index 0000000..77d20a5
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportResumeTests.cs
+@@ -0,0 +1,131 @@
++using System.Text.Json;
++using PrintFlow.App.ViewModels;
++using PrintFlow.Domain.Attempts;
++using PrintFlow.Domain.Ids;
++using PrintFlow.Domain.Revisions;
++using PrintFlow.Domain.Sessions;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Tests.Integration.Persistence;
++using PrintFlow.Workflow.Commands;
++using PrintFlow.Workflow.Engine;
++using PrintFlow.Workflow.Ports;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportResumeTests
++{
++    [Theory]
++    [InlineData(WorkflowType.PrepareAsset, false)]
++    [InlineData(WorkflowType.PrepareAsset, true)]
++    [InlineData(WorkflowType.PrepareCustomerDesign, true)]
++    [InlineData(WorkflowType.GeneratePrintTiff, true)]
++    public async Task Continuing_an_unconfirmed_original_requires_explicit_route_choice_without_guessing_prior_intent(WorkflowType route, bool previouslySelected)
++    {
++        using HomeScreenHarness h = new();
++        var imported = await GuidedImportRouteTests.Import(h, "choose-before-continuing.png");
++        if (previouslySelected)
++            (await h.Sessions.ExecuteAsync(imported.Id, new WorkflowCommand.SelectWorkflow(route), "tester", default)).IsSuccess.ShouldBeTrue();
++        var before = await Snapshot(h, imported.Id);
++        await h.Home.RefreshCommand.ExecuteAsync(null);
++        await h.Home.ResumeCommand.ExecuteAsync(h.Home.RecentSessions.Single());
++        h.Navigation.SessionFor.ShouldBeNull();
++        h.Navigation.WorkflowSelectionFor.ShouldNotBeNull().Id.ShouldBe(imported.Id);
++        (await Snapshot(h, imported.Id)).ShouldBe(before, "navigation cannot infer intent or write a route");
++
++        var selection = h.WorkflowSelection(h.Navigation); selection.Open(h.Navigation.WorkflowSelectionFor!);
++        await selection.SelectCommand.ExecuteAsync(selection.Workflows.Single(w => w.Type == route));
++        h.Navigation.SessionFor.ShouldNotBeNull().WorkflowType.ShouldBe(route);
++    }
++
++    [Theory]
++    [InlineData(WorkflowType.PrepareAsset)]
++    [InlineData(WorkflowType.PrepareCustomerDesign)]
++    [InlineData(WorkflowType.GeneratePrintTiff)]
++    public async Task Continuing_after_original_confirmation_preserves_the_actual_next_step_even_while_route_is_still_changeable(WorkflowType route)
++    {
++        using HomeScreenHarness h = new();
++        var imported = (await h.Sessions.ImportAsync(route, h.WriteSourceFile("confirmed.png"), null, "tester", default)).Value!;
++        var confirmed = (await h.Sessions.ExecuteAsync(imported.Id, new WorkflowCommand.ConfirmOriginal(), "tester", default)).Value!;
++        confirmed.AvailableCommands.ShouldContain(CommandKind.SelectWorkflow);
++        var before = await Snapshot(h, imported.Id);
++        await h.Home.RefreshCommand.ExecuteAsync(null);
++        await h.Home.ResumeCommand.ExecuteAsync(h.Home.RecentSessions.Single());
++        h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++        h.Navigation.SessionFor.ShouldNotBeNull().CurrentStep.ShouldBe(confirmed.CurrentStep);
++        (await Snapshot(h, imported.Id)).ShouldBe(before);
++    }
++
++    [Fact]
++    public async Task Prepared_source_review_is_resumed_without_reselecting_a_locked_route()
++    {
++        using HomeScreenHarness h = new();
++        var service = h.Inner.CreateServiceWithPhotoshop(new PsdPreparationWorkflowTests.PsdProcessor(h.Inner.FileWorkspace));
++        string source = h.Inner.Workspace.CreateSourceFile("prepared.psd", PsdInputPreparationTests.RgbCompositePsd());
++        var imported = (await service.ImportAsync(WorkflowType.PrepareAsset, source, null, "tester", default)).Value!;
++        (await service.ExecuteAsync(imported.Id, new WorkflowCommand.StartStep(StepKind.OriginalConfirmation), "tester", default)).IsSuccess.ShouldBeTrue();
++        var prepared = (await service.LoadAsync(imported.Id, default)).Value!;
++        prepared.CurrentStep!.State.ShouldBe(StepState.ReviewRequired);
++        prepared.AvailableCommands.ShouldNotContain(CommandKind.SelectWorkflow);
++        var before = await Snapshot(h, imported.Id);
++        var home = NewHome(h, service);
++        await home.RefreshCommand.ExecuteAsync(null); await home.ResumeCommand.ExecuteAsync(home.RecentSessions.Single());
++        h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++        h.Navigation.SessionFor.ShouldNotBeNull().CurrentStep.ShouldBe(prepared.CurrentStep);
++        (await Snapshot(h, imported.Id)).ShouldBe(before);
++    }
++
++    [Theory]
++    [InlineData(false, false)]
++    [InlineData(false, true)]
++    [InlineData(true, false)]
++    [InlineData(true, true)]
++    public async Task Recovery_keeps_interrupted_work_in_place_and_rechecks_route_only_after_original_restart(bool original, bool restart)
++    {
++        using HomeScreenHarness h = new();
++        SessionId id = original ? await SeedInterruptedSource(h) : await RecoverySurfaceTests.Seed(h.Inner, "interrupted-next-step");
++        var before = (await h.Inner.Repository.LoadAsync(id, default)).Value!;
++        var meitu = new CountingMeituProcessor(h.Inner.FakeMeitu);
++        var home = NewHome(h, h.Inner.CreateServiceWithMeitu(meitu));
++        await home.RefreshCommand.ExecuteAsync(null);
++        if (restart) await home.RestartRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
++        else await home.OpenRecoveryCommand.ExecuteAsync(home.RecoverySessions.Single());
++        if (original && restart)
++        {
++            h.Navigation.SessionFor.ShouldBeNull();
++            h.Navigation.WorkflowSelectionFor.ShouldNotBeNull().Id.ShouldBe(id);
++        }
++        else
++        {
++            h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++            h.Navigation.SessionFor.ShouldNotBeNull().CurrentStep!.Step.ShouldBe(original ? StepKind.OriginalConfirmation : StepKind.Enhancement);
++            h.Navigation.SessionFor!.CurrentStep!.State.ShouldBe(restart ? StepState.Waiting : StepState.Interrupted);
++        }
++        var after = (await h.Inner.Repository.LoadAsync(id, default)).Value!;
++        after.Attempts.ShouldBe(before.Attempts); after.Revisions.ShouldBe(before.Revisions);
++        if (!restart) JsonSerializer.Serialize(after).ShouldBe(JsonSerializer.Serialize(before));
++        meitu.CallCount.ShouldBe(0);
++    }
++
++    private static HomeViewModel NewHome(HomeScreenHarness h, ISessionService service) =>
++        new(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
++    private static async Task<string> Snapshot(HomeScreenHarness h, SessionId id) =>
++        JsonSerializer.Serialize((await h.Inner.Repository.LoadAsync(id, default)).Value);
++
++    private static async Task<SessionId> SeedInterruptedSource(HomeScreenHarness h)
++    {
++        string source = h.Inner.Workspace.CreateSourceFile("interrupted-source.psd", PsdInputPreparationTests.RgbCompositePsd());
++        var imported = (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset, source, null, "tester", default)).Value!;
++        var aggregate = (await h.Inner.Repository.LoadAsync(imported.Id, default)).Value!;
++        var context = new CommandContext(h.Inner.Clock.GetUtcNow(), "synthetic interrupted source", ReviewId.From(Guid.NewGuid()), AttemptId.From(Guid.NewGuid()));
++        var started = WorkflowEngine.Instance.Apply(aggregate.ToSnapshot(), new WorkflowCommand.StartStep(StepKind.OriginalConfirmation), context);
++        started.IsAccepted.ShouldBeTrue();
++        var running = ProcessingAttempt.Start(context.NewAttemptId, imported.Id, StepKind.OriginalConfirmation,
++            aggregate.ToSnapshot().UpstreamRevisionOf(StepKind.OriginalConfirmation), OperationKind.PreparePsd,
++            "synthetic-no-external-app", h.Inner.Clock.GetUtcNow());
++        (await h.Inner.Repository.CommitAsync(new SessionMutation(aggregate.Session, started.State.Steps, [], [], [running], [], [], null, null), default)).IsSuccess.ShouldBeTrue();
++        (await h.Inner.CreateRecoveryService(new FakeProcessLiveness(ProcessLiveness.Dead)).RecoverAsync(default)).IsSuccess.ShouldBeTrue();
++        return imported.Id;
++    }
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportRouteTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportRouteTests.cs
+new file mode 100644
+index 0000000..21b58b3
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportRouteTests.cs
+@@ -0,0 +1,141 @@
++using System.Reflection;
++using System.Windows;
++using System.Windows.Automation.Peers;
++using System.Windows.Automation.Provider;
++using System.Windows.Controls;
++using System.Windows.Input;
++using System.Windows.Media;
++using CommunityToolkit.Mvvm.Input;
++using PrintFlow.App.ViewModels;
++using PrintFlow.App.Views;
++using PrintFlow.Domain.Sessions;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportRouteTests
++{
++    [Fact]
++    public async Task Busy_selection_does_not_claim_a_derived_result_locked_the_route()
++    {
++        using HomeScreenHarness h = new();
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new WorkflowSelectionViewModel(service, h.Previews, h.Navigation);
++        m.Open(await Import(h, "busy-route.png"));
++        string before = m.RouteChangeHint;
++        var gate = proxy.HoldNext(); var running = m.SelectCommand.ExecuteAsync(m.Workflows.First());
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        try { m.CanSelect.ShouldBeFalse(); m.RouteChangeHint.ShouldBe(before); }
++        finally { gate.Release.SetResult(); await running; }
++    }
++
++    [Fact]
++    public async Task All_three_route_actions_are_visible_together_at_minimum_viewport()
++    {
++        using HomeScreenHarness h = new();
++        var m = h.WorkflowSelection(h.Navigation); m.Open(await Import(h, "route-cards.png")); await m.PreviewLoaded;
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            foreach (var choice in m.Workflows)
++            {
++                var button = GuidedImportHomeTests.Find<Button>(tree, choice.AutomationId);
++                var bounds = button.TransformToAncestor(tree.Root).TransformBounds(new Rect(button.RenderSize));
++                bounds.Bottom.ShouldBeLessThanOrEqualTo(700);
++                bounds.Right.ShouldBeLessThanOrEqualTo(1000);
++                var scroll = GuidedSessionShellTests.Ancestors(button).OfType<ScrollViewer>().First();
++                var clipped = button.TransformToAncestor(scroll).TransformBounds(new Rect(button.RenderSize));
++                clipped.Bottom.ShouldBeLessThanOrEqualTo(scroll.ViewportHeight + 0.5, "the whole action must be visible without scrolling");
++                button.IsEnabled.ShouldBeTrue();
++                tree.OfType<TextBlock>().ShouldContain(x => x.Text == choice.Purpose);
++                tree.OfType<TextBlock>().ShouldContain(x => x.Text == choice.Result);
++                tree.OfType<TextBlock>().ShouldContain(x => x.Text == choice.Dimensions);
++            }
++            return true;
++        });
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(bool rename)
++    {
++        using HomeScreenHarness h = new();
++        var a = await Import(h, "route-a.png"); var b = await Import(h, "route-b.png");
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new WorkflowSelectionViewModel(service, h.Previews, h.Navigation); m.Open(a);
++        if (rename) m.OutputName = "renamed-a";
++        var gate = proxy.HoldNext();
++        Task pending = m.SelectCommand.ExecuteAsync(m.Workflows.Last());
++        await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        if (rename) { m.Open(b); m.Notice = "B remains current"; }
++        else m.Deactivate(); // External navigation retires a pending operation; busy Back is intentionally disabled.
++        gate.Release.SetResult(); await pending;
++        h.Navigation.SessionFor.ShouldBeNull();
++        if (rename)
++        {
++            m.SourceFileName.ShouldBe("route-b.png"); m.OutputName.ShouldBe("route-b");
++            m.Notice.ShouldBe("B remains current");
++            (await h.Sessions.LoadAsync(a.Id, default)).Value.WorkflowType.ShouldBe(WorkflowType.PrepareAsset);
++        }
++        m.IsBusy.ShouldBeFalse();
++    }
++
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task Retained_route_action_and_name_provider_cannot_operate_reopened_task(bool queueBefore)
++    {
++        using HomeScreenHarness h = new();
++        var a = await Import(h, "provider-a.png"); var b = await Import(h, "provider-b.png");
++        var m = h.WorkflowSelection(h.Navigation); m.Open(a); await m.PreviewLoaded;
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            var button = GuidedImportHomeTests.Find<Button>(tree, m.Workflows.First().AutomationId);
++            var editor = GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName");
++            int calls = 0; button.Command = new RelayCommand(() => calls++);
++            var invoke = GuidedSessionInputTests.Provider(button);
++            var value = (IValueProvider)UIElementAutomationPeer.CreatePeerForElement(editor)!.GetPattern(PatternInterface.Value)!;
++            if (queueBefore) invoke.Invoke();
++            m.Open(b); tree.Root.UpdateLayout();
++            if (!queueBefore) invoke.Invoke();
++            value.SetValue("stale name"); GuidedImportHomeTests.Drain();
++            calls.ShouldBe(0); m.OutputName.ShouldBe("provider-b");
++            GuidedSessionInputTests.Provider(button).Invoke(); GuidedImportHomeTests.Drain(); calls.ShouldBe(1);
++            return true;
++        });
++    }
++
++    [Theory]
++    [InlineData(Key.Enter)]
++    [InlineData(Key.Space)]
++    public async Task Held_route_key_cannot_cross_reopened_task(Key key)
++    {
++        using HomeScreenHarness h = new(); var a = await Import(h, "key-a.png"); var b = await Import(h, "key-b.png");
++        var m = h.WorkflowSelection(h.Navigation); m.Open(a); await m.PreviewLoaded;
++        WpfRendering.RenderExpectingNoBindingErrors(() => new WorkflowSelectionView { DataContext = m }, new Size(1000, 700), tree =>
++        {
++            var button = GuidedImportHomeTests.Find<Button>(tree, m.Workflows.First().AutomationId);
++            int calls = 0; button.Command = new RelayCommand(() => calls++);
++            var source = new HeadlessSource(); Send(key, true);
++            int before = calls; m.Open(b); tree.Root.UpdateLayout(); Send(key, false);
++            calls.ShouldBe(before);
++            Send(key, true); Send(key, false); calls.ShouldBe(before + 1);
++            return true;
++            void Send(Key k, bool down) => button.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, source, Environment.TickCount, k)
++                { RoutedEvent = down ? Keyboard.KeyDownEvent : Keyboard.KeyUpEvent });
++        });
++    }
++
++    internal static async Task<SessionView> Import(HomeScreenHarness h, string name) =>
++        (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset, h.WriteSourceFile(name), null, "tester", default)).Value;
++    private sealed class HeadlessSource : PresentationSource
++    {
++        public override Visual RootVisual { get; set; } = null!;
++        public override bool IsDisposed => false;
++        protected override CompositionTarget GetCompositionTargetCore() => null!;
++    }
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportSourceTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportSourceTests.cs
+new file mode 100644
+index 0000000..2ff8a28
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportSourceTests.cs
+@@ -0,0 +1,119 @@
++using System.IO;
++using System.Windows;
++using System.Windows.Automation;
++using System.Windows.Controls;
++using System.Windows.Data;
++using PrintFlow.App.ViewModels;
++using PrintFlow.App.Views;
++using PrintFlow.Domain.Sessions;
++using PrintFlow.Infrastructure.Imaging;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Tests.Integration.Persistence;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportSourceTests
++{
++    [Theory]
++    [InlineData(false)]
++    [InlineData(true)]
++    public async Task Route_return_is_available_only_before_the_first_derived_result(bool processed)
++    {
++        using HomeScreenHarness h = new();
++        var imported = await GuidedImportRouteTests.Import(h, "return-route.png");
++        var driver = h.Session(h.Navigation); driver.Open(imported);
++        if (processed) { await driver.ConfirmOriginalCommand.ExecuteAsync(null); await driver.RunStepCommand.ExecuteAsync(null); }
++        var shown = h.Session(h.Navigation); shown.Open((await h.Sessions.LoadAsync(imported.Id, default)).Value);
++        await shown.PreviewsLoaded;
++        WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = shown }, new Size(1000, 700), tree =>
++        {
++            var change = GuidedImportHomeTests.Find<Button>(tree, "Session.ChangeRoute");
++            GuidedSessionProjectionTests.Shown(change).ShouldBe(!processed);
++            change.Command!.Execute(null);
++            if (processed) h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++            else h.Navigation.WorkflowSelectionFor!.Id.ShouldBe(imported.Id);
++            return true;
++        });
++        (await h.Sessions.LoadAsync(imported.Id, default)).Value.WorkflowType.ShouldBe(WorkflowType.PrepareAsset);
++    }
++
++    [Theory]
++    [InlineData("pdf", false)]
++    [InlineData("psd", false)]
++    [InlineData("pdf", true)]
++    [InlineData("psd", true)]
++    public async Task Source_information_is_visible_during_preparation_and_review_then_collapses(string format, bool asset)
++    {
++        using OperatorCultureScope culture = new("zh-CN");
++        using SessionServiceHarness h = new();
++        ISessionService service = format == "pdf"
++            ? PdfPreparationWorkflowTests.Service(h, new WindowsPdfPreparationProcessor(h.FileWorkspace, h.FileInspector))
++            : h.CreateServiceWithPhotoshop(new PsdPreparationWorkflowTests.PsdProcessor(h.FileWorkspace));
++        byte[] bytes = format == "pdf" ? PdfFixtures.Read("single") : PsdInputPreparationTests.RgbCompositePsd();
++        string fileName = "合成源文件." + format;
++        string source = h.Workspace.CreateSourceFile(fileName, bytes);
++        var imported = (await service.ImportAsync(asset ? WorkflowType.PrepareAsset : WorkflowType.GeneratePrintTiff, source, "different-output-name", "tester", default)).Value;
++        var m = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation()); m.Open(imported);
++        await m.PreviewsLoaded;
++        if (asset && format == "psd") m.PsdSourceNotice.ShouldNotContain("TIFF");
++        await AssertSource(true);
++        await m.RunStepCommand.ExecuteAsync(null); await m.PreviewsLoaded;
++        m.GuidedPage.ShouldBe(GuidedSessionPage.Review); await AssertSource(true);
++        if (asset && format == "pdf") m.PdfSourceNotice.ShouldNotContain("印刷尺寸");
++        await m.ApproveCommand.ExecuteAsync(null);
++        m.GuidedPage.ShouldBe(asset ? GuidedSessionPage.Ready : GuidedSessionPage.Dimensions); await AssertSource(false);
++        File.ReadAllBytes(source).ShouldBe(bytes);
++        var stored = (await h.Repository.LoadAsync(imported.Id, default)).Value!;
++        stored.Snapshot!.OriginalFileName.ShouldBe(fileName);
++        stored.Session.WhiteUnderbaseBranch.ShouldBeNull();
++
++        async Task AssertSource(bool visible)
++        {
++            // Each STA render gets its own view model and CollectionViews; the workflow driver
++            // remains unbound, exactly as the existing E2 evidence fixture does.
++            var shown = new SessionViewModel(service, h.Previews, h.TiffReviews, new RecordingNavigation());
++            shown.Open((await service.LoadAsync(imported.Id, default)).Value); await shown.PreviewsLoaded;
++            WpfRendering.RenderExpectingNoBindingErrors(
++            () => new SessionScreenView { DataContext = shown }, new Size(1000, 700), tree =>
++            {
++                string binding = format == "pdf" ? "PdfSourceNotice" : "PsdSourceNotice";
++                var notice = tree.OfType<TextBlock>().Single(t => BindingOperations.GetBindingExpression(t, TextBlock.TextProperty)?.ParentBinding.Path.Path == binding);
++                GuidedSessionProjectionTests.Shown(notice).ShouldBe(visible);
++                if (visible)
++                {
++                    notice.Text.ShouldNotBeNullOrWhiteSpace();
++                    tree.OfType<TextBlock>().ShouldContain(t => t.Text.Contains(fileName) && GuidedSessionProjectionTests.Shown(t));
++                    GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices")).ShouldBeFalse();
++                    GuidedSessionProjectionTests.Shown(GuidedSessionShellTests.Find<ItemsControl>(tree, "Session.SizePresetList")).ShouldBeFalse();
++                }
++                return true;
++            });
++        }
++    }
++
++    [Fact]
++    public async Task Unavailable_ai_is_information_and_all_local_routes_still_reach_their_original_step()
++    {
++        using OperatorCultureScope culture = new("zh-CN");
++        using HomeScreenHarness h = new();
++        WpfRendering.RenderExpectingNoBindingErrors(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), tree =>
++        {
++            var notice = GuidedImportHomeTests.Find<TextBlock>(tree, "Home.AiUnavailable");
++            notice.Text.ShouldContain("暂不可用");
++            tree.OfType<Button>().ShouldNotContain(b => AutomationProperties.GetAutomationId(b).StartsWith("AI.", StringComparison.Ordinal));
++            GuidedImportHomeTests.Find<Button>(tree, "Home.ChooseFile").IsEnabled.ShouldBeTrue();
++            return true;
++        });
++        foreach (var route in Enum.GetValues<WorkflowType>())
++        {
++            var state = await GuidedImportRouteTests.Import(h, "local-" + route + ".png");
++            var selection = h.WorkflowSelection(h.Navigation); selection.Open(state);
++            await selection.SelectCommand.ExecuteAsync(selection.Workflows.Single(w => w.Type == route));
++            h.Navigation.SessionFor!.WorkflowType.ShouldBe(route);
++            h.Navigation.SessionFor.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
++            h.Navigation.SessionFor.WhiteUnderbaseBranch.ShouldBeNull();
++        }
++    }
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/GuidedImportVisualEvidenceTests.cs b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportVisualEvidenceTests.cs
+new file mode 100644
+index 0000000..cdeb0f6
+--- /dev/null
++++ b/tests/PrintFlow.Tests/Integration/Ui/GuidedImportVisualEvidenceTests.cs
+@@ -0,0 +1,181 @@
++using System.IO;
++using System.Reflection;
++using System.Security.Cryptography;
++using System.Text.Json;
++using System.Windows;
++using System.Windows.Automation;
++using System.Windows.Controls;
++using System.Windows.Media;
++using PrintFlow.App.ViewModels;
++using PrintFlow.App.Startup;
++using PrintFlow.App.Views;
++using PrintFlow.Domain.Sessions;
++using PrintFlow.Infrastructure.Imaging;
++using PrintFlow.Infrastructure.Startup;
++using PrintFlow.Tests.Fixtures;
++using PrintFlow.Tests.Integration.Persistence;
++using PrintFlow.Workflow.Services;
++
++namespace PrintFlow.Tests.Integration.Ui;
++
++[Collection(SqliteCollection.Name)]
++public sealed class GuidedImportVisualEvidenceTests
++{
++    [Theory]
++    [InlineData(1000, 700)]
++    [InlineData(1280, 720)]
++    [InlineData(1920, 1080)]
++    public async Task Reviewed_resume_and_draft_decision_fit_supported_viewports(int width, int height)
++    {
++        using OperatorCultureScope culture = new("zh-CN"); using HomeScreenHarness h = new();
++        string source = h.Inner.WriteBorderedSourcePng("继续处理—保留原件.png");
++        var imported = (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset, source, "继续处理的合成图案", "tester", default)).Value;
++        await h.Home.RefreshCommand.ExecuteAsync(null);
++        await h.Home.ResumeCommand.ExecuteAsync(h.Home.RecentSessions.Single());
++        h.Navigation.SessionFor.ShouldBeNull();
++        var route = h.WorkflowSelection(h.Navigation); route.Open(h.Navigation.WorkflowSelectionFor.ShouldNotBeNull());
++        await route.PreviewLoaded;
++        if (width == 1000)
++            Capture(() => new WorkflowSelectionView { DataContext = route }, new Size(width, height), "review-resume-route", source,
++                route.Workflows.Select(w => w.AutomationId).Append("WorkflowSelection.Back").ToArray());
++
++        // A fresh model prevents sharing dispatcher-owned preview state between renders.
++        var draft = h.WorkflowSelection(h.Navigation); draft.Open(imported); await draft.PreviewLoaded;
++        draft.OutputName = "尚未保存的新输出名称"; await draft.BackToHomeCommand.ExecuteAsync(null);
++        Capture(() => new WorkflowSelectionView { DataContext = draft }, new Size(width, height), "review-draft-leave", source,
++            ["WorkflowSelection.KeepDraft", "WorkflowSelection.DiscardDraft"], tree =>
++            {
++                GuidedImportHomeTests.Find<TextBox>(tree, "WorkflowSelection.OutputName").IsEnabled.ShouldBeFalse();
++                GuidedImportHomeTests.Find<Button>(tree, "WorkflowSelection.Back").IsEnabled.ShouldBeFalse();
++                foreach (var choice in draft.Workflows) GuidedImportHomeTests.Find<Button>(tree, choice.AutomationId).IsEnabled.ShouldBeFalse();
++            });
++    }
++
++    [Theory]
++    [InlineData(1000, 700)]
++    [InlineData(1280, 720)]
++    [InlineData(1920, 1080)]
++    public async Task Chinese_home_routes_and_original_steps_fit_the_supported_viewports(int width, int height)
++    {
++        using OperatorCultureScope culture = new("zh-CN");
++        using HomeScreenHarness h = new();
++        h.StartupStatus.Publish(StartupStatus.Started(true, StartupRecoveryReport.Empty));
++        string source = h.Inner.WriteBorderedSourcePng("合成图案—保留原件.png");
++        var imported = (await h.Sessions.ImportAsync(WorkflowType.PrepareAsset, source, "待处理的合成图案", "tester", default)).Value;
++        await h.Home.RefreshCommand.ExecuteAsync(null); await h.Home.ThumbnailsLoaded;
++        Size size = new(width, height);
++        Capture(() => new HomeView { DataContext = h.Home }, size, "home-continue", source,
++            ["Home.ChooseFile", "Home.ResumeSession", "Home.ShowSettings"],
++            tree => GuidedImportHomeTests.Find<Expander>(tree, "Home.HistoryDetails").IsExpanded.ShouldBeFalse());
++        var route = h.WorkflowSelection(h.Navigation); route.Open(imported); await route.PreviewLoaded;
++        Capture(() => new WorkflowSelectionView { DataContext = route }, size, "route-choice", source,
++            route.Workflows.Select(w => w.AutomationId).Append("WorkflowSelection.Back").ToArray());
++        foreach (var type in Enum.GetValues<WorkflowType>())
++        {
++            var state = (await h.Sessions.ImportAsync(type, source, "合成图案—" + type, "tester", default)).Value;
++            var m = h.Session(h.Navigation); m.Open(state); await m.PreviewsLoaded;
++            Capture(() => new SessionScreenView { DataContext = m }, size, "original-" + type, source,
++                ["Session.ConfirmOriginal", "Session.ChangeRoute", "Session.BackToHome"], tree =>
++                {
++                    GuidedSessionProjectionTests.Shown(GuidedImportHomeTests.Find<ListBox>(tree, "Session.WhiteUnderbaseChoices")).ShouldBeFalse();
++                    GuidedSessionProjectionTests.Shown(GuidedImportHomeTests.Find<ItemsControl>(tree, "Session.SizePresetList")).ShouldBeFalse();
++                });
++        }
++    }
++
++    [Theory]
++    [InlineData("pdf")]
++    [InlineData("psd")]
++    public async Task Chinese_preparation_and_source_review_retain_real_input_context(string format)
++    {
++        using OperatorCultureScope culture = new("zh-CN"); using SessionServiceHarness h = new();
++        var service = format == "pdf" ? PdfPreparationWorkflowTests.Service(h, new WindowsPdfPreparationProcessor(h.FileWorkspace, h.FileInspector))
++            : h.CreateServiceWithPhotoshop(new PsdPreparationWorkflowTests.PsdProcessor(h.FileWorkspace));
++        string source = h.Workspace.CreateSourceFile("合成来源." + format,
++            format == "pdf" ? PdfFixtures.Read("single") : PsdInputPreparationTests.RgbCompositePsd());
++        var state = (await service.ImportAsync(WorkflowType.GeneratePrintTiff, source, "合成源图准备", "tester", default)).Value;
++        var driver = new SessionViewModel(service, h.Previews, h.TiffReviews, hnav()); driver.Open(state);
++        await Snapshot("pending", "Session.RunStep");
++        await driver.RunStepCommand.ExecuteAsync(null);
++        driver.GuidedPage.ShouldBe(GuidedSessionPage.Review);
++        await Snapshot("review", "Session.Approve");
++        async Task Snapshot(string suffix, string action)
++        {
++            var m = new SessionViewModel(service, h.Previews, h.TiffReviews, hnav());
++            m.Open((await service.LoadAsync(state.Id, default)).Value); await m.PreviewsLoaded;
++            Capture(() => new SessionScreenView { DataContext = m }, new Size(1000, 700), format + "-" + suffix, source, [action, "Session.BackToHome"]);
++        }
++        static RecordingNavigation hnav() => new();
++    }
++
++    [Fact]
++    public async Task Chinese_import_progress_and_refusal_are_truthful_and_cancellable()
++    {
++        using OperatorCultureScope culture = new("zh-CN"); using HomeScreenHarness h = new();
++        h.StartupStatus.Publish(StartupStatus.Started(true, StartupRecoveryReport.Empty));
++        await h.Home.DropFilesCommand.ExecuteAsync(["one", "two"]);
++        Capture(() => new HomeView { DataContext = h.Home }, new Size(1000, 700), "import-refused-multiple", null, ["Home.ChooseFile"]);
++        var service = DispatchProxy.Create<ISessionService, GuidedSessionInputTests.DeferredService>();
++        var proxy = (GuidedSessionInputTests.DeferredService)service; proxy.Inner = h.Sessions;
++        var m = new HomeViewModel(service, h.Previews, h.Navigation, h.FilePicker, h.StartupStatus, h.Readiness);
++        h.FilePicker.Path = h.WriteSourceFile("正在导入的合成图.png");
++        var gate = proxy.HoldNext(nameof(ISessionService.ImportAsync));
++        Task running = m.ChooseFileCommand.ExecuteAsync(null); await gate.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));
++        try
++        {
++            Capture(() => new HomeView { DataContext = m }, new Size(1000, 700), "import-pending", h.FilePicker.Path, ["Home.CancelImport"], tree =>
++            {
++                GuidedImportHomeTests.Find<Button>(tree, "Home.ChooseFile").IsEnabled.ShouldBeFalse();
++                GuidedImportHomeTests.Find<TextBlock>(tree, "Home.ImportProgress").Text.ShouldNotBeNullOrWhiteSpace();
++            });
++            m.CancelImportCommand.Execute(null);
++        }
++        finally { gate.Release.SetResult(); await running; }
++        h.Navigation.WorkflowSelectionFor.ShouldBeNull();
++    }
++
++    private static void Capture(Func<UserControl> create, Size size, string state, string? source, string[] essential, Action<RenderedTree>? inspect = null)
++    {
++        var result = WpfRendering.RenderExpectingNoBindingErrors(create, size, tree =>
++        {
++            foreach (string id in essential)
++            {
++                var button = GuidedImportHomeTests.Find<Button>(tree, id);
++                GuidedSessionProjectionTests.Shown(button).ShouldBeTrue(id); button.IsEnabled.ShouldBeTrue(id);
++                var b = Bounds(button, tree.Root);
++                b.Left.ShouldBeGreaterThanOrEqualTo(-0.5, id); b.Top.ShouldBeGreaterThanOrEqualTo(-0.5, id);
++                b.Right.ShouldBeLessThanOrEqualTo(size.Width + 0.5, id); b.Bottom.ShouldBeLessThanOrEqualTo(size.Height + 0.5, id);
++                foreach (var scroll in tree.OfType<ScrollViewer>().Where(s => s.IsAncestorOf(button)))
++                {
++                    var withinScroll = Bounds(button, scroll);
++                    withinScroll.Top.ShouldBeGreaterThanOrEqualTo(-0.5, id);
++                    withinScroll.Bottom.ShouldBeLessThanOrEqualTo(scroll.ViewportHeight + 0.5, id);
++                }
++            }
++            inspect?.Invoke(tree);
++            return new
++            {
++                Actions = tree.OfType<Button>().Where(b => GuidedSessionProjectionTests.Shown(b) && b.ActualHeight > 0 && tree.Root.IsAncestorOf(b))
++                    .Select(b => new { Id = AutomationProperties.GetAutomationId(b), b.IsEnabled,
++                        CanExecute = b.Command?.CanExecute(b.CommandParameter), Bounds = Measure(Bounds(b, tree.Root)) }).ToArray(),
++                Scrolls = tree.OfType<ScrollViewer>().Where(s => GuidedSessionProjectionTests.Shown(s) && s.ActualHeight > 0 && tree.Root.IsAncestorOf(s))
++                    .Select(s => new { s.VerticalOffset, s.ScrollableHeight, s.ViewportHeight }).ToArray(),
++                Previews = tree.OfType<Image>().Count(i => i.Source is not null && GuidedSessionProjectionTests.Shown(i)),
++            };
++        });
++        string? directory = Environment.GetEnvironmentVariable("PF_11170_CAPTURE_DIR");
++        if (string.IsNullOrWhiteSpace(directory)) return;
++        Directory.CreateDirectory(directory);
++        string stem = state + $"-{size.Width:0}x{size.Height:0}"; string path = Path.Combine(directory, stem + ".png");
++        WpfRendering.CapturePng(create, size, path);
++        File.WriteAllText(Path.Combine(directory, stem + ".json"), JsonSerializer.Serialize(new
++        {
++            State = state, Language = "zh-CN", WidthDip = size.Width, HeightDip = size.Height, Dpi = 96,
++            CaptureKind = "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
++            SourceSha256 = source is null ? null : Hash(source), ScreenshotSha256 = Hash(path), EssentialActions = essential, Measurements = result.Facts,
++        }, new JsonSerializerOptions { WriteIndented = true }));
++    }
++    private static Rect Bounds(FrameworkElement item, Visual root) => item.TransformToAncestor(root).TransformBounds(new Rect(item.RenderSize));
++    private static object Measure(Rect r) => new { r.X, r.Y, r.Width, r.Height };
++    private static string Hash(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
++}
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/HomeRecentAccessibilityTests.cs b/tests/PrintFlow.Tests/Integration/Ui/HomeRecentAccessibilityTests.cs
+index 0ee3db7..95557f0 100644
+--- a/tests/PrintFlow.Tests/Integration/Ui/HomeRecentAccessibilityTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Ui/HomeRecentAccessibilityTests.cs
+@@ -298,6 +298,7 @@ public async Task A_driver_removes_one_finished_record_and_nothing_else_changes(
+         WpfRendering.OnStaThread(() =>
+         {
+             HomeView view = new() { DataContext = harness.Home };
++            ((Expander)view.FindName("HistoryDisclosure")).IsExpanded = true;
+             view.Measure(WpfRendering.ReviewViewport);
+             view.Arrange(new Rect(0, 0, WpfRendering.ReviewViewport.Width, WpfRendering.ReviewViewport.Height));
+             view.UpdateLayout();
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/RecentProcessingRecordTests.cs b/tests/PrintFlow.Tests/Integration/Ui/RecentProcessingRecordTests.cs
+index 9d2586c..7273025 100644
+--- a/tests/PrintFlow.Tests/Integration/Ui/RecentProcessingRecordTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Ui/RecentProcessingRecordTests.cs
+@@ -433,6 +433,16 @@ public async Task A_row_whose_picture_cannot_be_produced_stays_neutral_and_still
+ 
+         RecentSessionRow missing = harness.Home.RecentSessions.Single(row => row.Id == raster);
+         await harness.Home.ResumeCommand.ExecuteAsync(missing);
++        // This original has never been confirmed: missing thumbnail does not block opening,
++        // and continuing still requires the operator's explicit route choice.
++        harness.Navigation.SessionFor.ShouldBeNull();
++        SessionView choosing = harness.Navigation.WorkflowSelectionFor.ShouldNotBeNull();
++        choosing.Id.ShouldBe(raster);
++        choosing.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
++        choosing.CurrentStep.State.ShouldBe(StepState.Waiting);
++        var selection = harness.WorkflowSelection(harness.Navigation);
++        selection.Open(choosing);
++        await selection.SelectCommand.ExecuteAsync(selection.Workflows.Single(w => w.Type == WorkflowType.PrepareAsset));
+         harness.Navigation.SessionFor.ShouldNotBeNull().Id.ShouldBe(raster);
+     }
+ 
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/SessionSmokeTests.cs b/tests/PrintFlow.Tests/Integration/Ui/SessionSmokeTests.cs
+index 56dfabf..3bb9fa1 100644
+--- a/tests/PrintFlow.Tests/Integration/Ui/SessionSmokeTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Ui/SessionSmokeTests.cs
+@@ -1049,8 +1049,12 @@ await selection.SelectCommand.ExecuteAsync(
+ 
+             SessionViewModel session = navigation.Current.ShouldBeOfType<SessionViewModel>();
+ 
+-            await home.RefreshCommand.ExecuteAsync(null);
+-            OpenSessionId = home.RecentSessions[0].Id;
++            // Navigation retires the old Home's commands. Read recents through a fresh
++            // transient model, preserving the independently loaded identity check.
++            HomeViewModel recentHome = Services.GetRequiredService<HomeViewModel>();
++            await recentHome.RefreshCommand.ExecuteAsync(null);
++            OpenSessionId = recentHome.RecentSessions[0].Id;
++            OpenSessionId.ShouldBe(session.Id);
+ 
+             return session;
+         }
+diff --git a/tests/PrintFlow.Tests/Integration/Ui/WorkflowPurposeCardTests.cs b/tests/PrintFlow.Tests/Integration/Ui/WorkflowPurposeCardTests.cs
+index 6fa80fb..f07531a 100644
+--- a/tests/PrintFlow.Tests/Integration/Ui/WorkflowPurposeCardTests.cs
++++ b/tests/PrintFlow.Tests/Integration/Ui/WorkflowPurposeCardTests.cs
+@@ -73,7 +73,9 @@ public async Task Every_card_explains_purpose_result_and_dimensions_without_clip
+                             line.ActualHeight.ShouldBeGreaterThanOrEqualTo(
+                                 line.DesiredSize.Height - line.Margin.Top - line.Margin.Bottom - 0.5);
+                             Rect bounds = line.TransformToAncestor(card).TransformBounds(new Rect(line.RenderSize));
+-                            bounds.Right.ShouldBeLessThanOrEqualTo(choose.TranslatePoint(new Point(), card).X + 0.5);
++                            // The guided three-column cards place their action below the copy.
++                            bounds.Bottom.ShouldBeLessThanOrEqualTo(choose.TranslatePoint(new Point(), card).Y + 0.5);
++                            bounds.Right.ShouldBeLessThanOrEqualTo(card.ActualWidth + 0.5);
+                             line.ActualWidth.ShouldBeGreaterThan(100);
+                         }
+                     }

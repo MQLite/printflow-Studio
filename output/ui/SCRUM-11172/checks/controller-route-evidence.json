@@ -1,0 +1,24 @@
+{
+  "policy": "2.4",
+  "routeOffset": 0,
+  "normalUIRoute": "Astra High",
+  "requested": {
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "executor": {
+    "sessionId": "01a1561e-df5a-7871-93c2-93f56c2b7794",
+    "timestamp": "2026-10-19T21:43:48.507Z",
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "status": "VERIFIED"
+  },
+  "controller": {
+    "sessionId": "01a1561c-444d-76c1-88e1-f58ef281b41f",
+    "timestamp": "2026-10-19T21:40:59.201Z",
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "status": "VERIFIED"
+  },
+  "basis": "Minimal session_meta and turn_context fields read from local rollout JSONL."
+}

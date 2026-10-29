@@ -13,8 +13,8 @@ namespace PrintFlow.Tests.Integration.Ui;
 
 /// <summary>
 /// SCRUM-11150 layout: the print-size guidance lives in the right-hand details column, wraps
-/// inside it, stays reachable by scrolling, and the picture keeps exactly the area it had before
-/// the guidance existed. Off-screen WPF at 96 DPI only; no window, UIA or input.
+/// inside it, stays reachable by scrolling, and the picture keeps the same area with or without
+/// guidance in the E2 shell. Off-screen WPF at 96 DPI only; no window, UIA or input.
 /// </summary>
 [Collection(SqliteCollection.Name)]
 public sealed class PrintSizeGuidanceLayoutTests
@@ -59,6 +59,11 @@ public sealed class PrintSizeGuidanceLayoutTests
         using OperatorCultureScope culture = new(language);
         using HomeScreenHarness h = new();
         SessionViewModel screen = await PrintSizeGuidanceSetup.OpenStateAsync(h, state == "details" ? "preset" : state);
+        if (screen.ShowsGuidedWhiteInk)
+        {
+            screen.SelectedWhiteUnderbaseChoice = screen.WhiteUnderbaseChoices[0];
+            await screen.SelectWhiteUnderbaseCommand.ExecuteAsync(null);
+        }
         Size viewport = new(width, height);
         bool expand = state == "details";
 
@@ -85,7 +90,8 @@ public sealed class PrintSizeGuidanceLayoutTests
             // Scoped to the three print-size sections (size choice, preflight, preparation); the
             // desired height excludes the margin, which DesiredSize includes.
             Rect contentBounds = ReviewGuidanceLayoutTests.Bounds(content, tree.Root);
-            List<Border> sections = [.. PrintSizeGuidanceUiTests.Descendants<Border>(content)
+            List<FrameworkElement> sections = [.. PrintSizeGuidanceUiTests.Descendants<FrameworkElement>(content)
+                .Where(b => b is Border or Wpf.Ui.Controls.Card)
                 .Where(b => ReferenceEquals(VisualTreeHelper.GetParent(b), content) && ReviewGuidanceLayoutTests.Shown(b) &&
                     PrintSizeGuidanceUiTests.Descendants<FrameworkElement>(b).Any(e => GuidanceIds.Contains(AutomationProperties.GetAutomationId(e))))];
             List<string> clipped = [.. sections.SelectMany(PrintSizeGuidanceUiTests.Descendants<TextBlock>)
@@ -97,21 +103,30 @@ public sealed class PrintSizeGuidanceLayoutTests
                 .Count(t => ReviewGuidanceLayoutTests.Shown(t) &&
                     AutomationProperties.GetAutomationId(t).StartsWith("Session.PrintDimensions.", StringComparison.Ordinal) &&
                     screen.PreflightRows.Any(r => r.AutomationId == AutomationProperties.GetAutomationId(t)));
+            foreach (FrameworkElement section in sections) section.Visibility = Visibility.Collapsed;
+            tree.Root.UpdateLayout();
+            Rect withoutGuidance = ReviewGuidanceLayoutTests.Bounds(tree.OfType<SharedReviewSurface>().Single(), tree.Root);
+            foreach (FrameworkElement section in sections) section.Visibility = Visibility.Visible;
+            tree.Root.UpdateLayout();
             return (Image: image, Column: column, Shown: shown, Clipped: clipped, Sections: sections.Count, Rows: rows,
-                ExtentHeight: details.ExtentHeight, ViewportHeight: details.ViewportHeight);
+                ExtentHeight: details.ExtentHeight, ViewportHeight: details.ViewportHeight, WithoutGuidance: withoutGuidance);
         });
 
         Record(state, language, width, height, new
         {
             Image = Plain(facts.Facts.Image), Column = Plain(facts.Facts.Column), facts.Facts.ExtentHeight, facts.Facts.ViewportHeight,
+            PreviousLayout = Plain(BaselineImageArea[width]), WithoutGuidance = Plain(facts.Facts.WithoutGuidance),
             facts.Facts.Sections, facts.Facts.Rows, facts.Facts.Clipped,
             Shown = facts.Facts.Shown.Select(e => new { e.Id, InContent = Plain(e.InContent), e.InColumn, e.InExpander }),
         });
 
-        Rect before = BaselineImageArea[width];
+        Rect before = facts.Facts.WithoutGuidance;
         foreach ((double actual, double expected) in new[] { (facts.Facts.Image.X, before.X), (facts.Facts.Image.Y, before.Y),
                      (facts.Facts.Image.Width, before.Width), (facts.Facts.Image.Height, before.Height) })
-            actual.ShouldBe(expected, 0.01, $"the picture keeps its {width:0}×{height:0} area");
+            actual.ShouldBe(expected, 0.01, "size guidance does not consume the picture area in the guided shell");
+        facts.Facts.Image.Left.ShouldBeGreaterThanOrEqualTo(190);
+        facts.Facts.Image.Right.ShouldBeLessThanOrEqualTo(facts.Facts.Column.Left);
+        facts.Facts.Image.Bottom.ShouldBeLessThanOrEqualTo(height);
 
         facts.Facts.Clipped.ShouldBeEmpty("every line in the print-size sections wraps inside the column");
         facts.Facts.Sections.ShouldBeGreaterThan(0);
@@ -151,10 +166,14 @@ public sealed class PrintSizeGuidanceLayoutTests
 
     private static void Settle(FrameworkElement root, bool expand)
     {
+        // E4 keeps the current custom input above the fold. Preset guidance remains reachable
+        // through its own disclosure; open that choice before asserting all of its help text.
+        foreach (Expander presets in PrintSizeGuidanceUiTests.Descendants<Expander>(root)
+                     .Where(e => AutomationProperties.GetAutomationId(e) == "Session.PrintDimensions.Presets"))
+            presets.IsExpanded = true;
         if (expand)
             foreach (Expander expander in PrintSizeGuidanceUiTests.Descendants<Expander>(root)) expander.IsExpanded = true;
-        root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
-        root.UpdateLayout();
+        ProcessingWorkspaceRolloutTests.Settle(root);
     }
 
     private static bool InsideExpander(DependencyObject element)

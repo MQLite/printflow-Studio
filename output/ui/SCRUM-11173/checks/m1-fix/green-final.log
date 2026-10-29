@@ -1,0 +1,10 @@
+
+name                      outcome
+----                      -------
+fresh-success             PASS
+build-failure             PASS
+existing-evidence-refused PASS
+two-fresh-candidates      PASS
+validation-failure        PASS
+
+5 cases; 0 failures. Controlled filesystem fixtures only; no real build, App or desktop.

@@ -34,10 +34,14 @@ public partial class SessionScreenView : UserControl
     private SessionViewModel? _observed;
     private string? _reviewTarget;
     private DependencyObject? _reviewFocusScope;
+    private string? _interactionContext;
+    private DependencyObject? _interactionFocusScope;
+    private bool _interactionActive = true;
 
     public SessionScreenView()
     {
         InitializeComponent();
+        SessionActionScope.SetActive(this, true);
 
         CropOverlay.MouseLeftButtonDown += OnCropMouseDown;
         CropOverlay.MouseMove += OnCropMouseMove;
@@ -58,7 +62,10 @@ public partial class SessionScreenView : UserControl
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) =>
         {
+            _interactionActive = true;
+            SessionActionScope.SetActive(this, true);
             ObserveModel();
+            FocusNewContext();
             FocusNewReview();
             if (_reviewTarget is not null &&
                 ReferenceEquals(FocusManager.GetFocusedElement(FocusManager.GetFocusScope(this)), OperatorStatusPanel))
@@ -364,7 +371,11 @@ public partial class SessionScreenView : UserControl
         FocusManager.SetFocusedElement(FocusManager.GetFocusScope(this), element);
         if (IsLoaded)
         {
-            Dispatcher.BeginInvoke(() => element.Focus(), System.Windows.Threading.DispatcherPriority.Loaded);
+            var context = SessionActionScope.State(this);
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (ReferenceEquals(context, SessionActionScope.State(this)) && SessionActionScope.CanInteract(element)) element.Focus();
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }
 
@@ -377,7 +388,10 @@ public partial class SessionScreenView : UserControl
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         _reviewTarget = null;
+        _interactionContext = null;
+        SessionActionScope.SetActive(this, _interactionActive);
         ObserveModel();
+        FocusNewContext();
         FocusNewReview();
         RedrawSelection();
     }
@@ -400,6 +414,7 @@ public partial class SessionScreenView : UserControl
 
     private void FocusNewReview()
     {
+        if (!_interactionActive) return;
         string? target = Model?.ReviewTargetIdentity;
         DependencyObject scope = FocusManager.GetFocusScope(this);
         if (target == _reviewTarget && ReferenceEquals(scope, _reviewFocusScope)) return;
@@ -415,6 +430,8 @@ public partial class SessionScreenView : UserControl
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        _interactionActive = false;
+        SessionActionScope.SetActive(this, false);
         if (_observed is not null)
         {
             _observed.PropertyChanged -= OnModelPropertyChanged;
@@ -433,6 +450,16 @@ public partial class SessionScreenView : UserControl
     /// </remarks>
     private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (ReferenceEquals(_observed, sender)) OnModelPropertyChanged(sender, e);
+            });
+            return;
+        }
+        if (e.PropertyName is nameof(SessionViewModel.GuidedInteractionIdentity) or "" or null)
+            FocusNewContext();
         if (e.PropertyName == nameof(SessionViewModel.NoticeErrorCode) && Model?.HasNoticeErrorCode == true)
         {
             // A failure from a lower control must still be visible. Only move this scrolling
@@ -484,6 +511,21 @@ public partial class SessionScreenView : UserControl
             // previous layout.
             Dispatcher.BeginInvoke(RedrawSelection, System.Windows.Threading.DispatcherPriority.Loaded);
         }
+    }
+
+    private void FocusNewContext()
+    {
+        string? context = Model?.GuidedInteractionIdentity;
+        DependencyObject scope = FocusManager.GetFocusScope(this);
+        if (context == _interactionContext && ReferenceEquals(scope, _interactionFocusScope)) return;
+        _interactionContext = context;
+        _interactionFocusScope = scope;
+        SessionActionScope.SetContext(this, context);
+        if (Model is null || !_interactionActive) return;
+        _dragOrigin = null;
+        CancelTrimGesture();
+        PlaceFocus(Model.IsConfirmingDraftLeave ? DraftLeaveHeadingText :
+            Model.IsViewingHistory ? HistoryHeadingText : Model.IsConfirmingReturn ? ReturnHeadingText : OperatorStatusPanel);
     }
 
     private void RedrawSelection()

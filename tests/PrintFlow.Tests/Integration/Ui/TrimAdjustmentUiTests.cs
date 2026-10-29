@@ -439,6 +439,8 @@ public sealed class TrimAdjustmentUiTests
 
         var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = screen }, viewport, tree =>
         {
+            tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.Crop.CoordinatesAndKeyboard").IsExpanded = true;
+            ProcessingWorkspaceRolloutTests.Settle(tree.Root);
             tree.Root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
             tree.Root.UpdateLayout();
             Canvas overlay = tree.OfType<Canvas>().Single(c => AutomationProperties.GetAutomationId(c) == "Session.ManualCropSurface");
@@ -452,7 +454,7 @@ public sealed class TrimAdjustmentUiTests
             Image? proposed = tree.OfType<Image>().SingleOrDefault(i => AutomationProperties.GetAutomationId(i) == "Session.TrimAdjust.ProposedImage");
 
             // Clipping: every shown button of the left (preview/crop) column ends inside that column.
-            Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+            Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
             double columnRight = content.ColumnDefinitions[0].ActualWidth;
             FrameworkElement leftColumn = content.Children.OfType<FrameworkElement>().First(c => Grid.GetColumn(c) == 0);
             var clippedButtons = tree.OfType<ButtonBase>()
@@ -468,7 +470,8 @@ public sealed class TrimAdjustmentUiTests
                 ConfirmShown: tree.OfType<ReviewApprovalButton>().Any(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave.ConfirmAndSave" && Shown(b)),
                 OutlineShown: tree.OfType<System.Windows.Shapes.Rectangle>().Any(r => AutomationProperties.GetAutomationId(r) == "Session.TrimAdjust.Outline" && r.Visibility == Visibility.Visible),
                 Proposed: proposed?.Source is BitmapSource bitmap ? (bitmap.PixelWidth, bitmap.PixelHeight) : (0, 0),
-                Instructions: tree.OfType<TextBlock>().Single(t => AutomationProperties.GetAutomationId(t) == "Session.TrimAdjust.Instructions").Text);
+                Instructions: tree.OfType<TextBlock>().Where(t => AutomationProperties.GetAutomationId(t) == "Session.TrimAdjust.Instructions")
+                    .Select(t => new System.Windows.Documents.TextRange(t.ContentStart, t.ContentEnd).Text).Single());
         });
 
         facts.Facts.TooWide.ShouldBe(0, "adjust-panel text wraps inside its column");

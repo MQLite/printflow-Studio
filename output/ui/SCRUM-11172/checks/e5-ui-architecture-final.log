@@ -1,0 +1,326 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:02:44.07]     PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "keep", label: "Artwork extent", artwork: "Full original canvas", canvas: "12 × 10 px") [FAIL]
+[xUnit.net 00:02:44.48]     PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "automatic", label: "Artwork content", artwork: "5 × 5 px", canvas: "9 × 9 px") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "keep", label: "Artwork extent", artwork: "Full original canvas", canvas: "12 × 10 px") [446 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(String path, String label, String artwork, String canvas) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 117
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Control[T](DependencyObject root, String key) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 245
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.AssertRow(DependencyObject root, String key, String value, String label) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 236
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.<>c__DisplayClass1_0.<Persisted_geometry_is_rendered_from_the_exact_approved_artwork>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 120
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "automatic", label: "Artwork content", artwork: "5 × 5 px", canvas: "9 × 9 px") [409 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(String path, String label, String artwork, String canvas) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 117
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Control[T](DependencyObject root, String key) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 245
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.AssertRow(DependencyObject root, String key, String value, String label) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 236
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.<>c__DisplayClass1_0.<Persisted_geometry_is_rendered_from_the_exact_approved_artwork>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 120
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:02:44.90]     PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "manual", label: "Selected artwork", artwork: "6 × 5 px", canvas: "10 × 9 px") [FAIL]
+[xUnit.net 00:02:45.58]     PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: "en-US", effectiveLabel: "Effective source resolution", normalStatus: "No enlargement required", enlargementStatus: "Enlargement required") [FAIL]
+[xUnit.net 00:02:46.02]     PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: "zh-CN", effectiveLabel: "源图有效分辨率", normalStatus: "无需放大", enlargementStatus: "需要放大") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: "manual", label: "Selected artwork", artwork: "6 × 5 px", canvas: "10 × 9 px") [427 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(String path, String label, String artwork, String canvas) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 117
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Control[T](DependencyObject root, String key) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 245
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.AssertRow(DependencyObject root, String key, String value, String label) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 236
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.<>c__DisplayClass1_0.<Persisted_geometry_is_rendered_from_the_exact_approved_artwork>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 120
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: "en-US", effectiveLabel: "Effective source resolution", normalStatus: "No enlargement required", enlargementStatus: "Enlargement required") [389 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(String culture, String effectiveLabel, String normalStatus, String enlargementStatus) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 41
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Control[T](DependencyObject root, String key) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 245
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.AssertRow(DependencyObject root, String key, String value, String label) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 236
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.<>c__DisplayClass0_0.<Rendered_drafts_update_through_UIA_without_recording_a_size>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 53
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: "zh-CN", effectiveLabel: "源图有效分辨率", normalStatus: "无需放大", enlargementStatus: "需要放大") [433 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(String culture, String effectiveLabel, String normalStatus, String enlargementStatus) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 41
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Control[T](DependencyObject root, String key) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 245
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.AssertRow(DependencyObject root, String key, String value, String label) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 236
+   at PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.<>c__DisplayClass0_0.<Rendered_drafts_update_through_UIA_without_recording_a_size>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\PrintDimensionsPreflightUiTests.cs:line 53
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:02:56.25]     PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke [601 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.InvalidOperationException : Sequence contains more than one element
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\OperatorWave1AHostTests.cs:line 54
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at System.Linq.ThrowHelper.ThrowMoreThanOneElementException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source)
+   at PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.<>c__DisplayClass0_0.<Nonvisible_seed_and_real_command_persistence_smoke>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\OperatorWave1AHostTests.cs:line 57
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:02:56.93]     PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test [23 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : selectedBefore
+    should be null but was
+zh-CN
+
+Additional Info:
+    the application never unselects, so a test starting with a selection inherited a leak
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\OperatorCultureIsolationTests.cs:line 24
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:03:15.32]     PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: "en-US", tight: "Tight", uniform: "Uniform margin", edge: "Per-edge margin") [FAIL]
+[xUnit.net 00:03:16.30]     PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: "en-US", heading: "Manual crop", selected: "Selected bounds", applied: "Applied crop bounds") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: "en-US", tight: "Tight", uniform: "Uniform margin", edge: "Per-edge margin") [446 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : peer.GetName()
+    should be
+"Tight"
+    but was
+"紧贴选区"
+    difference
+Difference     |  |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    
+Expected Value | T    i    g    h    t    
+Actual Value   | 紧    贴    选    区         
+Expected Code  | 84   105  103  104  116  
+Actual Code    | 32039361483687321306     
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(String culture, String tight, String uniform, String edge) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ManualCropAdjustmentUiTests.cs:line 42
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.<>c__DisplayClass2_0.<Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ManualCropAdjustmentUiTests.cs:line 60
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: "en-US", heading: "Manual crop", selected: "Selected bounds", applied: "Applied crop bounds") [477 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : model.ManualCropHeading
+    should be
+"Manual crop"
+    but was
+"手动裁切"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   
+Expected Value | M    a    n    u    a    l    \s   c    r    o    p    
+Actual Value   | 手    动    裁    切                                       
+Expected Code  | 77   97   110  117  97   108  32   99   114  111  112  
+Actual Code    | 25163211603500920999                                   
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(String culture, String heading, String selected, String applied) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ManualCropAdjustmentUiTests.cs:line 123
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.<>c__DisplayClass3_0.<Rendered_apply_uses_real_command_and_review_metadata_survives_restart>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\ManualCropAdjustmentUiTests.cs:line 139
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:03:17.17]     PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "manual", label: "Keep original extent", retained: "Original extent retained") [FAIL]
+[xUnit.net 00:03:18.17]     PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "review", label: "Keep original extent", retained: "Original extent retained") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "manual", label: "Keep original extent", retained: "Original extent retained") [475 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : peer.GetName()
+    should be
+"Keep original extent"
+    but was
+"保留原始范围"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   
+Expected Value | K    e    e    p    \s   o    r    i    g    i    n    a    l    \s   e    x    t    e    n    t    
+Actual Value   | 保    留    原    始    范    围                                                                          
+Expected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  
+Actual Code    | 204453004121407229873353922260                                                                      
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(String culture, String phase, String label, String retained) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 41
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.<>c__DisplayClass2_0.<Rendered_action_is_localized_and_Invoke_advances_real_session>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 59
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "review", label: "Keep original extent", retained: "Original extent retained") [466 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : peer.GetName()
+    should be
+"Keep original extent"
+    but was
+"保留原始范围"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   
+Expected Value | K    e    e    p    \s   o    r    i    g    i    n    a    l    \s   e    x    t    e    n    t    
+Actual Value   | 保    留    原    始    范    围                                                                          
+Expected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  
+Actual Code    | 204453004121407229873353922260                                                                      
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(String culture, String phase, String label, String retained) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 41
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.<>c__DisplayClass2_0.<Rendered_action_is_localized_and_Invoke_advances_real_session>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 59
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:03:18.57]     PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "waiting", label: "Keep original extent", retained: "Original extent retained") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: "en-US", phase: "waiting", label: "Keep original extent", retained: "Original extent retained") [394 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : peer.GetName()
+    should be
+"Keep original extent"
+    but was
+"保留原始范围"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   
+Expected Value | K    e    e    p    \s   o    r    i    g    i    n    a    l    \s   e    x    t    e    n    t    
+Actual Value   | 保    留    原    始    范    围                                                                          
+Expected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  
+Actual Code    | 204453004121407229873353922260                                                                      
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(String culture, String phase, String label, String retained) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 41
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.<>c__DisplayClass2_0.<Rendered_action_is_localized_and_Invoke_advances_real_session>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\KeepOriginalExtentUiTests.cs:line 59
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:03:24.09]     PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not [696 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : english.Single(label => label.Id == "Home.RemoveSessionRecord").Name
+    should be
+"Remove from list"
+    but was
+"从列表移除"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   
+Expected Value | R    e    m    o    v    e    \s   f    r    o    m    \s   l    i    s    t    
+Actual Value   | 从    列    表    移    除                                                           
+Expected Code  | 82   101  109  111  118  101  32   102  114  111  109  32   108  105  115  116  
+Actual Code    | 2017421015349203122738500                                                       
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 116
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:03:24.73]     PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "en-US", expected: "No preview") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: "en-US", expected: "No preview") [262 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : rendered.Facts
+    should be
+"No preview"
+    but was
+"无预览"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    
+Expected Value | N    o    \s   p    r    e    v    i    e    w    
+Actual Value   | 无    预    览                                       
+Expected Code  | 78   111  32   112  114  101  118  105  101  119  
+Actual Code    | 260803904435272                                   
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(String culture, String expected) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\HomeRecentAccessibilityTests.cs:line 155
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-ui-architecture-final.trx
+
+失败!  - 失败:    14，通过:  1471，已跳过:     0，总计:  1485，持续时间: 7 m 25 s - PrintFlow.Tests.dll (net10.0)

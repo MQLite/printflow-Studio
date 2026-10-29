@@ -1,0 +1,10 @@
+
+name                      outcome message
+----                      ------- -------
+fresh-success             FAIL    Fresh candidate must have its own evidence directory.
+build-failure             FAIL    Failed build overwrote reviewed evidence.
+existing-evidence-refused FAIL    Existing candidate evidence must be refused.
+two-fresh-candidates      FAIL    First evidence directory missing.
+validation-failure        FAIL    Failed validation must retain its own summary.
+
+5 cases; 5 failures. Controlled filesystem fixtures only; no real build, App or desktop.

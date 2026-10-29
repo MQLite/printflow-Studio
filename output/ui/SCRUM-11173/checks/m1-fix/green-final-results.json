@@ -1,0 +1,22 @@
+[
+  {
+    "name": "fresh-success",
+    "outcome": "PASS"
+  },
+  {
+    "name": "build-failure",
+    "outcome": "PASS"
+  },
+  {
+    "name": "existing-evidence-refused",
+    "outcome": "PASS"
+  },
+  {
+    "name": "two-fresh-candidates",
+    "outcome": "PASS"
+  },
+  {
+    "name": "validation-failure",
+    "outcome": "PASS"
+  }
+]

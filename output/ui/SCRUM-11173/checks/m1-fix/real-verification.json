@@ -1,0 +1,21 @@
+{
+  "candidateId": "e6-20261022-m1-fixed",
+  "repeatRefused": true,
+  "refusal": "Fresh candidate path required; preserve existing evidence: C:\\Users\\admin\\.codex\\worktrees\\scrum-11173-guided-acceptance\\printflow-Studio\\artifacts\\pf-opux-scrum11154-workstation-entry\\build\\e6-20261022-m1-fixed",
+  "newCandidateEvidenceChanges": 0,
+  "protectedOriginalFiles": 103,
+  "originalChanges": 0,
+  "manifests": [
+    {
+      "path": "output\\ui\\SCRUM-11173\\candidate\\candidate-manifest.json",
+      "count": 863,
+      "mismatches": 0
+    },
+    {
+      "path": "output\\ui\\SCRUM-11173\\candidates\\e6-20261022-m1-fixed\\candidate-manifest.json",
+      "count": 863,
+      "mismatches": 0
+    }
+  ],
+  "runtimeRootExists": false
+}

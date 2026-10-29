@@ -1,0 +1,129 @@
+{
+  "State": "pdf-review",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "5663822B2A087960E8C52FE09C5E6D39352E6CAD01BE5F7A743F15A82BCA3D7B",
+  "ScreenshotSha256": "E0B1AF25A5503A2EB72C27DBE006EEF8A8032264B8662D55FE12A9598ED1D89B",
+  "EssentialActions": [
+    "Session.Approve",
+    "Session.BackToHome"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Session.ReviewZoomOut",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 272,
+          "Y": 335.24666666666667,
+          "Width": 50,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.ReviewZoomIn",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 328,
+          "Y": 335.24666666666667,
+          "Width": 50,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.ReviewResetZoom",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 384,
+          "Y": 335.24666666666667,
+          "Width": 78,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.ReviewActualSize",
+        "IsEnabled": true,
+        "CanExecute": null,
+        "Bounds": {
+          "X": 571,
+          "Y": 385.24666666666667,
+          "Width": 59.086666666666666,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.Approve",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 16,
+          "Y": 642,
+          "Width": 60,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.Reject",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 84,
+          "Y": 642,
+          "Width": 58,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.HandOff",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 150,
+          "Y": 642,
+          "Width": 110,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 898,
+          "Y": 642,
+          "Width": 86,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 156.35666666666668,
+        "ViewportHeight": 333.87
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 139.32333333333332
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 333.87
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 50
+      }
+    ],
+    "Previews": 1
+  }
+}

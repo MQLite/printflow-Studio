@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="cfaac733-38ea-486c-863a-dd08fe22a8c2" name="admin@DESKTOP-0BG8884 2026-10-20 09:57:42" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T09:57:42.8620781+13:00" queuing="2026-10-20T09:57:42.8620783+13:00" start="2026-10-20T09:57:35.1286857+13:00" finish="2026-10-20T09:57:56.7351206+13:00" />
+  <TestSettings name="default" id="1825f699-d6a2-4875-bbef-c0132c5c8628">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_09_57_42" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="f0a27ddb-309a-44de-89f1-3fb03b68c14e" testId="bbf3a4f1-cc17-89b2-a5c3-3c022be35131" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" computerName="DESKTOP-0BG8884" duration="00:00:00.4155934" startTime="2026-10-20T09:57:54.9111945+13:00" endTime="2026-10-20T09:57:55.3274066+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0a27ddb-309a-44de-89f1-3fb03b68c14e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts&#xD;
+    should be within&#xD;
+0.001d&#xD;
+    of&#xD;
+0.4d&#xD;
+    but was&#xD;
+0.2646502835538752d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the E4 review sizing must not shrink unrelated accepted source forms</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry() in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 23&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="47412222-87d8-40be-ba80-3ea74d6b7b67" testId="35f7be68-bedb-b106-2253-9bff7fad7e00" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5062674" startTime="2026-10-20T09:57:53.4451322+13:00" endTime="2026-10-20T09:57:53.9538382+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="47412222-87d8-40be-ba80-3ea74d6b7b67">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : rendered.Facts.ChangeRoute&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    a reloaded running session must not offer route changes</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 66&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c6ff34b2-c81c-4429-8e66-212e96e3e8c1" testId="5af0aa22-6d50-9477-b10d-b3cf0b75af46" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Successful_processing_enters_required_review_without_automatic_next_step" computerName="DESKTOP-0BG8884" duration="00:00:00.4851714" startTime="2026-10-20T09:57:54.4265791+13:00" endTime="2026-10-20T09:57:54.9109668+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c6ff34b2-c81c-4429-8e66-212e96e3e8c1" />
+    <UnitTestResult executionId="3d58e5aa-cb62-4677-a764-091b1671af8e" testId="afb2df18-2ed1-8a02-17bd-4e7165f42455" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.4591346" startTime="2026-10-20T09:57:55.6839055+13:00" endTime="2026-10-20T09:57:56.1453765+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d58e5aa-cb62-4677-a764-091b1671af8e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.DuplicateApply&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    adjusting trim has one apply action</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropTests.cs:line 42&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a0c705f9-ffaf-42d4-9b24-8150861a15c6" testId="898dac98-5704-16c9-1595-931a3e2d1ce7" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:06.1628789" startTime="2026-10-20T09:57:47.2806711+13:00" endTime="2026-10-20T09:57:53.4419540+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0c705f9-ffaf-42d4-9b24-8150861a15c6">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : r.Right&#xD;
+    should be less than or equal to&#xD;
+700.5d&#xD;
+    but was&#xD;
+741.72d&#xD;
+&#xD;
+Additional Info:&#xD;
+    dimensions: custom-size input</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Inside(Rect r, Size viewport, String label) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 198&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 170&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 98&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="725de19a-bfdf-4408-ab4c-57a962668b58" testId="883a29ae-949e-99c4-7583-e51da9391295" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:04.0200961" startTime="2026-10-20T09:57:38.8052795+13:00" endTime="2026-10-20T09:57:42.8312906+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="725de19a-bfdf-4408-ab4c-57a962668b58">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : r.Right&#xD;
+    should be less than or equal to&#xD;
+720.5d&#xD;
+    but was&#xD;
+723.2433333333333d&#xD;
+&#xD;
+Additional Info:&#xD;
+    dimensions: custom-size input</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Inside(Rect r, Size viewport, String label) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 198&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 170&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs:line 98&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d26a3363-c78d-4e85-b1a3-1dc6748170a6" testId="292bbd36-63a3-d79a-f6c0-e6e966e51e1c" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.4708268" startTime="2026-10-20T09:57:53.9576560+13:00" endTime="2026-10-20T09:57:54.4254080+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d26a3363-c78d-4e85-b1a3-1dc6748170a6">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : rendered.Facts.ChangeRoute&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    a reloaded running session must not offer route changes</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs:line 66&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="06449aec-815c-448e-bc4f-29f528af6e6e" testId="b4289537-bbd3-5538-9443-c29b1dbda383" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.4470140" startTime="2026-10-20T09:57:56.1478322+13:00" endTime="2026-10-20T09:57:56.5930391+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="06449aec-815c-448e-bc4f-29f528af6e6e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : result.Facts.DuplicateApply&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True&#xD;
+&#xD;
+Additional Info:&#xD;
+    adjusting trim has one apply action</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropTests.cs:line 42&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="11d8e8f9-d63d-493b-a78c-dba040f534e0" testId="44dee1e3-38de-bb13-3f01-928f8485d726" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Cancel_preserves_exact_review_and_using_changed_crop_requires_a_new_review" computerName="DESKTOP-0BG8884" duration="00:00:00.3559400" startTime="2026-10-20T09:57:55.3283782+13:00" endTime="2026-10-20T09:57:55.6837435+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="11d8e8f9-d63d-493b-a78c-dba040f534e0" />
+    <UnitTestResult executionId="2b6d0b7d-a2d3-4670-a36c-5c8ed4217549" testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:04.4458787" startTime="2026-10-20T09:57:42.8492085+13:00" endTime="2026-10-20T09:57:47.2785486+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2b6d0b7d-a2d3-4670-a36c-5c8ed4217549" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="883a29ae-949e-99c4-7583-e51da9391295">
+      <Execution id="725de19a-bfdf-4408-ab4c-57a962668b58" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="898dac98-5704-16c9-1595-931a3e2d1ce7">
+      <Execution id="a0c705f9-ffaf-42d4-9b24-8150861a15c6" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Cancel_preserves_exact_review_and_using_changed_crop_requires_a_new_review" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="44dee1e3-38de-bb13-3f01-928f8485d726">
+      <Execution id="11d8e8f9-d63d-493b-a78c-dba040f534e0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests" name="Cancel_preserves_exact_review_and_using_changed_crop_requires_a_new_review" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="afb2df18-2ed1-8a02-17bd-4e7165f42455">
+      <Execution id="3d58e5aa-cb62-4677-a764-091b1671af8e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests" name="Crop_uses_the_whole_current_workspace_without_unrelated_forms" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="292bbd36-63a3-d79a-f6c0-e6e966e51e1c">
+      <Execution id="d26a3363-c78d-4e85-b1a3-1dc6748170a6" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="84f0eab8-a201-7cb5-2da4-2245f49cd9d6">
+      <Execution id="2b6d0b7d-a2d3-4670-a36c-5c8ed4217549" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests" name="Chinese_processing_review_crop_and_print_states_fit_the_current_workspace" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Successful_processing_enters_required_review_without_automatic_next_step" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="5af0aa22-6d50-9477-b10d-b3cf0b75af46">
+      <Execution id="c6ff34b2-c81c-4429-8e66-212e96e3e8c1" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Successful_processing_enters_required_review_without_automatic_next_step" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b4289537-bbd3-5538-9443-c29b1dbda383">
+      <Execution id="06449aec-815c-448e-bc4f-29f528af6e6e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests" name="Crop_uses_the_whole_current_workspace_without_unrelated_forms" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="bbf3a4f1-cc17-89b2-a5c3-3c022be35131">
+      <Execution id="f0a27ddb-309a-44de-89f1-3fb03b68c14e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests" name="Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="35f7be68-bedb-b106-2253-9bff7fad7e00">
+      <Execution id="47412222-87d8-40be-ba80-3ea74d6b7b67" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingTests" name="Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="bbf3a4f1-cc17-89b2-a5c3-3c022be35131" executionId="f0a27ddb-309a-44de-89f1-3fb03b68c14e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="35f7be68-bedb-b106-2253-9bff7fad7e00" executionId="47412222-87d8-40be-ba80-3ea74d6b7b67" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5af0aa22-6d50-9477-b10d-b3cf0b75af46" executionId="c6ff34b2-c81c-4429-8e66-212e96e3e8c1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="afb2df18-2ed1-8a02-17bd-4e7165f42455" executionId="3d58e5aa-cb62-4677-a764-091b1671af8e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="898dac98-5704-16c9-1595-931a3e2d1ce7" executionId="a0c705f9-ffaf-42d4-9b24-8150861a15c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="883a29ae-949e-99c4-7583-e51da9391295" executionId="725de19a-bfdf-4408-ab4c-57a962668b58" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="292bbd36-63a3-d79a-f6c0-e6e966e51e1c" executionId="d26a3363-c78d-4e85-b1a3-1dc6748170a6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b4289537-bbd3-5538-9443-c29b1dbda383" executionId="06449aec-815c-448e-bc4f-29f528af6e6e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="44dee1e3-38de-bb13-3f01-928f8485d726" executionId="11d8e8f9-d63d-493b-a78c-dba040f534e0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84f0eab8-a201-7cb5-2da4-2245f49cd9d6" executionId="2b6d0b7d-a2d3-4670-a36c-5c8ed4217549" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="10" executed="10" passed="3" failed="7" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.27]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.20]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.30]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:07.35]       Shouldly.ShouldAssertException : r.Right&#xD;
+[xUnit.net 00:00:07.35]           should be less than or equal to&#xD;
+[xUnit.net 00:00:07.35]       720.5d&#xD;
+[xUnit.net 00:00:07.35]           but was&#xD;
+[xUnit.net 00:00:07.35]       723.2433333333333d&#xD;
+[xUnit.net 00:00:07.35]       &#xD;
+[xUnit.net 00:00:07.35]       Additional Info:&#xD;
+[xUnit.net 00:00:07.35]           dimensions: custom-size input&#xD;
+[xUnit.net 00:00:07.35]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.36]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(198,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Inside(Rect r, Size viewport, String label)&#xD;
+[xUnit.net 00:00:07.36]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(170,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential)&#xD;
+[xUnit.net 00:00:07.36]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(98,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.36]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.36]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.96]       Shouldly.ShouldAssertException : r.Right&#xD;
+[xUnit.net 00:00:17.96]           should be less than or equal to&#xD;
+[xUnit.net 00:00:17.96]       700.5d&#xD;
+[xUnit.net 00:00:17.96]           but was&#xD;
+[xUnit.net 00:00:17.96]       741.72d&#xD;
+[xUnit.net 00:00:17.96]       &#xD;
+[xUnit.net 00:00:17.96]       Additional Info:&#xD;
+[xUnit.net 00:00:17.96]           dimensions: custom-size input&#xD;
+[xUnit.net 00:00:17.96]       Stack Trace:&#xD;
+[xUnit.net 00:00:17.96]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(198,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Inside(Rect r, Size viewport, String label)&#xD;
+[xUnit.net 00:00:17.96]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(170,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Capture(SessionViewModel model, Size viewport, String state, String[] essential)&#xD;
+[xUnit.net 00:00:17.96]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingVisualEvidenceTests.cs(98,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.96]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:17.96]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.47]       Shouldly.ShouldAssertException : rendered.Facts.ChangeRoute&#xD;
+[xUnit.net 00:00:18.48]           should be&#xD;
+[xUnit.net 00:00:18.48]       False&#xD;
+[xUnit.net 00:00:18.48]           but was&#xD;
+[xUnit.net 00:00:18.48]       True&#xD;
+[xUnit.net 00:00:18.48]       &#xD;
+[xUnit.net 00:00:18.48]       Additional Info:&#xD;
+[xUnit.net 00:00:18.48]           a reloaded running session must not offer route changes&#xD;
+[xUnit.net 00:00:18.48]       Stack Trace:&#xD;
+[xUnit.net 00:00:18.48]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.48]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.48]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.48]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.95]       Shouldly.ShouldAssertException : rendered.Facts.ChangeRoute&#xD;
+[xUnit.net 00:00:18.95]           should be&#xD;
+[xUnit.net 00:00:18.95]       False&#xD;
+[xUnit.net 00:00:18.95]           but was&#xD;
+[xUnit.net 00:00:18.95]       True&#xD;
+[xUnit.net 00:00:18.95]       &#xD;
+[xUnit.net 00:00:18.95]       Additional Info:&#xD;
+[xUnit.net 00:00:18.95]           a reloaded running session must not offer route changes&#xD;
+[xUnit.net 00:00:18.95]       Stack Trace:&#xD;
+[xUnit.net 00:00:18.95]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.95]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingTests.cs(66,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(Boolean takeOver)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.95]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:18.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:19.85]       Shouldly.ShouldAssertException : result.Facts&#xD;
+[xUnit.net 00:00:19.85]           should be within&#xD;
+[xUnit.net 00:00:19.85]       0.001d&#xD;
+[xUnit.net 00:00:19.85]           of&#xD;
+[xUnit.net 00:00:19.85]       0.4d&#xD;
+[xUnit.net 00:00:19.85]           but was&#xD;
+[xUnit.net 00:00:19.85]       0.2646502835538752d&#xD;
+[xUnit.net 00:00:19.85]       &#xD;
+[xUnit.net 00:00:19.85]       Additional Info:&#xD;
+[xUnit.net 00:00:19.85]           the E4 review sizing must not shrink unrelated accepted source forms&#xD;
+[xUnit.net 00:00:19.85]       Stack Trace:&#xD;
+[xUnit.net 00:00:19.85]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs(23,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry()&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:19.85]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:19.85]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:20.67]       Shouldly.ShouldAssertException : result.Facts.DuplicateApply&#xD;
+[xUnit.net 00:00:20.67]           should be&#xD;
+[xUnit.net 00:00:20.67]       False&#xD;
+[xUnit.net 00:00:20.67]           but was&#xD;
+[xUnit.net 00:00:20.67]       True&#xD;
+[xUnit.net 00:00:20.67]       &#xD;
+[xUnit.net 00:00:20.67]       Additional Info:&#xD;
+[xUnit.net 00:00:20.67]           adjusting trim has one apply action&#xD;
+[xUnit.net 00:00:20.67]       Stack Trace:&#xD;
+[xUnit.net 00:00:20.67]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropTests.cs(42,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:20.67]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:20.67]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:21.11]       Shouldly.ShouldAssertException : result.Facts.DuplicateApply&#xD;
+[xUnit.net 00:00:21.11]           should be&#xD;
+[xUnit.net 00:00:21.11]       False&#xD;
+[xUnit.net 00:00:21.11]           but was&#xD;
+[xUnit.net 00:00:21.11]       True&#xD;
+[xUnit.net 00:00:21.11]       &#xD;
+[xUnit.net 00:00:21.11]       Additional Info:&#xD;
+[xUnit.net 00:00:21.11]           adjusting trim has one apply action&#xD;
+[xUnit.net 00:00:21.11]       Stack Trace:&#xD;
+[xUnit.net 00:00:21.11]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropTests.cs(42,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:21.11]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:21.11]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:21.12]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:42.8339638+13:00">
+        <Text>[xUnit.net 00:00:07.35]     PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:53.4425694+13:00">
+        <Text>[xUnit.net 00:00:17.96]     PrintFlow.Tests.Integration.Ui.GuidedProcessingVisualEvidenceTests.Chinese_processing_review_crop_and_print_states_fit_the_current_workspace(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:53.9547571+13:00">
+        <Text>[xUnit.net 00:00:18.47]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:54.4256634+13:00">
+        <Text>[xUnit.net 00:00:18.95]     PrintFlow.Tests.Integration.Ui.GuidedProcessingTests.Running_has_truthful_indeterminate_focus_and_keeps_stop_or_takeover_reachable(takeOver: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:55.3276446+13:00">
+        <Text>[xUnit.net 00:00:19.85]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Source_keeps_the_accepted_proportional_workspace_instead_of_review_only_geometry [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:56.1460884+13:00">
+        <Text>[xUnit.net 00:00:20.67]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T09:57:56.5932939+13:00">
+        <Text>[xUnit.net 00:00:21.11]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropTests.Crop_uses_the_whole_current_workspace_without_unrelated_forms(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

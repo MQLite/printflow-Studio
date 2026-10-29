@@ -298,6 +298,7 @@ public sealed class HomeRecentAccessibilityTests
         WpfRendering.OnStaThread(() =>
         {
             HomeView view = new() { DataContext = harness.Home };
+            ((Expander)view.FindName("HistoryDisclosure")).IsExpanded = true;
             view.Measure(WpfRendering.ReviewViewport);
             view.Arrange(new Rect(0, 0, WpfRendering.ReviewViewport.Width, WpfRendering.ReviewViewport.Height));
             view.UpdateLayout();

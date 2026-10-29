@@ -1,0 +1,318 @@
+{
+  "captureRun": "checks/e5-visual-final.trx",
+  "language": "zh-CN",
+  "count": 31,
+  "captureKind": "Synthetic offscreen WPF at 96 DPI; no workstation/keyboard/UIA/production acceptance",
+  "images": [
+    {
+      "file": "screenshots/completed-1000x700.png",
+      "metadata": "screenshots/completed-1000x700.json",
+      "state": "completed",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "B73A0321A58C021E1F8214B00CA08AE03B2D81902FA0001CFC8B5FFC0FF62EE7",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/completed-1280x720.png",
+      "metadata": "screenshots/completed-1280x720.json",
+      "state": "completed",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "FAB80AC69B7801ACB45CCB72B56E2E47395D84E7868FA882F1F8E79F31FFD447",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/completed-1920x1080.png",
+      "metadata": "screenshots/completed-1920x1080.json",
+      "state": "completed",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "AD860B49F6A0B560BC104674893B87DB0F4D0B781A93164DDC7711FBF2ACA5F3",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/confirmation-1000x700.png",
+      "metadata": "screenshots/confirmation-1000x700.json",
+      "state": "confirmation",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "CD38C557047741C4EBBAC8FECC50587C575757D2AF22CA8B286F305611CE804A",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/correction-prepare-1000x700.png",
+      "metadata": "screenshots/correction-prepare-1000x700.json",
+      "state": "correction-prepare",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "22D0B0582EE04720B2AF7B2C1F945763ABD2E3D56E49CFD049AD913B731F0005",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/correction-returned-1000x700.png",
+      "metadata": "screenshots/correction-returned-1000x700.json",
+      "state": "correction-returned",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "8EBE5BE4045791BB9DCF87E1FD93412A2174A0592FCF8C7DFFF26C0B1F45EA65",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/correction-waiting-1000x700.png",
+      "metadata": "screenshots/correction-waiting-1000x700.json",
+      "state": "correction-waiting",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "6ED564B7B633FFAEE6DAEACF9C275EF7AB78D3AE2631CF5E9D75F8CFAEE76F2D",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/correction-waiting-1280x720.png",
+      "metadata": "screenshots/correction-waiting-1280x720.json",
+      "state": "correction-waiting",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "4F9C1233B1216AE745063750BD55D6FC26BF6CB2D91A1556CE1FA12A805C63D3",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/correction-waiting-1920x1080.png",
+      "metadata": "screenshots/correction-waiting-1920x1080.json",
+      "state": "correction-waiting",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "C6F63C5D72647AFE91B42E4091DAC2161D00866AE1D414679D8773746FB92DC2",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/error-details-1000x700.png",
+      "metadata": "screenshots/error-details-1000x700.json",
+      "state": "error-details",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "D5F35350865404E9FB300F6001EA55B11F7C70554AB861FD6185D90AA7BCC2F1",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/failure-1000x700.png",
+      "metadata": "screenshots/failure-1000x700.json",
+      "state": "failure",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "17F9848E99FDC04455DEE432559519A3F4582C0DBC331F45F995E99DBB8B47EA",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-1000x700.png",
+      "metadata": "screenshots/readiness-1000x700.json",
+      "state": "readiness",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "F100EC0749E84F01DE36DB478E43A431431B5BF88E2510DE7D3152100DAE390D",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-1280x720.png",
+      "metadata": "screenshots/readiness-1280x720.json",
+      "state": "readiness",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "998378EF3931951EED6DE2282F9D5EB4F4CF34BD1CB44167D5F2A879836E3EFB",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-1920x1080.png",
+      "metadata": "screenshots/readiness-1920x1080.json",
+      "state": "readiness",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "86B0BA931A4A27FAB4B7E5A37330A2F924199D06720F5D3D4C0EFD14E60B7E7D",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-blocked-1000x700.png",
+      "metadata": "screenshots/readiness-blocked-1000x700.json",
+      "state": "readiness-blocked",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "456C094AB258E4C8AAACC226350B739B71ECA9F15CE3F8A9B92AEEEC3620FEAB",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-stale-1000x700.png",
+      "metadata": "screenshots/readiness-stale-1000x700.json",
+      "state": "readiness-stale",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "5CED522BBB9FBBF1B1E5D790B4A89AD87CDC2636F366F399EDB460A273B0A2E6",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/readiness-unchecked-1000x700.png",
+      "metadata": "screenshots/readiness-unchecked-1000x700.json",
+      "state": "readiness-unchecked",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "607F7204E7BFA09A90F32A2E49309DDB0E1A839CBC8824CE13D139D8C71CBE4E",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recent-1000x700.png",
+      "metadata": "screenshots/recent-1000x700.json",
+      "state": "recent",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "57B61B9358CA4629A1C40667EE5939B43ECE9DF374F4369F43F6986C396CA89A",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recent-1280x720.png",
+      "metadata": "screenshots/recent-1280x720.json",
+      "state": "recent",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "772BDF09ADF6C53D4559773E4AF662788A2B39BD4AB8CA9A59AEB3429D6ECB6B",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recent-1920x1080.png",
+      "metadata": "screenshots/recent-1920x1080.json",
+      "state": "recent",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "B8A3AD8CE2A4E47F5A4BF23FD28C54C73370C6A02A56975B7B8D38A60FF1DBE0",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recovery-1000x700.png",
+      "metadata": "screenshots/recovery-1000x700.json",
+      "state": "recovery",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "CE187F4783247C45EC765F2AB753DC5B2CF550686104B346D99FD6EA8B9FB33B",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recovery-1280x720.png",
+      "metadata": "screenshots/recovery-1280x720.json",
+      "state": "recovery",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "4DF02627654AD8350F89EC8DA1F013BC277EC49C048838C8435B039E98E68096",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/recovery-1920x1080.png",
+      "metadata": "screenshots/recovery-1920x1080.json",
+      "state": "recovery",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "7270AB203C6B0DDABD467EDF79BADDBE38F316F650638FE9470A13387BE2FA8D",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/save-1000x700.png",
+      "metadata": "screenshots/save-1000x700.json",
+      "state": "save",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "BEA3C9D0A3123769094DC29473CCE2C935E93040AA0157B047582F66551E6C11",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/save-1280x720.png",
+      "metadata": "screenshots/save-1280x720.json",
+      "state": "save",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "DD963E2225D9E7110B78B9E13040E9A52972CF99A8B7ABADDCB0C2FE5EA78C52",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/save-1920x1080.png",
+      "metadata": "screenshots/save-1920x1080.json",
+      "state": "save",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "4CCA4D6DE12A412429B569AB127E82EEAC04FE06C0B8E181826FB1B2524F5BCC",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/save-collision-1000x700.png",
+      "metadata": "screenshots/save-collision-1000x700.json",
+      "state": "save-collision",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "1705D28A0AACA5F1E5F6896DB79014207F43BB4B9130C037252390116A33A2C6",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/save-uncertain-1000x700.png",
+      "metadata": "screenshots/save-uncertain-1000x700.json",
+      "state": "save-uncertain",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "DDABB83AEB100786B49652B244917C1BC85D0E27DC5CE6A8F2DE96BE79B67D3C",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/settings-1000x700.png",
+      "metadata": "screenshots/settings-1000x700.json",
+      "state": "settings",
+      "widthDip": 1000,
+      "heightDip": 700,
+      "sha256": "316B25991EF945DECFEA0718615599710B0CB3021FBC157E609AC690CAC620B1",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/settings-1280x720.png",
+      "metadata": "screenshots/settings-1280x720.json",
+      "state": "settings",
+      "widthDip": 1280,
+      "heightDip": 720,
+      "sha256": "FA16AAB8CE04AE506E5F3E73514A71EDCE733410AD2FC5C9921D1F31DD1709FD",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    },
+    {
+      "file": "screenshots/settings-1920x1080.png",
+      "metadata": "screenshots/settings-1920x1080.json",
+      "state": "settings",
+      "widthDip": 1920,
+      "heightDip": 1080,
+      "sha256": "B2079C8B0E5295F48EA2F0F630D02156EF0F73E1DD409BA0E60110EE5CD64315",
+      "inspected": true,
+      "inspection": "Viewed full PNG: status/guidance readable, primary actions visible, no unintended overlap; scrolling retained for secondary content."
+    }
+  ]
+}

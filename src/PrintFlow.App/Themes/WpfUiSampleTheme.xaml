@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <!-- Compatibility entry. New consumers use WpfUiTheme.xaml and PF.* keys. -->
+  <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="WpfUiTheme.xaml" /></ResourceDictionary.MergedDictionaries>
+  <Style x:Key="PF.Sample.Secondary" TargetType="Button" BasedOn="{StaticResource PF.Button.Secondary}">
+  </Style>
+  <Style x:Key="PF.Sample.Primary" TargetType="Button" BasedOn="{StaticResource PF.Button.Primary}">
+  </Style>
+  <Style x:Key="PF.Sample.Input" TargetType="TextBox" BasedOn="{StaticResource PF.Input.TextBox}">
+  </Style>
+  <Style x:Key="PF.Sample.Card" TargetType="ui:Card" BasedOn="{StaticResource PF.Card.Fluent}">
+  </Style>
+
+</ResourceDictionary>

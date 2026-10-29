@@ -1,0 +1,349 @@
+{
+  "Source": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+  "ReviewTarget": "9fe125eaf3104049192f3c766278db60adab6ecb",
+  "Count": 30,
+  "Unguarded": 0,
+  "Controls": [
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "Session.FinalSave.Target",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedFinalSaveTarget, Mode=TwoWay}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "Session.FinalSave.Record",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedFinalSaveRecord, Mode=TwoWay}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.FinalSave.FileName",
+      "Name": "",
+      "Text": "{Binding SaveFileNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.FinalSave.Folder",
+      "Name": "",
+      "Text": "{Binding SaveFolderText, Mode=OneWay}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "True",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.FinalSave.SavedPath",
+      "Name": "",
+      "Text": "{Binding FinalSaveSavedPath, Mode=OneWay}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "True",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding FinalSaveDetails, Mode=OneWay}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "True",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedHistoryStep}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionRadioButton",
+      "AutomationId": "Session.ManualCropModeTight",
+      "Name": "",
+      "Text": "",
+      "Selection": "",
+      "Checked": "{Binding IsManualCropTight}",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionRadioButton",
+      "AutomationId": "Session.ManualCropModeUniform",
+      "Name": "",
+      "Text": "",
+      "Selection": "",
+      "Checked": "{Binding IsManualCropUniform}",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionRadioButton",
+      "AutomationId": "Session.ManualCropModePerEdge",
+      "Name": "",
+      "Text": "",
+      "Selection": "",
+      "Checked": "{Binding IsManualCropPerEdge}",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.ManualCropUniformMargin",
+      "Name": "",
+      "Text": "{Binding ManualCropUniformMargin, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.ManualCropMarginLeft",
+      "Name": "",
+      "Text": "{Binding ManualCropMarginLeft, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.ManualCropMarginTop",
+      "Name": "",
+      "Text": "{Binding ManualCropMarginTop, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.ManualCropMarginRight",
+      "Name": "",
+      "Text": "{Binding ManualCropMarginRight, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.ManualCropMarginBottom",
+      "Name": "",
+      "Text": "{Binding ManualCropMarginBottom, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.Correction.Note",
+      "Name": "CorrectionNoteBox",
+      "Text": "{Binding CorrectionNote, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.Correction.Folder",
+      "Name": "",
+      "Text": "{Binding CorrectionFolderText, Mode=OneWay}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "True",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionListBox",
+      "AutomationId": "Session.TrimModes",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedTrimMode}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding UniformMarginText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding TopMarginText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding RightMarginText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding BottomMarginText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "",
+      "Name": "",
+      "Text": "{Binding LeftMarginText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "Session.PrintDimensions.TargetEdge",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedTargetEdgeChoice}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.PrintDimensions.TargetMillimetres",
+      "Name": "",
+      "Text": "{Binding CustomMillimetresText, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionListBox",
+      "AutomationId": "Session.WhiteUnderbaseChoices",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedWhiteUnderbaseChoice}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.TiffOutputPath",
+      "Name": "",
+      "Text": "{Binding TiffOutputPath, Mode=OneWay}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "True",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "Session.RejectReason",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedRejectionReason}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionTextBox",
+      "AutomationId": "Session.RejectNotes",
+      "Name": "",
+      "Text": "{Binding RejectionNotes, UpdateSourceTrigger=PropertyChanged}",
+      "Selection": "",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    },
+    {
+      "Type": "SessionComboBox",
+      "AutomationId": "Session.ReturnTarget",
+      "Name": "",
+      "Text": "",
+      "Selection": "{Binding SelectedReturnTarget}",
+      "Checked": "",
+      "IsReadOnly": "",
+      "Guarded": true
+    }
+  ],
+  "Patterns": "TextBox Value; ComboBox SelectionItem and ExpandCollapse (Value if editable); ListBox SelectionItem; RadioButton SelectionItem. No bound CheckBox/ToggleButton/Slider/range-value draft controls in Session XAML. Readonly text is wrapped too, preserving IsReadOnly. Native item peer/read patterns retained; generic mutation wrappers cover Value, SelectionItem, Toggle, RangeValue and ExpandCollapse when exposed.",
+  "Boundary": "Captured presentation scope, owner DataContext, enabled state, own/ancestor visibility changes, unload/reload; queued calls recheck at actual application. Scope grants no workflow or approval authority. Native accessibility client and visible popup behavior NOT RUN.",
+  "DisclosureControls": [
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.FinalSave.Details",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.HistorySelector",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.Correction.OtherOptions",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.TechnicalDetails",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.PrintDimensions.TechnicalDetails",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "Session.Preparation.TechnicalDetails",
+      "IsExpanded": ""
+    },
+    {
+      "Type": "SessionExpander",
+      "AutomationId": "",
+      "IsExpanded": "{Binding IsConfirmingReturn, Mode=OneWay}"
+    }
+  ],
+  "DisclosureCount": 7,
+  "PatternCompatibility": "Wrap by requested PatternInterface, not runtime interface precedence. Native ComboBox peer implements multiple provider interfaces; Selection remains ISelectionProvider and ExpandCollapse remains IExpandCollapseProvider. First implementation defect retained in review-r4-pattern-red.trx and fixed before final broad regression."
+}

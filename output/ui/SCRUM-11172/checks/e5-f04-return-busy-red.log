@@ -1,0 +1,59 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.39]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True) [FAIL]
+[xUnit.net 00:00:05.87]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True) [492 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn
+    should be
+False
+    but was
+True
+
+Additional Info:
+    task reload owns the utility until it completes
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 62
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False) [478 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : diagnosticsAvailableDuringReturn
+    should be
+False
+    but was
+True
+
+Additional Info:
+    task reload owns the utility until it completes
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 62
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f04-return-busy-red.trx
+
+失败!  - 失败:     2，通过:     2，已跳过:     0，总计:     4，持续时间: 2 s - PrintFlow.Tests.dll (net10.0)

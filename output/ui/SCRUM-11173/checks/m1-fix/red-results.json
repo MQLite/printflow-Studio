@@ -1,0 +1,27 @@
+[
+  {
+    "name": "fresh-success",
+    "outcome": "FAIL",
+    "message": "Fresh candidate must have its own evidence directory."
+  },
+  {
+    "name": "build-failure",
+    "outcome": "FAIL",
+    "message": "Failed build overwrote reviewed evidence."
+  },
+  {
+    "name": "existing-evidence-refused",
+    "outcome": "FAIL",
+    "message": "Existing candidate evidence must be refused."
+  },
+  {
+    "name": "two-fresh-candidates",
+    "outcome": "FAIL",
+    "message": "First evidence directory missing."
+  },
+  {
+    "name": "validation-failure",
+    "outcome": "FAIL",
+    "message": "Failed validation must retain its own summary."
+  }
+]

@@ -1,0 +1,71 @@
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.74]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: False) [FAIL]
+[xUnit.net 00:00:06.05]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: True) [FAIL]
+[xUnit.net 00:00:06.32]     PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(changeBranch: False, refuse: False) [303 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.GuidedPage
+    should be
+GuidedSessionPage.Preflight
+    but was
+GuidedSessionPage.WhiteInk
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Reconfirming_white_ink_finishes_only_a_successful_edit(Boolean changeBranch, Boolean refuse) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 36
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: True) [309 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.SelectedTrimMode.Mode
+    should be
+TrimMode.UniformMargin
+    but was
+TrimMode.TightCrop
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 70
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(laterEdit: False) [273 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave
+    should be
+False
+    but was
+True
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionReviewFixTests.Applied_trim_becomes_the_navigation_baseline_without_erasing_later_edits(Boolean laterEdit) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionReviewFixTests.cs:line 66
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\review-r1-r3-red.trx
+
+失败!  - 失败:     3，通过:     3，已跳过:     0，总计:     6，持续时间: 2 s - PrintFlow.Tests.dll (net10.0)

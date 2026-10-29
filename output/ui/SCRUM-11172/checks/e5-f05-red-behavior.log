@@ -1,0 +1,113 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.12]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.Collapsed
+    should be
+True
+    but was
+False
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 135
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.34]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: True) [FAIL]
+[xUnit.net 00:00:07.02]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: True) [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)
+    should contain (case insensitive comparison)
+"尚未重新核实"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 37
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: False) [678 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)
+    should contain (case insensitive comparison)
+"保留规则"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 37
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:07.61]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft [FAIL]
+[xUnit.net 00:00:08.56]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft [293 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : navigation.GoHomeCount
+    should be
+0
+    but was
+1
+
+Additional Info:
+    refresh retires the old confirmation callback
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 60
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts [950 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.FinalSave.Alert", string.Empty) (null)
+    should not be null or white space
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 106
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f05-red-behavior.trx
+
+失败!  - 失败:     5，通过:     1，已跳过:     0，总计:     6，持续时间: 4 s - PrintFlow.Tests.dll (net10.0)

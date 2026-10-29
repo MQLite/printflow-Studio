@@ -1,0 +1,61 @@
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:04.84]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(fail: True) [376 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsConfirmingDraftLeave
+    should be
+True
+    but was
+False
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 74
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_pending_or_failed_save_does_not_consume_the_unconfirmed_draft(Boolean fail) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 95
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:05.49]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard [648 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.SaveFileNameText
+    should be
+"confirmed-output.png"
+    but was
+"keep-extent.png"
+    difference
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   
+Expected Value | c    o    n    f    i    r    m    e    d    -    o    u    t    p    u    t    .    p    n    g    
+Actual Value   | k    e    e    p    -    e    x    t    e    n    t    .    p    n    g                             
+Expected Code  | 99   111  110  102  105  114  109  101  100  45   111  117  116  112  117  116  46   112  110  103  
+Actual Code    | 107  101  101  112  45   101  120  116  101  110  116  46   112  110  103                           
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.A_saved_name_and_folder_are_the_baseline_for_the_next_discard() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 39
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\review-r5-red.trx
+
+失败!  - 失败:     2，通过:     1，已跳过:     0，总计:     3，持续时间: 2 s - PrintFlow.Tests.dll (net10.0)

@@ -1,0 +1,9 @@
+{
+  "persistenceFilterExact": true,
+  "inheritedExclusionsExact": true,
+  "exclusionCount": 11,
+  "smokeNamespaceExcluded": true,
+  "printflowOptInsUsed": false,
+  "sourceHashes": "tested-source-hashes.json",
+  "reviewStatus": "Parent-owned fresh review pending"
+}

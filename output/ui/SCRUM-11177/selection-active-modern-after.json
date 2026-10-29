@@ -1,0 +1,17 @@
+{
+  "State": "selection-active-modern-after",
+  "WidthDip": 500,
+  "HeightDip": 100,
+  "Dpi": 96,
+  "Method": "Isolated process; explicitly selected non-adorner WPF renderer; synthetic focus/selection flags; no App, Window.Show or desktop input",
+  "UseAdornerForTextboxSelectionRendering": false,
+  "IsSelectionActive": true,
+  "SelectedCharacters": 27,
+  "SelectionTextBrush": "#FF202E2A",
+  "SelectionBrush": "#FFE8F4EF",
+  "InkPixels": 415,
+  "SelectionPixels": 3041,
+  "ScreenshotSha256": "9E794F492EAD525BC88E142AB7CB522A453E8F73CAAA5326D6F6C4FD597E3B22",
+  "TokensSha256": "496E2711E431643692F238969A2DCDA3C747E3B3F61B492C296CE6DC4FC789A5",
+  "ControlsSha256": "EFA0FE8C3E7F791DED0D2BF861653715BC888830ED1F1BE677E298F1BA3C8F74"
+}

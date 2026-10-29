@@ -44,6 +44,11 @@ public sealed class FailureGuidanceLayoutTests
                 SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
                 TextBlock notice = tree.OfType<TextBlock>().Single(t => t.Text == screen.Notice && Shown(t));
                 ScrollViewer scroll = Ancestor<ScrollViewer>(notice)!;
+                // E2 collapses low-frequency metadata. Open that actual content so this
+                // regression still starts below the failure, rather than assuming an old tall page.
+                tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.TechnicalDetails").IsExpanded = true;
+                scroll.MaxHeight = 180; // Bounded scrolling fixture; normal viewport geometry is tested separately below.
+                Settle(tree);
                 scroll.ScrollToEnd();
                 Settle(tree);
                 double before = scroll.VerticalOffset;

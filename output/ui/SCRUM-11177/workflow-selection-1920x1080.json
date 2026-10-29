@@ -1,0 +1,21 @@
+{
+  "State": "workflow-selection",
+  "Language": "zh-CN",
+  "WidthDip": 1920,
+  "HeightDip": 1080,
+  "Dpi": 96,
+  "CaptureKind": "offscreen WPF; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "25A155B390190A715CA12DB6B31F703B1B558E139FA2CB88CE1878AC306D3D6E",
+  "Measurements": {
+    "MainAction": {
+      "X": 36,
+      "Y": 1006,
+      "Width": 82,
+      "Height": 42
+    },
+    "ActionEnabled": true,
+    "PreviewCount": 1,
+    "NoProcessingStarted": true
+  }
+}

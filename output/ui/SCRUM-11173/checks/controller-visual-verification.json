@@ -1,0 +1,225 @@
+{
+  "manifestEntries": [
+    {
+      "path": "visuals/correction-waiting-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/correction-waiting-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/correction-waiting-1280x720.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/correction-waiting-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/correction-waiting-1920x1080.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/correction-waiting-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1280x720.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1920x1080.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/crop-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1280x720.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1920x1080.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/long-chinese-source-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1280x720.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1920x1080.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-completed-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1280x720.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1920x1080.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/multisize-long-name-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/readiness-blocked-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/readiness-blocked-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/save-uncertain-1000x700.png",
+      "hashMatches": true
+    },
+    {
+      "path": "visuals/save-uncertain-1000x700.json",
+      "hashMatches": true
+    }
+  ],
+  "geometryPairs": [
+    {
+      "path": "correction-waiting-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "correction-waiting-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "correction-waiting-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "crop-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "crop-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "crop-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "long-chinese-source-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "long-chinese-source-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "long-chinese-source-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-completed-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-completed-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-completed-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-long-name-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-long-name-1280x720.json",
+      "hashMatches": true
+    },
+    {
+      "path": "multisize-long-name-1920x1080.json",
+      "hashMatches": true
+    },
+    {
+      "path": "readiness-blocked-1000x700.json",
+      "hashMatches": true
+    },
+    {
+      "path": "save-uncertain-1000x700.json",
+      "hashMatches": true
+    }
+  ],
+  "sourceFreeze": [
+    {
+      "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+      "unchanged": true
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedAcceptanceTests.cs",
+      "unchanged": true
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionVisualEvidenceTests.cs",
+      "unchanged": true
+    }
+  ],
+  "allMatch": true
+}

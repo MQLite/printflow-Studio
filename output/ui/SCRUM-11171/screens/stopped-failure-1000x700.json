@@ -1,0 +1,508 @@
+{
+  "State": "stopped-failure",
+  "Language": "zh-CN",
+  "WidthDip": 1000,
+  "HeightDip": 700,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no App/Window.Show, desktop input or real external application",
+  "ScreenshotSha256": "4E69EBDB6571EF56EAB6A3E57DC05348096B73A2442B60C335346E67F0EA0D2F",
+  "EssentialActions": [
+    "Session.Retry"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Session.ReviewZoomOut",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 272,
+            "Y": 247.34000000000003
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 50,
+            "Height": 42
+          },
+          "X": 272,
+          "Y": 247.34000000000003,
+          "Width": 50,
+          "Height": 42,
+          "Left": 272,
+          "Top": 247.34000000000003,
+          "Right": 322,
+          "Bottom": 289.34000000000003,
+          "TopLeft": {
+            "X": 272,
+            "Y": 247.34000000000003
+          },
+          "TopRight": {
+            "X": 322,
+            "Y": 247.34000000000003
+          },
+          "BottomLeft": {
+            "X": 272,
+            "Y": 289.34000000000003
+          },
+          "BottomRight": {
+            "X": 322,
+            "Y": 289.34000000000003
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ReviewZoomIn",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 328,
+            "Y": 247.34000000000003
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 50,
+            "Height": 42
+          },
+          "X": 328,
+          "Y": 247.34000000000003,
+          "Width": 50,
+          "Height": 42,
+          "Left": 328,
+          "Top": 247.34000000000003,
+          "Right": 378,
+          "Bottom": 289.34000000000003,
+          "TopLeft": {
+            "X": 328,
+            "Y": 247.34000000000003
+          },
+          "TopRight": {
+            "X": 378,
+            "Y": 247.34000000000003
+          },
+          "BottomLeft": {
+            "X": 328,
+            "Y": 289.34000000000003
+          },
+          "BottomRight": {
+            "X": 378,
+            "Y": 289.34000000000003
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ReviewResetZoom",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 384,
+            "Y": 247.34000000000003
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 78,
+            "Height": 42
+          },
+          "X": 384,
+          "Y": 247.34000000000003,
+          "Width": 78,
+          "Height": 42,
+          "Left": 384,
+          "Top": 247.34000000000003,
+          "Right": 462,
+          "Bottom": 289.34000000000003,
+          "TopLeft": {
+            "X": 384,
+            "Y": 247.34000000000003
+          },
+          "TopRight": {
+            "X": 462,
+            "Y": 247.34000000000003
+          },
+          "BottomLeft": {
+            "X": 384,
+            "Y": 289.34000000000003
+          },
+          "BottomRight": {
+            "X": 462,
+            "Y": 289.34000000000003
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ReviewActualSize",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 397,
+            "Y": 297.34000000000003
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 59.086666666666666,
+            "Height": 42
+          },
+          "X": 397,
+          "Y": 297.34000000000003,
+          "Width": 59.086666666666666,
+          "Height": 42,
+          "Left": 397,
+          "Top": 297.34000000000003,
+          "Right": 456.08666666666664,
+          "Bottom": 339.34000000000003,
+          "TopLeft": {
+            "X": 397,
+            "Y": 297.34000000000003
+          },
+          "TopRight": {
+            "X": 456.08666666666664,
+            "Y": 297.34000000000003
+          },
+          "BottomLeft": {
+            "X": 397,
+            "Y": 339.34000000000003
+          },
+          "BottomRight": {
+            "X": 456.08666666666664,
+            "Y": 339.34000000000003
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.RunStep",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 16,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 82,
+            "Height": 42
+          },
+          "X": 16,
+          "Y": 642,
+          "Width": 82,
+          "Height": 42,
+          "Left": 16,
+          "Top": 642,
+          "Right": 98,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 16,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 98,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 16,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 98,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.Retry",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 98,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 56,
+            "Height": 42
+          },
+          "X": 98,
+          "Y": 642,
+          "Width": 56,
+          "Height": 42,
+          "Left": 98,
+          "Top": 642,
+          "Right": 154,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 98,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 154,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 98,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 154,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ErrorDetails",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 154,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 82,
+            "Height": 42
+          },
+          "X": 154,
+          "Y": 642,
+          "Width": 82,
+          "Height": 42,
+          "Left": 154,
+          "Top": 642,
+          "Right": 236,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 154,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 236,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 154,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 236,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.Skip",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 236,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 54,
+            "Height": 42
+          },
+          "X": 236,
+          "Y": 642,
+          "Width": 54,
+          "Height": 42,
+          "Left": 236,
+          "Top": 642,
+          "Right": 290,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 236,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 290,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 236,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 290,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.HandOff",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 290,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 110,
+            "Height": 42
+          },
+          "X": 290,
+          "Y": 642,
+          "Width": 110,
+          "Height": 42,
+          "Left": 290,
+          "Top": 642,
+          "Right": 400,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 290,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 400,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 290,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 400,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ChangeRoute",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 400,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 194,
+            "Height": 42
+          },
+          "X": 400,
+          "Y": 642,
+          "Width": 194,
+          "Height": 42,
+          "Left": 400,
+          "Top": 642,
+          "Right": 594,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 400,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 594,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 400,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 594,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 898,
+            "Y": 642
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 86,
+            "Height": 42
+          },
+          "X": 898,
+          "Y": 642,
+          "Width": 86,
+          "Height": 42,
+          "Left": 898,
+          "Top": 642,
+          "Right": 984,
+          "Bottom": 684,
+          "TopLeft": {
+            "X": 898,
+            "Y": 642
+          },
+          "TopRight": {
+            "X": 984,
+            "Y": 642
+          },
+          "BottomLeft": {
+            "X": 898,
+            "Y": 684
+          },
+          "BottomRight": {
+            "X": 984,
+            "Y": 684
+          }
+        },
+        "WithinScroll": true
+      }
+    ],
+    "Images": [
+      {
+        "IsEmpty": false,
+        "Location": {
+          "X": 316.004,
+          "Y": 411.05500000000006
+        },
+        "Size": {
+          "IsEmpty": false,
+          "Width": 247.99198423529427,
+          "Height": 206.65999999999997
+        },
+        "X": 316.004,
+        "Y": 411.05500000000006,
+        "Width": 247.99198423529427,
+        "Height": 206.65999999999997,
+        "Left": 316.004,
+        "Top": 411.05500000000006,
+        "Right": 563.9959842352943,
+        "Bottom": 617.715,
+        "TopLeft": {
+          "X": 316.004,
+          "Y": 411.05500000000006
+        },
+        "TopRight": {
+          "X": 563.9959842352943,
+          "Y": 411.05500000000006
+        },
+        "BottomLeft": {
+          "X": 316.004,
+          "Y": 617.715
+        },
+        "BottomRight": {
+          "X": 563.9959842352943,
+          "Y": 617.715
+        }
+      }
+    ],
+    "Summary": [],
+    "WhiteChoices": [],
+    "Page": "Failure"
+  }
+}

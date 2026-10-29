@@ -1,0 +1,161 @@
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:04.31]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: True, fail: True, newBusy: False) [FAIL]
+[xUnit.net 00:00:04.77]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: False, newBusy: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: True, fail: True, newBusy: False) [846 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: False, newBusy: True) [469 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:05.14]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: True, fail: False, newBusy: False) [FAIL]
+[xUnit.net 00:00:05.49]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: True, newBusy: True) [FAIL]
+[xUnit.net 00:00:05.89]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: False, newBusy: False) [FAIL]
+[xUnit.net 00:00:06.26]     PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: True, newBusy: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: True, fail: False, newBusy: False) [362 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: True, newBusy: True) [354 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: False, newBusy: False) [397 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(sameId: False, fail: True, newBusy: False) [371 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : m.IsBusy
+    should be
+False
+    but was
+True
+
+Additional Info:
+    an old delivery does not own the newly opened presentation
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 44
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionSaveOwnershipTests.Opening_a_presentation_retires_old_save_success_failure_and_finally(Boolean sameId, Boolean fail, Boolean newBusy) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionSaveOwnershipTests.cs:line 76
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\output\ui\SCRUM-11169\checks\review-r6-red.trx
+
+失败!  - 失败:     6，通过:     0，已跳过:     0，总计:     6，持续时间: 2 s - PrintFlow.Tests.dll (net10.0)

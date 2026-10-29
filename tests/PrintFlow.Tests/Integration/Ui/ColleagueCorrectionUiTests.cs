@@ -251,8 +251,8 @@ public sealed class ColleagueCorrectionUiTests
         {
             tree.Root.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => { }));
             tree.Root.UpdateLayout();
-            Border? ask = tree.OfType<Border>().SingleOrDefault(b => AutomationProperties.GetAutomationId(b) == "Session.Correction.AskPanel" && Shown(b));
-            Border? panel = tree.OfType<Border>().SingleOrDefault(b => AutomationProperties.GetAutomationId(b) == "Session.Correction.Panel" && Shown(b));
+            FrameworkElement? ask = tree.OfType<FrameworkElement>().SingleOrDefault(b => AutomationProperties.GetAutomationId(b) == "Session.Correction.AskPanel" && Shown(b));
+            FrameworkElement? panel = tree.OfType<FrameworkElement>().SingleOrDefault(b => AutomationProperties.GetAutomationId(b) == "Session.Correction.Panel" && Shown(b));
             FrameworkElement? shown = ask ?? panel;
             var tooWide = shown is null ? [] : tree.OfType<TextBlock>()
                 .Where(t => Shown(t) && IsInside(t, shown) && t.ActualWidth > shown.ActualWidth + 0.5).ToList();

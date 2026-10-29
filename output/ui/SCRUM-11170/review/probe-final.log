@@ -1,0 +1,7 @@
+Workspace: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\735032fa040e4498b5b435238153fad8
+Database: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\1e104aaa4e51459cb702e790dcbd919f.db
+{"Probe":"BackWithoutRouteThenContinue","WasExplicitSelectInvoked":false,"ResumedRoute":"PrepareAsset","ResumedStep":"OriginalConfirmation","Destination":"Session","CanConfirmOriginal":true}
+Workspace: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\b8dd6cef03bd42e19dc8f1f27a0b5e86
+Database: C:\Users\admin\AppData\Local\Temp\PrintFlowTests\0fbfeb4e15ef45ebbbc1e3e98751eb95.db
+{"Probe":"CancelCommittedImport","Persisted":1,"ContinueRows":0,"RecentRows":0,"Notice":"\u5DF2\u53D6\u6D88\u5BFC\u5165\u7B49\u5F85\u3002\u82E5\u4EFB\u52A1\u5DF2\u521B\u5EFA\uFF0C\u53EF\u5728\u6700\u8FD1\u4EFB\u52A1\u4E2D\u627E\u5230\uFF1B\u539F\u6587\u4EF6\u4FDD\u6301\u4E0D\u53D8\u3002"}
+{"Probe":"BackDiscardsRouteNameDraft","NavigatedImmediately":true,"Typed":"operator-new-output-name","Persisted":"never-chose-a-route"}

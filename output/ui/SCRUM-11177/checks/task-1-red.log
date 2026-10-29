@@ -1,0 +1,108 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:03.58]     PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Long_button_labels_wrap_instead_of_losing_the_action [FAIL]
+[xUnit.net 00:00:03.59]     PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Tokens_resolve_to_approved_values [FAIL]
+[xUnit.net 00:00:03.65]     PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Focused_selected_and_disabled_controls_remain_distinguishable [FAIL]
+[xUnit.net 00:00:03.66]     PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Dictionary_loads_without_production_application [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Long_button_labels_wrap_instead_of_losing_the_action [172 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.IO.IOException : 找不到资源“themes/guidedtheme.xaml”。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Long_button_labels_wrap_instead_of_losing_the_action() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 86
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at MS.Internal.AppModel.ResourcePart.GetStreamCore(FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackagePart.GetStream(FileMode mode, FileAccess access)
+   at MS.Internal.IO.Packaging.PackagePartExtensions.GetSeekableStream(PackagePart packPart, FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackWebResponse.CachedResponse.GetResponseStream()
+   at System.IO.Packaging.PackWebResponse.get_ContentType()
+   at MS.Internal.WpfWebRequestHelper.GetContentType(WebResponse response)
+   at MS.Internal.WpfWebRequestHelper.GetResponseStream(WebRequest request, ContentType& contentType)
+   at System.Windows.ResourceDictionary.set_Source(Uri value)
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.CreateResources() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 8
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.Host(FrameworkElement content) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 16
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.<>c.<Long_button_labels_wrap_instead_of_losing_the_action>b__3_0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 90
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 90
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Tokens_resolve_to_approved_values [3 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.IO.IOException : 找不到资源“themes/guidedtheme.xaml”。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Tokens_resolve_to_approved_values() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 29
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at MS.Internal.AppModel.ResourcePart.GetStreamCore(FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackagePart.GetStream(FileMode mode, FileAccess access)
+   at MS.Internal.IO.Packaging.PackagePartExtensions.GetSeekableStream(PackagePart packPart, FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackWebResponse.CachedResponse.GetResponseStream()
+   at System.IO.Packaging.PackWebResponse.get_ContentType()
+   at MS.Internal.WpfWebRequestHelper.GetContentType(WebResponse response)
+   at MS.Internal.WpfWebRequestHelper.GetResponseStream(WebRequest request, ContentType& contentType)
+   at System.Windows.ResourceDictionary.set_Source(Uri value)
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.CreateResources() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 8
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.<>c.<Tokens_resolve_to_approved_values>b__1_0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 31
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Focused_selected_and_disabled_controls_remain_distinguishable [76 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.IO.IOException : 找不到资源“themes/guidedtheme.xaml”。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Focused_selected_and_disabled_controls_remain_distinguishable() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 59
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at MS.Internal.AppModel.ResourcePart.GetStreamCore(FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackagePart.GetStream(FileMode mode, FileAccess access)
+   at MS.Internal.IO.Packaging.PackagePartExtensions.GetSeekableStream(PackagePart packPart, FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackWebResponse.CachedResponse.GetResponseStream()
+   at System.IO.Packaging.PackWebResponse.get_ContentType()
+   at MS.Internal.WpfWebRequestHelper.GetContentType(WebResponse response)
+   at MS.Internal.WpfWebRequestHelper.GetResponseStream(WebRequest request, ContentType& contentType)
+   at System.Windows.ResourceDictionary.set_Source(Uri value)
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.CreateResources() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 8
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.Host(FrameworkElement content) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 16
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.<>c__DisplayClass2_0.<Focused_selected_and_disabled_controls_remain_distinguishable>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 66
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 90
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Dictionary_loads_without_production_application [2 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- System.IO.IOException : 找不到资源“themes/guidedtheme.xaml”。
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Dictionary_loads_without_production_application() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 15
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at MS.Internal.AppModel.ResourcePart.GetStreamCore(FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackagePart.GetStream(FileMode mode, FileAccess access)
+   at MS.Internal.IO.Packaging.PackagePartExtensions.GetSeekableStream(PackagePart packPart, FileMode mode, FileAccess access)
+   at System.IO.Packaging.PackWebResponse.CachedResponse.GetResponseStream()
+   at System.IO.Packaging.PackWebResponse.get_ContentType()
+   at MS.Internal.WpfWebRequestHelper.GetContentType(WebResponse response)
+   at MS.Internal.WpfWebRequestHelper.GetResponseStream(WebRequest request, ContentType& contentType)
+   at System.Windows.ResourceDictionary.set_Source(Uri value)
+   at PrintFlow.Tests.Fixtures.GuidedThemeFixture.CreateResources() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\GuidedThemeFixture.cs:line 8
+   at PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.<>c.<Dictionary_loads_without_production_application>b__0_0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedThemeResourceTests.cs:line 18
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+
+失败!  - 失败:     4，通过:     0，已跳过:     0，总计:     4，持续时间: 328 ms - PrintFlow.Tests.dll (net10.0)

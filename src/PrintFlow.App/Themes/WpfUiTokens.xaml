@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <!-- Scoped overrides. Unmigrated GuidedTheme consumers keep their existing metrics. -->
+  <sys:Double x:Key="PF.Font.Body">16</sys:Double>
+  <sys:Double x:Key="PF.Font.Section">24</sys:Double>
+  <sys:Double x:Key="PF.Icon.Size">20</sys:Double>
+  <Thickness x:Key="PF.Padding.Button">16,8</Thickness>
+  <Thickness x:Key="PF.Padding.Choice">8,4</Thickness>
+  <Thickness x:Key="PF.Padding.FluentCard">20</Thickness>
+  <SolidColorBrush x:Key="PF.Brush.ImportSurface" Color="#FAFCFB" />
+  <SolidColorBrush x:Key="PF.Brush.ImportBorder" Color="#B6D4C8" />
+  <SolidColorBrush x:Key="PF.Brush.ImportIcon" Color="#6D8A7D" />
+</ResourceDictionary>

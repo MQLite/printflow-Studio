@@ -1049,8 +1049,12 @@ public sealed class SessionSmokeTests
 
             SessionViewModel session = navigation.Current.ShouldBeOfType<SessionViewModel>();
 
-            await home.RefreshCommand.ExecuteAsync(null);
-            OpenSessionId = home.RecentSessions[0].Id;
+            // Navigation retires the old Home's commands. Read recents through a fresh
+            // transient model, preserving the independently loaded identity check.
+            HomeViewModel recentHome = Services.GetRequiredService<HomeViewModel>();
+            await recentHome.RefreshCommand.ExecuteAsync(null);
+            OpenSessionId = recentHome.RecentSessions[0].Id;
+            OpenSessionId.ShouldBe(session.Id);
 
             return session;
         }

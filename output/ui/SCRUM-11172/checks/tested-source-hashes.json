@@ -1,0 +1,123 @@
+{
+  "base": "209d0b3a6442aac1f901864107b94c5e6a0cb52d",
+  "files": [
+    {
+      "path": "src/PrintFlow.App/Navigation/IUtilityTaskNavigation.cs",
+      "sha256": "75E7AFD2A8DBBCE8011251C056307C7BA40AFA3A6E5912F5ED349B07D75B6898"
+    },
+    {
+      "path": "src/PrintFlow.App/Navigation/NavigationService.cs",
+      "sha256": "08F485F675BCE21E51AEED01795691953D516C2A16E5B75C99936535F10047FB"
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.resx",
+      "sha256": "8D47805DB2F9E473A020058E696FCF70FAE3BAB18AB60AFF84AA9316C50841B1"
+    },
+    {
+      "path": "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+      "sha256": "7D57FD7B529B175191985D7002A215C6170316E2A6697F9C4ACAD9B68022C7D6"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/EnvironmentReadinessViewModel.cs",
+      "sha256": "7B54B451556AD1B53425F30AF7E10F664A76B24A10112D19267F31B9B0633E04"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/RecentSessionRow.cs",
+      "sha256": "24A04E360DA3FFE6A58BBE4AF76078F13253D2112BB9347C52409EE1B674E114"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Completion.cs",
+      "sha256": "9365E0EC6613ED9872289BD5F805E4309D83697408ECEE135ECF53826F7BC8C3"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Correction.cs",
+      "sha256": "DC154C6AD85D7E86A8CF0A8A3206446638A0A39818F45636EA642D8B05E0224A"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.cs",
+      "sha256": "5CADDF716BA6FA0A5FFB00D80688A254135C479E48149259FF34C6DB5CF0CB1D"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.FailureNotice.cs",
+      "sha256": "8721995CC148E88E2AAED09664843FD7BD690D6698536D936B56A1ED07065F20"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.FinalSave.cs",
+      "sha256": "3AA19CF5057C8F4C75A5F9D000C85B49F1697DEA0AD1214B3647B9946F4BC865"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
+      "sha256": "B11F551BAEAAFC27330BF71A167A505F85123DAC6D6C611D227E4C5351321DCC"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Navigation.cs",
+      "sha256": "A249A1BC0E5453383537C68606569D1BA9FD129186F46B0F7BA6322799C18620"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.RecoveryGuidance.cs",
+      "sha256": "CA9385C741F93C331BA4F70675B4C18578C11CC8A83EE209F8FD79C9B73F7093"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SessionViewModel.Utilities.cs",
+      "sha256": "4A60B8ADCDAE441ACE88C6C39FA9F8C1D1DA0F9BFFAFF46DB52E688030D96F88"
+    },
+    {
+      "path": "src/PrintFlow.App/ViewModels/SettingsViewModel.cs",
+      "sha256": "949EFE96E25110AEF89EB92783BB542AF61EB6D405FF9C3CB5CFA58BE225ABD2"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/EnvironmentReadinessView.xaml",
+      "sha256": "ABB90C0B9F69507DBAEC4FF3EF047EEAE4E5955F51F9C22A7EF0E2B1BD62EF71"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/ErrorDetailsView.xaml",
+      "sha256": "DAAFFFCA0620D67A26D43C734A16E7B66B56EF31C51C1AA616838DD5B7DBDDA1"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/HomeView.xaml",
+      "sha256": "5AB2FF6D012F855AA9BB36B2EAE58E65EBBD31F7F80E0208D775682238A4EF9C"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SessionScreenView.xaml",
+      "sha256": "93A46CC8782FD09917BF90C8AD053550F6BF7253724D5615D750B098932149E0"
+    },
+    {
+      "path": "src/PrintFlow.App/Views/SettingsView.xaml",
+      "sha256": "342ECA7B3A7135A37E4BEDC16F83AC5AE7E6ECCB84E063D8B627F78F4D06F0DC"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionFeedbackTests.cs",
+      "sha256": "51C107685A38461C86FB92E277F75AAF436BD86CF89F43AA273B2E82B4A86BBA"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionRecentTests.cs",
+      "sha256": "06DAFBAE1237D79A95DC3D779AE865A34445A3E486D008E18DEBC575DF34DD39"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionRecoveryTests.cs",
+      "sha256": "1BCAEDEDD270CCEB5CEDB945F3755E6A1A70446CAC887314188D75863E9AFD66"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionSaveTests.cs",
+      "sha256": "D80D51D75934E0022D0F4488622432F66B0BDA5C5C9401201F42A9A653355291"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionUtilityTests.cs",
+      "sha256": "BFF10381176A5DE3B480D0F24417D8938202C1D4EF627FF05868AE1382BE1DCC"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedCompletionVisualEvidenceTests.cs",
+      "sha256": "67ED61D7F4BA474279EE47FD48811CB9E67EF42A3279C1EC4489800EB14BFD3A"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/GuidedUtilityReturnTests.cs",
+      "sha256": "C48C8CE31B09EB6FCD14490C0F88CBC0EC1CF401E6507D92C9E87DB62ED577B4"
+    },
+    {
+      "path": "tests/PrintFlow.Tests/Integration/Ui/SettingsAndLocalisationTests.cs",
+      "sha256": "E076CDD7CA14FB43BCF3445671213C35D36D13BE74597084002666143BE9CF73"
+    }
+  ],
+  "scope": "App presentation/navigation and tests only; no Domain/Workflow/Infrastructure diff",
+  "capturedAt": "2026-10-20T20:06:03.1149022+13:00"
+}

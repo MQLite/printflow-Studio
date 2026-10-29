@@ -37,7 +37,6 @@ public sealed class LocalisationResourceTests
             "Session_RunReady",
             "Session_RunNotReady",
             "Session_DimensionReviewRequired",
-            "Session_PdfPrepared",
             "Session_NextDimensions",
             "Session_PreflightHeading",
             "Session_PreflightPrintSize",
@@ -49,6 +48,22 @@ public sealed class LocalisationResourceTests
             value.ShouldContain("印刷尺寸", Case.Sensitive,
                 $"{key} names the same physical print-size decision");
             value.ShouldNotContain("打印尺寸");
+        }
+    }
+
+    [Fact]
+    public void Shared_source_preparation_copy_does_not_promise_a_print_route()
+    {
+        // Source preparation also belongs to the PNG-only asset route. Its page must
+        // describe the input/raster copy; print-size terminology belongs to the later step.
+        foreach (string resource in new[] { NeutralResx, ChineseResx })
+        foreach (string key in new[] { "Session_PdfPrepared", "Session_PsdPrepared" })
+        {
+            string value = ValueOf(resource, key);
+            value.ShouldContain("PNG");
+            value.ShouldNotContain("TIFF");
+            value.ShouldNotContain("印刷尺寸");
+            value.ShouldNotContain("print size", Case.Insensitive);
         }
     }
 

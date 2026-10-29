@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="47f2abae-2ad9-4dd5-9682-344590012ff8" name="admin@DESKTOP-0BG8884 2026-10-19 17:47:26" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:47:26.8292830+13:00" queuing="2026-10-19T17:47:26.8292833+13:00" start="2026-10-19T17:47:20.8956995+13:00" finish="2026-10-19T17:47:28.6993991+13:00" />
+  <TestSettings name="default" id="25320538-4fe2-4f18-80a5-c922b850b9e6">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_47_26" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="3d6b77c3-a8d0-47b8-8643-bc7355f5667d" testId="9305702c-a300-9531-3c81-2aa0371930dd" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: True)" computerName="DESKTOP-0BG8884" duration="00:00:01.1142249" startTime="2026-10-19T17:47:25.3119962+13:00" endTime="2026-10-19T17:47:26.4325475+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d6b77c3-a8d0-47b8-8643-bc7355f5667d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(Boolean queueBefore) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 77&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass2_0.&lt;Retained_route_action_and_name_provider_cannot_operate_reopened_task&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 88&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="202c3e35-9ff2-491b-89b0-443584992743" testId="a0002bdd-7cdb-ac9b-7d07-45d8d9cfc529" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.3032848" startTime="2026-10-19T17:47:27.1794664+13:00" endTime="2026-10-19T17:47:27.4842121+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="202c3e35-9ff2-491b-89b0-443584992743">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : h.Navigation.SessionFor&#xD;
+    should be null but was&#xD;
+SessionView { Id = 01a1527c-68a9-7ded-bbef-72af6fdd2a0a, WorkflowType = GeneratePrintTiff, OutputName = renamed-a, State = Active, Steps = System.Collections.Generic.List`1[PrintFlow.Domain.Sessions.SessionStep], CurrentStep = SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, Dimensions = , WhiteUnderbaseBranch = , AvailableCommands = System.Collections.Generic.List`1[PrintFlow.Workflow.Engine.CommandKind], CurrentArtefact = ArtefactView { RevisionId = 01a1527c-68bf-7e98-8372-2334a1368416, FileName = route-a.png, Facts = FileFacts { Format = Png, ByteLength = 155, Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, PixelWidth = 6, PixelHeight = 5, DpiX = 299.9993896484375, DpiY = 299.9993896484375, ColourMode = Rgb, HasAlpha = True, HasPixelDimensions = True }, IsCurrentStepResult = False, SourceRevisionId = , Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, IsManualProcessingResult = False }, ProcessingMode = Fake, Outputs = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.PrintOutputView], ProducesPrintOutput = True, UpstreamArtefact = , CurrentStepFailure = , CanManualCrop = False, ReturnTargets = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.ReturnTargetView], TrimMargin = TightCrop(top 0, right 0, bottom 0, left 0 px), CanSetTrimParameters = False, CurrentTrimParameters = , ArtefactTrimGeometry = , BackgroundRemovalDecision = Unspecified, BackgroundRemovalDecisionRevisionId = , CanSetBackgroundRemovalDecision = False, CanRunBackgroundRemoval = False, BackgroundRemovalAttemptDecision = Unspecified, BackgroundRemovalAttemptReviewedRevisionId = , LastAutomationStop = , DimensionSemantics = , MaxWidthMm = , MaxHeightMm = , PreparationMode = , LimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , NeedsDimensionReview = False, CanSetMaximumBounds = False, CanRunPhotoshopOutput = False, AttemptPreparation = , Sizing = FlexibleSizeView { PresetRecommendations = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Domain.Outputs.PresetPrintRecommendation], SizingMode = , Preset = , RecommendationKind = , RecommendationMaxWidthMm = , RecommendationMaxHeightMm = , PresetOverride = False, RequestedTargetEdge = , RequestedMillimetres = , ResolvedLimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , ResizeDirection = , ProjectedScalePercent = , PresetLimitExceeded = False, SourceCapacityExceeded = False, NeedsEnlargementAuthority = False, HasUsableEnlargementAuthority = False, CanAuthoriseEnlargement = False, EnlargementOfferId = , CanSetPresetFitSize = False, CanSetCustomTargetEdgeSize = False }, History = System.Collections.ObjectModel.ReadOnlyCollection`1[PrintFlow.Workflow.Services.SessionHistoryView], CompletionCleanup = , CurrentFailureAttemptId = , Preflight = , ArtefactManualCropGeometry = , CurrentManualCropGeometry = , HasManualCropGeometry = False, TrimAdjustment = , CanAdjustTrim = False, CanSubmitManualResult = False, Correction = , CanImportCorrectedImage = False, CanAskColleague = False, CorrectionReturn = , CanKeepOriginalExtent = False, OriginalExtentRetained = False, OriginalSourceFormat = Png, PdfInspection = , SourceFileName = route-a.png, RootRevisionId = 01a1527c-68bf-7e98-8372-2334a1368416, CanReturnToStep = True, HasRetainedExternalState = False, RequiresAutomationReentry = False, HasTrimParameters = False, CurrentTrimGeometry = , HasTrimGeometry = False, HasDetectedGraphicBounds = False, HasBackgroundRemovalAttemptAuthority = False, HasAttemptPreparation = False, CanContinueProcessing = True, IsFakeProcessing = True, HasBeforeAfterComparison = False }</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="514093aa-d8bd-4ca5-a90a-4890508c37d4" testId="9d7adab6-1432-be98-3b37-fe78a0859ad8" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3823499" startTime="2026-10-19T17:47:26.4510867+13:00" endTime="2026-10-19T17:47:26.8163307+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="514093aa-d8bd-4ca5-a90a-4890508c37d4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(Boolean queueBefore) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 77&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass2_0.&lt;Retained_route_action_and_name_provider_cannot_operate_reopened_task&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 88&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="21bde28f-deb8-45e0-84a8-a2056e4f802a" testId="bc96f820-7b12-fd0e-1f11-0bbbaffa4a04" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(key: Return)" computerName="DESKTOP-0BG8884" duration="00:00:00.3614407" startTime="2026-10-19T17:47:27.4850505+13:00" endTime="2026-10-19T17:47:27.8466961+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21bde28f-deb8-45e0-84a8-a2056e4f802a" />
+    <UnitTestResult executionId="4bb55e02-1366-465d-a057-3cd47ef67b18" testId="f1a72df3-9cbd-c766-571e-7caa36ef2379" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.3603883" startTime="2026-10-19T17:47:26.8186367+13:00" endTime="2026-10-19T17:47:27.1785079+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4bb55e02-1366-465d-a057-3cd47ef67b18">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : h.Navigation.SessionFor&#xD;
+    should be null but was&#xD;
+SessionView { Id = 01a1527c-6750-7bca-942f-e655473ea404, WorkflowType = GeneratePrintTiff, OutputName = route-a, State = Active, Steps = System.Collections.Generic.List`1[PrintFlow.Domain.Sessions.SessionStep], CurrentStep = SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, Dimensions = , WhiteUnderbaseBranch = , AvailableCommands = System.Collections.Generic.List`1[PrintFlow.Workflow.Engine.CommandKind], CurrentArtefact = ArtefactView { RevisionId = 01a1527c-6769-7cc2-8e20-ee0b07b81a5f, FileName = route-a.png, Facts = FileFacts { Format = Png, ByteLength = 155, Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, PixelWidth = 6, PixelHeight = 5, DpiX = 299.9993896484375, DpiY = 299.9993896484375, ColourMode = Rgb, HasAlpha = True, HasPixelDimensions = True }, IsCurrentStepResult = False, SourceRevisionId = , Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, IsManualProcessingResult = False }, ProcessingMode = Fake, Outputs = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.PrintOutputView], ProducesPrintOutput = True, UpstreamArtefact = , CurrentStepFailure = , CanManualCrop = False, ReturnTargets = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.ReturnTargetView], TrimMargin = TightCrop(top 0, right 0, bottom 0, left 0 px), CanSetTrimParameters = False, CurrentTrimParameters = , ArtefactTrimGeometry = , BackgroundRemovalDecision = Unspecified, BackgroundRemovalDecisionRevisionId = , CanSetBackgroundRemovalDecision = False, CanRunBackgroundRemoval = False, BackgroundRemovalAttemptDecision = Unspecified, BackgroundRemovalAttemptReviewedRevisionId = , LastAutomationStop = , DimensionSemantics = , MaxWidthMm = , MaxHeightMm = , PreparationMode = , LimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , NeedsDimensionReview = False, CanSetMaximumBounds = False, CanRunPhotoshopOutput = False, AttemptPreparation = , Sizing = FlexibleSizeView { PresetRecommendations = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Domain.Outputs.PresetPrintRecommendation], SizingMode = , Preset = , RecommendationKind = , RecommendationMaxWidthMm = , RecommendationMaxHeightMm = , PresetOverride = False, RequestedTargetEdge = , RequestedMillimetres = , ResolvedLimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , ResizeDirection = , ProjectedScalePercent = , PresetLimitExceeded = False, SourceCapacityExceeded = False, NeedsEnlargementAuthority = False, HasUsableEnlargementAuthority = False, CanAuthoriseEnlargement = False, EnlargementOfferId = , CanSetPresetFitSize = False, CanSetCustomTargetEdgeSize = False }, History = System.Collections.ObjectModel.ReadOnlyCollection`1[PrintFlow.Workflow.Services.SessionHistoryView], CompletionCleanup = , CurrentFailureAttemptId = , Preflight = , ArtefactManualCropGeometry = , CurrentManualCropGeometry = , HasManualCropGeometry = False, TrimAdjustment = , CanAdjustTrim = False, CanSubmitManualResult = False, Correction = , CanImportCorrectedImage = False, CanAskColleague = False, CorrectionReturn = , CanKeepOriginalExtent = False, OriginalExtentRetained = False, OriginalSourceFormat = Png, PdfInspection = , SourceFileName = route-a.png, RootRevisionId = 01a1527c-6769-7cc2-8e20-ee0b07b81a5f, CanReturnToStep = True, HasRetainedExternalState = False, RequiresAutomationReentry = False, HasTrimParameters = False, CurrentTrimGeometry = , HasTrimGeometry = False, HasDetectedGraphicBounds = False, HasBackgroundRemovalAttemptAuthority = False, HasAttemptPreparation = False, CanContinueProcessing = True, IsFakeProcessing = True, HasBeforeAfterComparison = False }</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(Boolean rename) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 59&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="41415ae9-fc62-4a63-a6b5-6b4155734a47" testId="1425c09f-3b95-ec29-5c8a-85995544ecbe" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(key: Space)" computerName="DESKTOP-0BG8884" duration="00:00:00.3421446" startTime="2026-10-19T17:47:27.8476445+13:00" endTime="2026-10-19T17:47:28.1893126+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="41415ae9-fc62-4a63-a6b5-6b4155734a47">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : calls&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(Key key) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 101&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass3_0.&lt;Held_route_key_cannot_cross_reopened_task&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 107&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2406d238-4d0c-40b7-a121-7663c8ca9a33" testId="306219cb-3783-b31b-aded-3a82ebe1dce2" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport" computerName="DESKTOP-0BG8884" duration="00:00:00.3407788" startTime="2026-10-19T17:47:28.1904423+13:00" endTime="2026-10-19T17:47:28.5311115+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2406d238-4d0c-40b7-a121-7663c8ca9a33">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : bounds.Bottom&#xD;
+    should be less than or equal to&#xD;
+700d&#xD;
+    but was&#xD;
+809.6816666666666d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass0_0.&lt;All_three_route_actions_are_visible_together_at_minimum_viewport&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 31&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: False)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="f1a72df3-9cbd-c766-571e-7caa36ef2379">
+      <Execution id="4bb55e02-1366-465d-a057-3cd47ef67b18" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: True)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9305702c-a300-9531-3c81-2aa0371930dd">
+      <Execution id="3d6b77c3-a8d0-47b8-8643-bc7355f5667d" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Retained_route_action_and_name_provider_cannot_operate_reopened_task" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: True)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a0002bdd-7cdb-ac9b-7d07-45d8d9cfc529">
+      <Execution id="202c3e35-9ff2-491b-89b0-443584992743" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(key: Return)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="bc96f820-7b12-fd0e-1f11-0bbbaffa4a04">
+      <Execution id="21bde28f-deb8-45e0-84a8-a2056e4f802a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Held_route_key_cannot_cross_reopened_task" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(key: Space)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="1425c09f-3b95-ec29-5c8a-85995544ecbe">
+      <Execution id="41415ae9-fc62-4a63-a6b5-6b4155734a47" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Held_route_key_cannot_cross_reopened_task" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="306219cb-3783-b31b-aded-3a82ebe1dce2">
+      <Execution id="2406d238-4d0c-40b7-a121-7663c8ca9a33" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="All_three_route_actions_are_visible_together_at_minimum_viewport" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: False)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9d7adab6-1432-be98-3b37-fe78a0859ad8">
+      <Execution id="514093aa-d8bd-4ca5-a90a-4890508c37d4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Retained_route_action_and_name_provider_cannot_operate_reopened_task" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="9305702c-a300-9531-3c81-2aa0371930dd" executionId="3d6b77c3-a8d0-47b8-8643-bc7355f5667d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a0002bdd-7cdb-ac9b-7d07-45d8d9cfc529" executionId="202c3e35-9ff2-491b-89b0-443584992743" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9d7adab6-1432-be98-3b37-fe78a0859ad8" executionId="514093aa-d8bd-4ca5-a90a-4890508c37d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc96f820-7b12-fd0e-1f11-0bbbaffa4a04" executionId="21bde28f-deb8-45e0-84a8-a2056e4f802a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f1a72df3-9cbd-c766-571e-7caa36ef2379" executionId="4bb55e02-1366-465d-a057-3cd47ef67b18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1425c09f-3b95-ec29-5c8a-85995544ecbe" executionId="41415ae9-fc62-4a63-a6b5-6b4155734a47" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="306219cb-3783-b31b-aded-3a82ebe1dce2" executionId="2406d238-4d0c-40b7-a121-7663c8ca9a33" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="7" executed="7" passed="1" failed="6" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.59]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.95]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.06]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.21]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.21]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:05.21]           should be&#xD;
+[xUnit.net 00:00:05.21]       0&#xD;
+[xUnit.net 00:00:05.21]           but was&#xD;
+[xUnit.net 00:00:05.21]       1&#xD;
+[xUnit.net 00:00:05.21]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(77,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(Boolean queueBefore)&#xD;
+[xUnit.net 00:00:05.21]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.21]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(88,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass2_0.&lt;Retained_route_action_and_name_provider_cannot_operate_reopened_task&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.21]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.59]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.59]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:05.59]           should be&#xD;
+[xUnit.net 00:00:05.59]       0&#xD;
+[xUnit.net 00:00:05.59]           but was&#xD;
+[xUnit.net 00:00:05.59]       1&#xD;
+[xUnit.net 00:00:05.59]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(77,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(Boolean queueBefore)&#xD;
+[xUnit.net 00:00:05.59]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.59]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(88,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass2_0.&lt;Retained_route_action_and_name_provider_cannot_operate_reopened_task&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.95]       Shouldly.ShouldAssertException : h.Navigation.SessionFor&#xD;
+[xUnit.net 00:00:05.95]           should be null but was&#xD;
+[xUnit.net 00:00:05.95]       SessionView { Id = 01a1527c-6750-7bca-942f-e655473ea404, WorkflowType = GeneratePrintTiff, OutputName = route-a, State = Active, Steps = System.Collections.Generic.List`1[PrintFlow.Domain.Sessions.SessionStep], CurrentStep = SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, Dimensions = , WhiteUnderbaseBranch = , AvailableCommands = System.Collections.Generic.List`1[PrintFlow.Workflow.Engine.CommandKind], CurrentArtefact = ArtefactView { RevisionId = 01a1527c-6769-7cc2-8e20-ee0b07b81a5f, FileName = route-a.png, Facts = FileFacts { Format = Png, ByteLength = 155, Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, PixelWidth = 6, PixelHeight = 5, DpiX = 299.9993896484375, DpiY = 299.9993896484375, ColourMode = Rgb, HasAlpha = True, HasPixelDimensions = True }, IsCurrentStepResult = False, SourceRevisionId = , Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, IsManualProcessingResult = False }, ProcessingMode = Fake, Outputs = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.PrintOutputView], ProducesPrintOutput = True, UpstreamArtefact = , CurrentStepFailure = , CanManualCrop = False, ReturnTargets = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.ReturnTargetView], TrimMargin = TightCrop(top 0, right 0, bottom 0, left 0 px), CanSetTrimParameters = False, CurrentTrimParameters = , ArtefactTrimGeometry = , BackgroundRemovalDecision = Unspecified, BackgroundRemovalDecisionRevisionId = , CanSetBackgroundRemovalDecision = False, CanRunBackgroundRemoval = False, BackgroundRemovalAttemptDecision = Unspecified, BackgroundRemovalAttemptReviewedRevisionId = , LastAutomationStop = , DimensionSemantics = , MaxWidthMm = , MaxHeightMm = , PreparationMode = , LimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , NeedsDimensionReview = False, CanSetMaximumBounds = False, CanRunPhotoshopOutput = False, AttemptPreparation = , Sizing = FlexibleSizeView { PresetRecommendations = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Domain.Outputs.PresetPrintRecommendation], SizingMode = , Preset = , RecommendationKind = , RecommendationMaxWidthMm = , RecommendationMaxHeightMm = , PresetOverride = False, RequestedTargetEdge = , RequestedMillimetres = , ResolvedLimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , ResizeDirection = , ProjectedScalePercent = , PresetLimitExceeded = False, SourceCapacityExceeded = False, NeedsEnlargementAuthority = False, HasUsableEnlargementAuthority = False, CanAuthoriseEnlargement = False, EnlargementOfferId = , CanSetPresetFitSize = False, CanSetCustomTargetEdgeSize = False }, History = System.Collections.ObjectModel.ReadOnlyCollection`1[PrintFlow.Workflow.Services.SessionHistoryView], CompletionCleanup = , CurrentFailureAttemptId = , Preflight = , ArtefactManualCropGeometry = , CurrentManualCropGeometry = , HasManualCropGeometry = False, TrimAdjustment = , CanAdjustTrim = False, CanSubmitManualResult = False, Correction = , CanImportCorrectedImage = False, CanAskColleague = False, CorrectionReturn = , CanKeepOriginalExtent = False, OriginalExtentRetained = False, OriginalSourceFormat = Png, PdfInspection = , SourceFileName = route-a.png, RootRevisionId = 01a1527c-6769-7cc2-8e20-ee0b07b81a5f, CanReturnToStep = True, HasRetainedExternalState = False, RequiresAutomationReentry = False, HasTrimParameters = False, CurrentTrimGeometry = , HasTrimGeometry = False, HasDetectedGraphicBounds = False, HasBackgroundRemovalAttemptAuthority = False, HasAttemptPreparation = False, CanContinueProcessing = True, IsFakeProcessing = True, HasBeforeAfterComparison = False }&#xD;
+[xUnit.net 00:00:05.95]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.95]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(Boolean rename)&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.95]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.95]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.25]       Shouldly.ShouldAssertException : h.Navigation.SessionFor&#xD;
+[xUnit.net 00:00:06.25]           should be null but was&#xD;
+[xUnit.net 00:00:06.25]       SessionView { Id = 01a1527c-68a9-7ded-bbef-72af6fdd2a0a, WorkflowType = GeneratePrintTiff, OutputName = renamed-a, State = Active, Steps = System.Collections.Generic.List`1[PrintFlow.Domain.Sessions.SessionStep], CurrentStep = SessionStep { Step = OriginalConfirmation, Ordinal = 1, State = Waiting, CurrentRevisionId = , CurrentRevisionSha256 = , SkipReason = , AttemptCount = 0, EnteredStateAtUtc = 2026/8/19 9:00:00 +00:00, IsFinished = False, HasResult = False }, Dimensions = , WhiteUnderbaseBranch = , AvailableCommands = System.Collections.Generic.List`1[PrintFlow.Workflow.Engine.CommandKind], CurrentArtefact = ArtefactView { RevisionId = 01a1527c-68bf-7e98-8372-2334a1368416, FileName = route-a.png, Facts = FileFacts { Format = Png, ByteLength = 155, Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, PixelWidth = 6, PixelHeight = 5, DpiX = 299.9993896484375, DpiY = 299.9993896484375, ColourMode = Rgb, HasAlpha = True, HasPixelDimensions = True }, IsCurrentStepResult = False, SourceRevisionId = , Sha256 = D19E21026144AD63F22DF1C845BD3F9F17444A4628AA6E4A6F8E0ECD9C6E2B77, IsManualProcessingResult = False }, ProcessingMode = Fake, Outputs = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.PrintOutputView], ProducesPrintOutput = True, UpstreamArtefact = , CurrentStepFailure = , CanManualCrop = False, ReturnTargets = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Workflow.Services.ReturnTargetView], TrimMargin = TightCrop(top 0, right 0, bottom 0, left 0 px), CanSetTrimParameters = False, CurrentTrimParameters = , ArtefactTrimGeometry = , BackgroundRemovalDecision = Unspecified, BackgroundRemovalDecisionRevisionId = , CanSetBackgroundRemovalDecision = False, CanRunBackgroundRemoval = False, BackgroundRemovalAttemptDecision = Unspecified, BackgroundRemovalAttemptReviewedRevisionId = , LastAutomationStop = , DimensionSemantics = , MaxWidthMm = , MaxHeightMm = , PreparationMode = , LimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , NeedsDimensionReview = False, CanSetMaximumBounds = False, CanRunPhotoshopOutput = False, AttemptPreparation = , Sizing = FlexibleSizeView { PresetRecommendations = &lt;&gt;z__ReadOnlyList`1[PrintFlow.Domain.Outputs.PresetPrintRecommendation], SizingMode = , Preset = , RecommendationKind = , RecommendationMaxWidthMm = , RecommendationMaxHeightMm = , PresetOverride = False, RequestedTargetEdge = , RequestedMillimetres = , ResolvedLimitingEdge = , ProjectedPixelWidth = , ProjectedPixelHeight = , ResizeDirection = , ProjectedScalePercent = , PresetLimitExceeded = False, SourceCapacityExceeded = False, NeedsEnlargementAuthority = False, HasUsableEnlargementAuthority = False, CanAuthoriseEnlargement = False, EnlargementOfferId = , CanSetPresetFitSize = False, CanSetCustomTargetEdgeSize = False }, History = System.Collections.ObjectModel.ReadOnlyCollection`1[PrintFlow.Workflow.Services.SessionHistoryView], CompletionCleanup = , CurrentFailureAttemptId = , Preflight = , ArtefactManualCropGeometry = , CurrentManualCropGeometry = , HasManualCropGeometry = False, TrimAdjustment = , CanAdjustTrim = False, CanSubmitManualResult = False, Correction = , CanImportCorrectedImage = False, CanAskColleague = False, CorrectionReturn = , CanKeepOriginalExtent = False, OriginalExtentRetained = False, OriginalSourceFormat = Png, PdfInspection = , SourceFileName = route-a.png, RootRevisionId = 01a1527c-68bf-7e98-8372-2334a1368416, CanReturnToStep = True, HasRetainedExternalState = False, RequiresAutomationReentry = False, HasTrimParameters = False, CurrentTrimGeometry = , HasTrimGeometry = False, HasDetectedGraphicBounds = False, HasBackgroundRemovalAttemptAuthority = False, HasAttemptPreparation = False, CanContinueProcessing = True, IsFakeProcessing = True, HasBeforeAfterComparison = False }&#xD;
+[xUnit.net 00:00:06.25]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.25]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(59,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(Boolean rename)&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.25]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.25]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.96]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:06.96]       ---- Shouldly.ShouldAssertException : calls&#xD;
+[xUnit.net 00:00:06.96]           should be&#xD;
+[xUnit.net 00:00:06.96]       0&#xD;
+[xUnit.net 00:00:06.96]           but was&#xD;
+[xUnit.net 00:00:06.96]       1&#xD;
+[xUnit.net 00:00:06.96]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(101,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(Key key)&#xD;
+[xUnit.net 00:00:06.96]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.96]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(107,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass3_0.&lt;Held_route_key_cannot_cross_reopened_task&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:06.96]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.30]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.30]       ---- Shouldly.ShouldAssertException : bounds.Bottom&#xD;
+[xUnit.net 00:00:07.30]           should be less than or equal to&#xD;
+[xUnit.net 00:00:07.30]       700d&#xD;
+[xUnit.net 00:00:07.30]           but was&#xD;
+[xUnit.net 00:00:07.30]       809.6816666666666d&#xD;
+[xUnit.net 00:00:07.30]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(25,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport()&#xD;
+[xUnit.net 00:00:07.30]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.30]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(31,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass0_0.&lt;All_three_route_actions_are_visible_together_at_minimum_viewport&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.30]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.31]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:26.4350029+13:00">
+        <Text>[xUnit.net 00:00:05.20]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:26.8341822+13:00">
+        <Text>[xUnit.net 00:00:05.59]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Retained_route_action_and_name_provider_cannot_operate_reopened_task(queueBefore: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:27.1790042+13:00">
+        <Text>[xUnit.net 00:00:05.95]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:27.4845225+13:00">
+        <Text>[xUnit.net 00:00:06.25]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Late_rename_or_selection_cannot_replace_new_task_or_navigate_after_leaving(rename: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:28.1896008+13:00">
+        <Text>[xUnit.net 00:00:06.96]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Held_route_key_cannot_cross_reopened_task(key: Space) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:47:28.5313822+13:00">
+        <Text>[xUnit.net 00:00:07.30]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

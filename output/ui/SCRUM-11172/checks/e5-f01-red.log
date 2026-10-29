@@ -1,0 +1,142 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.85]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: False) [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(Boolean saved, Boolean completed) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 50
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.81]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: True) [954 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(Boolean saved, Boolean completed) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 50
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:07.52]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: True) [FAIL]
+[xUnit.net 00:00:08.25]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: False) [FAIL]
+[xUnit.net 00:00:08.70]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Each_size_retains_its_own_review_and_delivery_summary [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: False, completed: True) [709 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(Boolean saved, Boolean completed) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 50
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(saved: True, completed: False) [733 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Approved_result_enters_save_without_claiming_delivery(Boolean saved, Boolean completed) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 50
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Each_size_retains_its_own_review_and_delivery_summary [437 ms]
+  错误消息:
+   System.InvalidOperationException : Sequence contains no matching element
+  堆栈跟踪:
+     at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)
+   at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Each_size_retains_its_own_review_and_delivery_summary() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 84
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:09.40]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: False) [FAIL]
+[xUnit.net 00:00:10.14]     PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: False) [701 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(Boolean uncertain) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 119
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(uncertain: True) [737 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.Completion.Approval")
+    should be
+"结果已批准"
+    but was
+null
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionSaveTests.Uncertain_collision_and_picker_cancel_keep_their_real_save_state(Boolean uncertain) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionSaveTests.cs:line 119
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f01-red.trx
+
+失败!  - 失败:     7，通过:     0，已跳过:     0，总计:     7，持续时间: 6 s - PrintFlow.Tests.dll (net10.0)

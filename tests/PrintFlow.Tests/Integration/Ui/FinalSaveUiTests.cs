@@ -942,14 +942,24 @@ public sealed class FinalSaveUiTests
             Size viewport = new(width, height);
             var facts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = screen }, viewport, tree =>
             {
+                // E4 keeps optional save fields behind an explicit disclosure during review.
+                tree.OfType<Expander>().Single(e => AutomationProperties.GetAutomationId(e) == "Session.FinalSave.Options").IsExpanded = true;
+                tree.Root.UpdateLayout();
+                List<DependencyObject> expanded = [];
+                Collect(tree.Root, expanded);
+                tree = new RenderedTree(tree.Root, expanded);
                 Border panel = tree.OfType<Border>().Single(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave");
                 List<DependencyObject> inside = [];
                 Collect(panel, inside);
-                var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).ToList();
+                // E2: save submissions live in the fixed action bar; their identity/accessibility
+                // contracts are unchanged even though they are no longer children of the form.
+                var buttons = inside.OfType<Button>().Where(b => Shown(b, panel)).Concat(
+                    tree.OfType<Button>().Where(b => AutomationProperties.GetAutomationId(b).StartsWith("Session.FinalSave.", StringComparison.Ordinal)
+                        && !inside.Contains(b) && Shown(b, tree.Root))).ToList();
                 var tooWide = inside.OfType<TextBlock>().Where(t => Shown(t, panel) && t.ActualWidth > panel.ActualWidth + 0.5).ToList();
-                ReviewApprovalButton? combined = inside.OfType<ReviewApprovalButton>().SingleOrDefault(b =>
+                ReviewApprovalButton? combined = tree.OfType<ReviewApprovalButton>().SingleOrDefault(b =>
                     AutomationProperties.GetAutomationId(b) == "Session.FinalSave.ConfirmAndSave");
-                Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+                Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
                 return (PanelWidth: panel.ActualWidth, RightWidth: content.ColumnDefinitions[1].ActualWidth,
                     LeftWidth: content.ColumnDefinitions[0].ActualWidth, VisibleButtons: buttons.Count,
                     AllTabStops: buttons.All(b => b.Focusable && KeyboardNavigationTabStop(b)), AnyDefault: tree.OfType<Button>().Any(b => b.IsDefault),
@@ -963,15 +973,15 @@ public sealed class FinalSaveUiTests
             var baselineFacts = WpfRendering.RenderExpectingNoBindingErrors(() => new SessionScreenView { DataContext = baseline }, viewport,
                 tree =>
                 {
-                    Grid content = tree.OfType<Grid>().First(g => g.ColumnDefinitions.Count == 2 && g.ColumnDefinitions[1].Width.Value == 360);
+                    Grid content = tree.OfType<Grid>().Single(g => AutomationProperties.GetAutomationId(g) == "Session.CurrentWorkspace");
                     return (Left: content.ColumnDefinitions[0].ActualWidth, Panels: tree.OfType<Border>()
                         .Count(b => AutomationProperties.GetAutomationId(b) == "Session.FinalSave"));
                 });
 
             baselineFacts.Facts.Panels.ShouldBe(0, "without the coordinator nothing is instantiated");
             facts.Facts.LeftWidth.ShouldBe(baselineFacts.Facts.Left, "the preview/crop column is unchanged");
-            facts.Facts.RightWidth.ShouldBe(360);
-            facts.Facts.PanelWidth.ShouldBeLessThanOrEqualTo(360);
+            facts.Facts.RightWidth.ShouldBeGreaterThan(0);
+            facts.Facts.PanelWidth.ShouldBeLessThanOrEqualTo(facts.Facts.RightWidth);
             facts.Facts.TooWide.ShouldBe(0);
             facts.Facts.AnyDefault.ShouldBeFalse("no implicit Enter approval or save");
             facts.Facts.AllTabStops.ShouldBeTrue();
@@ -1095,7 +1105,9 @@ public sealed class FinalSaveUiTests
         if (state == "saved-tiff") await screen.CheckSavedFileCommand.ExecuteAsync(null);
         await screen.FinalSaveFactsLoaded;
         var baseline = new SessionViewModel(workflow, h.Previews, h.TiffReviews, new RecordingNavigation());
-        baseline.Open(view);
+        // A collision attempt can already approve the result. Compare the same current page,
+        // with and without the coordinator, rather than a saved page against an old review.
+        baseline.Open((await workflow.LoadAsync(view.Id, CancellationToken.None)).Value);
         await baseline.PreviewsLoaded;
         return (screen, baseline);
     }

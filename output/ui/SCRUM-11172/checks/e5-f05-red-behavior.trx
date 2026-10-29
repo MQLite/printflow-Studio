@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="7215dd8b-8acf-4795-becf-ce7619464398" name="admin@DESKTOP-0BG8884 2026-10-20 19:47:53" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T19:47:53.2054566+13:00" queuing="2026-10-20T19:47:53.2054569+13:00" start="2026-10-20T19:47:47.1228594+13:00" finish="2026-10-20T19:47:56.3407753+13:00" />
+  <TestSettings name="default" id="6ab30393-f60b-4b11-89a6-f2d654007a0b">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_19_47_53" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="1df80d4f-86b6-46d0-a0b7-570d061e6806" testId="4a5fcb97-144d-8a3f-90f4-bcaa8f4652a6" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_return_confirmation_cannot_invalidate_results" computerName="DESKTOP-0BG8884" duration="00:00:00.2972765" startTime="2026-10-20T19:47:54.6424554+13:00" endTime="2026-10-20T19:47:54.9391973+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1df80d4f-86b6-46d0-a0b7-570d061e6806" />
+    <UnitTestResult executionId="9eca7ed7-e2be-4591-b7cb-0932b78270d5" testId="c7ead803-bec6-3c41-6910-03190c508e84" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft" computerName="DESKTOP-0BG8884" duration="00:00:00.2931890" startTime="2026-10-20T19:47:54.9400664+13:00" endTime="2026-10-20T19:47:55.2328873+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9eca7ed7-e2be-4591-b7cb-0932b78270d5">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : navigation.GoHomeCount&#xD;
+    should be&#xD;
+0&#xD;
+    but was&#xD;
+1&#xD;
+&#xD;
+Additional Info:&#xD;
+    refresh retires the old confirmation callback</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 60&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="13ff7d3d-7bf0-4dbe-b832-6f9fbf6e8938" testId="49ae68f2-3ad2-2ec4-327f-6e624b32f12f" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.6784855" startTime="2026-10-20T19:47:53.9640518+13:00" endTime="2026-10-20T19:47:54.6409764+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13ff7d3d-7bf0-4dbe-b832-6f9fbf6e8938">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)&#xD;
+    should contain (case insensitive comparison)&#xD;
+"保留规则"&#xD;
+    but was actually&#xD;
+""</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 37&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="383c3c88-4bd5-4365-9108-5a7a78aeaeda" testId="5c74c188-14e2-77d7-9027-7e535c36dd36" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts" computerName="DESKTOP-0BG8884" duration="00:00:00.9501936" startTime="2026-10-20T19:47:55.2338340+13:00" endTime="2026-10-20T19:47:56.1836726+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="383c3c88-4bd5-4365-9108-5a7a78aeaeda">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.FinalSave.Alert", string.Empty) (null)&#xD;
+    should not be null or white space</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 106&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5369df0c-799c-4bf4-afcd-138f6ad88421" testId="a90cec2d-acab-c52f-9bee-7f25b5e1b2cb" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: True)" computerName="DESKTOP-0BG8884" duration="00:00:01.2245945" startTime="2026-10-20T19:47:52.7504111+13:00" endTime="2026-10-20T19:47:53.9620185+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5369df0c-799c-4bf4-afcd-138f6ad88421">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)&#xD;
+    should contain (case insensitive comparison)&#xD;
+"尚未重新核实"&#xD;
+    but was actually&#xD;
+""</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 37&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e14d4759-a9e8-4c69-a959-2a5992928dc5" testId="4d947746-8201-1ff5-ffe2-a49da412a7ef" testName="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand" computerName="DESKTOP-0BG8884" duration="00:00:01.0498324" startTime="2026-10-20T19:47:51.6792484+13:00" endTime="2026-10-20T19:47:52.7351919+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e14d4759-a9e8-4c69-a959-2a5992928dc5">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.Collapsed&#xD;
+    should be&#xD;
+True&#xD;
+    but was&#xD;
+False</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs:line 135&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="c7ead803-bec6-3c41-6910-03190c508e84">
+      <Execution id="9eca7ed7-e2be-4591-b7cb-0932b78270d5" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_return_confirmation_cannot_invalidate_results" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4a5fcb97-144d-8a3f-90f4-bcaa8f4652a6">
+      <Execution id="1df80d4f-86b6-46d0-a0b7-570d061e6806" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Refreshed_return_confirmation_cannot_invalidate_results" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: True)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a90cec2d-acab-c52f-9bee-7f25b5e1b2cb">
+      <Execution id="5369df0c-799c-4bf4-afcd-138f6ad88421" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Failure_keeps_preservation_qualified_by_successful_or_failed_reload" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="5c74c188-14e2-77d7-9027-7e535c36dd36">
+      <Execution id="383c3c88-4bd5-4365-9108-5a7a78aeaeda" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Uncertain_save_and_unavailable_history_remain_separate_visible_facts" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: False)" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="49ae68f2-3ad2-2ec4-327f-6e624b32f12f">
+      <Execution id="13ff7d3d-7bf0-4dbe-b832-6f9fbf6e8938" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Failure_keeps_preservation_qualified_by_successful_or_failed_reload" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand" storage="c:\users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="4d947746-8201-1ff5-ffe2-a49da412a7ef">
+      <Execution id="e14d4759-a9e8-4c69-a959-2a5992928dc5" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests" name="Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4a5fcb97-144d-8a3f-90f4-bcaa8f4652a6" executionId="1df80d4f-86b6-46d0-a0b7-570d061e6806" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c7ead803-bec6-3c41-6910-03190c508e84" executionId="9eca7ed7-e2be-4591-b7cb-0932b78270d5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49ae68f2-3ad2-2ec4-327f-6e624b32f12f" executionId="13ff7d3d-7bf0-4dbe-b832-6f9fbf6e8938" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c74c188-14e2-77d7-9027-7e535c36dd36" executionId="383c3c88-4bd5-4365-9108-5a7a78aeaeda" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a90cec2d-acab-c52f-9bee-7f25b5e1b2cb" executionId="5369df0c-799c-4bf4-afcd-138f6ad88421" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d947746-8201-1ff5-ffe2-a49da412a7ef" executionId="e14d4759-a9e8-4c69-a959-2a5992928dc5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="1" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.68]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.92]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.03]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.12]       Shouldly.ShouldAssertException : facts.Collapsed&#xD;
+[xUnit.net 00:00:05.12]           should be&#xD;
+[xUnit.net 00:00:05.12]       True&#xD;
+[xUnit.net 00:00:05.12]           but was&#xD;
+[xUnit.net 00:00:05.12]       False&#xD;
+[xUnit.net 00:00:05.12]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.12]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs(135,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand()&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.12]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:05.12]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.34]       Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)&#xD;
+[xUnit.net 00:00:06.34]           should contain (case insensitive comparison)&#xD;
+[xUnit.net 00:00:06.34]       "尚未重新核实"&#xD;
+[xUnit.net 00:00:06.34]           but was actually&#xD;
+[xUnit.net 00:00:06.34]       ""&#xD;
+[xUnit.net 00:00:06.34]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.34]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs(37,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale)&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.34]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.34]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.02]       Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.ActionPreserved", string.Empty)&#xD;
+[xUnit.net 00:00:07.02]           should contain (case insensitive comparison)&#xD;
+[xUnit.net 00:00:07.02]       "保留规则"&#xD;
+[xUnit.net 00:00:07.02]           but was actually&#xD;
+[xUnit.net 00:00:07.02]       ""&#xD;
+[xUnit.net 00:00:07.02]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.02]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs(37,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(Boolean stale)&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.02]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.02]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]       Shouldly.ShouldAssertException : navigation.GoHomeCount&#xD;
+[xUnit.net 00:00:07.61]           should be&#xD;
+[xUnit.net 00:00:07.61]       0&#xD;
+[xUnit.net 00:00:07.61]           but was&#xD;
+[xUnit.net 00:00:07.61]       1&#xD;
+[xUnit.net 00:00:07.61]       &#xD;
+[xUnit.net 00:00:07.61]       Additional Info:&#xD;
+[xUnit.net 00:00:07.61]           refresh retires the old confirmation callback&#xD;
+[xUnit.net 00:00:07.61]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.61]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs(60,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.61]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.56]       Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.FinalSave.Alert", string.Empty) (null)&#xD;
+[xUnit.net 00:00:08.56]           should not be null or white space&#xD;
+[xUnit.net 00:00:08.56]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.56]         C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionFeedbackTests.cs(106,0): at PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts()&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.56]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.56]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.57]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:47:52.7384913+13:00">
+        <Text>[xUnit.net 00:00:05.12]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Diagnostic_unavailability_does_not_hide_the_failure_and_technical_detail_is_on_demand [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:47:53.9623755+13:00">
+        <Text>[xUnit.net 00:00:06.34]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:47:54.6412996+13:00">
+        <Text>[xUnit.net 00:00:07.02]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Failure_keeps_preservation_qualified_by_successful_or_failed_reload(stale: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:47:55.2331680+13:00">
+        <Text>[xUnit.net 00:00:07.61]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Refreshed_draft_confirmation_is_inert_without_discarding_supported_draft [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T19:47:56.1839273+13:00">
+        <Text>[xUnit.net 00:00:08.56]     PrintFlow.Tests.Integration.Ui.GuidedCompletionFeedbackTests.Uncertain_save_and_unavailable_history_remain_separate_visible_facts [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

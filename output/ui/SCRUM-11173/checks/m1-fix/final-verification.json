@@ -1,0 +1,77 @@
+{
+  "task": "SCRUM-11173 E6-M1",
+  "status": "RESOLVED",
+  "date": "2026-10-22",
+  "scope": "Candidate rebuild evidence isolation only",
+  "base": "3af7bd8a999208c2b8d5542e20aa682e38b7ae20",
+  "reviewedHead": "dc8f110c24ad0d34bfcf3e73cf1b5fa74e79b97b",
+  "implementationCommit": "73caeb26d5c8611aa5b95e3e879f22a45a28b3da",
+  "execution": {
+    "method": "Native sequential inline",
+    "actualModel": "gpt-6.1-sol",
+    "effort": "high",
+    "verifiedAt": "2026-10-22T01:22:50.675Z",
+    "policy": "2.4",
+    "routeOffset": 0,
+    "host": "Windows/local",
+    "modelSwitch": "NOT CLAIMED"
+  },
+  "tests": {
+    "red": {
+      "cases": 5,
+      "failed": 5
+    },
+    "green": {
+      "cases": 5,
+      "passed": 5,
+      "exit": 0
+    },
+    "controlledDependencies": true,
+    "realHelperBuild": {
+      "candidateId": "e6-20261022-m1-fixed",
+      "buildExit": 0,
+      "validateExit": 0,
+      "status": "STATIC_VALIDATED",
+      "graphConstructed": false,
+      "runtimeRootExists": false
+    },
+    "sameIdRetry": "REFUSED_BEFORE_BUILD",
+    "protectedOriginalFiles": 103,
+    "originalHashChanges": 0,
+    "oldManifest": {
+      "files": 863,
+      "mismatches": 0
+    },
+    "newManifest": {
+      "files": 863,
+      "mismatches": 0
+    },
+    "docs": 8,
+    "localLinks": 47,
+    "parseErrors": 0,
+    "retainedEvidenceVerifier": "PASS",
+    "productTestsToolsChanged": false,
+    "mainFilesChecked": 18,
+    "mainChanges": 0,
+    "priorWorktrees": 5,
+    "worktreeChanges": 0
+  },
+  "review": {
+    "count": 1,
+    "critical": 0,
+    "important": 0,
+    "minor": 0,
+    "verdict": "PASS",
+    "agent": "/root/review_e6_m1",
+    "isolation": "fork_turns=none",
+    "actualModel": "gpt-6-astra",
+    "effort": "high",
+    "sessionId": "01a1613a-8211-7a22-8561-b9a7918a3ca1",
+    "verifiedAt": "2026-10-22T01:29:49.419Z",
+    "runtimeFile": "C:/Users/admin/.codex/sessions/2026/10/22/rollout-2026-10-22T14-29-46-01a1613a-8211-7a22-8561-b9a7918a3ca1.jsonl"
+  },
+  "noviceTesting": "DEFERRED_BY_USER_NOT_RUN",
+  "runtimePreparation": "NOT RUN",
+  "production": "NOT RUN",
+  "mergePushDeploy": "NOT PERFORMED"
+}

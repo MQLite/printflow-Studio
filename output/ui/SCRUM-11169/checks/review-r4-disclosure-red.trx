@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="0d56b324-d249-44d7-9f5a-d4ab3461a0be" name="admin@DESKTOP-0BG8884 2026-10-19 17:02:42" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:02:42.4678083+13:00" queuing="2026-10-19T17:02:42.4678086+13:00" start="2026-10-19T17:02:37.3388202+13:00" finish="2026-10-19T17:02:42.4724210+13:00" />
+  <TestSettings name="default" id="6c7e1a33-cf8f-4f1c-91f8-348349e4974a">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_02_42" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a6f14ad0-f429-418d-9ef1-eccb529f1cf9" testId="85b6dc69-e7a0-1786-f4aa-e640650aa36a" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_disclosure_cannot_expand_the_next_presentation" computerName="DESKTOP-0BG8884" duration="00:00:01.4159120" startTime="2026-10-19T17:02:40.8733364+13:00" endTime="2026-10-19T17:02:42.2958938+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a6f14ad0-f429-418d-9ef1-eccb529f1cf9">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : old.Expand(); disclosure.IsExpanded&#xD;
+    should be&#xD;
+False&#xD;
+    but was&#xD;
+True</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_disclosure_cannot_expand_the_next_presentation() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 23&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_disclosure_cannot_expand_the_next_presentation&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs:line 29&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_disclosure_cannot_expand_the_next_presentation" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="85b6dc69-e7a0-1786-f4aa-e640650aa36a">
+      <Execution id="a6f14ad0-f429-418d-9ef1-eccb529f1cf9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests" name="Captured_disclosure_cannot_expand_the_next_presentation" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="85b6dc69-e7a0-1786-f4aa-e640650aa36a" executionId="a6f14ad0-f429-418d-9ef1-eccb529f1cf9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="1" executed="1" passed="0" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.24]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.13]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.17]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.62]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.62]       ---- Shouldly.ShouldAssertException : old.Expand(); disclosure.IsExpanded&#xD;
+[xUnit.net 00:00:04.62]           should be&#xD;
+[xUnit.net 00:00:04.62]       False&#xD;
+[xUnit.net 00:00:04.62]           but was&#xD;
+[xUnit.net 00:00:04.62]       True&#xD;
+[xUnit.net 00:00:04.62]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(23,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_disclosure_cannot_expand_the_next_presentation()&#xD;
+[xUnit.net 00:00:04.62]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.62]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionEditorInputTests.cs(29,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.&lt;&gt;c__DisplayClass0_0.&lt;Captured_disclosure_cannot_expand_the_next_presentation&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.62]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:04.63]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:02:42.2984939+13:00">
+        <Text>[xUnit.net 00:00:04.62]     PrintFlow.Tests.Integration.Ui.GuidedSessionEditorInputTests.Captured_disclosure_cannot_expand_the_next_presentation [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

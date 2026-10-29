@@ -15,6 +15,44 @@ public sealed record PrintDimensionsPreflightRow(string Key, string Label, strin
 
 public sealed partial class SessionViewModel
 {
+    public bool ShowsGuidedPrintSummary => Preflight is not null && GuidedPage is
+        GuidedSessionPage.Dimensions or GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
+    public bool ShowsGuidedPrintWhiteInk => ShowsGuidedPrintSummary && GuidedPage is GuidedSessionPage.WhiteInk or GuidedSessionPage.Preflight;
+    public bool CanConfirmGuidedCustomSize => ShowsGuidedCustomSizeAction && !IsBusy && CanInteractWithLivePage && ReadCustomSizeCommand() is not null;
+    public string GuidedPrintRequested => !ShowsGuidedPrintSummary ? string.Empty : string.Format(OperatorCulture.Current,
+        Strings.Resolve("Session_GuidedPrintRequested"), IsDraftPreflight
+            ? IsChoosingCustomSize && ReadCustomSizeCommand() is WorkflowCommand.SetCustomTargetEdgeSize custom
+                ? string.Format(OperatorCulture.Current, Strings.Session_CurrentCustomTarget, DisplayNames.TargetEdge(custom.Edge),
+                    custom.Millimetres.ToString("0.##", OperatorCulture.Current))
+                : PendingMaximumBounds
+            : CurrentSizeSummary.Length > 0 ? CurrentSizeSummary : ConfirmedMaximumBounds);
+    public string GuidedPrintActual => Preflight is { } p ? string.Format(OperatorCulture.Current,
+        Strings.Resolve("Session_GuidedPrintActual"), p.PhysicalWidthMm, p.PhysicalHeightMm) : string.Empty;
+    public string GuidedPrintPixels => Preflight is { } p ? string.Format(OperatorCulture.Current,
+        Strings.Resolve("Session_GuidedPrintPixels"), p.OutputPixelWidth, p.OutputPixelHeight) : string.Empty;
+    public string GuidedPrintContract => Preflight is { } p ? string.Format(OperatorCulture.Current,
+        Strings.Resolve("Session_GuidedPrintContract"), p.ProductionOutputPpi) : string.Empty;
+    public string GuidedPrintWhiteInk => string.Format(OperatorCulture.Current, Strings.Resolve("Session_GuidedPrintWhiteInk"), ConfirmedWhiteUnderbase);
+    public bool ShowsGuidedPrintRisk => ShowsGuidedPrintSummary && Preflight is { RequiresEnlargement: true, EnlargementAuthorised: false };
+    public string GuidedPrintRisk => Strings.Resolve("Session_GuidedPrintRisk");
+    public string GuidedWhiteInkReasonHint => Strings.Resolve("Session_GuidedWhiteInkReasonHint");
+    public string GuidedWhiteInkSourceHint => Strings.Resolve("Session_GuidedWhiteInkSourceHint");
+
+    private void NotifyGuidedPrintSummary()
+    {
+        OnPropertyChanged(nameof(ShowsGuidedPrintSummary));
+        OnPropertyChanged(nameof(ShowsGuidedPrintWhiteInk));
+        OnPropertyChanged(nameof(CanConfirmGuidedCustomSize));
+        OnPropertyChanged(nameof(GuidedPrintRequested));
+        OnPropertyChanged(nameof(GuidedPrintActual));
+        OnPropertyChanged(nameof(GuidedPrintPixels));
+        OnPropertyChanged(nameof(GuidedPrintContract));
+        OnPropertyChanged(nameof(GuidedPrintWhiteInk));
+        OnPropertyChanged(nameof(ShowsGuidedPrintRisk));
+        OnPropertyChanged(nameof(GuidedPrintRisk));
+        OnPropertyChanged(nameof(GuidedWhiteInkReasonHint));
+        OnPropertyChanged(nameof(GuidedWhiteInkSourceHint));
+    }
     private int _preflightGeneration;
     private bool _draftCustomSizePreviewFailed;
 
@@ -122,11 +160,13 @@ public sealed partial class SessionViewModel
         OnPropertyChanged(nameof(Preflight));
         OnPropertyChanged(nameof(PreflightRows));
         OnPropertyChanged(nameof(HasPrintDimensionsPreflight));
+        OnPropertyChanged(nameof(ShowsGuidedPreflight));
         OnPropertyChanged(nameof(IsDraftPreflight));
         OnPropertyChanged(nameof(PrintSizeSummary));
         OnPropertyChanged(nameof(PreflightEnlargementNote));
         OnPropertyChanged(nameof(HasPreflightEnlargementNote));
         OnPropertyChanged(nameof(EnlargementPlainWarning));
+        NotifyGuidedPrintSummary();
     }
 
     /// <summary>Rebuilds the technical rows in the current language from the preflight already shown.</summary>
@@ -254,6 +294,7 @@ public sealed partial class SessionViewModel
     {
         OnPropertyChanged(nameof(CustomSizeInputHint));
         OnPropertyChanged(nameof(HasCustomSizeInputHint));
+        OnPropertyChanged(nameof(CanConfirmGuidedCustomSize));
     }
 
     partial void OnSelectedTargetEdgeChoiceChanged(TargetEdgeChoice? value)
@@ -270,6 +311,10 @@ public sealed partial class SessionViewModel
 
     partial void OnIsChoosingCustomSizeChanged(bool value)
     {
+        OnPropertyChanged(nameof(GuidedInteractionIdentity));
+        OnPropertyChanged(nameof(ShowsGuidedCustomSizeAction));
+        OnPropertyChanged(nameof(ShowsGuidedCustomSizeEntry));
+        OnPropertyChanged(nameof(RecommendedCommand));
         NotifyCustomSizeInputHint();
         RequestDraftPreflight();
     }

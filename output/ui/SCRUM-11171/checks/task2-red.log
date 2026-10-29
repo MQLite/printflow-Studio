@@ -1,0 +1,151 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:06.01]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "background") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "background") [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.ImageShare
+    should be greater than
+0.65d
+    but was
+0.6d
+
+Additional Info:
+    the exact result must dominate the current workspace
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.92]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "tiff") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "tiff") [906 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.ImageShare
+    should be greater than
+0.65d
+    but was
+0.6d
+
+Additional Info:
+    the exact result must dominate the current workspace
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:07.61]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "trim") [FAIL]
+[xUnit.net 00:00:08.19]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "enhancement") [FAIL]
+[xUnit.net 00:00:08.79]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "trim") [688 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.ImageShare
+    should be greater than
+0.65d
+    but was
+0.6d
+
+Additional Info:
+    the exact result must dominate the current workspace
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(step: "enhancement") [576 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.ImageShare
+    should be greater than
+0.65d
+    but was
+0.6d
+
+Additional Info:
+    the exact result must dominate the current workspace
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Common_review_reserves_the_majority_for_the_image_and_keeps_save_form_secondary(String step) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 39
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: False) [601 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.Comparison
+    should be
+False
+    but was
+True
+
+Additional Info:
+    a before/after tool requires two available previews
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 64
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:09.36]     PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(missing: True) [569 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : result.Facts.Comparison
+    should be
+False
+    but was
+True
+
+Additional Info:
+    a before/after tool requires two available previews
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedProcessingReviewTests.Single_or_missing_preview_does_not_offer_comparison(Boolean missing) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingReviewTests.cs:line 64
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\output\ui\SCRUM-11171\checks\task2-red.trx
+
+失败!  - 失败:     6，通过:     0，已跳过:     0，总计:     6，持续时间: 5 s - PrintFlow.Tests.dll (net10.0)

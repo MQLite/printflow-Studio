@@ -1,0 +1,422 @@
+[
+  {
+    "File": "e3-baseline-targeted.trx",
+    "Counters": {
+      "Total": 136,
+      "Passed": 136,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 136
+    },
+    "Start": "2026-10-19T17:40:21.5816293+13:00",
+    "Finish": "2026-10-19T17:41:13.1930874+13:00"
+  },
+  {
+    "File": "e3-broad-contracts-green.trx",
+    "Counters": {
+      "Total": 160,
+      "Passed": 160,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 160
+    },
+    "Start": "2026-10-19T18:08:47.7293298+13:00",
+    "Finish": "2026-10-19T18:09:17.3216050+13:00"
+  },
+  {
+    "File": "e3-home-green.trx",
+    "Counters": {
+      "Total": 121,
+      "Passed": 110,
+      "Failed": 11,
+      "NotExecuted": 0,
+      "Executed": 121
+    },
+    "Start": "2026-10-19T17:42:56.8250629+13:00",
+    "Finish": "2026-10-19T17:43:35.9752218+13:00"
+  },
+  {
+    "File": "e3-home-green2.trx",
+    "Counters": {
+      "Total": 121,
+      "Passed": 120,
+      "Failed": 1,
+      "NotExecuted": 0,
+      "Executed": 121
+    },
+    "Start": "2026-10-19T17:44:38.2060606+13:00",
+    "Finish": "2026-10-19T17:45:15.2284387+13:00"
+  },
+  {
+    "File": "e3-home-green3.trx",
+    "Counters": {
+      "Total": 121,
+      "Passed": 121,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 121
+    },
+    "Start": "2026-10-19T17:45:41.3162874+13:00",
+    "Finish": "2026-10-19T17:46:17.4683500+13:00"
+  },
+  {
+    "File": "e3-home-red.trx",
+    "Counters": {
+      "Total": 5,
+      "Passed": 0,
+      "Failed": 5,
+      "NotExecuted": 0,
+      "Executed": 5
+    },
+    "Start": "2026-10-19T17:41:13.7304454+13:00",
+    "Finish": "2026-10-19T17:41:20.7117619+13:00"
+  },
+  {
+    "File": "e3-late-continue-red.trx",
+    "Counters": {
+      "Total": 3,
+      "Passed": 0,
+      "Failed": 3,
+      "NotExecuted": 0,
+      "Executed": 3
+    },
+    "Start": "2026-10-19T18:08:23.1744473+13:00",
+    "Finish": "2026-10-19T18:08:28.3317783+13:00"
+  },
+  {
+    "File": "e3-layout-green.trx",
+    "Counters": {
+      "Total": 20,
+      "Passed": 20,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 20
+    },
+    "Start": "2026-10-19T18:00:59.2337832+13:00",
+    "Finish": "2026-10-19T18:01:09.8491105+13:00"
+  },
+  {
+    "File": "e3-route-busy-red.trx",
+    "Counters": {
+      "Total": 1,
+      "Passed": 0,
+      "Failed": 1,
+      "NotExecuted": 0,
+      "Executed": 1
+    },
+    "Start": "2026-10-19T17:49:04.6737068+13:00",
+    "Finish": "2026-10-19T17:49:09.5704670+13:00"
+  },
+  {
+    "File": "e3-route-green.trx",
+    "Counters": {
+      "Total": 49,
+      "Passed": 45,
+      "Failed": 4,
+      "NotExecuted": 0,
+      "Executed": 49
+    },
+    "Start": "2026-10-19T17:48:17.3459109+13:00",
+    "Finish": "2026-10-19T17:48:36.3977023+13:00"
+  },
+  {
+    "File": "e3-route-green2.trx",
+    "Counters": {
+      "Total": 50,
+      "Passed": 50,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 50
+    },
+    "Start": "2026-10-19T17:49:38.6772559+13:00",
+    "Finish": "2026-10-19T17:49:57.7897148+13:00"
+  },
+  {
+    "File": "e3-route-red.trx",
+    "Counters": {
+      "Total": 7,
+      "Passed": 1,
+      "Failed": 6,
+      "NotExecuted": 0,
+      "Executed": 7
+    },
+    "Start": "2026-10-19T17:47:20.8956995+13:00",
+    "Finish": "2026-10-19T17:47:28.6993991+13:00"
+  },
+  {
+    "File": "e3-source-green.trx",
+    "Counters": {
+      "Total": 152,
+      "Passed": 152,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 152
+    },
+    "Start": "2026-10-19T17:53:12.2880765+13:00",
+    "Finish": "2026-10-19T17:54:23.1949856+13:00"
+  },
+  {
+    "File": "e3-source-green3.trx",
+    "Counters": {
+      "Total": 154,
+      "Passed": 154,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 154
+    },
+    "Start": "2026-10-19T17:55:33.9419952+13:00",
+    "Finish": "2026-10-19T17:56:44.7751941+13:00"
+  },
+  {
+    "File": "e3-source-red.trx",
+    "Counters": {
+      "Total": 3,
+      "Passed": 1,
+      "Failed": 2,
+      "NotExecuted": 0,
+      "Executed": 3
+    },
+    "Start": "2026-10-19T17:51:11.5893082+13:00",
+    "Finish": "2026-10-19T17:51:18.8349766+13:00"
+  },
+  {
+    "File": "e3-source-red2.trx",
+    "Counters": {
+      "Total": 3,
+      "Passed": 1,
+      "Failed": 2,
+      "NotExecuted": 0,
+      "Executed": 3
+    },
+    "Start": "2026-10-19T17:51:44.6824804+13:00",
+    "Finish": "2026-10-19T17:51:52.0156024+13:00"
+  },
+  {
+    "File": "e3-source-red3.trx",
+    "Counters": {
+      "Total": 5,
+      "Passed": 1,
+      "Failed": 4,
+      "NotExecuted": 0,
+      "Executed": 5
+    },
+    "Start": "2026-10-19T17:52:29.7050660+13:00",
+    "Finish": "2026-10-19T17:52:38.4603019+13:00"
+  },
+  {
+    "File": "e3-source-route-return-red.trx",
+    "Counters": {
+      "Total": 2,
+      "Passed": 0,
+      "Failed": 2,
+      "NotExecuted": 0,
+      "Executed": 2
+    },
+    "Start": "2026-10-19T17:54:46.3544240+13:00",
+    "Finish": "2026-10-19T17:54:52.0617304+13:00"
+  },
+  {
+    "File": "e3-ui-architecture-final.trx",
+    "Counters": {
+      "Total": 1385,
+      "Passed": 1356,
+      "Failed": 29,
+      "NotExecuted": 0,
+      "Executed": 1385
+    },
+    "Start": "2026-10-19T18:01:57.6345029+13:00",
+    "Finish": "2026-10-19T18:08:08.9362041+13:00"
+  },
+  {
+    "File": "e3-ui-architecture-final2.trx",
+    "Counters": {
+      "Total": 1389,
+      "Passed": 1375,
+      "Failed": 14,
+      "NotExecuted": 0,
+      "Executed": 1389
+    },
+    "Start": "2026-10-19T18:09:32.0542130+13:00",
+    "Finish": "2026-10-19T18:15:50.2195659+13:00"
+  },
+  {
+    "File": "e3-visual-final.trx",
+    "Counters": {
+      "Total": 6,
+      "Passed": 6,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 6
+    },
+    "Start": "2026-10-19T18:01:31.7382452+13:00",
+    "Finish": "2026-10-19T18:01:47.0719047+13:00"
+  },
+  {
+    "File": "e3-visual-layout-red.trx",
+    "Counters": {
+      "Total": 2,
+      "Passed": 0,
+      "Failed": 2,
+      "NotExecuted": 0,
+      "Executed": 2
+    },
+    "Start": "2026-10-19T17:59:24.7707673+13:00",
+    "Finish": "2026-10-19T17:59:29.9091372+13:00"
+  },
+  {
+    "File": "e3-visual2.trx",
+    "Counters": {
+      "Total": 6,
+      "Passed": 1,
+      "Failed": 5,
+      "NotExecuted": 0,
+      "Executed": 6
+    },
+    "Start": "2026-10-19T17:57:43.1440043+13:00",
+    "Finish": "2026-10-19T17:57:52.3560833+13:00"
+  },
+  {
+    "File": "e3-visual3.trx",
+    "Counters": {
+      "Total": 6,
+      "Passed": 6,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 6
+    },
+    "Start": "2026-10-19T17:58:33.0541439+13:00",
+    "Finish": "2026-10-19T17:58:48.4846067+13:00"
+  },
+  {
+    "File": "e3-workflow-persistence-final.trx",
+    "Counters": {
+      "Total": 277,
+      "Passed": 277,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 277
+    },
+    "Start": "2026-10-19T18:16:12.1945601+13:00",
+    "Finish": "2026-10-19T18:17:45.5593863+13:00"
+  },
+  {
+    "File": "review-contract-green.trx",
+    "Counters": {
+      "Total": 94,
+      "Passed": 94,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 94
+    },
+    "Start": "2026-10-19T18:47:00.6150428+13:00",
+    "Finish": "2026-10-19T18:47:38.4576371+13:00"
+  },
+  {
+    "File": "review-r1-green.trx",
+    "Counters": {
+      "Total": 48,
+      "Passed": 48,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 48
+    },
+    "Start": "2026-10-19T18:33:34.7505948+13:00",
+    "Finish": "2026-10-19T18:33:53.3768839+13:00"
+  },
+  {
+    "File": "review-r1-red2.trx",
+    "Counters": {
+      "Total": 12,
+      "Passed": 7,
+      "Failed": 5,
+      "NotExecuted": 0,
+      "Executed": 12
+    },
+    "Start": "2026-10-19T18:33:02.3019431+13:00",
+    "Finish": "2026-10-19T18:33:10.6608006+13:00"
+  },
+  {
+    "File": "review-r3-green.trx",
+    "Counters": {
+      "Total": 20,
+      "Passed": 20,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 20
+    },
+    "Start": "2026-10-19T18:35:50.3353730+13:00",
+    "Finish": "2026-10-19T18:36:01.3908355+13:00"
+  },
+  {
+    "File": "review-r3-modal-green.trx",
+    "Counters": {
+      "Total": 26,
+      "Passed": 26,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 26
+    },
+    "Start": "2026-10-19T18:37:59.7200902+13:00",
+    "Finish": "2026-10-19T18:38:12.2370806+13:00"
+  },
+  {
+    "File": "review-r3-modal-red.trx",
+    "Counters": {
+      "Total": 9,
+      "Passed": 8,
+      "Failed": 1,
+      "NotExecuted": 0,
+      "Executed": 9
+    },
+    "Start": "2026-10-19T18:37:09.3937876+13:00",
+    "Finish": "2026-10-19T18:37:16.7800606+13:00"
+  },
+  {
+    "File": "review-r3-red.trx",
+    "Counters": {
+      "Total": 3,
+      "Passed": 0,
+      "Failed": 3,
+      "NotExecuted": 0,
+      "Executed": 3
+    },
+    "Start": "2026-10-19T18:34:22.8034135+13:00",
+    "Finish": "2026-10-19T18:34:28.0660648+13:00"
+  },
+  {
+    "File": "review-ui-architecture-final.trx",
+    "Counters": {
+      "Total": 1413,
+      "Passed": 1398,
+      "Failed": 15,
+      "NotExecuted": 0,
+      "Executed": 1413
+    },
+    "Start": "2026-10-19T18:40:24.0803387+13:00",
+    "Finish": "2026-10-19T18:46:40.8679011+13:00"
+  },
+  {
+    "File": "review-ui-architecture-final2.trx",
+    "Counters": {
+      "Total": 1413,
+      "Passed": 1399,
+      "Failed": 14,
+      "NotExecuted": 0,
+      "Executed": 1413
+    },
+    "Start": "2026-10-19T18:47:59.2834575+13:00",
+    "Finish": "2026-10-19T18:54:26.2295864+13:00"
+  },
+  {
+    "File": "review-visual.trx",
+    "Counters": {
+      "Total": 3,
+      "Passed": 3,
+      "Failed": 0,
+      "NotExecuted": 0,
+      "Executed": 3
+    },
+    "Start": "2026-10-19T18:39:43.6729578+13:00",
+    "Finish": "2026-10-19T18:39:49.2945994+13:00"
+  }
+]

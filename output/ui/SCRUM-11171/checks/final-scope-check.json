@@ -1,0 +1,79 @@
+{
+  "FinalImageCount": 28,
+  "AllFinalImageHashesMatch": true,
+  "MainTrackedFiles": [
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+      "Sha256": "71A96309DCA37F0FC69DFCFF4AF4D63F040F96823609CF10CFD5934213942F06",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11149_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "CAB968DD00195C3BC23917B782F5D35A31A2A74F8BD34552CCAED5F9A6E430B6",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11150_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "9651FBE9226A75DDF678C8658A7C42DB82DB86CF8F167D490DB343B9B6D53DFD",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11151_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "81BE7F65AEF11A5C4476164B33E7BFFEDA804A94B8037C81882B94B4D966E86F",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11153_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "3C9FE2FB2C215A6D789CE29A02F8292841D3632215E7684F712AD8EFA4D072B8",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "9DF4F1F237A53BD0BF087819DCA5CF7C326880EBC8660281E92C0AA874AD9F00",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_AUDIT.json",
+      "Sha256": "D26C77BBD3F6573B8844493A1232441F5BB416BC45AD3202CC09E9F8245C9AC6",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_IMPL_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "D363AB8FFCEAB6726B67AD05A8A518946A1FA525538C04E39F76F08131326CFF",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_OBSERVATIONS_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "917BB7E06CA1A20688496D6F9C4DDBC8ABC3F4E81CCC5F7EF1EF336F256C9B41",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "1D44DA5A6138E4EE101EF996BA94BACBEE66BF6B7F674F6BB0BDD44DBBF7D107",
+      "MatchesStartup": true
+    },
+    {
+      "Path": "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json",
+      "Sha256": "1D2EEDBCF8A068CE994011DA5DEF71BD18F073DA34742914359FE53D31A0EC65",
+      "MatchesStartup": true
+    }
+  ],
+  "ChangedProductPaths": [
+    "src/PrintFlow.App/Resources/Strings.resx",
+    "src/PrintFlow.App/Resources/Strings.zh-CN.resx",
+    "src/PrintFlow.App/ViewModels/SessionViewModel.Guided.cs",
+    "src/PrintFlow.App/ViewModels/SessionViewModel.PrintDimensions.cs",
+    "src/PrintFlow.App/Views/SessionScreenView.xaml",
+    "src/PrintFlow.App/Views/SharedReviewSurface.cs"
+  ]
+}

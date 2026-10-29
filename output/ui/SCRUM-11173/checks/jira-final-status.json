@@ -1,0 +1,261 @@
+{
+  "userDecision": "先准备走查材料，真人测试稍后安排",
+  "q02Transition": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11196 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": {
+      "issues": {
+        "nodes": [
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10956",
+            "key": "SCRUM-11196",
+            "fields": {
+              "summary": "完成三条路线与关键异常的集成回归和证据核对",
+              "issuetype": {
+                "id": "10003",
+                "description": "Tasks track small, distinct pieces of work.",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
+                "name": "Task",
+                "subtask": false,
+                "avatarId": 10318,
+                "entityId": "e232e3e3-2ca2-45b3-9cb8-79132141f85c",
+                "hierarchyLevel": 0
+              },
+              "components": [],
+              "created": "2026-10-19T11:08:34.689+1300",
+              "description": "Planning-ID：PF-GUX-v2-Q02  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n确认界面重构没有破坏现有审批、状态和文件安全契约。\n\n## 验收条件\n\n1. 在隔离测试环境验证三条路线及可选跳过、驳回重试、返回失效、修正回导、重启恢复、多尺寸和保存冲突/失败。\n2. 校验当前结果精确审批、原件/快照保护、环境门禁、自动化锁和生产 TIFF 合同未回退。\n3. 将旧 N1–N4、F6、PNG 审批/绑定、generic recovery 等缺口逐项分类为已确认解决、旧缺陷或新回归；未解决项不得标为通过。\n4. 记录具体构建、执行范围和结果；模拟处理器、屏幕渲染、真实桌面及真实生产验证分别报告，不互相替代。\n\n## 前置依赖\n\n* [SCRUM-11195](https://yituoxx.atlassian.net/browse/SCRUM-11195)：验收窗口缩放、中文布局、键盘和辅助技术可操作性\n\n## Scrum 分组\n\n建议 Sprint 4（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11173](https://yituoxx.atlassian.net/browse/SCRUM-11173)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+              "project": {
+                "id": "10000",
+                "key": "SCRUM",
+                "name": "My Software Team",
+                "projectTypeKey": "software",
+                "simplified": true,
+                "avatarUrls": {
+                  "48x48": "https://jira-prod-ap-4-2.prod.atl-paas.net/rest/api/3/universal_avatar/view/type/project/avatar/10410",
+                  "24x24": "https://jira-prod-ap-4-2.prod.atl-paas.net/rest/api/3/universal_avatar/view/type/project/avatar/10410?size=small",
+                  "16x16": "https://jira-prod-ap-4-2.prod.atl-paas.net/rest/api/3/universal_avatar/view/type/project/avatar/10410?size=xsmall",
+                  "32x32": "https://jira-prod-ap-4-2.prod.atl-paas.net/rest/api/3/universal_avatar/view/type/project/avatar/10410?size=medium"
+                }
+              },
+              "reporter": {
+                "accountId": "557058:869390a0-49f0-499e-93d7-abceb4c9b74f",
+                "emailAddress": "yituoxx@gmail.com",
+                "avatarUrls": {
+                  "48x48": "https://secure.gravatar.com/avatar/6a459b44e823a547ac056268d4a3a6d0?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault%2Fdefault-avatar-0.png",
+                  "24x24": "https://secure.gravatar.com/avatar/6a459b44e823a547ac056268d4a3a6d0?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault%2Fdefault-avatar-0.png",
+                  "16x16": "https://secure.gravatar.com/avatar/6a459b44e823a547ac056268d4a3a6d0?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault%2Fdefault-avatar-0.png",
+                  "32x32": "https://secure.gravatar.com/avatar/6a459b44e823a547ac056268d4a3a6d0?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault%2Fdefault-avatar-0.png"
+                },
+                "displayName": "张鸣谦",
+                "active": true,
+                "timeZone": "Pacific/Auckland",
+                "accountType": "atlassian"
+              },
+              "priority": {
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/priorities/high_new.svg",
+                "name": "High",
+                "id": "2"
+              },
+              "labels": [
+                "guided-ui",
+                "pf-guided-ux-v2",
+                "pf-gux-q02",
+                "pf-gux-wave-4",
+                "printflow"
+              ],
+              "assignee": null,
+              "updated": "2026-10-22T14:19:58.534+1300",
+              "status": {
+                "description": "",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "In Review",
+                "id": "10002",
+                "statusCategory": {
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              }
+            },
+            "descriptionEditable": true,
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11196"
+          }
+        ]
+      },
+      "context": {
+        "atlassianAccountId": "557058:869390a0-49f0-499e-93d7-abceb4c9b74f",
+        "cloudId": "6ea5df13-e1e2-4df3-bb4b-691a3fb8626c",
+        "toolsExposure": "primary",
+        "clientName": "chatgpt.com",
+        "mcpClientName": "openai-mcp (Codex)",
+        "toolName": "transitionJiraIssue",
+        "endpoint": "v2:streamable-http",
+        "sessionId": "r5-c20b94a2-6089-4958-928a-0520f952f9b9",
+        "invocationId": "63f10895-0290-4d61-9e26-585eb0aa35f5",
+        "env": "prod",
+        "featureFlags": {
+          "mcp-app-v2-primary": true,
+          "mcp-jira-instrumentation-phase-1": true,
+          "ken-4811-4724-jira-mcp-status-assignee-fields": true,
+          "mcp-ui-local-cache": true,
+          "jira-mcp-app-loading-skeleton-and-error-case": false,
+          "jira-mcp-app-shared-row-components": true,
+          "claude_mcp_ui_theme_fix_jac-99665": true
+        }
+      }
+    },
+    "isError": false
+  },
+  "observed": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"isLast\":true,\"appliedContentFormat\":\"markdown\",\"issues\":[{\"id\":\"10932\",\"key\":\"SCRUM-11172\",\"fields\":{\"summary\":\"引导式界面改版：保存交付、恢复与辅助页面\",\"status\":{\"name\":\"Done\"}}},{\"id\":\"10933\",\"key\":\"SCRUM-11173\",\"fields\":{\"summary\":\"引导式界面改版：无障碍、回归与新手验收\",\"status\":{\"name\":\"In Progress\"}}},{\"id\":\"10955\",\"key\":\"SCRUM-11195\",\"fields\":{\"summary\":\"验收窗口缩放、中文布局、键盘和辅助技术可操作性\",\"status\":{\"name\":\"In Progress\"}}},{\"id\":\"10956\",\"key\":\"SCRUM-11196\",\"fields\":{\"summary\":\"完成三条路线与关键异常的集成回归和证据核对\",\"status\":{\"name\":\"In Review\"}}},{\"id\":\"10957\",\"key\":\"SCRUM-11197\",\"fields\":{\"summary\":\"运行中文真实新手走查、视觉验收并形成改版结论\",\"status\":{\"name\":\"In Progress\"}}}]}}"
+      }
+    ],
+    "structuredContent": {
+      "issues": {
+        "nodes": [
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10932",
+            "key": "SCRUM-11172",
+            "fields": {
+              "summary": "引导式界面改版：保存交付、恢复与辅助页面",
+              "status": {
+                "description": "",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "Done",
+                "id": "10003",
+                "statusCategory": {
+                  "id": 3,
+                  "key": "done",
+                  "colorName": "green",
+                  "name": "Done"
+                }
+              }
+            },
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11172"
+          },
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10933",
+            "key": "SCRUM-11173",
+            "fields": {
+              "summary": "引导式界面改版：无障碍、回归与新手验收",
+              "status": {
+                "description": "This work item is being actively worked on at the moment by the assignee.",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "In Progress",
+                "id": "10001",
+                "statusCategory": {
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              }
+            },
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11173"
+          },
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10955",
+            "key": "SCRUM-11195",
+            "fields": {
+              "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+              "status": {
+                "description": "This work item is being actively worked on at the moment by the assignee.",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "In Progress",
+                "id": "10001",
+                "statusCategory": {
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              }
+            },
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11195"
+          },
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10956",
+            "key": "SCRUM-11196",
+            "fields": {
+              "summary": "完成三条路线与关键异常的集成回归和证据核对",
+              "status": {
+                "description": "",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "In Review",
+                "id": "10002",
+                "statusCategory": {
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              }
+            },
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11196"
+          },
+          {
+            "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+            "id": "10957",
+            "key": "SCRUM-11197",
+            "fields": {
+              "summary": "运行中文真实新手走查、视觉验收并形成改版结论",
+              "status": {
+                "description": "This work item is being actively worked on at the moment by the assignee.",
+                "iconUrl": "https://jira-prod-ap-4-2.prod.atl-paas.net/images/icons/statuses/generic.png",
+                "name": "In Progress",
+                "id": "10001",
+                "statusCategory": {
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              }
+            },
+            "webUrl": "https://yituoxx.atlassian.net/browse/SCRUM-11197"
+          }
+        ],
+        "webUrl": "https://yituoxx.atlassian.net/issues?jql=key%20IN%20(SCRUM-11172%2CSCRUM-11173%2CSCRUM-11195%2CSCRUM-11196%2CSCRUM-11197)%20ORDER%20BY%20key",
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        }
+      },
+      "context": {
+        "atlassianAccountId": "557058:869390a0-49f0-499e-93d7-abceb4c9b74f",
+        "cloudId": "6ea5df13-e1e2-4df3-bb4b-691a3fb8626c",
+        "toolsExposure": "primary",
+        "clientName": "chatgpt.com",
+        "mcpClientName": "openai-mcp (Codex)",
+        "toolName": "searchJiraIssuesUsingJql",
+        "endpoint": "v2:streamable-http",
+        "sessionId": "r5-d7fcee47-51cf-4279-926a-21394b4c187e",
+        "invocationId": "8aea169c-c67e-4ecf-b073-149b1476471c",
+        "env": "prod",
+        "featureFlags": {
+          "mcp-app-v2-primary": true,
+          "mcp-jira-instrumentation-phase-1": true,
+          "ken-4811-4724-jira-mcp-status-assignee-fields": true,
+          "mcp-ui-local-cache": true,
+          "jira-mcp-app-loading-skeleton-and-error-case": false,
+          "jira-mcp-app-shared-row-components": true,
+          "claude_mcp_ui_theme_fix_jac-99665": true
+        }
+      }
+    },
+    "isError": false
+  }
+}

@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="0f5d4f01-dd21-4046-8628-94a52070dcd3" name="admin@DESKTOP-0BG8884 2026-10-19 18:01:37" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T18:01:37.6238954+13:00" queuing="2026-10-19T18:01:37.6238955+13:00" start="2026-10-19T18:01:31.7382452+13:00" finish="2026-10-19T18:01:47.0719047+13:00" />
+  <TestSettings name="default" id="484e549e-e24e-4e11-821a-334716dcd8a8">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_18_01_37" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="daa9722d-1722-4cc1-8d4f-58b4cdeb3a9f" testId="9ec00b0b-1533-11c9-3095-579c1da414ea" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:02.2402136" startTime="2026-10-19T18:01:42.3502726+13:00" endTime="2026-10-19T18:01:44.5909546+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="daa9722d-1722-4cc1-8d4f-58b4cdeb3a9f" />
+    <UnitTestResult executionId="f1960714-104c-4f5f-be2e-18f39f14fdcb" testId="8345f3c5-edbd-62b2-4355-092b9fa0c3ab" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:02.4159268" startTime="2026-10-19T18:01:39.9339223+13:00" endTime="2026-10-19T18:01:42.3500993+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f1960714-104c-4f5f-be2e-18f39f14fdcb" />
+    <UnitTestResult executionId="ca44749e-bb2e-4eb0-877f-c4be30c515e4" testId="b69b9a98-8290-c7f4-0634-62dfa60f949f" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;pdf&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:01.7382119" startTime="2026-10-19T18:01:37.6119113+13:00" endTime="2026-10-19T18:01:39.3411884+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ca44749e-bb2e-4eb0-877f-c4be30c515e4" />
+    <UnitTestResult executionId="72818c36-71c8-436e-a04b-1b6255f3fa55" testId="76378147-dbe1-ca0c-50d9-3d2b6f5af445" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_import_progress_and_refusal_are_truthful_and_cancellable" computerName="DESKTOP-0BG8884" duration="00:00:00.5847814" startTime="2026-10-19T18:01:39.3492357+13:00" endTime="2026-10-19T18:01:39.9336457+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="72818c36-71c8-436e-a04b-1b6255f3fa55" />
+    <UnitTestResult executionId="8b71fbd9-2cdd-4101-9bde-e2aa95365cdf" testId="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;psd&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:02.3069205" startTime="2026-10-19T18:01:35.2916147+13:00" endTime="2026-10-19T18:01:37.6002371+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b71fbd9-2cdd-4101-9bde-e2aa95365cdf" />
+    <UnitTestResult executionId="2ef55e5f-94e0-42f4-b545-7d6811668cec" testId="a98743be-c1ae-1036-d5aa-becd08c8a023" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:02.3302990" startTime="2026-10-19T18:01:44.5913812+13:00" endTime="2026-10-19T18:01:46.9218102+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ef55e5f-94e0-42f4-b545-7d6811668cec" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9ec00b0b-1533-11c9-3095-579c1da414ea">
+      <Execution id="daa9722d-1722-4cc1-8d4f-58b4cdeb3a9f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_import_progress_and_refusal_are_truthful_and_cancellable" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="76378147-dbe1-ca0c-50d9-3d2b6f5af445">
+      <Execution id="72818c36-71c8-436e-a04b-1b6255f3fa55" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_import_progress_and_refusal_are_truthful_and_cancellable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;pdf&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b69b9a98-8290-c7f4-0634-62dfa60f949f">
+      <Execution id="ca44749e-bb2e-4eb0-877f-c4be30c515e4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_preparation_and_source_review_retain_real_input_context" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8345f3c5-edbd-62b2-4355-092b9fa0c3ab">
+      <Execution id="f1960714-104c-4f5f-be2e-18f39f14fdcb" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a98743be-c1ae-1036-d5aa-becd08c8a023">
+      <Execution id="2ef55e5f-94e0-42f4-b545-7d6811668cec" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;psd&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651">
+      <Execution id="8b71fbd9-2cdd-4101-9bde-e2aa95365cdf" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_preparation_and_source_review_retain_real_input_context" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="9ec00b0b-1533-11c9-3095-579c1da414ea" executionId="daa9722d-1722-4cc1-8d4f-58b4cdeb3a9f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8345f3c5-edbd-62b2-4355-092b9fa0c3ab" executionId="f1960714-104c-4f5f-be2e-18f39f14fdcb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b69b9a98-8290-c7f4-0634-62dfa60f949f" executionId="ca44749e-bb2e-4eb0-877f-c4be30c515e4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="76378147-dbe1-ca0c-50d9-3d2b6f5af445" executionId="72818c36-71c8-436e-a04b-1b6255f3fa55" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651" executionId="8b71fbd9-2cdd-4101-9bde-e2aa95365cdf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a98743be-c1ae-1036-d5aa-becd08c8a023" executionId="2ef55e5f-94e0-42f4-b545-7d6811668cec" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="6" executed="6" passed="6" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.26]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.10]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.19]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:14.85]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

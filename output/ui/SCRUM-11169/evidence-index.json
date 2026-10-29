@@ -1,0 +1,504 @@
+[
+  {
+    "Path": "renders/dimensions-1000x700.png",
+    "Sha256": "6CF1204AD5A0764E6EBE6ADE64BDE4D5A075D92F60B919FDDC104416654C6D8E",
+    "State": "dimensions",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/dimensions-1280x720.png",
+    "Sha256": "6B1DC6171061CAA12E72A25A934C70853F967BCA8D765E76487CFADA39840559",
+    "State": "dimensions",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/dimensions-1920x1080.png",
+    "Sha256": "37A63E74F8DDBA1F4AC004696220B9E24D119AD737D756383A4E58A5A9E6277E",
+    "State": "dimensions",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/draft-leave-1000x700.png",
+    "Sha256": "C15501757B3931D7DF2CB4C6FD5EB6CCDF2EE71C402016B9A598DD6FBA08574A",
+    "State": "draft-leave",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/draft-leave-1280x720.png",
+    "Sha256": "DAACD51F41948B8C5CEDCCA2C406EFE94C4016A79590C5F1F2D665A9AB1F9B1A",
+    "State": "draft-leave",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/draft-leave-1920x1080.png",
+    "Sha256": "DD4518ABBD1F5051C9D01E809871AB548AA8E437E5EB0ADA295C37FC920CB5CC",
+    "State": "draft-leave",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/failure-stopped-1000x700.png",
+    "Sha256": "0AAF1191031594DC32C58207C258151F4B72F86CF194268FF40BDE293BD337BF",
+    "State": "failure-stopped",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/failure-stopped-1280x720.png",
+    "Sha256": "81BDFD4D7B76B51C717042CDFE1885401F5ADAF77F2609A933D33048820E5615",
+    "State": "failure-stopped",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/failure-stopped-1920x1080.png",
+    "Sha256": "EFFF6FF95D08938BEB5514F4F9390660834BE168302237AB1EF841B00807F8A3",
+    "State": "failure-stopped",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/history-readonly-1000x700.png",
+    "Sha256": "48D9225BE073ED0513D09C3B9918D2A236DA1DC531BA0682A8B45197BB6E21F0",
+    "State": "history-readonly",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/history-readonly-1280x720.png",
+    "Sha256": "7DFFEBE26C3571E6BEE094F198981EDCC9B9DC9BA84829AE7323F1E604124679",
+    "State": "history-readonly",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/history-readonly-1920x1080.png",
+    "Sha256": "D17D6B7A7603855C9E77D1593AF96E22E9BEE1CCF2EF9FA11E5235E8AF11710B",
+    "State": "history-readonly",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/preflight-1000x700.png",
+    "Sha256": "A50E751A199272C6183A1577B7169AE2D6C910B581B82EC228E678D7349A3863",
+    "State": "preflight",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/preflight-1280x720.png",
+    "Sha256": "D83648366FC222C86E471A87979E62A4957717DC54F0108381BEC2674327DB07",
+    "State": "preflight",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/preflight-1920x1080.png",
+    "Sha256": "171F0459C6483D5EE5D59DB5CE3092E42A86F8C7F8F7EA153BE1BE4E3D3A9FF0",
+    "State": "preflight",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/processing-stop-takeover-1000x700.png",
+    "Sha256": "6B5627D4AC98CC671C00049BABED858B26D11D84369C31BBA92D771D2424D922",
+    "State": "processing-stop-takeover",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/processing-stop-takeover-1280x720.png",
+    "Sha256": "CB8E50EF3E362822625AAB4785FF8618C0D0E6C64985ADA38402DE48F63F8A97",
+    "State": "processing-stop-takeover",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/processing-stop-takeover-1920x1080.png",
+    "Sha256": "11BF5E2D13995BD6CCDB6679DCA3AC9F08FB51DD08ABCAB952B3D42E8034D55E",
+    "State": "processing-stop-takeover",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/recovered-stopped-1000x700.png",
+    "Sha256": "0AAF1191031594DC32C58207C258151F4B72F86CF194268FF40BDE293BD337BF",
+    "State": "recovered-stopped",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/recovered-stopped-1280x720.png",
+    "Sha256": "81BDFD4D7B76B51C717042CDFE1885401F5ADAF77F2609A933D33048820E5615",
+    "State": "recovered-stopped",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/recovered-stopped-1920x1080.png",
+    "Sha256": "EFFF6FF95D08938BEB5514F4F9390660834BE168302237AB1EF841B00807F8A3",
+    "State": "recovered-stopped",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/return-confirmation-1000x700.png",
+    "Sha256": "93C721B458B02C0A560DC475E1D2D0B856F4C41E02276EA0654C31A98D627769",
+    "State": "return-confirmation",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/return-confirmation-1280x720.png",
+    "Sha256": "EA804096D8D027404B3916C32E7EE9D2ECEDC05A6A5CD44C697367F8DF06BEC0",
+    "State": "return-confirmation",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/return-confirmation-1920x1080.png",
+    "Sha256": "FE899F3DB9C1FF399AB96CDD18A439C04AB4D632BEBF6472CC138C6BF4C3945D",
+    "State": "return-confirmation",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/review-required-1000x700.png",
+    "Sha256": "AA13251ACAEDE0CF0C36698019925E3760EE7D249BE83763FF28A72925B8B978",
+    "State": "review-required",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/review-required-1280x720.png",
+    "Sha256": "C638A4C3F9CDF8D041F7A6BACFAD6D371D879B44FA088CE16B193C496D98C28B",
+    "State": "review-required",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/review-required-1920x1080.png",
+    "Sha256": "559A6BB7BCD892412774B07C47DAE938E6573CB7A1A3BA98B3749B78C8A5CB0D",
+    "State": "review-required",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/source-GeneratePrintTiff-1000x700.png",
+    "Sha256": "CE3E4044CB02619A1CF262FA324FCE317F2B29AAD667A174B26DCF08F051CEA6",
+    "State": "source-GeneratePrintTiff",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/source-GeneratePrintTiff-1280x720.png",
+    "Sha256": "B57F54D2CC5DF515C6F1FD8C6B3C68B86F60CE44D19A7E0C9CBEEAD4502F7B79",
+    "State": "source-GeneratePrintTiff",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/source-GeneratePrintTiff-1920x1080.png",
+    "Sha256": "E0F4AE4CC219B6D5ECE703F2170086FA6E739CC61DC9446A181A52A3A7010444",
+    "State": "source-GeneratePrintTiff",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/source-PrepareAsset-1000x700.png",
+    "Sha256": "15D4F79CF72DD86B04A1060F821053575C48AD8C82142765B802C6AE5CE8593B",
+    "State": "source-PrepareAsset",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/source-PrepareAsset-1280x720.png",
+    "Sha256": "86A57AD9C69194A391DC08EA552E7E55F58E2CC089852549D80E7A460FEB0E51",
+    "State": "source-PrepareAsset",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/source-PrepareAsset-1920x1080.png",
+    "Sha256": "C04D4AB1C8C912A155B0896EEE56BC2D5A9BB2E6ED0CFCDCA10CCD2449C43E84",
+    "State": "source-PrepareAsset",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/source-PrepareCustomerDesign-1000x700.png",
+    "Sha256": "F648BB263D760B570309AAC4180BBA54B8D52D096042F82ACDBA920E68F37813",
+    "State": "source-PrepareCustomerDesign",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/source-PrepareCustomerDesign-1280x720.png",
+    "Sha256": "13AE73BC23601A4A2DDCE7F3663E6F6AC1D5652EF0026BDB5EE9F35FB46867CC",
+    "State": "source-PrepareCustomerDesign",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "renders/source-PrepareCustomerDesign-1920x1080.png",
+    "Sha256": "483E5B0D29E40C5D75DA2EEEE9461C46D72BE562C42119553458CCE95BB805C6",
+    "State": "source-PrepareCustomerDesign",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/white-ink-explicit-1000x700.png",
+    "Sha256": "E775E7C92153733465E9430AF7AAB9A19691E92C0EE9E75F5B40DA9AFE5DD0F8",
+    "State": "white-ink-explicit",
+    "WidthDip": 1000,
+    "HeightDip": 700,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/white-ink-explicit-1280x720.png",
+    "Sha256": "93AEB3FD53F06AFA75CF80A15950490E1ABADB0CFBDBD8CA1142D35C4D611B0D",
+    "State": "white-ink-explicit",
+    "WidthDip": 1280,
+    "HeightDip": 720,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "renders/white-ink-explicit-1920x1080.png",
+    "Sha256": "D783DB4D074CBA8C77478D4D248D76877728CDDFF87BA01919F8E2A3C3D42FBD",
+    "State": "white-ink-explicit",
+    "WidthDip": 1920,
+    "HeightDip": 1080,
+    "Dpi": 96,
+    "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-background-en-1000x700.png",
+    "Sha256": "D0838639797B3777EB037B061952AF72023170B1463F781236B1E353CA179010",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-background-en-1920x1040.png",
+    "Sha256": "26940708F93012A1744D54DE0F33FD804A9F2F7F081A5AAECDF4BA8E129AA7F1",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-background-zh-CN-1000x700.png",
+    "Sha256": "9AE8FF20F82A2FAFEBE6EFFB83E1F8A53D5F4D27E49EA655F4F9D940F3E80DF3",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-background-zh-CN-1920x1040.png",
+    "Sha256": "97C884D88B479EA4097389E1C21E43E6FEF6E6CAE91581A405A5B9C1AEC10F25",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-enhancement-en-1000x700.png",
+    "Sha256": "BFF98AEDAF0EF075B4971B16F858E30F85D809CFDBABD9334776C6E329061ED2",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-enhancement-en-1920x1040.png",
+    "Sha256": "38A1CFCEECA2421B7F87B00417FA1E819C028761B91CAA00BF1F73B4C4EAF03C",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-enhancement-zh-CN-1000x700.png",
+    "Sha256": "2A820C54E009468ED472E7A901BFC5DCE2ECE0DC3F3B6355AD007F38615F2D43",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-enhancement-zh-CN-1920x1040.png",
+    "Sha256": "BB5CF636FD4F6C250BD268263A2CCC878C54850868B79AC8B98DF81A28D9C8E1",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-tiff-en-1000x700.png",
+    "Sha256": "58E93A5065BE5AECE80FF039D9B566833AC9372B2E7F4D0044CBA6C3E0287CA4",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-tiff-en-1920x1040.png",
+    "Sha256": "961F9E2BCD997C9FC0EAD7710BB15086215D7371E71AEC74BC87F8ACD7C65174",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-tiff-zh-CN-1000x700.png",
+    "Sha256": "2D8D7A2D359CB27D414EB0BE001461F948ECD020712F40CE362B5156568DEF1A",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": true
+  },
+  {
+    "Path": "geometry/review-png/guidance-tiff-zh-CN-1920x1040.png",
+    "Sha256": "E0ED420E90012BDD78B30EE8720757BDE6BD91A3FF46A4905336EA31D4EA51A4",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-trim-en-1000x700.png",
+    "Sha256": "8474231F4023364CDAC57F350D6DBEF0392ED15BE5FE4A1E01C44B89FBFE0128",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-trim-en-1920x1040.png",
+    "Sha256": "C0133B9B4BE9410DC37849BBEFA6D2CE5379B64E123BDB8C9550AF8656FF3C94",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-trim-zh-CN-1000x700.png",
+    "Sha256": "1EE8B61345FBCFAA1B9D8192032F3B390830CCFAD7FA0EEA41FC1F7248BA465F",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  },
+  {
+    "Path": "geometry/review-png/guidance-trim-zh-CN-1920x1040.png",
+    "Sha256": "16F1C01D1A21FFD74B4323B66C6A7262E149764B8B1F21A6A98F34BE2DF9712B",
+    "State": "Supplemental review geometry fixture",
+    "Dpi": 96,
+    "InspectedByExecutor": false
+  }
+]

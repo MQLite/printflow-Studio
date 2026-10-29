@@ -1,0 +1,6 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+C:\Users\admin\AppData\Local\Microsoft\dotnet\sdk\10.0.400\Sdks\Microsoft.NET.Sdk.WindowsDesktop\targets\Microsoft.WinFX.targets(440,8): error : Access to the path 'C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\PrintFlow.App_2e0otaim_wpftmp.csproj' is denied. [C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\src\PrintFlow.App\PrintFlow.App.csproj]

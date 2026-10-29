@@ -433,6 +433,16 @@ public sealed class RecentProcessingRecordTests
 
         RecentSessionRow missing = harness.Home.RecentSessions.Single(row => row.Id == raster);
         await harness.Home.ResumeCommand.ExecuteAsync(missing);
+        // This original has never been confirmed: missing thumbnail does not block opening,
+        // and continuing still requires the operator's explicit route choice.
+        harness.Navigation.SessionFor.ShouldBeNull();
+        SessionView choosing = harness.Navigation.WorkflowSelectionFor.ShouldNotBeNull();
+        choosing.Id.ShouldBe(raster);
+        choosing.CurrentStep!.Step.ShouldBe(StepKind.OriginalConfirmation);
+        choosing.CurrentStep.State.ShouldBe(StepState.Waiting);
+        var selection = harness.WorkflowSelection(harness.Navigation);
+        selection.Open(choosing);
+        await selection.SelectCommand.ExecuteAsync(selection.Workflows.Single(w => w.Type == WorkflowType.PrepareAsset));
         harness.Navigation.SessionFor.ShouldNotBeNull().Id.ShouldBe(raster);
     }
 

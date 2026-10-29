@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="08215b7f-3ac7-4142-8c25-ed2341c9f255" name="admin@DESKTOP-0BG8884 2026-10-19 17:49:09" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:49:09.5662056+13:00" queuing="2026-10-19T17:49:09.5662061+13:00" start="2026-10-19T17:49:04.6737068+13:00" finish="2026-10-19T17:49:09.5704670+13:00" />
+  <TestSettings name="default" id="7ad5bae2-c102-41b9-87d9-19877fbaf689">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_49_09" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="5774ab9a-55dd-400b-8335-134e59aad553" testId="d90ea975-940d-8a8e-b823-e429bda8fc9e" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route" computerName="DESKTOP-0BG8884" duration="00:00:00.7924484" startTime="2026-10-19T17:49:08.6615495+13:00" endTime="2026-10-19T17:49:09.4597331+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5774ab9a-55dd-400b-8335-134e59aad553">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : try { m.CanSelect&#xD;
+    should be&#xD;
+"尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。"&#xD;
+    but was&#xD;
+"已有处理结果，当前路线已锁定。返回首页会保留任务和结果。"&#xD;
+    difference&#xD;
+Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   ...  &#xD;
+Expected Value | 尚    未    开    始    处    理    ；    首    个    处    理    结    果    生    成    前    可    更    换    路    线    ...  &#xD;
+Actual Value   | 已    有    处    理    结    果    ，    当    前    路    线    已    锁    定    。    返    回    首    页    会    保    ...  &#xD;
+Expected Code  | 235782641024320229872278829702653073931820010227882970232467265242998325104210692148726356254423633532447...  &#xD;
+Actual Code    | 240502637722788297023246726524652922440321069363353244724050381452345012290368202223839318390292025020445...  &#xD;
+&#xD;
+Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+               |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+Index          | ...  13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   &#xD;
+Expected Value | ...  生    成    前    可    更    换    路    线    。    返    回    首    页    会    保    留    本    次    任    务    。    &#xD;
+Actual Value   | ...  定    。    返    回    首    页    会    保    留    任    务    和    结    果    。                                  &#xD;
+Expected Code  | ...  299832510421069214872635625442363353244712290368202223839318390292025020445300412641227425202192115312290&#xD;
+Actual Code    | ...  234501229036820222383931839029202502044530041202192115321644324672652412290                              </Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 31&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 32&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d90ea975-940d-8a8e-b823-e429bda8fc9e">
+      <Execution id="5774ab9a-55dd-400b-8335-134e59aad553" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="Busy_selection_does_not_claim_a_derived_result_locked_the_route" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d90ea975-940d-8a8e-b823-e429bda8fc9e" executionId="5774ab9a-55dd-400b-8335-134e59aad553" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="1" executed="1" passed="0" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.53]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.62]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.44]       Shouldly.ShouldAssertException : try { m.CanSelect&#xD;
+[xUnit.net 00:00:04.44]           should be&#xD;
+[xUnit.net 00:00:04.44]       "尚未开始处理；首个处理结果生成前可更换路线。返回首页会保留本次任务。"&#xD;
+[xUnit.net 00:00:04.44]           but was&#xD;
+[xUnit.net 00:00:04.44]       "已有处理结果，当前路线已锁定。返回首页会保留任务和结果。"&#xD;
+[xUnit.net 00:00:04.44]           difference&#xD;
+[xUnit.net 00:00:04.44]       Difference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |        &#xD;
+[xUnit.net 00:00:04.44]                      | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/       &#xD;
+[xUnit.net 00:00:04.44]       Index          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   ...  &#xD;
+[xUnit.net 00:00:04.44]       Expected Value | 尚    未    开    始    处    理    ；    首    个    处    理    结    果    生    成    前    可    更    换    路    线    ...  &#xD;
+[xUnit.net 00:00:04.44]       Actual Value   | 已    有    处    理    结    果    ，    当    前    路    线    已    锁    定    。    返    回    首    页    会    保    ...  &#xD;
+[xUnit.net 00:00:04.44]       Expected Code  | 235782641024320229872278829702653073931820010227882970232467265242998325104210692148726356254423633532447...  &#xD;
+[xUnit.net 00:00:04.44]       Actual Code    | 240502637722788297023246726524652922440321069363353244724050381452345012290368202223839318390292025020445...  &#xD;
+[xUnit.net 00:00:04.44]       &#xD;
+[xUnit.net 00:00:04.44]       Difference     |       |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   &#xD;
+[xUnit.net 00:00:04.44]                      |      \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  &#xD;
+[xUnit.net 00:00:04.44]       Index          | ...  13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32   33   &#xD;
+[xUnit.net 00:00:04.44]       Expected Value | ...  生    成    前    可    更    换    路    线    。    返    回    首    页    会    保    留    本    次    任    务    。    &#xD;
+[xUnit.net 00:00:04.44]       Actual Value   | ...  定    。    返    回    首    页    会    保    留    任    务    和    结    果    。                                  &#xD;
+[xUnit.net 00:00:04.44]       Expected Code  | ...  299832510421069214872635625442363353244712290368202223839318390292025020445300412641227425202192115312290&#xD;
+[xUnit.net 00:00:04.44]       Actual Code    | ...  234501229036820222383931839029202502044530041202192115321644324672652412290                              &#xD;
+[xUnit.net 00:00:04.44]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.45]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(31,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route()&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.45]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(32,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route()&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.45]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.45]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.46]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:49:09.4620858+13:00">
+        <Text>[xUnit.net 00:00:04.44]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.Busy_selection_does_not_claim_a_derived_result_locked_the_route [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

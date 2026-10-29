@@ -1,0 +1,18 @@
+WHITE_INITIAL page=Preflight runVisible=True
+WHITE_RECONFIRM page=WhiteInk runVisible=False persisted=W1_1px notice=
+TRIM_BEFORE page=Ready uniform=0 mode=TightCrop
+TRIM_APPLIED uniform=2 summary= notice=
+TRIM_HISTORY prompt=True history=False
+TRIM_AFTER_DISCARD uniform=0 mode=TightCrop summary=
+TRIM_PERSISTED=UniformMargin(top 2, right 2, bottom 2, left 2 px)
+CROP_MODAL prompt=True canManual=True selection=[3,2 → 9,7) 6×5
+CROP_MODAL_BUTTON enabled=True shown=True
+CROP_AFTER_KEEP selection= cropping=True
+STALE_TEXTBOX taskB=old-task-input
+HIDDEN_TEXTBOX page=Source target=hidden-old-task-input ownEnabled=True
+SAVE_CONFIRMED name=confirmed-output.png folder=C:\Users\admin\AppData\Local\Temp\printflow-e2-readonly-review-20261019\saved-06d0d70857fa47bfb2dd15c0c32084de path=C:\Users\admin\AppData\Local\Temp\printflow-e2-readonly-review-20261019\saved-06d0d70857fa47bfb2dd15c0c32084de\confirmed-output.png
+SAVE_SECOND_EDIT prompt=True
+SAVE_AFTER_DISCARD original=keep-extent.png name=keep-extent.png folder=尚未选择文件夹 path=C:\Users\admin\AppData\Local\Temp\printflow-e2-readonly-review-20261019\saved-06d0d70857fa47bfb2dd15c0c32084de\confirmed-output.png
+OLD_SAVE_OPEN_B idB=True page=Source busy=True
+OLD_SAVE_B_CONFIRM page=Source persistedStep=OriginalConfirmation
+OLD_SAVE_END_B idB=True page=Source busy=False

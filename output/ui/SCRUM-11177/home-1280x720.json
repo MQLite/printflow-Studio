@@ -1,0 +1,21 @@
+{
+  "State": "home",
+  "Language": "zh-CN",
+  "WidthDip": 1280,
+  "HeightDip": 720,
+  "Dpi": 96,
+  "CaptureKind": "offscreen WPF; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "90C2660556CDDB5414A1EDBDBE0F908C533EA8180E9948CD10CDBBFCFD30CEAC",
+  "Measurements": {
+    "MainAction": {
+      "X": 49,
+      "Y": 402,
+      "Width": 95.48,
+      "Height": 42
+    },
+    "ActionEnabled": true,
+    "PreviewCount": 1,
+    "NoProcessingStarted": true
+  }
+}

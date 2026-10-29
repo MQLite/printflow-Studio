@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-19",
+  "userAccepted": false,
+  "transitionResults": [
+    {
+      "key": "SCRUM-11170",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11170 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11182",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11182 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11183",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11183 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ],
+  "aiDependencyRead": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"isLast\":true,\"appliedContentFormat\":\"markdown\",\"issues\":[{\"id\":\"10926\",\"key\":\"SCRUM-11166\",\"fields\":{\"summary\":\"实现 WPF AI设计页面、进度及完整手动交接\",\"status\":{\"name\":\"To Do\"}}},{\"id\":\"10930\",\"key\":\"SCRUM-11170\",\"fields\":{\"summary\":\"引导式界面改版：开始任务、导入与路线选择\",\"status\":{\"name\":\"In Progress\"}}},{\"id\":\"10942\",\"key\":\"SCRUM-11182\",\"fields\":{\"summary\":\"重做首页与单文件导入，突出开始任务和继续处理\",\"status\":{\"name\":\"In Progress\"}}},{\"id\":\"10943\",\"key\":\"SCRUM-11183\",\"fields\":{\"summary\":\"把路线选择和原图确认拆成清晰的引导步骤\",\"status\":{\"name\":\"In Progress\"}}},{\"id\":\"10944\",\"key\":\"SCRUM-11184\",\"fields\":{\"summary\":\"为 AI 设计提供统一的分步界面接入与手动交接布局\",\"status\":{\"name\":\"To Do\"}}}]}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "notes": "SCRUM-11170/11182/11183 In Review;11184 remains To Do blocked by11166; no Jira comments sent; transition tool returns actual landed status."
+}

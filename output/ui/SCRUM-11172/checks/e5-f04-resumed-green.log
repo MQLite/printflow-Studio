@@ -1,0 +1,53 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:27.18]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True) [FAIL]
+[xUnit.net 00:00:27.65]     PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: True) [493 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : (await h.Inner.Repository.LoadAsync(source.Id, default)).Value!.Attempts
+    should be empty but had
+1
+    item and was
+[ProcessingAttempt { Id = 01a1580b-3c9f-724a-998d-c71a80531c58, SessionId = 01a1580b-3c9f-79e6-8bc9-02ffd618504f, Step = Import, InputRevisionId = , Operation = Import, AdapterId = internal-import-v1, StartedAtUtc = 2026/8/19 9:00:00 +00:00, EndedAtUtc = 2026/8/19 9:00:00 +00:00, Status = Succeeded, OutputRevisionId = 01a1580b-3cba-7bcc-90eb-68afd09328aa, Failure = , RetryOfAttemptId = , RetrySequence = 0, PsdInspection = , PdfInspection = , TrimParameters = , TrimGeometry = , ManualCropGeometry = , BackgroundRemovalAuthority = , AdapterNotes = , ManualResultSourcePath = , Preparation = , ProducedRevision = True }]
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 59
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(navigateAway: False) [465 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : (await h.Inner.Repository.LoadAsync(source.Id, default)).Value!.Attempts
+    should be empty but had
+1
+    item and was
+[ProcessingAttempt { Id = 01a1580b-3e84-7367-a506-f86243dfcbbb, SessionId = 01a1580b-3e84-77cc-9a33-41cbbc518768, Step = Import, InputRevisionId = , Operation = Import, AdapterId = internal-import-v1, StartedAtUtc = 2026/8/19 9:00:00 +00:00, EndedAtUtc = 2026/8/19 9:00:00 +00:00, Status = Succeeded, OutputRevisionId = 01a1580b-3e9f-72ac-8015-1beca39e72b7, Failure = , RetryOfAttemptId = , RetrySequence = 0, PsdInspection = , PdfInspection = , TrimParameters = , TrimGeometry = , ManualCropGeometry = , BackgroundRemovalAuthority = , AdapterNotes = , ManualResultSourcePath = , Preparation = , ProducedRevision = True }]
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedUtilityReturnTests.Failed_or_late_reload_cannot_restore_old_task_ownership(Boolean navigateAway) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedUtilityReturnTests.cs:line 59
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\output\ui\SCRUM-11172\checks\e5-f04-resumed-green.trx
+
+失败!  - 失败:     2，通过:   152，已跳过:     0，总计:   154，持续时间: 35 s - PrintFlow.Tests.dll (net10.0)

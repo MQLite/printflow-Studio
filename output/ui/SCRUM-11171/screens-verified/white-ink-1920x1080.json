@@ -1,0 +1,417 @@
+{
+  "State": "white-ink",
+  "Language": "zh-CN",
+  "WidthDip": 1920,
+  "HeightDip": 1080,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no App/Window.Show, desktop input or real external application",
+  "ScreenshotSha256": "EDAD767AAE0286AF406CC76D8AC4045C60398E919C2A1A13468B02FECC57D880",
+  "EssentialActions": [],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "",
+        "IsEnabled": false,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 16,
+            "Y": 1022
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 120.04,
+            "Height": 42
+          },
+          "X": 16,
+          "Y": 1022,
+          "Width": 120.04,
+          "Height": 42,
+          "Left": 16,
+          "Top": 1022,
+          "Right": 136.04000000000002,
+          "Bottom": 1064,
+          "TopLeft": {
+            "X": 16,
+            "Y": 1022
+          },
+          "TopRight": {
+            "X": 136.04000000000002,
+            "Y": 1022
+          },
+          "BottomLeft": {
+            "X": 16,
+            "Y": 1064
+          },
+          "BottomRight": {
+            "X": 136.04000000000002,
+            "Y": 1064
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.ChangeRoute",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 136.04000000000002,
+            "Y": 1012
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 194,
+            "Height": 52
+          },
+          "X": 136.04000000000002,
+          "Y": 1012,
+          "Width": 194,
+          "Height": 52,
+          "Left": 136.04000000000002,
+          "Top": 1012,
+          "Right": 330.04,
+          "Bottom": 1064,
+          "TopLeft": {
+            "X": 136.04000000000002,
+            "Y": 1012
+          },
+          "TopRight": {
+            "X": 330.04,
+            "Y": 1012
+          },
+          "BottomLeft": {
+            "X": 136.04000000000002,
+            "Y": 1064
+          },
+          "BottomRight": {
+            "X": 330.04,
+            "Y": 1064
+          }
+        },
+        "WithinScroll": true
+      },
+      {
+        "Id": "Session.BackToHome",
+        "IsEnabled": true,
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 1818,
+            "Y": 1012
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 86,
+            "Height": 52
+          },
+          "X": 1818,
+          "Y": 1012,
+          "Width": 86,
+          "Height": 52,
+          "Left": 1818,
+          "Top": 1012,
+          "Right": 1904,
+          "Bottom": 1064,
+          "TopLeft": {
+            "X": 1818,
+            "Y": 1012
+          },
+          "TopRight": {
+            "X": 1904,
+            "Y": 1012
+          },
+          "BottomLeft": {
+            "X": 1818,
+            "Y": 1064
+          },
+          "BottomRight": {
+            "X": 1904,
+            "Y": 1064
+          }
+        },
+        "WithinScroll": true
+      }
+    ],
+    "Images": [
+      {
+        "IsEmpty": false,
+        "Location": {
+          "X": 325.88666666666666,
+          "Y": 443.6016666666667
+        },
+        "Size": {
+          "IsEmpty": false,
+          "Width": 1088.2266666666667,
+          "Height": 544.1133333333333
+        },
+        "X": 325.88666666666666,
+        "Y": 443.6016666666667,
+        "Width": 1088.2266666666667,
+        "Height": 544.1133333333333,
+        "Left": 325.88666666666666,
+        "Top": 443.6016666666667,
+        "Right": 1414.1133333333332,
+        "Bottom": 987.715,
+        "TopLeft": {
+          "X": 325.88666666666666,
+          "Y": 443.6016666666667
+        },
+        "TopRight": {
+          "X": 1414.1133333333332,
+          "Y": 443.6016666666667
+        },
+        "BottomLeft": {
+          "X": 325.88666666666666,
+          "Y": 987.715
+        },
+        "BottomRight": {
+          "X": 1414.1133333333332,
+          "Y": 987.715
+        }
+      }
+    ],
+    "Summary": [
+      {
+        "Id": "Session.PrintSummary.Requested",
+        "Text": "\u5F53\u524D\u8981\u6C42\uFF1A\u6700\u5927 200 \u00D7 150 mm",
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 223,
+            "Y": 221.22333333333333
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 1304,
+            "Height": 18.476666666666667
+          },
+          "X": 223,
+          "Y": 221.22333333333333,
+          "Width": 1304,
+          "Height": 18.476666666666667,
+          "Left": 223,
+          "Top": 221.22333333333333,
+          "Right": 1527,
+          "Bottom": 239.7,
+          "TopLeft": {
+            "X": 223,
+            "Y": 221.22333333333333
+          },
+          "TopRight": {
+            "X": 1527,
+            "Y": 221.22333333333333
+          },
+          "BottomLeft": {
+            "X": 223,
+            "Y": 239.7
+          },
+          "BottomRight": {
+            "X": 1527,
+            "Y": 239.7
+          }
+        }
+      },
+      {
+        "Id": "Session.PrintSummary.Actual",
+        "Text": "\u9884\u8BA1\u5B9E\u9645\u56FE\u7247\uFF1A199.98 \u00D7 99.99 \u6BEB\u7C73",
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 223,
+            "Y": 247.7
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 1304,
+            "Height": 23.756666666666668
+          },
+          "X": 223,
+          "Y": 247.7,
+          "Width": 1304,
+          "Height": 23.756666666666668,
+          "Left": 223,
+          "Top": 247.7,
+          "Right": 1527,
+          "Bottom": 271.45666666666665,
+          "TopLeft": {
+            "X": 223,
+            "Y": 247.7
+          },
+          "TopRight": {
+            "X": 1527,
+            "Y": 247.7
+          },
+          "BottomLeft": {
+            "X": 223,
+            "Y": 271.45666666666665
+          },
+          "BottomRight": {
+            "X": 1527,
+            "Y": 271.45666666666665
+          }
+        }
+      },
+      {
+        "Id": "Session.PrintSummary.Pixels",
+        "Text": "\u8F93\u51FA\uFF1A2362 \u00D7 1181 \u50CF\u7D20 \u00B7 \u4FDD\u6301\u539F\u6BD4\u4F8B",
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 223,
+            "Y": 275.45666666666665
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 1304,
+            "Height": 18.476666666666667
+          },
+          "X": 223,
+          "Y": 275.45666666666665,
+          "Width": 1304,
+          "Height": 18.476666666666667,
+          "Left": 223,
+          "Top": 275.45666666666665,
+          "Right": 1527,
+          "Bottom": 293.93333333333334,
+          "TopLeft": {
+            "X": 223,
+            "Y": 275.45666666666665
+          },
+          "TopRight": {
+            "X": 1527,
+            "Y": 275.45666666666665
+          },
+          "BottomLeft": {
+            "X": 223,
+            "Y": 293.93333333333334
+          },
+          "BottomRight": {
+            "X": 1527,
+            "Y": 293.93333333333334
+          }
+        }
+      },
+      {
+        "Id": "Session.PrintSummary.WhiteInk",
+        "Text": "\u767D\u58A8\uFF1A\u5C1A\u672A\u9009\u62E9",
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 223,
+            "Y": 301.93333333333334
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 1304,
+            "Height": 18.476666666666667
+          },
+          "X": 223,
+          "Y": 301.93333333333334,
+          "Width": 1304,
+          "Height": 18.476666666666667,
+          "Left": 223,
+          "Top": 301.93333333333334,
+          "Right": 1527,
+          "Bottom": 320.41,
+          "TopLeft": {
+            "X": 223,
+            "Y": 301.93333333333334
+          },
+          "TopRight": {
+            "X": 1527,
+            "Y": 301.93333333333334
+          },
+          "BottomLeft": {
+            "X": 223,
+            "Y": 320.41
+          },
+          "BottomRight": {
+            "X": 1527,
+            "Y": 320.41
+          }
+        }
+      },
+      {
+        "Id": "Session.PrintSummary.Contract",
+        "Text": "\u751F\u4EA7\u8981\u6C42\uFF1A300 PPI \u00B7 CMYK \u002B W1\u3002\u751F\u6210\u540E\u4ECD\u987B\u6821\u9A8C\u4E0E\u5BA1\u6838\u3002",
+        "Bounds": {
+          "IsEmpty": false,
+          "Location": {
+            "X": 223,
+            "Y": 328.40999999999997
+          },
+          "Size": {
+            "IsEmpty": false,
+            "Width": 1304,
+            "Height": 18.476666666666667
+          },
+          "X": 223,
+          "Y": 328.40999999999997,
+          "Width": 1304,
+          "Height": 18.476666666666667,
+          "Left": 223,
+          "Top": 328.40999999999997,
+          "Right": 1527,
+          "Bottom": 346.88666666666666,
+          "TopLeft": {
+            "X": 223,
+            "Y": 328.40999999999997
+          },
+          "TopRight": {
+            "X": 1527,
+            "Y": 328.40999999999997
+          },
+          "BottomLeft": {
+            "X": 223,
+            "Y": 346.88666666666666
+          },
+          "BottomRight": {
+            "X": 1527,
+            "Y": 346.88666666666666
+          }
+        }
+      }
+    ],
+    "WhiteChoices": [
+      {
+        "IsEmpty": false,
+        "Location": {
+          "X": 1577,
+          "Y": 447.3566666666667
+        },
+        "Size": {
+          "IsEmpty": false,
+          "Width": 314,
+          "Height": 128
+        },
+        "X": 1577,
+        "Y": 447.3566666666667,
+        "Width": 314,
+        "Height": 128,
+        "Left": 1577,
+        "Top": 447.3566666666667,
+        "Right": 1891,
+        "Bottom": 575.3566666666667,
+        "TopLeft": {
+          "X": 1577,
+          "Y": 447.3566666666667
+        },
+        "TopRight": {
+          "X": 1891,
+          "Y": 447.3566666666667
+        },
+        "BottomLeft": {
+          "X": 1577,
+          "Y": 575.3566666666667
+        },
+        "BottomRight": {
+          "X": 1891,
+          "Y": 575.3566666666667
+        }
+      }
+    ],
+    "Page": "WhiteInk",
+    "CustomInputs": []
+  }
+}

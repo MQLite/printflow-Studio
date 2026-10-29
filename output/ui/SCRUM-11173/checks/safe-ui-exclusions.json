@@ -1,0 +1,13 @@
+[
+  "PrintDimensionsPreflightUiTests.Keyboard_traverses_the_bound_custom_size_controls_and_panel_does_not_trap_focus",
+  "ErrorDetailsRenderingTests.Rendered_failure_entry_and_UIA_retry_preserve_history_and_only_reset_the_step",
+  "ErrorDetailsRenderingTests.Error_details_previews_the_actual_plan_then_UIA_saves_an_exact_local_package",
+  "SharedReviewAuthorityTests.Live_synthetic_review_window_is_operable_through_Windows_UIA",
+  "ManualCropAdjustmentUiTests.Live_synthetic_WPF_UIA_uniform",
+  "ManualCropAdjustmentUiTests.Live_synthetic_WPF_UIA_per_edge",
+  "ManualCropAdjustmentUiTests.Live_synthetic_WPF_UIA_cancel_keep",
+  "KeepOriginalExtentUiTests.Live_synthetic_WPF_UIA_review",
+  "KeepOriginalExtentUiTests.Live_synthetic_WPF_UIA_manual_crop_required",
+  "KeepOriginalExtentUiTests.Live_synthetic_WPF_UIA_waiting_keyboard",
+  "OperatorWave1AHostTests.Operator_launched_visible_synthetic_host"
+]

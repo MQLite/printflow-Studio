@@ -103,12 +103,12 @@ public sealed partial class SessionViewModel
     // --- Offers ---------------------------------------------------------------------------
 
     /// <summary>"Ask a colleague to correct this image" beside Approve and Reject.</summary>
-    public bool CanAskColleague => _session?.CanAskColleague == true && !IsBusy && !IsAdjustingTrim &&
+    public bool CanAskColleague => CanInteractWithLivePage && _session?.CanAskColleague == true && !IsBusy && !IsAdjustingTrim &&
         !IsAskingColleague && !IsCropping && _finalSaveOperation is null;
 
-    public bool CanPrepareCorrection => IsAskingColleague && !IsBusy && _session?.CanAskColleague == true;
+    public bool CanPrepareCorrection => CanInteractWithLivePage && IsAskingColleague && !IsBusy && _session?.CanAskColleague == true;
 
-    public bool CanCancelAskColleague => IsAskingColleague && !IsBusy;
+    public bool CanCancelAskColleague => CanInteractWithLivePage && IsAskingColleague && !IsBusy;
 
     /// <summary>The handed-off panel (S3): the request still grants an import.</summary>
     public bool ShowsCorrectionPanel => CorrectionHandoff is { CanImport: true };
@@ -116,12 +116,12 @@ public sealed partial class SessionViewModel
     /// <summary>The history line for a request that no longer grants anything.</summary>
     public bool ShowsCorrectionObsolete => CorrectionHandoff is { IsObsolete: true };
 
-    public bool CanImportCorrectedImage => CorrectionHandoff is { CanImport: true } && !IsBusy && !IsAdjustingTrim;
+    public bool CanImportCorrectedImage => CanInteractWithLivePage && CorrectionHandoff is { CanImport: true } && !IsBusy && !IsAdjustingTrim;
 
     /// <summary>Read-only: stays available in S3 while nothing is running.</summary>
-    public bool CanOpenCorrectionFolder => ShowsCorrectionPanel && _correctionShell is not null;
+    public bool CanOpenCorrectionFolder => CanInteractWithLivePage && ShowsCorrectionPanel && _correctionShell is not null;
 
-    public bool CanRepairCorrectionFiles => CorrectionHandoff is { CanImport: true, MissingFiles: true } && !IsBusy;
+    public bool CanRepairCorrectionFiles => CanInteractWithLivePage && CorrectionHandoff is { CanImport: true, MissingFiles: true } && !IsBusy;
 
     public bool ShowsCorrectionMissingFiles => CorrectionHandoff is { CanImport: true, MissingFiles: true };
 
@@ -237,7 +237,7 @@ public sealed partial class SessionViewModel
     [RelayCommand]
     private void CancelAskColleague()
     {
-        if (!IsAskingColleague || IsBusy)
+        if (!CanCancelAskColleague)
         {
             return;
         }
@@ -607,6 +607,7 @@ public sealed partial class SessionViewModel
 
     private void NotifyCorrectionState()
     {
+        NotifyGuidedRecovery();
         OnPropertyChanged(nameof(CorrectionHandoff));
         OnPropertyChanged(nameof(CanAskColleague));
         OnPropertyChanged(nameof(CanPrepareCorrection));

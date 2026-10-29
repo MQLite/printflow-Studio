@@ -1,0 +1,188 @@
+{
+  "Baseline": {
+    "Total": 1244,
+    "Passed": 1228,
+    "Failed": 15,
+    "Skipped": 1
+  },
+  "Final": {
+    "Total": 1282,
+    "Passed": 1267,
+    "Failed": 14,
+    "Skipped": 1
+  },
+  "NewFailures": [],
+  "BaselineFailuresNotReproduced": [
+    "PrintFlow.Tests.Integration.Ui.FinalSaveUiTests.Tiff_shows_backend_physical_size_keeps_older_size_selectable_and_late_results_stay_with_their_item"
+  ],
+  "RetainedFailures": [
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"review\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"zh-CN\", effectiveLabel: \"源图有效分辨率\", normalStatus: \"无需放大\", enlargementStatus: \"需要放大\")",
+    "PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test",
+    "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: \"en-US\", tight: \"Tight\", uniform: \"Uniform margin\", edge: \"Per-edge margin\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"automatic\", label: \"Artwork content\", artwork: \"5 × 5 px\", canvas: \"9 × 9 px\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"keep\", label: \"Artwork extent\", artwork: \"Full original canvas\", canvas: \"12 × 10 px\")",
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"manual\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+    "PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"manual\", label: \"Selected artwork\", artwork: \"6 × 5 px\", canvas: \"10 × 9 px\")",
+    "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not",
+    "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: \"en-US\", heading: \"Manual crop\", selected: \"Selected bounds\", applied: \"Applied crop bounds\")",
+    "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
+    "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"waiting\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+    "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"en-US\", effectiveLabel: \"Effective source resolution\", normalStatus: \"No enlargement required\", enlargementStatus: \"Enlargement required\")"
+  ],
+  "NewGuidedTests": [
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.PageHeader\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Future_steps_are_not_tab_stops_or_invokable",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Loading_is_indeterminate_and_does_not_hide_legal_stop",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Styled_review_approval_preserves_target_and_gesture_guard",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: \"Error\", heading: \"处理未完成\", explanation: \"请检查失败原因，再选择可用操作。\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Replacing_items_does_not_execute_or_change_business_state",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Dictionary_loads_without_production_application",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.All_five_states_show_text_and_distinct_current_marker",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Route_cards_keep_exact_commands_parameters_and_three_workflows",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.TaskCard\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Home_keeps_import_warnings_and_recent_actions",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"error\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Standalone_adopted_views_resolve_theme_without_application",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"long-text\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"disabled\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Long_button_labels_wrap_instead_of_losing_the_action",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: \"PF.FormSection\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Focused_selected_and_disabled_controls_remain_distinguishable",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"loading\", width: 1920, height: 1080)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedStepNavigationTests.Long_step_text_wraps_without_overlapping_neighbours",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Long_Chinese_source_and_failure_text_keep_actions_reachable(width: 1280, height: 720)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.Representative_views_capture_the_same_synthetic_sources(width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeAdoptionTests.Long_Chinese_source_and_failure_text_keep_actions_reachable(width: 1000, height: 700)",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: \"Warning\", heading: \"请先完成检查\", explanation: \"缺少必要条件，已有输入会保留。\")",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeResourceTests.Tokens_resolve_to_approved_values",
+      "outcome": "Passed"
+    },
+    {
+      "testName": "PrintFlow.Tests.Integration.Ui.GuidedThemeVisualEvidenceTests.All_component_states_fit_with_wrapping_and_visible_actions(state: \"normal\", width: 1000, height: 700)",
+      "outcome": "Passed"
+    }
+  ]
+}

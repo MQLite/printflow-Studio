@@ -1,0 +1,260 @@
+[
+  {
+    "Run": "baseline-scoped",
+    "Log": "baseline-scoped.log",
+    "Trx": "baseline-scoped.trx",
+    "Total": 89,
+    "Passed": 89,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-broad-contracts-green",
+    "Log": "e4-broad-contracts-green.log",
+    "Trx": "e4-broad-contracts-green.trx",
+    "Total": 76,
+    "Passed": 76,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-ui-architecture-final",
+    "Log": "e4-ui-architecture-final.log",
+    "Trx": "e4-ui-architecture-final.trx",
+    "Total": 1438,
+    "Passed": 1397,
+    "Failed": 41,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-ui-architecture-final2",
+    "Log": "e4-ui-architecture-final2.log",
+    "Trx": "e4-ui-architecture-final2.trx",
+    "Total": 1438,
+    "Passed": 1424,
+    "Failed": 14,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-visual-final",
+    "Log": "e4-visual-final.log",
+    "Trx": "e4-visual-final.trx",
+    "Total": 3,
+    "Passed": 3,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-visual-verified",
+    "Log": "e4-visual-verified.log",
+    "Trx": "e4-visual-verified.trx",
+    "Total": 52,
+    "Passed": 52,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "e4-workflow-persistence-final",
+    "Log": "e4-workflow-persistence-final.log",
+    "Trx": "e4-workflow-persistence-final.trx",
+    "Total": 277,
+    "Passed": 277,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "preview-area-red",
+    "Log": "preview-area-red.log",
+    "Trx": "preview-area-red.trx",
+    "Total": 3,
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0
+  },
+  {
+    "Run": "r1-crop-failure-affected",
+    "Log": "r1-crop-failure-affected.log",
+    "Trx": "r1-crop-failure-affected.trx",
+    "Total": 251,
+    "Passed": 251,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "r1-crop-failure-green",
+    "Log": "r1-crop-failure-green.log",
+    "Trx": "r1-crop-failure-green.trx",
+    "Total": 4,
+    "Passed": 4,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "r1-crop-failure-red-behavior",
+    "Log": "r1-crop-failure-red-behavior.log",
+    "Trx": "r1-crop-failure-red-behavior.trx",
+    "Total": 4,
+    "Passed": 0,
+    "Failed": 4,
+    "Skipped": 0
+  },
+  {
+    "Run": "r1-crop-failure-red",
+    "Log": "r1-crop-failure-red.log",
+    "Trx": null,
+    "Status": "No completed TRX; consult raw build/process log"
+  },
+  {
+    "Run": "task1-green",
+    "Log": "task1-green.log",
+    "Trx": "task1-green.trx",
+    "Total": 68,
+    "Passed": 68,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "task1-red-behavior",
+    "Log": "task1-red-behavior.log",
+    "Trx": "task1-red-behavior.trx",
+    "Total": 3,
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0
+  },
+  {
+    "Run": "task1-red-retry",
+    "Log": "task1-red-retry.log",
+    "Trx": "task1-red-retry.trx",
+    "Total": 1,
+    "Passed": 0,
+    "Failed": 1,
+    "Skipped": 0
+  },
+  {
+    "Run": "task1-red-valid",
+    "Log": "task1-red-valid.log",
+    "Trx": "task1-red-valid.trx",
+    "Total": 3,
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0
+  },
+  {
+    "Run": "task1-red",
+    "Log": "task1-red.log",
+    "Trx": null,
+    "Status": "No completed TRX; consult raw build/process log"
+  },
+  {
+    "Run": "task2-green",
+    "Log": "task2-green.log",
+    "Trx": "task2-green.trx",
+    "Total": 120,
+    "Passed": 120,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "task2-red",
+    "Log": "task2-red.log",
+    "Trx": "task2-red.trx",
+    "Total": 6,
+    "Passed": 0,
+    "Failed": 6,
+    "Skipped": 0
+  },
+  {
+    "Run": "task3-green-final",
+    "Log": "task3-green-final.log",
+    "Trx": "task3-green-final.trx",
+    "Total": 188,
+    "Passed": 188,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "task3-green",
+    "Log": "task3-green.log",
+    "Trx": "task3-green.trx",
+    "Total": 188,
+    "Passed": 186,
+    "Failed": 2,
+    "Skipped": 0
+  },
+  {
+    "Run": "task3-red",
+    "Log": "task3-red.log",
+    "Trx": "task3-red.trx",
+    "Total": 3,
+    "Passed": 1,
+    "Failed": 2,
+    "Skipped": 0
+  },
+  {
+    "Run": "task4-green",
+    "Log": "task4-green.log",
+    "Trx": "task4-green.trx",
+    "Total": 80,
+    "Passed": 75,
+    "Failed": 5,
+    "Skipped": 0
+  },
+  {
+    "Run": "task4-red-behavior",
+    "Log": "task4-red-behavior.log",
+    "Trx": "task4-red-behavior.trx",
+    "Total": 9,
+    "Passed": 1,
+    "Failed": 8,
+    "Skipped": 0
+  },
+  {
+    "Run": "task4-red",
+    "Log": "task4-red.log",
+    "Trx": null,
+    "Status": "No completed TRX; consult raw build/process log"
+  },
+  {
+    "Run": "visual-first",
+    "Log": "visual-first.log",
+    "Trx": null,
+    "Status": "No completed TRX; consult raw build/process log"
+  },
+  {
+    "Run": "visual-layout",
+    "Log": "visual-layout.log",
+    "Trx": "visual-layout.trx",
+    "Total": 3,
+    "Passed": 0,
+    "Failed": 3,
+    "Skipped": 0
+  },
+  {
+    "Run": "visual-layout2",
+    "Log": "visual-layout2.log",
+    "Trx": "visual-layout2.trx",
+    "Total": 4,
+    "Passed": 3,
+    "Failed": 1,
+    "Skipped": 0
+  },
+  {
+    "Run": "visual-refinement-green",
+    "Log": "visual-refinement-green.log",
+    "Trx": "visual-refinement-green.trx",
+    "Total": 10,
+    "Passed": 10,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "Run": "visual-refinement-red",
+    "Log": "visual-refinement-red.log",
+    "Trx": "visual-refinement-red.trx",
+    "Total": 10,
+    "Passed": 3,
+    "Failed": 7,
+    "Skipped": 0
+  }
+]

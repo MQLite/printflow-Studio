@@ -1,0 +1,67 @@
+{
+  "source": "output/ui/SCRUM-11171/checks/e4-ui-architecture-final2.trx",
+  "base": "209d0b3a6442aac1f901864107b94c5e6a0cb52d",
+  "counters": {
+    "total": "1438",
+    "failed": "14",
+    "passed": "1424"
+  },
+  "failures": [
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_missing_picture_state_is_translated(culture: \"en-US\", expected: \"No preview\")",
+      "message": "Shouldly.ShouldAssertException : rendered.Facts\r\n    should be\r\n\"No preview\"\r\n    but was\r\n\"无预览\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    \r\nExpected Value | N    o    \\s   p    r    e    v    i    e    w    \r\nActual Value   | 无    预    览                                       \r\nExpected Code  | 78   111  32   112  114  101  118  105  101  119  \r\nActual Code    | 260803904435272                                   "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_apply_uses_real_command_and_review_metadata_survives_restart(culture: \"en-US\", heading: \"Manual crop\", selected: \"Selected bounds\", applied: \"Applied crop bounds\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : model.ManualCropHeading\r\n    should be\r\n\"Manual crop\"\r\n    but was\r\n\"手动裁切\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   \r\nExpected Value | M    a    n    u    a    l    \\s   c    r    o    p    \r\nActual Value   | 手    动    裁    切                                       \r\nExpected Code  | 77   97   110  117  97   108  32   99   114  111  112  \r\nActual Code    | 25163211603500920999                                   "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"zh-CN\", effectiveLabel: \"源图有效分辨率\", normalStatus: \"无需放大\", enlargementStatus: \"需要放大\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Rendered_drafts_update_through_UIA_without_recording_a_size(culture: \"en-US\", effectiveLabel: \"Effective source resolution\", normalStatus: \"No enlargement required\", enlargementStatus: \"Enlargement required\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.HomeRecentAccessibilityTests.The_row_actions_are_localised_while_their_identities_are_not",
+      "message": "Shouldly.ShouldAssertException : english.Single(label => label.Id == \"Home.RemoveSessionRecord\").Name\r\n    should be\r\n\"Remove from list\"\r\n    but was\r\n\"从列表移除\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   \r\nExpected Value | R    e    m    o    v    e    \\s   f    r    o    m    \\s   l    i    s    t    \r\nActual Value   | 从    列    表    移    除                                                           \r\nExpected Code  | 82   101  109  111  118  101  32   102  114  111  109  32   108  105  115  116  \r\nActual Code    | 2017421015349203122738500                                                       "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"keep\", label: \"Artwork extent\", artwork: \"Full original canvas\", canvas: \"12 × 10 px\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"manual\", label: \"Selected artwork\", artwork: \"6 × 5 px\", canvas: \"10 × 9 px\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"waiting\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.ManualCropAdjustmentUiTests.Rendered_adjustments_validate_and_preview_the_exact_crop_without_persisting(culture: \"en-US\", tight: \"Tight\", uniform: \"Uniform margin\", edge: \"Per-edge margin\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Tight\"\r\n    but was\r\n\"紧贴选区\"\r\n    difference\r\nDifference     |  |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    \r\nExpected Value | T    i    g    h    t    \r\nActual Value   | 紧    贴    选    区         \r\nExpected Code  | 84   105  103  104  116  \r\nActual Code    | 32039361483687321306     "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.OperatorWave1AHostTests.Nonvisible_seed_and_real_command_persistence_smoke",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains more than one element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"review\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.PrintDimensionsPreflightUiTests.Persisted_geometry_is_rendered_from_the_exact_approved_artwork(path: \"automatic\", label: \"Artwork content\", artwork: \"5 × 5 px\", canvas: \"9 × 9 px\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- System.InvalidOperationException : Sequence contains no matching element"
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.KeepOriginalExtentUiTests.Rendered_action_is_localized_and_Invoke_advances_real_session(culture: \"en-US\", phase: \"manual\", label: \"Keep original extent\", retained: \"Original extent retained\")",
+      "message": "System.InvalidOperationException : The view failed to render.\r\n---- Shouldly.ShouldAssertException : peer.GetName()\r\n    should be\r\n\"Keep original extent\"\r\n    but was\r\n\"保留原始范围\"\r\n    difference\r\nDifference     |  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |   \r\n               | \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \\|/  \r\nIndex          | 0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   \r\nExpected Value | K    e    e    p    \\s   o    r    i    g    i    n    a    l    \\s   e    x    t    e    n    t    \r\nActual Value   | 保    留    原    始    范    围                                                                          \r\nExpected Code  | 75   101  101  112  32   111  114  105  103  105  110  97   108  32   101  120  116  101  110  116  \r\nActual Code    | 204453004121407229873353922260                                                                      "
+    },
+    {
+      "name": "PrintFlow.Tests.Integration.Ui.OperatorCultureIsolationTests.Language_tests_leave_the_ambient_culture_in_charge_for_the_next_test",
+      "message": "Shouldly.ShouldAssertException : selectedBefore\r\n    should be null but was\r\nzh-CN\r\n\r\nAdditional Info:\r\n    the application never unselects, so a test starting with a selection inherited a leak"
+    }
+  ]
+}

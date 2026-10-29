@@ -1,0 +1,82 @@
+[
+  {
+    "View": "HomeView.xaml",
+    "Checks": [
+      {
+        "Attribute": "Command",
+        "Count": 14,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "CommandParameter",
+        "Count": 9,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "TargetIdentity",
+        "Count": 1,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsGestureGuarded",
+        "Count": 0,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "AutomationProperties.AutomationId",
+        "Count": 41,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsDefault",
+        "Count": 0,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsCancel",
+        "Count": 1,
+        "Unchanged": true
+      }
+    ]
+  },
+  {
+    "View": "WorkflowSelectionView.xaml",
+    "Checks": [
+      {
+        "Attribute": "Command",
+        "Count": 2,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "CommandParameter",
+        "Count": 1,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "TargetIdentity",
+        "Count": 0,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsGestureGuarded",
+        "Count": 0,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "AutomationProperties.AutomationId",
+        "Count": 8,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsDefault",
+        "Count": 0,
+        "Unchanged": true
+      },
+      {
+        "Attribute": "IsCancel",
+        "Count": 0,
+        "Unchanged": true
+      }
+    ]
+  }
+]

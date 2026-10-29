@@ -1,0 +1,130 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:03.55]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.PageHeader") [FAIL]
+[xUnit.net 00:00:03.56]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.TaskCard") [FAIL]
+[xUnit.net 00:00:03.59]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.FormSection") [FAIL]
+[xUnit.net 00:00:03.67]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: "Error", heading: "处理未完成", explanation: "请检查失败原因，再选择可用操作。") [FAIL]
+[xUnit.net 00:00:03.69]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: "Warning", heading: "请先完成检查", explanation: "缺少必要条件，已有输入会保留。") [FAIL]
+[xUnit.net 00:00:03.70]     PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Loading_is_indeterminate_and_does_not_hide_legal_stop [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.PageHeader") [406 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : component.Style
+    should not be null but was
+
+Additional Info:
+    the shared presentation component must actually be applied
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(String style) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 30
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c__DisplayClass0_0.<Components_preserve_content_and_accessible_names>b__2(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 44
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.TaskCard") [12 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : component.Style
+    should not be null but was
+
+Additional Info:
+    the shared presentation component must actually be applied
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(String style) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 30
+   at InvokeStub_GuidedComponentTests.Components_preserve_content_and_accessible_names(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c__DisplayClass0_0.<Components_preserve_content_and_accessible_names>b__2(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 44
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(style: "PF.FormSection") [25 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : component.Style
+    should not be null but was
+
+Additional Info:
+    the shared presentation component must actually be applied
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Components_preserve_content_and_accessible_names(String style) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 30
+   at InvokeStub_GuidedComponentTests.Components_preserve_content_and_accessible_names(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c__DisplayClass0_0.<Components_preserve_content_and_accessible_names>b__2(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 44
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: "Error", heading: "处理未完成", explanation: "请检查失败原因，再选择可用操作。") [25 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : tree.OfType<TextBlock>()
+    should contain an element satisfying the condition
+((t.Text == explanation) && (t.TextWrapping == 2))
+    but does not
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(String kind, String heading, String explanation) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 64
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c__DisplayClass1_0.<Warning_and_error_have_persistent_text_beyond_colour>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 73
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(kind: "Warning", heading: "请先完成检查", explanation: "缺少必要条件，已有输入会保留。") [11 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : tree.OfType<TextBlock>()
+    should contain an element satisfying the condition
+((t.Text == explanation) && (t.TextWrapping == 2))
+    but does not
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(String kind, String heading, String explanation) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 64
+   at InvokeStub_GuidedComponentTests.Warning_and_error_have_persistent_text_beyond_colour(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c__DisplayClass1_0.<Warning_and_error_have_persistent_text_beyond_colour>b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 73
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+  失败 PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Loading_is_indeterminate_and_does_not_hide_legal_stop [9 ms]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : tree.OfType<ProgressBar>()
+    should have single item but had
+0
+    items and was
+[] (System.Linq.Enumerable+OfTypeIterator`1[System.Windows.Controls.ProgressBar])
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Loading_is_indeterminate_and_does_not_hide_legal_stop() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 82
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.RuntimeMethodInfo.Invoke(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedComponentTests.<>c.<Loading_is_indeterminate_and_does_not_hide_legal_stop>b__2_1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedComponentTests.cs:line 84
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+
+失败!  - 失败:     6，通过:     1，已跳过:     0，总计:     7，持续时间: 556 ms - PrintFlow.Tests.dll (net10.0)

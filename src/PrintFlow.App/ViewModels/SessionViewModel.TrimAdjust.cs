@@ -46,7 +46,7 @@ public sealed partial class SessionViewModel
     public TrimAdjustmentView? TrimAdjustTarget => _trimAdjustTarget;
 
     /// <summary>Whether Adjust trim edges is offered.</summary>
-    public bool CanAdjustTrim => _session?.TrimAdjustment is not null && !IsCropping && !IsBusy && _finalSaveOperation is null;
+    public bool CanAdjustTrim => CanInteractWithLivePage && _session?.TrimAdjustment is not null && !IsCropping && !IsBusy && _finalSaveOperation is null;
 
     public string TrimAdjustBeginLabel => Strings.Session_TrimAdjustBegin;
     public string TrimAdjustHeading => Strings.Session_TrimAdjustHeading;
@@ -91,9 +91,9 @@ public sealed partial class SessionViewModel
 
     public bool IsTrimDraftUnchanged => IsAdjustingTrim && CropSelection is { } kept && kept == _trimAdjustTarget?.CurrentBounds;
 
-    public bool CanRestoreAutomaticSuggestion => IsAdjustingTrim && !IsBusy && _trimAdjustTarget?.AutomaticSuggestion is not null;
+    public bool CanRestoreAutomaticSuggestion => CanInteractWithLivePage && IsAdjustingTrim && !IsBusy && _trimAdjustTarget?.AutomaticSuggestion is not null;
 
-    public bool CanUseThisTrim => IsAdjustingTrim && !IsBusy && _trimAdjustTarget is { } target &&
+    public bool CanUseThisTrim => CanInteractWithLivePage && IsAdjustingTrim && !IsBusy && _trimAdjustTarget is { } target &&
         CropSelection is { IsEmpty: false } kept && kept.FitsWithin(target.SourcePixelWidth, target.SourcePixelHeight) &&
         TrimAdjustSourcePane is not null;
 
@@ -196,7 +196,7 @@ public sealed partial class SessionViewModel
     [RelayCommand]
     private void CancelTrimAdjust()
     {
-        if (!IsAdjustingTrim || IsBusy)
+        if (!CanInteractWithLivePage || !IsAdjustingTrim || IsBusy)
         {
             return;
         }
@@ -210,16 +210,19 @@ public sealed partial class SessionViewModel
     [RelayCommand]
     private void ToggleTrimCompare()
     {
-        if (IsAdjustingTrim) IsComparingTrim = !IsComparingTrim;
+        if (CanInteractWithLivePage && IsAdjustingTrim) IsComparingTrim = !IsComparingTrim;
     }
 
     [RelayCommand]
-    private void ShowTrimAdjustView() => IsComparingTrim = false;
+    private void ShowTrimAdjustView()
+    {
+        if (CanInteractWithLivePage) IsComparingTrim = false;
+    }
 
     [RelayCommand]
     private void ShowTrimCompareView()
     {
-        if (IsAdjustingTrim) IsComparingTrim = true;
+        if (CanInteractWithLivePage && IsAdjustingTrim) IsComparingTrim = true;
     }
 
     /// <summary>
@@ -234,12 +237,13 @@ public sealed partial class SessionViewModel
             return;
         }
 
+        long generation = _openGeneration;
         await RunAsync(new WorkflowCommand.AdjustTrimFromReview(
             target.ResultRevisionId, target.ResultSha256, target.PreTrimRevisionId, target.PreTrimSha256, kept),
             cancellationToken).ConfigureAwait(true);
 
         // Said only when a new result from this source really is the one now under review.
-        if (Notice is null && _session is { CurrentStep: { Step: StepKind.Trim, State: StepState.ReviewRequired } } session &&
+        if (generation == _openGeneration && Notice is null && _session is { CurrentStep: { Step: StepKind.Trim, State: StepState.ReviewRequired } } session &&
             session.CurrentArtefact is { IsCurrentStepResult: true } shown && shown.RevisionId != target.ResultRevisionId &&
             session.UpstreamArtefact?.RevisionId == target.PreTrimRevisionId)
         {
@@ -333,7 +337,11 @@ public sealed partial class SessionViewModel
         NotifyOperatorStatusChanged();
     }
 
-    partial void OnIsComparingTrimChanged(bool value) => NotifyTrimAdjustState();
+    partial void OnIsComparingTrimChanged(bool value)
+    {
+        OnPropertyChanged(nameof(GuidedInteractionIdentity));
+        NotifyTrimAdjustState();
+    }
 
     private void NotifyTrimAdjustPanes()
     {

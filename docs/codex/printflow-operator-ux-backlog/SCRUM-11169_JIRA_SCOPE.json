@@ -1,0 +1,392 @@
+{
+  "date": "2026-10-19",
+  "cloudId": "6ea5df13-e1e2-4df3-bb4b-691a3fb8626c",
+  "userAuthorization": "SCRUM-11177 通过。请继续推进 SCRUM-11169，沿用已批准的视觉风格和 Native 执行方式。",
+  "base": "7fd87f6ef7ac349633af19aa04355def00c79b41",
+  "issues": [
+    {
+      "appliedContentFormat": "markdown",
+      "id": "10929",
+      "key": "SCRUM-11169",
+      "fields": {
+        "summary": "引导式界面改版：步骤导航与单步聚焦框架",
+        "description": "Planning-ID：PF-GUX-v2-E2\n\n## 目标\n\n把集中式 Session 工作区改为由业务状态驱动的引导界面，每次只呈现当前可操作的一步。\n\n## 范围\n\n应用壳、步骤导航、当前工作区、固定操作栏、步骤投影、返回编辑和恢复定位；业务状态及命令仍由既有工作流决定。\n\n## Epic 验收条件\n\n1. 每屏清楚呈现步骤名称、当前状态、当前必要内容和一个推荐主操作；辅助动作不抢占主流程。\n2. 未来步骤只读或显示明确不可达原因，不能通过导航越过审核、前置条件或环境门禁。\n3. 浏览历史与重新执行区分；合法返回修改展示影响范围，并按原有规则失效下游结果。\n4. 重启、退出、重入和异步状态刷新正确定位；隐藏控件退出 Tab/UIA 操作面，重复输入不会触发下一步。\n\n## 子项范围\n\n* G01：建立步骤导航、当前任务区与固定操作栏的应用壳\n* G02：按业务状态生成步骤进度与当前步骤专属内容\n* G03：提供安全的上一步、查看历史与修改后续影响提示\n* G04：恢复任务时定位真实步骤并防止重复操作和焦点穿透\n\n## 共同范围与约束\n\nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）。用户要求：全面美化使用界面，改为一步一步指导操作、单步尽量仅显示相关内容的引导式应用。本轮授权为生成 Scrum 待办与 Epics；所有条目是待规划/待开发，不代表已完成或自动进入实施。\n\n推荐体验：步骤导航＋当前任务工作区＋固定操作栏；一个推荐主操作，低频/技术内容按需展开，相关辅助动作与关键阻塞仍可见。最终样式及详细交互需经过设计评审。\n\n保持一任务一图片、三条既有路线、原件和 InputSnapshot、合法命令、必要人工审核、精确结果身份、下游失效、300 PPI/CMYK/W1、环境门禁、自动化锁、原有回收/保留和本地隐私合同。AI 相关外部传输沿用 SCRUM-11156 已有明确选取/上传范围，本次不扩大。保留现有 zh-CN/en 资源，中文为人工验收主语言，不增加英文人工测试。\n\n不包含新增图片编辑器、批量处理、订单/账号系统、自动打印、自动通过审核、新云服务、收费服务、发布或生产变更。保留工作区已有修改；本次不改产品代码。\n\n## 与既有工作衔接\n\n复用 [SCRUM-11139](https://yituoxx.atlassian.net/browse/SCRUM-11139) 的术语、状态、审核、裁切、保存、修正和最近任务能力；它及 SCRUM-11154/11155 的未完成验收和已知缺陷保持原状态。本轮是信息架构和视觉重组，不重建底层能力，不把旧功能验收转写为通过。\n\n[SCRUM-11156](https://yituoxx.atlassian.net/browse/SCRUM-11156) / [SCRUM-11166](https://yituoxx.atlassian.net/browse/SCRUM-11166) 的 AI 业务功能继续由原 Epic 负责，新界面仅有条件接入；不作为三条核心路线交付的阻塞。\n\n## 计划依据与证据状态\n\n基于本地 master de7bca6e0a8462584b4d6bf4d16307d1335e2fb3 的 WPF XAML、ViewModels、WorkflowCatalog/TransitionTable、MVP 设计、术语及历史交接材料，并于本轮读取既有 Jira 状态。未运行应用、未采集新界面截图、未执行真人走查；规划判断不构成产品验证。\n\n## Scrum 组织\n\n建议 Sprint 0：体验蓝图与原型评审；Sprint 1：共享组件与引导框架；Sprint 2：导入/导航/恢复；Sprint 3：处理审核/保存辅助页/条件 AI 接入；Sprint 4：集成、布局键盘和真实新手验收。仅为分组与顺序建议，待容量评估和估点后拆分，不承诺每组能在一个 Sprint 完成；本次不创建/启动实际 Sprint，不指派人员、工期或故事点。按依赖顺序取入待办。\n\nReady：当前范围、旧能力复用边界、依赖及验收条件明确；涉及交互/状态变更的实现先有经评审设计。Done：实现和适当行为/视觉检查有证据、关键缺陷处置明确、人工验收单独记录；模拟不代替真人或生产证据。",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "name": "To Do"
+          }
+        },
+        "issuelinks": []
+      }
+    },
+    {
+      "appliedContentFormat": "markdown",
+      "id": "10938",
+      "key": "SCRUM-11178",
+      "fields": {
+        "summary": "建立步骤导航、当前任务区与固定操作栏的应用壳",
+        "description": "Planning-ID：PF-GUX-v2-G01  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望随时知道在哪一步、当前要做什么、下一步是什么。\n\n## 验收条件\n\n1. 统一提供任务名称、当前步骤及状态、步骤进度、当前工作区和固定主操作栏。\n2. 当前页面只出现必要输入和相关图片；技术信息、历史和低频动作通过明确次级入口查看。\n3. 每步只有一个推荐主操作；审核中的驳回、求助和运行中的停止/接管仍清晰可达。\n4. 主操作不随图片滚动丢失，长内容可滚动，窄窗口下仍可完成操作；现有导航与测试入口保持可定位。\n\n## 前置依赖\n\n* [SCRUM-11177](https://yituoxx.atlassian.net/browse/SCRUM-11177)：在 WPF 落地共享主题资源与引导界面组件\n\n## Scrum 分组\n\n建议 Sprint 1（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11169](https://yituoxx.atlassian.net/browse/SCRUM-11169)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "name": "To Do"
+          }
+        },
+        "parent": {
+          "id": "10929",
+          "key": "SCRUM-11169",
+          "fields": {
+            "summary": "引导式界面改版：步骤导航与单步聚焦框架"
+          }
+        },
+        "issuelinks": [
+          {
+            "id": "10048",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "key": "SCRUM-11177",
+              "fields": {
+                "summary": "在 WPF 落地共享主题资源与引导界面组件",
+                "status": {
+                  "name": "In Review"
+                }
+              }
+            }
+          },
+          {
+            "id": "10049",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11179",
+              "fields": {
+                "summary": "按业务状态生成步骤进度与当前步骤专属内容",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10067",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11193",
+              "fields": {
+                "summary": "统一环境检查、设置和技术详情的页面层级",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10069",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11194",
+              "fields": {
+                "summary": "统一错误、空状态、确认对话框与就地反馈",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "appliedContentFormat": "markdown",
+      "id": "10939",
+      "key": "SCRUM-11179",
+      "fields": {
+        "summary": "按业务状态生成步骤进度与当前步骤专属内容",
+        "description": "Planning-ID：PF-GUX-v2-G02  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我只想看到当前路线和当前状态真正需要的内容。\n\n## 验收条件\n\n1. 步骤展示由既有 WorkflowCatalog、状态和命令资格投影产生，不创建第二套业务状态机。\n2. 步骤区分当前、已完成、可查看、待执行、已跳过、需处理；增强和去背景可选但审核不能被隐式跳过。\n3. 未来步骤不能点击执行；隐藏内容不响应快捷键、Tab、默认按钮或辅助技术操作。\n4. 为三条路线及白墨、PDF/PSD、多尺寸条件分支建立状态到页面的映射和行为测试。\n\n## 前置依赖\n\n* [SCRUM-11178](https://yituoxx.atlassian.net/browse/SCRUM-11178)：建立步骤导航、当前任务区与固定操作栏的应用壳\n\n## Scrum 分组\n\n建议 Sprint 1（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11169](https://yituoxx.atlassian.net/browse/SCRUM-11169)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "name": "To Do"
+          }
+        },
+        "parent": {
+          "id": "10929",
+          "key": "SCRUM-11169",
+          "fields": {
+            "summary": "引导式界面改版：步骤导航与单步聚焦框架"
+          }
+        },
+        "issuelinks": [
+          {
+            "id": "10049",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "key": "SCRUM-11178",
+              "fields": {
+                "summary": "建立步骤导航、当前任务区与固定操作栏的应用壳",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10050",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11180",
+              "fields": {
+                "summary": "提供安全的上一步、查看历史与修改后续影响提示",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10051",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11181",
+              "fields": {
+                "summary": "恢复任务时定位真实步骤并防止重复操作和焦点穿透",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10052",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11182",
+              "fields": {
+                "summary": "重做首页与单文件导入，突出开始任务和继续处理",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10054",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11184",
+              "fields": {
+                "summary": "为 AI 设计提供统一的分步界面接入与手动交接布局",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10056",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11185",
+              "fields": {
+                "summary": "将自动处理改为独立进度步骤并保留停止和接管入口",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10059",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11188",
+              "fields": {
+                "summary": "将印刷尺寸设置做成聚焦表单与实时结果预览",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "appliedContentFormat": "markdown",
+      "id": "10940",
+      "key": "SCRUM-11180",
+      "fields": {
+        "summary": "提供安全的上一步、查看历史与修改后续影响提示",
+        "description": "Planning-ID：PF-GUX-v2-G03  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望返回检查或修改时了解会影响哪些结果。\n\n## 验收条件\n\n1. 只读查看历史与返回重做有不同入口，查看不能撤销审核或把旧结果当作当前结果。\n2. 返回修改只在工作流允许时提供；提交前明确说明将失效的下游结果、尺寸和审核。\n3. 取消返回保留原业务状态；确认修改后按既有失效和谱系规则处理，不重复使用旧审批。\n4. 草稿未提交时离开有保留或放弃选择；不能把界面草稿显示成已确认业务输入。\n\n## 前置依赖\n\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\n\n## Scrum 分组\n\n建议 Sprint 2（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11169](https://yituoxx.atlassian.net/browse/SCRUM-11169)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "name": "To Do"
+          }
+        },
+        "parent": {
+          "id": "10929",
+          "key": "SCRUM-11169",
+          "fields": {
+            "summary": "引导式界面改版：步骤导航与单步聚焦框架"
+          }
+        },
+        "issuelinks": [
+          {
+            "id": "10050",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "key": "SCRUM-11179",
+              "fields": {
+                "summary": "按业务状态生成步骤进度与当前步骤专属内容",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10071",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11195",
+              "fields": {
+                "summary": "验收窗口缩放、中文布局、键盘和辅助技术可操作性",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "appliedContentFormat": "markdown",
+      "id": "10941",
+      "key": "SCRUM-11181",
+      "fields": {
+        "summary": "恢复任务时定位真实步骤并防止重复操作和焦点穿透",
+        "description": "Planning-ID：PF-GUX-v2-G04  \nInitiative：PF-GUX-v2；计划日期：2026-10-19（Pacific/Auckland）\n\n## 用户价值 / 目标\n\n作为操作者，我希望中断后继续到正确位置，并且一次点击只提交一次。\n\n## 验收条件\n\n1. 从已持久化状态恢复任务，定位待输入、待审或故障步骤；处理被中断时不自动重启外部动作。\n2. 进入新步骤设置中性可见焦点，不将此前按住的 Enter/Space 或双击余波作为新审批。\n3. 重复点击、异步返回、旧页面回调和语言/窗口刷新不能重复发命令或覆盖新任务。\n4. 只恢复现有契约支持的数据；新增草稿持久化若有必要先单独设计，不擅自迁移业务存储。\n\n## 前置依赖\n\n* [SCRUM-11179](https://yituoxx.atlassian.net/browse/SCRUM-11179)：按业务状态生成步骤进度与当前步骤专属内容\n\n## Scrum 分组\n\n建议 Sprint 2（候选分组，非时间或容量承诺）；正式 Sprint、负责人和故事点在评审后确定，本次保持待办状态。所属 Epic：[SCRUM-11169](https://yituoxx.atlassian.net/browse/SCRUM-11169)。\n\n## 实现与验收边界\n\n本项是用户要求“先生成 Scrum & Epics”的规划结果，不代表已批准产品实现、已完成或已运行测试。实现前按所属 Epic 完成设计评审与依赖核实；复用已有业务服务、审核、导出和恢复能力，UI 不能创造命令资格。保留原件/InputSnapshot、精确审批、下游失效、单任务单图、三条路线及生产安全契约。关键提示、停止和接管不能因减少内容而不可达。保持 zh-CN/en 资源，中文人工验收，不新增英文人工走查。\n\n## 验证要求与来源\n\n按本项风险执行适当的行为/组件/集成验证，并对变化页面保留可审阅视觉证据；单纯规范或原型项采用设计检查。真实键盘、工作站、新手和生产验证分别记录，未运行不能标 PASS。旧缺陷与新回归分列，发现超出界面范围的底层缺陷另行关联处置，不扩展本项修复。\n\n范围和全局 Done 标准见所属 Epic；现有能力来源 SCRUM-11139，AI 条件接入来源 SCRUM-11156/11166。依据本地 master de7bca6 与本轮 Jira 读取；本次没有产品代码、桌面操作、发布或生产变更。",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "name": "To Do"
+          }
+        },
+        "parent": {
+          "id": "10929",
+          "key": "SCRUM-11169",
+          "fields": {
+            "summary": "引导式界面改版：步骤导航与单步聚焦框架"
+          }
+        },
+        "issuelinks": [
+          {
+            "id": "10051",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "inwardIssue": {
+              "key": "SCRUM-11179",
+              "fields": {
+                "summary": "按业务状态生成步骤进度与当前步骤专属内容",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10063",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11191",
+              "fields": {
+                "summary": "将同事修正、人工接管和恢复显示为独立引导分支",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          },
+          {
+            "id": "10066",
+            "type": {
+              "name": "Blocks",
+              "inward": "is blocked by",
+              "outward": "blocks"
+            },
+            "outwardIssue": {
+              "key": "SCRUM-11192",
+              "fields": {
+                "summary": "重做最近任务和待处理入口并准确定位继续步骤",
+                "status": {
+                  "name": "To Do"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

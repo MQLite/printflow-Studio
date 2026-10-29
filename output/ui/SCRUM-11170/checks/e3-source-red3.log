@@ -1,0 +1,94 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:03.90]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "psd", asset: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "psd", asset: True) [606 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : if (asset && format == "psd") m.PsdSourceNotice
+    should not contain (case insensitive comparison)
+"TIFF"
+    but was actually
+"原始文件：PSD（保持不变）。请先准备栅格预览再检查。支持 RGB、8 位、包含 Photoshop 兼容合成图的 PSD。PSD 文件仅作为视觉设计稿输入：源文件中已有的专色或白墨通道不会作为生产通..."
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format, Boolean asset) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 37
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:05.31]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "psd", asset: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "psd", asset: False) [1 s]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : tree.OfType<TextBlock>()
+    should contain an element satisfying the condition
+(t.Text.Contains(CS$<>8__locals1.fileName) && Shown(t))
+    but does not
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.<>c__DisplayClass0_0.<<Source_information_is_visible_during_preparation_and_review_then_collapses>g__AssertSource|0>d.MoveNext() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 55
+--- End of stack trace from previous location ---
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format, Boolean asset) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 40
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.<>c__DisplayClass0_1.<Source_information_is_visible_during_preparation_and_review_then_collapses>b__2(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 64
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+[xUnit.net 00:00:06.62]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "pdf", asset: True) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "pdf", asset: True) [1 s]
+  错误消息:
+   Shouldly.ShouldAssertException : if (asset && format == "pdf") m.PdfSourceNotice
+    should not contain (case insensitive comparison)
+"印刷尺寸"
+    but was actually
+"单页 PDF 已准备好供检查。原始 PDF 保持不变，显示的 PNG 是以 300 PPI 生成的受管整页栅格图。请确认第 1 页及其尺寸：50.8 × 25.4 毫米（600 × 300 像素）。检..."
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format, Boolean asset) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 41
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:07.86]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "pdf", asset: False) [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(format: "pdf", asset: False) [1 s]
+  错误消息:
+   System.InvalidOperationException : The view failed to render.
+---- Shouldly.ShouldAssertException : GuidedSessionProjectionTests.Shown(notice)
+    should be
+False
+    but was
+True
+  堆栈跟踪:
+     at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.<>c__DisplayClass0_0.<<Source_information_is_visible_during_preparation_and_review_then_collapses>g__AssertSource|0>d.MoveNext() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 55
+--- End of stack trace from previous location ---
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Source_information_is_visible_during_preparation_and_review_then_collapses(String format, Boolean asset) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 43
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.<>c__DisplayClass0_1.<Source_information_is_visible_during_preparation_and_review_then_collapses>b__2(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 60
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass1_0`1.<Render>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99
+   at PrintFlow.Tests.Fixtures.WpfRendering.<>c__DisplayClass6_0.<OnStaThread>b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206
+结果文件: C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\output\ui\SCRUM-11170\checks\e3-source-red3.trx
+
+失败!  - 失败:     4，通过:     1，已跳过:     0，总计:     5，持续时间: 4 s - PrintFlow.Tests.dll (net10.0)

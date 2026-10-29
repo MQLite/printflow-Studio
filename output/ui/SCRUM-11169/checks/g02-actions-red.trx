@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9c1e67d3-545a-4946-9f0f-7ca3b0b9625a" name="admin@DESKTOP-0BG8884 2026-10-19 15:14:47" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T15:14:47.0635263+13:00" queuing="2026-10-19T15:14:47.0635267+13:00" start="2026-10-19T15:14:41.8938980+13:00" finish="2026-10-19T15:14:47.4792652+13:00" />
+  <TestSettings name="default" id="357eae07-5a66-449e-879a-18f5eafc0fb4">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_15_14_47" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="b339829c-f355-40f0-b8d7-c92ce400a778" testId="8411e136-5acb-2df9-3620-82338a1916eb" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar" computerName="DESKTOP-0BG8884" duration="00:00:00.9396684" startTime="2026-10-19T15:14:46.3921339+13:00" endTime="2026-10-19T15:14:47.3216310+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b339829c-f355-40f0-b8d7-c92ce400a778">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : GuidedSessionShellTests.Ancestors(confirm)&#xD;
+    should contain&#xD;
+System.Windows.Controls.Grid (23327356)&#xD;
+    but was actually&#xD;
+[System.Windows.Controls.StackPanel (41362659), System.Windows.Controls.StackPanel (7592968), System.Windows.Controls.Border (15962040), System.Windows.Controls.StackPanel (55619406), System.Windows.Controls.StackPanel (65019658), System.Windows.Controls.Border (23998419), System.Windows.Controls.StackPanel (56351695), System.Windows.Controls.ScrollContentPresenter (16479749), System.Windows.Controls.Grid (49082446), System.Windows.Controls.ScrollViewer (38392800), System.Windows.Controls.Grid (62772636), System.Windows.Controls.Grid (29532276), System.Windows.Controls.ContentPresenter (32724255), System.Windows.Controls.Border (3532638), PrintFlow.App.Views.SessionScreenView (10665485)]</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 196&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.&lt;&gt;c__DisplayClass6_0.&lt;Current_background_authorisation_confirmation_is_in_the_fixed_bar&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 199&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="731c302c-0652-4690-91f3-1cd86648733e" testId="8d502861-a29d-2602-0893-187396c25231" testName="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run" computerName="DESKTOP-0BG8884" duration="00:00:00.8234932" startTime="2026-10-19T15:14:45.5495562+13:00" endTime="2026-10-19T15:14:46.3795394+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="731c302c-0652-4690-91f3-1cd86648733e">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : model.RecommendedCommand&#xD;
+    should be same as&#xD;
+CommunityToolkit.Mvvm.Input.AsyncRelayCommand (43156878)&#xD;
+    but was&#xD;
+null</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run() in C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs:line 170&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8d502861-a29d-2602-0893-187396c25231">
+      <Execution id="731c302c-0652-4690-91f3-1cd86648733e" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests" name="Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar" storage="c:\users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8411e136-5acb-2df9-3620-82338a1916eb">
+      <Execution id="b339829c-f355-40f0-b8d7-c92ce400a778" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests" name="Current_background_authorisation_confirmation_is_in_the_fixed_bar" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8411e136-5acb-2df9-3620-82338a1916eb" executionId="b339829c-f355-40f0-b8d7-c92ce400a778" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8d502861-a29d-2602-0893-187396c25231" executionId="731c302c-0652-4690-91f3-1cd86648733e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="2" executed="2" passed="0" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.24]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.14]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.17]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.03]       Shouldly.ShouldAssertException : model.RecommendedCommand&#xD;
+[xUnit.net 00:00:04.03]           should be same as&#xD;
+[xUnit.net 00:00:04.03]       CommunityToolkit.Mvvm.Input.AsyncRelayCommand (43156878)&#xD;
+[xUnit.net 00:00:04.03]           but was&#xD;
+[xUnit.net 00:00:04.03]       null&#xD;
+[xUnit.net 00:00:04.03]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.03]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs(170,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run()&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.03]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:04.03]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:04.97]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.97]       ---- Shouldly.ShouldAssertException : GuidedSessionShellTests.Ancestors(confirm)&#xD;
+[xUnit.net 00:00:04.97]           should contain&#xD;
+[xUnit.net 00:00:04.97]       System.Windows.Controls.Grid (23327356)&#xD;
+[xUnit.net 00:00:04.97]           but was actually&#xD;
+[xUnit.net 00:00:04.97]       [System.Windows.Controls.StackPanel (41362659), System.Windows.Controls.StackPanel (7592968), System.Windows.Controls.Border (15962040), System.Windows.Controls.StackPanel (55619406), System.Windows.Controls.StackPanel (65019658), System.Windows.Controls.Border (23998419), System.Windows.Controls.StackPanel (56351695), System.Windows.Controls.ScrollContentPresenter (16479749), System.Windows.Controls.Grid (49082446), System.Windows.Controls.ScrollViewer (38392800), System.Windows.Controls.Grid (62772636), System.Windows.Controls.Grid (29532276), System.Windows.Controls.ContentPresenter (32724255), System.Windows.Controls.Border (3532638), PrintFlow.App.Views.SessionScreenView (10665485)]&#xD;
+[xUnit.net 00:00:04.97]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs(196,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar()&#xD;
+[xUnit.net 00:00:04.97]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.97]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedSessionProjectionTests.cs(199,0): at PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.&lt;&gt;c__DisplayClass6_0.&lt;Current_background_authorisation_confirmation_is_in_the_fixed_bar&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.97]         C:\Users\admin\.codex\worktrees\scrum-11177-guided-theme\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:04.98]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:14:46.3819200+13:00">
+        <Text>[xUnit.net 00:00:04.03]     PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_white_ink_submission_is_recommended_and_reediting_does_not_expose_run [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T15:14:47.3220487+13:00">
+        <Text>[xUnit.net 00:00:04.97]     PrintFlow.Tests.Integration.Ui.GuidedSessionProjectionTests.Current_background_authorisation_confirmation_is_in_the_fixed_bar [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

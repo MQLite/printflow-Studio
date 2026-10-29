@@ -26,6 +26,7 @@ public sealed class SessionStepRow
         ArgumentNullException.ThrowIfNull(step);
 
         Ordinal = step.Ordinal + 1;
+        Kind = step.Step;
         Name = DisplayNames.Step(step.Step);
         State = step.Step == StepKind.Trim && step.State == StepState.Skipped
             ? Strings.Session_OriginalExtentRetained : DisplayNames.StepState(step.State);
@@ -33,6 +34,8 @@ public sealed class SessionStepRow
     }
 
     public int Ordinal { get; }
+
+    public StepKind Kind { get; }
 
     public string Name { get; }
 
@@ -2110,7 +2113,14 @@ public sealed partial class SessionViewModel : ObservableObject
     public void Open(SessionView session)
     {
         ArgumentNullException.ThrowIfNull(session);
-
+        _openGeneration++;
+        if (_serviceOperationGeneration is not null || _finalSaveOperation is not null)
+        {
+            _serviceOperationGeneration = null;
+            // Retire presentation ownership only; the old save keeps its own durable intent.
+            _finalSaveOperation = null;
+            IsBusy = false;
+        }
         Show(session);
         Notice = null;
     }
@@ -2379,7 +2389,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void BeginManualCrop()
     {
-        if (!CanManualCrop || IsBusy)
+        if (!CanInteractWithLivePage || !CanManualCrop || IsBusy)
         {
             return;
         }
@@ -2398,7 +2408,10 @@ public sealed partial class SessionViewModel : ObservableObject
     /// property of what the code can do, not of what it happens to do today.
     /// </remarks>
     [RelayCommand]
-    private void CancelManualCrop() => ClearCropState();
+    private void CancelManualCrop()
+    {
+        if (CanInteractWithLivePage && !IsBusy) ClearCropState();
+    }
 
     /// <summary>
     /// Submits the drawn rectangle through the ordinary command path (§12).
@@ -2438,7 +2451,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// <returns>True when the drag produced a usable rectangle.</returns>
     public bool TrySetCropSelection(CropSurfaceLayout layout, double x1, double y1, double x2, double y2)
     {
-        if (!IsCropping)
+        if (!CanInteractWithLivePage || !IsCropping || IsBusy)
         {
             return false;
         }
@@ -2473,7 +2486,7 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
-        IsConfirmingReturn = true;
+        CaptureReturn(SelectedReturnTarget!);
     }
 
     /// <summary>
@@ -2485,7 +2498,11 @@ public sealed partial class SessionViewModel : ObservableObject
     /// command and reaches no service.
     /// </remarks>
     [RelayCommand]
-    private void CancelReturn() => IsConfirmingReturn = false;
+    private void CancelReturn()
+    {
+        _returnIntent = null;
+        IsConfirmingReturn = false;
+    }
 
     /// <summary>
     /// Returns to the chosen step through the ordinary command path (§3, §6).
@@ -2500,13 +2517,25 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private async Task ConfirmReturnAsync(CancellationToken cancellationToken)
     {
-        if (SelectedReturnTarget is not { } target)
+        if (!IsConfirmingReturn || _returnIntent is not { } intent ||
+            intent.Context != NavigationContext(_session) || SelectedReturnTarget?.Step != intent.Target.Step ||
+            !IsLiveInteractionAllowed || IsBusy)
         {
             return;
         }
 
+        CancelReturn();
+        long generation = _openGeneration;
         await RunAsync(
-            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
+            new WorkflowCommand.ReturnToStep(intent.Target.Step), cancellationToken).ConfigureAwait(true);
+        if (generation == _openGeneration && intent.EditSize && _session?.Sizing.CanSetCustomTargetEdgeSize == true)
+        {
+            _customPresetContext = intent.Preset is { } named ? SizePresets.FirstOrDefault(choice => choice.Preset == named) : null;
+            SelectedTargetEdgeChoice = intent.Edge is { } selected ? TargetEdgeChoices.Single(choice => choice.Edge == selected) : null;
+            CustomMillimetresText = intent.Millimetres is { } value ? SizeText.MillimetresValue(value) : null;
+            IsChoosingCustomSize = true;
+            NotifyCustomSizeStateChanged();
+        }
     }
 
     // --- Background removal authority (Part C2B2 §5, §6, §10, §11) ------------------------
@@ -2601,7 +2630,9 @@ public sealed partial class SessionViewModel : ObservableObject
             return Task.CompletedTask;
         }
 
-        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken);
+        var submittedDraft = CapturePageDraft();
+        return RunAsync(new WorkflowCommand.SetTrimParameters(margin), cancellationToken,
+            _ => _cleanDraft = submittedDraft);
     }
 
     /// <summary>
@@ -2616,7 +2647,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void ApplyPreset(SizePresetChoice? preset)
     {
-        if (preset is null)
+        if (!CanInteractWithLivePage || IsBusy || preset is null)
         {
             return;
         }
@@ -2634,7 +2665,7 @@ public sealed partial class SessionViewModel : ObservableObject
     private async Task UsePresetAsync(
         SizePresetChoice? preset, CancellationToken cancellationToken)
     {
-        if (preset is null || _session?.Sizing.CanSetPresetFitSize != true)
+        if (!CanInteractWithLivePage || IsBusy || preset is null || _session?.Sizing.CanSetPresetFitSize != true)
         {
             return;
         }
@@ -2651,7 +2682,7 @@ public sealed partial class SessionViewModel : ObservableObject
     [RelayCommand]
     private void ChooseCustomSize()
     {
-        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true || IsBusy)
+        if (!CanInteractWithLivePage || _session?.Sizing.CanSetCustomTargetEdgeSize != true || IsBusy)
         {
             return;
         }
@@ -2693,38 +2724,13 @@ public sealed partial class SessionViewModel : ObservableObject
             cancellationToken).ConfigureAwait(true);
     }
 
-    private async Task ReturnToSizeAndEditAsync(
-        SizePreset? preset,
-        TargetEdge? edge,
-        decimal? millimetres,
-        CancellationToken cancellationToken)
+    private Task ReturnToSizeAndEditAsync(
+        SizePreset? preset, TargetEdge? edge, decimal? millimetres, CancellationToken cancellationToken)
     {
-        if (ReviewBoundsTarget is not { } target)
-        {
-            return;
-        }
-
-        await RunAsync(
-            new WorkflowCommand.ReturnToStep(target.Step), cancellationToken).ConfigureAwait(true);
-
-        if (_session?.Sizing.CanSetCustomTargetEdgeSize != true)
-        {
-            return;
-        }
-
-        _customPresetContext = preset is { } named
-            ? SizePresets.FirstOrDefault(choice => choice.Preset == named)
-            : null;
-        SelectedTargetEdgeChoice = edge is { } selected
-            ? TargetEdgeChoices.Single(choice => choice.Edge == selected)
-            : null;
-        CustomMillimetresText = millimetres is { } value
-            ? SizeText.MillimetresValue(value)
-            : null;
-        IsChoosingCustomSize = true;
-        NotifyCustomSizeStateChanged();
+        if (ReviewBoundsTarget is { } target)
+            CaptureReturn(target, preset, edge, millimetres, editSize: true);
+        return Task.CompletedTask;
     }
-
     /// <summary>Records exactly one operator-selected decimal target through the service path.</summary>
     [RelayCommand]
     private async Task ConfirmCustomSizeAsync(CancellationToken cancellationToken)
@@ -2736,9 +2742,10 @@ public sealed partial class SessionViewModel : ObservableObject
             return;
         }
 
+        long generation = _openGeneration;
         await RunAsync(command, cancellationToken).ConfigureAwait(true);
 
-        if (_session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
+        if (generation == _openGeneration && _session?.Sizing.SizingMode == OperatorSizingMode.CustomTargetEdge)
         {
             IsChoosingCustomSize = false;
         }
@@ -2746,42 +2753,14 @@ public sealed partial class SessionViewModel : ObservableObject
 
     /// <summary>Confirms only the exact enlargement the service currently offers.</summary>
     [RelayCommand]
-    private async Task ContinueWithSizeAsync(CancellationToken cancellationToken)
+    private Task ContinueWithSizeAsync(CancellationToken cancellationToken)
     {
-        if (_session is null || IsBusy || !CanAuthoriseEnlargement)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            Notice = null;
-            OperationResult<SessionView> result = await _sessions
-                .AuthoriseCurrentEnlargementAsync(
-                    _session.Id,
-                    _session.Sizing.EnlargementOfferId ?? Guid.Empty,
-                    Environment.UserName,
-                    cancellationToken)
-                .ConfigureAwait(true);
-
-            if (result.IsFailure)
-            {
-                ShowActionFailure(result.Failure, ActionFailureScreen.Pending);
-                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
-                await PreviewsLoaded.ConfigureAwait(true);
-                return;
-            }
-
-            Show(result.Value);
-            await PreviewsLoaded.ConfigureAwait(true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        if (_session is null || IsBusy || !IsLiveInteractionAllowed || !CanAuthoriseEnlargement)
+            return Task.CompletedTask;
+        Guid offer = _session.Sizing.EnlargementOfferId ?? Guid.Empty;
+        return RunServiceAsync(id => _sessions.AuthoriseCurrentEnlargementAsync(
+            id, offer, Environment.UserName, cancellationToken), cancellationToken);
     }
-
     /// <summary>
     /// Confirms the typed maximum bounds through the ordinary command path
     /// (§3; Epic 11400 Part B1A.2B §7).
@@ -2853,7 +2832,7 @@ public sealed partial class SessionViewModel : ObservableObject
         }
 
         SelectedReturnTarget = target;
-        IsConfirmingReturn = true;
+        CaptureReturn(target);
     }
 
     /// <summary>
@@ -2868,7 +2847,14 @@ public sealed partial class SessionViewModel : ObservableObject
         SelectedWhiteUnderbaseChoice is { } choice
             ? RunAsync(
                 new WorkflowCommand.SelectWhiteUnderbaseBranch(choice.Branch, JustificationFor(choice.Branch)),
-                cancellationToken)
+                cancellationToken, applied =>
+                {
+                    _isChoosingGuidedWhiteInk = false;
+                    SelectedWhiteUnderbaseChoice = WhiteUnderbaseChoices.FirstOrDefault(c => c.Branch == applied.WhiteUnderbaseBranch);
+                    _cleanDraft = CapturePageDraft();
+                    NotifyGuidedPresentation();
+                    NotifyOperatorStatusChanged();
+                })
             : Task.CompletedTask;
 
     /// <summary>
@@ -2908,6 +2894,19 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     [RelayCommand]
     private async Task BackToHomeAsync(CancellationToken cancellationToken)
+    {
+        if (_isSuspendedForUtility || IsBusy || _finalSaveOperation is not null || IsConfirmingDraftLeave) return;
+        if (HasPageDraft())
+        {
+            _leaveIntent = new LeaveIntent(NavigationContext(_session), LeaveHomeAsync);
+            IsConfirmingDraftLeave = true;
+            NotifyNavigation();
+            return;
+        }
+        await LeaveHomeAsync(cancellationToken).ConfigureAwait(true);
+    }
+
+    private async Task LeaveHomeAsync(CancellationToken cancellationToken)
     {
         ClearPreviews();
         await _navigation.GoHomeAsync(cancellationToken).ConfigureAwait(true);
@@ -2950,7 +2949,7 @@ public sealed partial class SessionViewModel : ObservableObject
     /// trim adjustment is open (SCRUM-11147): an Approve pressed then would approve the old
     /// result while the operator believes they are confirming the new boundary.
     /// </summary>
-    private bool Allows(CommandKind kind) => !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
+    private bool Allows(CommandKind kind) => CanInteractWithLivePage && !IsAdjustingTrim && !IsAskingColleague && Offers(kind);
 
     /// <summary>What the workflow layer offers, regardless of what this screen is showing.</summary>
     private bool Offers(CommandKind kind) => _session?.AvailableCommands.Contains(kind) == true;
@@ -3045,6 +3044,8 @@ public sealed partial class SessionViewModel : ObservableObject
             current,
             cancellationToken).ConfigureAwait(true));
 
+        var saveReviewPanes = await BuildSaveReviewPanesAsync(session, loaded, cancellationToken).ConfigureAwait(true);
+
         // Decoding is slow enough that a second command can land while the first load is still
         // in flight. Publishing only for the generation that is still current is what stops the
         // older load's images from reappearing beside the newer state's metadata — the exact
@@ -3058,6 +3059,9 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             PreviewPanes.Add(pane);
         }
+
+        SaveReviewPanes = saveReviewPanes;
+        OnPropertyChanged(nameof(SaveReviewPanes));
 
         _publishedPreviewGeneration = generation;
         OnPropertyChanged(nameof(HasPreview));
@@ -3098,6 +3102,8 @@ public sealed partial class SessionViewModel : ObservableObject
     {
         _previewGeneration++;
         ClearTiffReview();
+        SaveReviewPanes = [];
+        OnPropertyChanged(nameof(SaveReviewPanes));
 
         if (PreviewPanes.Count == 0)
         {
@@ -3169,6 +3175,7 @@ public sealed partial class SessionViewModel : ObservableObject
         // Changing the destination puts the confirmation away: what was confirmed a moment ago
         // was a warning about a different step.
         IsConfirmingReturn = false;
+        _returnIntent = null;
         OnPropertyChanged(nameof(CanBeginReturn));
     }
 
@@ -3358,27 +3365,32 @@ public sealed partial class SessionViewModel : ObservableObject
     /// adjustment itself: every other action is hidden, and this refuses it even if something
     /// invoked it anyway (SCRUM-11147). The service's exact-target checks stay the authority.
     /// </remarks>
-    private Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken) =>
+    private Task RunAsync(WorkflowCommand? command, CancellationToken cancellationToken, Action<SessionView>? onApplied = null) =>
         command is null || (IsAdjustingTrim && command is not WorkflowCommand.AdjustTrimFromReview)
             ? Task.CompletedTask
-            : RunServiceAsync(id => _sessions.ExecuteAsync(id, command, Environment.UserName, cancellationToken), cancellationToken);
+            : RunServiceAsync(id => _sessions.ExecuteAsync(id, command, Environment.UserName, cancellationToken), cancellationToken, onApplied);
 
     /// <summary>
     /// Runs one service call with the screen's ordinary busy, notice and refresh handling.
     /// </summary>
     private async Task RunServiceAsync(
-        Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken)
+        Func<SessionId, Task<OperationResult<SessionView>>> call, CancellationToken cancellationToken, Action<SessionView>? onApplied = null)
     {
-        if (_session is null || IsBusy)
+        if (_session is null || IsBusy || !CanInteractWithLivePage)
         {
             return;
         }
 
+        SessionId id = _session.Id;
+        long generation = _openGeneration;
+        _serviceOperationGeneration = generation;
+        bool IsCurrent() => generation == _openGeneration && _session?.Id == id;
         IsBusy = true;
         try
         {
             Notice = null;
-            OperationResult<SessionView> result = await call(_session.Id).ConfigureAwait(true);
+            OperationResult<SessionView> result = await call(id).ConfigureAwait(true);
+            if (!IsCurrent()) return;
 
             if (result.IsFailure)
             {
@@ -3389,19 +3401,29 @@ public sealed partial class SessionViewModel : ObservableObject
                 // attempt is persisted before the failure returns. Re-reading is what keeps the
                 // screen showing the database rather than the last thing that worked. Only a
                 // successful re-read lets the notice point at the status line (SCRUM-11151).
-                SettleActionFailure(result.Failure, await RefreshAsync(cancellationToken).ConfigureAwait(true));
+                bool refreshed = await RefreshAsync(cancellationToken).ConfigureAwait(true);
+                if (!IsCurrent()) return;
+                SettleActionFailure(result.Failure, refreshed);
                 await PreviewsLoaded.ConfigureAwait(true);
                 return;
             }
 
             Show(result.Value);
+            onApplied?.Invoke(result.Value);
             await PreviewsLoaded.ConfigureAwait(true);
         }
         finally
         {
-            IsBusy = false;
+            if (IsCurrent() && _serviceOperationGeneration == generation)
+            {
+                _serviceOperationGeneration = null;
+                IsBusy = false;
+            }
         }
     }
+
+    private long _openGeneration;
+    private long? _serviceOperationGeneration;
 
     /// <summary>
     /// Adopts the workflow layer's live automation state (Epic 11300 Part D2A §28).
@@ -3418,12 +3440,14 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private void OnAutomationRuntimeChanged(object? sender, AutomationRuntimeView runtime)
     {
-        AutomationRuntimeView adopted = _session is not null && runtime.SessionId == _session.Id
-            ? runtime
-            : AutomationRuntimeView.Idle;
+        long generation = _openGeneration;
 
         void Apply()
         {
+            if (generation != _openGeneration || _session is not { } session) return;
+            if (runtime.SessionId is not null && runtime.SessionId != session.Id) return;
+            AutomationRuntimeView adopted = runtime.SessionId == session.Id
+                ? runtime : _sessions.GetAutomationRuntime(session.Id);
             _runtime = adopted;
 
             // A takeover confirmation left standing after the run has ended would offer to take
@@ -3468,8 +3492,11 @@ public sealed partial class SessionViewModel : ObservableObject
             return false;
         }
 
+        SessionId id = _session.Id;
+        long generation = _openGeneration;
         OperationResult<SessionView> reloaded =
-            await _sessions.LoadAsync(_session.Id, cancellationToken).ConfigureAwait(true);
+            await _sessions.LoadAsync(id, cancellationToken).ConfigureAwait(true);
+        if (generation != _openGeneration || _session?.Id != id) return false;
 
         if (reloaded.IsSuccess)
         {
@@ -3488,6 +3515,17 @@ public sealed partial class SessionViewModel : ObservableObject
     /// </remarks>
     private void Show(SessionView session)
     {
+        bool sameNavigationContext = NavigationContext(_session) == NavigationContext(session);
+        var preservedDraft = sameNavigationContext ? CapturePageDraft() : ((string Signature, Action Restore)?)null;
+        // Reloads retire the previous leave confirmation even when its draft still belongs
+        // to this exact task/result. Keeping that draft is not permission to execute an old leave.
+        KeepDraft();
+        if (!sameNavigationContext)
+        {
+            _isChoosingGuidedWhiteInk = false;
+            CloseHistory();
+            ClearPendingDecisions();
+        }
         if (session.CompletionCleanup is { IsComplete: false })
             Notice = Strings.Session_CompletionCleanupPending;
         // A trim adjustment survives a refresh of the very same review of the very same source —
@@ -3501,7 +3539,7 @@ public sealed partial class SessionViewModel : ObservableObject
         ShowCommittedPreflight(session);
 
         // Zoom belongs to the artefact being looked at, so a new one opens fitted (§15).
-        if (!keepTrimDraft) ResetZoom();
+        if (!keepTrimDraft && !(sameNavigationContext && IsCropping && session.CanManualCrop)) ResetZoom();
 
         // The crop surface belongs to the state that needed one. A rectangle drawn against the
         // file the operator was looking at a moment ago must not survive into a state showing a
@@ -3511,7 +3549,7 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             _trimAdjustTarget = session.TrimAdjustment;
         }
-        else
+        else if (!sameNavigationContext || IsAdjustingTrim || IsCropping && !session.CanManualCrop)
         {
             ClearCropState();
         }
@@ -3582,6 +3620,7 @@ public sealed partial class SessionViewModel : ObservableObject
         {
             Steps.Add(new SessionStepRow(step, isCurrent: step == session.CurrentStep));
         }
+        RefreshGuidedPresentation();
 
         // Rebuilt wholesale from what the service returned, like everything else here: an
         // output whose review state or validity changed must not survive as the row this
@@ -3733,6 +3772,9 @@ public sealed partial class SessionViewModel : ObservableObject
 
         // The final-save section is rebuilt from the same view; operator drafts are kept by key.
         ShowFinalSave(session);
+        if (preservedDraft is { } draft) draft.Restore();
+        else _cleanDraft = CapturePageDraft();
+        OnPropertyChanged(nameof(HistorySteps));
     }
 
     private void OnOperatorLanguageChanged(object? sender, EventArgs e)

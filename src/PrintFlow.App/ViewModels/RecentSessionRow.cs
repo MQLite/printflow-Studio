@@ -56,6 +56,7 @@ public sealed partial class RecentSessionRow : ObservableObject
         OnPropertyChanged(nameof(ThumbnailState));
         OnPropertyChanged(nameof(ThumbnailName));
         OnPropertyChanged(nameof(OpenActionLabel));
+        OnPropertyChanged(nameof(GuidedNextAction));
     }
 
     private string FormatSaveHistory() => _item.PreviouslySavedOutputCount switch
@@ -82,10 +83,12 @@ public sealed partial class RecentSessionRow : ObservableObject
     public string DisplayName { get; }
 
     /// <summary>The localised workflow name.</summary>
-    public string Workflow => DisplayNames.Workflow(_item.WorkflowType);
+    public string Workflow => Enum.IsDefined(_item.WorkflowType) ? DisplayNames.Workflow(_item.WorkflowType)
+        : Strings.Resolve("Home_RecentUnknownWorkflow");
 
     /// <summary>The localised step the session is waiting on.</summary>
-    public string CurrentStep => DisplayNames.Step(_item.CurrentStep);
+    public string CurrentStep => Enum.IsDefined(_item.CurrentStep) ? DisplayNames.Step(_item.CurrentStep)
+        : Strings.Resolve("Home_RecentUnknownStep");
     public bool ShowStepInMetadata => _item.State != SessionState.Active;
     public string MetadataText => ShowStepInMetadata
         ? $"{Workflow} · {CurrentStep} · {UpdatedAt}"
@@ -97,6 +100,12 @@ public sealed partial class RecentSessionRow : ObservableObject
     /// <summary>Qualified database history for exact approved outputs; no present-file claim.</summary>
     public string SaveHistoryText => FormatSaveHistory();
     public bool HasSaveHistoryText => SaveHistoryText.Length != 0;
+
+    /// <summary>What opening this exact row means; saved history grants no present-file claim.</summary>
+    public string GuidedNextAction => Strings.Resolve(HasOpenCorrection ? "Home_RecentNextCorrection"
+        : CanContinueProcessing && _item.PreviouslySavedOutputCount > 0 ? "Home_RecentNextSaved"
+        : CanContinueProcessing ? "Home_RecentNextContinue"
+        : _item.State == SessionState.HandedOff ? "Home_RecentNextHandedOff" : "Home_RecentNextHistory");
 
     private static string Status(SessionListItem item, string step)
     {
@@ -120,7 +129,7 @@ public sealed partial class RecentSessionRow : ObservableObject
             SessionState.Active => item.CurrentStepState switch
             {
                 StepState.ReviewRequired => Strings.Session_StatusReview,
-                StepState.Failed or StepState.RetryRequired => Strings.Session_StatusStopped,
+                StepState.Failed or StepState.Interrupted or StepState.RetryRequired => Strings.Session_StatusStopped,
                 StepState.Waiting or StepState.Approved or StepState.Skipped => Strings.Session_StatusInput,
                 StepState.Processing when item.HasRunningCurrentAttempt => Strings.Session_StatusProcessing,
                 _ => Strings.Home_RecentStatusUnknown,

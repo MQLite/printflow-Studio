@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c35d8131-7fc8-4337-b859-2cf68e6b87fc" name="admin@DESKTOP-0BG8884 2026-10-19 17:54:51" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:54:51.5617542+13:00" queuing="2026-10-19T17:54:51.5617544+13:00" start="2026-10-19T17:54:46.3544240+13:00" finish="2026-10-19T17:54:52.0617304+13:00" />
+  <TestSettings name="default" id="79cb33e2-9cf9-4c79-aeaa-846bb30bff78">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_54_51" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="681af336-696d-4806-ac05-0f9d3ff4ec47" testId="0be35ffc-03ad-8c90-9d66-97315281c6c8" testName="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: False)" computerName="DESKTOP-0BG8884" duration="00:00:01.2504206" startTime="2026-10-19T17:54:50.0357788+13:00" endTime="2026-10-19T17:54:51.2946879+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="681af336-696d-4806-ac05-0f9d3ff4ec47">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(Boolean processed) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 30&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs:line 77&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.&lt;&gt;c__DisplayClass0_0.&lt;Route_return_is_available_only_before_the_first_derived_result&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 32&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cffa38d2-7a74-434a-82f6-01e5bcd98054" testId="ce32c89f-b8ff-71a2-dbb8-8a57c12a3cf6" testName="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.5948392" startTime="2026-10-19T17:54:51.3075346+13:00" endTime="2026-10-19T17:54:51.8912015+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cffa38d2-7a74-434a-82f6-01e5bcd98054">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : Sequence contains no matching element</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(Boolean processed) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 30&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+   at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Find[T](RenderedTree tree, String id) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs:line 77&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.&lt;&gt;c__DisplayClass0_0.&lt;Route_return_is_available_only_before_the_first_derived_result&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs:line 32&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: True)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="ce32c89f-b8ff-71a2-dbb8-8a57c12a3cf6">
+      <Execution id="cffa38d2-7a74-434a-82f6-01e5bcd98054" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests" name="Route_return_is_available_only_before_the_first_derived_result" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: False)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="0be35ffc-03ad-8c90-9d66-97315281c6c8">
+      <Execution id="681af336-696d-4806-ac05-0f9d3ff4ec47" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests" name="Route_return_is_available_only_before_the_first_derived_result" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0be35ffc-03ad-8c90-9d66-97315281c6c8" executionId="681af336-696d-4806-ac05-0f9d3ff4ec47" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ce32c89f-b8ff-71a2-dbb8-8a57c12a3cf6" executionId="cffa38d2-7a74-434a-82f6-01e5bcd98054" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="2" executed="2" passed="0" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.21]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.30]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.59]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.59]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:04.59]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(30,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(Boolean processed)&#xD;
+[xUnit.net 00:00:04.59]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.59]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.59]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:04.59]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs(77,0): at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(32,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.&lt;&gt;c__DisplayClass0_0.&lt;Route_return_is_available_only_before_the_first_derived_result&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.59]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.18]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.18]       ---- System.InvalidOperationException : Sequence contains no matching element&#xD;
+[xUnit.net 00:00:05.18]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.18]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.18]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.18]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.18]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(30,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(Boolean processed)&#xD;
+[xUnit.net 00:00:05.18]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.18]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.19]            at System.Linq.ThrowHelper.ThrowNoMatchException()&#xD;
+[xUnit.net 00:00:05.19]            at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source, Func`2 predicate)&#xD;
+[xUnit.net 00:00:05.19]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs(77,0): at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Find[T](RenderedTree tree, String id)&#xD;
+[xUnit.net 00:00:05.19]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportSourceTests.cs(32,0): at PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.&lt;&gt;c__DisplayClass0_0.&lt;Route_return_is_available_only_before_the_first_derived_result&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.19]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.19]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.19]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:54:51.2976050+13:00">
+        <Text>[xUnit.net 00:00:04.59]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:54:51.8916775+13:00">
+        <Text>[xUnit.net 00:00:05.18]     PrintFlow.Tests.Integration.Ui.GuidedImportSourceTests.Route_return_is_available_only_before_the_first_derived_result(processed: True) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

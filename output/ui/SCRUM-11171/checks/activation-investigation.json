@@ -1,0 +1,25 @@
+{
+  "InspectedFiles": [
+    "src/PrintFlow.App/Views/ReviewApprovalButton.cs",
+    "tests/PrintFlow.Tests/Integration/Ui/OperatorWave1Tests.cs",
+    "tests/PrintFlow.Tests/Integration/Ui/GuidedComponentTests.cs",
+    "tests/PrintFlow.Tests/Fixtures/WpfRendering.cs"
+  ],
+  "Conclusion": "Both unchanged keyboard cases passed in the targeted 76-case run and the final 1438-case broad run. Root cause remains unestablished; this is non-reproduction, not a fix or inherited-status claim. Guard, keyboard tests and WPF renderer remain unchanged.",
+  "ChangedFiles": [],
+  "Cases": [
+    {
+      "FirstBroadOutcome": "Failed",
+      "Name": "PrintFlow.Tests.Integration.Ui.GuidedComponentTests.Styled_review_approval_preserves_target_and_gesture_guard",
+      "TargetedOutcome": "Passed",
+      "FinalBroadOutcome": "Passed"
+    },
+    {
+      "FirstBroadOutcome": "Failed",
+      "Name": "PrintFlow.Tests.Integration.Ui.OperatorWave1Tests.Repeating_key_and_old_release_cannot_approve_another_job(key: Return, anotherJob: True)",
+      "TargetedOutcome": "Passed",
+      "FinalBroadOutcome": "Passed"
+    }
+  ],
+  "Baseline": "5c061dd15f23d2cc33a7e62dca9e130296b14a8a"
+}

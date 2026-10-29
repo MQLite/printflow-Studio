@@ -1,0 +1,98 @@
+{
+  "State": "home-continue",
+  "Language": "zh-CN",
+  "WidthDip": 1920,
+  "HeightDip": 1080,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "4C321EEB097D91E87A183E4987CB7926B3C58D70F0673D595B106CD87B1B4B8A",
+  "EssentialActions": [
+    "Home.ChooseFile",
+    "Home.ResumeSession",
+    "Home.ShowSettings"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "Home.ShowSettings",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 1842,
+          "Y": 24,
+          "Width": 54,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ChooseFile",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 153.95333333333332,
+          "Width": 95.48,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ShowEnvironment",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 49,
+          "Y": 407.5,
+          "Width": 124,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.Refresh",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 1842,
+          "Y": 676,
+          "Width": 54,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.ResumeSession",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 1759,
+          "Y": 777.7566666666667,
+          "Width": 54,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "Home.AbandonSession",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 1821,
+          "Y": 777.7566666666667,
+          "Width": 54,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 594
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 330
+      }
+    ],
+    "Previews": 1
+  }
+}

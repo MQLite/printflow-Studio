@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-20",
+  "timezone": "Pacific/Auckland",
+  "purpose": "Implementation and single independent review complete, awaiting user acceptance",
+  "receipts": [
+    {
+      "key": "SCRUM-11172",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11172 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11190",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11190 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11191",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11191 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11192",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11192 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11193",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11193 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11194",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11194 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ]
+}

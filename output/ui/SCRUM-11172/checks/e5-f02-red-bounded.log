@@ -1,0 +1,142 @@
+  正在确定要还原的项目…
+  所有项目均是最新的，无法还原。
+  PrintFlow.Domain -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Domain\bin\Debug\net10.0\PrintFlow.Domain.dll
+  PrintFlow.Workflow -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Workflow\bin\Debug\net10.0\PrintFlow.Workflow.dll
+  PrintFlow.Infrastructure -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.Infrastructure\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Infrastructure.dll
+  PrintFlow.App -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\src\PrintFlow.App\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.App.dll
+  PrintFlow.WorkstationEntry -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.WorkstationEntry\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.WorkstationEntry.dll
+  PrintFlow.Tests -> C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll
+C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:05.71]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "reopened") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "reopened") [2 s]
+  错误消息:
+   Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)
+    should be
+"等待修正后的图片"
+    but was
+""
+    difference
+Difference     |  |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    
+Expected Value | 等    待    修    正    后    的    图    片    
+Actual Value   |                                         
+Expected Code  | 3156124453204622749121518303402227029255
+Actual Code    |                                         
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:06.37]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "prepare") [FAIL]
+[xUnit.net 00:00:07.08]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "waiting") [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "prepare") [657 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)
+    should be
+"准备同事修正"
+    but was
+""
+    difference
+Difference     |  |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    
+Expected Value | 准    备    同    事    修    正    
+Actual Value   |                               
+Expected Code  | 209342279121516201072046227491
+Actual Code    |                               
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "waiting") [715 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)
+    should be
+"等待修正后的图片"
+    but was
+""
+    difference
+Difference     |  |    |    |    |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    5    6    7    
+Expected Value | 等    待    修    正    后    的    图    片    
+Actual Value   |                                         
+Expected Code  | 3156124453204622749121518303402227029255
+Actual Code    |                                         
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 60
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+[xUnit.net 00:00:07.77]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "returned") [FAIL]
+[xUnit.net 00:00:08.39]     PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity [FAIL]
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(stage: "returned") [681 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : guidance.GetValueOrDefault("Session.Correction.ReturnReview", string.Empty)
+    should contain (case insensitive comparison)
+"重新审核"
+    but was actually
+""
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Correction_prepare_wait_import_and_review_remain_explicit(String stage) in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 55
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+  失败 PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity [617 ms]
+  错误消息:
+   Shouldly.ShouldAssertException : facts.GetValueOrDefault("Session.RecoveryGuidance.Heading", string.Empty)
+    should be
+"处理已停止"
+    but was
+""
+    difference
+Difference     |  |    |    |    |    |   
+               | \|/  \|/  \|/  \|/  \|/  
+Index          | 0    1    2    3    4    
+Expected Value | 处    理    已    停    止    
+Actual Value   |                          
+Expected Code  | 2278829702240502057227490
+Actual Code    |                          
+  堆栈跟踪:
+     at PrintFlow.Tests.Integration.Ui.GuidedCompletionRecoveryTests.Restored_interruption_names_only_executable_actions_and_keeps_the_original_identity() in C:\Users\admin\.codex\worktrees\scrum-11172-guided-completion\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedCompletionRecoveryTests.cs:line 126
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+--- End of stack trace from previous location ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)

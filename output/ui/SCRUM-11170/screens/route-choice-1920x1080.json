@@ -1,0 +1,77 @@
+{
+  "State": "route-choice",
+  "Language": "zh-CN",
+  "WidthDip": 1920,
+  "HeightDip": 1080,
+  "Dpi": 96,
+  "CaptureKind": "Synthetic offscreen WPF RenderTargetBitmap; no Window.Show or desktop input",
+  "SourceSha256": "7C0C301F48992E292768A1156278CEAD3BF05829A792C53A80194E1F8981113B",
+  "ScreenshotSha256": "F3560FCFDD2054F69E20A1C1C177C646BF0FDBC455FA2DD06F8DFC14B0C69BED",
+  "EssentialActions": [
+    "WorkflowSelection.PrepareDesignAsset",
+    "WorkflowSelection.PrepareCustomerDesign",
+    "WorkflowSelection.GeneratePrintTiff",
+    "WorkflowSelection.Back"
+  ],
+  "Measurements": {
+    "Actions": [
+      {
+        "Id": "WorkflowSelection.PrepareDesignAsset",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 41,
+          "Y": 447.2,
+          "Width": 578,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.PrepareCustomerDesign",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 665,
+          "Y": 447.2,
+          "Width": 578,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.GeneratePrintTiff",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 1289,
+          "Y": 447.2,
+          "Width": 578,
+          "Height": 42
+        }
+      },
+      {
+        "Id": "WorkflowSelection.Back",
+        "IsEnabled": true,
+        "CanExecute": true,
+        "Bounds": {
+          "X": 36,
+          "Y": 1006,
+          "Width": 82,
+          "Height": 42
+        }
+      }
+    ],
+    "Scrolls": [
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 24
+      },
+      {
+        "VerticalOffset": 0,
+        "ScrollableHeight": 0,
+        "ViewportHeight": 636.23
+      }
+    ],
+    "Previews": 1
+  }
+}

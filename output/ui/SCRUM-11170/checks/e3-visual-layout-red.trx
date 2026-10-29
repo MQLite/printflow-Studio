@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c6f7bb88-c212-4ca1-87b1-936675e81673" name="admin@DESKTOP-0BG8884 2026-10-19 17:59:29" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:59:29.9041627+13:00" queuing="2026-10-19T17:59:29.9041629+13:00" start="2026-10-19T17:59:24.7707673+13:00" finish="2026-10-19T17:59:29.9091372+13:00" />
+  <TestSettings name="default" id="39517f0b-020b-466e-b592-4176e09fe58a">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_59_29" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="59e30010-bf30-42e2-8925-efadfbcf8bd4" testId="306219cb-3783-b31b-aded-3a82ebe1dce2" testName="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport" computerName="DESKTOP-0BG8884" duration="00:00:01.0210028" startTime="2026-10-19T17:59:28.3923816+13:00" endTime="2026-10-19T17:59:29.4196341+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="59e30010-bf30-42e2-8925-efadfbcf8bd4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : clipped.Bottom&#xD;
+    should be less than or equal to&#xD;
+220.73000000000002d&#xD;
+    but was&#xD;
+234.33666666666667d&#xD;
+&#xD;
+Additional Info:&#xD;
+    the whole action must be visible without scrolling</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 40&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass1_0.&lt;All_three_route_actions_are_visible_together_at_minimum_viewport&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs:line 50&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3cef8b49-b23e-4eff-84bc-d44441e17018" testId="dc6da1c3-6dbb-87b4-9303-9a8ebef36d67" testName="PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Import_refusal_remains_visible_beside_the_import_action_without_scrolling" computerName="DESKTOP-0BG8884" duration="00:00:00.3145944" startTime="2026-10-19T17:59:29.4333244+13:00" endTime="2026-10-19T17:59:29.7381202+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3cef8b49-b23e-4eff-84bc-d44441e17018">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- Shouldly.ShouldAssertException : bounds.Top.ShouldBeGreaterThanOrEqualTo(0); bounds.Bottom&#xD;
+    should be less than or equal to&#xD;
+366.5d&#xD;
+    but was&#xD;
+599.4066666666666d</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Import_refusal_remains_visible_beside_the_import_action_without_scrolling() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs:line 21&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.&lt;&gt;c__DisplayClass0_0.&lt;Import_refusal_remains_visible_beside_the_import_action_without_scrolling&gt;b__1(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs:line 26&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="306219cb-3783-b31b-aded-3a82ebe1dce2">
+      <Execution id="59e30010-bf30-42e2-8925-efadfbcf8bd4" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests" name="All_three_route_actions_are_visible_together_at_minimum_viewport" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Import_refusal_remains_visible_beside_the_import_action_without_scrolling" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="dc6da1c3-6dbb-87b4-9303-9a8ebef36d67">
+      <Execution id="3cef8b49-b23e-4eff-84bc-d44441e17018" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests" name="Import_refusal_remains_visible_beside_the_import_action_without_scrolling" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="306219cb-3783-b31b-aded-3a82ebe1dce2" executionId="59e30010-bf30-42e2-8925-efadfbcf8bd4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc6da1c3-6dbb-87b4-9303-9a8ebef36d67" executionId="3cef8b49-b23e-4eff-84bc-d44441e17018" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="2" executed="2" passed="0" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.25]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.16]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.26]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:04.31]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.31]       ---- Shouldly.ShouldAssertException : clipped.Bottom&#xD;
+[xUnit.net 00:00:04.31]           should be less than or equal to&#xD;
+[xUnit.net 00:00:04.31]       220.73000000000002d&#xD;
+[xUnit.net 00:00:04.31]           but was&#xD;
+[xUnit.net 00:00:04.31]       234.33666666666667d&#xD;
+[xUnit.net 00:00:04.31]       &#xD;
+[xUnit.net 00:00:04.31]       Additional Info:&#xD;
+[xUnit.net 00:00:04.31]           the whole action must be visible without scrolling&#xD;
+[xUnit.net 00:00:04.31]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(40,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport()&#xD;
+[xUnit.net 00:00:04.31]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.31]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportRouteTests.cs(50,0): at PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.&lt;&gt;c__DisplayClass1_0.&lt;All_three_route_actions_are_visible_together_at_minimum_viewport&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.31]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:04.63]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:04.63]       ---- Shouldly.ShouldAssertException : bounds.Top.ShouldBeGreaterThanOrEqualTo(0); bounds.Bottom&#xD;
+[xUnit.net 00:00:04.63]           should be less than or equal to&#xD;
+[xUnit.net 00:00:04.63]       366.5d&#xD;
+[xUnit.net 00:00:04.63]           but was&#xD;
+[xUnit.net 00:00:04.63]       599.4066666666666d&#xD;
+[xUnit.net 00:00:04.63]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs(21,0): at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Import_refusal_remains_visible_beside_the_import_action_without_scrolling()&#xD;
+[xUnit.net 00:00:04.63]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.63]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportHomeTests.cs(26,0): at PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.&lt;&gt;c__DisplayClass0_0.&lt;Import_refusal_remains_visible_beside_the_import_action_without_scrolling&gt;b__1(RenderedTree tree)&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:04.63]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:04.63]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:59:29.4221361+13:00">
+        <Text>[xUnit.net 00:00:04.31]     PrintFlow.Tests.Integration.Ui.GuidedImportRouteTests.All_three_route_actions_are_visible_together_at_minimum_viewport [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:59:29.7384936+13:00">
+        <Text>[xUnit.net 00:00:04.63]     PrintFlow.Tests.Integration.Ui.GuidedImportHomeTests.Import_refusal_remains_visible_beside_the_import_action_without_scrolling [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

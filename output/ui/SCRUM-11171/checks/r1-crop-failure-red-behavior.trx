@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="6095ff6e-982e-4182-9fae-7d3f857a9706" name="admin@DESKTOP-0BG8884 2026-10-20 10:30:56" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-20T10:30:56.6913932+13:00" queuing="2026-10-20T10:30:56.6913934+13:00" start="2026-10-20T10:30:49.7185200+13:00" finish="2026-10-20T10:30:58.8515613+13:00" />
+  <TestSettings name="default" id="5cc506be-3f4e-4ad1-a660-4f946878ff2c">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-20_10_30_56" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="f7c059de-bb75-4b2b-b3ff-2f16ad52d9a9" testId="35696a29-c286-fec7-6d6b-f3c9c87fd788" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: True)" computerName="DESKTOP-0BG8884" duration="00:00:02.4945364" startTime="2026-10-20T10:30:54.1630925+13:00" endTime="2026-10-20T10:30:56.6633851+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f7c059de-bb75-4b2b-b3ff-2f16ad52d9a9">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+    should be&#xD;
+1&#xD;
+    but was&#xD;
+0&#xD;
+&#xD;
+Additional Info:&#xD;
+    a refused crop must show its coded failure while the same draft remains open</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs:line 90&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="244c0127-6028-415c-83a6-ac75ab575a79" testId="7a8c20c9-da4c-bccc-c38e-329db20bd740" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: True)" computerName="DESKTOP-0BG8884" duration="00:00:00.6029863" startTime="2026-10-20T10:30:58.0842651+13:00" endTime="2026-10-20T10:30:58.6866664+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="244c0127-6028-415c-83a6-ac75ab575a79">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+    should be&#xD;
+1&#xD;
+    but was&#xD;
+0&#xD;
+&#xD;
+Additional Info:&#xD;
+    a refused crop must show its coded failure while the same draft remains open</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs:line 90&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e14ccb5a-e042-4471-89a2-a62e1aa2f99a" testId="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.7085808" startTime="2026-10-20T10:30:56.6788171+13:00" endTime="2026-10-20T10:30:57.3734170+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e14ccb5a-e042-4471-89a2-a62e1aa2f99a">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+    should be&#xD;
+1&#xD;
+    but was&#xD;
+0&#xD;
+&#xD;
+Additional Info:&#xD;
+    a refused crop must show its coded failure while the same draft remains open</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs:line 90&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7f0b0df3-5afb-4d8d-888f-e3ab6da690a2" testId="d3aaca81-6aa0-b9c9-43d9-bf5546847493" testName="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: False)" computerName="DESKTOP-0BG8884" duration="00:00:00.7087058" startTime="2026-10-20T10:30:57.3751848+13:00" endTime="2026-10-20T10:30:58.0828823+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7f0b0df3-5afb-4d8d-888f-e3ab6da690a2">
+      <Output>
+        <ErrorInfo>
+          <Message>Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+    should be&#xD;
+1&#xD;
+    but was&#xD;
+0&#xD;
+&#xD;
+Additional Info:&#xD;
+    a refused crop must show its coded failure while the same draft remains open</Message>
+          <StackTrace>   at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails) in C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs:line 90&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7">
+      <Execution id="e14ccb5a-e042-4471-89a2-a62e1aa2f99a" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="7a8c20c9-da4c-bccc-c38e-329db20bd740">
+      <Execution id="244c0127-6028-415c-83a6-ac75ab575a79" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;zh-CN&quot;, reloadFails: False)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="d3aaca81-6aa0-b9c9-43d9-bf5546847493">
+      <Execution id="7f0b0df3-5afb-4d8d-888f-e3ab6da690a2" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: &quot;en&quot;, reloadFails: True)" storage="c:\users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="35696a29-c286-fec7-6d6b-f3c9c87fd788">
+      <Execution id="f7c059de-bb75-4b2b-b3ff-2f16ad52d9a9" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests" name="A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="35696a29-c286-fec7-6d6b-f3c9c87fd788" executionId="f7c059de-bb75-4b2b-b3ff-2f16ad52d9a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7a8c20c9-da4c-bccc-c38e-329db20bd740" executionId="244c0127-6028-415c-83a6-ac75ab575a79" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e8d7b6c1-7999-41e2-ef8b-52f7ac18d6b7" executionId="e14ccb5a-e042-4471-89a2-a62e1aa2f99a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d3aaca81-6aa0-b9c9-43d9-bf5546847493" executionId="7f0b0df3-5afb-4d8d-888f-e3ab6da690a2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="4" executed="4" passed="0" failed="4" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.82]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.68]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.77]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:06.30]       Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+[xUnit.net 00:00:06.30]           should be&#xD;
+[xUnit.net 00:00:06.30]       1&#xD;
+[xUnit.net 00:00:06.30]           but was&#xD;
+[xUnit.net 00:00:06.30]       0&#xD;
+[xUnit.net 00:00:06.30]       &#xD;
+[xUnit.net 00:00:06.30]       Additional Info:&#xD;
+[xUnit.net 00:00:06.30]           a refused crop must show its coded failure while the same draft remains open&#xD;
+[xUnit.net 00:00:06.30]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.30]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs(90,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails)&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.30]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:06.30]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.01]       Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+[xUnit.net 00:00:07.01]           should be&#xD;
+[xUnit.net 00:00:07.01]       1&#xD;
+[xUnit.net 00:00:07.01]           but was&#xD;
+[xUnit.net 00:00:07.01]       0&#xD;
+[xUnit.net 00:00:07.01]       &#xD;
+[xUnit.net 00:00:07.01]       Additional Info:&#xD;
+[xUnit.net 00:00:07.01]           a refused crop must show its coded failure while the same draft remains open&#xD;
+[xUnit.net 00:00:07.01]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.01]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs(90,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails)&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.01]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.01]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.72]       Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+[xUnit.net 00:00:07.72]           should be&#xD;
+[xUnit.net 00:00:07.72]       1&#xD;
+[xUnit.net 00:00:07.72]           but was&#xD;
+[xUnit.net 00:00:07.72]       0&#xD;
+[xUnit.net 00:00:07.72]       &#xD;
+[xUnit.net 00:00:07.72]       Additional Info:&#xD;
+[xUnit.net 00:00:07.72]           a refused crop must show its coded failure while the same draft remains open&#xD;
+[xUnit.net 00:00:07.72]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.72]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs(90,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails)&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.72]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:07.72]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.32]       Shouldly.ShouldAssertException : facts.NoticeCount&#xD;
+[xUnit.net 00:00:08.32]           should be&#xD;
+[xUnit.net 00:00:08.32]       1&#xD;
+[xUnit.net 00:00:08.32]           but was&#xD;
+[xUnit.net 00:00:08.32]       0&#xD;
+[xUnit.net 00:00:08.32]       &#xD;
+[xUnit.net 00:00:08.32]       Additional Info:&#xD;
+[xUnit.net 00:00:08.32]           a refused crop must show its coded failure while the same draft remains open&#xD;
+[xUnit.net 00:00:08.32]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.32]         C:\Users\admin\.codex\worktrees\scrum-11171-guided-processing\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedProcessingCropFailureTests.cs(90,0): at PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(String language, Boolean reloadFails)&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.32]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)&#xD;
+[xUnit.net 00:00:08.32]            at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task, ConfigureAwaitOptions options)&#xD;
+[xUnit.net 00:00:08.33]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:30:56.6660154+13:00">
+        <Text>[xUnit.net 00:00:06.30]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: "en", reloadFails: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:30:57.3739690+13:00">
+        <Text>[xUnit.net 00:00:07.01]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: "en", reloadFails: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:30:58.0832322+13:00">
+        <Text>[xUnit.net 00:00:07.72]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: "zh-CN", reloadFails: False) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-20T10:30:58.6869730+13:00">
+        <Text>[xUnit.net 00:00:08.32]     PrintFlow.Tests.Integration.Ui.GuidedProcessingCropFailureTests.A_refused_crop_keeps_its_draft_and_exposes_the_reason_and_code(language: "zh-CN", reloadFails: True) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

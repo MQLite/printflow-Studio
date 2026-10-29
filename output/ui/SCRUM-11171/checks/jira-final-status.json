@@ -1,0 +1,62 @@
+{
+  "SCRUM-11171": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11171 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "SCRUM-11185": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11185 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "SCRUM-11186": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11186 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "SCRUM-11187": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11187 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "SCRUM-11188": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11188 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "SCRUM-11189": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"data\":{\"message\":\"Issue SCRUM-11189 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  }
+}

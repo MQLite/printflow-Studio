@@ -629,6 +629,8 @@ public sealed record SessionView(
     PrintPreparationAttemptView? AttemptPreparation,
     FlexibleSizeView Sizing)
 {
+    public IReadOnlyList<SessionHistoryView> History { get; init; } = [];
+
     /// <summary>Post-completion maintenance outcome; failure leaves State = Completed.</summary>
     public SessionCleanupResult? CompletionCleanup { get; init; }
 
@@ -961,6 +963,13 @@ public sealed record SessionView(
             FlexibleSizeView.From(
                 snapshot, availableCommands, presetRecommendations, enlargementOfferId))
         {
+            History = Array.AsReadOnly(snapshot.Steps.Select(step => new SessionHistoryView(step.Step, step.State,
+                Array.AsReadOnly(revisions.Where(revision => revision.Id == step.CurrentRevisionId ||
+                    attempts.Any(attempt => attempt.Step == step.Step && attempt.OutputRevisionId == revision.Id))
+                    .OrderBy(revision => revision.CreatedAtUtc)
+                    .Select(revision => new HistoricalRevisionView(revision.Id, revision.SourceRevisionId,
+                        revision.File.FileName, revision.Facts, revision.ReviewState, revision.IsValid,
+                        revision.RetentionReleasedAtUtc is not null)).ToArray()))).ToArray()),
             ArtefactManualCropGeometry = current is null ? null : attempts.FirstOrDefault(a => a.OutputRevisionId == current.RevisionId)?.ManualCropGeometry,
             TrimAdjustment = availableCommands.Contains(CommandKind.AdjustTrimFromReview)
                 ? TrimAdjustmentEligibility.Resolve(snapshot, revisions, attempts, outputs)

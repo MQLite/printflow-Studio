@@ -1,0 +1,73 @@
+{
+  "task": "SCRUM-11169",
+  "status": "In Review",
+  "proofs": [
+    {
+      "key": "SCRUM-11178",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11178 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11179",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11179 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11180",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11180 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11181",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11181 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    },
+    {
+      "key": "SCRUM-11169",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"data\":{\"message\":\"Issue SCRUM-11169 transitioned successfully\",\"transitionId\":31,\"statusName\":\"In Review\"}}"
+          }
+        ],
+        "structuredContent": null,
+        "isError": false
+      }
+    }
+  ],
+  "userAcceptancePending": true,
+  "laterEpicsChanged": false
+}

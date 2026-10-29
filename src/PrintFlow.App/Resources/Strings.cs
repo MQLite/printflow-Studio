@@ -20,6 +20,24 @@ namespace PrintFlow.App.Resources;
 /// </remarks>
 internal static class Strings
 {
+    internal static string Session_HistoryHeading => Get(nameof(Session_HistoryHeading));
+    internal static string Session_HistoryNotice => Get(nameof(Session_HistoryNotice));
+    internal static string Session_HistoryOpen => Get(nameof(Session_HistoryOpen));
+    internal static string Session_HistoryClose => Get(nameof(Session_HistoryClose));
+    internal static string Session_HistoryValid => Get(nameof(Session_HistoryValid));
+    internal static string Session_HistoryInvalid => Get(nameof(Session_HistoryInvalid));
+    internal static string Session_HistoryBytesReleased => Get(nameof(Session_HistoryBytesReleased));
+    internal static string Session_DraftLeaveHeading => Get(nameof(Session_DraftLeaveHeading));
+    internal static string Session_DraftLeaveNotice => Get(nameof(Session_DraftLeaveNotice));
+    internal static string Session_KeepDraft => Get(nameof(Session_KeepDraft));
+    internal static string Session_DiscardDraft => Get(nameof(Session_DiscardDraft));
+    internal static string Session_ReturnImpact => Get(nameof(Session_ReturnImpact));
+    internal static string Session_GuidedPreflight => Get(nameof(Session_GuidedPreflight));
+    internal static string Session_GuidedCurrent => Get(nameof(Session_GuidedCurrent));
+    internal static string Session_GuidedFuture => Get(nameof(Session_GuidedFuture));
+    internal static string Session_GuidedChangeWhiteInk => Get(nameof(Session_GuidedChangeWhiteInk));
+    internal static string Session_GuidedHistoryAvailable => Get(nameof(Session_GuidedHistoryAvailable));
+    internal static string Session_GuidedTechnicalDetails => Get(nameof(Session_GuidedTechnicalDetails));
     internal static string Session_NextCrop => Get(nameof(Session_NextCrop));
     internal static string Session_StatusHandedOff => Get(nameof(Session_StatusHandedOff));
     internal static string Session_StatusCompleted => Get(nameof(Session_StatusCompleted));

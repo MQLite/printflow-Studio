@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f0607321-2033-4953-a5dd-f42d79ea1c77" name="admin@DESKTOP-0BG8884 2026-10-19 17:57:48" runUser="DESKTOP-0BG8884\admin" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-19T17:57:48.8300794+13:00" queuing="2026-10-19T17:57:48.8300796+13:00" start="2026-10-19T17:57:43.1440043+13:00" finish="2026-10-19T17:57:52.3560833+13:00" />
+  <TestSettings name="default" id="699e6796-df79-4176-aed4-2ee55016cb31">
+    <Deployment runDeploymentRoot="admin_DESKTOP-0BG8884_2026-10-19_17_57_48" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="8db7725a-c0f5-4034-9d81-6fd50a4824fe" testId="8345f3c5-edbd-62b2-4355-092b9fa0c3ab" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1000, height: 700)" computerName="DESKTOP-0BG8884" duration="00:00:00.8106354" startTime="2026-10-19T17:57:49.7796284+13:00" endTime="2026-10-19T17:57:50.5897217+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8db7725a-c0f5-4034-9d81-6fd50a4824fe">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 109&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 47&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 123&#xD;
+   at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 120&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="bd97ef44-e026-4b15-9020-4abe31ebe458" testId="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;psd&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:01.2288817" startTime="2026-10-19T17:57:47.3151508+13:00" endTime="2026-10-19T17:57:48.5605243+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bd97ef44-e026-4b15-9020-4abe31ebe458">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 109&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass1_0.&lt;&lt;Chinese_preparation_and_source_review_retain_real_input_context&gt;g__Snapshot|0&gt;d.MoveNext() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 76&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(String format) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 68&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 123&#xD;
+   at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 120&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d7de0b7e-fa71-492f-b66f-056b3290258f" testId="b69b9a98-8290-c7f4-0634-62dfa60f949f" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;pdf&quot;)" computerName="DESKTOP-0BG8884" duration="00:00:00.5725201" startTime="2026-10-19T17:57:48.5732356+13:00" endTime="2026-10-19T17:57:49.1346086+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d7de0b7e-fa71-492f-b66f-056b3290258f">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 109&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass1_0.&lt;&lt;Chinese_preparation_and_source_review_retain_real_input_context&gt;g__Snapshot|0&gt;d.MoveNext() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 76&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(String format) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 68&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 123&#xD;
+   at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 120&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="beec12ca-668a-4b58-842d-d29848f42616" testId="a98743be-c1ae-1036-d5aa-becd08c8a023" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1920, height: 1080)" computerName="DESKTOP-0BG8884" duration="00:00:00.8144111" startTime="2026-10-19T17:57:51.3901513+13:00" endTime="2026-10-19T17:57:52.2040155+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="beec12ca-668a-4b58-842d-d29848f42616">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 109&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 47&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 123&#xD;
+   at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 120&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="29ae244e-9d35-4d23-af21-09344d9bd447" testId="9ec00b0b-1533-11c9-3095-579c1da414ea" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1280, height: 720)" computerName="DESKTOP-0BG8884" duration="00:00:00.7981486" startTime="2026-10-19T17:57:50.5909532+13:00" endTime="2026-10-19T17:57:51.3889277+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="29ae244e-9d35-4d23-af21-09344d9bd447">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The view failed to render.&#xD;
+---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。</Message>
+          <StackTrace>   at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 220&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 80&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 133&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 109&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 47&#xD;
+--- End of stack trace from previous location ---&#xD;
+----- Inner Stack Trace -----&#xD;
+   at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+   at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 142&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 123&#xD;
+   at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+   at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree) in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs:line 120&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 99&#xD;
+   at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0() in C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs:line 206</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1ca4afdb-1810-4d1c-982a-3041ffcad6c0" testId="76378147-dbe1-ca0c-50d9-3d2b6f5af445" testName="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_import_progress_and_refusal_are_truthful_and_cancellable" computerName="DESKTOP-0BG8884" duration="00:00:00.6421069" startTime="2026-10-19T17:57:49.1376283+13:00" endTime="2026-10-19T17:57:49.7785295+13:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ca4afdb-1810-4d1c-982a-3041ffcad6c0" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1280, height: 720)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="9ec00b0b-1533-11c9-3095-579c1da414ea">
+      <Execution id="29ae244e-9d35-4d23-af21-09344d9bd447" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_import_progress_and_refusal_are_truthful_and_cancellable" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="76378147-dbe1-ca0c-50d9-3d2b6f5af445">
+      <Execution id="1ca4afdb-1810-4d1c-982a-3041ffcad6c0" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_import_progress_and_refusal_are_truthful_and_cancellable" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;pdf&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b69b9a98-8290-c7f4-0634-62dfa60f949f">
+      <Execution id="d7de0b7e-fa71-492f-b66f-056b3290258f" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_preparation_and_source_review_retain_real_input_context" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1000, height: 700)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="8345f3c5-edbd-62b2-4355-092b9fa0c3ab">
+      <Execution id="8db7725a-c0f5-4034-9d81-6fd50a4824fe" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1920, height: 1080)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="a98743be-c1ae-1036-d5aa-becd08c8a023">
+      <Execution id="beec12ca-668a-4b58-842d-d29848f42616" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_home_routes_and_original_steps_fit_the_supported_viewports" />
+    </UnitTest>
+    <UnitTest name="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: &quot;psd&quot;)" storage="c:\users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-studio\tests\printflow.tests\bin\debug\net10.0-windows10.0.19041.0\printflow.tests.dll" id="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651">
+      <Execution id="bd97ef44-e026-4b15-9020-4abe31ebe458" />
+      <TestMethod codeBase="C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\bin\Debug\net10.0-windows10.0.19041.0\PrintFlow.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests" name="Chinese_preparation_and_source_review_retain_real_input_context" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8345f3c5-edbd-62b2-4355-092b9fa0c3ab" executionId="8db7725a-c0f5-4034-9d81-6fd50a4824fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b29f2d3b-6c2a-c197-4ba6-dff2cdeca651" executionId="bd97ef44-e026-4b15-9020-4abe31ebe458" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b69b9a98-8290-c7f4-0634-62dfa60f949f" executionId="d7de0b7e-fa71-492f-b66f-056b3290258f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a98743be-c1ae-1036-d5aa-becd08c8a023" executionId="beec12ca-668a-4b58-842d-d29848f42616" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ec00b0b-1533-11c9-3095-579c1da414ea" executionId="29ae244e-9d35-4d23-af21-09344d9bd447" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="76378147-dbe1-ca0c-50d9-3d2b6f5af445" executionId="1ca4afdb-1810-4d1c-982a-3041ffcad6c0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="1" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.5+1b188a7b0a (64-bit .NET 10.0.11)&#xD;
+[xUnit.net 00:00:00.64]   Discovering: PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.71]   Discovered:  PrintFlow.Tests&#xD;
+[xUnit.net 00:00:03.80]   Starting:    PrintFlow.Tests&#xD;
+[xUnit.net 00:00:05.08]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.08]       ---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。&#xD;
+[xUnit.net 00:00:05.08]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(109,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(76,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass1_0.&lt;&lt;Chinese_preparation_and_source_review_retain_real_input_context&gt;g__Snapshot|0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.08]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(68,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(String format)&#xD;
+[xUnit.net 00:00:05.08]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.08]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.08]            at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+[xUnit.net 00:00:05.08]            at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(123,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b)&#xD;
+[xUnit.net 00:00:05.08]            at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.08]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:05.65]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:05.65]       ---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。&#xD;
+[xUnit.net 00:00:05.65]       Stack Trace:&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(109,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(76,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass1_0.&lt;&lt;Chinese_preparation_and_source_review_retain_real_input_context&gt;g__Snapshot|0&gt;d.MoveNext()&#xD;
+[xUnit.net 00:00:05.65]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(68,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(String format)&#xD;
+[xUnit.net 00:00:05.65]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:05.65]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:05.65]            at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+[xUnit.net 00:00:05.65]            at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(123,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b)&#xD;
+[xUnit.net 00:00:05.65]            at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree)&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:05.65]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.10]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.10]       ---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。&#xD;
+[xUnit.net 00:00:07.10]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(109,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(47,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.10]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.10]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.10]            at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+[xUnit.net 00:00:07.10]            at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(123,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b)&#xD;
+[xUnit.net 00:00:07.10]            at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.10]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:07.90]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:07.90]       ---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。&#xD;
+[xUnit.net 00:00:07.90]       Stack Trace:&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(109,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(47,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:07.90]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:07.90]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:07.90]            at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+[xUnit.net 00:00:07.90]            at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(123,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b)&#xD;
+[xUnit.net 00:00:07.90]            at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree)&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:07.90]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.72]       System.InvalidOperationException : The view failed to render.&#xD;
+[xUnit.net 00:00:08.72]       ---- System.InvalidOperationException : 指定的 Visual 不是此 Visual 的上级。&#xD;
+[xUnit.net 00:00:08.72]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(220,0): at PrintFlow.Tests.Fixtures.WpfRendering.OnStaThread(Action action)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(80,0): at PrintFlow.Tests.Fixtures.WpfRendering.Render[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(133,0): at PrintFlow.Tests.Fixtures.WpfRendering.RenderExpectingNoBindingErrors[T](Func`1 create, Size viewport, Func`2 inspect)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(109,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Capture(Func`1 create, Size size, String state, String source, String[] essential, Action`1 inspect)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(47,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(Int32 width, Int32 height)&#xD;
+[xUnit.net 00:00:08.72]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:08.72]         ----- Inner Stack Trace -----&#xD;
+[xUnit.net 00:00:08.72]            at System.Windows.Media.Visual.TrySimpleTransformToAncestor(Visual ancestor, Boolean inverse, GeneralTransform&amp; generalTransform, Matrix&amp; simpleTransform)&#xD;
+[xUnit.net 00:00:08.72]            at System.Windows.Media.Visual.TransformToAncestor(Visual ancestor)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(142,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Bounds(FrameworkElement item, Visual root)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(123,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_1.&lt;Capture&gt;b__2(Button b)&#xD;
+[xUnit.net 00:00:08.72]            at System.Linq.Enumerable.IEnumerableWhereSelectIterator`2.ToArray()&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Integration\Ui\GuidedImportVisualEvidenceTests.cs(120,0): at PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.&lt;&gt;c__DisplayClass3_0.&lt;Capture&gt;b__0(RenderedTree tree)&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(99,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass1_0`1.&lt;Render&gt;b__0()&#xD;
+[xUnit.net 00:00:08.72]         C:\Users\admin\.codex\worktrees\scrum-11170-guided-import\printflow-Studio\tests\PrintFlow.Tests\Fixtures\WpfRendering.cs(206,0): at PrintFlow.Tests.Fixtures.WpfRendering.&lt;&gt;c__DisplayClass6_0.&lt;OnStaThread&gt;b__0()&#xD;
+[xUnit.net 00:00:08.72]   Finished:    PrintFlow.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:57:48.5637207+13:00">
+        <Text>[xUnit.net 00:00:05.08]     PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: "psd") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:57:49.1351595+13:00">
+        <Text>[xUnit.net 00:00:05.65]     PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_preparation_and_source_review_retain_real_input_context(format: "pdf") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:57:50.5899989+13:00">
+        <Text>[xUnit.net 00:00:07.10]     PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1000, height: 700) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:57:51.3892326+13:00">
+        <Text>[xUnit.net 00:00:07.90]     PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1280, height: 720) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="DESKTOP-0BG8884" outcome="Error" timestamp="2026-10-19T17:57:52.2042946+13:00">
+        <Text>[xUnit.net 00:00:08.72]     PrintFlow.Tests.Integration.Ui.GuidedImportVisualEvidenceTests.Chinese_home_routes_and_original_steps_fit_the_supported_viewports(width: 1920, height: 1080) [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>
