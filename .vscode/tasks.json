@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // The .NET 10 SDK pinned by global.json is a per-user install that is not on PATH;
+      // the machine-wide dotnet on PATH only has .NET 8, so call the per-user one directly.
+      "label": "PrintFlow: build (Debug)",
+      "type": "process",
+      "command": "${env:LOCALAPPDATA}\\Microsoft\\dotnet\\dotnet.exe",
+      "args": [
+        "build",
+        "${workspaceFolder}\\src\\PrintFlow.App\\PrintFlow.App.csproj",
+        "--configuration",
+        "Debug",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      // Copies .vscode\appsettings.debug.json beside the Debug build as appsettings.local.json,
+      // which overrides the committed appsettings.json section by section. It moves the
+      // workspace off production (D:\PrintFlowStudio) and selects Fake adapters so a debug
+      // session never drives the real Meitu / Photoshop. That file must stay comment-free:
+      // the local override is parsed without comment handling and a comment refuses startup.
+      "label": "PrintFlow: copy debug settings",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "Copy-Item -LiteralPath '${workspaceFolder}\\.vscode\\appsettings.debug.json' -Destination '${workspaceFolder}\\src\\PrintFlow.App\\bin\\Debug\\net10.0-windows10.0.19041.0\\appsettings.local.json' -Force"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "PrintFlow: prepare debug",
+      "dependsOrder": "sequence",
+      "dependsOn": ["PrintFlow: build (Debug)", "PrintFlow: copy debug settings"],
+      "problemMatcher": []
+    }
+  ]
+}

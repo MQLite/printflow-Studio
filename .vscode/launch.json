@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PrintFlow: Debug (Fake adapters, debug workspace)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "PrintFlow: prepare debug",
+      // Launch the apphost rather than the .dll so the runtime is found through DOTNET_ROOT
+      // (the per-user .NET 10 install), not the .NET 8 dotnet on PATH.
+      "program": "${workspaceFolder}\\src\\PrintFlow.App\\bin\\Debug\\net10.0-windows10.0.19041.0\\PrintFlow.App.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}\\src\\PrintFlow.App\\bin\\Debug\\net10.0-windows10.0.19041.0",
+      "env": {
+        "DOTNET_ROOT": "${env:LOCALAPPDATA}\\Microsoft\\dotnet"
+      },
+      "console": "internalConsole",
+      "stopAtEntry": false,
+      "justMyCode": true
+    },
+    {
+      "name": "PrintFlow: Attach to running process",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}
