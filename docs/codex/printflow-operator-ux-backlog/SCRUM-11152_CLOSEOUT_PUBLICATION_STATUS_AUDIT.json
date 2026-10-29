@@ -64,8 +64,29 @@
       "checkedAt": "2026-09-29T22:57:10.9581530+00:00"
     },
     "documentationCommit": {
-      "status": "Recorded only in local final audit after this documentation commit is published",
-      "reason": "Avoid self-referential commit chain"
+      "status": "MASTER_PUSH_VERIFIED",
+      "authenticated": true,
+      "repository": "MQLite/printflow-Studio",
+      "branch": "master",
+      "sha": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+      "tree": "10666f04492d6b10cee7fdbec56d2b4e545b2aae",
+      "parent": "11df50f7143faa8cc33ec537eaf5f7a162a69d08",
+      "files": [
+        "docs/codex/printflow-operator-ux-backlog/Export-Wave1Jira.ps1",
+        "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT.md",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_COPY_REVIEW.md",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_INDEPENDENT_REVIEW.md",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_JIRA_FINAL.csv",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_PUBLICATION_STATUS_AUDIT.json",
+        "docs/codex/printflow-operator-ux-backlog/SCRUM-11152_CLOSEOUT_RESULTS.md"
+      ],
+      "fileCount": 8,
+      "fetched": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+      "advertised": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+      "coAuthoredByTrailer": false,
+      "checkedAt": "2026-09-29T23:02:13.3319851+00:00",
+      "note": "Deliberate local final audit residue; published audit predates documentation publication. Do not recommit merely to record this SHA."
     },
     "hooksAndAutomation": "No active local hooks, core.hooksPath or .github directory found; no repository deployment trigger found. No deployment performed.",
     "preservedPriorAuditResidues": {
@@ -74,7 +95,14 @@
       "SCRUM-11151_PUBLICATION_STATUS_AUDIT.json": "9E698BAE3AE1D3B452EDC3354E4535E3130197F111067432408E3DAE9AF30228",
       "SCRUM-11152_PUBLICATION_STATUS_AUDIT.json": "42B5906E96AAF2F8E316C49E5AE852E89C57165F0C4CA1AFBD9BB047E2774938"
     },
-    "priorPacketZipSha256": "7C48A3F6DE6A0154E1A4F431A82A8B3F9BC971EC52D67226D80FBDBF4A501F50"
+    "priorPacketZipSha256": "7C48A3F6DE6A0154E1A4F431A82A8B3F9BC971EC52D67226D80FBDBF4A501F50",
+    "finalRemoteTip": {
+      "sha": "1f9a93dfb4f3b90b6357b86a5fbb03dfbd75b4ec",
+      "tree": "10666f04492d6b10cee7fdbec56d2b4e545b2aae",
+      "containsCodeCommit": true,
+      "authenticated": true,
+      "verifiedAt": "2026-09-29T23:02:13.3319851+00:00"
+    }
   },
   "change": {
     "observationSources": [
@@ -210,7 +238,8 @@
       "ranTests": false
     },
     "exclusions": "Real-window/UIA, OperatorInteractive, ApplicationStartup/ProductionComposition paths, known hanging ManualResultImportTests.Interrupted_recovery_offers_restart_manual_import_and_abandonment excluded and NOT PASS; no broad 11,531-case suite.",
-    "rawRunSummary": "artifacts/pf-opux-scrum11152-closeout/test-evidence-summary.json"
+    "rawRunSummary": "artifacts/pf-opux-scrum11152-closeout/test-evidence-summary.json",
+    "documentationWhitespace": "Original authenticated Jira Markdown hard-break spaces retained in CSV for exact fidelity. Non-CSV diff whitespace checks PASS; source/code diff checks PASS."
   },
   "jira": {
     "issue": "SCRUM-11152",
@@ -403,7 +432,7 @@
     "humanAcceptance": "NOT RUN; no production-readiness claim"
   },
   "packet": {
-    "status": "Created locally after documentation publication; final path/ZIP hash in LATEST.md and execution report",
+    "status": "Settled publication/readback audit; packet extraction/hash validation is recorded separately in MANIFEST.json, LATEST.md and packet-validation.json.",
     "root": "doc/owner-review/SCRUM-11152/",
     "privacy": "No raw account-bearing responses, credentials, customer data or machine-specific user paths; redacted derivative retains business fields."
   },

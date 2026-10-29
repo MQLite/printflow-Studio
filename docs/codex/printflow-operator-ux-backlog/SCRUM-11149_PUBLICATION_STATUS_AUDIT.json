@@ -38,7 +38,14 @@
       "githubApiHead": "6cbde817a2da7f3565cf52860ca26d79a3e71242"
     },
     "result": "MASTER_PUSH_VERIFIED",
-    "documentationCommit": "created after this audit was written; its SHA and the final remote tip are recorded in the local final copy of this audit and in HANDOFF.md, to avoid a self-referential commit"
+    "documentationCommit": {
+      "sha": "fe38160796e39af5dd511cacf676778e9c3bee16",
+      "subject": "docs: SCRUM-11149 plan, Jira export, audit and handoff",
+      "paths": 5,
+      "push": "6cbde81..fe38160  master -> master (fast-forward, no force)",
+      "note": "the committed copy of this audit predates this commit; this local final copy records it, to avoid a self-referential commit"
+    },
+    "finalRemoteTip": { "sha": "fe38160796e39af5dd511cacf676778e9c3bee16", "fetch": "fe38160796e39af5dd511cacf676778e9c3bee16", "lsRemote": "fe38160796e39af5dd511cacf676778e9c3bee16", "githubApiHead": "fe38160796e39af5dd511cacf676778e9c3bee16", "containsCodeCommit": true }
   },
   "verification": {
     "sdk": "%LOCALAPPDATA%/Microsoft/dotnet/dotnet.exe 10.0.400",

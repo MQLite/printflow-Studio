@@ -45,26 +45,73 @@
       "privacyScan": "No e-mail, account id, credential, token or workstation user path in the staged diff"
     },
     "documentationCommit": {
-      "status": "Recorded in the local final copy of this audit and in the owner-review packet only; the committed copy predates it by design (no self-referential commit)."
+      "status": "MASTER_PUSH_VERIFIED",
+      "sha": "20ece916d290e489fe64a58155800a873dde5ed0",
+      "url": "https://github.com/MQLite/printflow-Studio/commit/20ece916d290e489fe64a58155800a873dde5ed0",
+      "paths": 8,
+      "tree": "5af71af4f692744f7bd73704863d97f71873cc58",
+      "parent": "a71927fcfe09f3644be74bbc9718321a220e670c",
+      "push": "a71927f..20ece91 master -> master; normal fast-forward",
+      "verification": "local HEAD, fetched origin/master, ls-remote and GitHub REST commit readback agree (REST GET unauthenticated, public repository)",
+      "documentsCode": "a71927fcfe09f3644be74bbc9718321a220e670c",
+      "note": "Deliberate local final audit residue; the committed audit predates docs publication. Do not recommit only to record this."
+    },
+    "finalRemoteTip": {
+      "sha": "20ece916d290e489fe64a58155800a873dde5ed0",
+      "containsCodeCommit": true,
+      "verifiedAt": "2026-09-29T22:00:57.673Z"
     }
   },
   "change": {
     "summary": "Home readiness summary from the latest readiness observation of this run; startup recovery counts under a collapsed Startup details expander; warnings stay visible; upper area scrolls on overflow.",
-    "states": ["NotChecked", "Checking", "Ready (when last checked)", "Blocked (report's first blocking reason)", "NotConfirmed (unfinished or no reason)"],
+    "states": [
+      "NotChecked",
+      "Checking",
+      "Ready (when last checked)",
+      "Blocked (report's first blocking reason)",
+      "NotConfirmed (unfinished or no reason)"
+    ],
     "source": "ReadinessObservationAccessor: app-lifetime in-memory singleton, latest-ticket-wins, fed by EnvironmentReadinessViewModel (Read and RunLiveChecksAsync) and SettingsViewModel (Read); read-only for Home; never persisted; not read by any gate or workflow",
     "newResourceKeys": 20,
-    "locales": ["en", "zh-CN"],
+    "locales": [
+      "en",
+      "zh-CN"
+    ],
     "copyReview": "SCRUM-11152_COPY_REVIEW.md",
     "unchanged": "IEnvironmentDiagnostics, VerifiedEnvironmentGate, verifier, production authorisation, persistence, Recovery list/actions, correction navigation, 11151 notice and Error details, Import/Resume/recovery eligibility, StartupSummary"
   },
   "verification": {
-    "build": { "command": "dotnet build PrintFlowStudio.sln -c Debug --no-incremental", "warnings": 0, "errors": 0 },
-    "behavioralRed": { "beforeWiring": "16 failed of 27", "beforeReviewFixes": "5 failed of 30 (F1, F3 returned-cancel, F4 x2, F5)" },
+    "build": {
+      "command": "dotnet build PrintFlowStudio.sln -c Debug --no-incremental",
+      "warnings": 0,
+      "errors": 0
+    },
+    "behavioralRed": {
+      "beforeWiring": "16 failed of 27",
+      "beforeReviewFixes": "5 failed of 30 (F1, F3 returned-cancel, F4 x2, F5)"
+    },
     "mutationsKilled": 3,
-    "settledCandidate02": { "focused": "155/155", "architecture": "473/473", "safeCombinedUi": "711/711" },
+    "settledCandidate02": {
+      "focused": "155/155",
+      "architecture": "473/473",
+      "safeCombinedUi": "711/711"
+    },
     "finalClass": "30/30 on a clean build after test-only follow-ups",
     "countsOverlap": true,
-    "renders": { "count": 32, "contexts": 8, "locales": ["en", "zh-CN"], "viewports": ["1000x700", "1920x1040"], "dpi": 96, "inspection": "Materially different states inspected from the final source; earlier render sets are not final" },
+    "renders": {
+      "count": 32,
+      "contexts": 8,
+      "locales": [
+        "en",
+        "zh-CN"
+      ],
+      "viewports": [
+        "1000x700",
+        "1920x1040"
+      ],
+      "dpi": 96,
+      "inspection": "Materially different states inspected from the final source; earlier render sets are not final"
+    },
     "independentReview": {
       "round1": "NOT ACCEPTABLE AS-IS: F1, F2 P1; F3, F4 P2; F5-F9 P3",
       "round2": "F1, F3, F4, F5, F6 CLOSED; F2 dispositioned (option b: Ready worded as past, AC1 PARTIAL); F7, F8 accepted residuals; new P3s N1 (kept), N2, N3 (done); no blocking defect",
@@ -75,15 +122,41 @@
   },
   "jira": {
     "site": "https://yituoxx.atlassian.net",
-    "issue": { "id": "10882", "key": "SCRUM-11152", "parent": "SCRUM-11139" },
-    "transitionsDiscovered": { "11": "To Do", "21": "In Progress", "31": "In Review", "41": "Done" },
+    "issue": {
+      "id": "10882",
+      "key": "SCRUM-11152",
+      "parent": "SCRUM-11139"
+    },
+    "transitionsDiscovered": {
+      "11": "To Do",
+      "21": "In Progress",
+      "31": "In Review",
+      "41": "Done"
+    },
     "transitions": [
-      { "id": "21", "before": "To Do", "after": "In Progress", "when": "implementation start" },
-      { "id": "31", "before": "In Progress", "after": "In Review", "when": "after verified code publication and evidence comment", "readbackUpdated": "2026-09-30T10:55:55.112+1300" }
+      {
+        "id": "21",
+        "before": "To Do",
+        "after": "In Progress",
+        "when": "implementation start"
+      },
+      {
+        "id": "31",
+        "before": "In Progress",
+        "after": "In Review",
+        "when": "after verified code publication and evidence comment",
+        "readbackUpdated": "2026-09-30T10:55:55.112+1300"
+      }
     ],
     "finalStatus": "In Review",
     "whyNotDone": "AC1 and AC5 PARTIAL; owner copy review and Jira human check open",
-    "comment": { "id": "10186", "marker": "PF-OPUX-v1-SCRUM-11152-impl-v1", "created": "2026-09-30T10:55:50.349+1300", "preReadMarkerCount": 0, "finalMarkerCount": 1 },
+    "comment": {
+      "id": "10186",
+      "marker": "PF-OPUX-v1-SCRUM-11152-impl-v1",
+      "created": "2026-09-30T10:55:50.349+1300",
+      "preReadMarkerCount": 0,
+      "finalMarkerCount": 1
+    },
     "otherIssues": "Read-only; no comments, transitions or field updates",
     "readback": {
       "readAt": "2026-09-29T21:57:25.846Z",
@@ -110,7 +183,10 @@
       "utf8Bom": true,
       "exporter": "PASS",
       "independentFidelityOracle": "PASS; zero failures",
-      "writeActions": { "SCRUM-11152": "STATUS_TRANSITION_AND_COMMENT", "others": "READ_ONLY" },
+      "writeActions": {
+        "SCRUM-11152": "STATUS_TRANSITION_AND_COMMENT",
+        "others": "READ_ONLY"
+      },
       "exporterChange": "11152 task allowlist entry and marker mapping only; no schema change"
     }
   },

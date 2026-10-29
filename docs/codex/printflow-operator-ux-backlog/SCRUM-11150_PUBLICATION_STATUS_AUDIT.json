@@ -38,7 +38,14 @@
       "githubApiHead": "03da756f6b021cce809b8591229b0c605ebe1f55"
     },
     "result": "MASTER_PUSH_VERIFIED",
-    "documentationCommit": "created after this audit was written; its SHA and the final remote tip are recorded in the local final copy of this audit and in the final report, to avoid a self-referential commit"
+    "documentationCommit": {
+      "sha": "91a21ea39c93c227a1ad980150dafc21b067e4c5",
+      "subject": "docs: SCRUM-11150 plan, Jira export, audit and handoff",
+      "paths": 5,
+      "push": "03da756..91a21ea  master -> master (fast-forward, no force)",
+      "note": "the committed copy of this audit predates this commit; this local final copy records it, to avoid a self-referential commit"
+    },
+    "finalRemoteTip": { "sha": "91a21ea39c93c227a1ad980150dafc21b067e4c5", "fetch": "91a21ea39c93c227a1ad980150dafc21b067e4c5", "lsRemote": "91a21ea39c93c227a1ad980150dafc21b067e4c5", "githubApiHead": "91a21ea39c93c227a1ad980150dafc21b067e4c5", "containsCodeCommit": true }
   },
   "change": {
     "product": [

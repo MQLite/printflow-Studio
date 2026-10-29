@@ -52,7 +52,9 @@
     "activeHooks": [],
     "repositoryWorkflows": [],
     "codeCommit": "20747aa404ad2200bd8ab8bbabf49bc5de683440",
-    "documentationCommit": "Recorded locally after its verified push, without a self-referencing commit",
+    "documentationCommit": "3999287c7921a0322072603dcf0dfd0f4ea5d043",
+    "documentationCommitNote": "Recorded locally after the verified push; this local audit residue is intentionally not recommitted",
+    "finalObservedRemoteTip": "3999287c7921a0322072603dcf0dfd0f4ea5d043",
     "documentationPaths": [
       "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
       "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_WORKSTATION_ENTRY_RUNBOOK.md",

@@ -278,8 +278,8 @@
     "activeHooks": [],
     "repositoryWorkflows": [],
     "codeCommit": "f720899ee8798a344190940547f3dbda7fee5171",
-    "documentationCommit": null,
-    "finalObservedRemoteTip": "f720899ee8798a344190940547f3dbda7fee5171",
+    "documentationCommit": "20cae9f5677a045f53ad30717280ad9850d66c8c",
+    "finalObservedRemoteTip": "20cae9f5677a045f53ad30717280ad9850d66c8c",
     "documentationCommitNote": "Final documentation commit/tip recorded locally after publication; audit residue not recommitted.",
     "documentationPaths": [
       "docs/codex/printflow-operator-ux-backlog/HANDOFF.md",
@@ -292,7 +292,9 @@
       "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_FINDINGS_REMEDIATION.md",
       "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_OPEN_ITEMS.md",
       "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RETEST_CHECKLIST.md"
-    ]
+    ],
+    "verification": "PASS; successful fast-forward push, exact ls-remote tip and origin/master match; code commit ancestor; exact 10-file scope; no trailer",
+    "authentication": "Git transport identity not claimed; Jira readback authenticated through connector"
   },
   "acceptanceCriteria": {
     "AC1": "OPEN; English portion NOT RUN — NOT REQUIRED BY OWNER",
@@ -302,5 +304,11 @@
   },
   "englishScope": "Owner instructed 不需要安排英文测试; no English workstation/journey/input/screenshots arranged; localization preserved",
   "desktop": "No new window/dialog/Explorer/input/capture/real processor/production on this batch or continuation",
-  "stop": "No Chinese recheck, Done, production, deployment or SCRUM-11155 continuation"
+  "stop": "No Chinese recheck, Done, production, deployment or SCRUM-11155 continuation",
+  "ownerPacket": {
+    "path": "doc/owner-review/SCRUM-11154/20261001T035841Z-zh-findings-fix-f720899",
+    "zip": "doc/owner-review/SCRUM-11154/20261001T035841Z-zh-findings-fix-f720899.zip",
+    "verificationRecord": "artifacts/pf-opux-scrum11154-zh-findings/packet-verification.json",
+    "note": "ZIP checksum lives outside its payload to avoid circular hashes; packet rebuilt from this final local audit."
+  }
 }

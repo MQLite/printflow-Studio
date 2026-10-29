@@ -84,7 +84,8 @@
       "docs/codex/printflow-operator-ux-backlog/SCRUM-11154_ZH_RECHECK_PUBLICATION_STATUS_AUDIT.json"
     ],
     "hooksAndCi": "No active Git hooks and no .github/workflows in the repository",
-    "commit": "Recorded locally after push (audit residue) to avoid a self-referential commit"
+    "commit": "Recorded locally after push (audit residue) to avoid a self-referential commit",
+    "localResidue": { "docsCommit": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3", "parent": "20cae9f5677a045f53ad30717280ad9850d66c8c", "files": 6, "verifiedUtc": "2026-10-02T04:58:06.6249187Z", "verification": "git fetch origin/master and ls-remote refs/heads/master equal de7bca6; public GitHub REST commit readback shows the same sha, parent and message; push used the configured HTTPS credential helper (gh CLI not installed)", "note": "This residue is not committed." }
   },
   "acceptanceCriteria": {
     "AC1": "OPEN",

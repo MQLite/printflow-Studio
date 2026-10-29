@@ -25,7 +25,7 @@
   },
   "independentDesignReview": "CORRECTIONS_RECHECKED_NO_REMAINING_ACTIONABLE_FINDINGS",
   "publication": {
-    "status": "DESIGN_MASTER_PUSH_VERIFIED_EXPORT_FOLLOWUP_PENDING",
+    "status": "MASTER_PUSH_VERIFIED",
     "finalCommitRecordedLocallyAfterPublication": true,
     "automationInspection": "No active local hooks, no configured hooksPath, no tracked CI/workflows/deployment files; GitHub connected read returned zero workflow runs. No unsafe automation found in available evidence; unobservable external hooks are not certified absent.",
     "designCommit": "a4a896b11023e7e2a89993d81436ce591f262b61",
@@ -35,7 +35,11 @@
     "githubApiAuthentication": "Connected GitHub app transport; raw response does not independently attest authentication. No separate unauthenticated public read relabelled as authenticated.",
     "noCoAuthoredBy": true,
     "changedDesignPaths": 4,
-    "finalDocumentationCommit": null
+    "finalDocumentationCommit": "25a93f551f27f9e918fdcbbec701a1371ccc23d0",
+    "finalParent": "a4a896b11023e7e2a89993d81436ce591f262b61",
+    "finalChangedPaths": 3,
+    "finalLocalAuditOnly": "This final SHA update is deliberately local and copied into the owner packet; not a new publication loop.",
+    "finalTree": "e092ad93fce084cb5a07e4f98985de682b6ee7ee"
   },
   "jira": {
     "initialAuthenticatedStatus": "In Review",
@@ -112,7 +116,7 @@
   },
   "implementation": "NOT_AUTHORIZED_NOT_STARTED",
   "SCRUM-11155": "READ_ONLY_NOT_STARTED",
-  "packet": "Await final documentation publication and final local audit; then allowlist copy, redaction, manifest and extracted ZIP verification",
+  "packet": "Publication and Jira prerequisites settled. Payload provenance, privacy, links, redaction and ZIP extraction verdicts are recorded in MANIFEST.json and the separate packet-validation record/LATEST pointer to avoid self-hashing.",
   "reviewedDesignSha256": "E31BE7B9435F457A12A525D82117D891E16FD05A77A935CA670DE7BD6C273DA3",
   "reviewFindings": {
     "P3": 1,

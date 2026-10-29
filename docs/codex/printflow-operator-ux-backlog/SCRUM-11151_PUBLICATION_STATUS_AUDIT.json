@@ -50,9 +50,23 @@
       "privacyScan": "No binary/private artifacts, credentials, tokens, emails, account IDs or workstation user paths in added staged lines"
     },
     "documentationCommit": {
-      "status": "PENDING_AT_DOCUMENT_CREATION",
-      "intendedPaths": 6,
-      "note": "After docs push, its SHA and final remote tip are recorded only in the local final audit and final report, avoiding a self-referential commit loop."
+      "status": "MASTER_PUSH_VERIFIED",
+      "sha": "d017fdba365bd3425585688acd09b6b179d380d2",
+      "url": "https://github.com/MQLite/printflow-Studio/commit/d017fdba365bd3425585688acd09b6b179d380d2",
+      "paths": 6,
+      "push": "924281d..d017fdb master -> master; normal fast-forward",
+      "verification": [
+        "fetch exact SHA",
+        "ls-remote exact SHA",
+        "authenticated GitHub readback exact SHA"
+      ],
+      "documentsCode": "924281d22974f1693900052851f05c7ddfda750a",
+      "note": "Deliberate local final audit residue; committed audit predates docs publication. Do not recommit only to record its own SHA."
+    },
+    "finalRemoteTip": {
+      "sha": "d017fdba365bd3425585688acd09b6b179d380d2",
+      "containsCodeCommit": true,
+      "verifiedAt": "2026-09-29T05:17:57.4717696Z"
     }
   },
   "change": {
@@ -190,7 +204,8 @@
         "others": "READ_ONLY"
       },
       "exporterChange": "One task-marker mapping; no schema change",
-      "privacyScan": "Verified before documentation commit"
+      "privacyScan": "Verified before documentation commit",
+      "preservedWhitespace": "339 exact Jira Markdown hard-break lines trigger git whitespace diagnostics; preserved for raw fidelity. Non-CSV staged whitespace PASS."
     }
   },
   "remainingAcceptance": [

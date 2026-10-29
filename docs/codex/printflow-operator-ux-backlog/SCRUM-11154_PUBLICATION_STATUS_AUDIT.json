@@ -25,9 +25,15 @@
       "coAuthoredByTrailer": false
     },
     "documentationCommit": {
-      "status": "PENDING_AT_PUBLIC_DOCS_SNAPSHOT",
-      "sha": null,
-      "note": "Deliberate final local audit update after documentation push; do not recommit only to record this SHA."
+      "status": "MASTER_PUSH_VERIFIED",
+      "sha": "5e6adcf3251bded0ce3df2d127d933eecde71969",
+      "tree": "115608491bce956b988ffb64a5cfaa9bbd6cfd66",
+      "parent": "e7852f00311d5bc914eae12174e0ae84196bcc23",
+      "fileCount": 7,
+      "authenticatedGithubCommitAndFileReadback": true,
+      "advertised": "5e6adcf3251bded0ce3df2d127d933eecde71969",
+      "coAuthoredByTrailer": false,
+      "note": "Deliberate final local audit residue after documentation push; the published audit predates this SHA. Do not recommit merely to record it."
     },
     "hooksAndAutomation": "No active hooks or .github workflow/deployment trigger found; no deployment performed.",
     "preservedPriorAuditResidues": {
