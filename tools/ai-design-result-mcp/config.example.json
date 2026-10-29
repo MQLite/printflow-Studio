@@ -1,0 +1,10 @@
+{
+  "storageRoot": "C:\\absolute\\private\\printflow-mcp-store",
+  "port": 32179,
+  "writerBearer": "replace-with-a-distinct-random-32-byte-secret",
+  "controlBearer": "replace-with-a-different-random-32-byte-secret",
+  "readBearer": "replace-with-a-third-random-32-byte-secret",
+  "allowedSources": [
+    { "origin": "https://replace-with-approved-file-origin.example", "pathPrefix": "/files/" }
+  ]
+}

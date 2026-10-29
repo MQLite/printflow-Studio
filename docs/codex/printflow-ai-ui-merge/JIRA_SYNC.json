@@ -1,0 +1,40 @@
+{
+  "initiative": "PF-AI-UI-MERGE-20261029",
+  "date": "2026-10-29",
+  "timezone": "Pacific/Auckland",
+  "parent": "SCRUM-11156",
+  "label": "pf-ai-ui-merge-20261029",
+  "tasks": [
+    {
+      "key": "SCRUM-11214",
+      "type": "Task",
+      "summary": "核对 AI 分支与新版 UI 分支的合并基线及验收范围",
+      "creationVerified": true
+    },
+    {
+      "key": "SCRUM-11215",
+      "type": "Task",
+      "summary": "将 AI 功能分支合并到新版 UI 分支并处理兼容冲突",
+      "creationVerified": true
+    },
+    {
+      "key": "SCRUM-11216",
+      "type": "Task",
+      "summary": "验证 AI 与新版 UI 合并结果并归档回归证据",
+      "creationVerified": true
+    }
+  ],
+  "blocks": [
+    {
+      "to": "SCRUM-11215",
+      "from": "SCRUM-11214"
+    },
+    {
+      "to": "SCRUM-11216",
+      "from": "SCRUM-11215"
+    }
+  ],
+  "source": "d0bcc0519c64ca596f9fd8dfec3a98b9c6db29b0",
+  "target": "27fec015408e97b1089682f190daf25d9a84deed",
+  "commonAncestor": "de7bca6e0a8462584b4d6bf4d16307d1335e2fb3"
+}

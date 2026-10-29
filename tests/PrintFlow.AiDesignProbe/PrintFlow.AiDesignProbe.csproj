@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <WindowsSdkPackageVersion>10.0.19041.57</WindowsSdkPackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/PrintFlow.Infrastructure/PrintFlow.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/PrintFlow.NativeHost/PrintFlow.NativeHost.csproj" />
+  </ItemGroup>
+</Project>

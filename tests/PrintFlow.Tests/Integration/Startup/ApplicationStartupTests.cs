@@ -321,9 +321,14 @@ public sealed class ApplicationStartupTests
                 WpfRendering.ReviewViewport,
                 tree =>
                 {
-                    tree.OfType<System.Windows.Controls.TextBlock>().ShouldContain(
-                        block => block.Visibility == System.Windows.Visibility.Visible && block.ActualHeight > 0
-                            && block.Text.Contains(Strings.Startup_DiagnosticRetentionWarning));
+                    System.Windows.Controls.TextBlock warning = tree.OfType<System.Windows.Controls.TextBlock>()
+                        .Single(block => System.Windows.Automation.AutomationProperties.GetAutomationId(block)
+                            == "Home.Startup.RetentionWarning");
+                    warning.Visibility.ShouldBe(System.Windows.Visibility.Visible);
+                    warning.ActualHeight.ShouldBeGreaterThan(0);
+                    warning.Text.ShouldBe(Strings.Resolve("Home_DiagnosticRetentionWarning"));
+                    warning.Text.ShouldNotContain("customer-secret");
+                    warning.Text.ShouldNotContain("Private detail");
                     return true;
                 });
         }

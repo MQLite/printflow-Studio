@@ -167,6 +167,13 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
+      "printflow.aidesignprobe": {
+        "type": "Project",
+        "dependencies": {
+          "PrintFlow.Infrastructure": "[0.1.0, )",
+          "PrintFlow.NativeHost": "[0.1.0, )"
+        }
+      },
       "printflow.app": {
         "type": "Project",
         "dependencies": {
@@ -189,6 +196,12 @@
           "Microsoft.Data.Sqlite": "[10.0.11, )",
           "PrintFlow.Domain": "[0.1.0, )",
           "PrintFlow.Workflow": "[0.1.0, )"
+        }
+      },
+      "printflow.nativehost": {
+        "type": "Project",
+        "dependencies": {
+          "PrintFlow.Infrastructure": "[0.1.0, )"
         }
       },
       "printflow.workflow": {

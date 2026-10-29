@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-10-05T03:35:20Z",
+  "browser": "Chrome",
+  "scopeAuthorization": "User explicitly selected Chrome: 改用Chrome",
+  "status": "PARTIAL_OBSERVATION_DOWNLOAD_BLOCKED",
+  "automationEnabled": false,
+  "productionContractVerified": false,
+  "evidenceReport": "../../../docs/codex/printflow-ai-design-backlog/WEB_CAPABILITY_REPORT.md",
+  "fixture": "work-observed-sanitized.html",
+  "fixtureKind": "Sanitized reconstruction of observed element attributes and distinct UI states; not a captured complete live page",
+  "workIdentity": {
+    "entry": { "role": "button", "name": "Work", "exact": true },
+    "activeAttribute": { "name": "aria-pressed", "value": "true" },
+    "activeHeading": "What should we work on?",
+    "composer": { "role": "textbox", "name": "Work with ChatGPT", "contenteditable": "true" },
+    "warning": "AX represents Work as checkbox; DOM checkbox locator failed. Use observed button semantics."
+  },
+  "upload": {
+    "menuButton": { "role": "button", "name": "Add files and more" },
+    "chooserButton": { "role": "button", "name": "Add photos & files Upload from computer" },
+    "fileChooserMultiple": true,
+    "fileInput": { "tag": "input", "type": "file", "aria-label": "Attach files", "multiple": true, "accept": null },
+    "observedProgressLabels": ["Uploading reference-shapes.png", "Uploading requirements.txt"],
+    "observedReadyChips": [
+      { "tag": "div", "role": "button", "aria-label": "reference-shapes.png", "disabled": false },
+      { "tag": "button", "aria-label": "requirements.txt", "disabled": false }
+    ],
+    "readyObservation": "Both per-name upload indicators disappeared; both enabled chips and Remove controls remained; composer progressbar count was zero; Send enabled.",
+    "receiptIdentityVerified": false,
+    "negativeCasesVerified": false
+  },
+  "submit": { "role": "button", "name": "Send", "exact": true, "clicksPerTrial": 1 },
+  "completionObservations": ["Worked for elapsed duration", "Response complete", "Generated image 1", "Named PNG output"],
+  "result": {
+    "button": { "role": "button", "name": "Generated image 1" },
+    "image": { "role": "img", "name": "Generated image 1" },
+    "previewHeading": "Image preview",
+    "viewerDownload": { "role": "button", "name": "Download", "exact": true },
+    "responseDownload": { "role": "button", "name": "Download file", "exact": true },
+    "warning": "Generated image 1 is not unique across conversations; bind conversation, attempt and output identity."
+  },
+  "trials": [
+    {
+      "id": "PF-T02-TEXT-20261005",
+      "attachments": [],
+      "correlationEvidence": "Ignored artifacts/ai-design-chrome-trial/browser-trial-correlation.json",
+      "generatedFileNamePattern": "exec-<generated-output-id>.png",
+      "viewerTitle": "Centered Teal Circle On White",
+      "naturalWidth": 1254,
+      "naturalHeight": 1254,
+      "generationUiStatus": "COMPLETE",
+      "downloadStatus": "BLOCKED_CONTROL_EVENT_TIMEOUT"
+    },
+    {
+      "id": "PF-T02-MIXED-20261005",
+      "attachments": ["reference-shapes.png", "requirements.txt"],
+      "correlationEvidence": "Ignored artifacts/ai-design-chrome-trial/browser-trial-correlation.json",
+      "generatedFileNamePattern": "exec-<generated-output-id>.png",
+      "viewerTitle": "Red Square and Blue Circle",
+      "naturalWidth": 1254,
+      "naturalHeight": 1254,
+      "generationUiStatus": "COMPLETE",
+      "downloadStatus": "BLOCKED_CONTROL_EVENT_TIMEOUT"
+    }
+  ],
+  "download": {
+    "completedLocalFileVerified": false,
+    "browserDownloadId": null,
+    "browserDownloadIdVerified": false,
+    "imageBytesDecoded": false,
+    "sha256": null,
+    "controllerLimitation": "Download event timed out for response and viewer controls; documented downloadMedia fallback also timed out. API exposes path() but no numeric download ID. This does not prove product or webpage impossibility."
+  },
+  "unverified": ["Durable attachment receipt and attempt binding", "Upload rejection/error/late/same-name cases", "Unique result-to-browser-download ID association", "Completed exact local file and content hash", "Generated pixels visual QA", "Stop confirmation semantics"],
+  "nextAction": "Continue existing completed trial results using the authorized Chrome product extension and official downloads API; do not resubmit generation."
+}

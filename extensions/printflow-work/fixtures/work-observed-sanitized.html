@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Partial observed Work semantics — not an accepted production contract</title>
+<!-- Sanitized reconstruction of attributes directly observed on 2026-10-05.
+     Sections represent distinct times/pages, not a complete live DOM capture.
+     No network sources, account content, transient DOM IDs or generated URLs.
+     Upload completion and download identity must not be inferred from this fixture alone. -->
+<section data-observed-state="active-work-before-submit">
+  <button type="button" aria-pressed="true" data-state="closed">Work</button>
+  <h1>What should we work on?</h1>
+  <form>
+    <div role="textbox" contenteditable="true" aria-label="Work with ChatGPT"></div>
+    <button type="button" aria-label="Add files and more"></button>
+    <input type="file" aria-label="Attach files" multiple>
+    <div role="button" aria-label="reference-shapes.png" data-state="closed"></div>
+    <button aria-label="Remove reference-shapes.png"></button>
+    <button aria-label="requirements.txt"></button>
+    <button aria-label="Remove requirements.txt"></button>
+    <button aria-label="Send"></button>
+  </form>
+</section>
+<section data-observed-state="upload-menu">
+  <button>Add photos &amp; files Upload from computer</button>
+</section>
+<section data-observed-state="completed-response">
+  <button aria-label="Generated image 1"></button>
+  <button type="button" aria-label="Download file"></button>
+</section>
+<section data-observed-state="generated-image-preview">
+  <h2>Image preview</h2>
+  <button>Download</button>
+  <button>Close viewer</button>
+  <img alt="Generated image 1">
+</section>
+</html>
